@@ -78,7 +78,7 @@ test('new eight source plans have unique source-owned architectural crowns and n
 });
 test('full Wave14 new-to-historical strict original D4 comparison census',()=>{
  let compared=0;for(const n of fresh)for(const h of old)if(n.type===h.type){strictPair(n,h);compared++;}
- assert.equal(compared,0,'historical 153 unexpectedly contains arcane academy IDs; recensus required');
+ assert.equal(compared,8,'all eight Wave14-to-historical arcane academy comparisons must execute; source census drift');
 });
 test('all eight Wave14 versus all prior 100 same-type sources pass strict two-direction eight-way D4 <.89',()=>{
  let compared=0;for(const n of fresh)for(const h of protected100)if(n.type===h.type){strictPair(n,h);compared++;}
@@ -86,5 +86,5 @@ test('all eight Wave14 versus all prior 100 same-type sources pass strict two-di
 });
 test('all Wave14 new/new same-type two-way eight-orientation D4 <.89; historical 2326 untouched',()=>{
  let compared=0;for(let i=0;i<fresh.length;i++)for(let j=i+1;j<fresh.length;j++){strictPair(fresh[i],fresh[j]);compared++;}
- assert.equal(compared,28);assert.equal(2326+208+28,2562,'all-in total strict D4 census');
+ assert.equal(compared,28);assert.equal(2326+8+208+28,2570,'preserved 2326 plus eight historical +208 old/new +28 new/new strict D4 census');
 });
