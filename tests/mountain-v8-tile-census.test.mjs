@@ -23,6 +23,10 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.equal(first.stats.sourceBudgetExhausted,0);
     assert.ok(first.stats.sourceCacheHits>=0);
     assert.ok(first.stats.cachedSourceVetoes<=first.stats.sourceSites);
+    assert.ok(first.stats.eligible>0,
+      'Real original-world source unexpectedly produced no viable mountain sites');
+    if(seed===2026)assert.ok(first.stats.plants>0,
+      'Seed 2026 no longer has any admitted original-source alpine plants');
     assert.ok(first.stats.plants<=first.stats.eligible);
     assert.equal(first.stats.eligible+first.stats.rejected+
       first.stats.terrainRejected+first.stats.seamRejected,first.stats.tiles);
@@ -45,7 +49,9 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
       sourceSites:first.stats.sourceSites,sourceCacheHits:first.stats.sourceCacheHits,
       cachedSourceVetoes:first.stats.cachedSourceVetoes,
       sourceBudgetExhausted:first.stats.sourceBudgetExhausted,
-      rejected:first.stats.rejected
+      meadow:first.stats.meadow,snow:first.stats.snow,rock:first.stats.rock,
+      cliff:first.stats.cliff,nonMeadow:first.stats.nonMeadow,
+      occupied:first.stats.occupied,rejected:first.stats.rejected
     }));
   }
 });
