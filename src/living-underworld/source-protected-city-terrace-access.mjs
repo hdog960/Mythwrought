@@ -93,17 +93,34 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  // selected stairways, not just the future terrace. A user supplied
  // materialAllowed cannot override the fixed original safe-geology allowlist.
  let inspected=detour?.sourceChecks??0;
+ // This combined proof includes source work already spent by the detour.
+ // Never permit another stair scan a fresh 20k allowance when only the
+ // tail of the caller's ORIGINAL M7 source-visit budget remains.
+ if(!Number.isSafeInteger(inspected)||inspected<0||
+    inspected>maxTotalSourceChecks)return Object.freeze({
+  sitePresent:true,ok:false,seed,rx,rz,
+  reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',
+  sourceChecks:inspected,worldChanged:false});
  for(let i=detour?1:0;i<selected.length;i++){
+  const available=maxTotalSourceChecks-inspected;
+  if(available<100)return Object.freeze({
+   sitePresent:true,ok:false,seed,rx,rz,
+   reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',
+   sourceChecks:inspected,routeIndex:i,
+   maxTotalSourceChecks,worldChanged:false});
   const r=auditProtectedSubsurfaceStairs(selected[i],{
    naturalAt:source.naturalAt,authoredAt:source.authoredAt,
    editedAt:source.editedAt,protectedAt:source.protectedAt,
-   minY:-210,maxY:19,maxCells:20000,stopOnFirstUnsafe:true
+   minY:-210,maxY:19,maxCells:Math.min(20000,available),
+   stopOnFirstUnsafe:true
   });
   inspected+=r.sourceChecks??0;
-  if(inspected>maxTotalSourceChecks)
+  if(r.reason==='SOURCE_QUERY_BUDGET_EXCEEDED'||
+     inspected>maxTotalSourceChecks)
    return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
     reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',
-    sourceChecks:inspected,worldChanged:false});
+    sourceChecks:inspected,routeIndex:i,
+    maxTotalSourceChecks,worldChanged:false});
   if(!r.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
    reason:'CITY_LINK_OR_SELECTED_STAIRS_SOURCE_UNSAFE',
    routeIndex:i,firstRefusal:r.firstRefusal??r.reason??null,
@@ -124,6 +141,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  // Count its original M7 callbacks ONCE; do not inflate aggregate budgets.
  const sourceChecks=inspected+
   (detour?.terraceProof?.ok===true?0:(terrace.sourceChecks??0));
+ if(!Number.isSafeInteger(sourceChecks)||sourceChecks>maxTotalSourceChecks)
+  return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
+   reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',
+   sourceChecks,maxTotalSourceChecks,worldChanged:false});
  if(!terrace.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_TERRACE_SOURCE_OR_GEOMETRY_UNSAFE',
   refusal:terrace.reason??null,sourceChecks,
