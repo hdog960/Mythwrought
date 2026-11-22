@@ -4,6 +4,7 @@
 // integration requires real source confirmation before wiring this into main.
 export const SKY_ISLAND_MIN_Y = 20;
 export const SKY_ISLAND_MAX_Y = 256;
+export const SKY_ISLAND_PLAYER_HEIGHT = 1.78;
 export const SKY_ISLAND_SECTION_HEIGHT = 16;
 export const SKY_ISLAND_MAX_VIEW_RADIUS_CHUNKS = 6;
 export const SKY_ISLAND_SECTION_COUNT = Math.ceil((SKY_ISLAND_MAX_Y-SKY_ISLAND_MIN_Y+1)/SKY_ISLAND_SECTION_HEIGHT);
@@ -61,8 +62,8 @@ export function verifySkyIslandFlightSpace(position,{isSkySectionLoaded,isBodyCl
      typeof isSkySectionLoaded!=='function'||typeof isBodyClear!=='function')
     fail('live physical host and position are required');
   // This check supplements, NEVER replaces, original G2 region readiness.
-  if(position.feet>SKY_ISLAND_MAX_Y)
-    return Object.freeze({ready:false,reason:'Above sky-world safe-flight ceiling',required:Object.freeze([])});
+  if(position.feet+SKY_ISLAND_PLAYER_HEIGHT>SKY_ISLAND_MAX_Y+1e-9)
+    return Object.freeze({ready:false,reason:'Full player body exceeds upper-world ceiling',required:Object.freeze([])});
   const required=skyIslandBodyRegions(position);
   const missing=required.filter(region=>!isSkySectionLoaded(region));
   if(missing.length)return Object.freeze({ready:false,reason:'Upper section not resident',required,missing:freezeRows(missing)});

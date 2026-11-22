@@ -2,7 +2,7 @@
 // Original G2 streaming owns 0 and negative sections; this standalone queue
 // owns only namespaced upper keys, never aliases sky to depth section 0.
 // No flight state, input ownership, production renderer or saves are mutated.
-import {skyIslandBodyRegions,SKY_ISLAND_MAX_Y} from './sky-runtime-adapter.mjs';
+import {skyIslandBodyRegions,SKY_ISLAND_MAX_Y,SKY_ISLAND_PLAYER_HEIGHT} from './sky-runtime-adapter.mjs';
 export const SKY_PREFETCH_MAX_NEW=2;
 export const SKY_PREFETCH_MAX_PENDING=6;
 export const SKY_PREFETCH_MAX_POINTS=8;
@@ -62,8 +62,8 @@ export function verifySkyCreativeFlightStep(point,{worldToken,expectedWorldToken
     fail('authoritative dual-world physical host required');
   if(worldToken!==expectedWorldToken)
     return Object.freeze({safe:false,reason:'World changed; flight suspended',required:Object.freeze([])});
-  if(point.y>SKY_ISLAND_MAX_Y)
-    return Object.freeze({safe:false,reason:'Upper source ceiling exceeded',required:Object.freeze([])});
+  if(point.y+SKY_ISLAND_PLAYER_HEIGHT>SKY_ISLAND_MAX_Y+1e-9)
+    return Object.freeze({safe:false,reason:'Full player body exceeds upper-world ceiling',required:Object.freeze([])});
   const required=bodyRegions(point);
   if(point.y<20&&!isBaseRegionReady(point))
     return Object.freeze({safe:false,reason:'Original terrain region unloaded',required});

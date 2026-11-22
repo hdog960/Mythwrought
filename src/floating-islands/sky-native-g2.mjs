@@ -4,7 +4,7 @@
 // physical sky sections and keeping upper-prefetch keys out of G2's 0/-N queue.
 import {planG2FlightStep} from '../creative-integration/g2-flight.mjs';
 import {sectionForY} from '../depth.mjs';
-import {skyIslandBodyRegions} from './sky-runtime-adapter.mjs';
+import {skyIslandBodyRegions,SKY_ISLAND_MAX_Y,SKY_ISLAND_PLAYER_HEIGHT} from './sky-runtime-adapter.mjs';
 import {planSkyCreativePrefetch} from './sky-creative-bridge.mjs';
 const fail=s=>{throw new TypeError('Sky original G2 owner: '+s);};
 const xyz=p=>p&&[p.x,p.y,p.z].every(Number.isFinite);
@@ -41,6 +41,7 @@ export function planNativeG2SkyStep({g2State,intent,skyPrefetchState,
     .every(r=>isSkyResident(r));
   const ready=p=>{
     if(now()!==g2State.worldToken){rejectedBySource=true;return false;}
+    if(p.y+SKY_ISLAND_PLAYER_HEIGHT>SKY_ISLAND_MAX_Y+1e-9){rejectedBySource=true;return false;}
     if(p.y<20&&!isBaseRegionReady(p))return false;
     return checkSkyReady(p);
   };
