@@ -1,8 +1,6 @@
-# Isolated candidate-only source validation. Previous 44/44 authentic M7
-# tests at commit 15f7521f92954d1861163d2a295712c8483b5975 remain reusable.
-# This revision applies the measured 1024-entry experimental default and
-# requires <=5% more original source reads than the exact 2048-entry baseline,
-# with original M7 terrain, save and chunk parity on current source.
+# Standalone Phase 2 experimental tree planner: one targeted original-source
+# site-envelope regression. Reuse prior 30/30 native and matched WebGL2
+# from #45057456018 for unchanged source; no repeated Chromium or broad CI.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,9 +14,9 @@ permissions:
   contents: read
 
 jobs:
-  source-only-m7-dense-memory-and-diagonal-routes:
+  authentic-m7-candidate-site-reach:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,19 +25,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check exact source revision and focused module syntax
+      - name: Verify exact source and changed test syntax
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/environment-v7.mjs
-          node --check src/manual-biomes/enchanted-tree-source-cache.mjs
-          node --check tests/manual-biomes/enchanted-tree-source-cache.test.mjs
-          node --check tests/manual-biomes/enchanted-tree-cache-capacity-real-m7.test.mjs
-          node --check tests/manual-biomes/enchanted-tree-multistep-diagonal-real-m7.test.mjs
-      - name: Run only affected actual-source native tests
+          node --check tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs
+      - name: Actual M7 early-cull byte parity, chunk seams, save and source cost
         run: |
           node --test \
-            tests/manual-biomes/enchanted-tree-source-cache.test.mjs \
-            tests/manual-biomes/enchanted-tree-cache-capacity-real-m7.test.mjs \
-            tests/manual-biomes/enchanted-tree-multistep-diagonal-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs \
+            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
             tests/manual-biomes/enchanted-tree-source-cost.test.mjs \
-            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs
+            tests/manual-biomes/enchanted-trees-phase2.test.mjs
