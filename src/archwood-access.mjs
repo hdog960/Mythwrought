@@ -1,0 +1,62 @@
+// :48 optional physical access stairs for the existing opt-in archwood canopy.
+// No default-world generation, material registration or saved-world migration.
+import {BLOCK,baseBlock,terrainHeight,WORLD_MAX_Y} from './voxel.mjs';
+import {planVoxelTree,placeVoxelTree} from './voxel-trees.mjs';
+
+const same=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
+export function planArchwoodAccess(world,x,z){
+  if(!world||!Number.isInteger(world.seed)||typeof world.get!=='function')return null;
+  const tree=planVoxelTree(world,x,z,{variant:'archwood'});
+  if(!tree)return null;
+  const y=tree.origin[1],cells=[];
+  // Narrow, face-connected diagonal stair spine rather than six tall solid cube stacks.
+  // Every tread has one lower joiner (except the grounded first tread), making
+  // each diagonal rise attach by a shared voxel face to the previous tread.
+  // Landing at x=-1 / x=7 is one level below the bridge at x=0..6.
+  for(const side of [-1,1])for(let step=1;step<=6;step++){
+    const dx=side<0?-7+step:13-step;
+    const level=step;
+    const px=x+dx;
+    if(terrainHeight(px,z,world.seed)!==y ||
+       world.get(px,y,z)!==BLOCK.GRASS ||
+       baseBlock(px,y,z,world.seed)!==BLOCK.GRASS)return null;
+    const py=y+level;
+    if(py+2>WORLD_MAX_Y)return null;
+    // Stair body, two cells of standing clearance, and neighboring shoulder
+    // must all remain naturally empty and free of player edits.
+    for(let dy=1;dy<=level+2;dy++)for(let dz=-1;dz<=1;dz++){
+      const cy=y+dy,cz=z+dz;
+      if(baseBlock(px,cy,cz,world.seed)!==BLOCK.AIR||
+         world.get(px,cy,cz)!==BLOCK.AIR)return null;
+    }
+    // Filled steps are physical support, not floating isolated slabs.
+    cells.push([px,py,z,BLOCK.WOOD]);
+    if(level>1)cells.push([px,py-1,z,BLOCK.WOOD]);
+  }
+  // The bridge's own approach guard must remain valid.
+  return {origin:[x,y,z],seed:world.seed,tree,cells,optIn:true};
+}
+export function placeArchwoodAccess(world,plan){
+  if(!world||typeof world.set!=='function'||!plan?.optIn||
+     !Array.isArray(plan.origin)||plan.seed!==world.seed)return false;
+  const fresh=planArchwoodAccess(world,plan.origin[0],plan.origin[2]);
+  if(!fresh||!same(plan,fresh))return false;
+  // The tree planner checks clear approaches, so install its real voxels first.
+  // If any stair write fails, reverse both sets of edits in reverse order.
+  if(!placeVoxelTree(world,fresh.tree))return false;
+  const written=[];
+  try{
+    for(const [x,y,z,id] of fresh.cells){
+      if(!world.set(x,y,z,id))throw Error('stair write rejected');
+      written.push([x,y,z]);
+    }
+    return true;
+  }catch{
+    const undo=[...written,...fresh.tree.cells];
+    for(let i=undo.length-1;i>=0;i--){
+      const [x,y,z]=undo[i];
+      if(!world.set(x,y,z,BLOCK.AIR))throw Error('archwood access rollback failed');
+    }
+    return false;
+  }
+}
