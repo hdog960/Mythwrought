@@ -6,7 +6,8 @@ import {surveyMountainV8Column as survey}
   from '../src/manual-biomes/mountain-v8-source-adapter.mjs';
 const ids={AIR:0,GRASS:1,DIRT:2,STONE:3};
 const options={worldMaxY:19,airId:0,readOriginalBlock:()=>0,
-  protectedAt:()=>false,mountainAt:()=>true};
+  protectedAt:()=>false,mountainAt:()=>true,
+  proposedSurfaceAt:()=>10};
 const proposal=(kind='dwarf-conifer')=>({x:7,z:7,top:10,cap:'alpine-grass',
   snowy:false,cliff:false,slope:.1,vegetation:kind,
   vegetationSite:{chosen:true},safeToIntegrate:false,
@@ -52,4 +53,12 @@ test('never consume mutable source edits or register an unapproved material',()=
   assert.equal(plant({...a,cap:'slate'},options),null);
   assert.equal(plant({...a,vegetationSite:{chosen:false}},options),null);
   assert.equal(plant({...a,safeToIntegrate:true},options),null);
+});
+
+test('plant never embeds any cell in neighboring proposed V8 raised slopes',()=>{
+  const p=proposal();
+  assert.ok(plant(p,options));
+  assert.equal(plant(p,{...options,proposedSurfaceAt:(x,z)=>x===8?12:10}),null);
+  assert.equal(plant(p,{...options,proposedSurfaceAt:()=>null}),null);
+  assert.equal(plant(p,{...options,proposedSurfaceAt:undefined}),null);
 });
