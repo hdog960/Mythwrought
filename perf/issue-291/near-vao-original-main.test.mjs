@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '60f3535304856d3d3df9d8ffda7a597360232077');
+    'b91cb27aa1290c003bcaabd809e94802f1f8ea4b');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -536,4 +536,115 @@ test('deep seam cleanup retries all ten handles after early and late native fail
   assert.deepEqual(x.events.slice(-2),['pause','fatal']);
   assert.equal(x.scope.near291Fatal,true);
   assert.deepEqual([...x.scope.chunks.values()].map(c=>c.buffer),x.originalResidents);
+});
+
+
+// ORIGINAL src/main.mjs two-buffer upload transaction, not a duplicate
+// implementation. These tests execute its exact extracted function body with
+// controlled upload and WebGL deletion failures. They are NOT true GPU tests.
+const internalUploadStart=source.indexOf('  function uploadPack2Chunk(vertices,water){');
+const internalUploadEnd=source.indexOf('\n  let editMeshBatches=0;',internalUploadStart);
+assert.ok(internalUploadStart>=0&&internalUploadEnd>internalUploadStart);
+const originalInternalUploadFunction=new Function('scope',
+  'with(scope){\n'+source.slice(internalUploadStart,internalUploadEnd)+
+  '\nreturn uploadPack2Chunk;}');
+function originalInternalUploadCase({
+  enabled=true,failAt=0,failNativeDeletes=[],failPause=false,
+  failFatal=false,throwAfterWaterAllocation=false
+}={}){
+  const events=[],initiatingError=new Error('291_ORIGINAL_INTERNAL_UPLOAD_ERROR');
+  let uploaded=0,waterReads=0;
+  const water=throwAfterWaterAllocation?{
+    get length(){
+      waterReads++;
+      if(waterReads>1)throw initiatingError;
+      return 9;
+    }
+  }:{length:9};
+  const scope={
+    near291Enabled:enabled,near291Fatal:false,
+    gl:{deleteBuffer:buffer=>{
+      events.push('delete-'+buffer.id);
+      if(failNativeDeletes.includes(buffer.id))
+        throw Error('291_NATIVE_DELETE_FAILED_'+buffer.id);
+    }},
+    uploadChunkBuffer:()=>{
+      uploaded++;
+      events.push('upload-'+uploaded);
+      if(uploaded===failAt)throw initiatingError;
+      return {id:'staged-'+uploaded};
+    },
+    frameDriver:{pause:()=>{
+      events.push('pause');
+      if(failPause)throw Error('PAUSE_FAILED');
+    }},
+    fatal:()=>{
+      events.push('fatal');
+      if(failFatal)throw Error('FATAL_UI_FAILED');
+    }
+  };
+  let result=null,error=null;
+  try{result=originalInternalUploadFunction(scope)(new Float32Array(9),water);}
+  catch(caught){error=caught;}
+  return {scope,events,initiatingError,result,error};
+}
+
+test('exact original two-buffer upload success keeps local GPU cleanup untouched',()=>{
+  const x=originalInternalUploadCase();
+  assert.equal(x.error,null);
+  assert.equal(x.result.buffer.id,'staged-1');
+  assert.equal(x.result.waterBuffer.id,'staged-2');
+  assert.deepEqual(x.events,['upload-1','upload-2']);
+  assert.equal(x.scope.near291Fatal,false);
+});
+test('first opaque allocation failure has no completed handle to delete',()=>{
+  const x=originalInternalUploadCase({failAt:1});
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events,['upload-1']);
+  assert.equal(x.scope.near291Fatal,false);
+});
+test('second water allocation failure deletes staged opaque, retains original cause',()=>{
+  const x=originalInternalUploadCase({failAt:2});
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events,['upload-1','upload-2','delete-staged-1']);
+  assert.equal(x.scope.near291Fatal,false);
+});
+test('failed native delete on second upload failure preserves cause and stops experiment',()=>{
+  const x=originalInternalUploadCase({failAt:2,failNativeDeletes:['staged-1']});
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events,['upload-1','upload-2','delete-staged-1','pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('failed pause and fatal UI cannot mask initial original GPU upload exception',()=>{
+  const x=originalInternalUploadCase({
+    failAt:2,failNativeDeletes:['staged-1'],failPause:true,failFatal:true
+  });
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events.slice(-2),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('both temporary opaque+water handles independently retire after later failure',()=>{
+  const x=originalInternalUploadCase({throwAfterWaterAllocation:true});
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events.filter(v=>v.startsWith('delete-')),
+    ['delete-staged-1','delete-staged-2']);
+  assert.equal(x.scope.near291Fatal,false);
+});
+test('first deletion exception does not skip second staged water-buffer retirement',()=>{
+  const x=originalInternalUploadCase({
+    throwAfterWaterAllocation:true,failNativeDeletes:['staged-1']
+  });
+  assert.equal(x.error,x.initiatingError);
+  assert.deepEqual(x.events.filter(v=>v.startsWith('delete-')),
+    ['delete-staged-1','delete-staged-2']);
+  assert.deepEqual(x.events.slice(-2),['pause','fatal']);
+  assert.equal(x.scope.near291Fatal,true);
+});
+test('public original two-buffer cleanup exception behavior remains byte-for-byte',()=>{
+  const x=originalInternalUploadCase({
+    enabled:false,failAt:2,failNativeDeletes:['staged-1']
+  });
+  assert.equal(x.error.message,'291_NATIVE_DELETE_FAILED_staged-1');
+  assert.deepEqual(x.events,['upload-1','upload-2','delete-staged-1']);
+  assert.equal(x.scope.near291Fatal,false);
 });
