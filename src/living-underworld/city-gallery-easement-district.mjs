@@ -219,6 +219,16 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
    centerTileCount:proposed.centerTileCount
   });
  let floorSourceChecks=0,solidSupport=0,existingAir=0,excavation=0;
+ const callbacks={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
+ const read=(role,x,y,z)=>{
+  callbacks[role]++;
+  return source[role](x,y,z);
+ };
+ const callbackSummary=()=>Object.freeze({
+  districtActualOriginalReaderCallsByRole:Object.freeze({...callbacks}),
+  districtActualOriginalReaderMethodCalls:
+   Object.values(callbacks).reduce((a,b)=>a+b,0)
+ });
  const count={originalEdits:0,protectedLandmarks:0,authored:0,
   authoredAirSupport:0,oldNaturalAirSupport:0,oreOrUnsafe:0,
   inconsistentAuthoredAir:0};
@@ -229,20 +239,21 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
      kind=y<=proposed.floorY?'support':'clearance';
     floorSourceChecks++;
     let reason=null;
-    if(sourceFlag(source.editedAt,'edit',x,y,z)){
+    if(sourceFlag((...args)=>read('editedAt',...args),'edit',x,y,z)){
      count.originalEdits++;reason='PLAYER_EDIT';
     }else{
-     const authored=source.authoredAt(x,y,z);
+     const authored=read('authoredAt',x,y,z);
      if(authored!==undefined&&(!INT(authored)||authored<0))
       throw TypeError('Invalid original M7 district authored material');
      if(authored!==undefined&&authored!==0){
       count.authored++;reason='AUTHORED_SOURCE';
      }else if(kind==='support'&&authored===0){
       count.authoredAirSupport++;reason='AUTHORED_AIR_SUPPORT';
-     }else if(sourceFlag(source.protectedAt,'landmark',x,y,z)){
+     }else if(sourceFlag((...args)=>read('protectedAt',...args),
+      'landmark',x,y,z)){
       count.protectedLandmarks++;reason='PROTECTED_LANDMARK';
      }else{
-      const material=source.naturalAt(x,y,z);
+      const material=read('naturalAt',x,y,z);
       if(!INT(material)||material<0)
        throw TypeError('Invalid original M7 district material');
       if(!isCandidateGeologyMaterial(material)){
@@ -265,6 +276,7 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
       sourceChecks:deep.sourceChecks+floorSourceChecks,
       originalFourHubSourceChecks:deep.sourceChecks,
       sourceRefusalCounts:Object.freeze({...count}),
+      ...callbackSummary(),
       geometricDistrictColumns:proposed.columns,
       originalM7ReaderIdentityByCallerOnly:true
      });
@@ -279,7 +291,8 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
   requiredSourceChecks:proposed.requiredSourceChecks,
   floorSourceChecks,sourceChecks:deep.sourceChecks+floorSourceChecks,
   originalFourHubSourceChecks:deep.sourceChecks,maxTotalSourceChecks,
-  sourceRefusalCounts:Object.freeze(count),solidSupport,
+  sourceRefusalCounts:Object.freeze(count),
+  ...callbackSummary(),solidSupport,
   existingAir,excavation,
   threeWideTileConnectivityVerified:true,
   geometryClearanceComparedToAll16MainGalleries:true,
