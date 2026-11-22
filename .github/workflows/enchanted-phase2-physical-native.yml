@@ -1,7 +1,7 @@
 # Isolated candidate-only source validation. Previous 44/44 authentic M7
 # tests at commit 15f7521f92954d1861163d2a295712c8483b5975 remain reusable.
-# This revision validates only changed real-source diagnostics, dense
-# cache bounds/source parity and one-player mixed-height diagonal walking.
+# This revision adds a five-capacity original-M7 data comparison;
+# prior 9/9 exact-source tests are reused for unchanged code.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -32,11 +32,13 @@ jobs:
           node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/enchanted-tree-source-cache.mjs
           node --check tests/manual-biomes/enchanted-tree-source-cache.test.mjs
+          node --check tests/manual-biomes/enchanted-tree-cache-capacity-real-m7.test.mjs
           node --check tests/manual-biomes/enchanted-tree-multistep-diagonal-real-m7.test.mjs
       - name: Run only affected actual-source native tests
         run: |
           node --test \
             tests/manual-biomes/enchanted-tree-source-cache.test.mjs \
+            tests/manual-biomes/enchanted-tree-cache-capacity-real-m7.test.mjs \
             tests/manual-biomes/enchanted-tree-multistep-diagonal-real-m7.test.mjs \
             tests/manual-biomes/enchanted-tree-source-cost.test.mjs \
             tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs
