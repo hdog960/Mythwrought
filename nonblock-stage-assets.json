@@ -3,7 +3,7 @@
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "adcf082ddc016e9a11d1becfdb6fbd172344b0f109ad9d4c2b1b41f463ba86b1",
     "./src/environment-ground.mjs": "90b3375fc29c1cae061681ccb2d2ddbd77926e884478a4dcbf29c5c5e731b6dc",
-    "./src/manual-biomes/environment-v7.mjs": "592a20f75d2821ce392517b7ee872ac475e8bedea9bf22e215b18a3e5cadaac3",
+    "./src/manual-biomes/environment-v7.mjs": "2681100ea4901a6bf1f42809d1539fc2729d76cde54ac99d882fb049f193bf68",
     "./src/manual-biomes/environment-oasis.mjs": "6627e772dbded074cb85cf99c79f9f92e61c21cb50c43f392dac1526f6c3e42f",
     "./src/nonblock/candidate-effects.mjs": "2bcbdff0a68c595521d619f10f0f1671ac358e79af812af74b20df875462b424",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
