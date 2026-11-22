@@ -1,0 +1,151 @@
+{
+  "schema": "mythwrought.builder-b.waves16-17-source-handoff.v1",
+  "project": "MYTHWROUGHT Builder B Roadmap B, isolated 1B service originals",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startedExactHEAD": "23af94eb4f82f2980556ceb13c99f5083235ab80",
+  "basedOnProtectedPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "committedOriginals": [
+    {
+      "wave": 16,
+      "id": "r1:fishing-lodge:snow:small:002",
+      "title": "Frostline Eight-Wing Icewatch Fishing Lodge",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave16.mjs",
+      "exactGitBlob": "0d643fa1b27810ea4e976dcb0e8909c91aa6d3b5",
+      "sourceCells": 7845,
+      "roofCells": 1858,
+      "walkableConnected": 1494,
+      "rooms": 8,
+      "portals": 12,
+      "exteriorPack4WindowCells": 13,
+      "roofWings": 8,
+      "originalOpenCourts": [
+        36,
+        20
+      ],
+      "groundedStoneMastWithRealCap": true,
+      "sourceOnly": true,
+      "focusEightWayNovelty": {
+        "against": [
+          "Sedgewatch temperate fishing lodge",
+          "Dunewake desert fishing lodge"
+        ],
+        "comparisons": 16,
+        "maxIoU": 0.3008373205741627
+      }
+    },
+    {
+      "wave": 17,
+      "id": "r1:greenhouse:desert:small:002",
+      "title": "Amberwell Sandglass Conservatory",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave17.mjs",
+      "exactGitBlob": "36ab1f088b8826740cb87b6d34b6740cf25a5157",
+      "sourceCells": 7745,
+      "roofCells": 1665,
+      "walkableConnected": 1299,
+      "rooms": 8,
+      "portals": 12,
+      "lowerPack4UprightGlassCells": 96,
+      "sourceThreeTallGlassBays": 32,
+      "roofWings": 8,
+      "originalOpenCourts": [
+        42,
+        20
+      ],
+      "groundedRaisedSolidStoneTower": true,
+      "upperWindowsRejectedWithoutExteriorProof": true,
+      "upperTowerStairsNotInstalled": true,
+      "sourceOnly": true,
+      "focusEightWayNovelty": {
+        "against": [
+          "Alderglass temperate greenhouse",
+          "Rimeglass snow greenhouse",
+          "Glimmerbough enchanted greenhouse"
+        ],
+        "comparisons": 24,
+        "maxIoU": 0.38223261250730567
+      }
+    }
+  ],
+  "focusedVerification": {
+    "method": "Original repository sourcePlan and validateBlueprint executed inside isolated V8 evaluation against exact returned original source Git blobs, not a native Node test runner",
+    "outcome": "PASS 2/2",
+    "supportRoofFailures": 0,
+    "framedWindowFailures": 0,
+    "windowsFacingWings": 0,
+    "blockedSourcePortals": 0,
+    "falseSkyCourtyardCells": 0,
+    "frozenBuilderB115": true,
+    "excludesBuilderD92": true,
+    "excludesHistoricalAccepted228IDs": true,
+    "strictEightWayD4AgainstPriorNewSameCategory": "40/40 focused transforms PASS (16 Frostline, 24 Amberwell), full 228 historic PENDING"
+  },
+  "stagedNativeTestFiles": [
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave16.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave17.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-waves16-17-shared-historical-d4.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9-17-gallery-wiring.test.mjs"
+  ],
+  "oneCoordinatedBrowserMilestone": {
+    "sourceBuildings": 9,
+    "requiredActualWebGL2Screenshots": 54,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-17-gallery.mjs",
+    "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-17-gallery.mjs",
+    "exactHeadRequired": true,
+    "sourceProvenanceFiles": 12,
+    "PNGCRCAndSHA256Required": true,
+    "status": "SCRIPTS STAGED AND STATIC SYNTAX CHECKED, NO CHROMIUM OR PNG FILES GENERATED",
+    "supersedesEarlierUnexecutedGalleryPlans": "Earlier 6, 12, 24, 30 and 42-frame drafts need not each run separately"
+  },
+  "outstandingRequiredGates": [
+    "Actual original repository native Node runs for current wave tests",
+    "One strict canonical 228 prior original-source 8-way D4 for Waves16-17",
+    "True producer Pack1-5 instantiation, Pack4 collider/selection/weather physical review",
+    "One actual source-specific 54-frame Chromium WebGL2 capture + independent authentic SHA256 and PNG CRC audit",
+    "Future real game runtime, iPhone landscape PWA/performance, biome, saves and artwork acceptance"
+  ],
+  "status": {
+    "nativeNodeRunnerExecuted": false,
+    "fullHistorical228Executed": false,
+    "chromiumExecuted": false,
+    "PNGArtifactsExist": false,
+    "creatorApproved": false,
+    "liveGameRegistered": false,
+    "actualIphoneRun": false,
+    "worldSavesModified": false,
+    "sharedCIChanged": false,
+    "newWorkflowRuns": false,
+    "newPRCreated": false,
+    "productionDeployed": false,
+    "merged": false,
+    "otherBuildersModified": false,
+    "automationsModified": false
+  },
+  "progress": {
+    "newResidentialSources": 10,
+    "newServiceSources": 17,
+    "totalNewOriginals": 27,
+    "targetNewOriginals": 294,
+    "remainingNewOriginals": 267,
+    "remainingResidential": 169,
+    "remainingServices": 98
+  },
+  "policy": "A single read-only initial refs+prior exact-head CI check reused PR407 original passed runs; no repeated queue audits, PR/CI fanout, production edits, merges, deployments, approval claims or weakened acceptance assertions."
+}
