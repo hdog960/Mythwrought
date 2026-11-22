@@ -120,7 +120,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
   source,selectedStairProposals:selected,
   maxSourceChecks:Math.min(60000,remaining)
  });
- const sourceChecks=inspected+(terrace.sourceChecks??0);
+ // The terrace was already fully source-audited inside the accepted detour.
+ // Count its original M7 callbacks ONCE; do not inflate aggregate budgets.
+ const sourceChecks=inspected+
+  (detour?.terraceProof?.ok===true?0:(terrace.sourceChecks??0));
  if(!terrace.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_TERRACE_SOURCE_OR_GEOMETRY_UNSAFE',
   refusal:terrace.reason??null,sourceChecks,
