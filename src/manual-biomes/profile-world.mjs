@@ -54,11 +54,20 @@ export function validateFourRegionProfile(input,seed){
  * All four biomes are deterministic; only bounded column plans are cached.
  */
 export class FourRegionWorld extends VoxelWorld{
-  constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS}={}){
+  constructor(seed,profile=fourRegionProfile(seed),{
+    maxCachedColumns=MAX_COLUMNS,experimentalEnchantedTrees=false
+  }={}){
     super(seed);
     this.profile=validateFourRegionProfile(profile,seed);
     if(!Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
+    // Transient, explicitly opted-in source-only prototype. NOT serialized in
+    // schema-1 saves or enabled for ordinary M7 gameplay/profile restores.
+    // An eventual release must assign a distinct new generator identity.
+    if(typeof experimentalEnchantedTrees!=='boolean'||
+      experimentalEnchantedTrees&&this.profile.generator!==M7_ENVIRONMENT_GENERATOR)
+      throw Error('Enchanted tree prototype requires explicit M7 opt-in');
+    this.experimentalEnchantedTrees=experimentalEnchantedTrees;
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
     if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
@@ -174,7 +183,8 @@ export class FourRegionWorld extends VoxelWorld{
     if(!cells){
       cells=environmentalTreesForChunk(cx,cz,this.seed,
         (a,c)=>this._columnPlan(a,c),
-        (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c));
+        (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
+        {experimentalEnchantedTrees:this.experimentalEnchantedTrees});
       this._environmentTreeChunks.set(key,cells);
       if(this._environmentTreeChunks.size>64)
         this._environmentTreeChunks.delete(this._environmentTreeChunks.keys().next().value);
