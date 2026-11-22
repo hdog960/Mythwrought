@@ -61,3 +61,60 @@ test('real cave-air aperture breaks a shelf without fabricating a zero-height fl
   assert.deepEqual(result.longest[0].start,{x:0,z:2});
   assert.throws(()=>detectHeightShelfRuns(grid,{legacy:[[1,2],[2,null],[3,4],[4,5]]}));
 });
+
+test('authentic source reason grid separates protected-air, protected-solid and safe cliffs',()=>{
+  // Three signed steep horizontal edges, one protected AIR, one landmark
+  // solid, one unprotected; exact physical height changes persist.
+  const grid=[[1,4],[2,5],[3,6]];
+  const legacy=[[1,2],[2,3],[3,4]];
+  const protectedColumns=[[true,false],[false,true],[false,false]];
+  const protectionReasons=[['air','none'],['none','solid'],['none','none']];
+  const result=detectHeightShelfRuns(grid,{
+    legacy,protectedColumns,protectionReasons});
+  assert.equal(result.edgeCensus.totalSteepEdges,3);
+  assert.equal(result.edgeCensus.protectedEdges,2);
+  assert.equal(result.edgeCensus.protectedAirEdges,1);
+  assert.equal(result.edgeCensus.protectedSolidEdges,1);
+  assert.equal(result.edgeCensus.unprotectedEdges,1);
+  assert.equal(result.edgeCensus.unprotectedSourceAmplifiedEdges,1);
+  assert.equal(result.edgeCensus.unprotectedMaxStep,3);
+  assert.equal(result.edgeCensus.unprotectedStepCounts['3'],1);
+  assert.equal(result.longest[0].protectedTouches,2);
+  assert.equal(result.longest[0].unprotectedEdges,1);
+  assert.equal(result.longest[0].protectedAirEdges,1);
+  assert.equal(result.longest[0].protectedSolidEdges,1);
+});
+
+test('unprotected continuous cliffs are ranked separately, not hidden by protected cliffs',()=>{
+  const grid=[[1,4,5,8],[2,5,6,9],[3,6,7,10]];
+  const protectedColumns=[[true,true,false,false],
+    [true,true,false,false],[true,true,false,false]];
+  const protectionReasons=protectedColumns.map(row=>row.map(b=>b?'air':'none'));
+  const result=detectHeightShelfRuns(grid,{protectedColumns,protectionReasons});
+  assert.equal(result.longestUnprotected[0].length,3);
+  assert.equal(result.longestUnprotected[0].protectedTouches,0);
+  assert.ok(result.longest.some(run=>run.protectedTouches>0));
+});
+
+test('malformed source protection reason grids fail closed',()=>{
+  const grid=[[1,4],[2,5]];
+  const protectedColumns=[[true,false],[false,false]];
+  assert.throws(()=>detectHeightShelfRuns(grid,{
+    protectedColumns,protectionReasons:[['none','none'],['none','none']]}));
+  assert.throws(()=>detectHeightShelfRuns(grid,{
+    protectedColumns,protectionReasons:[['air','none'],['cave','none']]}));
+  assert.throws(()=>detectHeightShelfRuns(grid,{
+    protectionReasons:[['air'],['none','none']]}));
+});
+
+test('protected apertures cannot be counted as unprotected clifflines',()=>{
+  const grid=[[1,4],[null,5],[4,7],[4,7]];
+  const protectedColumns=[[true,false],[true,false],[false,false],[false,false]];
+  const protectionReasons=[['air','none'],['air','none'],
+    ['none','none'],['none','none']];
+  const result=detectHeightShelfRuns(grid,{protectedColumns,protectionReasons});
+  assert.equal(result.edgeCensus.totalSteepEdges,3);
+  assert.equal(result.edgeCensus.protectedEdges,1);
+  assert.equal(result.edgeCensus.unprotectedEdges,2);
+  assert.equal(result.longestUnprotected[0].length,2);
+});

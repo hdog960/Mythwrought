@@ -19,6 +19,7 @@ function read(seed,cx,cz,label){
   const grid=Array.from({length:WIDTH},()=>new Array(WIDTH));
   const legacyGrid=Array.from({length:WIDTH},()=>new Array(WIDTH));
   const protectedGrid=Array.from({length:WIDTH},()=>new Array(WIDTH));
+  const protectedReasons=Array.from({length:WIDTH},()=>new Array(WIDTH));
   const raisedHist={},stepHist={},vetoExamples=[],transect=[],surfaceIds={};
   let veto=0,caveVeto=0,solidVeto=0,unchanged=0,changed=0,cells=0,grass=0;
   let openApertures=0,apertureAdjacentEdges=0;
@@ -50,6 +51,7 @@ function read(seed,cx,cz,label){
       raisedHist[raised]=(raisedHist[raised]??0)+1;
       if(raised)changed++;else unchanged++;
     }
+    let protectionReason='none';
     if(!plan.size){
       veto++;
       let reason='unknown';
@@ -61,11 +63,14 @@ function read(seed,cx,cz,label){
       }
       if(reason==='protected-air')caveVeto++;
       if(reason==='protected-solid')solidVeto++;
+      protectionReason=reason==='protected-air'?'air':
+        reason==='protected-solid'?'solid':'unknown';
       if(vetoExamples.length<12)vetoExamples.push({x,z,old,top,reason});
     }
     grid[dz+R][dx+R]=top;
     legacyGrid[dz+R][dx+R]=old;
     protectedGrid[dz+R][dx+R]=plan.size===0;
+    protectedReasons[dz+R][dx+R]=protectionReason;
     if(dz===0)transect.push({x,old,top,raised,plan:plan.size});
     cells++;
   }
@@ -92,9 +97,11 @@ function read(seed,cx,cz,label){
     apertureAdjacentEdges,
     straightShelf: {
       step2:detectHeightShelfRuns(grid,{legacy:legacyGrid,
-        protectedColumns:protectedGrid,minStep:2,limit:8}),
+        protectedColumns:protectedGrid,protectionReasons:protectedReasons,
+        minStep:2,limit:8}),
       step1:detectHeightShelfRuns(grid,{legacy:legacyGrid,
-        protectedColumns:protectedGrid,minStep:1,limit:8})
+        protectedColumns:protectedGrid,protectionReasons:protectedReasons,
+        minStep:1,limit:8})
     },
     xTransectZ0:transect, naturalGrassAtTop:grass,savedEdits:0};
   console.log('DESERT_P3_GEOMETRY_SOURCE '+JSON.stringify(result));

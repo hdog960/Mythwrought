@@ -2,7 +2,8 @@
 // A cliff can remain straight while the two heights vary along its length.
 // Earlier same-height-pair counting incorrectly split such cliffs to length 1.
 export function detectHeightShelfRuns(terrain,{
-  legacy=terrain,protectedColumns=null,minStep=2,limit=8
+  legacy=terrain,protectedColumns=null,protectionReasons=null,
+  minStep=2,limit=8
 }={}){
   if(!Number.isInteger(minStep)||minStep<1||!Number.isInteger(limit)||limit<1)
     throw Error('Invalid shelf-run minimum step or result limit');
@@ -20,7 +21,22 @@ export function detectHeightShelfRuns(terrain,{
   requireGrid(terrain,'actual',true,true);
   requireGrid(legacy,'legacy',true,legacy===terrain);
   if(protectedColumns!==null)requireGrid(protectedColumns,'protected',false);
+  if(protectionReasons!==null){
+    if(!Array.isArray(protectionReasons)||
+       protectionReasons.length!==terrain.length||
+       protectionReasons.some((row,z)=>!Array.isArray(row)||
+         row.length!==terrain[0].length||
+         row.some((kind,x)=>!['none','air','solid','unknown'].includes(kind)||
+           protectedColumns!==null&&
+           (kind!=='none')!==protectedColumns[z][x])))
+      throw Error('Invalid or inconsistent source protection reason grid');
+  }
   const H=terrain.length,W=terrain[0].length,found=[];
+  const edgeCensus={totalSteepEdges:0,protectedEdges:0,
+    protectedAirEdges:0,protectedSolidEdges:0,protectedUnknownEdges:0,
+    unprotectedEdges:0,unprotectedSourceAmplifiedEdges:0,
+    unprotectedMaxStep:0,unprotectedMaxLegacyStep:0,
+    unprotectedStepCounts:{}};
   for(const axis of ['x','z']){
     const transverse=axis==='x'?W-1:H-1;
     const along=axis==='x'?H:W;
@@ -44,18 +60,48 @@ export function detectHeightShelfRuns(terrain,{
         const legacyDelta=legacy[nz][nx]-legacy[z][x];
         const protects=protectedColumns?
           protectedColumns[z][x]||protectedColumns[nz][nx]:false;
+        const reasons=protectionReasons?
+          [protectionReasons[z][x],protectionReasons[nz][nx]]:null;
+        const kind=protects?(reasons?
+          (reasons.includes('air')?'air':
+            reasons.includes('solid')?'solid':'unknown'):'unknown'):'none';
+        const amplified=Math.abs(delta)>Math.abs(legacyDelta);
+        edgeCensus.totalSteepEdges++;
+        if(protects){
+          edgeCensus.protectedEdges++;
+          edgeCensus[kind==='air'?'protectedAirEdges':
+            kind==='solid'?'protectedSolidEdges':'protectedUnknownEdges']++;
+        }else{
+          edgeCensus.unprotectedEdges++;
+          edgeCensus.unprotectedSourceAmplifiedEdges+=Number(amplified);
+          edgeCensus.unprotectedMaxStep=Math.max(
+            edgeCensus.unprotectedMaxStep,Math.abs(delta));
+          edgeCensus.unprotectedMaxLegacyStep=Math.max(
+            edgeCensus.unprotectedMaxLegacyStep,Math.abs(legacyDelta));
+          const step=String(Math.abs(delta));
+          edgeCensus.unprotectedStepCounts[step]=
+            (edgeCensus.unprotectedStepCounts[step]??0)+1;
+        }
         if(!current)current={axis,sign,start:{x,z},end:{x,z},
           length:0,totalStep:0,maxStep:0,sourceAmplifiedEdges:0,
-          protectedTouches:0};
+          protectedTouches:0,protectedAirEdges:0,protectedSolidEdges:0,
+          protectedUnknownEdges:0,unprotectedEdges:0};
         current.end={x,z};current.length++;
         current.totalStep+=Math.abs(delta);
         current.maxStep=Math.max(current.maxStep,Math.abs(delta));
-        current.sourceAmplifiedEdges+=Number(Math.abs(delta)>Math.abs(legacyDelta));
+        current.sourceAmplifiedEdges+=Number(amplified);
         current.protectedTouches+=Number(protects);
+        if(!protects)current.unprotectedEdges++;
+        else current[kind==='air'?'protectedAirEdges':
+          kind==='solid'?'protectedSolidEdges':'protectedUnknownEdges']++;
       }
     }
   }
   found.sort((a,b)=>b.length-a.length||b.maxStep-a.maxStep||
     a.axis.localeCompare(b.axis)||a.start.z-b.start.z||a.start.x-b.start.x);
-  return {minStep,allRunCount:found.length,longest:found.slice(0,limit)};
+  const allRunCount=found.length;
+  const longestUnprotected=found.filter(run=>run.protectedTouches===0)
+    .slice(0,limit);
+  return {minStep,allRunCount,longest:found.slice(0,limit),
+    longestUnprotected,edgeCensus};
 }
