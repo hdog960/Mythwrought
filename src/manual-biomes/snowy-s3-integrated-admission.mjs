@@ -14,6 +14,35 @@ const fail=(reason)=>Object.freeze({
   kind:'detached-snow-S3-original-scene-admission',safe:false,reason
 });
 
+// A scene-source read must not change the cave/legacy/physical cells that
+// were approved earlier in this SAME synchronous review. Schema-1 save
+// equality alone cannot detect a changed cave override or natural cache.
+// Snapshot ONLY already proposed trees and the protective five-cell ring;
+// no global world hash or per-frame scan. The original legacy reader is
+// passed through from VoxelWorld.prototype.naturalAndLandmarkBlock.
+function sourceCertificate(world,candidate,legacyNatural){
+  if(typeof world.get!=='function'||
+    typeof world.environmentCaves?.get!=='function'||
+    typeof world.naturalAndLandmarkBlock!=='function'||
+    typeof legacyNatural!=='function')return null;
+  const {x,z,floor}=candidate,checks=[];
+  for(let dz=-2;dz<=2;dz++)for(let dx=-2;dx<=2;dx++)
+    for(let dy=-1;dy<=3;dy++){
+      const ax=x+dx,ay=floor+dy,az=z+dz;
+      const cave=world.environmentCaves.get(ax,ay,az);
+      checks.push(cave===undefined?null:cave);
+    }
+  for(const [ax,ay,az] of candidate.cells){
+    checks.push(world.get(ax,ay,az));
+    checks.push(world.naturalAndLandmarkBlock(ax,ay,az));
+    checks.push(legacyNatural(ax,ay,az));
+    const cave=world.environmentCaves.get(ax,ay,az);
+    checks.push(cave===undefined?null:cave);
+    checks.push(world.edits.has(ax+','+ay+','+az));
+  }
+  return JSON.stringify(checks);
+}
+
 export function reviewSnowS3SafeChunk(world,cx,cz,{
   biomeAt,terrainHeight,legacyNatural,proposedSnowTree,
   planScenery,describeScene
@@ -30,6 +59,22 @@ export function reviewSnowS3SafeChunk(world,cx,cz,{
   catch{return fail('invalid-source-chunk-review')}
   if(raw.proposals.length>24||raw.proposals.length>raw.checked)
     return fail('excessive-S3-proposals');
+  // Capture all candidates before any scene callback, including those
+  // visited later. A planner must not silently invalidate an earlier OR
+  // future tree simply because scene plans are visited in chunk order.
+  const certificates=new Map();
+  try{
+    for(const candidate of raw.proposals){
+      const proof=sourceCertificate(world,candidate,legacyNatural);
+      if(proof===null)return fail('missing-stable-M7-source-certificates');
+      certificates.set(candidate.key,proof);
+    }
+  }catch{return fail('original-M7-source-certificate-failed')}
+  const sourceUnchanged=()=>{
+    try{return raw.proposals.every(c=>
+      sourceCertificate(world,c,legacyNatural)===certificates.get(c.key));}
+    catch{return false}
+  };
   const sceneCache=new Map(),describeCache=new Map();
   let sceneRequests=0,sceneCalls=0,descriptorCalls=0;
   const cachedPlanner=(world,x,z)=>{
@@ -66,12 +111,18 @@ export function reviewSnowS3SafeChunk(world,cx,cz,{
     catch{return fail('scene-source-review-failed')}
     if(!scenery.safe){
       rejected.push(Object.freeze({key:candidate.key,reason:scenery.reason}));
+      if(!sourceUnchanged())return fail('original-M7-source-changed-during-scene-review');
       continue;
     }
+    // A scene resolver can affect cave overrides or occupied voxels without
+    // changing a schema-1 edit. Recheck BEFORE admitting and AGAIN once all
+    // candidates have been inspected (later calls can invalidate earlier ones).
+    if(!sourceUnchanged())return fail('original-M7-source-changed-during-scene-review');
     admitted.push(candidate); // Already deeply frozen by source clearance.
   }
   if(originalSave(world)!==before)
     return fail('source-changed-schema-1-world-during-review');
+  if(!sourceUnchanged())return fail('original-M7-source-changed-during-scene-review');
   return Object.freeze({kind:'detached-snow-S3-original-scene-admission',
     safe:true,cx,cz,checked:raw.checked,sourceCandidates:raw.proposals.length,
     sourceRejected:raw.checked-raw.proposals.length,

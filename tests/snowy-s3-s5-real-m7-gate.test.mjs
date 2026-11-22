@@ -3,7 +3,7 @@
 // source save reader, biome profiler and nonblock scene host installed.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import {VoxelWorld,terrainHeight} from '../src/voxel.mjs';
+import {VoxelWorld,terrainHeight,collides} from '../src/voxel.mjs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR,
   restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
@@ -13,6 +13,8 @@ import {auditSnowS3Walkway} from '../src/manual-biomes/snowy-s3-walkway-audit.mj
 import {planEnvironmentalScenery} from '../src/nonblock/staged-habitats.mjs';
 import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
 import {reviewSnowS3SafeChunk} from '../src/manual-biomes/snowy-s3-integrated-admission.mjs';
+import {reviewSnowS3PlayerApprovedChunk}
+  from '../src/manual-biomes/snowy-s3-player-approved-chunk.mjs';
 import {surveySnowS4ChunkSeams} from '../src/manual-biomes/snowy-s4-seam-evidence.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
@@ -48,6 +50,18 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
     assert.equal(integrated.safe,true,
       'Original-world S3/S5 admission needs source repair: '+integrated.reason);
     assert.equal(integrated.sourceWorldUnchanged,true);
+    // Actual original voxel.collides + BODY_RADIUS/BODY_HEIGHT against the
+    // already checked source world; this is a STRICT extra headroom gate,
+    // not a stand-in for original stepPlayer or Home Screen acceptance.
+    const body=reviewSnowS3PlayerApprovedChunk(world,0,32,{
+      ...deps,planScenery:planEnvironmentalScenery,
+      describeScene:describeCandidateObject,collides
+    });
+    assert.equal(body.safe,true,
+      'Original source-body collision gate failed: '+body.reason);
+    assert.equal(body.sourceAdmitted,integrated.admitted.length);
+    assert.equal(body.sourceWorldUnchanged,true);
+    assert.ok(body.admitted.length<=integrated.admitted.length);
     const seam=surveySnowS4ChunkSeams(world,
       {x:13,z:508,width:6,height:6},{biomeAt:v6BiomeAt,terrainHeight});
     assert.equal(seam.sampled,36);
@@ -66,6 +80,8 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
       scenery:scenery.summary,
       admission:{checked:integrated.checked,sourceCandidates:integrated.sourceCandidates,
         admitted:integrated.admitted.length,rejected:integrated.rejected},
+      body:{sourceAdmitted:body.sourceAdmitted,playerBodyApproved:body.admitted.length,
+        collisionProbes:body.collisionProbes,protectedPortalPairs:body.preservedPortalConnections},
       seam:seam.counts}));
   }
 });
