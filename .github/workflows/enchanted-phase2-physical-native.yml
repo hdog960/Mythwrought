@@ -1,8 +1,7 @@
-# Exact original-M7 experimental-only 128-entry immutable site metadata cache.
-# Scope: 96 original FourRegionWorld chunk builds per seed (>64 cache), cache eviction, actual
-# cave/landmark source integrity. Prior 6/6 density tests and earlier Moonwillow
-# native/WebGL2 proofs are reused where their tree/renderer source is unchanged.
-# No shared workflows, browser runs, broad CI or queue audits.
+# Exact original-M7 isolated candidate immutable-site cache hardening.
+# Only affected real-world biome-cache, source safety, walking and measured
+# 128-chunk AB/BA cost tests. Reuse unchanged original three-species WebGL2,
+# 288-chunk density and native GPU evidence. No duplicate broad CI.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-world-site-memo:
+  original-m7-immutable-site-and-cost:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -27,16 +26,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify exact original-world and affected source syntax
+      - name: Verify exact changed source and focused tests syntax
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-tree-site-biome-cache.mjs
-          node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/profile-world.mjs
+          node --check tests/manual-biomes/enchanted-site-biome-controlled-cost-real-m7.test.mjs
           node --check tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
-      - name: Source-authentic 192-chunk original-world residency, cave, seam and save proof
+      - name: Run original-world cache safety, controlled cost and real pedestrian acceptance
         run: |
           node --test \
+            tests/manual-biomes/enchanted-site-biome-controlled-cost-real-m7.test.mjs \
             tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs \
-            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
-            tests/manual-biomes/enchanted-tree-source-cost.test.mjs
+            tests/manual-biomes/enchanted-tree-multistep-diagonal-real-m7.test.mjs
