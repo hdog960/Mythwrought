@@ -53,6 +53,12 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     const seam=certifyMountainV8Seam(rootX,rootZ,seed,(x,z)=>{
       return x===rootX&&z===rootZ?chosen:
         sourcSurvey(x,z,seed,{world:source});
+    },{
+      readSupport:p=>p.x===rootX&&p.z===rootZ?terrain:
+        planMountainV8PhysicalColumn(p,{
+          worldMaxY:WORLD_MAX_Y,ids:BLOCK,
+          readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z)
+        })
     });
     if(!seam){stats.seamRejected++;continue;}
     stats.terrainCells+=terrain.estimatedCells;
