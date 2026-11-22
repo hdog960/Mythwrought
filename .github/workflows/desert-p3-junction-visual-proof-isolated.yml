@@ -1,0 +1,102 @@
+name: Desert P3 isolated original-game two-site visual proof
+on:
+  push:
+    branches:
+      - research/desert-p3-junction-visual-gate-20261122
+    paths:
+      - .github/workflows/desert-p3-junction-visual-proof-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-visual-proof-isolated
+  cancel-in-progress: false
+jobs:
+  original-game-before-after:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9b3f9dc99b878f9e2291e54082920617b10edeae
+          path: harness
+      - uses: actions/checkout@v4
+        with:
+          ref: 3c1f87c0db53ebafa8fbb52fcb7964c23fd5ba68
+          path: before
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: after
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce exact three-source pins and no source changes
+        run: |
+          test "$(git -C harness rev-parse HEAD)" = 9b3f9dc99b878f9e2291e54082920617b10edeae
+          test "$(git -C before rev-parse HEAD)" = 3c1f87c0db53ebafa8fbb52fcb7964c23fd5ba68
+          test "$(git -C after rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          cp harness/tests/desert-phase3-triple-junction-browser.mjs before/tests/
+          cp harness/tests/desert-phase3-triple-junction-browser.mjs after/tests/
+          node --check before/tests/desert-phase3-triple-junction-browser.mjs
+          node --check after/tests/desert-phase3-triple-junction-browser.mjs
+      - name: Install only focused browser dependencies
+        run: |
+          cd before
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+          cd ../after
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+      - name: Capture original real-engine before and after
+        run: |
+          set -euo pipefail
+          cd before
+          python3 -m http.server 4173 >/tmp/desert-before-http.log 2>&1 &
+          srv_before=$!
+          trap 'kill "$srv_before" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=before DESERT_JUNCTION_OUTPUT=artifacts/desert-triple-junction node tests/desert-phase3-triple-junction-browser.mjs
+          kill "$srv_before" 2>/dev/null || true
+          cd ../after
+          python3 -m http.server 4173 >/tmp/desert-after-http.log 2>&1 &
+          srv_after=$!
+          trap 'kill "$srv_after" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-triple-junction node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Verify PNG integrity and report bounded pixel differences
+        if: success()
+        run: |
+          cd after
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import assert from 'node:assert/strict';
+          import {PNG} from 'pngjs';
+          const before=JSON.parse(fs.readFileSync('../before/artifacts/desert-triple-junction/before-manifest.json'));
+          const after=JSON.parse(fs.readFileSync('artifacts/desert-triple-junction/after-manifest.json'));
+          assert.equal(before.sites.length,2); assert.equal(after.sites.length,2);
+          for(let i=0;i<2;i++){
+            const b=before.sites[i],a=after.sites[i];
+            assert.equal(b.seed,a.seed); assert.equal(b.x,a.x); assert.equal(b.z,a.z);
+            const x=fs.readFileSync('../before/'+b.file),y=fs.readFileSync(a.file);
+            const px=PNG.sync.read(x),py=PNG.sync.read(y);
+            assert.equal(px.width,932); assert.equal(px.height,430);
+            assert.equal(py.width,932); assert.equal(py.height,430);
+            let changed=0;for(let j=0;j<px.data.length;j+=4){
+              if(px.data[j]!==py.data[j]||px.data[j+1]!==py.data[j+1]||px.data[j+2]!==py.data[j+2])changed++;
+            }
+            console.log('DESERT_P3_VISUAL_EVIDENCE '+JSON.stringify({
+              seed:b.seed,beforeCap:b.cap,afterCap:a.cap,width:px.width,height:px.height,
+              changedPixels:changed,totalPixels:px.width*px.height,
+              beforeSHA256:crypto.createHash('sha256').update(x).digest('hex'),
+              afterSHA256:crypto.createHash('sha256').update(y).digest('hex')
+            }));
+          }
+          EOF
+      - name: Preserve images and exact-engine manifests even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-triple-junction-original-game
+          path: |
+            before/artifacts/desert-triple-junction/**
+            after/artifacts/desert-triple-junction/**
+          if-no-files-found: warn
+          retention-days: 7
