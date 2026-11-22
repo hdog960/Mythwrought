@@ -3,6 +3,8 @@
 // support + nine headroom cells; budget exhaustion is a refusal, not approval.
 import {planUnderworldRegion} from './worldwide-network.mjs';
 import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
+import {compileMainGalleryPedestrianClearance}
+ from './combined-stair-footprints.mjs';
 const INT=Number.isSafeInteger;
 const FIELDS=['naturalAt','authoredAt','editedAt','protectedAt'];
 export function auditOriginalCityFloorProvenance(seed,rx,rz,{
@@ -29,12 +31,26 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
   requiredSourceChecks:columns*15,maxColumns,maxSourceChecks,
   sourceChecks:0,worldChanged:false
  });
+ const galleries=compileMainGalleryPedestrianClearance(seed,rx,rz);
+ if(!galleries.ok)return Object.freeze({sitePresent:true,ok:false,
+  seed,rx,rz,reason:'CITY_MAIN_GALLERY_INDEX_UNSAFE',
+  galleryReason:galleries.reason,sourceChecks:0,
+  worldChanged:false});
  let checked=0,solidSupport=0,existingHeadroomAir=0,excavation=0;
  for(let z=minZ;z<=maxZ;z++)for(let x=minX;x<=maxX;x++){
   const nx=(x-city.x)/(city.rx*.55),nz=(z-city.z)/(city.rz*.55);
   if(nx*nx+nz*nz>1)continue;
   for(let y=floorY-5;y<=floorY+9;y++){
    const type=y<=floorY?'support':'clearance';
+   // A solid city pad cannot consume an original gallery's walking AIR,
+   // and city headroom cannot consume any existing gallery's deck.
+   const conflict=galleries.inspectCell(x,y,z,type);
+   if(conflict)return Object.freeze({sitePresent:true,ok:false,
+    seed,rx,rz,reason:'CITY_PAD_CONFLICTS_WITH_MAIN_GALLERY',
+    horizontalPairIndex:conflict.horizontalPairIndex,
+    firstRejectedCell:Object.freeze({x,y,z,type}),columns,
+    sourceChecks:checked,worldChanged:false,
+    cityPadAndOriginalGalleryMutualClearanceVerified:false});
    checked++;
    let refusal=null;
    if(y< -210||y>19)refusal='WORLD_BOUNDS';
@@ -65,6 +81,7 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
  return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,columns,
   sourceChecks:checked,solidSupport,existingHeadroomAir,excavation,
   fullFootprintChecked:true,originalSourceOwned:true,
+  cityPadAndOriginalGalleryMutualClearanceVerified:true,
   floorActuallyConstructed:false,worldChanged:false,
   genuineM7ReaderIdentityVerifiedByCallerOnly:true,
   livePlayerWalkingVerified:false});
