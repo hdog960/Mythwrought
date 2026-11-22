@@ -9,6 +9,8 @@ import {auditMutualMainGalleryClearance}
  from '../../src/living-underworld/main-gallery-mutual-clearance.mjs';
 import {auditSourceProtectedMainGalleries}
  from '../../src/living-underworld/main-gallery-source-survey.mjs';
+import {auditOriginalMainGalleryVoxelReadiness}
+ from '../../src/living-underworld/combined-stair-footprints.mjs';
 const seed=179;
 const sites=Object.freeze([
  Object.freeze({biome:'plains',rx:-9,rz:0}),
@@ -31,7 +33,16 @@ const rows=[];
 for(const site of sites){
  const mutual=auditMutualMainGalleryClearance(seed,site.rx,site.rz);
  const full=auditSourceProtectedMainGalleries(seed,site.rx,site.rz,{source});
+ const existing=auditOriginalMainGalleryVoxelReadiness(seed,site.rx,site.rz,{
+  materialAt:source.naturalAt,editedAt:source.editedAt
+ });
  rows.push(Object.freeze({...site,seed,
+  oldM7AsBuiltGalleryDeckAndAirPresent:existing.ok===true,
+  oldM7AsBuiltBlockedHeadroomCells:existing.blockedHeadroom??null,
+  oldM7AsBuiltMissingSupportCells:existing.unsupportedDeck??null,
+  oldM7AsBuiltEditedCells:existing.editedCells??null,
+  oldM7AsBuiltSourceCells:existing.sampledCells??null,
+  originalGalleryVoxelWalkabilityStillRequiresPlayerPhysics:true,
   mutuallySafe:mutual.ok,checkedPairs:mutual.examined,
   collidingPairs:mutual.conflictingPairs??null,
   sourceSafe:full.ok,galleriesInspected:full.galleriesInspected,
@@ -43,6 +54,7 @@ const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-ga
  readOnlyOriginalM7:true,seed,regions:rows.length,
  mutualPairs:rows.reduce((n,r)=>n+(r.checkedPairs??0),0),
  sourceSafeRegions:rows.filter(x=>x.sourceSafe).length,
+ asBuiltGalleryRegions:rows.filter(x=>x.oldM7AsBuiltGalleryDeckAndAirPresent).length,
  sourceRefusals:rows.filter(x=>!x.sourceSafe).length,
  sourceCells:rows.reduce((n,r)=>n+(r.inspectedSourceCells??0),0),
  rows:Object.freeze(rows),
