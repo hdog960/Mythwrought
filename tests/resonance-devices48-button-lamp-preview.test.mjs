@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {stepButtonLampPreview as step,BUTTON_LAMP_PREVIEW_CONTRACT} from '../src/resonance/devices48/button-lamp-preview-v1.mjs';
+const input=(tick,pressed,observedGrant=1,extra={})=>({worldId:'fixture',seed:7,tick,buttonId:'button',lampId:'lamp',anchor:[0,2,0],pressed,observedGrant,...extra});
+test('contract is source-only and immutable',()=>{const a=step(null,input(0,false));assert.equal(a.contract,BUTTON_LAMP_PREVIEW_CONTRACT);assert.ok(Object.isFrozen(a));assert.equal(a.activationAuthorized,false);assert.equal(a.productionBound,false)});
+test('press lights lamp only with observed fixture grant',()=>{const a=step(null,input(0,true));assert.equal(a.visible,true);assert.equal(a.lamp.mode,'preview-lit')});
+test('held press does not toggle repeatedly',()=>{const a=step(null,input(0,true));const b=step(a,input(1,true));assert.equal(b.latched,true);assert.equal(b.button.observedPress,false)});
+test('release then press toggles off',()=>{const a=step(null,input(0,true));const b=step(a,input(1,false));const c=step(b,input(2,true));assert.equal(c.latched,false);assert.equal(c.visible,false)});
+test('power deficit darkens without destroying latch',()=>{const a=step(null,input(0,true));const b=step(a,input(1,true,0));assert.equal(b.latched,true);assert.equal(b.visible,false);const c=step(b,input(2,true,1));assert.equal(c.visible,true);assert.equal(c.button.observedPress,false)});
+test('unpowered press never latches on restoration',()=>{const a=step(null,input(0,true,0));const b=step(a,input(1,true,1));assert.equal(b.latched,false);assert.equal(b.visible,false)});
+test('reject replay and gaps',()=>{const a=step(null,input(0,false));assert.throws(()=>step(a,input(0,true)));assert.throws(()=>step(a,input(2,true)))});
+test('reject cross-world, seed and device reuse',()=>{const a=step(null,input(0,false));for(const extra of [{worldId:'other'},{seed:8},{buttonId:'other'},{lampId:'other'}])assert.throws(()=>step(a,input(1,true,1,extra)))});
+test('reject forged authority and latch type',()=>{const a=step(null,input(0,false));for(const extra of [{activationAuthorized:true},{authoritativeDelivery:true},{productionBound:true},{latched:1},{button:{...a.button,activationAuthorized:true}}])assert.throws(()=>step({...a,...extra},input(1,true)))});
+test('reject invalid ids, grants and anchors',()=>{for(const extra of [{buttonId:'lamp'},{observedGrant:2},{observedGrant:-1},{anchor:[1,2]},{anchor:[1,2,1.2]},{pressed:1}])assert.throws(()=>step(null,input(0,false,1,extra)))});
