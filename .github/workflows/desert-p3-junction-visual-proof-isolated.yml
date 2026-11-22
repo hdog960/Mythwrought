@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 9b3f9dc99b878f9e2291e54082920617b10edeae
+          ref: ${{ github.sha }}
           path: harness
       - uses: actions/checkout@v4
         with:
@@ -32,7 +32,7 @@ jobs:
           node-version: '22'
       - name: Enforce exact three-source pins and no source changes
         run: |
-          test "$(git -C harness rev-parse HEAD)" = 9b3f9dc99b878f9e2291e54082920617b10edeae
+          test "$(git -C harness rev-parse HEAD)" = "$GITHUB_SHA"
           test "$(git -C before rev-parse HEAD)" = 3c1f87c0db53ebafa8fbb52fcb7964c23fd5ba68
           test "$(git -C after rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
           cp harness/tests/desert-phase3-triple-junction-browser.mjs before/tests/
