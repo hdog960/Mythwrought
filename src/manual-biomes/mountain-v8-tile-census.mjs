@@ -9,6 +9,7 @@ import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PlantCells} from './mountain-v8-vegetation-cells.mjs';
 import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
 import {certifyMountainV8Seam} from './mountain-v8-seam-certificate.mjs';
+import {createMountainV8SurveyCache} from './mountain-v8-survey-cache.mjs';
 
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
@@ -33,12 +34,17 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
+  // Reuse authentic original-world proposals across seam and foliage checks.
+  // Nine possible sites per tile: one root, four seams, four foliage offsets.
+  const cache=createMountainV8SurveyCache({seed,maxSites:width*height*9,
+    read:(x,z)=>inspect(x,z,seed,{world:source})});
+  if(!cache)return null;
   for(let dz=0;dz<height;dz++)for(let dx=0;dx<width;dx++){
     const tx=tileX+dx,tz=tileZ+dz;
     // One source-backed read at the unique owner site: 64x fewer
     // candidate surveys than scanning every square of each 8x8 tile.
     const {rootX,rootZ}=mountainV8TileRoot(tx,tz,seed);
-    const chosen=inspect(rootX,rootZ,seed,{world:source});
+    const chosen=cache.survey(rootX,rootZ);
     stats.seen++;
     if(chosen&&(chosen.x!==rootX||chosen.z!==rootZ||
        !chosen.vegetationSite?.chosen))
@@ -52,8 +58,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     // Source-backed one-block adjacency, not the 4-block noise slope proxy.
     // A protected cave or >2-height seam fails closed before admission.
     const seam=certifyMountainV8Seam(rootX,rootZ,seed,(x,z)=>{
-      return x===rootX&&z===rootZ?chosen:
-        sourcSurvey(x,z,seed,{world:source});
+      return cache.survey(x,z);
     },{
       readSupport:p=>p.x===rootX&&p.z===rootZ?terrain:
         planMountainV8PhysicalColumn(p,{
@@ -79,8 +84,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     const proposedSurfaceAt=(x,z)=>{
       const k=key(x,z);
       if(!elevations.has(k)){
-        const p=x===rootX&&z===rootZ?chosen:
-          sourcSurvey(x,z,seed,{world:source});
+        const p=cache.survey(x,z);
         elevations.set(k,p?.top??null);
       }
       return elevations.get(k);
@@ -100,6 +104,12 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       top:chosen.top,cap:chosen.cap,kind:physical.kind,
       cells:physical.estimatedCells}));
   }
+  const readCosts=cache.stats();
+  stats.sourceSites=readCosts.uniqueSites;
+  stats.sourceCacheHits=readCosts.cacheHits;
+  stats.cachedSourceVetoes=readCosts.cachedRejections;
+  if(stats.sourceSites>width*height*9)
+    throw Error('Mountain V8 source budget exceeded');
   if(source.save()!==before||source.edits.size||source.rotations.size)
     throw Error('Read-only Mountain V8 census changed a schema-1 save');
   return Object.freeze({seed,stats:Object.freeze(stats),
