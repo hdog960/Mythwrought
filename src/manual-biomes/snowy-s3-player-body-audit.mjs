@@ -1,96 +1,137 @@
 // SNOW S3 DETACHED ORIGINAL PLAYER-BODY ACCEPTANCE PRIMITIVE.
-// The caller MUST supply the actual voxel.collides function when running the
-// genuine world acceptance test; this file never imports/mutates M7 or saves.
-// Unlike the early one-cell footstep proxy, samples full player AABB collision
-// at both stand positions and swept quarter-edges in a bounded 9x9 window.
-// Local mock collision tests establish only adapter behavior, NOT true engine.
+// The caller MUST supply the authentic voxel.collides function for the real
+// full-world acceptance gate. Local stand-ins establish only adapter safety.
+// This diagnostic has no imports into current M7 and never changes saves.
 import {reviewSnowS3CandidateSelection} from './snowy-s3-collision-review.mjs';
 
-const RADIUS=4,TOP=19,STEP=1.01;
+const RADIUS=4,TOP=19,STEP=1.01,MAX_PROBES=6000;
 const DIR=[[1,0],[-1,0],[0,1],[0,-1]];
-const PORTALS=[[-4,0],[4,0],[0,-4],[0,4]];
+// Every boundary opening matters. The previous midpoint-only, four-portal
+// proxy could silently sever off-axis trails through winter tree branches.
+const PORTALS=Object.freeze(Array.from({length:2*RADIUS+1},(_,i)=>i-RADIUS)
+  .flatMap(v=>[[-RADIUS,v],[RADIUS,v],[v,-RADIUS],[v,RADIUS]])
+  .filter((p,i,a)=>a.findIndex(q=>q[0]===p[0]&&q[1]===p[1])===i)
+  .map(p=>Object.freeze(p)));
 const key=(x,y,z)=>x+','+y+','+z;
 const pos=(dx,dz)=>dx+','+dz;
-const stop=(reason)=>Object.freeze({kind:'detached-S3-player-body-walk-audit',safe:false,reason});
+const stop=(reason,more={})=>Object.freeze({kind:'detached-S3-player-body-walk-audit',safe:false,reason,...more});
 
 export function auditSnowS3OriginalPlayerBody(world,candidate,{collides}={}){
   if(!world||typeof world.get!=='function'||typeof collides!=='function'||
+    typeof world.save!=='function'||!(world.edits instanceof Map)||
     !reviewSnowS3CandidateSelection(candidate))
     return stop('missing-original-engine-body-contract');
   const {x:originX,z:originZ,floor}=candidate;
   if(!Number.isSafeInteger(floor)||floor<2||floor>13)
     return stop('invalid-authored-surface');
-  const originalSave=typeof world.save==='function'?JSON.stringify(world.save()):null;
+  let originalSave;
+  try{originalSave=JSON.stringify(world.save())}
+  catch{return stop('original-schema-1-save-source-failed')}
   const cells=new Map(candidate.cells.map(([x,y,z,id])=>[key(x,y,z),id]));
   const overlay=Object.create(world);
   overlay.get=(x,y,z)=>cells.get(key(x,y,z))??world.get(x,y,z);
-  const certificate=[new Map(),new Map()],routes=[new Map(),new Map()];
-  let collisionProbes=0;
+  const floorCache=[new Map(),new Map()];
+  const edgeCache=[new Map(),new Map()];
+  let collisionProbes=0,edgeEvaluations=0;
   const bodyFits=(after,x,y,z)=>{
-    // Real original engine: radius=.28, height=1.78, Pack2/manual overlays
-    // and registered nonblock collision all resolve from the passed callback.
-    collisionProbes++;
-    return !collides(after?overlay:world,x,y,z);
+    if(++collisionProbes>MAX_PROBES)
+      throw new RangeError('original-player-collision-probe-budget-exceeded');
+    const blocked=collides(after?overlay:world,x,y,z);
+    if(typeof blocked!=='boolean')throw new TypeError('Nonboolean original collision result');
+    return !blocked;
   };
   function feet(dx,dz,after){
-    const map=certificate[Number(after)],k=pos(dx,dz);
+    const map=floorCache[Number(after)],k=pos(dx,dz);
     if(map.has(k))return map.get(k);
     const x=originX+dx,z=originZ+dz;
     let chosen=null;
-    for(let feet=Math.min(TOP-1,floor+3);feet>=floor;feet--){
+    for(let feet=Math.min(TOP-1,floor+2);feet>=floor;feet--){
       if((after?overlay:world).get(x,feet-1,z)===0)continue;
       if(!bodyFits(after,x+.5,feet,z+.5))continue;
-      // Highest safely supported standing position within one block of the
-      // original known source floor. Steep vertical cliff moves are excluded.
-      if(feet>floor+2)continue;
       chosen=feet;break;
     }
     map.set(k,chosen);return chosen;
   }
   function edgeClear(x,z,nx,nz,feetA,feetB,after){
-    if(Math.abs(feetA-feetB)>STEP)return false;
-    const higher=Math.max(feetA,feetB);
-    for(const t of [.25,.5,.75]){
-      const px=originX+x+.5+(nx-x)*t,pz=originZ+z+.5+(nz-z)*t;
-      if(!bodyFits(after,px,higher,pz))return false;
-    }
-    return true;
-  }
-  function reachable(source,after){
-    const [sx,sz]=source,start=feet(sx,sz,after);
-    if(start===null)return new Set();
-    const seen=new Set([pos(sx,sz)]),queue=[[sx,sz]];
-    for(let i=0;i<queue.length;i++){
-      const [dx,dz]=queue[i],y=feet(dx,dz,after);
-      for(const [ox,oz] of DIR){
-        const nx=dx+ox,nz=dz+oz,k=pos(nx,nz);
-        if(Math.abs(nx)>RADIUS||Math.abs(nz)>RADIUS||seen.has(k))continue;
-        const ny=feet(nx,nz,after);
-        if(ny===null||!edgeClear(dx,dz,nx,nz,y,ny,after))continue;
-        seen.add(k);queue.push([nx,nz]);
+    // Movement is directional: stepping UP a partial-height obstruction
+    // requires vertical clearance at the player's CURRENT location. Do not
+    // share an uphill certificate with its downhill reverse traversal.
+    const cache=edgeCache[Number(after)],k=pos(x,z)+'>'+pos(nx,nz);
+    if(cache.has(k))return cache.get(k);
+    edgeEvaluations++;
+    let clear=Math.abs(feetA-feetB)<=STEP;
+    if(clear&&feetB>feetA){
+      for(const t of [.25,.5,.75,1]){
+        if(!bodyFits(after,originX+x+.5,feetA+(feetB-feetA)*t,originZ+z+.5)){
+          clear=false;break;
+        }
       }
     }
-    return seen;
+    if(clear){
+      const higher=Math.max(feetA,feetB);
+      for(const t of [.25,.5,.75]){
+        const px=originX+x+.5+(nx-x)*t,pz=originZ+z+.5+(nz-z)*t;
+        if(!bodyFits(after,px,higher,pz)){clear=false;break;}
+      }
+    }
+    cache.set(k,clear);
+    // With equal feet, reverse horizontal sampling has exactly the same
+    // quarter-edge points and body height. The AUTHENTIC original collides
+    // contract is read-only: reuse the result, but never for an uphill edge.
+    if(feetA===feetB)cache.set(pos(nx,nz)+'>'+pos(x,z),clear);
+    return clear;
+  }
+  function reachable(start,after){
+    // Directed, cached graph walk: stepping UP and stepping DOWN need not
+    // have the same physics clearance. Every boundary portal gets its own
+    // reachability set, but costly body/edge probes are reused across sets.
+    const [sx,sz]=start,initial=feet(sx,sz,after);
+    if(initial===null)return new Set();
+    const visited=new Set([pos(sx,sz)]),queue=[[sx,sz]];
+    for(let i=0;i<queue.length;i++){
+      const [x,z]=queue[i],y=feet(x,z,after);
+      for(const [dx,dz] of DIR){
+        const nx=x+dx,nz=z+dz,k=pos(nx,nz);
+        if(Math.abs(nx)>RADIUS||Math.abs(nz)>RADIUS||visited.has(k))continue;
+        const next=feet(nx,nz,after);
+        if(next===null||!edgeClear(x,z,nx,nz,y,next,after))continue;
+        visited.add(k);queue.push([nx,nz]);
+      }
+    }
+    return visited;
+  }
+  let original,withTree;
+  try{
+    original=PORTALS.map(portal=>reachable(portal,false));
+    withTree=PORTALS.map(portal=>reachable(portal,true));
+  }catch(e){
+    return stop(e?.message==='original-player-collision-probe-budget-exceeded'?
+      'original-player-collision-probe-budget-exceeded':
+      'original-player-collision-callback-failed',{collisionProbes});
   }
   try{
-    for(let i=0;i<PORTALS.length;i++){
-      routes[0].set(i,reachable(PORTALS[i],false));
-      routes[1].set(i,reachable(PORTALS[i],true));
-    }
-  }catch{return stop('original-player-collision-callback-failed')}
-  if(originalSave!==null&&JSON.stringify(world.save())!==originalSave)
-    return stop('original-schema-1-save-mutated-during-body-review');
+    if(JSON.stringify(world.save())!==originalSave)
+      return stop('original-schema-1-save-mutated-during-body-review');
+  }catch{return stop('original-schema-1-save-source-failed')}
   let oldPairs=0,keptPairs=0;
-  for(let i=0;i<PORTALS.length;i++)for(let j=i+1;j<PORTALS.length;j++){
-    const end=pos(...PORTALS[j]);
-    if(!routes[0].get(i).has(end))continue;
+  // Both directions must be examined: a one-block rise with an obstructed
+  // vertical step can be traversable DOWNHILL, but not UPHILL. Checking
+  // undirected components would wrongly certify such one-way losses.
+  for(let i=0;i<PORTALS.length;i++)for(let j=0;j<PORTALS.length;j++){
+    if(i===j)continue;
+    const destination=pos(...PORTALS[j]);
+    if(!original[i].has(destination))continue;
     oldPairs++;
-    if(!routes[1].get(i).has(end))return stop('original-player-body-passage-severed');
+    if(!withTree[i].has(destination))
+      return stop('original-player-body-passage-severed',
+        {portals:Object.freeze([Object.freeze([...PORTALS[i]]),
+          Object.freeze([...PORTALS[j]])]),protectedOldPairs:oldPairs,
+          collisionProbes});
     keptPairs++;
   }
   return Object.freeze({kind:'detached-S3-player-body-walk-audit',safe:true,
     protectedOldPairs:oldPairs,preservedPairs:keptPairs,
-    collisionProbes,sites:81,worldEdited:false,
-    originalEngineCallbackRequired:true,
+    collisionProbes,edgeEvaluations,sites:81,boundaryPortals:PORTALS.length,
+    worldEdited:false,originalEngineCallbackRequired:true,
     fullWorldAndActualStepPlayerAccepted:false});
 }

@@ -27,9 +27,12 @@ test('true BODY_RADIUS .28 and BODY_HEIGHT 1.78 shape-interface proxy preserves 
   const {world,candidate,collides}=fixture(),before=JSON.stringify([...world.edits]);
   const a=auditSnowS3OriginalPlayerBody(world,candidate,{collides});
   assert.equal(a.safe,true);
-  assert.equal(a.protectedOldPairs,6);
-  assert.equal(a.preservedPairs,6);
-  assert.ok(a.collisionProbes>100&&a.collisionProbes<10000);
+  assert.equal(a.protectedOldPairs,992);
+  assert.equal(a.boundaryPortals,32);
+  assert.equal(a.preservedPairs,992);
+  assert.ok(a.edgeEvaluations<=600);
+  assert.ok(a.collisionProbes>100&&a.collisionProbes<=950,
+    `Boundary-wide cached body review must stay bounded; got ${a.collisionProbes}`);
   assert.deepEqual(a,auditSnowS3OriginalPlayerBody(world,candidate,{collides}));
   assert.equal(JSON.stringify([...world.edits]),before);
 });
@@ -45,8 +48,7 @@ test('fractional edge collision is sampled, not inferred from empty end cells',(
   const {world,candidate,collides}=fixture();
   let fractional=0;
   const veto=(w,x,feet,z)=>{
-    if(Math.abs((x%1)-.0)<.001 && Math.abs((z%1)-.5)<.001 &&
-       Math.abs(x-.0)<.05 && Math.abs(z)<.6 && feet>=6){fractional++;return true;}
+    if(Math.abs((x%1)-.75)<.001 && Math.abs((z%1)-.5)<.001 && feet>=6){fractional++;return true;}
     return collides(w,x,feet,z);
   };
   const a=auditSnowS3OriginalPlayerBody(world,candidate,{collides:veto});
@@ -70,4 +72,56 @@ test('body reader cannot mutate a schema-1 edit during collision evaluation',()=
   const result=auditSnowS3OriginalPlayerBody(world,candidate,{collides:bad});
   assert.equal(result.safe,false);
   assert.equal(result.reason,'original-schema-1-save-mutated-during-body-review');
+});
+
+test('off-center cardinal snow trail is protected beyond the four old midpoint portals',()=>{
+  const {world,candidate,extra,collides}=fixture();
+  // The original side trail is at x=+2, not at the tree's center (x=0).
+  // Only the northern/southern OFFSET boundary openings are connected.
+  for(let z=-4;z<=4;z++)for(let x=-4;x<=4;x++)
+    if(x!==2)for(const y of [7,8,9])extra.set(key(x,y,z),3);
+  const a=auditSnowS3OriginalPlayerBody(world,candidate,{collides});
+  assert.equal(a.safe,false,'Snowy canopy at (2,8,0) must not bury an offset trail');
+  assert.equal(a.reason,'original-player-body-passage-severed');
+  assert.deepEqual(a.portals,[[2,-4],[2,4]]);
+});
+
+test('source step-up checks intermediate body heights, not only endpoints',()=>{
+  const {world,extra,collides,candidate:fir}=fixture();
+  const shape=proposedSnowTree('highland-pine',fir.x,fir.floor,fir.z);
+  const candidate=Object.freeze({...fir,style:'highland-pine',
+    voxelCount:shape.cells.length,
+    cells:Object.freeze(shape.cells.map(row=>Object.freeze([...row])))});
+  // Tall pine's first boughs are above head height in the x=+2 lane.
+  // The one-block ramp has clear body endpoints, but a moving overhang can
+  // obstruct the intermediate rise. A pure highest-feet horizontal probe
+  // would incorrectly certify that climb.
+  for(let z=-4;z<=4;z++)for(let x=-4;x<=4;x++)
+    if(x!==2)for(const y of [7,8,9])extra.set(key(x,y,z),3);
+  extra.set(key(2,7,0),272);
+  const baseline=auditSnowS3OriginalPlayerBody(world,candidate,{collides});
+  assert.equal(baseline.safe,true,'Original lane and pine must be compatible');
+  let intermediate=0;
+  const obstructed=(w,x,feet,z)=>{
+    if(w!==world&&Math.abs(x-2.5)<1e-6&&Math.abs(z+.5)<1e-6&&
+       feet>7.1&&feet<7.9){intermediate++;return true;}
+    return collides(w,x,feet,z);
+  };
+  const blocked=auditSnowS3OriginalPlayerBody(world,candidate,{collides:obstructed});
+  assert.ok(intermediate>0,'Real-height ascent must be physically sampled');
+  assert.equal(blocked.safe,false);
+  assert.equal(blocked.reason,'original-player-body-passage-severed');
+  assert.equal(world.edits.size,0);
+});
+
+
+test('original body evidence refuses incomplete save source and non-boolean collision readers',()=>{
+  const {world,candidate}=fixture();
+  assert.equal(auditSnowS3OriginalPlayerBody({...world,save:null},candidate,{collides:()=>false}).safe,false);
+  assert.equal(auditSnowS3OriginalPlayerBody({...world,edits:null},candidate,{collides:()=>false}).safe,false);
+  assert.equal(auditSnowS3OriginalPlayerBody({...world,save:()=>{throw Error('save unavailable');}},candidate,{collides:()=>false}).reason,
+    'original-schema-1-save-source-failed');
+  const notBoolean=auditSnowS3OriginalPlayerBody(world,candidate,{collides:()=>undefined});
+  assert.equal(notBoolean.safe,false);
+  assert.equal(notBoolean.reason,'original-player-collision-callback-failed');
 });
