@@ -37,6 +37,11 @@ export function buildSunspokeForkedShelterCorralStables(){
   for(let y=1;y<=4;y++)if(b.clear(x,y,z))
    b.put(x,y,z,'partition','live:wood','none',{sourceStallDivider:true,liveHorseAI:false});
  }
+ // A fully enclosed one-column junction is a structural pier, not a phantom
+ // pedestrian space; explicitly block all four lower cells.
+ for(let y=1;y<=4;y++)if(b.clear(17,y,33))
+  b.put(17,y,33,'partition','live:wood','none',
+   {sealedGroundedTackPier:true,nonWalkableSource:true});
  for(const [name,x0,z0,x1,z1,base,asset] of wings)
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
    if(!has(x,z)||roofMap.has(K(x,z)))continue;
