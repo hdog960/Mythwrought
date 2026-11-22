@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {stepButtonLampBank as step,BUTTON_LAMP_BANK_CONTRACT} from '../src/resonance/devices48/button-lamp-bank-v1.mjs';
+const entry=(name,pressed=false,observedGrant=1)=>({buttonId:'button_'+name,lampId:'lamp_'+name,anchor:[0,2,0],pressed,observedGrant});
+const input=(tick,entries=[entry('a'),entry('b')],extra={})=>({worldId:'fixture',seed:7,tick,entries,...extra});
+test('bank is bounded immutable and explicitly non-authoritative',()=>{const s=step(null,input(0));assert.equal(s.contract,BUTTON_LAMP_BANK_CONTRACT);assert.ok(Object.isFrozen(s.devices));assert.equal(s.activationAuthorized,false);assert.equal(s.productionBound,false)});
+test('independent buttons and grants',()=>{const a=step(null,input(0,[entry('a',true),entry('b',false)]));assert.equal(a.lit,1);assert.equal(a.requested,1);const b=step(a,input(1,[entry('a',true,0),entry('b',true)]));assert.equal(b.lit,1);assert.equal(b.requested,2)});
+test('order of entries does not affect results',()=>{const a=step(null,input(0,[entry('b',true),entry('a',false)]));assert.deepEqual(a,step(null,input(0,[entry('a',false),entry('b',true)])))});
+test('held press does not retrigger after power restoration',()=>{const a=step(null,input(0,[entry('a',true,1)]));const b=step(a,input(1,[entry('a',true,0)]));const c=step(b,input(2,[entry('a',true,1)]));assert.equal(c.lit,1);assert.equal(c.devices[0].button.observedPress,false)});
+test('release and repress toggles only selected lamp',()=>{const a=step(null,input(0,[entry('a',true),entry('b',true)]));const b=step(a,input(1,[entry('a',false),entry('b',true)]));const c=step(b,input(2,[entry('a',true),entry('b',true)]));assert.equal(c.lit,1);assert.equal(c.devices[0].latched,false)});
+test('reject duplicate and cross-role identities',()=>{for(const entries of [[entry('a'),entry('a')],[entry('a'),{...entry('b'),lampId:'button_a'}]])assert.throws(()=>step(null,input(0,entries)))});
+test('reject invalid bounds and grants',()=>{for(const entries of [[],Array.from({length:9},(_,i)=>entry(String(i))),[entry('a',true,2)]])assert.throws(()=>step(null,input(0,entries)))});
+test('reject skipped tick and roster replacement',()=>{const a=step(null,input(0));assert.throws(()=>step(a,input(2)));assert.throws(()=>step(a,input(1,[entry('a'),entry('c')])))});
+test('reject forged previous authority and device identity',()=>{const a=step(null,input(0));assert.throws(()=>step({...a,activationAuthorized:true},input(1)));assert.throws(()=>step({...a,devices:[{...a.devices[0],productionBound:true},a.devices[1]]},input(1)))});
+test('reject changed world and seed',()=>{const a=step(null,input(0));assert.throws(()=>step(a,input(1,undefined,{worldId:'other'})));assert.throws(()=>step(a,input(1,undefined,{seed:8})))});

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {createMotion,commandMotion} from '../src/resonance/devices48/motion-v1.mjs';
+const powered={id:'gate_a',mode:'running'};
+test('deterministic movement and bounded travel',()=>{let s=createMotion({id:'gate_a',seed:42,travel:2});s=commandMotion(s,{desired:1,seed:42,tick:8,allocation:powered,clearance:true});assert.equal(s.position,1);s=commandMotion(s,{desired:1,seed:42,tick:16,allocation:powered,clearance:true});assert.equal(s.position,2);assert.equal(s.status,'idle')});
+test('power shortage and obstruction freeze movement',()=>{let s=createMotion({id:'gate_a',seed:42,travel:2});s=commandMotion(s,{desired:1,seed:42,tick:1,allocation:{id:'gate_a',mode:'stopped'},clearance:true});assert.equal(s.position,0);s=commandMotion(s,{desired:1,seed:42,tick:2,allocation:powered,clearance:false});assert.equal(s.position,0)});
+test('foreign seed, stale time, and missing clearance rejected',()=>{const s=createMotion({id:'gate_a',seed:42,travel:2});const args={desired:1,seed:42,tick:1,allocation:powered,clearance:true};for(const change of [{seed:41},{tick:0},{clearance:null},{allocation:{id:'wrong',mode:'running'}}])assert.throws(()=>commandMotion(s,{...args,...change}))});
+test('no voxel assembly or physics bridge claimed',()=>{const s=createMotion({id:'gate_a',seed:42,travel:2});assert.equal(Object.hasOwn(s,'voxelEdits'),false)});

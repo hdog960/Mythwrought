@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {summarizeResonanceStatus as s} from '../src/resonance/devices48/status-preview-v1.mjs';
+const base=()=>({worldId:'world1',tick:4,produced:5,stored:2,storageCapacity:10,consumers:[{id:'lamp',requested:4,observedGrant:3}]});
+test('reports bounded shortage without granting power',()=>{const r=s(base());assert.equal(r.deficit,1);assert.equal(r.used,3);assert.equal(r.state,'shortage');assert.equal(r.deliveryAuthorized,false);assert.equal(r.allocationAuthoritative,false)});
+test('zero demand is idle',()=>{const x=base();x.consumers=[];assert.equal(s(x).state,'idle')});
+test('fully observed demand',()=>{const x=base();x.consumers[0].observedGrant=4;assert.equal(s(x).state,'observed-sufficient')});
+test('order-independent totals',()=>{const x=base();x.consumers.push({id:'gate',requested:2,observedGrant:1});const y=base();y.consumers=[...x.consumers].reverse();assert.deepEqual(s(x),s(y))});
+test('reject duplicate ids',()=>{const x=base();x.consumers.push({...x.consumers[0]});assert.equal(s(x).valid,false)});
+test('reject fabricated grant',()=>{const x=base();x.consumers[0].observedGrant=5;assert.equal(s(x).valid,false)});
+test('reject negative energy',()=>{const x=base();x.produced=-1;assert.equal(s(x).valid,false)});
+test('reject storage overflow',()=>{const x=base();x.stored=11;assert.equal(s(x).valid,false)});
+test('reject roster above 16',()=>{const x=base();x.consumers=Array.from({length:17},(_,i)=>({id:'d'+i,requested:1,observedGrant:1}));assert.equal(s(x).valid,false)});
+test('reject malformed world',()=>{const x=base();x.worldId='bad world';assert.equal(s(x).valid,false)});
+test('reject fractional tick',()=>{const x=base();x.tick=1.5;assert.equal(s(x).valid,false)});
+test('frozen result',()=>assert.equal(Object.isFrozen(s(base())),true));
