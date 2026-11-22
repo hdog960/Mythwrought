@@ -7,6 +7,11 @@ import {compileMainGalleryPedestrianClearance}
  from './combined-stair-footprints.mjs';
 const INT=Number.isSafeInteger;
 const FIELDS=['naturalAt','authoredAt','editedAt','protectedAt'];
+const strictFlag=(value,role)=>{
+ if(typeof value!=='boolean')
+  throw TypeError('Nonboolean original M7 city floor '+role+' source');
+ return value;
+};
 export function auditOriginalCityFloorProvenance(seed,rx,rz,{
  source,maxColumns=25000,maxSourceChecks=150000
 }={}){
@@ -54,14 +59,18 @@ export function auditOriginalCityFloorProvenance(seed,rx,rz,{
    checked++;
    let refusal=null;
    if(y< -210||y>19)refusal='WORLD_BOUNDS';
-   else if(source.editedAt(x,y,z))refusal='PLAYER_EDIT';
+   else if(strictFlag(source.editedAt(x,y,z),'edit'))
+    refusal='PLAYER_EDIT';
    else{
     const owner=source.authoredAt(x,y,z);
     if(owner!==undefined&&(!INT(owner)||owner<0))refusal='INVALID_AUTHORED_SOURCE';
     else if(owner!==undefined&&owner!==0)refusal='AUTHORED_SOURCE';
-    else if(source.protectedAt(x,y,z))refusal='PROTECTED_LANDMARK';
+    else if(strictFlag(source.protectedAt(x,y,z),'landmark'))
+     refusal='PROTECTED_LANDMARK';
     else{
      const material=source.naturalAt(x,y,z);
+     if(!INT(material)||material<0)
+      throw TypeError('Invalid original M7 city floor material source');
      if(!isCandidateGeologyMaterial(material))refusal='UNSAFE_MATERIAL';
      else if(owner===0&&material!==0)refusal='AUTHORED_AIR_MISMATCH';
      else if(type==='support'){
