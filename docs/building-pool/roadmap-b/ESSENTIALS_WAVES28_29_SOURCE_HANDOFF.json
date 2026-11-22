@@ -1,0 +1,152 @@
+{
+  "schema": "mythwrought.builder-b.waves28-29.source-handoff.v1",
+  "status": "ISOLATED_SOURCE_AUTHORED_NOT_NATIVE_OR_GAME_ACCEPTED",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startHead": "0398638d6fbae0da4bff035e07f1d1a2a38e5dd5",
+  "protectedDraft407Head": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "waves": [
+    {
+      "wave": 28,
+      "title": "Driftgale T-Landing Snow Lodge",
+      "id": "r1:fishing-lodge:snow:medium:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave28.mjs",
+      "blob": "838a35e4157ba3caeea5225b3b88651c76e7990d",
+      "sourceCells": 11159,
+      "roofCells": 2764,
+      "connectedWalkable": 2807,
+      "roofWings": 8,
+      "rooms": 12,
+      "portals": 17,
+      "pavedSkyCourts": [
+        182,
+        49
+      ],
+      "pavedOpenTApronCells": 179,
+      "uprightGlassCells": 50,
+      "completeTwoTierBays": 25,
+      "groundedInertMarkerTiers": 22,
+      "sourceDAuditTransforms": 24,
+      "maxIoU": 0.5361890694239291
+    },
+    {
+      "wave": 29,
+      "title": "Starpetal Double-Garden Orchidarium",
+      "id": "r1:greenhouse:enchanted-forest:medium:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave29.mjs",
+      "blob": "82631877cb8987e0442e114072b72c023ecf5209",
+      "sourceCells": 11679,
+      "roofCells": 2906,
+      "connectedWalkable": 2748,
+      "roofWings": 8,
+      "rooms": 10,
+      "portals": 14,
+      "pavedSkyCourts": [
+        156,
+        72
+      ],
+      "uprightGlassCells": 75,
+      "completeThreeTierBays": 25,
+      "windowSourceFrame": "physical timber y1 sill, y2-y4 vertical glass, y5 lintel",
+      "repair": "Moved window construction after original two-high portal cuts to avoid incomplete glass bays",
+      "sourceDAuditTransforms": 24,
+      "maxIoU": 0.5424696645253391
+    }
+  ],
+  "actualExecuted": {
+    "method": "Isolated V8 evaluation of exact authentic repository sourcePlan and unchanged validateBlueprint; NOT native Node",
+    "sourceCompiler": "PASS",
+    "immediateBackedRoofCells": 5670,
+    "physicallyGroundedWalkableUnroofedCourts": 459,
+    "verifiedRooms": 22,
+    "verifiedPortalLinks": 31,
+    "sourceTApronBFS": "PASS from (17,1,64) to (48,1,64)",
+    "physicalSourceWindows": "125 intact symbolic upright window cells in 50 bays; actual Pack AABBs and live collisions NOT certified",
+    "sourceSameCategoryD4": "48/48 eight-way rotations/reflections against six previously authored original designs PASS with original IoU cutoff 0.85",
+    "frozenB115D92": "Both new IDs B-only, absent D and historical 228"
+  },
+  "stagedNotRun": {
+    "focusedNodeTest": "tests/building-pool/roadmap-b/builder-b-essentials-waves28-29-focused.test.mjs",
+    "focusedNodeTestBlob": "ab34f55b3663a596807c3ea34cab20bd575e47fb",
+    "fullHistoricalNative": "tests/building-pool/roadmap-b/builder-b-originals-waves9-29-shared-historical-d4.test.mjs",
+    "historicalBlob": "1fafc08ce08f0b2ea66bb992c7e10f3f385d4ff5",
+    "historicAcceptedSources": 228,
+    "sourceOriginalsTotal": 29,
+    "newWaves9to29": 21,
+    "singleUnrelaxedEightWayD4": true,
+    "oneBrowserGallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-29-gallery.mjs",
+    "galleryBlob": "8f9b586745c9cd55df8f0f1f1b592d9623335f5b",
+    "independentPNGCRCSHAAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-29-gallery.mjs",
+    "auditorBlob": "9b9fc52fc6df18b726738a981effb5504097093c",
+    "wiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-29-gallery-wiring.test.mjs",
+    "wiringBlob": "3b7a03f7ead9d3c4fdca03c064c1dfbb93b97291",
+    "requiredPNGFrames": 126,
+    "originalSourceEvidenceFiles": 24,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "exactHeadCRC_SHA256": true,
+    "actualNativeNodeRun": false,
+    "actualChromiumRun": false,
+    "actualPNGs": 0
+  },
+  "acceptanceOpen": [
+    "Exact-HEAD native Node original focused plus shared historic 228 D4",
+    "Original Pack3/4 real physical producer mesh/selection/collider and mounting/window orientation and full roof support/weather safety",
+    "One real exact-HEAD WebGL2 Chromium 126-PNG CRC/SHA audited SOURCE-PROXY gallery",
+    "Actual live-game world registration/biome placement, iPhone PWA performance/saves and creator artwork approval"
+  ],
+  "CI": {
+    "reusedHistoricalPR407Runs": [
+      44972498965,
+      44972499027
+    ],
+    "newActions": 0,
+    "newBrowserRuns": 0,
+    "duplicateFullHistoricalRuns": 0,
+    "requiredTestsWeakened": false,
+    "workflowFilesChanged": 0,
+    "workflowCancellation": 0
+  },
+  "safety": {
+    "frozenB115D92Unmodified": true,
+    "historicalAccepted228Unmodified": true,
+    "otherDevelopersUnmodified": true,
+    "automationsFiveUnmodified": true,
+    "productionUnmodified": true,
+    "saveChanges": false,
+    "protectedPR407Unmodified": true,
+    "merge": false,
+    "deployment": false
+  },
+  "progress": {
+    "newResidential": 10,
+    "newService": 29,
+    "newOriginals": 39,
+    "target": 294,
+    "remainingTotal": 255,
+    "remainingResidential": 169,
+    "remainingServices": 86
+  },
+  "remainingFocusedSessionsEstimate": {
+    "low": 100,
+    "high": 250,
+    "excludesIntegrationAndFinalAcceptance": true,
+    "uncertain": true
+  }
+}
