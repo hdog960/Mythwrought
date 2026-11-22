@@ -5,6 +5,12 @@ import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
 const integer=Number.isSafeInteger;
 const k=(x,y,z)=>x+','+y+','+z;
 const coords=s=>s.split(',').map(Number);
+const checkedBoolean=(fn,x,y,z,role)=>{
+ const value=fn(x,y,z);
+ if(typeof value!=='boolean')
+  throw TypeError('Nonboolean original M7 stair '+role+' source');
+ return value;
+};
 export function auditProtectedSubsurfaceStairs(proposal,{
  naturalAt,authoredAt=()=>undefined,editedAt=()=>false,
  protectedAt=()=>false,materialAllowed=isCandidateGeologyMaterial,
@@ -60,7 +66,7 @@ export function auditProtectedSubsurfaceStairs(proposal,{
    const [x,y,z]=coords(key);
    let reason=null;
    if(y<minY||y>maxY){count.bounds++;reason='BOUNDS';}
-   else if(editedAt(x,y,z)){count.edited++;reason='PLAYER_EDIT';}
+   else if(checkedBoolean(editedAt,x,y,z,'edit')){count.edited++;reason='PLAYER_EDIT';}
    else {
     const owner=authoredAt(x,y,z);
     // A cave author's explicit AIR (0) is not 'unowned' terrain:
@@ -72,7 +78,7 @@ export function auditProtectedSubsurfaceStairs(proposal,{
       count.authored++;reason='AUTHORED_SOURCE';
     }else if(kind==='support'&&owner===0){
       count.authoredAirSupport++;reason='AUTHORED_AIR_SUPPORT';
-    }else if(protectedAt(x,y,z)){
+    }else if(checkedBoolean(protectedAt,x,y,z,'landmark')){
       count.protected++;reason='PROTECTED_LANDMARK';
     }else{
       const material=naturalAt(x,y,z);
