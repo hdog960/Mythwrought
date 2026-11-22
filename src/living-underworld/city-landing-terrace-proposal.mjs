@@ -115,7 +115,9 @@ export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
    allSupportAndNineHeadroomSourceOwned:true,
    oldWholeCityPadNotApproved:true,
    entranceRampSourceNotYetApproved:true,
-   interlevelStairMutualClearanceNotYetApproved:!selected,
+   // A partial caller-selected set cannot certify the entire original
+   // four-link network, nor the source ownership of those selected ramps.
+   interlevelStairMutualClearanceNotYetApproved:true,
    terrainActuallyModified:false,worldChanged:false,
    originalM7ReaderIdentityVerifiedByCallerOnly:true});
   if(refusal==='TERRACE_ORIGINAL_SOURCE_BUDGET')break;
