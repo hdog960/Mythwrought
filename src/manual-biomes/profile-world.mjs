@@ -9,6 +9,7 @@ import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
 import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
+import {desertRockFeatherCandidate} from './desert-rock-feather-candidate.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
@@ -76,6 +77,29 @@ export class FourRegionWorld extends VoxelWorld{
       const region=v6BiomeAt(x,z,this.seed);
       lookup=this._oasisNear(x,z,0,region)?.columns.get(key)??
         planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region);
+      // Isolated Desert material-feather candidate: AFTER original cave/landmark
+      // veto, never replace scree or touch Snow/Mountain/Enchanted plans.
+      // Precheck original hash before probing adjacent true ORIGINAL plans.
+      if(region?.name==='desert'&&region.weight<=.50&&lookup.size){
+        const top=Math.max(...lookup.keys()),cap=lookup.get(top);
+        if(cap===258&&desertRockFeatherCandidate(this.seed,x,z,cap,true,true)===261){
+          const cardinal=[[1,0],[-1,0],[0,1],[0,-1]];
+          for(const [dx,dz] of cardinal){
+            const ax=x+dx,az=z+dz,near=v6BiomeAt(ax,az,this.seed);
+            if(near?.name!=='desert')continue;
+            // Do not recurse through _columnPlan: inspect the unmodified
+            // source neighbor and its original protected cave/landmark veto.
+            const source=this._oasisNear(ax,az,0,near)?.columns.get(ax+','+az)??
+              planEnvironmentalColumn(ax,az,this.seed,
+                (a,b,c)=>this._environmentBaseline(a,b,c),near);
+            if(source.size&&source.get(Math.max(...source.keys()))===401){
+              lookup=new Map(lookup);
+              lookup.set(top,261); // EXISTING Desert rock, cap only.
+              break;
+            }
+          }
+        }
+      }
     }else lookup=this._existingBiomeColumn(x,z);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
