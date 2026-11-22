@@ -62,7 +62,13 @@ for(const site of sites){
   originalM7HistoricalArtifactId:14733859064,
   oldM7AsBuiltGalleryDeckAndAirPresent:existing.ok===true,
   oldM7AsBuiltBlockedHeadroomCells:existing.blockedHeadroom??null,
+  oldM7AsBuiltHeadroomBlockedByBlockId:existing.blockedHeadroomByBlockId??null,
   oldM7AsBuiltMissingSupportCells:existing.unsupportedDeck??null,
+  oldM7AsBuiltUnsupportedFloorByBlockId:existing.unsupportedDeckByBlockId??null,
+  oldM7AsBuiltMaterialIdCoverageComplete:
+   existing.allBlockedMaterialIdsReported===true,
+  oldM7AsBuiltBlockedMaterialIdOverflow:existing.blockedIdsOverflow??null,
+  oldM7AsBuiltSupportMaterialIdOverflow:existing.unsupportedIdsOverflow??null,
   oldM7AsBuiltEditedCells:existing.editedCells??null,
   oldM7AsBuiltSourceCells:existing.sampledCells??null,
   originalGalleryVoxelWalkabilityStillRequiresPlayerPhysics:true,
