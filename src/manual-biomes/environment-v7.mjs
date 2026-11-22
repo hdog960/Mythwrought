@@ -6,7 +6,9 @@ import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted
 import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
 import {resolveEnchantedTreeOverlap} from './enchanted-tree-overlap.mjs';
 import {clearEnchantedCanopyForWalking} from './enchanted-tree-walking-clearance.mjs';
-import {EnchantedCandidateSourceCache} from './enchanted-tree-source-cache.mjs';
+import {EnchantedCandidateSourceCache,
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX_SOURCE_CACHE}
+  from './enchanted-tree-source-cache.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -169,7 +171,13 @@ function treeVoxels(climate,x,y,z,roll){
 }
 
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
-  {experimentalEnchantedTrees=false,onCandidateCacheSummary=null}={}){
+  {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
+    candidateSourceCacheCapacity=MAX_SOURCE_CACHE}={}){
+  // This capacity parameter is for isolated source-memory experiments;
+  // ordinary candidate runtime always uses its fixed reviewed default.
+  if(!Number.isInteger(candidateSourceCacheCapacity)||
+     candidateSourceCacheCapacity<1||candidateSourceCacheCapacity>MAX_SOURCE_CACHE)
+    throw Error('Invalid enchanted candidate source cache capacity');
   if(onCandidateCacheSummary!==null&&
      typeof onCandidateCacheSummary!=='function')
     throw Error('Invalid enchanted cache diagnostics callback');
@@ -189,7 +197,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
   // lookups. No cache exists for the historical M7 tree path.
   const candidateReadCell=(x,y,z)=>{
-    candidateClearanceCache??=new EnchantedCandidateSourceCache();
+    candidateClearanceCache??=new EnchantedCandidateSourceCache(candidateSourceCacheCapacity);
     const key=x+','+y+','+z;
     if(!candidateClearanceCache.has(key)){
       if(onCandidateCacheSummary)diagnosticMisses++;
@@ -249,7 +257,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       // M7 ground unobstructed, without changing mineable bark or terrain.
       // Only experimental candidates use this additional headroom filter.
       if(candidate){
-        candidateClearanceCache??=new EnchantedCandidateSourceCache();
+        candidateClearanceCache??=new EnchantedCandidateSourceCache(candidateSourceCacheCapacity);
         tree=clearEnchantedCanopyForWalking(tree,candidateReadCell,BLOCK.AIR,
           candidateClearanceCache);
       }
