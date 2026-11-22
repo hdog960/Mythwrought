@@ -5,6 +5,8 @@
 import {planUnderworldRegion} from './worldwide-network.mjs';
 import {auditSelectedInterlevelTopology}
  from './source-network-topology.mjs';
+import {searchSourceProtectedCityDetours}
+ from './source-protected-city-detours.mjs';
 import {auditCityAccessRamp} from './city-access-proposal.mjs';
 import {auditProtectedSubsurfaceStairs} from './protected-subsurface-stairs.mjs';
 import {compileMainGalleryPedestrianClearance,
@@ -18,12 +20,13 @@ const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y&&a.z===b.z;
 
 export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  source,additionalStairProposals=[],requireCompleteDeepLinks=false,
- maxTotalSourceChecks=60000
+ useSourceAwareDetour=false,maxTotalSourceChecks=60000
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||ROLES.some(k=>typeof source[k]!=='function')||
   !Array.isArray(additionalStairProposals)||additionalStairProposals.length>7||
   typeof requireCompleteDeepLinks!=='boolean'||
+  typeof useSourceAwareDetour!=='boolean'||
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<1000||
   maxTotalSourceChecks>100000)
   throw TypeError('Invalid protected rare-cavern pedestrian link');
@@ -52,7 +55,21 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  if(!same(access.landing,landing))
   return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
    reason:'CITY_LANDING_MISMATCH',sourceChecks:0,worldChanged:false});
- const route=Object.freeze({ok:true,segments:Object.freeze([
+ // Keep historical straight access as the exact unchanged default.
+ // Opt-in detour candidates must pass independent original-source protection
+ // and existing gallery/deep-stair mutual clearance before they can replace it.
+ const detour=useSourceAwareDetour?
+  searchSourceProtectedCityDetours(seed,rx,rz,{
+   source,selectedStairProposals:additionalStairProposals,
+   maxSourceChecks:Math.min(30000,maxTotalSourceChecks)
+  }):null;
+ if(detour&&!detour.ok)return Object.freeze({sitePresent:true,ok:false,
+  seed,rx,rz,reason:'CITY_SOURCE_PROTECTED_DETOUR_UNSAFE',
+  detourRefusal:detour.reason??null,
+  detourAttempted:detour.tested??0,
+  sourceChecks:detour.sourceChecks??0,
+  worldChanged:false,playerWalkingUnverified:true});
+ const route=detour?.proposal??Object.freeze({ok:true,segments:Object.freeze([
   Object.freeze({a:access.hub,b:access.landing})
  ])});
  const selected=[route,...additionalStairProposals];
@@ -74,8 +91,8 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  // Inspect ORIGINAL M7 ownership of the actual approach and ALL caller
  // selected stairways, not just the future terrace. A user supplied
  // materialAllowed cannot override the fixed original safe-geology allowlist.
- let inspected=0;
- for(let i=0;i<selected.length;i++){
+ let inspected=detour?.sourceChecks??0;
+ for(let i=detour?1:0;i<selected.length;i++){
   const r=auditProtectedSubsurfaceStairs(selected[i],{
    naturalAt:source.naturalAt,authoredAt:source.authoredAt,
    editedAt:source.editedAt,protectedAt:source.protectedAt,
@@ -111,6 +128,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,
   terraceRadius:terrace.radius,terraceColumns:terrace.columns,
   sourceChecks,selectedStairCount:selected.length,
+  useSourceAwareDetour,detourTestedCandidates:detour?.tested??0,
+  detourDepartureBlocks:detour?.departureBlocks??null,
+  detourBearing:detour?.bearing??null,
+  sourceAuditedDetourAlreadyCountedOnce:!!detour,
   requireCompleteDeepLinks,
   completeFourHubCandidateTopologyVerified:topology?.ok===true,
   completeDeepLinkSourceOwnershipVerified:topology?.ok===true,
