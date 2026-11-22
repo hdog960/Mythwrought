@@ -1,6 +1,7 @@
 // Mountain V8 isolated physical-cell proposal. NOT connected to world.set,
 // meshing, original V7 vegetation, saves, or runtime. No side effects.
 // Requires source-confirmed V8 meadow and original pre-uplift AIR provenance.
+import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 export const MOUNTAIN_V8_PLANT_CELL_LIMIT=18;
 const valid=n=>Number.isSafeInteger(n);
 const pattern=Object.freeze({
@@ -33,10 +34,20 @@ export function planMountainV8PlantCells(proposal,{
      proposal.cap!=='alpine-grass'||proposal.snowy||proposal.cliff||
      !(proposal.slope<.35)||!proposal.vegetation||
      !proposal.vegetationSite?.chosen||
-     ![proposal.x,proposal.z,proposal.top,worldMaxY,airId].every(valid)||
+     ![proposal.x,proposal.z,proposal.seed,proposal.top,worldMaxY,airId].every(valid)||
+     proposal.seed!==(proposal.seed|0)||
      typeof readOriginalBlock!=='function'||typeof protectedAt!=='function'||
      typeof mountainAt!=='function'||
      typeof proposedSurfaceAt!=='function')return null;
+  // Never accept an invented 'chosen:true' vegetation slot. Sparse flora
+  // ownership derives from the exact same original 8x8 seeded root as
+  // its terrain source, including negative tile coordinates.
+  const tileX=Math.floor(proposal.x/8),tileZ=Math.floor(proposal.z/8);
+  const root=mountainV8TileRoot(tileX,tileZ,proposal.seed);
+  const owner=proposal.vegetationSite;
+  if(!root||root.rootX!==proposal.x||root.rootZ!==proposal.z||
+     owner.tileX!==tileX||owner.tileZ!==tileZ||
+     owner.rootX!==root.rootX||owner.rootZ!==root.rootZ)return null;
   const pieces=pattern[proposal.vegetation];
   if(!pieces||pieces.length>MOUNTAIN_V8_PLANT_CELL_LIMIT)return null;
   const cells=[],seen=new Set();
