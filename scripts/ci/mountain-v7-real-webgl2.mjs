@@ -94,6 +94,12 @@ try{
     if(activated.generator!==M7_ENVIRONMENT_GENERATOR||!activated.webgl2)
       throw Error('Original-game M7 physical profile did not activate '+
         JSON.stringify({width,height,activated}));
+    // The original Switch World workflow leaves the settings modal open.
+    // Close it through the real RETURN control before any original-game image.
+    // Never accept modal-covered images as distinct mountain scene evidence.
+    await page.locator('#closeHelp').click();
+    await page.waitForFunction(()=>document.getElementById('help')?.hidden===true,
+      null,{timeout:15000});
     const before=await page.evaluate(()=>localStorage.getItem(
       'mythwrought-v002-world-179'));
     for(const site of sites){
