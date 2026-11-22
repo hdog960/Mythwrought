@@ -1,0 +1,210 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves38-39-original-source-handoff.v1",
+  "status": "PROVISIONAL BUILDER B-EXCLUSIVE ORIGINAL SOURCE. NO native Node, live-game, real Chromium/WebGL2, original iPhone Home Screen PWA, mesh/collider or final creator acceptance",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartedFromExactHEAD": "74935aa245c0e2ac9ef22289b3531447d811ec2f",
+  "protectedOpenDraftPR407HEAD": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "newOriginals": [
+    {
+      "wave": 38,
+      "name": "Sleetgrove Rafter-Lattice Winter Barn",
+      "id": "r1:farm-barn:snow:large:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave38.mjs",
+      "gitBlob": "67d80f7509d6ab99718c0e792af8f58c382f07b5",
+      "sourceCells": 18505,
+      "immediateBackedOriginalPack3Roofs": 4783,
+      "connectedWalkableSourceCells": 5072,
+      "sourceRoofWingCount": 11,
+      "rooms": 19,
+      "twoHighPortals": 27,
+      "physicallyPavedAndFullySkyOpenCourts": [
+        285,
+        121,
+        132
+      ],
+      "additionalOriginalSkyOpenGroundedLoadingCells": 207,
+      "realGroundConnectedBranches": 4,
+      "original7TierStoneGroundedBreakposts": 4,
+      "originalUprightPack4GlassCells": 63,
+      "completeThreeHighFramedExteriorBays": 21,
+      "actualPedestrianWalking": "PASS cardinal BFS from original physical paved (16,1,77) to (63,1,77)",
+      "focusedEightWayD4": {
+        "olderOriginalWaves": [
+          11,
+          22,
+          34
+        ],
+        "comparisons": 24,
+        "highestIoU": 0.5600513808606294,
+        "cutoff": 0.85
+      },
+      "sourceOnly": true,
+      "workingGrainOrCrops": false,
+      "liveSnowMechanics": false,
+      "realPackProducerAccepted": false
+    },
+    {
+      "wave": 39,
+      "name": "Coppersalt Triple Dry-Slip Lodge",
+      "id": "r1:fishing-lodge:desert:large:004",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave39.mjs",
+      "gitBlob": "f889bfd638084bcfe80bd5d858cea29384b27709",
+      "sourceCells": 18588,
+      "immediateBackedOriginalPack3Roofs": 4559,
+      "connectedWalkableSourceCells": 4867,
+      "sourceRoofWingCount": 10,
+      "rooms": 17,
+      "twoHighPortals": 24,
+      "physicallyPavedAndFullySkyOpenCourts": [
+        285,
+        121,
+        132
+      ],
+      "additionalOriginalSkyOpenGroundedDrySlipCells": 236,
+      "realGroundConnectedBranches": 3,
+      "original28TierStoneLookout": "Continuous actual 7x9 stone source footprint, fully solid core y1-3, continuous octagonal upper wall y4-28",
+      "originalDirectlyBackedPack3TowerCapCells": 24,
+      "originalHighStoneFramedPack4Windows": 6,
+      "originalLowPack4UprightWindowCells": 51,
+      "completeThreeHighFramedExteriorBays": 17,
+      "actualPedestrianWalking": "PASS cardinal BFS from original physical paved (17,1,77) to (61,1,77)",
+      "focusedEightWayD4": {
+        "olderOriginalWaves": [
+          10,
+          26,
+          28
+        ],
+        "comparisons": 24,
+        "highestIoU": 0.45157152020525976,
+        "cutoff": 0.85
+      },
+      "sourceOnly": true,
+      "liveFishOrSeaOrBoats": false,
+      "realPackProducerAccepted": false
+    }
+  ],
+  "actualSourceEvidenceExecuted": {
+    "method": "Original GitHub Git blobs for legacy-stable-schema, schema and original sourcePlan/unchanged validateBlueprint evaluated in isolated JS V8. Original source geometry and strict same-category eight-way D4 independently checked. NOT native Node, original WebGL2 or original-game execution.",
+    "blueprintCompiler": "PASS both new source originals",
+    "newOriginalSourceCells": 37093,
+    "immediateOriginalPack3RoofCellsWithActualYMinusOneBacking": 9342,
+    "originalSourceConnectedWalkableCells": 9939,
+    "genuinelyGroundedWalkableSkyOpenCourtyardCells": 1076,
+    "additionalGroundedUnroofedWalkingCells": 443,
+    "originalRooms": 36,
+    "twoHighOriginalPortals": 51,
+    "completeSourcePack4WindowCells": 120,
+    "completeLowThreeTierGlassBays": 38,
+    "highFramedStonePack4GlassCells": 6,
+    "true28TierOriginalLookout": "PASS 24 backed crown cells, 6 high windows and continuous solid-source masonry",
+    "originalSevenTierStoneWindbreakSource": "PASS 4 grounded source posts 7 tiers each",
+    "physicalOutdoorCardinalWalking": "PASS both source-designed outdoor start/end paths",
+    "strictEightWayD4": "PASS all 48 transforms vs six previously authored same-category original designs; maximum 0.5600513808606294 with unchanged 0.85 cutoff",
+    "ownership": "Both are frozen B115-exclusive source IDs, absent D92 and historical accepted 228",
+    "originalPack3RoofAndPack4WindowOccupancy": "Explicit unresolved physical candidate ABI; no live producer certification"
+  },
+  "newlyStagedButNotExecuted": {
+    "focusedNativeNode": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves38-39-focused.test.mjs",
+      "blob": "fa02371160bd97a85687ae334e2627a5ebad7ea7",
+      "staticJSSyntax": "PASS",
+      "actualNodeExecution": false
+    },
+    "oneSharedStrictHistoricalD4": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-39-shared-historical-d4.test.mjs",
+      "blob": "29896a068de28aada4cb6d8d8fa1af9e363e60ea",
+      "acceptedOriginalCorpus": 228,
+      "authoredServiceSourceCount": 39,
+      "additionalNewServiceOriginalsWaves9to39": 31,
+      "singleSourceHistoricalCensus": true,
+      "strictEightWayThreshold": 0.85,
+      "totalHistoricalPlusNewServiceAllocation": 267,
+      "remainingUnderAllocation": 168,
+      "actualNodeExecution": false
+    },
+    "singleDeferredWebGL2SourceProxy": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-39-gallery.mjs",
+      "galleryBlob": "88883258b166a3b6f3aa1a7b8482316ec8bc9516",
+      "independentExactHeadPNGAudit": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-39-gallery.mjs",
+      "auditorBlob": "df3f52bf87ed9ff9fb67052b9bd01390486f5a67",
+      "constructorWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-39-gallery-wiring.test.mjs",
+      "wiringBlob": "3851f01fb780e316a9bbe6e10b48b09cc12dc937",
+      "originalSourcePreviews": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave38-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave39-preview.html"
+      ],
+      "directOriginalSourceDesigns": 31,
+      "sourceProvenanceFiles": 34,
+      "targetRealWebGL2SourceProxyPNGFrames": 186,
+      "sourceViews": [
+        "exterior",
+        "cutaway"
+      ],
+      "CSSViewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "exactGitHeadRequired": true,
+      "independentPNGCRC": true,
+      "distinctPNG_SHA256": true,
+      "actualChromiumExecution": false,
+      "actualPNGsProduced": 0,
+      "notRealLiveOriginalGame": true
+    }
+  },
+  "outstandingRequiredGates": [
+    "Exact-HEAD native Node original source focused tests with the genuine original repository and one shared strict 228-source historical D4, without redundant full-suite runs.",
+    "True original Pack3 and Pack4 candidate mesh, original-game shader and mount AABB, selection/collision, load and weather/snow support audit; all currently UNRESOLVED.",
+    "One coordinated actual Chromium original-source WebGL2 186 PNG visual capture, independent exact-head provenance/CRC/SHA verification and human visual comparison; proxy is not the original live game.",
+    "Creator-authorized real original-game world registration, physical movement/collision, terrain settlement integration, actual installed iPhone Home Screen PWA acceptance, offline, performance and saves."
+  ],
+  "CI": {
+    "originalHistoricalPR407SuccessfulActionsReusedOnlyAsHistorical": [
+      44972498965,
+      44972499027
+    ],
+    "noNewActions": true,
+    "noNewChromium": true,
+    "noDuplicateBroadAccepted228Runs": true,
+    "noSharedWorkflowsEdited": true,
+    "noCICancellation": true,
+    "strictRequiredChecksUnchanged": true
+  },
+  "protectedBoundaries": {
+    "frozenB115D92Untouched": true,
+    "acceptedHistorical228Untouched": true,
+    "otherDevelopersAndBranchesUntouched": true,
+    "allFiveHourlyAutomationsUntouched": true,
+    "originalWorldSavesUntouched": true,
+    "mainUntouched": true,
+    "PR407Untouched": true,
+    "noMerges": true,
+    "noDeployments": true
+  },
+  "progress": {
+    "newResidentialAuthoredOrStaged": 10,
+    "newServiceAuthoredOrStaged": 39,
+    "newOriginalsCombined": 49,
+    "goal": 294,
+    "remainingTotal": 245,
+    "remainingResidential": 169,
+    "remainingBuilderBService": 76
+  },
+  "estimatedRemainingFocusedDevelopmentSessions": {
+    "lower": 75,
+    "upper": 225,
+    "excludesFinalIntegrationAndRelease": true,
+    "approximate": true
+  }
+}
