@@ -14,6 +14,8 @@ import {buildBramblecrossSplitRailCoachStables} from '../../../src/building-pool
 import {getBuilderBServiceOwnership} from '../../../src/building-pool/roadmap-b/ownership-1b.mjs';
 import {structuralFingerprint} from '../../../src/building-pool/roadmap-1b/legacy-stable-schema.mjs';
 import {pack4BuilderAsset} from '../../../src/block-packs/pack-4/builder-handoff.mjs';
+import {PACK3_ROSTER} from '../../../src/block-packs/pack-3/manifest.mjs';
+import {pack3CandidateById} from '../../../src/block-packs/pack-3/catalog.mjs';
 const K=a=>a.join(',');
 const configurations=[
  {build:buildWistermereCrescentBaths,id:WISTERMERE_CRESCENT_BATHS_ID,
@@ -139,6 +141,23 @@ test('All 74 genuine upright Pack4 panes are two-tier y2/y3 source cells with so
   total+=glass.length;
  }
  assert.equal(total,74);
+});
+test('Every symbolic source roof maps to actual original Pack3 candidate roster and remains unresolved, never falsely game-installed',()=>{
+ const byRoster=new Map(PACK3_ROSTER.map(entry=>[entry.roster,entry]));
+ const seen=new Set();
+ for(const s of configurations){
+  for(const p of s.build().placements.filter(p=>p.role==='roof')){
+   assert.match(p.asset,/^pack3:\\d{3}$/,'unknown symbolic original Pack3 roof name');
+   assert.equal(p.occupancy.kind,'unresolved','invented real-game exact Pack3 collision bounds');
+   const roster=Number(p.asset.slice('pack3:'.length));
+   const candidate=byRoster.get(roster);
+   assert.ok(candidate&&candidate.implementation==='physical-candidate','roof roster not in original Pack3 physical manifest');
+   assert.equal(candidate.integrated,false,'Pack3 source incorrectly marked live');
+   assert.equal(pack3CandidateById(candidate.id,0)?.id,candidate.id,'original roof producer candidate absent');
+   seen.add(p.asset);
+  }
+ }
+ assert.deepEqual([...seen].sort(),['pack3:023','pack3:025','pack3:026']);
 });
 test('Focused 32 eight-way same-category original D4 comparisons remain below original 0.85 threshold',()=>{
  let checked=0;
