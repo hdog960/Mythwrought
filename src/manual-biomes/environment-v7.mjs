@@ -10,21 +10,29 @@ const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
 
 function sharedShoulder(biome,x,z,seed){
   if(biome.weight>.50)return null;
-  let touchesPlains=false;
+  let touchesPlains=false,hasOtherSpecial=false;
   for(const [dx,dz] of shoulderSamples){
     const neighbor=v6BiomeAt(x+dx,z+dz,seed);
-    // V6 represents real Plains as null, not {name:'plains'}. Skipping it
-    // entirely let bright salt-crust caps bleed right to the Desert/Plains
-    // edge. Preserve the special-biome material priority and make only the
-    // low-weight Desert-to-original-Plains fringe ordinary dune sand.
+    // Real V6 Plains is null, not a named biome. Preserve its dry Desert
+    // fringe and the original non-Desert neighbor policy.
     if(!neighbor){touchesPlains=true;continue;}
     if(neighbor.name===biome.name)continue;
-    // Both sides of a special-biome seam share an actual continuous material.
+    // At an authentic three-way Desert/Snow(or Enchanted)/Mountain junction,
+    // the old early return chose hardpan before it reached a later Mountain.
+    // Check all four ORIGINAL offsets on Desert only: mountain scree wins
+    // regardless of offset order, without touching other biome generation.
+    if(biome.name==='desert'){
+      if(neighbor.name==='mountain')return G.scree;
+      hasOtherSpecial=true;
+      continue;
+    }
+    // Preserve original ordering and material behavior outside the Desert.
     const pair=[biome.name,neighbor.name];
     if(pair.includes('mountain'))return G.scree;
     if(pair.includes('snow')&&pair.includes('enchanted'))return G.woodlandMoss;
     return 258;
   }
+  if(biome.name==='desert'&&hasOtherSpecial)return 258;
   return biome.name==='desert'&&touchesPlains?'desert-plains':null;
 }
 

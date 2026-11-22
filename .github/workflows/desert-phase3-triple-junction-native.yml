@@ -1,0 +1,41 @@
+name: Desert Phase 3 real triple-junction focused native (isolated)
+on:
+  push:
+    branches:
+      - dev/desert-v7-p3-triple-junction-20261122
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-p3-triple-junction-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source-authentic-desert-junction:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate direct protected parent and four-file branch scope
+        run: |
+          set -euo pipefail
+          BASE=3c1f87c0db53ebafa8fbb52fcb7964c23fd5ba68
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/environment-v7.mjs|nonblock-stage-assets.json|tests/desert-phase3-triple-junction.test.mjs|.github/workflows/desert-phase3-triple-junction-native.yml)$' || true)
+          test -z "$unexpected"
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check tests/desert-phase3-triple-junction.test.mjs
+      - name: Only changed Desert + source-linked preservation regressions
+        run: |
+          node --test \
+            tests/desert-phase3-triple-junction.test.mjs \
+            tests/desert-phase3-plains-shoulder.test.mjs \
+            tests/desert-grass-shoulder-phase2.test.mjs \
+            tests/nonblock-environment-profile.test.mjs \
+            tests/ci/nonblock-cache-manifest.test.mjs
