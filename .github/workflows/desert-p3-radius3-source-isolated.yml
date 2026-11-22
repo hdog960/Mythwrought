@@ -39,5 +39,7 @@ jobs:
           node --check candidate/src/voxel.mjs
           node --check candidate/src/manual-biomes/desert-seam-vertex-tint.mjs
           node --check candidate/tests/desert-p3-radius3-original-mesh.test.mjs
+      # The scoped protection witness must count genuine source vetoes across
+      # the entire sampled area; do not demand invented Desert-only vetoes.
       - name: New real M7 source-only gradient, protection and perf tests
         run: node --test candidate/tests/desert-p3-radius3-original-mesh.test.mjs
