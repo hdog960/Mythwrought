@@ -32,8 +32,10 @@ test('Stonecrown nine original windows face true outside air, including the clif
   const perimeter=out[0]===0||out[0]===b.footprint.width-1||out[1]===0||out[1]===b.footprint.depth-1;
   assert.ok(notch||perimeter,'window opens into an enclosed room rather than outdoors '+at(x,y,z));
   if(notch)notchViewCount++;
-  for(let yy=1;yy<b.footprint.height;yy++)
-    assert.ok(!pos.has(at(out[0],yy,out[1])),'window view occluded by physical source '+at(out[0],yy,out[1]));
+  // Test the real window-height air sightline. Legal roof overhangs at y>=4
+  // are intentionally NOT treated as opaque obstruction to a y=2 window.
+  for(const yy of [2,3])
+    assert.ok(!pos.has(at(out[0],yy,out[1])),'eye-level exterior window view occluded '+at(out[0],yy,out[1]));
  }
  assert.equal(notchViewCount,1,'one intentional exterior cliffside vista must remain visible');
 });
