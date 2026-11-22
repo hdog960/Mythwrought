@@ -62,3 +62,26 @@ test('invalid prior source readers and impossible work bounds are rejected',()=>
  assert.throws(()=>selectCityCompatibleDeepLinks(179,2,0,{
   source:stone,minTerraceRadius:30}));
 });
+test('original authored AIR, natural cave AIR, edits and landmarks all refuse city deep release',()=>{
+ const variants=[
+  {...stone,naturalAt:()=>0,authoredAt:()=>0},
+  {...stone,naturalAt:()=>0},
+  {...stone,editedAt:()=>true},
+  {...stone,protectedAt:()=>true}
+ ];
+ for(const source of variants){
+  const r=selectCityCompatibleDeepLinks(179,2,0,{
+   source,maxCombinations:1
+  });
+  assert.equal(r.ok,false);
+  assert.equal(r.worldChanged,false);
+ }
+});
+test('combined original-source callbacks are not counted twice on successful join',()=>{
+ let calls=0;
+ const source={...stone,naturalAt:()=>{calls++;return 1;}};
+ const r=selectCityCompatibleDeepLinks(179,2,0,{source});
+ assert.equal(r.ok,true);
+ assert.equal(r.sourceChecks,calls);
+ assert.equal(r.joined.sourceAuditedTerraceAlreadyCountedOnce,true);
+});
