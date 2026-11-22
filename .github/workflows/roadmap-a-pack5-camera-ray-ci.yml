@@ -1,0 +1,20 @@
+name: Roadmap A original camera and Pack5 sparse-dense target contract
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-camera-ray-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-camera-ray-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-main-camera-pack5-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only the new exact source game-camera and Pack5 sparse-dense native tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-camera-gate-producer.test.mjs
