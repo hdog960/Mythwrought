@@ -7,6 +7,10 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
+import {uploadChunkBuffer as sourceUploadChunkBuffer,
+  validateChunkUploadBytes as sourceValidateChunkUploadBytes,
+  GpuUploadRetry as SourceGpuUploadRetry,
+  MAX_CHUNK_UPLOAD_BYTES as SOURCE_MAX_CHUNK_UPLOAD_BYTES} from '../../src/gpu-recovery.mjs';
 
 const here=(p)=>new URL('../../'+p,import.meta.url);
 const read=p=>readFileSync(here(p));
@@ -647,4 +651,79 @@ test('public original two-buffer cleanup exception behavior remains byte-for-byt
   assert.equal(x.error.message,'291_NATIVE_DELETE_FAILED_staged-1');
   assert.deepEqual(x.events,['upload-1','upload-2','delete-staged-1']);
   assert.equal(x.scope.near291Fatal,false);
+});
+
+
+// Authenticate and EXECUTE the untouched original production GPU upload
+// module in Node, using controlled WebGL collaborators. A test cannot claim
+// a real WebGL context, but this is the real original uploader implementation
+// imported normally by the native Node ESM loader (NOT an extracted copy).
+function originalUploaderGl({preErrors=[],postError=0,failData=false,failDelete=false}={}){
+  const calls=[];let n=0;
+  const gl={
+    NO_ERROR:0,ARRAY_BUFFER:34962,STATIC_DRAW:35044,OUT_OF_MEMORY:1285,
+    createBuffer(){calls.push('create');return {id:'native-original-new'};},
+    getError(){calls.push('getError');n++;
+      return n<=preErrors.length?preErrors[n-1]:postError;},
+    bindBuffer(_target,b){calls.push('bind:'+b.id);},
+    bufferData(){calls.push('bufferData');if(failData)throw Error('ORIGINAL_BUFFERDATA_FAULT');},
+    deleteBuffer(b){calls.push('delete:'+b.id);
+      if(failDelete)throw Error('ORIGINAL_NATIVE_DELETE_FAULT');}
+  };
+  return {gl,calls};
+}
+test('actual imported unchanged native GPU uploader and original blob verified',()=>{
+  assert.equal(gitBlob(read('src/gpu-recovery.mjs')),
+    '422ef73e383bda78ff94607abb858e3c8a57c2d1');
+  const x=originalUploaderGl({preErrors:[0]});
+  const b=sourceUploadChunkBuffer(x.gl,new Float32Array(9));
+  assert.equal(b.id,'native-original-new');
+  assert.deepEqual(x.calls,['create','getError','bind:native-original-new',
+    'bufferData','getError']);
+});
+test('actual original native GPU uploader drains one stale WebGL error before upload',()=>{
+  const x=originalUploaderGl({preErrors:[1285,0]});
+  const b=sourceUploadChunkBuffer(x.gl,new Float32Array(9));
+  assert.equal(b.id,'native-original-new');
+  assert.equal(x.calls.filter(c=>c==='getError').length,3);
+});
+test('actual original native upload GL OOM deletes its temporary buffer',()=>{
+  const x=originalUploaderGl({preErrors:[0],postError:1285});
+  assert.throws(()=>sourceUploadChunkBuffer(x.gl,new Float32Array(9)),
+    /WebGL buffer upload error 1285/);
+  assert.deepEqual(x.calls.slice(-2),['getError','delete:native-original-new']);
+});
+test('actual original native bufferData JS exception deletes temporary GPU buffer',()=>{
+  const x=originalUploaderGl({preErrors:[0],failData:true});
+  assert.throws(()=>sourceUploadChunkBuffer(x.gl,new Float32Array(9)),
+    /ORIGINAL_BUFFERDATA_FAULT/);
+  assert.deepEqual(x.calls.slice(-2),
+    ['bufferData','delete:native-original-new']);
+});
+test('document exact original native uploader cleanup-error masking UNFIXED',()=>{
+  const x=originalUploaderGl({preErrors:[0],failData:true,failDelete:true});
+  // This expected original behavior is the remaining unresolved source-owner
+  // limitation, NOT an acceptance criterion for robust near GPU rollback.
+  assert.throws(()=>sourceUploadChunkBuffer(x.gl,new Float32Array(9)),
+    /ORIGINAL_NATIVE_DELETE_FAULT/);
+  assert.deepEqual(x.calls.slice(-2),
+    ['bufferData','delete:native-original-new']);
+});
+test('actual original native GPU uploader rejects bad geometry without allocation',()=>{
+  const x=originalUploaderGl();
+  assert.throws(()=>sourceUploadChunkBuffer(x.gl,new Float32Array(8)),
+    /packed vertex data/);
+  assert.deepEqual(x.calls,[]);
+  assert.equal(SOURCE_MAX_CHUNK_UPLOAD_BYTES,8*1024*1024);
+  assert.equal(sourceValidateChunkUploadBytes(new Float32Array(9)),36);
+});
+test('actual original native bounded retry rejects repeated early GPU retries',()=>{
+  const retry=new SourceGpuUploadRetry({baseDelayMs:250,maxDelayMs:8000});
+  assert.equal(retry.ready('original',100),true);
+  const first=retry.fail('original',100,'OOM');
+  assert.equal(first.until,350);
+  assert.equal(retry.ready('original',349),false);
+  assert.equal(retry.ready('original',350),true);
+  retry.success('original');
+  assert.equal(retry.stats().recovered,1);
 });
