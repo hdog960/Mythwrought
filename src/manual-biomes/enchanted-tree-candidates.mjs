@@ -72,24 +72,34 @@ export function buildEnchantedTreeCandidate(x,floor,z,styleRoll){
     for(let dy=1;dy<=trunk;dy++)put(dy>=trunk-2?bend:0,dy,0,G.aetherBark);
     // The bent willow shaft must connect by a FACE, not merely by an edge.
     put(bend,trunk-3,0,G.aetherBark);
-    for(let dy=trunk-2;dy<=trunk+1;dy++){
-      const r=dy===trunk+1?1:dy===trunk-2?2:3;
-      for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
+    // Moonwillow is a broad, horizontally arched umbrella, NOT a pine.
+    // Three deliberately different horizontal tiers: open underside,
+    // broad moonlit outer boughs and a thin, irregular upper rim.
+    // Offset bends are clipped to the same physical +/-4 cube envelope.
+    for(let dy=trunk-1;dy<=trunk+1;dy++){
+      const radius=dy===trunk-1?3:dy===trunk?4:2;
+      for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){
+        if(Math.abs(bend+dx)>ENCHANTED_TREE_MAX_RADIUS)continue;
         const distance=Math.abs(dx)+Math.abs(dz);
-        if(distance>r+1||distance<1&&dy<trunk)continue;
-        // Open an airy inner crown rather than filling a solid green cube.
-        if(dy===trunk-2&&distance<2)continue;
-        put(bend+dx,dy,dz,dy===trunk+1?G.moonLeaves:G.aetherLeaves);
+        // Hollow the underside for true walk-through space; reserve a
+        // broad, flat overhanging cap rather than a conical voxel tier.
+        if(dy===trunk-1&&(distance<2||distance>3))continue;
+        if(dy===trunk&&distance>4)continue;
+        if(dy===trunk+1&&distance>2)continue;
+        put(bend+dx,dy,dz,
+          dy===trunk-1?G.aetherLeaves:G.moonLeaves);
       }
     }
-    // Willow-specific split curtains, rather than another solid pine-like
-    // crown: eight uneven hanging strands beneath the airy upper shell.
-    // Their bottom dy>=3 leaves player headroom for the lowest trunk variant.
-    // The real terrain-aware canopy filter will prune raised-slope conflicts.
+    // Twelve separate drooping strands create the characteristic willow
+    // curtain silhouette. No vine can enter either original walking
+    // headroom voxel: lowest leaf is at dy=3 for trunkHeight=7.
+    // The existing real-world 3x3 terrain/headroom filter additionally
+    // removes leaves near raised shoulders, caves and landmarks.
     for(const [dx,dz,hang] of [
       [-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
-      [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3]
-    ])for(let dy=trunk-hang;dy<=trunk-1;dy++)
+      [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3],
+      [-3,-1,3],[3,1,3],[1,-3,4],[-1,3,3]
+    ])for(let dy=trunk-hang;dy<=trunk;dy++)
       put(bend+dx,dy,dz,G.moonLeaves);
     // Four physical outward arms keep the foliage curtains visually
     // anchored to mineable, face-connected bark (not diagonal-only twigs).
