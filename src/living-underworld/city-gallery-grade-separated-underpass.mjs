@@ -19,6 +19,8 @@ import {compileMainGalleryPedestrianClearance,
  from './combined-stair-footprints.mjs';
 import {auditProtectedSubsurfaceStairs}
  from './protected-subsurface-stairs.mjs';
+import {isCandidateGeologyMaterial}
+ from './protected-entrance-envelope.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -119,8 +121,43 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
   galleryReason:main.reason});
  for(const p of admitted.selectedRoutes)if(!main.inspect(p).ok)
   return failure(seed,rx,rz,'PRIOR_APPROACH_BLOCKS_MAIN_GALLERY');
+
+ // The city-center point is NOT a valid 3x3 full-depth landing at these
+ // historical sites. Search an actual three-wide pad with a one-cell
+ // unbuilt margin over the SAME 6 support + 9 clearance courses.
+ const floorY=city.y-8,centerPads=[];
+ for(let dx=-12;dx<=12;dx++)for(let dz=-12;dz<=12;dz++){
+  const x=city.x+dx,z=city.z+dz;
+  let blocked=false;
+  pad:for(let ox=-2;ox<=2;ox++)for(let oz=-2;oz<=2;oz++){
+   const xx=x+ox,zz=z+oz;
+   if(!cityEllipse(city,xx,zz)||
+    Math.floor(xx/UNDERWORLD_REGION_SIDE)!==rx||
+    Math.floor(zz/UNDERWORLD_REGION_SIDE)!==rz){
+    blocked=true;break pad;
+   }
+   for(let y=floorY-5;y<=floorY+9;y++){
+    const kind=y<=floorY?'support':'clearance';
+    if(y< -210||y>19||
+     main.inspectCell(xx,y,zz,kind)||
+     admitted.index.inspectCell(xx,y,zz,kind)){
+     blocked=true;break pad;
+    }
+   }
+  }
+  if(!blocked)centerPads.push(Object.freeze({
+   x,y:floorY+1,z,dx,dz,distanceSquared:dx*dx+dz*dz
+  }));
+ }
+ centerPads.sort((a,b)=>a.distanceSquared-b.distanceSquared||
+  a.x-b.x||a.z-b.z);
+ if(!centerPads.length)return failure(seed,rx,rz,
+  'NO_SAFE_THREE_WIDE_CENTER_SIDE_PAD',{
+   searchedCenterPadOffsets:625,sourceTerrainNotQueried:true
+  });
+ const centerPad=centerPads[0];
  const from=admitted.landing,to=Object.freeze({
-  x:city.x,y:city.y-7,z:city.z
+  x:centerPad.x,y:centerPad.y,z:centerPad.z
  });
  const mid={x:Math.round((from.x+to.x)/2),z:
   Math.round((from.z+to.z)/2)};
@@ -185,7 +222,15 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
    });
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
   kind:'three-wide-thin-deck-underpass-below-historical-galleries',
-  floorY:city.y-8,from,to,
+  floorY,from,to,
+  originalCityCenter:Object.freeze({x:city.x,y:floorY+1,z:city.z}),
+  centerSidePad:to,
+  centerSidePadOriginalSourceVisitsRequired:135,
+  centerPadSearchCandidates:625,
+  centerPadGeometricallyEligible:centerPads.length,
+  centerPadOffsetSquared:centerPad.distanceSquared,
+  centerPadThreeWideFullDepthAndOneCellEasementSafe:true,
+  originalCityCenterThreeWidePadNotAssumed:true,
   pivot:best.pivot,proposal:best.proposal,
   segments:best.proposal.segments.length,
   inspectedCandidates:considered,safeCandidates:safeCount,
@@ -197,7 +242,8 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
    best.grade.supportCells+best.grade.clearanceCells,
   originalStrictStairGradeSafe:best.grade.ok,
   selectedFourHubPlusAccessRouteCount:admitted.selectedRoutes.length,
-  historicalLandingAndCityCenterEndpointsPreserved:true,
+  historicalLandingPreservedAndCenterSidePadChecked:true,
+  exactOriginalCityCenterWalkableLandingNotCertified:true,
   all16MainGalleryFootprintsUnmodified:true,
   existingSelectedFourHubAndAccessFootprintsUnmodified:true,
   detachedAirCenterlineVerified:true,
@@ -221,11 +267,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  });
  if(!planned.ok)return planned;
  const previous=sourceOwnedDeepSelection.sourceChecks;
+ const requiredAdditional=planned.originalVoxelSourceVisitsRequired+
+  planned.centerSidePadOriginalSourceVisitsRequired;
  if(previous>maxTotalSourceChecks||
-  planned.originalVoxelSourceVisitsRequired>maxTotalSourceChecks-previous)
+  requiredAdditional>maxTotalSourceChecks-previous)
   return failure(seed,rx,rz,'UNDERPASS_ORIGINAL_SOURCE_BUDGET',{
    sourceChecks:previous,requiredAdditionalVisits:
-    planned.originalVoxelSourceVisitsRequired,
+    requiredAdditional,
    maxTotalSourceChecks,originalM7ReaderIdentityByCallerOnly:true
   });
  const audited=auditProtectedSubsurfaceStairs(planned.proposal,{
