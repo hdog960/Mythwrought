@@ -27,7 +27,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   const source=world??new VoxelWorld(seed);
   if(source.constructor!==VoxelWorld||source.seed!==seed||
      source.edits.size||source.rotations.size)return null;
-  const before=source.save(),sites=[],stats={
+  const before=JSON.stringify(source.save()),sites=[],stats={
     tiles:width*height,eligible:0,plants:0,plantCells:0,
     rejected:0,terrainRejected:0,seamRejected:0,terrainCells:0,
     seamExposedFaces:0,
@@ -112,7 +112,7 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   stats.cachedSourceVetoes=readCosts.cachedRejections;
   if(stats.sourceSites>width*height*9)
     throw Error('Mountain V8 source budget exceeded');
-  if(source.save()!==before||source.edits.size||source.rotations.size)
+  if(JSON.stringify(source.save())!==before||source.edits.size||source.rotations.size)
     throw Error('Read-only Mountain V8 census changed a schema-1 save');
   return Object.freeze({seed,stats:Object.freeze(stats),
     sites:Object.freeze(sites),source:'original-VoxelWorld-readonly',
