@@ -1,0 +1,1383 @@
+// MYTHWROUGHT Builder D Wave15 original eight D0-vacant school/research/arcane designs.
+// Detached source-only; no world, settlement, runtime, saves or historical edits.
+import {buildDistinctive4B} from '../roadmap-4b/m2-distinctive.mjs';
+import {validateBlueprint} from '../roadmap-4b/schema.mjs';
+export const ROADMAP_D_WAVE15_PLANS=Object.freeze([
+  {
+    "t": "schoolhouse",
+    "b": "enchanted-forest",
+    "s": "small",
+    "variant": 1,
+    "title": "Glimmerbrook Firefly Reading Hall",
+    "dim": [
+      78,
+      20,
+      74
+    ],
+    "r": [
+      [
+        30,
+        42,
+        1,
+        69
+      ],
+      [
+        7,
+        31,
+        8,
+        31
+      ],
+      [
+        40,
+        73,
+        31,
+        47
+      ],
+      [
+        11,
+        36,
+        47,
+        71
+      ],
+      [
+        42,
+        72,
+        7,
+        22
+      ],
+      [
+        19,
+        56,
+        24,
+        46
+      ]
+    ],
+    "discs": [
+      [
+        13,
+        40,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        13,
+        40,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      36,
+      1
+    ],
+    "rooms": [
+      [
+        "classroom",
+        18,
+        20
+      ],
+      [
+        "shared-study",
+        58,
+        37
+      ],
+      [
+        "teacher-area",
+        36,
+        9
+      ],
+      [
+        "glowcap-story-circle",
+        22,
+        57
+      ],
+      [
+        "living-map-workshop",
+        58,
+        15
+      ],
+      [
+        "moonbrook-sky-chart",
+        37,
+        58
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        30,
+        11,
+        29,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        18,
+        20
+      ],
+      [
+        58,
+        37
+      ],
+      [
+        36,
+        9
+      ],
+      [
+        22,
+        57
+      ],
+      [
+        58,
+        15
+      ],
+      [
+        37,
+        58
+      ]
+    ],
+    "towers": [
+      [
+        36,
+        13,
+        1,
+        17
+      ],
+      [
+        59,
+        37,
+        1,
+        15
+      ]
+    ],
+    "roof": "glimmerbrook-two-firefly-lanterns-and-open-song-circle"
+  },
+  {
+    "t": "schoolhouse",
+    "b": "mountain",
+    "s": "small",
+    "variant": 1,
+    "title": "Graysummit Switchback Survey School",
+    "dim": [
+      84,
+      22,
+      78
+    ],
+    "r": [
+      [
+        38,
+        48,
+        1,
+        74
+      ],
+      [
+        5,
+        40,
+        12,
+        31
+      ],
+      [
+        47,
+        79,
+        23,
+        42
+      ],
+      [
+        7,
+        39,
+        49,
+        75
+      ],
+      [
+        46,
+        76,
+        7,
+        23
+      ],
+      [
+        20,
+        61,
+        27,
+        55
+      ]
+    ],
+    "discs": [
+      [
+        14,
+        40,
+        8,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        14,
+        40,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      43,
+      1
+    ],
+    "rooms": [
+      [
+        "classroom",
+        19,
+        22
+      ],
+      [
+        "shared-study",
+        65,
+        33
+      ],
+      [
+        "teacher-area",
+        43,
+        10
+      ],
+      [
+        "scree-geometry-lesson",
+        20,
+        62
+      ],
+      [
+        "weather-vane-workshop",
+        62,
+        15
+      ],
+      [
+        "ridge-archive",
+        43,
+        63
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        38,
+        13,
+        29,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        22
+      ],
+      [
+        65,
+        33
+      ],
+      [
+        43,
+        10
+      ],
+      [
+        20,
+        62
+      ],
+      [
+        62,
+        15
+      ],
+      [
+        43,
+        63
+      ]
+    ],
+    "towers": [
+      [
+        43,
+        13,
+        1,
+        19
+      ],
+      [
+        65,
+        33,
+        1,
+        16
+      ]
+    ],
+    "roof": "graysummit-switchback-belltower-and-scree-gables"
+  },
+  {
+    "t": "schoolhouse",
+    "b": "snow",
+    "s": "medium",
+    "variant": 4,
+    "title": "Snowmere Crystal Compass Polytechnic",
+    "dim": [
+      99,
+      23,
+      93
+    ],
+    "r": [
+      [
+        44,
+        56,
+        1,
+        89
+      ],
+      [
+        7,
+        45,
+        9,
+        36
+      ],
+      [
+        55,
+        94,
+        18,
+        40
+      ],
+      [
+        7,
+        44,
+        64,
+        90
+      ],
+      [
+        55,
+        94,
+        62,
+        90
+      ],
+      [
+        25,
+        75,
+        33,
+        68
+      ]
+    ],
+    "discs": [
+      [
+        15,
+        48,
+        9,
+        8
+      ],
+      [
+        85,
+        51,
+        8,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        15,
+        48,
+        1,
+        1
+      ],
+      [
+        85,
+        51,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      50,
+      1
+    ],
+    "rooms": [
+      [
+        "classroom",
+        20,
+        22
+      ],
+      [
+        "shared-study",
+        81,
+        28
+      ],
+      [
+        "teacher-area",
+        50,
+        12
+      ],
+      [
+        "crystal-calibration-lab",
+        21,
+        79
+      ],
+      [
+        "iceway-cartography",
+        79,
+        78
+      ],
+      [
+        "storm-geography",
+        50,
+        52
+      ],
+      [
+        "western-lantern-rotunda",
+        15,
+        52
+      ],
+      [
+        "eastern-aurora-observatory",
+        86,
+        55
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        44,
+        14,
+        35,
+        21
+      ]
+    ],
+    "peak": [
+      [
+        20,
+        22
+      ],
+      [
+        81,
+        28
+      ],
+      [
+        50,
+        12
+      ],
+      [
+        21,
+        79
+      ],
+      [
+        79,
+        78
+      ],
+      [
+        50,
+        52
+      ],
+      [
+        15,
+        52
+      ],
+      [
+        86,
+        55
+      ]
+    ],
+    "towers": [
+      [
+        50,
+        14,
+        1,
+        20
+      ],
+      [
+        79,
+        78,
+        1,
+        17
+      ]
+    ],
+    "roof": "snowmere-double-compass-rotunda-and-snow-shear-spires"
+  },
+  {
+    "t": "magical-research-institute",
+    "b": "temperate",
+    "s": "small",
+    "variant": 2,
+    "title": "Rainhaven Tidelock Harmonic Workshop",
+    "dim": [
+      78,
+      21,
+      76
+    ],
+    "r": [
+      [
+        31,
+        43,
+        1,
+        73
+      ],
+      [
+        5,
+        33,
+        12,
+        30
+      ],
+      [
+        42,
+        73,
+        28,
+        51
+      ],
+      [
+        8,
+        32,
+        51,
+        73
+      ],
+      [
+        43,
+        72,
+        6,
+        24
+      ],
+      [
+        20,
+        57,
+        23,
+        50
+      ]
+    ],
+    "discs": [
+      [
+        13,
+        43,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        13,
+        43,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      37,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        18,
+        20
+      ],
+      [
+        "secure-repository",
+        60,
+        38
+      ],
+      [
+        "tide-clock-test",
+        37,
+        10
+      ],
+      [
+        "rainwater-resonator",
+        18,
+        62
+      ],
+      [
+        "riverbank-frequency-lab",
+        58,
+        15
+      ],
+      [
+        "mist-chart-archive",
+        37,
+        61
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        31,
+        14,
+        29,
+        20
+      ]
+    ],
+    "peak": [
+      [
+        18,
+        20
+      ],
+      [
+        60,
+        38
+      ],
+      [
+        37,
+        10
+      ],
+      [
+        18,
+        62
+      ],
+      [
+        58,
+        15
+      ],
+      [
+        37,
+        61
+      ]
+    ],
+    "towers": [
+      [
+        37,
+        13,
+        1,
+        18
+      ],
+      [
+        60,
+        38,
+        1,
+        15
+      ]
+    ],
+    "roof": "rainhaven-rainglass-clocktower-and-river-pendulum"
+  },
+  {
+    "t": "magical-research-institute",
+    "b": "desert",
+    "s": "small",
+    "variant": 3,
+    "title": "Kharaz Sunshadow Glass Crucible",
+    "dim": [
+      80,
+      21,
+      80
+    ],
+    "r": [
+      [
+        32,
+        45,
+        1,
+        77
+      ],
+      [
+        6,
+        33,
+        11,
+        34
+      ],
+      [
+        44,
+        74,
+        31,
+        53
+      ],
+      [
+        9,
+        36,
+        55,
+        77
+      ],
+      [
+        45,
+        74,
+        9,
+        30
+      ],
+      [
+        21,
+        59,
+        28,
+        60
+      ]
+    ],
+    "discs": [
+      [
+        16,
+        43,
+        8,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        16,
+        43,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      39,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        19,
+        22
+      ],
+      [
+        "secure-repository",
+        60,
+        41
+      ],
+      [
+        "sunshadow-dial",
+        39,
+        10
+      ],
+      [
+        "luminous-sand-forge",
+        20,
+        65
+      ],
+      [
+        "dune-lens-calibration",
+        61,
+        17
+      ],
+      [
+        "quartz-vault-records",
+        39,
+        68
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        32,
+        14,
+        33,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        22
+      ],
+      [
+        60,
+        41
+      ],
+      [
+        39,
+        10
+      ],
+      [
+        20,
+        65
+      ],
+      [
+        61,
+        17
+      ],
+      [
+        39,
+        68
+      ]
+    ],
+    "towers": [
+      [
+        39,
+        13,
+        1,
+        18
+      ],
+      [
+        61,
+        42,
+        1,
+        15
+      ]
+    ],
+    "roof": "kharaz-sunshadow-stepped-mirror-and-cooling-towers"
+  },
+  {
+    "t": "magical-research-institute",
+    "b": "enchanted-forest",
+    "s": "large",
+    "variant": 3,
+    "title": "Moonspore Ten-Root Mycomancy Institute",
+    "dim": [
+      128,
+      26,
+      119
+    ],
+    "r": [
+      [
+        53,
+        70,
+        1,
+        115
+      ],
+      [
+        5,
+        55,
+        10,
+        35
+      ],
+      [
+        69,
+        122,
+        14,
+        40
+      ],
+      [
+        8,
+        54,
+        78,
+        115
+      ],
+      [
+        70,
+        123,
+        75,
+        115
+      ],
+      [
+        25,
+        99,
+        31,
+        79
+      ]
+    ],
+    "discs": [
+      [
+        18,
+        56,
+        12,
+        9
+      ],
+      [
+        113,
+        58,
+        10,
+        8
+      ],
+      [
+        62,
+        95,
+        10,
+        9
+      ]
+    ],
+    "holes": [
+      [
+        18,
+        56,
+        1,
+        1
+      ],
+      [
+        113,
+        58,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      61,
+      1
+    ],
+    "rooms": [
+      [
+        "research-hall",
+        20,
+        23
+      ],
+      [
+        "secure-repository",
+        104,
+        25
+      ],
+      [
+        "moonspore-canopy-theory",
+        61,
+        10
+      ],
+      [
+        "western-root-alchemy",
+        23,
+        96
+      ],
+      [
+        "eastern-mycelium-vault",
+        101,
+        94
+      ],
+      [
+        "fungal-conduit-lab",
+        61,
+        57
+      ],
+      [
+        "mirror-pond-sampling",
+        13,
+        53
+      ],
+      [
+        "glowstem-astrarium",
+        110,
+        53
+      ],
+      [
+        "luminous-root-census",
+        62,
+        103
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        53,
+        15,
+        34,
+        24
+      ],
+      [
+        "x",
+        70,
+        80,
+        113,
+        87
+      ]
+    ],
+    "peak": [
+      [
+        20,
+        23
+      ],
+      [
+        104,
+        25
+      ],
+      [
+        61,
+        10
+      ],
+      [
+        23,
+        96
+      ],
+      [
+        101,
+        94
+      ],
+      [
+        61,
+        57
+      ],
+      [
+        13,
+        53
+      ],
+      [
+        110,
+        53
+      ],
+      [
+        62,
+        103
+      ]
+    ],
+    "towers": [
+      [
+        61,
+        14,
+        2,
+        22
+      ],
+      [
+        23,
+        96,
+        1,
+        17
+      ],
+      [
+        101,
+        94,
+        1,
+        19
+      ]
+    ],
+    "roof": "moonspore-ten-root-astrarium-and-three-branch-watchtowers"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "temperate",
+    "s": "medium",
+    "variant": 3,
+    "title": "Silvergrove Clockroot Glyph Academy",
+    "dim": [
+      101,
+      23,
+      95
+    ],
+    "r": [
+      [
+        42,
+        56,
+        1,
+        92
+      ],
+      [
+        7,
+        43,
+        10,
+        38
+      ],
+      [
+        54,
+        96,
+        14,
+        42
+      ],
+      [
+        8,
+        44,
+        62,
+        92
+      ],
+      [
+        55,
+        98,
+        65,
+        93
+      ],
+      [
+        25,
+        80,
+        34,
+        66
+      ]
+    ],
+    "discs": [
+      [
+        16,
+        51,
+        10,
+        8
+      ],
+      [
+        88,
+        53,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        16,
+        51,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      49,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        19,
+        23
+      ],
+      [
+        "study-chamber",
+        80,
+        27
+      ],
+      [
+        "clockroot-lore-gallery",
+        49,
+        11
+      ],
+      [
+        "silverwood-archive",
+        20,
+        77
+      ],
+      [
+        "bridge-glyph-practice",
+        80,
+        79
+      ],
+      [
+        "central-spellwork-library",
+        49,
+        53
+      ],
+      [
+        "west-solar-clock",
+        13,
+        48
+      ],
+      [
+        "east-moonprint-theater",
+        90,
+        55
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        42,
+        14,
+        37,
+        21
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        23
+      ],
+      [
+        80,
+        27
+      ],
+      [
+        49,
+        11
+      ],
+      [
+        20,
+        77
+      ],
+      [
+        80,
+        79
+      ],
+      [
+        49,
+        53
+      ],
+      [
+        13,
+        48
+      ],
+      [
+        90,
+        55
+      ]
+    ],
+    "towers": [
+      [
+        49,
+        15,
+        1,
+        20
+      ],
+      [
+        80,
+        80,
+        1,
+        17
+      ]
+    ],
+    "roof": "silvergrove-clockroot-cross-gables-and-offset-astral-clock"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "snow",
+    "s": "medium",
+    "variant": 2,
+    "title": "Frostward Polar Bell Arcanum",
+    "dim": [
+      104,
+      24,
+      98
+    ],
+    "r": [
+      [
+        45,
+        58,
+        1,
+        94
+      ],
+      [
+        6,
+        46,
+        12,
+        40
+      ],
+      [
+        57,
+        99,
+        20,
+        46
+      ],
+      [
+        8,
+        46,
+        68,
+        94
+      ],
+      [
+        58,
+        100,
+        65,
+        95
+      ],
+      [
+        26,
+        81,
+        37,
+        69
+      ]
+    ],
+    "discs": [
+      [
+        16,
+        52,
+        10,
+        8
+      ],
+      [
+        91,
+        56,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        16,
+        52,
+        1,
+        1
+      ],
+      [
+        91,
+        56,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      52,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        19,
+        25
+      ],
+      [
+        "study-chamber",
+        85,
+        32
+      ],
+      [
+        "aurora-lexicon",
+        52,
+        12
+      ],
+      [
+        "bell-canticle-school",
+        20,
+        81
+      ],
+      [
+        "icebound-astral-archive",
+        85,
+        81
+      ],
+      [
+        "frost-signal-patterning",
+        52,
+        55
+      ],
+      [
+        "west-mirror-scrying",
+        15,
+        55
+      ],
+      [
+        "eastern-coldlight-chant",
+        92,
+        59
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        45,
+        16,
+        37,
+        23
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        25
+      ],
+      [
+        85,
+        32
+      ],
+      [
+        52,
+        12
+      ],
+      [
+        20,
+        81
+      ],
+      [
+        85,
+        81
+      ],
+      [
+        52,
+        55
+      ],
+      [
+        15,
+        55
+      ],
+      [
+        92,
+        59
+      ]
+    ],
+    "towers": [
+      [
+        52,
+        14,
+        2,
+        21
+      ],
+      [
+        85,
+        81,
+        1,
+        18
+      ]
+    ],
+    "roof": "frostward-polar-bell-chimneys-and-northern-skyglass"
+  }
+].map(x=>Object.freeze(x)));
+export function buildWave15Original(p){
+ const base=buildDistinctive4B(p),occupied=new Set(base.cells.map(c=>c.at.join(','))),cells=[...base.cells];let elevated=0;
+ for(const [cx,cz,r,topY] of p.towers){
+  if(topY>=base.bounds[1]||topY<=10)throw Error('invalid Wave15 crown bounds '+p.title);
+  for(let y=8;y<=topY;y++)for(let x=cx-r;x<=cx+r;x++)for(let z=cz-r;z<=cz+r;z++){
+   if(Math.abs(x-cx)!==r&&Math.abs(z-cz)!==r)continue;
+   const here=[x,y,z].join(',');if(occupied.has(here))continue;
+   if(!occupied.has([x,y-1,z].join(',')))throw Error('unborne Wave15 source tower '+p.title+' '+here);
+   const isTop=y===topY;cells.push({at:[x,y,z],role:isTop?'trim':'column',asset:isTop?'live:crystal':'live:stone',facing:'north',feature:'source-'+p.roof+'-'+(isTop?'crown':'shaft')});
+   occupied.add(here);elevated++;
+  }
+ }
+ if(elevated<50)throw Error('no actual elevated source crown '+p.title);
+ const result=Object.freeze({...base,cells,provenance:{...base.provenance,lane:'roadmap-d',milestone:'D1-wave15',source:'Eight new independently authored D0-vacant regional educational and arcane plans',method:'unique hand-authored footprint, functional room navigation, supported original voxel crown rings',originalPlan:p.title,physicalCrownCells:elevated,historicalSourcesUnchanged:true,liveIntegration:false,notFinalArt:true}});
+ validateBlueprint(result);return result;
+}
+export const ROADMAP_D_WAVE15_BUILDINGS=Object.freeze(ROADMAP_D_WAVE15_PLANS.map(buildWave15Original));
+export const ROADMAP_D_WAVE15_IDS=Object.freeze(ROADMAP_D_WAVE15_BUILDINGS.map(b=>b.id));
+if(ROADMAP_D_WAVE15_IDS.length!==8||new Set(ROADMAP_D_WAVE15_IDS).size!==8)throw Error('Wave15 eight unique canonical source IDs needed');
