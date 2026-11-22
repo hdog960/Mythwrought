@@ -21,8 +21,10 @@ import {eligibleHabitatPool,planHabitatCandidate,
   from '../src/mobs/ecosystem-habitat.mjs';
 import {proposeTerrainAwarePosition}
   from '../src/mobs/ecosystem-terrain-placement.mjs';
-import {proposeRegionalMobSpawn,MAX_PROPOSALS_PER_TICK}
+import {MAX_PROPOSALS_PER_TICK}
   from '../src/mobs/ecosystem-region-proposals.mjs';
+import {deriveRegionalMobState,proposeMobFromRosterSnapshot}
+  from '../src/mobs/ecosystem-region-snapshot.mjs';
 
 const SURFACE=Object.freeze([
   {biome:'meadow',source:'plains',x:0,z:0},
@@ -87,13 +89,20 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       // One read-only regional POLL on the same real loaded source site.
       // Empty counts and explicit capacity are hypothetical inputs, not
       // natural births, current-game population or spawn integration.
-      const regional=proposeRegionalMobSpawn({
-        world:proposedQuery,seed,
-        region:{cx,cz,section,feet},observer,
+      const sourceRegion={cx,cz,section,feet};
+      const sourceRoster=deriveRegionalMobState([],sourceRegion);
+      assert.equal(sourceRoster.regionName,[cx,cz,section].join(','));
+      assert.equal(sourceRoster.localCounts.size,40,
+        'Source bridge must cover all 40 original creature species');
+      assert.equal(sourceRoster.rosterAvailable,true);
+      assert.equal(sourceRoster.occupiedPositions.length,0);
+      // Empty roster is an EXPLICIT hypothetical source game state,
+      // never a claim about existing natural mob populations.
+      const regional=proposeMobFromRosterSnapshot({
+        world:proposedQuery,seed,region:sourceRegion,observer,
         biome:site.biome,light:site.biome==='cave'?.29:.8,
         kind:site.siteType,
-        localCounts:new Map(pool.map(species=>[species.id,0])),
-        occupiedPositions:[],rosterAvailable:true,startSerial:0
+        entities:[],startSerial:0
       });
       assert.ok(regional.attempts>=0&&regional.attempts<=MAX_PROPOSALS_PER_TICK);
       assert.equal(regional.nextSerial,regional.attempts);
