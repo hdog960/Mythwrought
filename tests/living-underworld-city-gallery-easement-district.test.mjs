@@ -194,3 +194,21 @@ test('nonboolean edit/landmark flags and invalid material IDs never certify dist
     sourceOwnedDeepSelection:proof(2,0)}),
    /Invalid original M7 district material/);
 });
+
+test('every city district tile has a full one-cell no-build easement around corridors',()=>{
+ for(const [rx,rz] of [[2,0],[2,1]]){
+  const selectedProof=proof(rx,rz),r=plan(rx,rz);
+  const original=compileMainGalleryPedestrianClearance(seed,rx,rz);
+  const selected=compileSelectedStairPedestrianClearance([
+   ...selectedProof.deepProposals,
+   selectedProof.joined.sourceAuditedCityAccessRouteGeometry
+  ]);
+  for(const t of r.tileCenters)for(let dx=-2;dx<=2;dx++)
+   for(let dz=-2;dz<=2;dz++)
+    for(let y=r.floorY-5;y<=r.floorY+9;y++){
+     const role=y<=r.floorY?'support':'clearance';
+     assert.equal(original.inspectCell(t.x+dx,y,t.z+dz,role),null);
+     assert.equal(selected.inspectCell(t.x+dx,y,t.z+dz,role),null);
+    }
+ }
+});
