@@ -19,6 +19,7 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.equal(first.stats.eligible+first.stats.rejected+
       first.stats.terrainRejected+first.stats.seamRejected,first.stats.tiles);
     assert.ok(first.stats.terrainCells<=first.stats.eligible*18);
+    assert.ok(first.stats.seamExposedFaces<=first.stats.eligible*8);
     assert.ok(first.stats.terrainCells>=first.stats.eligible);
     assert.ok(first.stats.plantCells<=first.stats.plants*18);
     assert.equal(world.save(),save);
@@ -30,7 +31,8 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
       eligible:first.stats.eligible,plants:first.stats.plants,
       plantCells:first.stats.plantCells,terrainCells:first.stats.terrainCells,
       terrainRejected:first.stats.terrainRejected,
-      seamRejected:first.stats.seamRejected,rejected:first.stats.rejected
+      seamRejected:first.stats.seamRejected,
+      seamExposedFaces:first.stats.seamExposedFaces,rejected:first.stats.rejected
     }));
   }
 });
