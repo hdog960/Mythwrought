@@ -436,6 +436,11 @@ function start(nonblockStage=null){
   const near291Enabled=['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('near-vao-291')==='1';
   let near291=null;
+  // Only the localhost VAO experiment uses this page/render-stop fence.
+  let near291PageSuspended=false,near291Fatal=false,near291Pending=false;
+  let near291LoadEpoch=0;
+  const near291CanResume=()=>!near291PageSuspended&&!near291Fatal&&
+    near291?.status().phase!=='blocked';
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
   // Keep accepted M5/legacy module graph free of cave-only imports.
   const caveFarGpu=createCaveFarWallGpu(gl);
@@ -1664,26 +1669,37 @@ function start(nonblockStage=null){
   const frameDriver=new ForegroundFrameDriver(
     callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
   );
-  if(near291Enabled){
-    // Public Pages and offline PWA control load ZERO experimental modules.
-    // The localhost-only import completes between animation frames.
+  function armNear291(){
+    if(!near291Enabled||near291||near291Pending||
+       near291PageSuspended||near291Fatal)return;
+    // Only localhost/?near-vao-291=1 can import the experiment.
+    const epoch=++near291LoadEpoch;
+    near291Pending=true;
     import('../perf/issue-291/opaque-near-lifecycle.mjs')
       .then(({createOpaqueNearLifecycle})=>{
+        if(epoch!==near291LoadEpoch||near291PageSuspended||near291Fatal)return;
         if(graphicsLost||document.hidden)
           throw Error('Graphics suspended before local VAO experiment armed');
         near291=createOpaqueNearLifecycle({gl,
           attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
           originalDeleteChunkBuffers,stopRenderLoop:reason=>{
+            near291Fatal=true;
             frameDriver.pause();
             fatal('Local VAO 291 experiment stopped: '+reason);
             return true;
           }});
       })
       .catch(error=>{
+        if(epoch!==near291LoadEpoch||near291PageSuspended)return;
+        near291Fatal=true;
         frameDriver.pause();
         fatal('Local VAO 291 initialization refused: '+error.message);
+      })
+      .finally(()=>{
+        if(epoch===near291LoadEpoch)near291Pending=false;
       });
   }
+  armNear291();
   // iPhone Touch.identifier is stable across simultaneous fingers even if
   // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
   // Keep a separate positive ID namespace for Touch Events.
@@ -1912,8 +1928,9 @@ function start(nonblockStage=null){
       frameHistory.frame(performance.now(),false);
       cancelAllPointers();
       if(mirrorEnabled&&pendingMirrors.size)flushMirror();
-    }else if(!graphicsLost){
+    }else if(!graphicsLost&&near291CanResume()){
       lastFrame=performance.now(); // never simulate hidden time as movement
+      armNear291();
       frameDriver.resume();
     }
   });
@@ -3103,6 +3120,8 @@ function start(nonblockStage=null){
   canvas.addEventListener('webglcontextrestored',()=>{
     if(!graphicsLost)return;
     try{
+      if(near291Fatal)
+        throw Error('Local VAO experiment fatal; reload before graphics recovery');
       // Context loss invalidates EVERY old WebGL object; rebuilding only the
       // terrain mesh buffers while keeping old programs produces black frames.
       initializeGpuPipeline();
@@ -3120,7 +3139,7 @@ function start(nonblockStage=null){
       graphicsLost=false;graphicsRestoreCount++;
       notice.hidden=true;
       message('Graphics restored · rebuilding the nearby world without reloading saves');
-      if(!document.hidden)frameDriver.resume();
+      if(!document.hidden&&near291CanResume())frameDriver.resume();
     }catch(error){
       // Fail closed: no half-initialized rendering loop and no world writes.
       graphicsLost=true;frameDriver.pause();
@@ -3128,12 +3147,18 @@ function start(nonblockStage=null){
     }
   });
   window.addEventListener('pagehide',()=>{
+    near291PageSuspended=true;
+    near291LoadEpoch++; // cancel unresolved experimental module imports
+    near291Pending=false;
     mobSession?.save();
     if(graphicsLost)caveFarGpu?.resetForLostContext();
     else caveFarGpu?.invalidate();
     frameDriver.pause();
     frameHistory.frame(performance.now(),false);
     cancelAllPointers();
+    // Never let a VAO disposal failure interrupt the existing save path.
+    // Original WebGLBuffer ownership remains with deleteChunkBuffers().
+    if(near291)try{near291.dispose();}catch(_){near291Fatal=true;}
     // Do not rewrite valid/externally damaged saves on an ordinary reload.
     // Actual edits already save synchronously; only retry if still dirty.
     if(changed&&!storageReadOnly)save();
@@ -3143,7 +3168,9 @@ function start(nonblockStage=null){
   });
   window.addEventListener('pageshow',()=>{
     // iOS Safari BFCache restoration can resume without rerunning this module.
-    if(!document.hidden&&!graphicsLost){
+    near291PageSuspended=false;
+    if(!document.hidden&&!graphicsLost&&near291CanResume()){
+      armNear291(); // re-arm if pagehide invalidated an import in flight
       lastFrame=performance.now();
       frameDriver.resume();
     }
@@ -3388,7 +3415,7 @@ function start(nonblockStage=null){
   message(recoveryNote||'Move, look, mine and place · ☰ for help');
   // Restore saved shaped pieces without enabling construction editing.
   void restoreSavedPack5Scene();
-  if(!document.hidden)frameDriver.resume();
+  if(!document.hidden&&near291CanResume())frameDriver.resume();
   // Recorder is installed only after a valid world and WebGL render loop exist.
   // Recording never touches canonical saves, gameplay controls or GPU state.
   installGameUpdater({

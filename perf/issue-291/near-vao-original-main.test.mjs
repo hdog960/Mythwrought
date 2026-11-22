@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '42c172f0a1a5a73052311808272c0765f20eeac5');
+    '340b01e84798c02b46955e9d9adf7b84cb625f19');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -46,7 +46,7 @@ test('opt-in only on localhost and 127.0.0.1; public Pages always original contr
 test('public Pages never imports the experimental module into its offline dependency graph',()=>{
   assert.equal(source.includes("import {createOpaqueNearLifecycle}"),false);
   one("import('../perf/issue-291/opaque-near-lifecycle.mjs')");
-  inOrder('if(near291Enabled){',
+  inOrder('function armNear291(){',
     "import('../perf/issue-291/opaque-near-lifecycle.mjs')",
     'if(graphicsLost||document.hidden)',
     'near291=createOpaqueNearLifecycle({gl,');
@@ -81,7 +81,7 @@ test('single authoritative original deleteChunkBuffers hook covers every existin
 });
 test('candidate initialized only after original frame driver exists',()=>{
   inOrder('const frameDriver=new ForegroundFrameDriver(',
-    'if(near291Enabled){','near291=createOpaqueNearLifecycle({gl,',
+    'function armNear291(){','near291=createOpaqueNearLifecycle({gl,',
     'originalDeleteChunkBuffers,stopRenderLoop:reason=>{',
     'frameDriver.pause();');
 });
@@ -121,4 +121,49 @@ test('original source save, mine and mandatory GPU upload remain unchanged',()=>
   one('const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
   one("const persisted=save();\n    const label=BLOCK_NAMES[result.block]||'block';");
   one('buffer=uploadChunkBuffer(gl,vertices);');
+});
+
+test('all FOUR original frameDriver.resume sites share the fatal/pagehide gate',()=>{
+  const lines=source.split('\n');
+  const hits=lines.flatMap((line,index)=>line.includes('frameDriver.resume()')?[index]:[]);
+  assert.equal(hits.length,4);
+  for(const index of hits){
+    const preceding=lines.slice(Math.max(0,index-4),index+1).join('\n');
+    assert.ok(preceding.includes('near291CanResume()'),'unguarded resume at '+(index+1));
+  }
+  one("const near291CanResume=()=>!near291PageSuspended&&!near291Fatal&&");
+  one("near291?.status().phase!=='blocked';");
+});
+test('pagehide cancels old dynamic imports and retires VAOs before the unchanged save path',()=>{
+  const start=source.indexOf("window.addEventListener('pagehide',");
+  const end=source.indexOf("window.addEventListener('pageshow',",start);
+  assert.ok(start>=0&&end>start);
+  const body=source.slice(start,end);
+  const steps=['near291PageSuspended=true;','near291LoadEpoch++;',
+    'near291Pending=false;','frameDriver.pause();','near291.dispose();',
+    'if(changed&&!storageReadOnly)save();'];
+  let previous=-1;
+  for(const part of steps){
+    const at=body.indexOf(part);
+    assert.ok(at>previous, 'bad pagehide lifecycle order: '+part);
+    previous=at;
+  }
+});
+test('BFCache pageshow cannot revive a fatal VAO and can rearm only valid localhost sessions',()=>{
+  const start=source.indexOf("window.addEventListener('pageshow',");
+  const end=source.indexOf("if(['localhost','127.0.0.1'].includes(location.hostname))",start);
+  assert.ok(start>=0&&end>start);
+  const body=source.slice(start,end);
+  assert.ok(body.includes('near291PageSuspended=false;'));
+  assert.ok(body.includes('if(!document.hidden&&!graphicsLost&&near291CanResume()){'));
+  assert.ok(body.includes('armNear291();'));
+  assert.ok(body.includes('frameDriver.resume();'));
+});
+test('active async initialization failures latch fatal and cannot be undone by stale import',()=>{
+  one('const epoch=++near291LoadEpoch;');
+  one('if(epoch!==near291LoadEpoch||near291PageSuspended||near291Fatal)return;');
+  one('if(epoch!==near291LoadEpoch||near291PageSuspended)return;');
+  assert.ok(source.includes('near291Pending=false;'));
+  assert.ok(source.includes('near291Fatal=true;\n        frameDriver.pause();'));
+  assert.ok(source.includes('if(epoch===near291LoadEpoch)near291Pending=false;'));
 });
