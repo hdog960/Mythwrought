@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {preflightLiftIntertick} from '../src/resonance/devices48/lift-intertick-occupancy-v1.mjs';
+const box=(x,y=0)=>({minX:x,maxX:x+.5,minY:y,maxY:y+.5,minZ:0,maxZ:.5});
+const base=()=>({worldId:'world1',fromTick:2,toTick:3,platform:box(0),deltaY:1,previousActors:[],currentActors:[],obstacles:[]});
+test('empty path is advisory only',()=>{const r=preflightLiftIntertick(base());assert.equal(r.clearCandidate,true);assert.equal(r.movementAuthorized,false);assert.equal(r.passengerTransportAuthorized,false);assert.equal(r.continuousCollisionProven,false);assert.ok(Object.isFrozen(r));});
+test('actor crossing between endpoints blocks',()=>{const r=preflightLiftIntertick({...base(),previousActors:[{id:'a',box:box(-1,.5)}],currentActors:[{id:'a',box:box(1,.5)}]});assert.equal(r.clearCandidate,false);});
+test('newly appearing actor blocks',()=>assert.equal(preflightLiftIntertick({...base(),currentActors:[{id:'new',box:box(0,.5)}]}).clearCandidate,false));
+test('disappearing actor blocks',()=>assert.equal(preflightLiftIntertick({...base(),previousActors:[{id:'gone',box:box(0,.5)}]}).clearCandidate,false));
+test('stable passenger cannot authorize carriage',()=>{const r=preflightLiftIntertick({...base(),previousActors:[{id:'p',box:box(0,.2)}],currentActors:[{id:'p',box:box(0,.2)}]});assert.equal(r.clearCandidate,false);assert.equal(r.passengerTransportAuthorized,false);});
+test('actor order is deterministic',()=>{const a={...base(),previousActors:[{id:'z',box:box(2)},{id:'a',box:box(0)}]};assert.deepEqual(preflightLiftIntertick(a),preflightLiftIntertick({...a,previousActors:[...a.previousActors].reverse()}));});
+test('duplicate actor IDs rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),currentActors:[{id:'a',box:box(2)},{id:'a',box:box(3)}]})));
+test('cross-snapshot roster over 64 rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),previousActors:Array.from({length:40},(_,i)=>({id:'a'+i,box:box(2)})),currentActors:Array.from({length:40},(_,i)=>({id:'b'+i,box:box(2)}))}))));
+test('teleport-sized actor jump rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),previousActors:[{id:'a',box:box(-20)}],currentActors:[{id:'a',box:box(20)}]})));
+test('skipped tick rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),toTick:5})));
+test('forged energy rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),energyCandidate:true})));
+test('static obstacle blocks',()=>assert.equal(preflightLiftIntertick({...base(),obstacles:[{id:'rock',box:box(0,.7)}]}).clearCandidate,false));
