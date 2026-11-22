@@ -103,6 +103,7 @@ test('source-conserving district (2,0) uses exactly 8815+29970 source visits',()
  assert.equal(r.columns,1998);
  assert.equal(r.originalFourHubSourceChecks,8815);
  assert.equal(r.floorSourceChecks,29970);
+ assert.equal(r.districtActualOriginalReaderMethodCalls,119880);
  assert.equal(r.sourceChecks,38785);
  assert.equal(r.solidSupport,11988);
  assert.equal(r.excavation,17982);
@@ -117,6 +118,7 @@ test('source-conserving district (2,1) stays below existing 150k original budget
  assert.equal(r.columns,4239);
  assert.equal(r.originalFourHubSourceChecks,12711);
  assert.equal(r.floorSourceChecks,63585);
+ assert.equal(r.districtActualOriginalReaderMethodCalls,254340);
  assert.equal(r.sourceChecks,76296);
  assert.equal(r.historicalFullCityFloorNotReevaluatedOrReplacedHere,true);
  assert.equal(r.actualPlayerWalkingUnverified,true);
