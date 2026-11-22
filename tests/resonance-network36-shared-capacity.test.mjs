@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateChannelCapacity as solve} from '../src/resonance/network36/shared-capacity.mjs';
+const base={edges:[{id:'pipe',from:'a',to:'b',capacity:5}],generators:[{id:'g',at:'a',output:20}]};
+test('shared channel never double-spends capacity',()=>{const r=solve({...base,devices:[{id:'a',at:'b',demand:4},{id:'b',at:'b',demand:4}]});assert.deepEqual(r.deviceStates,{a:'active',b:'shortage'});assert.equal(r.used,4)});
+test('failed larger demand rolls back for smaller device',()=>{const r=solve({...base,devices:[{id:'large',at:'b',demand:6,priority:0},{id:'small',at:'b',demand:5,priority:1}]});assert.equal(r.deviceStates.large,'shortage');assert.equal(r.deviceStates.small,'active')});
+test('priority stable regardless of input order',()=>{const ds=[{id:'z',at:'b',demand:5,priority:2},{id:'a',at:'b',demand:5,priority:1}];assert.deepEqual(solve({...base,devices:ds}).deviceStates,solve({...base,devices:ds.reverse()}).deviceStates)});
+test('finite generator supply limits use',()=>{const r=solve({...base,generators:[{id:'g',at:'a',output:3}],devices:[{id:'d',at:'b',demand:4}]});assert.equal(r.used,0)});
+test('disconnected device receives no free energy',()=>{const r=solve({...base,devices:[{id:'d',at:'elsewhere',demand:1}]});assert.equal(r.deviceStates.d,'shortage')});
+test('invalid and duplicate descriptors fail closed',()=>{assert.throws(()=>solve({...base,edges:[...base.edges,{id:'pipe',from:'b',to:'c',capacity:1}]}),/duplicate/);assert.throws(()=>solve({...base,edges:[{id:'bad',from:'a',to:'b',capacity:-1}]}),/invalid/)});
