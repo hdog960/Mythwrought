@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {eligibleHabitatPool,planHabitatCandidate}
+import {eligibleHabitatPool,planHabitatCandidate,planRegionalHabitatCandidate,
+  deterministicHabitatRoll}
   from '../src/mobs/ecosystem-habitat.mjs';
 import {MAX_PROPOSALS_PER_TICK,MAX_OCCUPIED_CANDIDATES,
   MIN_OCCUPANCY_SEPARATION,proposeRegionalMobSpawn}
@@ -105,4 +106,54 @@ test('Phase 2 malformed host, region, counts and occupancy fail closed',()=>{
     /Invalid original-game regional mob proposal state/);
   assert.throws(()=>proposeRegionalMobSpawn({...base,rosterAvailable:undefined}),
     /Invalid original-game regional mob proposal state/);
+});
+
+test('regional species draw is uniform before a separate one-time source rarity gate',()=>{
+  const high=pool.find(s=>s.population.rarity===.75);
+  const low=pool.find(s=>s.population.rarity===.35);
+  assert.ok(high&&low,'Must use authentic high/low rarity implemented meadow creatures');
+  const pair=[high,low],chosen=[0,0],accepted=[0,0],weighted=[0,0];
+  for(let serial=1;serial<=12000;serial++){
+    const opts={seed:179,cx:0,cz:0,section:0,serial};
+    const old=planHabitatCandidate(pair,opts);
+    const uniform=planRegionalHabitatCandidate(pair,opts);
+    assert.equal(uniform.x,old.x);
+    assert.equal(uniform.z,old.z);
+    const choice=uniform.species===high?0:1;
+    chosen[choice]++;
+    weighted[old.species===high?0:1]++;
+    const rarity=deterministicHabitatRoll(179^0x3c91c7f5,0,0,0,serial);
+    if(rarity<=uniform.species.population.rarity)accepted[choice]++;
+  }
+  const picked=chosen[0]/chosen[1],successful=accepted[0]/accepted[1];
+  const oldPicked=weighted[0]/weighted[1];
+  assert.ok(picked>.90&&picked<1.11,'Selection must NOT preweight source rarity');
+  assert.ok(oldPicked>1.7&&oldPicked<2.6,
+    'Existing weighted exploratory source must remain unchanged');
+  assert.ok(successful>1.7&&successful<2.8,
+    'One independent original rarity acceptance follows uniform selection');
+});
+
+test('complete original 32-entity roster rejects before any voxel reads',()=>{
+  const world=physicalWorld();
+  const roster=Array.from({length:MAX_OCCUPIED_CANDIDATES},(_,i)=>[i,4,0]);
+  const result=proposeRegionalMobSpawn({
+    ...args(world),rosterAvailable:true,occupiedPositions:roster
+  });
+  assert.equal(result.proposal,null);
+  assert.equal(result.attempts,0);
+  assert.equal(world.reads,0);
+});
+
+test('candidate cell must remain resident at actual accepted height',()=>{
+  const world=physicalWorld({floor:4});
+  const withMovingResidency={
+    ...world,residentAt(p){return p[1]!==4;}
+  };
+  const input={...args(withMovingResidency),region:{...region,feet:8},observer:[0,8,0]};
+  const output=proposeRegionalMobSpawn(input);
+  assert.equal(output.proposal,null);
+  assert.equal(output.rejected.eligible,0);
+  assert.ok(output.rejected.unloaded+output.rejected.rarity+
+    output.rejected.physicalHabitat>0);
 });

@@ -2,7 +2,7 @@
 // Strict original residency, population, rarity, physics, habitat, occupancy and per-tick budget.
 import {sectionForY} from '../depth.mjs';
 import {validPoint} from './world-query.mjs';
-import {eligibleHabitatPool,deterministicHabitatRoll,planHabitatCandidate}
+import {eligibleHabitatPool,deterministicHabitatRoll,planRegionalHabitatCandidate}
   from './ecosystem-habitat.mjs';
 import {proposeTerrainAwarePosition} from './ecosystem-terrain-placement.mjs';
 
@@ -54,15 +54,18 @@ export function proposeRegionalMobSpawn({
     throw new TypeError('Missing or invalid original local population counts');
 
   const rejected={rarity:0,population:0,unloaded:0,physicalHabitat:0,occupied:0,eligible:0};
-  if(!rosterAvailable||pool.length===0)
+  // Original live MobEngine is created with maxEntities=32. Even when
+  // a caller reports available capacity, 32 complete occupants leave no slot.
+  if(!rosterAvailable||occupiedPositions.length===MAX_OCCUPIED_CANDIDATES||pool.length===0)
     return report(0,startSerial,rejected);
   let serial=startSerial;
   const {cx,cz,section,feet}=region;
   for(let attempt=1;attempt<=MAX_PROPOSALS_PER_TICK;attempt++){
     const next=++serial;
-    const candidate=planHabitatCandidate(pool,{seed,cx,cz,section,serial:next});
+    const candidate=planRegionalHabitatCandidate(pool,{seed,cx,cz,section,serial:next});
     const species=candidate.species;
-    // Separate deterministic rarity draw: weighting alone is insufficient.
+    // Uniform source species draw + one independent source rarity acceptance:
+    // do not square rare-species suppression by weighting twice.
     const rarity=deterministicHabitatRoll(seed^RARITY_SALT,cx,cz,section,next);
     if(rarity>species.population.rarity){rejected.rarity++;continue;}
     if(localCounts.get(species.id)>=species.population.localLimit){
@@ -76,6 +79,10 @@ export function proposeRegionalMobSpawn({
       species,x:candidate.x,z:candidate.z,feet,section,observer,kind
     });
     if(!placed){rejected.physicalHabitat++;continue;}
+    // A safe body query already checks neighboring sections and chunks, but
+    // require the exact resulting FEET cell to be resident as well. A source
+    // world that changes residency between preflight and selection must fail.
+    if(world.residentAt(placed.point)!==true){rejected.unloaded++;continue;}
     if(occupiedPositions.some(p=>Math.hypot(
       placed.point[0]-p[0],placed.point[1]-p[1],placed.point[2]-p[2]
     )<MIN_OCCUPANCY_SEPARATION)){

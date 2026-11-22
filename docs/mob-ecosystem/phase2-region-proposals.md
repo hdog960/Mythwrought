@@ -11,3 +11,10 @@ Native tests for the new isolated function cover deterministic proposal output, 
 ## Genuine M7 source-region sampling without duplicate test loops
 
 The already-existing 21 M7 source-site comparison now samples one bounded (up to six candidate trials) read-only regional poll per site, using the exact same source world, resident query and pool. Only explicit hypothetical empty local counts, empty occupancy and available engine capacity are used. The test records number of proposed candidates and attempted source-physics checks, not births. Every returned candidate must pass loaded real-world residency, real grounding, original spawnEligible, exact depth section; deep cave candidates additionally must remain valid on original unmodified reader with the original vertical window. No second region-generation, new browser suite or save writes are added. Native CI has not executed this detached change, so no authentic regional counts are yet claimed.
+
+
+## Rarity once, full-roster safety and final-position residency
+
+The earliest detached regional coordinator used a rarity-weighted species picker and THEN a separate independent per-species rarity roll, unintentionally giving infrequent species approximately **rarity squared** weighting. The new isolated `planRegionalHabitatCandidate` picks uniformly among already valid habitat species, preserving the exact deterministic spatial candidate coordinates, then applies the original-style rarity gate ONCE in the regional evaluator. Existing `planHabitatCandidate` and previous 21-site physics census remain untouched. A focused source-registered two-rarity distribution test checks neutral selection and approximately source-proportional acceptance.
+
+An explicitly complete 32-entity roster now fails closed even if a host accidentally reports capacity available. After physical support is found, the final exact spawn point must also pass the authoritative 3D residentAt check. Neither change enables spawning in the live game or mutates original saves. These are research-stage safeguards and must pass genuine native and M7 source tests before any integration.

@@ -79,3 +79,17 @@ export function planHabitatCandidate(pool,{
     section
   });
 }
+
+// Regional natural-spawn proposals select uniformly from the ALREADY
+// habitat-eligible preview pool. Rarity is accepted separately once by the
+// regional evaluator, as in the original PopulationManager's uniform choice
+// followed by species.population.rarity. Retain planHabitatCandidate unchanged
+// for existing weighted research measurements and their original provenance.
+export function planRegionalHabitatCandidate(pool,options={}){
+  const candidate=planHabitatCandidate(pool,options);
+  if(!candidate)return null;
+  const {seed,cx,cz,section,serial}=options;
+  const roll=deterministicHabitatRoll(seed^SPECIES_SALT,cx,cz,section,serial);
+  const species=pool[Math.floor(pool.length*roll)];
+  return Object.freeze({...candidate,species});
+}
