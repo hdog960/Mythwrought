@@ -31,3 +31,36 @@ test('malformed and adversarial source callbacks fail closed',()=>{
   assert.equal(certify(Number.MAX_SAFE_INTEGER,0,179,create()),null);
   assert.equal(certify(0,0,179,(x,z,s)=>({...create()(x,z,s),top:NaN})),null);
 });
+
+test('five adjacent sources each require genuine bounded physical support',()=>{
+  const read=create();
+  let calls=0;
+  const physical=p=>{
+    calls++;
+    return {x:p.x,z:p.z,top:p.top,estimatedCells:2,
+      writes:[{x:p.x,y:5,z:p.z,material:'stone'},
+              {x:p.x,y:6,z:p.z,material:'slate'}],
+      safeToIntegrate:false,requiresApprovedV8BlockMapping:true};
+  };
+  const certified=certify(-16,15,179,read,{readSupport:physical});
+  assert.ok(certified);
+  assert.equal(calls,5);
+  assert.equal(certified.physicallyVerified,true);
+  assert.equal(certified.verifiedCells,10);
+  assert.equal(certify(-16,15,179,read,{readSupport:p=>
+    p.x===-15?null:physical(p)}),null);
+});
+test('malformed or unbounded physical columns cannot certify mountain seams',()=>{
+  const original=create(),physical=p=>({
+    x:p.x,z:p.z,top:p.top,estimatedCells:1,
+    writes:[{x:p.x,y:5,z:p.z,material:'stone'}],
+    safeToIntegrate:false,requiresApprovedV8BlockMapping:true
+  });
+  for(const broken of [
+    p=>({...physical(p),estimatedCells:19}),
+    p=>({...physical(p),writes:[]}),
+    p=>({...physical(p),safeToIntegrate:true}),
+    p=>({...physical(p),writes:[{x:p.x,y:6,z:p.z,material:'stone'}]}),
+    p=>({...physical(p),requiresApprovedV8BlockMapping:false})
+  ])assert.equal(certify(0,0,179,original,{readSupport:broken}),null);
+});
