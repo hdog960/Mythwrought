@@ -16,6 +16,7 @@ function physicalWorld({resident=true,floor=4}={}){
   return {
     get reads(){return reads;},
     residentAt(){return resident;},
+    revision(){return 0;},
     volume([x,y,z]){reads++;return y<floor?'solid':'clear';},
     grounded([x,y,z]){reads++;return y>=floor&&y<floor+.04;},
     environment(){return {biome:'meadow',light:.8,hazard:false};},
@@ -156,4 +157,32 @@ test('candidate cell must remain resident at actual accepted height',()=>{
   assert.equal(output.rejected.eligible,0);
   assert.ok(output.rejected.unloaded+output.rejected.rarity+
     output.rejected.physicalHabitat>0);
+});
+
+test('original-world edit revision is mandatory and atomic across physical scans',()=>{
+  const base=args(physicalWorld());
+  assert.throws(()=>proposeRegionalMobSpawn({
+    ...base,world:{...base.world,revision:undefined}
+  }),/Invalid original-game regional mob proposal state/);
+  assert.throws(()=>proposeRegionalMobSpawn({
+    ...base,world:{...base.world,revision:()=>NaN}
+  }),/Invalid original world revision/);
+  let revision=0;
+  const edited={
+    ...physicalWorld(),
+    revision(){return revision;},
+    volume(point,body){revision++;return point[1]<4?'solid':'clear';}
+  };
+  let detected=false;
+  for(let seed=1;seed<=128;seed++){
+    revision=0;
+    try{proposeRegionalMobSpawn(args(edited,seed));}
+    catch(error){
+      if(/World revision changed during mob proposal/.test(String(error))){
+        detected=true;break;
+      }
+      throw error;
+    }
+  }
+  assert.equal(detected,true,'A change observed while reading must not yield a spawn');
 });

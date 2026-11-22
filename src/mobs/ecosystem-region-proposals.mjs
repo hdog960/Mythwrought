@@ -35,6 +35,7 @@ export function proposeRegionalMobSpawn({
 }={}){
   if(typeof world?.residentAt!=='function'||typeof world?.volume!=='function'||
      typeof world?.grounded!=='function'||typeof world?.environment!=='function'||
+     typeof world?.revision!=='function'||
      !Number.isSafeInteger(seed)||!validRegion(region)||!validPoint(observer)||
      !Number.isFinite(light)||light<0||light>1||
      !['surface','cave'].includes(kind)||
@@ -47,6 +48,12 @@ export function proposeRegionalMobSpawn({
      startSerial>Number.MAX_SAFE_INTEGER-MAX_PROPOSALS_PER_TICK)
     throw new TypeError('Invalid original-game regional mob proposal state');
 
+  // Query must report its world revision before scanning physical geometry.
+  // Any intervening world edit invalidates this entire candidate evaluation.
+  const startingRevision=world.revision();
+  if(!Number.isSafeInteger(startingRevision)||startingRevision<0)
+    throw new TypeError('Invalid original world revision');
+
   const pool=eligibleHabitatPool({biome,light,feet:region.feet});
   if(pool.some(species=>!localCounts.has(species.id)||
     !Number.isSafeInteger(localCounts.get(species.id))||
@@ -56,8 +63,11 @@ export function proposeRegionalMobSpawn({
   const rejected={rarity:0,population:0,unloaded:0,physicalHabitat:0,occupied:0,eligible:0};
   // Original live MobEngine is created with maxEntities=32. Even when
   // a caller reports available capacity, 32 complete occupants leave no slot.
-  if(!rosterAvailable||occupiedPositions.length===MAX_OCCUPIED_CANDIDATES||pool.length===0)
+  if(!rosterAvailable||occupiedPositions.length===MAX_OCCUPIED_CANDIDATES||pool.length===0){
+    if(world.revision()!==startingRevision)
+      throw new TypeError('World revision changed during mob proposal');
     return report(0,startSerial,rejected);
+  }
   let serial=startSerial;
   const {cx,cz,section,feet}=region;
   for(let attempt=1;attempt<=MAX_PROPOSALS_PER_TICK;attempt++){
@@ -71,6 +81,8 @@ export function proposeRegionalMobSpawn({
     if(localCounts.get(species.id)>=species.population.localLimit){
       rejected.population++;continue;
     }
+    if(world.revision()!==startingRevision)
+      throw new TypeError('World revision changed during mob proposal');
     // Source 3D section residency is required BEFORE expensive vertical scans.
     if(world.residentAt([candidate.x,feet,candidate.z])!==true){
       rejected.unloaded++;continue;
@@ -88,11 +100,15 @@ export function proposeRegionalMobSpawn({
     )<MIN_OCCUPANCY_SEPARATION)){
       rejected.occupied++;continue;
     }
+    if(world.revision()!==startingRevision)
+      throw new TypeError('World revision changed during mob proposal');
     rejected.eligible++;
     return report(attempt,serial,rejected,{
       species,point:placed.point,section,sourceSerial:next,
       offset:placed.offset,windowsTried:placed.windowsTried,kind
     });
   }
+  if(world.revision()!==startingRevision)
+    throw new TypeError('World revision changed during mob proposal');
   return report(MAX_PROPOSALS_PER_TICK,serial,rejected);
 }

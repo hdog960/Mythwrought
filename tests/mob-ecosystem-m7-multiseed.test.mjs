@@ -16,7 +16,8 @@ import {spawnEligible} from '../src/mobs/ecology.mjs';
 import {supportedPosition} from '../src/mobs/movement.mjs';
 import {createM7MobCollisionReader}
   from '../src/mobs/ecosystem-world-geometry.mjs';
-import {eligibleHabitatPool,planHabitatCandidate}
+import {eligibleHabitatPool,planHabitatCandidate,
+  planRegionalHabitatCandidate,deterministicHabitatRoll}
   from '../src/mobs/ecosystem-habitat.mjs';
 import {proposeTerrainAwarePosition}
   from '../src/mobs/ecosystem-terrain-placement.mjs';
@@ -98,7 +99,18 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       assert.equal(regional.nextSerial,regional.attempts);
       assert.equal(Object.isFrozen(regional),true);
       if(regional.proposal){
-        const {species,point}=regional.proposal;
+        const {species,point,sourceSerial}=regional.proposal;
+        const sameDraw=planRegionalHabitatCandidate(pool,{
+          seed,cx,cz,section,serial:sourceSerial
+        });
+        assert.equal(sameDraw.species,species,
+          'Regional proposal must use uniform source-habitat species draw');
+        assert.equal(sameDraw.x,point[0]);
+        assert.equal(sameDraw.z,point[2]);
+        assert.ok(deterministicHabitatRoll(
+          seed^0x3c91c7f5,cx,cz,section,sourceSerial
+        )<=species.population.rarity,
+          'Never bypass original independent rarity acceptance');
         assert.equal(proposedQuery.residentAt(point),true,
           'Original loaded voxel residency must permit any candidate');
         assert.equal(proposedQuery.grounded(point,species.body),true,
