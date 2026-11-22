@@ -15,6 +15,9 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.deepEqual(first,second);
     assert.equal(first.stats.tiles,9);
     assert.equal(first.stats.seen,9);
+    assert.ok(first.stats.sourceSites>=9&&first.stats.sourceSites<=81);
+    assert.ok(first.stats.sourceCacheHits>=0);
+    assert.ok(first.stats.cachedSourceVetoes<=first.stats.sourceSites);
     assert.ok(first.stats.plants<=first.stats.eligible);
     assert.equal(first.stats.eligible+first.stats.rejected+
       first.stats.terrainRejected+first.stats.seamRejected,first.stats.tiles);
@@ -32,7 +35,9 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
       plantCells:first.stats.plantCells,terrainCells:first.stats.terrainCells,
       terrainRejected:first.stats.terrainRejected,
       seamRejected:first.stats.seamRejected,
-      seamExposedFaces:first.stats.seamExposedFaces,rejected:first.stats.rejected
+      seamExposedFaces:first.stats.seamExposedFaces,
+      sourceSites:first.stats.sourceSites,sourceCacheHits:first.stats.sourceCacheHits,
+      cachedSourceVetoes:first.stats.cachedSourceVetoes,rejected:first.stats.rejected
     }));
   }
 });
