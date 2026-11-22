@@ -14,6 +14,10 @@ const ranks=new Map([
 export function resolveEnchantedTreeOverlap(previous,incoming){
   if(previous===undefined)return incoming;
   const priorRank=ranks.get(previous),nextRank=ranks.get(incoming);
-  if(priorRank===undefined||nextRank===undefined)return incoming;
+  // Do not erase an existing non-enchanted conifer, grove leaf or other
+  // protected source voxel when an enchanted crown spans the biome seam.
+  // Non-candidate writes still follow their untouched historic caller path.
+  if(priorRank===undefined)return previous;
+  if(nextRank===undefined)return incoming;
   return priorRank>=nextRank?previous:incoming;
 }
