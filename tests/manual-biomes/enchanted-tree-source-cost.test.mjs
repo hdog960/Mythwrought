@@ -65,11 +65,18 @@ test('measure actual cold and warm original M7 experimental canopy source cost w
  // cold/warm loops. New candidate-read memo must reduce these real reads
  // across root, AIR, and headroom checks, not merely change a unit mock.
  const priorExactSourceCallbacks=104112;
+ const previous2048DefaultSourceCallbacks=79456;
+ const allowableExtraReadsPercent=5;
  assert.ok(sourceReads<priorExactSourceCallbacks,
-   'per-chunk source probe sharing must reduce work versus prior exact scenario');
+   'per-chunk source probe sharing must improve over the old no-root-sharing code');
+ assert.ok(sourceReads<=Math.ceil(previous2048DefaultSourceCallbacks*
+   (1+allowableExtraReadsPercent/100)),
+   'halving cache occupancy must not increase original M7 source reads by more than 5%');
  console.log('# ENCHANTED M7 SOURCE COST NODE22 RUNNER ONLY '+JSON.stringify({
   sampledChunkPasses:checked,candidateCells,leafCells:retainedLeaves,
   totalOriginalSourceCallbacks:sourceReads,priorExactSourceCallbacks,
+  previous2048DefaultSourceCallbacks,allowableExtraReadsPercent,
+  readDeltaVs2048Default:sourceReads-previous2048DefaultSourceCallbacks,
   sourceCallbackSavings:priorExactSourceCallbacks-sourceReads,
   sourceCallbackReductionPercent:+(100*(1-sourceReads/priorExactSourceCallbacks)).toFixed(2),
   measurements,
