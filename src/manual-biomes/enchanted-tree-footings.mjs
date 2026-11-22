@@ -25,6 +25,11 @@ export function enchantedTreeFootingsSupported(x,floor,z,footprint,readColumn,re
     // A landmark roof or cave shelf can look superficially solid even when
     // it is NOT the real M7 ground cap for this adjacent root column.
     if(!(column instanceof Map)||!column.has(floor))return false;
+    // A y=FLOOR subsoil entry beneath a higher raised shelf is not a cap.
+    // Require the authentic M7 column's highest authored material at FLOOR,
+    // even if a cave/landmark masks the higher voxel in the cell reader.
+    for(const y of column.keys())
+      if(!Number.isInteger(y)||y>floor)return false;
     const cap=column.get(floor);
     if(!Number.isInteger(cap)||cap===air||readCell(px,floor,pz)!==cap)return false;
     // The entire root pad must be supported by physical subsoil. A hidden
