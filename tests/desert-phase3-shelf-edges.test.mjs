@@ -51,3 +51,13 @@ test('invalid mismatched grids and threshold fail closed',()=>{
   assert.throws(()=>detectHeightShelfRuns([[1,2],[3,4]],{legacy:[[1,2]]}));
   assert.throws(()=>detectHeightShelfRuns([[1,2],[3,4]],{minStep:0}));
 });
+
+test('real cave-air aperture breaks a shelf without fabricating a zero-height floor',()=>{
+  const grid=[[1,4],[null,5],[3,6],[4,7]];
+  const legacy=[[1,2],[2,3],[3,4],[4,5]];
+  const result=detectHeightShelfRuns(grid,{legacy});
+  assert.equal(result.longest[0].length,2);
+  assert.ok(result.longest.every(run=>run.length<=2));
+  assert.deepEqual(result.longest[0].start,{x:0,z:2});
+  assert.throws(()=>detectHeightShelfRuns(grid,{legacy:[[1,2],[2,null],[3,4],[4,5]]}));
+});

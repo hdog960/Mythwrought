@@ -6,18 +6,19 @@ export function detectHeightShelfRuns(terrain,{
 }={}){
   if(!Number.isInteger(minStep)||minStep<1||!Number.isInteger(limit)||limit<1)
     throw Error('Invalid shelf-run minimum step or result limit');
-  function requireGrid(grid,name,integer){
+  function requireGrid(grid,name,integer,allowOpen=false){
     if(!Array.isArray(grid)||grid.length<2||
        !Array.isArray(grid[0])||grid[0].length<2)
       throw Error('Invalid '+name+' grid');
     const width=grid[0].length;
     if(grid.length!==terrain.length||width!==terrain[0].length||
        grid.some(row=>!Array.isArray(row)||row.length!==width||
-         row.some(v=>integer?!Number.isInteger(v):typeof v!=='boolean')))
+         row.some(v=>integer?!(Number.isInteger(v)||(allowOpen&&v===null)):
+           typeof v!=='boolean')))
       throw Error('Mismatched or invalid '+name+' grid');
   }
-  requireGrid(terrain,'actual',true);
-  requireGrid(legacy,'legacy',true);
+  requireGrid(terrain,'actual',true,true);
+  requireGrid(legacy,'legacy',true,legacy===terrain);
   if(protectedColumns!==null)requireGrid(protectedColumns,'protected',false);
   const H=terrain.length,W=terrain[0].length,found=[];
   for(const axis of ['x','z']){
@@ -35,7 +36,8 @@ export function detectHeightShelfRuns(terrain,{
         const coords=axis==='x'?[[cross,j],[cross+1,j]]:
           [[j,cross],[j,cross+1]];
         const [[x,z],[nx,nz]]=coords;
-        const delta=j<along?terrain[nz][nx]-terrain[z][x]:0;
+        const delta=j<along&&terrain[nz][nx]!==null&&terrain[z][x]!==null?
+          terrain[nz][nx]-terrain[z][x]:0;
         const sign=Math.abs(delta)>=minStep?Math.sign(delta):0;
         if(!sign||current?.sign!==sign)flush();
         if(!sign)continue;
