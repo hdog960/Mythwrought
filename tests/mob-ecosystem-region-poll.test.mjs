@@ -133,3 +133,29 @@ test('original source protection mutation during prepare cannot produce stale pl
   assert.equal(engine.get(id).state,'dormant');
   engine.dispose();
 });
+
+test('original engine dormant transition after preparation invalidates no-birth settlement',()=>{
+  const w=world(),engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  const proposed=prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false
+  });
+  assert.equal(proposed.kind,'cooldown');
+  assert.equal(engine.transition(id,'dormant'),true);
+  assert.throws(()=>settleOriginalMobPoll(proposed,{world:w}),
+    /Original MobEngine roster changed during inspection/);
+  engine.dispose();
+});
+test('original engine health changes without moving invalidate source admission proof',()=>{
+  const w=world(),engine=engineOf(w);
+  const id=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  assert.ok(id);
+  const proposed=prepareOriginalMobPoll({
+    ...opts(w,engine),spawnOnFirstVisit:false
+  });
+  assert.equal(engine.damage(id,1),true);
+  assert.throws(()=>settleOriginalMobPoll(proposed,{world:w}),
+    /Original MobEngine roster changed during inspection/);
+  engine.dispose();
+});

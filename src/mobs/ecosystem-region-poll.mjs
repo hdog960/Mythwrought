@@ -10,6 +10,7 @@ import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
 
 // Keep actual source-engine ownership out of serializable preview objects.
 const owner=new WeakMap();
+const fullRosters=new WeakMap();
 const settled=new WeakSet();
 
 function snapshotIdentity(entities){
@@ -98,6 +99,7 @@ export function prepareOriginalMobPoll({
     before:snapshotIdentity(entities)
   });
   owner.set(prepared,engine);
+  fullRosters.set(prepared,rosterCertificate);
   return prepared;
 }
 
@@ -108,7 +110,8 @@ export function settleOriginalMobPoll(plan,{
   world,spawnedId=null
 }={}){
   const engine=plan&&typeof plan==='object'?owner.get(plan):null;
-  if(!(engine instanceof MobEngine)||settled.has(plan)||
+  const certified=plan&&typeof plan==='object'?fullRosters.get(plan):null;
+  if(!(engine instanceof MobEngine)||!certified||settled.has(plan)||
      typeof world?.revision!=='function'||
      world.revision()!==plan.worldRevision)
     throw new TypeError('Invalid or stale original regional mob poll');
@@ -118,6 +121,7 @@ export function settleOriginalMobPoll(plan,{
   if(plan.kind==='cooldown'){
     if(spawnedId!==null||!sameRoster(plan.before,afterEntities))
       throw new TypeError('No engine admission allowed during cooldown');
+    assertOriginalMobRosterUnchanged(certified,afterEntities);
     settled.add(plan);
     return plan.record;
   }
@@ -142,9 +146,17 @@ export function settleOriginalMobPoll(plan,{
        added.important!==false||
        added.position.some((v,i)=>v!==plan.proposal.point[i]))
       throw new TypeError('Original MobEngine admission proof mismatch');
+    // A newly spawned creature must not mask any mutation of existing
+    // source-engine state, health, velocity, origin, grounded flags, etc.
+    // The source engine's insertion order is stable; exclude ONLY its
+    // independently admitted ID before checking all prior original fields.
+    assertOriginalMobRosterUnchanged(certified,
+      afterEntities.filter(entity=>entity.id!==spawnedId));
     confirmed=true;speciesId=added.species.id;
-  }else if(!sameRoster(plan.before,afterEntities)){
-    throw new TypeError('No original-engine admission proof for changed roster');
+  }else{
+    if(!sameRoster(plan.before,afterEntities))
+      throw new TypeError('No original-engine admission proof for changed roster');
+    assertOriginalMobRosterUnchanged(certified,afterEntities);
   }
   if(plan.attempts===0){
     if(confirmed)throw new TypeError('Zero-trial poll cannot create a mob');
