@@ -54,6 +54,17 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
  assert.throws(()=>cache.set('179:50,51',Object.freeze({name:'plains',weight:1,
    center:Object.freeze([0,0])})),/immutable/);
  assert.throws(()=>cache.set('wrong-key',null),/immutable/);
+ for(const alias of ['179:-0,0','179:0,-0','-0:0,0','0179:0,0',
+   '179:00,0','179:0,01','2147483648:0,0','-2147483649:0,0',
+   '179:9007199254740992,0']){
+   const occupancy=cache.size,evicted=cache.evictions;
+   assert.throws(()=>cache.set(alias,null),/immutable/,
+     'direct cache identity must reject noncanonical site alias '+alias);
+   assert.equal(cache.size,occupancy);
+   assert.equal(cache.evictions,evicted);
+ }
+ assert.equal(cache.getOrRead(0,0,179,()=>null),null,
+   'canonical zero site must still support a real null Plains classification');
  assert.throws(()=>cache.getOrRead(9007199254740992,0,179,reader),/lookup/);
  const directNested=Object.freeze({name:'enchanted',weight:1,
    center:Object.freeze([0,0])});
