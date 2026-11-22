@@ -60,9 +60,19 @@ test('measure actual cold and warm original M7 experimental canopy source cost w
   retainedLeaves+=cold.leaves;sourceReads+=coldReads+warmReads;
  }
  assert.ok(candidateCells>100&&retainedLeaves>80);
+ // Previous exact-source single-tree-cache run #45038128242 measured
+ // 106516 real M7 source callbacks for the SAME 3 seeds, 6 chunks and
+ // cold/warm loops. Shared short-lived chunk cache must demonstrably cut
+ // redundant source lookups without loosening collision/air checks.
+ const priorExactSourceCallbacks=106516;
+ assert.ok(sourceReads<priorExactSourceCallbacks,
+   'per-chunk source probe sharing must reduce work versus prior exact scenario');
  console.log('# ENCHANTED M7 SOURCE COST NODE22 RUNNER ONLY '+JSON.stringify({
   sampledChunkPasses:checked,candidateCells,leafCells:retainedLeaves,
-  totalOriginalSourceCallbacks:sourceReads,measurements,
+  totalOriginalSourceCallbacks:sourceReads,priorExactSourceCallbacks,
+  sourceCallbackSavings:priorExactSourceCallbacks-sourceReads,
+  sourceCallbackReductionPercent:+(100*(1-sourceReads/priorExactSourceCallbacks)).toFixed(2),
+  measurements,
   notIphoneFps:true,notPhysicalIphone:true
  }));
 });
