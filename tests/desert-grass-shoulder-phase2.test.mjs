@@ -79,3 +79,37 @@ test('V7 desert no-grass overlay remains compatible with player-placed blocks, s
   assert.equal(old.naturalAndLandmarkBlock(x,y,z),oldBefore,
     'Older V6 profile must not be rewritten by V7 generation changes');
 });
+
+
+test('six real Desert/Enchanted protected-air columns keep their cave while only natural grass dries',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const world=new FourRegionWorld(seed,profile);
+  const exactCells=[[-25,-822],[-24,-822],[-23,-822],
+    [-25,-821],[-24,-821],[-23,-821]];
+  for(const [x,z] of exactCells){
+    assert.equal(v6BiomeAt(x,z,seed)?.name,'desert');
+    const old=terrainHeight(x,z,seed);
+    assert.equal(old,6,'Source-backed original terrain height has changed');
+    assert.equal(world._environmentBaseline(x,old-2,z),BLOCK.AIR,
+      'The original cave/protected air must exist before applying grass repair');
+    assert.equal(world._environmentBaseline(x,old,z),BLOCK.GRASS,
+      'This exact test must exercise originally generated green grass');
+    assert.equal(world._columnPlan(x,z).size,0,
+      'Protected air must still reject the entire full-column elevation');
+    for(let y=old-2;y<old;y++)
+      assert.equal(world.naturalAndLandmarkBlock(x,y,z),
+        world._environmentBaseline(x,y,z),
+        'The under-surface protected terrain/cave was changed');
+    assert.equal(world.naturalAndLandmarkBlock(x,old,z),256,
+      'Only the natural exposed Desert grass gets a dry sand surface');
+  }
+  assert.deepEqual(world.save().edits,[]);
+  const [x,z]=exactCells[0],y=terrainHeight(x,z,seed);
+  assert.equal(world.set(x,y,z,BLOCK.GRASS),true,
+    'Player-placed grass is still legal on the protected cave edge');
+  assert.equal(world.get(x,y,z),BLOCK.GRASS,
+    'Saved player grass must override natural surface dryness');
+  const save=world.save();
+  assert.deepEqual(restoreFourRegionWorld(save,profile).save(),save);
+  assert.equal(restoreFourRegionWorld(save,profile).get(x,y,z),BLOCK.GRASS);
+});
