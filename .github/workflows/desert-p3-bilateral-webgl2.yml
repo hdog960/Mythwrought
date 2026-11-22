@@ -1,0 +1,96 @@
+name: Desert P3 bilateral RGB two-site original WebGL2 proof
+on:
+  push:
+    branches:
+      - research/desert-p3-bilateral-provenance-rgb-20261122
+    paths:
+      - .github/workflows/desert-p3-bilateral-webgl2.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-bilateral-webgl2
+  cancel-in-progress: false
+jobs:
+  exact-candidate-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: 641726d815172abcde7417b22c71e9df250fcd4b
+          path: original-harness
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact successful native source baseline and own workflow-only diff
+        run: |
+          set -euo pipefail
+          BASE=ad6f8318fc4f52be050d74bcf16cc8774f43dfe2
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C original-harness rev-parse HEAD)" = 641726d815172abcde7417b22c71e9df250fcd4b
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(\.github/workflows/desert-p3-bilateral-webgl2.yml|docs/desert/PHASE3_BILATERAL_RGB_RESEARCH_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/main.mjs
+          node --check candidate/src/voxel.mjs
+      - name: Pinned Chromium for two authentic original-game site views only
+        run: |
+          cd candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Play actual original main.mjs on fixed source-backed V7 seeds
+        run: |
+          set -euo pipefail
+          cp original-harness/tests/desert-phase3-triple-junction-browser.mjs candidate/tests/
+          cd candidate
+          python3 -m http.server 4173 >/tmp/desert-bilateral-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-bilateral node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Authenticate native game material, viewport, PNGs and zero browser errors
+        run: |
+          cd candidate
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import crypto from 'node:crypto';
+          import {PNG} from 'pngjs';
+          const manifest=JSON.parse(fs.readFileSync('artifacts/desert-bilateral/after-manifest.json'));
+          assert.deepEqual(manifest.sites.map(s=>s.seed),[179,2026]);
+          assert.equal(manifest.browserErrors.length,0);
+          for(const site of manifest.sites){
+            assert.equal(site.cap,401);
+            assert.equal(site.data.gameBlock,401);
+            assert.equal(site.data.generator,'mythwrought-five-surface-regions-v7');
+            assert.equal(site.canvasState.daylight,1);
+            assert.equal(site.canvasState.loadedChunks,25);
+            assert.equal(site.canvasState.pendingChunks,0);
+            const bytes=fs.readFileSync(site.file);
+            const image=PNG.sync.read(bytes);
+            assert.equal(image.width,932);
+            assert.equal(image.height,430);
+            let nonBlack=0;
+            for(let i=0;i<image.data.length;i+=4)
+              if(image.data[i]+image.data[i+1]+image.data[i+2]>30)nonBlack++;
+            assert.ok(nonBlack>350000);
+            console.log('DESERT_P3_BILATERAL_REAL_WEBGL2 '+JSON.stringify({
+              seed:site.seed,x:site.x,z:site.z,center:site.canvasState.chunkCenter,
+              top:site.top,originalCap:site.cap,
+              sha256:crypto.createHash('sha256').update(bytes).digest('hex'),
+              totalPixels:932*430,nonBlack
+            }));
+          }
+          EOF
+      - name: Upload minimal genuine candidate evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-bilateral-original-game
+          path: candidate/artifacts/desert-bilateral/**
+          if-no-files-found: warn
+          retention-days: 7
