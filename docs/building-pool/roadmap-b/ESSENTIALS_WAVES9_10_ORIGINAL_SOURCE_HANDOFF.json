@@ -1,0 +1,75 @@
+{
+  "schema": "mythwrought.builder-b.1b-waves9-10-provisional-source.v1",
+  "scope": "Builder B Roadmap B 1B only; outside all registered game worlds",
+  "parentProtectedPR": 407,
+  "parentExactHead": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "frozenIDAllocation": {
+    "previousAccepted": 228,
+    "builderBReserved": 115,
+    "builderDReserved": 92
+  },
+  "originals": [
+    {
+      "wave": 9,
+      "id": "r1:lighthouse:temperate:small:002",
+      "name": "Saltreach Tidal Lantern Station",
+      "sourceBlob": "a02eaa23f9a22ac68449c7686bea7a87936fdb6a",
+      "sourceCells": 6287,
+      "roofCells": 1286,
+      "walkableGround": 987,
+      "rooms": 8,
+      "portals": 10,
+      "windows": 18,
+      "sourceOpenSkyColumns": 16,
+      "focusD4ToPreviousSameCategory": 0.4002932551319648
+    },
+    {
+      "wave": 10,
+      "id": "r1:fishing-lodge:desert:small:002",
+      "name": "Dunewake Oasis Reedworks Fishing Lodge",
+      "sourceBlob": "e6867043caf0d7ac6420d0b9c6cb3bc7187e63d4",
+      "sourceCells": 5123,
+      "roofCells": 1217,
+      "walkableGround": 975,
+      "rooms": 8,
+      "portals": 11,
+      "windows": 10,
+      "sourceOpenSkyColumns": 20,
+      "focusD4ToPreviousSameCategory": 0.4177215189873418
+    }
+  ],
+  "sourceOriginalCompilerEvidence": "PASS: loaded exact repository sourcePlan, validateBlueprint and validateAllocation directly in isolated JavaScript evaluation against both new GitHub source blobs. Not Node test runner and not GitHub Actions.",
+  "focusSourceGeometryEvidence": "PASS: original source-supported roof y-1, exterior-facing low windows, 16/20 open skywell columns, 8-way D4 against previous same-category Builder B original only. Full historical 228 D4 pending.",
+  "originOfFixedDefect": "Dunewake original [13,37,east] low window faced into a wing; repaired exclusively in new Wave10 source to [3,37,west]. No test reductions.",
+  "nativeTestsStaged": [
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave10.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9-10-gallery-wiring.test.mjs"
+  ],
+  "visualProofStaged": [
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9-preview.html",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave10-preview.html",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9-10-gallery.mjs",
+    "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-10-gallery.mjs"
+  ],
+  "visualProofState": "Scripts syntax-compiled only, 12 Chromium frames NOT captured; exact-head combined candidate acceptance pending, no artifact fabricated.",
+  "strictAcceptance": {
+    "newNativeTests": "PENDING actual repository Node runner on exact new head",
+    "historical228D4": "PENDING",
+    "realPack4AABBAndCollision": "PENDING",
+    "realChromiumWebGL2": "PENDING 12 new candidate frames and whole-catalog required final exact-head acceptance",
+    "realWorldPlacement": "NOT_AUTHORIZED",
+    "realIphoneLandscape": "NOT_TESTED",
+    "producerWeatherAndLiveCollision": "NOT_CERTIFIED",
+    "creatorArtwork": "NOT_ACCEPTED"
+  },
+  "authoredAfterTwoWaves": {
+    "originalNew1A": 10,
+    "originalNew1B": 10,
+    "totalNewOriginals": 20,
+    "targetNewOriginals": 294,
+    "remainingTotalNewOriginals": 274,
+    "remainingNew1B": 105
+  },
+  "policy": "No new PR or GitHub Actions triggered; branch-only staging during crowded Actions queue. Do not modify protected PRs/main/automations/other developer branches; no merges/deployments."
+}
