@@ -1,0 +1,47 @@
+name: Builder D28 original source-only long-bay structural triage (narrow)
+on:
+  push:
+    branches:
+      - builder-d-d28-unrated-long-bays-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d28-*.mjs'
+      - 'tests/building-pool/roadmap-d/d28-*.test.mjs'
+      - '.github/workflows/roadmap-d-d28-long-bay-narrow-native.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d28-unrated-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  exact-original-source-narrow:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify exact detached parent and immutable 16-building owners
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '224fac3cd4d9ff598527db33987b5aa9667a0a9b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-4b/m2-distinctive.mjs)" = '4a3bddd06d4d8d91f65279649c7545661c81729d'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly four new D28 source/test files
+        run: |
+          node --check src/building-pool/roadmap-d/d28-long-bay-load-equations.mjs
+          node --check src/building-pool/roadmap-d/d28-original-long-bay-architect.mjs
+          node --check tests/building-pool/roadmap-d/d28-long-bay-load-equations.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d28-original-long-bay-architect.source.test.mjs
+      - name: Run only NEW D28 original-source and pure finite-load native Node tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d28-long-bay-load-equations.pure.test.mjs \
+            tests/building-pool/roadmap-d/d28-original-long-bay-architect.source.test.mjs
