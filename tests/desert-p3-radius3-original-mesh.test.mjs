@@ -35,7 +35,7 @@ function compareMesh(a,b){
 }
 
 test('deterministic 3-block vertex-space gradient is smooth, seam-continuous and bounded',()=>{
- const f=(x,z)=>x===1&&z===0;
+ const f=(x,z)=>x===0&&z===0;
  const a=nearestNaturalScreeSquared(0,0,4,f);
  const b=nearestNaturalScreeSquared(0,0,4,f);
  assert.equal(a,b);assert.equal(a,.5);
