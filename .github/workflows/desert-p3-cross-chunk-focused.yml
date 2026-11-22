@@ -36,7 +36,11 @@ jobs:
           test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
           unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|tests/desert-p3-cross-chunk-provenance.test.mjs|.github/workflows/desert-p3-cross-chunk-focused.yml|docs/desert/PHASE3_CROSS_CHUNK_SOURCE_AUDIT_20261122.md)$' || true)
           test -z "$unexpected"
+          # Reuse native 4/4 source #45078698605: the production-impacting
+          # source blobs are unchanged. Only a NEW real edit/veto test was added.
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-vertex-tint.mjs)" = 023bc3bad89cc524c68d675b3ed8e724d3f3fed8
           node --check candidate/src/voxel.mjs
           node --check candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
-      - name: Run ONLY new genuine cross-chunk, cache, distance and climate checks, no browser
-        run: node --test candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
+      - name: Run ONLY new real cross-boundary edit and cave veto test
+        run: node --test --test-name-pattern='physical boundary edits' candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
