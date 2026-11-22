@@ -13,6 +13,7 @@ import {createMountainV8SurveyCache} from './mountain-v8-survey-cache.mjs';
 
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
+const biomeProbes=Object.freeze([[0,0],[4,0],[-4,0],[0,4],[0,-4]]);
 /** Every tile candidate is sampled at its single source-selected root.
  * No hypothetical random tree height is assumed; all plant cells are
  * verified against the untouched original world's existing AIR/landmarks.
@@ -31,6 +32,10 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     tiles:width*height,eligible:0,plants:0,plantCells:0,
     rejected:0,terrainRejected:0,seamRejected:0,terrainCells:0,
     seamExposedFaces:0,
+    seamVetoReasons:{biomeBoundary:0,sourceUnavailableInMountain:0,
+      foreignProposal:0,noPhysicalSupport:0,invalidPhysicalDescriptor:0,
+      physicalBudget:0,tooSteep:0,unsupportedExposedFace:0,
+      faceBudget:0,unsafeCoordinate:0},
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
     cliff:0,seen:0
   };
@@ -60,16 +65,46 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     if(!terrain){stats.terrainRejected++;continue;}
     // Source-backed one-block adjacency, not the 4-block noise slope proxy.
     // A protected cave or >2-height seam fails closed before admission.
+    let seamVeto=null;
     const seam=certifyMountainV8Seam(rootX,rootZ,seed,(x,z)=>{
       return cache.survey(x,z);
     },{
+      onVeto:issue=>{seamVeto=issue;},
       readSupport:p=>p.x===rootX&&p.z===rootZ?terrain:
         planMountainV8PhysicalColumn(p,{
           worldMaxY:WORLD_MAX_Y,ids:BLOCK,
           readOriginalBlock:(x,y,z)=>source.naturalAndLandmarkBlock(x,y,z)
         })
     });
-    if(!seam){stats.seamRejected++;continue;}
+    if(!seam){
+      if(!seamVeto)throw Error('Unclassified V8 seam rejection');
+      const code=seamVeto.reason;
+      let category;
+      if(code==='source-unavailable'){
+        // A missing proposal could be a protected cave/landmark, but only
+        // authoritative V6 climate can prove the missing site is a biome
+        // border. Never guess a cave/landmark classification from null.
+        const outside=biomeProbes.some(([dx,dz])=>{
+          const b=v6BiomeAt(seamVeto.x+dx,seamVeto.z+dz,seed);
+          return b?.name!=='mountain'||b.weight<.82;
+        });
+        category=outside?'biomeBoundary':'sourceUnavailableInMountain';
+      }else category=({
+        'foreign-proposal':'foreignProposal',
+        'no-physical-support':'noPhysicalSupport',
+        'invalid-physical-descriptor':'invalidPhysicalDescriptor',
+        'physical-budget':'physicalBudget',
+        'too-steep':'tooSteep',
+        'unsupported-exposed-face':'unsupportedExposedFace',
+        'face-budget':'faceBudget',
+        'unsafe-coordinate':'unsafeCoordinate'
+      })[code];
+      if(!category||!Object.hasOwn(stats.seamVetoReasons,category))
+        throw Error('Unexpected V8 seam veto reason: '+code);
+      stats.seamVetoReasons[category]++;
+      stats.seamRejected++;
+      continue;
+    }
     if(!seam.physicallyVerified||seam.exposedFaces.length>8)
       throw Error('Unverified V8 physical seam escaped rejection');
     stats.seamExposedFaces+=seam.exposedFaces.length;
@@ -107,6 +142,9 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       top:chosen.top,cap:chosen.cap,kind:physical.kind,
       cells:physical.estimatedCells}));
   }
+  if(Object.values(stats.seamVetoReasons).reduce((a,b)=>a+b,0)!==stats.seamRejected)
+    throw Error('V8 seam diagnostic counts failed to reconcile');
+  Object.freeze(stats.seamVetoReasons);
   const readCosts=cache.stats();
   if(!readCosts.complete)throw Error('Mountain V8 source census budget exhausted');
   stats.sourceBudgetExhausted=readCosts.exhausted;
