@@ -12,11 +12,31 @@ const gallery=()=>({
  allFiveExactHistoricalMouthBiomesVerified:true,
  all80GallerySourceReportsComplete:true,
  all80FullSourceVoxelCensusesComplete:true,
- sourceSafeRegions:5,asBuiltGalleryRegions:5,
+ sourceSafeRegions:5,sourceRefusals:0,asBuiltGalleryRegions:5,
+ sourceCells:7740,totalOriginalM7ReaderMethodCalls:30960,
+ diagnosedSafeGalleries:80,diagnosedRejectedGalleries:0,
+ unsafeBlockIdTotals:{},unsafeMaterialIdsOverflowTotal:0,
+ originalReaderCallCountsByRole:{naturalAt:7740,authoredAt:7740,
+  editedAt:7740,protectedAt:7740},
  rows:pairs.map(([biome,rx,rz])=>({
   biome,seed:179,rx,rz,all16GallerySourcesDiagnosed:true,
   completedFullSourceCellVetoCensus:true,sourceSafe:true,
-  oldM7AsBuiltGalleryDeckAndAirPresent:true
+  galleriesInspected:16,checkedPairs:120,
+  sourceSafeGalleries:16,sourceRejectedGalleries:0,
+  sourceCountMethod:'FULL_COMPLETED_GALLERY_SOURCE_VOXELS',
+  inspectedSourceCells:1548,genuineOriginalReaderCalls:6192,
+  originalReaderCallsByRole:{naturalAt:1548,authoredAt:1548,
+   editedAt:1548,protectedAt:1548},
+  sourceRejectionCounts:{unsafeMaterial:0},
+  unsafeMaterialByBlockId:{},otherUnsafeMaterialCells:0,
+  allUnsafeMaterialIdsEnumerated:true,
+  oldM7AsBuiltGalleryDeckAndAirPresent:true,
+  oldM7AsBuiltBlockedHeadroomCells:0,oldM7AsBuiltMissingSupportCells:0,
+  oldM7AsBuiltEditedCells:0,oldM7AsBuiltSourceCells:1548,
+  oldM7AsBuiltHeadroomBlockedByBlockId:{},
+  oldM7AsBuiltUnsupportedFloorByBlockId:{},
+  oldM7AsBuiltBlockedMaterialIdOverflow:0,
+  oldM7AsBuiltSupportMaterialIdOverflow:0
  }))
 });
 const city=()=>({
@@ -27,16 +47,33 @@ const city=()=>({
   threeDeepLinksOriginalM7SourceSelected:true,
   joinedCityTerraceAndActualApproachSourceSafe:true,
   joinedFourHubCandidateTopologyApproved:true,
-  joinedFourHubSourceOwnershipApproved:true
+  joinedFourHubSourceOwnershipApproved:true,
+  fullJoinedCandidateOriginalM7SourceChecks:8815,
+  fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
+  fullPadSourceChecks:200,
+  threeDeepLinkSelectedIndexList:[16,25,34],
+  selectedDeepLinkConfigurations:[16,25,34].map(index=>({index})),
+  oldWorldModified:false,cityPlaced:false,actuallyBuiltAndWalked:false
  }))
 });
 const chunk=()=>({
  schema:'living-underworld-original-m7-five-biome-one-hub-chunk-risk-v1',
  seed:179,actualOriginalM7SolidSource:true,noWorldEdits:true,totalChunks:5,
  aggregateSourceRisk:{ok:true,completeCoreHaloEvidence:true,
-  ownedChunkInteriorsDisjoint:true},
+  ownedChunkInteriorsDisjoint:true,expectedChunks:5,checkedChunks:5,
+  sourceQueries:29160,approvedCarves:5,unsafeCarves:0,
+  approvedHaloProposals:0,rejectedHaloProposals:0,faceGrowth:30},
+ sourceQueries:29160,ownedInteriorApprovedCarves:5,
+ sourceRejectedCarveCells:0,haloApprovedProposals:0,haloRejectedProposals:0,
  rows:pairs.map(([biome,rx,rz])=>({
-  biome,rx,rz,ok:true,sourceCoreCutParity:true
+  biome,rx,rz,ok:true,sourceCoreCutParity:true,
+  origin:{x:rx*256+16,y:-48,z:rz*256+16},
+  sourceHaloCells:5832,candidateCarveCells:1,
+  sourceAllowedCarveCells:1,sourceRejectedCarveCells:0,
+  ownedInteriorRequestedCarves:1,ownedInteriorApprovedCarves:1,
+  ownedInteriorRejectedCarves:0,haloRequestedProposals:0,
+  haloApprovedProposals:0,haloRejectedProposals:0,
+  approvedOnlyAddedFaces:6,oldWorldUnmodified:true
  }))
 });
 const check=(overrides={})=>classifyExactHeadOriginalM7Triplet({
@@ -46,6 +83,7 @@ const check=(overrides={})=>classifyExactHeadOriginalM7Triplet({
 test('fully formed exact original-HEAD evidence is only a source candidate, never release',()=>{
  const r=check();
  assert.equal(r.nativeTripletReportsPresent,true);
+ assert.equal(r.reportRowArithmeticReconciled,true);
  assert.equal(r.proposalEvidenceAllPassed,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
