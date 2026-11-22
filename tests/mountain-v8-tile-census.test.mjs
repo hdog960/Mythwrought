@@ -63,6 +63,8 @@ test('tile census rejects unbounded or dirty world and profile subclass',()=>{
   const a={seed:179,tileX:0,tileZ:0,width:9,height:9};
   assert.equal(census(a),null);
   assert.equal(census({...a,width:0,height:2}),null);
+  assert.equal(census({seed:179,tileX:Number.MAX_SAFE_INTEGER,tileZ:0,
+    width:1,height:1}),null,'Unrepresentable owner tile must fail closed');
   const world=new VoxelWorld(179);
   world.edits.set('0,0,0',BLOCK.STONE);
   assert.equal(census({...a,width:1,height:1,world}),null);
