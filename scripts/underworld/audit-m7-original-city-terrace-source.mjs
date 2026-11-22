@@ -17,6 +17,8 @@ import {auditSourceProtectedGalleryEasementDistrict}
  from '../../src/living-underworld/city-gallery-easement-district.mjs';
 import {surveyCityGalleryFloorCutsets}
  from '../../src/living-underworld/city-gallery-floor-cutset-survey.mjs';
+import {auditSourceProtectedCityUnderpass}
+ from '../../src/living-underworld/city-gallery-grade-separated-underpass.mjs';
 const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
@@ -62,6 +64,16 @@ for(const [rx,rz] of regions){
  ):Object.freeze({ok:false,
   reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
   sourceChecks:deep.sourceChecks??0,worldChanged:false});
+ // Separate THIN-DECK underpass option, with independently checked 3x3
+ // full-depth landing near the center. NEVER permit its success to waive
+ // the historical full-ellipse source/geometry refusal.
+ const underpassStarted=performance.now();
+ const underpass=approved?auditSourceProtectedCityUnderpass(
+  seed,rx,rz,{source,sourceOwnedDeepSelection:deep,
+   maxTotalSourceChecks:150000}
+ ):Object.freeze({ok:false,
+  reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
+  sourceChecks:deep.sourceChecks??0,worldChanged:false});
  rows.push(Object.freeze({seed,rx,rz,
   regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7TerrainReadOnly:true,
@@ -74,6 +86,26 @@ for(const [rx,rz] of regions){
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
+  candidateThinUnderpassOriginalSourceSafe:underpass.ok===true,
+  candidateThinUnderpassRefusal:underpass.reason??null,
+  candidateThinUnderpassFirstRefusal:underpass.firstRefusal??null,
+  candidateThinUnderpassFirstRejectedCell:
+   underpass.firstRejectedCell??null,
+  candidateThinUnderpassElapsedMs:
+   Math.round((performance.now()-underpassStarted)*1000)/1000,
+  candidateThinUnderpassPivot:underpass.pivot??null,
+  candidateThinUnderpassSegments:underpass.segments??null,
+  candidateThinUnderpassSourceVisits:underpass.underpassSourceVisits??0,
+  candidateThinUnderpassCenterLanding:underpass.centerSidePad??null,
+  candidateThinUnderpassCenterLandingSourceVisits:
+   underpass.centerPadSourceVisits??0,
+  candidateThinUnderpassCenterLandingSolidSupport:
+   underpass.centerPadSolidSupports??null,
+  candidateThinUnderpassTotalSourceVisits:underpass.sourceChecks??null,
+  candidateThinUnderpassFourHubSourceVisitsCountedOnce:
+   underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
+  candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
+  candidateThinUnderpassNoPlayerWalkingOrGpuVerified:true,
   wholeCityEllipseGalleryCutsetAudited:cutset.ok===true,
   wholeCityEllipsePlannedColumns:cutset.totalColumns??null,
   wholeCityEllipseBlockedByMainGalleries:cutset.blockedColumns??null,
