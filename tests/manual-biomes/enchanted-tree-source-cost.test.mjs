@@ -60,11 +60,11 @@ test('measure actual cold and warm original M7 experimental canopy source cost w
   retainedLeaves+=cold.leaves;sourceReads+=coldReads+warmReads;
  }
  assert.ok(candidateCells>100&&retainedLeaves>80);
- // Previous exact-source single-tree-cache run #45038128242 measured
- // 106516 real M7 source callbacks for the SAME 3 seeds, 6 chunks and
- // cold/warm loops. Shared short-lived chunk cache must demonstrably cut
- // redundant source lookups without loosening collision/air checks.
- const priorExactSourceCallbacks=106516;
+ // Previous exact-source chunk-shared clearance-cache run #45038344114
+ // measured 104112 actual M7 reads for the SAME 3 seeds x 6 chunks x
+ // cold/warm loops. New candidate-read memo must reduce these real reads
+ // across root, AIR, and headroom checks, not merely change a unit mock.
+ const priorExactSourceCallbacks=104112;
  assert.ok(sourceReads<priorExactSourceCallbacks,
    'per-chunk source probe sharing must reduce work versus prior exact scenario');
  console.log('# ENCHANTED M7 SOURCE COST NODE22 RUNNER ONLY '+JSON.stringify({
