@@ -31,6 +31,14 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
  const rows=[],failures=[];let sourceChecks=0,sourceRejectedGalleries=0;
  const firstRefusalTypes=Object.create(null);
  const countTotals=Object.create(null);
+ const vetoedMaterials=new Map();let otherUnsafeMaterialCells=0;
+ const materialSummary=()=>Object.freeze({
+  unsafeMaterialByBlockId:Object.freeze(Object.fromEntries(
+   [...vetoedMaterials].sort(([a],[b])=>a-b)
+    .map(([id,count])=>[String(id),count]))),
+  otherUnsafeMaterialCells,
+  completeUnsafeMaterialIdCoverage:otherUnsafeMaterialCells===0
+ });
  for(const index of PAIRS){
   const proposal=Object.freeze({ok:true,segments:Object.freeze([
    plan.capsules[index],plan.capsules[index+1]
@@ -47,6 +55,7 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    sourceRejectedGalleries,
    firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
    sourceRejectionCounts:Object.freeze({...countTotals}),
+   ...materialSummary(),
    diagnosticAll16GalleriesAttempted:false,
    worldChanged:false,nativePlayerWalkingVerified:false});
   // The ORIGINAL immutable fixed geology allowlist cannot be widened by a
@@ -71,6 +80,17 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    sourceRejectionCounts:Object.freeze({...countTotals}),
    diagnosticAll16GalleriesAttempted:false,
    worldChanged:false,nativePlayerWalkingVerified:false});
+  for(const [idString,count] of Object.entries(
+   checked.unsafeMaterialByBlockId??{})){
+   const id=Number(idString);
+   if(!INT(id)||!INT(count)||count<0)
+    throw Error('Malformed original gallery unsafe-material tally');
+   if(vetoedMaterials.has(id))
+    vetoedMaterials.set(id,vetoedMaterials.get(id)+count);
+   else if(vetoedMaterials.size<64)vetoedMaterials.set(id,count);
+   else otherUnsafeMaterialCells+=count;
+  }
+  otherUnsafeMaterialCells+=checked.otherUnsafeMaterialCells??0;
   rows.push(Object.freeze({galleryIndex:index,ok:checked.ok,
    sourceChecks:checked.sourceChecks??0,
    refusal:checked.firstRefusal??checked.examples?.[0]?.reason??
@@ -78,6 +98,8 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    fullGallerySourceCellsClassified:countEverySourceVeto&&
     checked.haltedEarly!==true&&checked.reason!=='SOURCE_QUERY_BUDGET_EXCEEDED',
    rejectedSourceCounts:checked.counts??null,
+   unsafeMaterialByBlockId:checked.unsafeMaterialByBlockId??null,
+   otherUnsafeMaterialCells:checked.otherUnsafeMaterialCells??null,
    examples:checked.examples??[]}));
   for(const [kind,count] of Object.entries(checked.counts??{}))
    if(Number.isSafeInteger(count)&&count>=0)
@@ -114,6 +136,7 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    'FULL_COMPLETED_GALLERY_SOURCE_VOXELS':'FIRST_REFUSAL_PER_GALLERY',
   firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
   sourceRejectionCounts:Object.freeze({...countTotals}),
+  ...materialSummary(),
   countsRepresentAllEligibleCells:countEverySourceVeto,
   rows:Object.freeze(rows),failures:Object.freeze(failures),
   mutuallyCollisionFree:true,
