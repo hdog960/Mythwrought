@@ -20,6 +20,8 @@ import {eligibleHabitatPool,planHabitatCandidate}
   from '../src/mobs/ecosystem-habitat.mjs';
 import {proposeTerrainAwarePosition}
   from '../src/mobs/ecosystem-terrain-placement.mjs';
+import {proposeRegionalMobSpawn,MAX_PROPOSALS_PER_TICK}
+  from '../src/mobs/ecosystem-region-proposals.mjs';
 
 const SURFACE=Object.freeze([
   {biome:'meadow',source:'plains',x:0,z:0},
@@ -81,6 +83,37 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       const pool=eligibleHabitatPool({biome:site.biome,feet,
         light:site.biome==='cave'?.29:.8});
       assert.ok(pool.length>0,'Source-approved species list is empty');
+      // One read-only regional POLL on the same real loaded source site.
+      // Empty counts and explicit capacity are hypothetical inputs, not
+      // natural births, current-game population or spawn integration.
+      const regional=proposeRegionalMobSpawn({
+        world:proposedQuery,seed,
+        region:{cx,cz,section,feet},observer,
+        biome:site.biome,light:site.biome==='cave'?.29:.8,
+        kind:site.siteType,
+        localCounts:new Map(pool.map(species=>[species.id,0])),
+        occupiedPositions:[],rosterAvailable:true,startSerial:0
+      });
+      assert.ok(regional.attempts>=0&&regional.attempts<=MAX_PROPOSALS_PER_TICK);
+      assert.equal(regional.nextSerial,regional.attempts);
+      assert.equal(Object.isFrozen(regional),true);
+      if(regional.proposal){
+        const {species,point}=regional.proposal;
+        assert.equal(proposedQuery.residentAt(point),true,
+          'Original loaded voxel residency must permit any candidate');
+        assert.equal(proposedQuery.grounded(point,species.body),true,
+          'No manufactured floating spawn positions');
+        assert.equal(sectionForY(Math.floor(point[1])),section,
+          'No change of original vertical section');
+        assert.equal(spawnEligible(proposedQuery,species,point,observer),true,
+          'Original habitat, light, depth and player distance contract');
+        if(site.siteType==='cave'){
+          assert.equal(spawnEligible(oldQuery,species,point,observer),true,
+            'Isolated cave proposals must remain original-physics eligible');
+          assert.equal(regional.proposal.offset,0,
+            'No cave vertical probing beyond original window');
+        }
+      }
       let originalEligible=0,compatibleEligible=0,terrainAwareEligible=0;
       let originalClear=0,proposedClear=0;
       for(let serial=1;serial<=24;serial++){
@@ -142,7 +175,10 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
         x:site.x,z:site.z,section,feet,poolSize:pool.length,
         proposals:24,originalFoundGround:originalClear,
         compatibleFoundGround:proposedClear,
-        originalEligible,compatibleEligible,terrainAwareEligible};
+        originalEligible,compatibleEligible,terrainAwareEligible,
+        regionalAttempts:regional.attempts,
+        regionalCandidate:Boolean(regional.proposal),
+        regionalRejected:regional.rejected};
       outcomes.push(item);
       console.log('MYTHWROUGHT_MOB_M7_COLLISION_COMPARISON '+JSON.stringify(item));
     }
@@ -156,10 +192,15 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
     originalEligible:outcomes.reduce((a,r)=>a+r.originalEligible,0),
     compatibleEligible:outcomes.reduce((a,r)=>a+r.compatibleEligible,0),
     terrainAwareEligible:outcomes.reduce((a,r)=>a+r.terrainAwareEligible,0),
+    boundedRegionalCandidates:outcomes.filter(r=>r.regionalCandidate).length,
+    boundedRegionalAttempts:outcomes.reduce((a,r)=>a+r.regionalAttempts,0),
+    assumedEmptyLocalCounts:true,
     unchangedSourceSaves:true,
     noMobsInjected:true
   };
   assert.ok(summary.compatibleEligible>=summary.originalEligible);
   assert.ok(summary.terrainAwareEligible>=summary.compatibleEligible);
+  assert.ok(summary.boundedRegionalCandidates<=summary.measurements);
+  assert.ok(summary.boundedRegionalAttempts<=summary.measurements*MAX_PROPOSALS_PER_TICK);
   console.log('MYTHWROUGHT_MOB_M7_COLLISION_COMPARISON_SUMMARY '+JSON.stringify(summary));
 });
