@@ -9,7 +9,8 @@ import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
   from '../../src/manual-biomes/profile-world.mjs';
 import {environmentalTreesForChunk}
   from '../../src/manual-biomes/environment-v7.mjs';
-import {ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX}
+import {ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX,
+  ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES as DEFAULT}
   from '../../src/manual-biomes/enchanted-tree-source-cache.mjs';
 import {BLOCK} from '../../src/voxel.mjs';
 
@@ -21,6 +22,7 @@ const footprints=[
 const capacities=[128,256,512,1024,2048];
 test('identical original M7 forest footprints support five bounded cache capacities with byte-exact geometry',()=>{
  assert.equal(MAX,2048);
+ assert.equal(DEFAULT,1024);
  const rows=[],totals=new Map(capacities.map(n=>[n,{
    sourceReads:0,hits:0,misses:0,evictions:0,
    peakEntries:0,nativeMs:0,sourceVoxels:0
