@@ -22,18 +22,26 @@ export function auditSourceProtectedChunkRisk({origin,source,candidateAirAt,
    return block!==0;
   },
   candidateAirAt:(x,y,z)=>{
-   if(!candidateAirAt(x,y,z))return false;
+   const wantsAir=candidateAirAt(x,y,z);
+   if(typeof wantsAir!=='boolean')throw TypeError('Nonboolean original M7 carve request');
+   if(!wantsAir)return false;
    plannedCarves++;
    const block=snapshot.get(key(x,y,z));
    let refusal=null;
-   if(source.editedAt(x,y,z))refusal='originalEdit';
+   const edited=source.editedAt(x,y,z);
+   if(typeof edited!=='boolean')throw TypeError('Nonboolean original M7 edit source');
+   if(edited)refusal='originalEdit';
    else{
     const authored=source.authoredAt(x,y,z);
     if(authored!==undefined&&(!INT(authored)||authored<0||authored!==0))
      refusal='authoredSolid';
-    else if(source.protectedAt(x,y,z))refusal='landmark';
-    else if(!isCandidateGeologyMaterial(block))refusal='oreOrUnsafe';
-    else if(authored===0&&block!==0)refusal='authoredAirMismatch';
+    else{
+     const protectedOriginal=source.protectedAt(x,y,z);
+     if(typeof protectedOriginal!=='boolean')throw TypeError('Nonboolean original M7 landmark source');
+     if(protectedOriginal)refusal='landmark';
+     else if(!isCandidateGeologyMaterial(block))refusal='oreOrUnsafe';
+     else if(authored===0&&block!==0)refusal='authoredAirMismatch';
+    }
    }
    if(refusal){unsafeCarves++;counts[refusal]++;
     if(examples.length<maxExamples)examples.push(Object.freeze({x,y,z,refusal}));
