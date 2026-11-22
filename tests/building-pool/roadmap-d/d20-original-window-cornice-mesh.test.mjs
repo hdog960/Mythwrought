@@ -112,8 +112,11 @@ test('original full Pack3 arches must not be layered on real Pack4 glazing; zero
 test('D20 source parity must reject tampered original Pack4 window geometry, fabricated Pack3 source part boxes, and invalid budgets',()=>{
  const b=structures[0],glass=planD19ExclusiveOriginalWindowGlass(b,{resolvePack4Asset:pack4BuilderAsset});
  assert.throws(()=>planD20SourceSafeWindowCornices(b,glass),/resolvers required/);
- for(const opts of [{maxSites:0},{maxSites:13},{maxPreviewBytes:8000},{maxPreviewBytes:500000}])
+ for(const opts of [{maxSites:0},{maxSites:13},{maxPreviewBytes:4000},{maxPreviewBytes:500000}])
   assert.throws(()=>planD20SourceSafeWindowCornices(b,glass,{...sourceResolvers,...opts}),/budget invalid/);
+ assert.throws(()=>planD20SourceSafeWindowCornices(b,glass,{
+  ...sourceResolvers,maxPreviewBytes:8192}),/memory exceeded/,
+  'valid but insufficient bounded memory budget must reject real source parts');
  const fakeWindow=(id,turn)=>{
   const original=windowShape(id,turn);
   return {...original,visible:original.visible.map((p,i)=>i===0?
