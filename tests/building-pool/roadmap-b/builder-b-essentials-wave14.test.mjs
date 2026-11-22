@@ -101,27 +101,6 @@ test('Twelve original lower and eight high Pack4 030 openings preserve real maso
   assert.equal(physical.registeredInLiveGame,false);
  }
 });
-test('Glassdune unrelaxed eight-way D4 against all authentic 228 historical 1B service sources + Tidehollow', {timeout:240000},async()=>{
- const accepted=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  accepted.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(accepted.length,228,'historic original 1B census drifted');
- assert.equal(new Set(accepted.map(x=>x.id)).size,228);
- const b=buildGlassduneSplitQuayRegistry();
- assert.ok(!accepted.some(x=>x.id===b.id),'reserved B-only ID already accepted historically');
- const same=[...accepted.filter(x=>x.category===b.category),buildTidehollowCrosswharfHarborOffice()];
- assert.ok(same.length>=21,'original harbor-office same-category historical baseline absent');
- const now=d4(b,false,0);let max=0,closest=null,checked=0;
- for(const old of same)for(const flip of [false,true])for(let turn=0;turn<4;turn++){
-  const n=iou(now,d4(old,flip,turn));checked++;
-  if(n>max){max=n;closest=old.id;}
-  assert.ok(n<.85,'Glassdune D4 clone of historical '+old.id+' '+n);
- }
- assert.ok(checked>=168,'D4 comparisons incomplete');
- console.log('GLASSDUNE_STRICT_HISTORICAL_228_HARBOR_OFFICE_D4_PASS '+JSON.stringify({
-  accepted:228,transforms:checked,maxIoU:max,closest,
-  actualIphone:false,creatorApproved:false,liveCustoms:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
