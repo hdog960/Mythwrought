@@ -57,6 +57,7 @@ const city=()=>({
   joinedCityTerraceAndActualApproachSourceSafe:true,
   joinedFourHubCandidateTopologyApproved:true,
   joinedFourHubSourceOwnershipApproved:true,
+  existingFullPadAndAccessSourceSafe:true,
   fullJoinedCandidateOriginalM7SourceChecks:8815,
   fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
   fullPadSourceChecks:200,
@@ -229,4 +230,13 @@ test('forged zero refused chunks cannot hide real refusal categories',()=>{
  assert.equal(r.chunkAccountingReconciled,false);
  assert.equal(r.proposalEvidenceAllPassed,false);
  assert.ok(r.reasonCodes.includes('M7_CHUNK_CORE_HALO_ARITHMETIC_INVALID'));
+});
+
+test('independent actual M7 full city pad veto blocks three nominally safe deep links',()=>{
+ const c=city();c.rows[1].existingFullPadAndAccessSourceSafe=false;
+ const r=check({city:c});
+ assert.equal(r.reportRowArithmeticReconciled,true);
+ assert.equal(r.citySourceSafe,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_FOUR_HUB_SOURCE_VETO'));
 });
