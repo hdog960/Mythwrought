@@ -1,5 +1,5 @@
 // MYTHWROUGHT Roadmap C Builder 1A Wave22: Stormglass Split-Ridge Tavern.
-// Original explicit coordinate-authoring of mountain-large tavern #003.
+// Original explicit coordinate-authoring of mountain-large tavern #001.
 // SOURCE-ONLY / UNREGISTERED. No settlements, world placement, schema saves,
 // active production/PR history/automations, or final gameplay effects.
 // Twin highland cliff cutouts and one southeast missing terrace, original Pack
@@ -10,7 +10,7 @@ export const ROADMAP_C_1A_WAVE22_TAVERN_SPECS=Object.freeze([
     "category": "tavern",
     "biome": "mountain",
     "size": "large",
-    "index": 3,
+    "index": 1,
     "title": "Stormglass Split-Ridge Tavern",
     "w": 72,
     "d": 60,
@@ -1078,7 +1078,7 @@ export const ROADMAP_C_1A_WAVE22_TAVERN_SPECS=Object.freeze([
       23,
       37
     ],
-    "detail": "Source-only original mountain tavern with split-ridge observatory, dining/bar/stage wings, stormwell courtyard, triple real cliffside missing courtyards, twenty-foot room connections, sixteen pitched roofs, eight original double-cell guest bunks, and enchanted-looking stormglass vista, without world placement, settlement automation, schema or save writes."
+    "detail": "Source-only original mountain tavern with split-ridge observatory, dining/bar/stage wings, stormwell courtyard, triple real cliffside missing courtyards, thirty-four actual two-high room connections, sixteen pitched roofs, eight original double-cell guest bunks, and enchanted-looking stormglass vista, without world placement, settlement automation, schema or save writes."
   }
 ]);
 export const ROADMAP_C_1A_WAVE22_TAVERN_IDS=Object.freeze(ROADMAP_C_1A_WAVE22_TAVERN_SPECS.map(s=>'r1:'+s.category+':'+s.biome+':'+s.size+':'+String(s.index).padStart(3,'0')));
