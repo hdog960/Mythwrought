@@ -105,7 +105,7 @@
     "method": "Direct isolated V8 execution of original GitHub-returned sourcePlan/validateBlueprint and original schema, using exact original Git blobs rather than native Node runner",
     "originalFullCompiler": "PASS for new Waves26 and27",
     "roofImmediateSourceBearing": "PASS — 5676 newly authored Pack3 roof cells supported at y−1, not full structural/wind certification",
-    "physicalGroundAndWalking": "PASS — 19 room/portal-source constraints valid via original blueprint validator; all original approved walkable cells mutually connected",
+    "physicalGroundAndWalking": "PASS — original validateBlueprint verified 22 authored rooms, 31 two-high portal links and connected walkable ground in both new buildings",
     "realSkyOpenPavedCourtyards": "PASS original ground y0, walkable y1, all y1+ empty",
     "groundedForkedQuay": "PASS source 205 unique unroofed quay cells and checked walkable two quay tips plus crossing deck",
     "groundedTowersAndHighWindows": "PASS two source-continuous octagonal solid bases and full-height tower walls; 24 direct-backed Pack3 crown cells and 6 high source-framed windows per tower",
