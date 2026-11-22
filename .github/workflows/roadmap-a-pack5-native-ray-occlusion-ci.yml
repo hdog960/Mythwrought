@@ -1,0 +1,20 @@
+name: Roadmap A Pack5 original ray occlusion crosswalk only
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-native-ray-occlusion-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-native-ray-occlusion-ci.yml'
+permissions:
+  contents: read
+jobs:
+  new-original-source-native-ray-crosswalk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new source authentic Pack5 ray and terrain precedence checks
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-native-ray-contract.test.mjs
