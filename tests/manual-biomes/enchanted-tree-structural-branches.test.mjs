@@ -113,15 +113,22 @@ test('canopies leave the two standing/player head voxels unobstructed away from 
   }
 });
 
-test('Moonwillow has eight separated hanging moonleaf curtains and four true bark arms',()=>{
-  const drapes=[[-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
-    [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3]];
+test('Moonwillow has twelve staggered hanging moonleaf curtains and four true bark arms',()=>{
+  const drapes=[
+    [-3,0,4],[3,0,3],[0,-3,4],[0,3,3],
+    [-2,-2,3],[2,2,4],[-2,2,2],[2,-2,3],
+    [-3,-1,2],[3,1,2],[1,-3,3],[-1,3,2]
+  ];
   for(const roll of [.63,.75,.81,.82,.99]){
     const tree=buildEnchantedTreeCandidate(0,3,0,roll);
     assert.equal(tree.species,ENCHANTED_TREE_CANDIDATE_KIND.MOONWILLOW);
     const bend=roll<.81?-1:1,top=tree.trunkHeight;
     const at=new Map(tree.cells.map(([x,y,z,id])=>[coord(x,y,z),id]));
     assert.ok(tree.cells.length<=ENCHANTED_TREE_MAX_CELLS);
+    assert.equal(new Set(drapes.map(([dx,dz])=>coord(bend+dx,top,dz))).size,12,
+      'all twelve curtain axes remain physically distinct');
+    assert.equal(new Set(drapes.map(([,,hang])=>hang)).size,3,
+      'trailing tips must vary by two, three and four voxels');
     for(const [dx,dz,hang] of drapes){
       assert.equal(at.get(coord(bend+dx,3+top-hang,dz)),G.moonLeaves,
         'hanging strand must reach its visibly different authored low tip');
