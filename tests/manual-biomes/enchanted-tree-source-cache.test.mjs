@@ -3,6 +3,7 @@
 // Uses the REAL original FourRegionWorld and environmentalTreesForChunk.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {performance} from 'node:perf_hooks';
 import {EnchantedCandidateSourceCache,
   ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX}
   from '../../src/manual-biomes/enchanted-tree-source-cache.mjs';
@@ -62,6 +63,8 @@ test('evicted AIR, non-AIR and undefined source entries can only be reconstructe
 test('dense original-source M7 sampling stays bounded, deterministic, cave-safe and save-safe',()=>{
   const seeds=[179,7919,-88];
   let plannedVoxels=0,checked=0,peak=0,evictions=0;
+  const denseWork=[]; // test-only real native reads, time, occupancy
+  let observedProcessHeapPeak=0;
   const rows=[];
   const chunks=[];
   // 4x4 actual independent source regions around the original Enchanted
@@ -75,21 +78,39 @@ test('dense original-source M7 sampling stays bounded, deterministic, cave-safe 
     const fresh=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR),
       {experimentalEnchantedTrees:true});
     const column=(x,z)=>world._columnPlan(x,z);
-    const read=(x,y,z)=>column(x,z).get(y)??world._environmentBaseline(x,y,z);
+    let originalSourceReads=0;
+    const read=(x,y,z)=>{
+      originalSourceReads++;
+      return column(x,z).get(y)??world._environmentBaseline(x,y,z);
+    };
     const readFresh=(x,z)=>fresh._columnPlan(x,z);
     const freshCell=(x,y,z)=>readFresh(x,z).get(y)??fresh._environmentBaseline(x,y,z);
     let sourceCells=0,sourceEvictions=0,sourcePeak=0;
     for(const [cx,cz] of chunks){
       let metrics;
+      const beforeReads=originalSourceReads;
+      const startMs=performance.now();
       const candidate=environmentalTreesForChunk(cx,cz,seed,column,read,{
         experimentalEnchantedTrees:true,
         onCandidateCacheSummary:summary=>{metrics=summary;}
       });
+      const nativeMs=+(performance.now()-startMs).toFixed(3);
+      const sourceReadCalls=originalSourceReads-beforeReads;
+      const processHeapUsed=process.memoryUsage().heapUsed;
+      observedProcessHeapPeak=Math.max(observedProcessHeapPeak,processHeapUsed);
       assert.ok(metrics,'one test-only synchronous metrics callback per chunk');
       assert.ok(Object.isFrozen(metrics));
       assert.ok(metrics.peakEntries<=MAX,'hard cap must never be exceeded');
       assert.ok(metrics.entries<=MAX);
       assert.ok(metrics.evictions>=0);
+      assert.ok(metrics.hits>=0&&metrics.misses>=0);
+      assert.ok(metrics.misses<=sourceReadCalls,
+        'actual candidate cache misses cannot exceed original source reads');
+      denseWork.push({
+        seed,cx,cz,sourceReadCalls,nativeMs,sourceCells:candidate.size,
+        hits:metrics.hits,misses:metrics.misses,
+        peakEntries:metrics.peakEntries,evictions:metrics.evictions
+      });
       if(metrics.entries)assert.equal(metrics.limit,MAX);
       else assert.equal(metrics.limit,0,'nonenchanted chunk does not allocate cache');
       peak=Math.max(peak,metrics.peakEntries);
@@ -118,9 +139,24 @@ test('dense original-source M7 sampling stays bounded, deterministic, cave-safe 
   }
   assert.equal(checked,seeds.length*chunks.length);
   assert.ok(plannedVoxels>700,'dense original forest acceptance must contain real trees');
+  const byTime=[...denseWork].sort((a,b)=>a.nativeMs-b.nativeMs);
+  const byReads=[...denseWork].sort((a,b)=>b.sourceReadCalls-a.sourceReadCalls);
+  const p95=byTime[Math.ceil(byTime.length*.95)-1]?.nativeMs??0;
+  const averageMs=+(denseWork.reduce((sum,r)=>sum+r.nativeMs,0)/denseWork.length).toFixed(3);
+  const totalReads=denseWork.reduce((sum,r)=>sum+r.sourceReadCalls,0);
+  const cacheHits=denseWork.reduce((sum,r)=>sum+r.hits,0);
+  const cacheMisses=denseWork.reduce((sum,r)=>sum+r.misses,0);
+  assert.ok(totalReads>0&&cacheMisses>0);
+  assert.equal(denseWork.length,checked);
   console.log('# ENCHANTED REAL BOUNDED CACHE DENSE SOURCE '+JSON.stringify({
     chunks:checked,sourceVoxels:plannedVoxels,
     peakEntries:peak,hardLimit:MAX,evictions,rows,
+    sourceReadCalls:totalReads,cacheHits,cacheMisses,
+    nativeRunnerAvgChunkMs:averageMs,nativeRunnerP95ChunkMs:p95,
+    worstReadChunks:byReads.slice(0,5),
+    observedNodeProcessHeapUsedPeakBytes:observedProcessHeapPeak,
+    heapSampleIsWholeProcessNotCacheAllocation:true,
+    nativeTimingIncludesColdWorldReaderAndTestOverhead:true,
     physicalIphone:false,notAnFpsTest:true
   }));
 });
