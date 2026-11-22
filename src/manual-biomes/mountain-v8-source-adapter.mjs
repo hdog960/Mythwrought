@@ -61,7 +61,9 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
   // Intentional no in-world tree placement. A bounded, descriptive vegetation
   // proposal prevents canopy on cliffs, rock, snow, steeps or protected cells.
   const tileX=Math.floor(x/8),tileZ=Math.floor(z/8);
-  const {rootX,rootZ}=mountainV8TileRoot(tileX,tileZ,seed);
+  const root=mountainV8TileRoot(tileX,tileZ,seed);
+  if(!root)return null;
+  const {rootX,rootZ}=root;
   // Exactly one site may own this tile; unlike the earlier tile-wide roll,
   // neighboring eligible columns must not all materialize the same plant.
   const chosen=x===rootX&&z===rootZ;
