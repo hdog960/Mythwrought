@@ -50,3 +50,21 @@ test('nonrecursive V8 neighbor prediction is bounded and deterministic',()=>{
   assert.equal(plan({...args(0,0),neighborBiomeWeights:[1,1,NaN,1]}),null);
   assert.equal(plan({...args(0,0),neighborTops:[5,-1,5,5]}),null);
 });
+
+test('V8 19-high proposal keeps both snow and exposed non-snow terrain at two seeds',()=>{
+  for(const seed of [179,2026]){
+    const counts=new Map();
+    for(let z=-96;z<=96;z+=4)for(let x=-96;x<=96;x+=4){
+      const v=plan({...args(x,z,seed),worldMaxY:19});
+      assert.ok(v);
+      counts.set(v.cap,(counts.get(v.cap)??0)+1);
+    }
+    const total=[...counts.values()].reduce((a,b)=>a+b,0),snow=counts.get('snow')??0;
+    assert.equal(total,2401);
+    assert.ok(snow>50&&snow<total*.75,
+      'A seeded mountain must have meaningful snow without blanketing all caps');
+    assert.ok((counts.get('alpine-grass')??0)>25,'Gentle alpine grass vanished');
+    assert.ok(['slate','scree','gneiss'].some(id=>(counts.get(id)??0)>50),
+      'Exposed mineable stone materials vanished');
+  }
+});
