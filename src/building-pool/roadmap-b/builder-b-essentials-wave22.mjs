@@ -43,7 +43,7 @@ export function buildDuneharpSpiralGranary(){
     {originalGranaryPerimeterMasonry:true,realWeatherSealPending:true});
  }
  // Real two HIGH round-corner stone silos, at actual existing y0 footings,
- // one 28 tall and the other 32 tall, NOT floating decor or working elevators.
+ // one 28 tall and the other 32 tall, with genuine lintel-backed two-high doorways; NOT floating decor or working elevators.
  const siloPerimeter=(s,x,z)=>x>=s.x0&&x<=s.x1&&z>=s.z0&&z<=s.z1&&
   (x===s.x0||x===s.x1||z===s.z0||z===s.z1)&&
   !((x===s.x0||x===s.x1)&&(z===s.z0||z===s.z1));
@@ -121,6 +121,23 @@ export function buildDuneharpSpiralGranary(){
   if(b.clear(x,0,z))b.put(x,0,z,'foundation','live:stone','none',{originalSiloOrGranaryPortalGround:true});
   b.opening(x,z);b.portal(from,to,x,z);
  }
+ // Both original hollow silos have functional SOURCE two-cell access
+ // openings in their masonry circumference. Reinstate a full-cell lintel at
+ // y3 and verify solid adjacent jambs; y4+ remains uninterrupted load-bearing
+ // stone, not a fictitious magically uninterrupted wall through the doorway.
+ for(const [x,z,height] of [[15,20,28],[56,35,32]]){
+  if(!ground(x,z))throw Error('Duneharp silo portal lacks original ground '+K(x,z));
+  if(!b.clear(x,1,z)||!b.clear(x,2,z))
+   throw Error('Duneharp 2-high silo door is blocked '+K(x,z));
+  if(b.clear(x,3,z))throw Error('Duneharp silo entrance lacks original stone lintel '+K(x,z));
+  b.cut(x,3,z);
+  b.put(x,3,z,'wall','live:stone','none',
+   {authoredTrueSiloDoorLintel:true,certifiedFullLoadPath:false});
+  // The two side-wall jambs must remain actual solid stone above the ground.
+  for(const zz of [z-1,z+1])for(let y=1;y<=height;y++){
+   if(b.clear(x,y,zz))throw Error('Duneharp hollow-silo side jamb discontinuity '+K(x,zz)+' tier '+y);
+  }
+ }
  let windows=0;
  for(const key of wing){
   const [x,z]=key.split(',').map(Number);
@@ -136,7 +153,7 @@ export function buildDuneharpSpiralGranary(){
  return b.finish('Original LARGE desert agricultural campus with seven distinct physically backed roof wings, a 529-column entirely walkable and roofless raised stone threshing hardstand and separate 72-column paved drying yard, two separate real 28/32-tier octagonal stone silos, all linked by grounded source paths, real Pack4 upright panes; no live farming or production.',{
   exclusiveOwner:'Builder B original 1B Wave22 large desert farm-barn',
   originalGranaryWingCount:7,groundedThreshingCourtCells:[529,72],
-  genuineGroundPavedRouteCells:paths.size,originalSiloWallTiers:[28,32],
+  genuineGroundPavedRouteCells:paths.size,originalSiloWallTiers:[28,32],originalSiloGroundDoorways:2,
   realExteriorUprightGlassCount:windows,
   liveGrainProduction:false,actuallyOperatingSilo:false,grainTransportActive:false,
   workingWindPower:false,upperTowerStairsInstalled:false,
