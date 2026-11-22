@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,writeFileSync,existsSync} from 'node:fs';
 import {join,resolve} from 'node:path';
 import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
 import {PNG} from 'pngjs';
 import {ROADMAP_D_WAVE14_BUILDINGS} from '../../../src/building-pool/roadmap-d/d1-original-institutions-wave14.mjs';
 const root=resolve(process.cwd());
@@ -58,8 +59,10 @@ for(const b of ROADMAP_D_WAVE14_BUILDINGS)for(const [w,h] of sizes){
  assert.ok(section.sourceCells<exterior.sourceCells,'cutaway does not expose interiors for '+b.id);
  assert.equal(section.roomCount,b.spaces.length);assert.equal(exterior.roomCount,b.spaces.length);
 }
+const actualHead=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();
+if(process.env.EXPECTED_LITERAL_HEAD)assert.equal(actualHead,process.env.EXPECTED_LITERAL_HEAD,'head provenance drift');
 const result={schema:'mythwrought.roadmap-d.d14.genuine-webgl2-evidence.v1',
- gitHead:process.env.GITHUB_SHA||null,runId:process.env.GITHUB_RUN_ID||null,attempt:process.env.GITHUB_RUN_ATTEMPT||null,
+ gitHead:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),runId:process.env.GITHUB_RUN_ID||null,attempt:process.env.GITHUB_RUN_ATTEMPT||null,
  exactSourceSHA256:sourceSha,sourceCount:8,views:['exterior','section'],sizes,captureCount:48,uniquePNG:hashes.size,
  status:'PASS',realChromium:true,cubeProxy:true,physicalMeshesAccepted:false,iphoneAccepted:false,productionRegistered:false,
  captures:records.sort((a,b)=>a.sourceId.localeCompare(b.sourceId)||a.width-b.width||a.view.localeCompare(b.view))};
