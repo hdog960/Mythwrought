@@ -98,27 +98,6 @@ test('Dunewake ten upright authentic Pack4 030 windows face dry exterior, not ro
  assert.equal(b.architecturalIdentity.pack4ProducerCollisionInLiveGameCertified,false);
  assert.equal(b.architecturalIdentity.roofSealCertified,false);
 });
-test('Dunewake unrelaxed 8-way historical 228 source D4 versus all fishing lodges plus prior Sedgewatch', {timeout:240000},async()=>{
- const old=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  old.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(old.length,228,'protected original 1B baseline modified');
- assert.equal(new Set(old.map(x=>x.id)).size,228);
- const b=buildDunewakeOasisReedworksFishingLodge();
- assert.ok(!old.some(x=>x.id===b.id),'claimed previously used 1B slot');
- const same=[...old.filter(x=>x.category===b.category),buildSedgewatchTidehookFishingLodge()];
- assert.ok(same.length>=21,'missing genuine same-category history');
- const exact=d4(b,false,0);let max=0,closest=null,n=0;
- for(const other of same)for(const flip of [false,true])for(const turn of [0,1,2,3]){
-  const value=iou(exact,d4(other,flip,turn));n++;
-  if(value>max){max=value;closest=other.id;}
-  assert.ok(value<.85,'source D4 near duplicate '+b.id+' vs '+other.id+' IoU '+value);
- }
- assert.ok(n>=168,'historical eight-way D4 coverage incomplete');
- console.log('DUNEWAKE_STRICT_228_FISHING_D4_PASS '+JSON.stringify({
-  accepted:228,comparisonCount:n,maxD4:max,closest,
-  liveRuntime:false,actualIphone:false,creatorArtApproved:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
