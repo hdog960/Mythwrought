@@ -28,20 +28,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify source and test syntax only
+      - name: Syntax for changed V8-only source and evidence files
         run: |
           node --version
           git rev-parse HEAD
-          node --check src/voxel.mjs
-          node --check src/manual-biomes/mountain-v8-tile-census.mjs
-          node --check src/manual-biomes/mountain-v8-original-world.mjs
+          node --check src/manual-biomes/mountain-v8-seam-certificate.mjs
           node --check src/manual-biomes/mountain-v8-source-adapter.mjs
-          node --check src/manual-biomes/mountain-v8-vegetation-cells.mjs
-          node --check tests/mountain-v8-original-world.test.mjs
-          node --check tests/mountain-v8-tile-census.test.mjs
-          node --check tests/mountain-v8-real-seam-census.test.mjs
+          node --check src/manual-biomes/mountain-v8-original-world.mjs
+          node --check src/manual-biomes/mountain-v8-tile-census.mjs
+          node --check tests/mountain-v8-seam-certificate.test.mjs
           node --check tests/mountain-v8-source-adapter.test.mjs
-          node --check tests/mountain-v8-vegetation-cells.test.mjs
+          node --check tests/mountain-v8-original-world.test.mjs
           node --check tests/mountain-v8-original-landform-atlas.test.mjs
-      - name: Only new original-world alpine 256-tile and mesh-parity audit
-        run: node --test --test-concurrency=1 tests/mountain-v8-original-landform-atlas.test.mjs
+      - name: Exact original VoxelWorld veto provenance and 256-tile atlas only
+        run: |
+          node --test --test-concurrency=1 \
+            tests/mountain-v8-seam-certificate.test.mjs \
+            tests/mountain-v8-source-adapter.test.mjs \
+            tests/mountain-v8-original-world.test.mjs \
+            tests/mountain-v8-original-landform-atlas.test.mjs
