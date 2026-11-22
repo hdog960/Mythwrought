@@ -1,0 +1,23 @@
+name: Roadmap A original Pack5 face-ray fidelity only
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-ray-native-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-ray-native.yml'
+permissions:
+  contents: read
+jobs:
+  original-pack5-ray-fidelity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact original source geometry rays and producer crosswalk only
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-ray-selection-core.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-ray-selection-producer.test.mjs
