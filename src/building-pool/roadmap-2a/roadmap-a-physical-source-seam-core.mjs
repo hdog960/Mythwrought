@@ -21,7 +21,10 @@ function faceKey(source,face){
 }
 // Rounded keys are ONLY a candidate bucket. A near-coincident face is NOT exact.
 // Deliberately accept false negatives rather than remove an unproven visible face.
-const exactFace=(a,b)=>a.face.plane===b.face.plane&&
+const exactFace=(a,b)=>
+ a.source.symbol===b.source.symbol&&a.source.variant===b.source.variant&&
+ a.source.orientation===b.source.orientation&&a.source.material===b.source.material&&
+ a.face.plane===b.face.plane&&
  a.face.rect.every((n,i)=>n===b.face.rect[i])&&
  a.rgba.every((n,i)=>n===b.rgba[i]);
 const add=(a,b)=>a.map((x,i)=>x+b[i]);
@@ -63,7 +66,7 @@ export function auditExactPack5SeamCandidates(fixtures,{maxFixtures=96,maxBoxes=
    for(let axis=0;axis<3;axis++)for(const positive of [false,true]){
     const f=face(b,axis,positive),key=faceKey(source,f);
     if(!faceBuckets.has(key))faceBuckets.set(key,{negative:[],positive:[]});
-    faceBuckets.get(key)[positive?'positive':'negative'].push({instanceIndex,boxIndex,face:f,rgba:[...source.color]});
+    faceBuckets.get(key)[positive?'positive':'negative'].push({instanceIndex,boxIndex,source:{...source},face:f,rgba:[...source.color]});
    }
   }
  }
