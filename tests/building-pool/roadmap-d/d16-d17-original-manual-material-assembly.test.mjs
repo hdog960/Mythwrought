@@ -34,6 +34,26 @@ test('16 original W16/17 source buildings map to exactly bounded real Pack1 maso
    assert.ok(p.renderablePhysicalBoxes.length>0);
    assert.ok(p.originalPhysicalSelectionBoxes>0);
    assert.equal(p.originalGeometryResolved,true);
+   if(p.sourceOriginalPack===4){
+    const mesh=p.originalRealPack4WorldMesh;
+    assert.equal(mesh.source,'original-pack4-actual-preview-vertices');
+    assert.equal(mesh.stride,10);
+    assert.ok(mesh.opaqueWorldVertices instanceof Float32Array);
+    assert.ok(mesh.translucentWorldVertices instanceof Float32Array);
+    assert.ok(mesh.opaqueTriangles+mesh.translucentTriangles>0,'fake original Pack4 mesh');
+    assert.equal(mesh.opaqueTriangles,mesh.opaqueWorldVertices.length/30);
+    assert.equal(mesh.translucentTriangles,mesh.translucentWorldVertices.length/30);
+    for(const group of [mesh.opaqueWorldVertices,mesh.translucentWorldVertices]){
+     for(let i=0;i<group.length;i+=10){
+      assert.ok(group[i]>=p.sourceAt[0]&&group[i]<=p.sourceAt[0]+1);
+      assert.ok(group[i+1]>=p.sourceAt[1]&&group[i+1]<=p.sourceAt[1]+1);
+      assert.ok(group[i+2]>=p.sourceAt[2]&&group[i+2]<=p.sourceAt[2]+1);
+      assert.ok(group[i+9]>=0&&group[i+9]<=1);
+     }
+    }
+    assert.equal(mesh.preSortedTransparency,false);
+    assert.equal(mesh.worldRendererAcceptance,false);
+   }
    assert.equal(p.materialPreviewOnly,true);
    assert.equal(p.worldPlaced,false);
    for(const box of p.renderablePhysicalBoxes)assert.ok(box.length===6&&box.every(Number.isFinite)&&
