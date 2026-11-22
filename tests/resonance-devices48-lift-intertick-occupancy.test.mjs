@@ -10,7 +10,7 @@ test('disappearing actor blocks',()=>assert.equal(preflightLiftIntertick({...bas
 test('stable passenger cannot authorize carriage',()=>{const r=preflightLiftIntertick({...base(),previousActors:[{id:'p',box:box(0,.2)}],currentActors:[{id:'p',box:box(0,.2)}]});assert.equal(r.clearCandidate,false);assert.equal(r.passengerTransportAuthorized,false);});
 test('actor order is deterministic',()=>{const a={...base(),previousActors:[{id:'z',box:box(2)},{id:'a',box:box(0)}]};assert.deepEqual(preflightLiftIntertick(a),preflightLiftIntertick({...a,previousActors:[...a.previousActors].reverse()}));});
 test('duplicate actor IDs rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),currentActors:[{id:'a',box:box(2)},{id:'a',box:box(3)}]})));
-test('cross-snapshot roster over 64 rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),previousActors:Array.from({length:40},(_,i)=>({id:'a'+i,box:box(2)})),currentActors:Array.from({length:40},(_,i)=>({id:'b'+i,box:box(2)}))}))));
+test('cross-snapshot roster over 64 rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),previousActors:Array.from({length:40},(_,i)=>({id:'a'+i,box:box(2)})),currentActors:Array.from({length:40},(_,i)=>({id:'b'+i,box:box(2)}))})));
 test('teleport-sized actor jump rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),previousActors:[{id:'a',box:box(-20)}],currentActors:[{id:'a',box:box(20)}]})));
 test('skipped tick rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),toTick:5})));
 test('forged energy rejected',()=>assert.throws(()=>preflightLiftIntertick({...base(),energyCandidate:true})));
