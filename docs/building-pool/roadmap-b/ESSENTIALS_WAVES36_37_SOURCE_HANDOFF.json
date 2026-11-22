@@ -1,0 +1,232 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves36-37-original-source-handoff.v1",
+  "state": "ISOLATED ORIGINAL SOURCE PROVISIONAL ONLY; native tests and physical/live-game/real browser acceptance NOT executed",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartingExactHEAD": "b3f38c748d8df1e5634ff7f41f9ce5ff1607e90e",
+  "protectedDraftPR407ExactHEAD": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "verifiedMainAtSessionStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "originalSources": [
+    {
+      "wave": 36,
+      "name": "Sunspire Twin-Crown Desert Lighthouse",
+      "id": "r1:lighthouse:desert:large:002",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave36.mjs",
+      "gitBlob": "2423c1e421c2a5d5170bf33a68f4195e5c6c7320",
+      "size": "large",
+      "authoredSourceCells": 18390,
+      "directlyOriginalSupportedPack3RoofCells": 4186,
+      "sourceConnectedWalkableCells": 4391,
+      "rooms": 15,
+      "twoHighPortalLinks": 21,
+      "authoredIndependentRoofWings": 9,
+      "fullyGroundedWalkableSkyCourts": [
+        252,
+        100,
+        100
+      ],
+      "additionalUnroofedGroundedYApproachSourceCells": 224,
+      "sourceCardinalBFS": "PASS actual grounded original y1 west (22,1,75) to east (57,1,75) without any above-ground obstructions",
+      "stoneTowerOriginalWalls": [
+        38,
+        34
+      ],
+      "physicalStoneTowers": 2,
+      "originalLowerSolidSiloStyleStoneTowerFoundations": "Both 7×9 actual stone original y0 and y1–3 source cores, continuous original y4–38/y4–34 octagonal masonry perimeter",
+      "directlyBackedOriginalPack3CrownCells": [
+        24,
+        24
+      ],
+      "trueElevatedStoneFramedPack4WindowCells": [
+        6,
+        6
+      ],
+      "lowerUprightPack4GlassCells": 51,
+      "completeOriginalThreeHighLowGlassBays": 17,
+      "strictD4SameCategory": {
+        "priorWaves": [
+          8,
+          21,
+          30
+        ],
+        "priorSourceComparisons": 3,
+        "actual8WayTransforms": 24,
+        "maxIoU": 0.5075907590759076,
+        "threshold": 0.85
+      },
+      "poweredLighthouse": false,
+      "upperStoneTowersPlayerAccessible": false,
+      "realSeaAndWindSimulation": false,
+      "physicalPack3Pack4Approved": false,
+      "creatorArtAccepted": false,
+      "liveWorldRegistered": false
+    },
+    {
+      "wave": 37,
+      "name": "Silverpine Four-Court Winterglass",
+      "id": "r1:greenhouse:snow:large:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave37.mjs",
+      "gitBlob": "db614f5c6ff5f936a398948c544dc2cdda594df6",
+      "size": "large",
+      "authoredSourceCells": 17350,
+      "directlyOriginalSupportedPack3RoofCells": 4308,
+      "sourceConnectedWalkableCells": 4620,
+      "rooms": 17,
+      "twoHighPortalLinks": 25,
+      "authoredIndependentRoofWings": 10,
+      "fullyGroundedWalkableSkyCourts": [
+        252,
+        100,
+        100,
+        120
+      ],
+      "additionalUnroofedGroundedUPromenadeCells": 209,
+      "sourceCardinalBFS": "PASS actual original y1 west (19,1,75) to east (60,1,75), outside source roof/trellis",
+      "fiveTierUprightPack4GlassCells": 105,
+      "completeFramedFiveTierWindowBays": 21,
+      "realWindowFraming": "Original y1 timber sill, y2–6 five separate vertical Pack4 pane cells, solid y7 lintel and independent source outward air; source window authoring occurs after all portal cuts",
+      "strictD4SameCategory": {
+        "priorWaves": [
+          23,
+          29,
+          31
+        ],
+        "priorSourceComparisons": 3,
+        "actual8WayTransforms": 24,
+        "maxIoU": 0.6188786373314408,
+        "threshold": 0.85
+      },
+      "activePlantGrowth": false,
+      "actualHeatingOrIrrigation": false,
+      "iceAndSnowLoadCertified": false,
+      "physicalPackMountCollisionApproved": false,
+      "creatorArtAccepted": false,
+      "liveWorldRegistered": false
+    }
+  ],
+  "actuallyExecuted": {
+    "provenance": "Authentic immutable original GitHub Git blobs evaluated through isolated JavaScript V8 with original sourcePlan/unchanged validateBlueprint and frozen original schema. Native Node / source game / Chromium / iPhone NOT executed.",
+    "originalCompiler": "PASS both new original source buildings",
+    "totalAuthoredOriginalCells": 35740,
+    "immediatelySourceBackedRoofCells": 8494,
+    "connectedOriginalSourceWalkableCells": 9011,
+    "genuinelyGroundedPavedUncoveredCourtColumns": 1024,
+    "additionalGroundedRooflessOutdoorWalkingCells": 433,
+    "realOriginalRooms": 32,
+    "twoHighPortalLinks": 46,
+    "fullOriginalBackedStoneTowerCrowns": 48,
+    "trueOriginalHighStoneFramedPack4Windows": 12,
+    "authenticCompleteThreeTierGlazingBays": 17,
+    "authenticCompleteFiveTierGlazingBays": 21,
+    "uprightOriginalPack4GlassCells": 168,
+    "cardinalActualOriginalSourceOutdoorGroundWalking": "PASS both endpoints for both sources, all y1 walkable and entirely sky-open at endpoints",
+    "strictEightWayD4": "PASS 48/48 across six other authored original lighthouse/greenhouse designs; maxIoU 0.6188786373314408 against original 0.85 limit",
+    "ownership": "Both original IDs B115 exclusive; absent frozen D92 and canonical 228 accepted",
+    "fullProducerPackPhysicalCollisionOrMaterialApproval": "NOT_CERTIFIED"
+  },
+  "stagedButNotExecuted": {
+    "focusedNode": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves36-37-focused.test.mjs",
+      "gitBlob": "80827e945121ae3ab0dcdf4cf243c2f9d9033f4a",
+      "staticSourceParsing": "PASS",
+      "realNativeNodeRun": false
+    },
+    "singleHistoricCensusD4": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-37-shared-historical-d4.test.mjs",
+      "gitBlob": "cccd8c5aa0b1c3489213bb560457449dc2777233",
+      "sourceAcceptedHistoricalPool": 228,
+      "stagedBServiceSources": 37,
+      "newSourceWaves9to37": 29,
+      "strictD4Threshold": 0.85,
+      "originalHistoricalLoadOnce": true,
+      "totalSourcePoolAllocation": 265,
+      "remainingAllocation": 170,
+      "realNativeNodeRun": false
+    },
+    "singleDeferredChromiumProxy": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-37-gallery.mjs",
+      "galleryGitBlob": "cfbeaa2d1c840ff25e3601ed98391068f04bb0c0",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-37-gallery.mjs",
+      "auditorGitBlob": "9927eb15e5a7f9ef7ec80db490299191b2d6098c",
+      "wiring": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-37-gallery-wiring.test.mjs",
+      "wiringGitBlob": "f8ce7dbdc40cd646a6a19cca3a52a46637587022",
+      "newOriginalSourcePreviewFiles": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave36-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave37-preview.html"
+      ],
+      "authenticSourceBoundOriginals": 29,
+      "sourceEvidenceFiles": 32,
+      "expectedWebGL2PNGFrames": 174,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "sourceViews": [
+        "exterior",
+        "cutaway"
+      ],
+      "requiresExactGitHEAD": true,
+      "independentPNGCRC": true,
+      "independentDistinctPNG_SHA256": true,
+      "realChromiumRun": false,
+      "actualPNGFilesGenerated": 0,
+      "proxyNotOriginalLiveGame": true
+    }
+  },
+  "requiredNextAcceptanceGates": [
+    "Authentic exact-HEAD native Node tests using the complete original repository, preserving all focused correctness and one strict full accepted-228 historical eight-way D4.",
+    "Live original-game and Pack3/4 material shader/mesh/orientation/mounting, collision/selection, supporting member and roof load/snow/weather acceptance; untested candidate source claims must stay fail-closed.",
+    "One coordinated exact-head Chromium WebGL2 original-source proxy 174 genuine PNG visual/CRC/SHA capture across 3 iPhone-like viewports and 2 views; proxy is NOT original-game rendering.",
+    "Creator-authorized actual game world/settlement/biome building registration, full movement/walking/saves/offline/performance through iPhone installed Home Screen PWA and artwork review."
+  ],
+  "CIEfficiency": {
+    "protectedRefsReadOnce": true,
+    "reusedPreviousExactPR407SuccessfulRunsAsHistoricalOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newGitHubActionRuns": 0,
+    "realChromiumRuns": 0,
+    "duplicateBroadHistorical228Runs": 0,
+    "sharedWorkflowEdited": false,
+    "GitHubJobCancellation": false,
+    "originalRequiredCIAndBranchProtectionUnchanged": true,
+    "noPromotedOrUnverifiedAcceptance": true
+  },
+  "boundaries": {
+    "frozenB115D92LedgerUntouched": true,
+    "canonical228HistoricalSourcesUntouched": true,
+    "otherBuildersAndDevelopersUntouched": true,
+    "allFiveAutomationsUntouched": true,
+    "originalSavedWorldsUntouched": true,
+    "productionMainUntouched": true,
+    "protectedPR407Untouched": true,
+    "noMerge": true,
+    "noDeployment": true,
+    "noNewPR": true
+  },
+  "progress": {
+    "residentialAuthoredStaged": 10,
+    "servicesAuthoredStaged": 37,
+    "combinedNewOriginals": 47,
+    "combinedGoal": 294,
+    "combinedRemaining": 247,
+    "residentialRemaining": 169,
+    "servicesRemaining": 78
+  },
+  "remainingFocusedDevelopmentSessionEstimate": {
+    "low": 80,
+    "high": 230,
+    "excludesPhysicalFinalIntegration": true,
+    "approximate": true
+  }
+}
