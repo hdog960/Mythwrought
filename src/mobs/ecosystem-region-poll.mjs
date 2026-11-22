@@ -72,7 +72,7 @@ export function prepareOriginalMobPoll({
   const inspected=inspectRegionalEcologySchedule(sourceRecord,{
     now,localCounts:roster.localCounts
   });
-  let attempts=0,proposal=null;
+  let attempts=0,proposal=null,rejected=null;
   if(inspected.ready){
     const poll=proposeMobFromRosterSnapshot({
       world,seed,region,observer,biome,light,kind,
@@ -80,12 +80,13 @@ export function prepareOriginalMobPoll({
     });
     attempts=poll.attempts;
     proposal=poll.proposal;
+    rejected=poll.rejected;
   }
   if(world.revision()!==revision)
     throw new TypeError('Original world changed during regional poll');
   const prepared=Object.freeze({
     kind:inspected.ready?'evaluated':'cooldown',
-    record:inspected.record,attempts,proposal,
+    record:inspected.record,attempts,proposal,rejected,
     worldRevision:revision,
     before:snapshotIdentity(entities)
   });

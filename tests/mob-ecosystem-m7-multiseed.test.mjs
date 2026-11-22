@@ -23,7 +23,10 @@ import {proposeTerrainAwarePosition}
   from '../src/mobs/ecosystem-terrain-placement.mjs';
 import {MAX_PROPOSALS_PER_TICK}
   from '../src/mobs/ecosystem-region-proposals.mjs';
-import {deriveRegionalMobState,proposeMobFromRosterSnapshot}
+import {MobEngine} from '../src/mobs/engine.mjs';
+import {prepareOriginalMobPoll,settleOriginalMobPoll}
+  from '../src/mobs/ecosystem-region-poll.mjs';
+import {deriveRegionalMobState}
   from '../src/mobs/ecosystem-region-snapshot.mjs';
 
 const SURFACE=Object.freeze([
@@ -90,7 +93,10 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       // Empty counts and explicit capacity are hypothetical inputs, not
       // natural births, current-game population or spawn integration.
       const sourceRegion={cx,cz,section,feet};
-      const sourceRoster=deriveRegionalMobState([],sourceRegion);
+      const sourceEngine=new MobEngine(proposedQuery,seed,{
+        maxEntities:32,maxActive:8
+      });
+      const sourceRoster=deriveRegionalMobState(sourceEngine.all(),sourceRegion);
       assert.equal(sourceRoster.regionName,[cx,cz,section].join(','));
       assert.equal(sourceRoster.localCounts.size,40,
         'Source bridge must cover all 40 original creature species');
@@ -98,12 +104,23 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       assert.equal(sourceRoster.occupiedPositions.length,0);
       // Empty roster is an EXPLICIT hypothetical source game state,
       // never a claim about existing natural mob populations.
-      const regional=proposeMobFromRosterSnapshot({
-        world:proposedQuery,seed,region:sourceRegion,observer,
+      const regional=prepareOriginalMobPoll({
+        engine:sourceEngine,world:proposedQuery,seed,
+        region:sourceRegion,observer,
         biome:site.biome,light:site.biome==='cave'?.29:.8,
-        kind:site.siteType,
-        entities:[],startSerial:0
+        kind:site.siteType,now:10,spawnOnFirstVisit:true
       });
+      assert.equal(regional.kind,'evaluated',
+        'Source-first original scheduling allows the same bounded read-only poll');
+      assert.equal(regional.record.next,10);
+      const noBirth=settleOriginalMobPoll(regional,{world:proposedQuery});
+      assert.equal(noBirth.serial,regional.attempts,
+        'Source serial only advances when the real poll is settled');
+      assert.equal(noBirth.next,10,
+        'A source-generated position is NOT a confirmed natural birth');
+      assert.equal(sourceEngine.counts().total,0,
+        'Never inject a mob into the original M7 world');
+      sourceEngine.dispose();
       assert.ok(regional.attempts>=0&&regional.attempts<=MAX_PROPOSALS_PER_TICK);
       assert.equal(regional.nextSerial,regional.attempts);
       assert.equal(Object.isFrozen(regional),true);
