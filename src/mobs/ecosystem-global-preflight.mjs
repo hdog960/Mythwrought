@@ -18,7 +18,7 @@ export function prepareGlobalMobTick({
   if(tick.selection===null){
     return Object.freeze({
       kind:'skipped',clock:tick.clock,reason:tick.reason,
-      proposal:null,attempts:0
+      proposal:null,attempts:0,rejected:null
     });
   }
   const chosen=tick.selection;
@@ -31,7 +31,8 @@ export function prepareGlobalMobTick({
   });
   const result=Object.freeze({
     kind:plan.kind,clock:tick.clock,reason:'selected',
-    regionKey:chosen.key,proposal:plan.proposal,attempts:plan.attempts
+    regionKey:chosen.key,proposal:plan.proposal,attempts:plan.attempts,
+    rejected:plan.rejected
   });
   tickets.set(result,Object.freeze({tick,plan,world}));
   return result;

@@ -24,10 +24,10 @@ import {proposeTerrainAwarePosition}
 import {MAX_PROPOSALS_PER_TICK}
   from '../src/mobs/ecosystem-region-proposals.mjs';
 import {MobEngine} from '../src/mobs/engine.mjs';
-import {prepareOriginalMobPoll,settleOriginalMobPoll}
-  from '../src/mobs/ecosystem-region-poll.mjs';
-import {createGlobalEcologyClock,advanceGlobalEcologyClock,
-  commitGlobalEcologyRegion} from '../src/mobs/ecosystem-global-clock.mjs';
+import {createGlobalEcologyClock}
+  from '../src/mobs/ecosystem-global-clock.mjs';
+import {prepareGlobalMobTick,settleGlobalMobTick}
+  from '../src/mobs/ecosystem-global-preflight.mjs';
 import {deriveRegionalMobState}
   from '../src/mobs/ecosystem-region-snapshot.mjs';
 
@@ -106,40 +106,32 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       assert.equal(sourceRoster.occupiedPositions.length,0);
       // Empty roster is an EXPLICIT hypothetical source game state,
       // never a claim about existing natural mob populations.
-      const sourceTick=advanceGlobalEcologyClock(createGlobalEcologyClock(),{
-        seconds:.5,regions:[sourceRegion]
-      });
-      assert.equal(sourceTick.reason,'selected');
-      assert.equal(sourceTick.selection.key,[cx,cz,section].join(','));
-      assert.equal(sourceTick.selection.time,.5);
-      const regional=prepareOriginalMobPoll({
-        engine:sourceEngine,world:proposedQuery,seed,
-        region:sourceTick.selection.region,observer,
+      const regional=prepareGlobalMobTick({
+        clock:createGlobalEcologyClock(),seconds:.5,regions:[sourceRegion],
+        engine:sourceEngine,world:proposedQuery,seed,observer,
         biome:site.biome,light:site.biome==='cave'?.29:.8,
-        kind:site.siteType,now:sourceTick.selection.time,
-        record:sourceTick.selection.record,spawnOnFirstVisit:true
+        kind:site.siteType,spawnOnFirstVisit:true
       });
       assert.equal(regional.kind,'evaluated',
-        'Source-first original scheduling allows the same bounded read-only poll');
-      assert.equal(regional.record.next,.5);
-      const noBirth=settleOriginalMobPoll(regional,{world:proposedQuery});
-      assert.equal(noBirth.serial,regional.attempts,
-        'Source serial only advances when the real poll is settled');
-      assert.equal(noBirth.next,.5,
-        'A source-generated position is NOT a confirmed natural birth');
-      const committedClock=commitGlobalEcologyRegion(
-        sourceTick.clock,sourceTick.selection,noBirth
-      );
+        'Original first-visit warm start permits one bounded region poll');
+      assert.equal(regional.regionKey,[cx,cz,section].join(','));
+      assert.equal(regional.clock.time,.5);
+      const committedClock=settleGlobalMobTick(regional,{world:proposedQuery});
       assert.equal(committedClock.entries.length,1,
-        'Exactly one original-region record per source M7 site');
-      assert.equal(committedClock.entries[0][0],[cx,cz,section].join(','));
+        'One committed source region record per M7 site');
+      const noBirth=committedClock.entries[0][1];
+      assert.equal(noBirth.serial,regional.attempts,
+        'Only actual completed source trials advance the regional serial');
+      assert.equal(noBirth.next,.5,
+        'A proposed position is never counted as a confirmed natural birth');
+      assert.equal(committedClock.entries[0][0],regional.regionKey);
       assert.equal(committedClock.cursor,1,
-        'Original global cursor advances exactly once');
+        'Original global cursor advances once per source site');
       assert.equal(sourceEngine.counts().total,0,
-        'Never inject a mob into the original M7 world');
+        'Never inject mobs into original M7 world');
       sourceEngine.dispose();
       assert.ok(regional.attempts>=0&&regional.attempts<=MAX_PROPOSALS_PER_TICK);
-      assert.equal(regional.nextSerial,regional.attempts);
+      assert.equal(noBirth.serial,regional.attempts);
       assert.equal(Object.isFrozen(regional),true);
       if(regional.proposal){
         const {species,point,sourceSerial}=regional.proposal;

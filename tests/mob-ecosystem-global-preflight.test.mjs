@@ -32,6 +32,7 @@ test('original global first-visit deferral and zero-birth poll are not bypassed'
   assert.equal(first.kind,'cooldown');
   assert.equal(first.proposal,null);
   assert.equal(first.attempts,0);
+  assert.equal(first.rejected,null);
   const next=settleGlobalMobTick(first,{world});
   assert.equal(next.entries.length,1);
   assert.equal(next.entries[0][1].next,1);
@@ -39,6 +40,7 @@ test('original global first-visit deferral and zero-birth poll are not bypassed'
   assert.equal(second.kind,'evaluated');
   assert.equal(second.attempts,6);
   assert.equal(second.proposal,null);
+  assert.equal(typeof second.rejected.physicalHabitat,'number');
   const after=settleGlobalMobTick(second,{world});
   assert.equal(after.entries[0][1].serial,6);
   assert.equal(after.entries[0][1].next,1);
