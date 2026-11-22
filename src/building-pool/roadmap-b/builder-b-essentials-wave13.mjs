@@ -38,7 +38,9 @@ export function buildGlimmerboughSplitSunOrchidHouse(){
  for(const q of foot){
   const [x,z]=q.split(',').map(Number);
   const outside=Object.entries(fac).find(([,v])=>!has(x+v[0],z+v[1]));
-  if(!outside||((x*7+z*11)%4!==0))continue;
+  // The north 2-high entry at (26,2) retains a solid framed arch;
+  // stacked panes need a grounded sill, not air below an active doorway.
+  if(!outside||((x*7+z*11)%4!==0)||(x===26&&z===2))continue;
   const [side]=outside;
   for(let y=2;y<=4;y++){
    if(b.clear(x,y,z))throw Error('Glimmerbough original glass has no exterior source frame '+K(x,z));
