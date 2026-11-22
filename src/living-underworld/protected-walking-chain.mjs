@@ -7,6 +7,8 @@ import {selectSourceProtectedInterlevelRamps}
  from './source-aware-ramp-selection.mjs';
 import {auditProtectedSubsurfaceStairs} from './protected-subsurface-stairs.mjs';
 import {auditSupportedEntranceStairs} from './walkable-entrance-stairs.mjs';
+import {auditProposedSupportsAgainstMainGalleries}
+ from './combined-stair-footprints.mjs';
 
 const INT=Number.isSafeInteger;
 const matching=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y&&a.z===b.z;
@@ -76,14 +78,20 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
    candidateOnly:true
   });
  });
+ const gallery=selected?.ok===true?
+  auditProposedSupportsAgainstMainGalleries(seed,rx,rz,[
+   p,...selected.links.map(x=>x.selected.proposal)
+  ]):null;
  const possible=entry.ok&&entryGrade.ok&&selected?.ok===true&&
+  gallery?.ok===true&&
   selected.completeNetworkCollisionFree===true&&
   connectors.every(x=>x.sourceSafe);
  return Object.freeze({
   ok:possible,seed,rx,rz,reason:possible?null:
    !entry.ok?'ENTRANCE_FULL_FOOTPRINT_UNSAFE':
    !entryGrade.ok?'ENTRANCE_NOT_SUPPORTED_STAIRS':
-   'DEEP_LINKS_SOURCE_UNSAFE',
+   !selected?.ok?'DEEP_LINKS_SOURCE_UNSAFE':
+   'MAIN_GALLERY_CLEARANCE_BLOCKED',
   surfaceMouth:p.mouth,
   upperHub:layers[0].hub,lowestHub:layers.at(-1).hub,
   fullEntranceGeologyAndProvenancePassed:entry.ok,
@@ -98,6 +106,12 @@ export function auditProtectedUnderworldWalkingChain(seed,rx,rz,{
   combinedSelectedRampAirFaceConnected:selected?.allSelectedCandidateVoxelAirFaceConnected===true,
   combinedDistinctProposedSupportCells:selected?.distinctProposedSupportCells??null,
   combinedStairwayCollisions:selected?.combined?.crossRouteBlockedCells??null,
+  mainGalleryClearanceSafe:gallery?.ok===true,
+  mainGalleryBlockedCells:gallery?.blockedCells??null,
+  mainGalleryPairsChecked:gallery?.pedestrianHorizontalPairsChecked??null,
+  mainGalleryFailure:gallery?.reason??null,
+  mainGalleryPerRouteObstructions:gallery?.routes??[],
+  mainGalleryExamples:gallery?.examples??[],
   alternativeLayoutsExamined:selected?.inspected??0,
   aggregateSourceRejectedAlternatives:selected?.sourceRejected??0,
   sourceReaderIdentityAuthenticatedByCallerOnly:true,

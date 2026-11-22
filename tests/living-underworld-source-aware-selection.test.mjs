@@ -23,7 +23,11 @@ test('surface mouth to lowest depth is source-checkable and cross-route clearanc
  const out=auditProtectedUnderworldWalkingChain(179,0,0,{
   entrance:entry,source:stone
  });
- assert.equal(out.ok,true,JSON.stringify(out));
+ // Three mutually safe stairs do NOT yet imply preserved horizontal galleries.
+ assert.equal(out.ok,false,JSON.stringify(out));
+ assert.equal(out.reason,'MAIN_GALLERY_CLEARANCE_BLOCKED');
+ assert.ok(out.mainGalleryBlockedCells>0);
+ assert.equal(out.mainGalleryPairsChecked,16);
  assert.equal(out.routeCount,4);
  assert.equal(out.sourceProtectedRoutes,4);
  assert.equal(out.combinedNetworkSupportAndHeadroomSafe,true);

@@ -13,7 +13,11 @@ const entrance=()=>searchWideProtectedEntrances(179,0,0,{
 test('fully connected source-safe proposed route joins exact upper and three deep hubs',()=>{
  const e=entrance();assert.equal(e.ok,true);
  const q=auditProtectedUnderworldWalkingChain(179,0,0,{entrance:e,source:src});
- assert.equal(q.ok,true,JSON.stringify(q));
+ // Full candidate-chain acceptance now includes old planned gallery headroom.
+ assert.equal(q.ok,false,JSON.stringify(q));
+ assert.equal(q.reason,'MAIN_GALLERY_CLEARANCE_BLOCKED');
+ assert.ok(q.mainGalleryBlockedCells>0);
+ assert.equal(q.mainGalleryPairsChecked,16);
  assert.equal(q.routeCount,4);
  assert.equal(q.sourceProtectedRoutes,4);
  assert.ok(q.originalM7SourceChecks>1000);
