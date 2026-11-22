@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'c6dadfb31daf37ec0923514b20ff6d84c09a5dc1');
+    'f134d5cbd642789849587cff7f1486780a82d0bd');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -296,4 +296,94 @@ test('fatal stream retirement aborts IN-FLIGHT frame before original mobs/C6/wat
   assert.equal(run(true,true),undefined,'local native retirement fatal must abort this frame');
   assert.equal(run(true,false),'original-atmosphere','healthy local rendering still proceeds');
   assert.equal(run(false,true),'original-atmosphere','public control unchanged by opt-in fence');
+});
+
+
+// Exact ORIGINAL source execution of refreshEditedMeshes, not a copied
+// alternative renderer/transaction model. Full checkout native Node tests
+// remain necessary; controlled collaborators here inject failure boundaries.
+const nearPublishStart=source.indexOf('  function refreshEditedMeshes(');
+const nearPublishEnd=source.indexOf('\n  function refreshPhysicalChunk',nearPublishStart);
+assert.ok(nearPublishStart>=0&&nearPublishEnd>nearPublishStart);
+const exactNearPublish=source.slice(nearPublishStart,nearPublishEnd);
+const makeExactNearPublisher=new Function('scope',
+  'with(scope){\n'+exactNearPublish+'\nreturn refreshEditedMeshes;}');
+function originalNearPublishCase({
+  enabled=true,loaded=true,failUpload=false,failRetire=false,failFar=false,
+  needFar=true,failPause=false,failAlert=false
+}={}){
+  const old={buffer:{id:'original-old'},count:3};
+  const next={buffer:{id:'original-new'},count:3,waterBuffer:null,waterCount:0};
+  const chunks=new Map(loaded?[['0,0,0',old]]:[]);
+  const calls=[],reason='291_ORIGINAL_PUBLISH_FAULT';
+  const scope={
+    near291Enabled:enabled,near291Fatal:false,chunks,
+    verticalEditSections:()=>[0],editAffectedChunks:()=>[{cx:0,cz:0}],
+    depthMeshKey:()=> '0,0,0',
+    meshPlayableChunk:()=>new Float32Array(9),
+    meshPlayableWater:()=>new Float32Array(0),
+    uploadPack2Chunk:()=>{calls.push('upload');
+      if(failUpload)throw Error(reason);return next;},
+    deleteChunkBuffers:()=>{calls.push('retire');
+      if(failRetire)throw Error(reason);},
+    caveSession:null,combinedWorld:()=>needFar,
+    caveFarGpu:{invalidate:()=>{calls.push('far');
+      if(failFar)throw Error(reason);}},
+    editMeshBatches:0,lastEditMeshKeys:[],
+    frameDriver:{pause:()=>{calls.push('pause');if(failPause)throw Error('pause callback failed');}},
+    fatal:()=>{calls.push('fatal');if(failAlert)throw Error('fatal UI failed');}
+  };
+  let error=null;
+  try{makeExactNearPublisher(scope)(0,0,0);}
+  catch(caught){error=caught;}
+  return {scope,old,next,calls,error,reason};
+}
+
+test('exact original near+far success publishes once with no fatal latch',()=>{
+  const x=originalNearPublishCase();
+  assert.equal(x.error,null);
+  assert.equal(x.scope.near291Fatal,false);
+  assert.equal(x.scope.chunks.get('0,0,0').buffer.id,'original-new');
+  assert.deepEqual(x.calls,['upload','retire','far']);
+});
+test('staged upload error before near publication retains old GPU mapping',()=>{
+  const x=originalNearPublishCase({failUpload:true});
+  assert.equal(x.error?.message,x.reason);
+  assert.equal(x.scope.near291Fatal,false);
+  assert.equal(x.scope.chunks.get('0,0,0').buffer.id,'original-old');
+  assert.deepEqual(x.calls,['upload']);
+});
+test('native old-buffer retirement failure after publication latches fatal',()=>{
+  const x=originalNearPublishCase({failRetire:true});
+  assert.equal(x.error?.message,x.reason);
+  assert.equal(x.scope.near291Fatal,true);
+  assert.equal(x.scope.chunks.get('0,0,0').buffer.id,'original-new');
+  assert.deepEqual(x.calls,['upload','retire','pause','fatal']);
+});
+test('near+far invalidation exception cannot silently resume after voxel rollback',()=>{
+  const x=originalNearPublishCase({failFar:true});
+  assert.equal(x.error?.message,x.reason);
+  assert.equal(x.scope.near291Fatal,true);
+  assert.deepEqual(x.calls,['upload','retire','far','pause','fatal']);
+});
+test('far-only invalidation exception without a loaded near chunk still latches fatal',()=>{
+  const x=originalNearPublishCase({loaded:false,failFar:true});
+  assert.equal(x.error?.message,x.reason);
+  assert.equal(x.scope.near291Fatal,true);
+  assert.deepEqual(x.calls,['far','pause','fatal']);
+});
+test('broken stop/UI callbacks never mask the original native retirement error',()=>{
+  const x=originalNearPublishCase({failRetire:true,failPause:true,failAlert:true});
+  assert.equal(x.error?.message,x.reason);
+  assert.equal(x.scope.near291Fatal,true);
+  assert.deepEqual(x.calls,['upload','retire','pause','fatal']);
+});
+test('unchanged public path rethrows original native fault without a local-only latch',()=>{
+  for(const opts of [{failRetire:true},{failFar:true}]){
+    const x=originalNearPublishCase({...opts,enabled:false});
+    assert.equal(x.error?.message,x.reason);
+    assert.equal(x.scope.near291Fatal,false);
+    assert.ok(!x.calls.includes('pause'));
+    assert.ok(!x.calls.includes('fatal'));
+  }
 });
