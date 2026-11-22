@@ -1,3 +1,6 @@
+# Child-branch-only exact-source gate. This revision checks the short-lived
+# shared source-probe cache against a measured 106516-call prior-run baseline.
+# No browser or full-repository CI; no existing workflows are cancelled.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
