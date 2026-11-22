@@ -1,0 +1,33 @@
+name: Roadmap A original Pack5 preview witnesses (isolated native Node)
+
+# CI-only child of a source-only Roadmap A branch. The one-file path filter
+# prevents repeat runs for later changes. This does not change shared workflows.
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-contact-gap-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-contact-gap-native-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  roadmap-a-pack5-focused-source-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact original producer plus conservative pure-core witnesses
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-physical-preview-dependency-producer.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-physical-preview-support-producer.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-physical-source-seam-producer.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-mesh-backing-core.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-mesh-backing-producer.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-contact-gap-core.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-contact-gap-producer.test.mjs
