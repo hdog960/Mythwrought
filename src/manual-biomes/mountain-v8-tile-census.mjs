@@ -43,7 +43,10 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     const tx=tileX+dx,tz=tileZ+dz;
     // One source-backed read at the unique owner site: 64x fewer
     // candidate surveys than scanning every square of each 8x8 tile.
-    const {rootX,rootZ}=mountainV8TileRoot(tx,tz,seed);
+    if(!valid(tx)||!valid(tz))return null;
+    const root=mountainV8TileRoot(tx,tz,seed);
+    if(!root)return null; // unsafe distant coordinates are never sampled
+    const {rootX,rootZ}=root;
     const chosen=cache.survey(rootX,rootZ);
     stats.seen++;
     if(chosen&&(chosen.x!==rootX||chosen.z!==rootZ||
