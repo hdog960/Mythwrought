@@ -6,6 +6,9 @@
 // must be called separately by the eventual integrator for actual construction.
 const str=x=>x.join(',');
 const bearing=new Set(['wall','partition','column']);
+// A wall is NOT a roof foundation bearing when a window interrupts its Y=3
+// masonry below. Require real continuous original columns from Y=6 down to 0.
+const verticalBearing=new Set(['foundation','floor','wall','beam','partition','column']);
 const validAt=a=>Array.isArray(a)&&a.length===3&&a.every(Number.isSafeInteger);
 // Original Pack2 ID61 is X-axis in zero/north rotation; east/quarter-turn rotates it along Z.
 const directions=Object.freeze([{dx:1,dz:0,axis:'x',orientation:'north'},
@@ -23,6 +26,13 @@ export function planD19SourceProvenRoofTrusses(blueprint,{maxSpans=12,maxBeamCel
   at.set(str(c.at),c);
  }
  const get=(x,y,z)=>at.get(x+','+y+','+z);
+ const bearingToFoundation=(x,z)=>{
+  for(let y=6;y>=0;y--){
+   const c=get(x,y,z);
+   if(!c||!verticalBearing.has(c.role))return false;
+  }
+  return true;
+ };
  for(const c of blueprint.cells){
   if(c.role!=='roof'||c.feature!=='weather-plane')continue;
   weather.push(c);
@@ -35,13 +45,15 @@ export function planD19SourceProvenRoofTrusses(blueprint,{maxSpans=12,maxBeamCel
  const keyed=new Map();
  for(const wall of walls){
   const [x, ,z]=wall.at;
+  if(!bearingToFoundation(x,z))continue;
   for(const {dx,dz,axis,orientation} of directions){
    const points=[];
    for(let n=1;n<=maxSpan+1;n++){
     const px=x+n*dx,pz=z+n*dz;
     const cell=get(px,6,pz);
     if(cell){
-     if(bearing.has(cell.role)&&points.length>=2&&points.length<=maxSpan){
+     if(bearing.has(cell.role)&&bearingToFoundation(px,pz)&&
+        points.length>=2&&points.length<=maxSpan){
       // Original structural bearing at BOTH endpoints, clear intermediate y=6,
       // original same-coordinate non-sky roof over every proposed beam.
       const token=points.map(str).join('|');
@@ -69,6 +81,7 @@ export function planD19SourceProvenRoofTrusses(blueprint,{maxSpans=12,maxBeamCel
     spanCells:cand.spanCells,bearingStart:Object.freeze([...cand.start]),
     bearingEnd:Object.freeze([...cand.end]),sourceClearanceHeight:6,
     points:Object.freeze(copies),authoredRoofAboveEveryCell:true,
+    bothBearingsReachUnbrokenOriginalFoundation:true,
     jointContinuityNeedsOriginalPhysicalReview:true,
     originalRoofLoadAcceptance:false}));
   for(const p of copies){
@@ -112,6 +125,7 @@ export function planD19SourceProvenRoofTrusses(blueprint,{maxSpans=12,maxBeamCel
   proposedTrussSpans:Object.freeze(spans),proposedBeamCells:Object.freeze(beams),
   proposedBeamCount:beams.length,proposedSpanCount:spans.length,
   allSupportEndpointsOriginalPhysicalStructure:true,
+  verifiedSourceBearingToFoundation:true,
   noExistingVoxelOverwrites:true,originalGeometryUnmodified:true,
   renderedPhysicalPack2MeshAccepted:false,
   fullRoofStructuralAcceptance:false,allWindowSurroundsAccepted:false,
