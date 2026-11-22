@@ -1,0 +1,110 @@
+name: Desert P3 radius-three real-game two-site visual comparison
+on:
+  push:
+    branches:
+      - research/desert-p3-surface-radius3-20261122
+    paths:
+      - .github/workflows/desert-p3-radius3-webgl2-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-radius3-webgl2-isolated
+  cancel-in-progress: false
+jobs:
+  exact-original-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce exact original protected parent and verified radius-three source
+        run: |
+          set -euo pipefail
+          test "$(git -C baseline rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base d546867dfad702654166e9fd3edfb28ba96beba4 HEAD)" = d546867dfad702654166e9fd3edfb28ba96beba4
+          unexpected=$(git -C candidate diff --name-only d546867dfad702654166e9fd3edfb28ba96beba4 HEAD | grep -Ev '^(\.github/workflows/desert-p3-radius3-webgl2-isolated.yml|docs/desert/PHASE3_RADIUS3_SOURCE_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+      - name: Install browser dependencies only for this targeted original-game proof
+        run: |
+          cd baseline
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+          cd ../candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+      - name: Capture exact original-game baseline and radius-three RGB candidate
+        run: |
+          set -euo pipefail
+          cp candidate/tests/desert-phase3-triple-junction-browser.mjs baseline/tests/
+          cmp candidate/tests/desert-phase3-triple-junction-browser.mjs baseline/tests/desert-phase3-triple-junction-browser.mjs
+          cd baseline
+          python3 -m http.server 4173 >/tmp/desert-radius3-original-server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-radius3 node tests/desert-phase3-triple-junction-browser.mjs
+          kill "$server" 2>/dev/null || true
+          cd ../candidate
+          python3 -m http.server 4173 >/tmp/desert-radius3-candidate-server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-radius3 node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Verify source parity, genuine WebGL2 PNG pixels and SHA256
+        run: |
+          cd candidate
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import assert from 'node:assert/strict';
+          import {PNG} from 'pngjs';
+          const old=JSON.parse(fs.readFileSync('../baseline/artifacts/desert-radius3/after-manifest.json'));
+          const next=JSON.parse(fs.readFileSync('artifacts/desert-radius3/after-manifest.json'));
+          assert.equal(old.sites.length,2);assert.equal(next.sites.length,2);
+          for(let i=0;i<2;i++){
+            const a=old.sites[i],b=next.sites[i];
+            for(const field of ['seed','x','z','other','top','cap'])
+              assert.equal(a[field],b[field]);
+            for(const site of [a,b]){
+              assert.equal(site.cap,401);
+              assert.equal(site.data.gameBlock,401);
+              assert.equal(site.data.generator,'mythwrought-five-surface-regions-v7');
+              assert.equal(site.canvasState.daylight,1);
+              assert.equal(site.canvasState.loadedChunks,25);
+              assert.equal(site.canvasState.pendingChunks,0);
+            }
+            const p=fs.readFileSync('../baseline/'+a.file),q=fs.readFileSync(b.file);
+            const before=PNG.sync.read(p),after=PNG.sync.read(q);
+            for(const png of [before,after]){
+              assert.equal(png.width,932);assert.equal(png.height,430);
+            }
+            let changed=0;
+            for(let j=0;j<before.data.length;j+=4)
+              if(before.data[j]!==after.data[j]||
+                 before.data[j+1]!==after.data[j+1]||
+                 before.data[j+2]!==after.data[j+2])changed++;
+            console.log('DESERT_P3_RADIUS3_WEBGL2 '+JSON.stringify({
+              seed:a.seed,changedPixels:changed,totalPixels:932*430,
+              baselineSHA256:crypto.createHash('sha256').update(p).digest('hex'),
+              candidateSHA256:crypto.createHash('sha256').update(q).digest('hex')
+            }));
+          }
+          EOF
+      - name: Upload only the four genuine scene captures and original manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-radius3-original-game
+          path: |
+            baseline/artifacts/desert-radius3/**
+            candidate/artifacts/desert-radius3/**
+          if-no-files-found: warn
+          retention-days: 7
