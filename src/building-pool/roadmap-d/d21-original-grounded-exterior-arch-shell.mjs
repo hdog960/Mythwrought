@@ -125,7 +125,7 @@ function translatePack4(at,group){
  }
  return buf;
 }
-function produceSourceAt(choice,resolvers){
+export function buildD21OriginalExteriorArchSourceAt(choice,resolvers){
  const facet=choice.authoritativeFacadeFacing,rotation=FOUR[facet];
  const sourceArch=resolvers.resolvePack3Ornamental(121,rotation);
  const physicalGlass=resolvers.resolvePack4WindowShape(choice.candidateId,rotation);
@@ -220,7 +220,7 @@ export function planD21GroundedExteriorWindowArches(blueprint,originalGlazingPla
  const samples=[],count=Math.min(bad.length,maxSites);let bytes=0;
  for(let i=0;i<count;i++){
   const c=bad[Math.floor(i*bad.length/count)];
-  const mesh=produceSourceAt(c,{resolvePack3Ornamental,resolvePack4WindowShape,resolvePack4Asset});
+  const mesh=buildD21OriginalExteriorArchSourceAt(c,{resolvePack3Ornamental,resolvePack4WindowShape,resolvePack4Asset});
   bytes+=mesh.worldSourceVertexBytes;
   if(bytes>maxPreviewBytes)throw Error('D21 original exterior arch iPhone sample memory cap exceeded');
   samples.push(mesh);
