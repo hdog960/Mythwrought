@@ -7,7 +7,7 @@ import {prepareOriginalMobPoll,settleOriginalMobPoll}
 import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
   settleRegionalEcologyPoll}
   from '../src/mobs/ecosystem-region-cadence.mjs';
-import {createGlobalEcologyClock,advanceGlobalEcologyClock,
+import {createGlobalEcologyClock,advanceGlobalEcologyClock,previewGlobalEcologySelection,
   previewGlobalEcologyTick,commitGlobalEcologyRegion,ORIGINAL_MAX_REGION_RECORDS,
   ORIGINAL_MAX_TIME_ADVANCE} from '../src/mobs/ecosystem-global-clock.mjs';
 
@@ -239,4 +239,35 @@ test('untrusted clock or invalid input cannot claim a due source tick',()=>{
   assert.throws(()=>previewGlobalEcologyTick(createGlobalEcologyClock(),{
     seconds:-1,regions:[location(0)]
   }),/Invalid original ecology global advance/);
+});
+
+test('certified source region preview selects without consuming a global tick',()=>{
+  const source=createGlobalEcologyClock(),regions=[location(5),location(6)];
+  const first=previewGlobalEcologySelection(source,{seconds:.5,regions});
+  const second=previewGlobalEcologySelection(source,{seconds:.5,regions});
+  assert.equal(first.reason,'selected');
+  assert.equal(first.key,'5,0,0');
+  assert.equal(first.nextCursor,1);
+  assert.deepEqual(first,second);
+  assert.notEqual(first,second);
+  const actual=at(source,.5,regions);
+  assert.equal(actual.reason,first.reason);
+  assert.equal(actual.selection.key,first.key);
+  assert.equal(actual.selection.time,first.time);
+  commitGlobalEcologyRegion(actual.clock,actual.selection,recordFor(actual.selection));
+  assert.throws(()=>previewGlobalEcologySelection(source,{seconds:.5,regions}),
+    /Invalid original ecology global advance/);
+});
+test('previews preserve source skip types without issuing any selection ticket',()=>{
+  const source=createGlobalEcologyClock();
+  assert.equal(previewGlobalEcologySelection(source,
+    {seconds:.25,regions:[location(0)]}).reason,'interval');
+  assert.equal(previewGlobalEcologySelection(source,
+    {seconds:.5,regions:[]}).reason,'empty');
+  assert.equal(previewGlobalEcologySelection(source,
+    {seconds:.5,regions:[location(0,0,-2,4)]}).reason,'invalid-region');
+  const valid=previewGlobalEcologySelection(source,
+    {seconds:.5,regions:[location(0)]});
+  assert.equal(valid.reason,'selected');
+  assert.equal(at(source,.5,[location(0)]).reason,'selected');
 });

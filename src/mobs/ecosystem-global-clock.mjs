@@ -3,6 +3,7 @@
 // Mirrors the original 0.5s world ticker, 64-item rotating region selection,
 // capped time advancement and earliest-eligible stale region eviction.
 import {sectionForY} from '../depth.mjs';
+import {previewSourceEcologyRegion} from './ecosystem-selection-preview.mjs';
 import {SOURCE_MAX_ECOLOGY_TIME_ADVANCE,previewSourceEcologyTick}
   from './ecosystem-tick-preview.mjs';
 import {ORIGINAL_ECOLOGY_POLL_INTERVAL,ORIGINAL_ECOLOGY_REPLENISH_SECONDS,
@@ -55,55 +56,51 @@ export function previewGlobalEcologyTick(state,{
   });
 }
 
-// One source advance() call; do not replay the same clock or skip an outstanding
-// due region. The returned ticket owns the selection, not a mutable shared
-// cursor/roster. An empty or invalid region still consumes the 0.5s global tick.
+// Compute which real source region would be visited, WITHOUT consuming
+// the certified global clock or issuing a commit-capable selection ticket.
+export function previewGlobalEcologySelection(state,{
+  seconds,regions
+}={}){
+  const due=previewGlobalEcologyTick(state,{seconds,regions});
+  if(!due.due)
+    return Object.freeze({
+      reason:'interval',time:due.time,nextCursor:state.cursor,
+      key:null,region:null,record:null,evictKey:null
+    });
+  const chosen=previewSourceEcologyRegion({
+    regions,cursor:state.cursor,time:due.time,
+    records:state.entries,isValidRegion:validRegion
+  });
+  return Object.freeze({...chosen,time:due.time});
+}
+
+// A single consuming source tick uses the SAME bounded source selection
+// algorithm as the preview; invalid/capacity/empty slots still advance
+// time and the original cursor when appropriate.
 export function advanceGlobalEcologyClock(state,{
   seconds,regions
 }={}){
-  const forecast=previewGlobalEcologyTick(state,{seconds,regions});
+  const predicted=previewGlobalEcologySelection(state,{seconds,regions});
   consumed.add(state);
-  const time=forecast.time;
-  if(!forecast.due)
+  const time=predicted.time;
+  if(predicted.reason==='interval')
     return Object.freeze({
       clock:clock(time,state.next,state.cursor,state.entries),
       selection:null,reason:'interval'
     });
   const next=time+ORIGINAL_ECOLOGY_POLL_INTERVAL;
-  if(!regions.length)
+  const advanced=clock(time,next,predicted.nextCursor,state.entries);
+  if(predicted.reason!=='selected')
     return Object.freeze({
-      clock:clock(time,next,state.cursor,state.entries),
-      selection:null,reason:'empty'
+      clock:advanced,selection:null,reason:predicted.reason
     });
-  const width=Math.min(regions.length,ORIGINAL_MAX_REGION_RECORDS);
-  const picked=regions[state.cursor%width];
-  const cursor=state.cursor+1;
-  const advanced=clock(time,next,cursor,state.entries);
-  if(!validRegion(picked))
-    return Object.freeze({clock:advanced,selection:null,reason:'invalid-region'});
-  const key=keyFor(picked);
-  const known=state.entries.find(([name])=>name===key);
-  let evictKey=null;
-  if(!known&&state.entries.length>=ORIGINAL_MAX_REGION_RECORDS){
-    const stale=state.entries.find(([,entry])=>
-      entry.next<=time-ORIGINAL_ECOLOGY_REPLENISH_SECONDS);
-    if(!stale)
-      return Object.freeze({clock:advanced,selection:null,reason:'capacity'});
-    evictKey=stale[0];
-  }
   const selection=Object.freeze({
-    key,
-    region:Object.freeze({
-      cx:picked.cx,cz:picked.cz,section:picked.section,feet:picked.feet
-    }),
-    record:known?.[1]??null,
-    evictKey,time
+    key:predicted.key,region:predicted.region,
+    record:predicted.record,evictKey:predicted.evictKey,time
   });
   issued.set(selection,advanced);
   pending.add(advanced);
-  return Object.freeze({
-    clock:advanced,selection,reason:'selected'
-  });
+  return Object.freeze({clock:advanced,selection,reason:'selected'});
 }
 
 // Only a genuine source regional cadence record from an already inspected or
