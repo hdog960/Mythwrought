@@ -55,3 +55,10 @@ test('genuine original Pack5 ceramic grout source box yields exact preview seam 
  assert.equal(check([a,alt]).exactOpaqueOppositeFacePairs,0);
  assert.equal(check([a,b]).appliedToActualRenderer,false);
 });
+
+test('delimiter-colliding variant and material strings never bypass source identity',()=>{
+ const a=fixture([0,0,0],[box([0,0,0,1,1,1],'gamma')],{variant:'alpha|0|beta'});
+ const b=fixture([1,0,0],[box([0,0,0,1,1,1],'beta|0|gamma')],{variant:'alpha'});
+ assert.equal(check([a,b]).exactOpaqueOppositeFacePairs,0);
+ assert.equal(check([fixture([0,0,0]),fixture([1,0,0])]).exactOpaqueOppositeFacePairs,1);
+});
