@@ -1,0 +1,43 @@
+name: Desert P3 radius-three original-source mesh gate
+on:
+  push:
+    branches:
+      - research/desert-p3-surface-radius3-20261122
+    paths:
+      - .github/workflows/desert-p3-radius3-source-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-radius3-source-isolated
+  cancel-in-progress: false
+jobs:
+  exact-original-mesh-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact branch and unchanged original source boundaries
+        run: |
+          set -euo pipefail
+          BASE=9466959d94b0464fd85e7f1ce95d630e48b3c89a
+          test "$(git -C baseline rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|tests/desert-p3-radius3-original-mesh.test.mjs|.github/workflows/desert-p3-radius3-source-isolated.yml|docs/desert/PHASE3_RADIUS3_SOURCE_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/voxel.mjs
+          node --check candidate/src/manual-biomes/desert-seam-vertex-tint.mjs
+          node --check candidate/tests/desert-p3-radius3-original-mesh.test.mjs
+      - name: New real M7 source-only gradient, protection and perf tests
+        run: node --test candidate/tests/desert-p3-radius3-original-mesh.test.mjs
