@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '340b01e84798c02b46955e9d9adf7b84cb625f19');
+    '45d1fc881237ecc05b05848826d7da7597bc6bf7');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -123,16 +123,16 @@ test('original source save, mine and mandatory GPU upload remain unchanged',()=>
   one('buffer=uploadChunkBuffer(gl,vertices);');
 });
 
-test('all FOUR original frameDriver.resume sites share the fatal/pagehide gate',()=>{
+test('all FIVE original frameDriver.resume sites share the fatal/pagehide gate',()=>{
   const lines=source.split('\n');
   const hits=lines.flatMap((line,index)=>line.includes('frameDriver.resume()')?[index]:[]);
-  assert.equal(hits.length,4);
+  assert.equal(hits.length,5);
   for(const index of hits){
     const preceding=lines.slice(Math.max(0,index-4),index+1).join('\n');
     assert.ok(preceding.includes('near291CanResume()'),'unguarded resume at '+(index+1));
   }
   one("const near291CanResume=()=>!near291PageSuspended&&!near291Fatal&&");
-  one("near291?.status().phase!=='blocked';");
+  one("(!near291Enabled||near291?.status().phase==='ready');");
 });
 test('pagehide cancels old dynamic imports and retires VAOs before the unchanged save path',()=>{
   const start=source.indexOf("window.addEventListener('pagehide',");
@@ -166,4 +166,41 @@ test('active async initialization failures latch fatal and cannot be undone by s
   assert.ok(source.includes('near291Pending=false;'));
   assert.ok(source.includes('near291Fatal=true;\n        frameDriver.pause();'));
   assert.ok(source.includes('if(epoch===near291LoadEpoch)near291Pending=false;'));
+});
+
+test('native original async arming does not admit a baseline frame as local opt-in',()=>{
+  inOrder('const frameDriver=new ForegroundFrameDriver(',
+    'function armNear291(){',
+    "import('../perf/issue-291/opaque-near-lifecycle.mjs')",
+    'near291=createOpaqueNearLifecycle({gl,',
+    '// Only this certified-ready async completion may wake',
+    'if(!document.hidden&&!graphicsLost&&near291CanResume()){',
+    'lastFrame=performance.now();',
+    'frameDriver.resume();');
+  const start=source.indexOf("import('../perf/issue-291/opaque-near-lifecycle.mjs')");
+  const end=source.indexOf('.catch(error=>',start);
+  assert.ok(start>=0&&end>start);
+  const region=source.slice(start,end);
+  assert.equal((region.match(/frameDriver\.resume\(\)/g)||[]).length,1);
+});
+
+test('the EXACT original-source resume gate executes correctly for all lifecycle states',()=>{
+  const match=source.match(/const near291CanResume=\(\)=>[^\n]*\n\s*\([^\n]*\);/);
+  assert.ok(match,'original local gate could not be extracted');
+  const gate=new Function('near291PageSuspended','near291Fatal',
+    'near291Enabled','near291',match[0]+'\nreturn near291CanResume();');
+  const ready={status:()=>({phase:'ready'})};
+  const lost={status:()=>({phase:'lost'})};
+  const blocked={status:()=>({phase:'blocked'})};
+  for(const [name,args,expect] of [
+    ['public startup',[false,false,false,null],true],
+    ['local import pending',[false,false,true,null],false],
+    ['local ready',[false,false,true,ready],true],
+    ['local lost',[false,false,true,lost],false],
+    ['local blocked',[false,false,true,blocked],false],
+    ['local page suspended',[true,false,true,ready],false],
+    ['local fatal latch',[false,true,true,ready],false],
+    ['public pagehide',[true,false,false,null],false],
+    ['public pageshow',[false,false,false,null],true]
+  ])assert.equal(gate(...args),expect,name);
 });
