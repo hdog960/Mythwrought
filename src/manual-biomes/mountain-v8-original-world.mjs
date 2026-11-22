@@ -19,7 +19,7 @@ const O=Object.freeze([[0,0],[4,0],[-4,0],[0,4],[0,-4]]);
 export function surveyMountainV8OriginalWorld(x,z,seed,{world}={}){
   if(!validPoint(x)||!validPoint(z)||!validSeed(seed))return null;
   const source=world??new VoxelWorld(seed);
-  if(!(source instanceof VoxelWorld)||source.seed!==seed||
+  if(source.constructor!==VoxelWorld||source.seed!==seed||
      source.edits.size!==0||source.rotations.size!==0)return null;
   // Require real mountain biome membership and read-only original substrate
   // throughout the center and four real horizontal neighbor sites.
