@@ -7,6 +7,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getRoadmapC1ATavernWave22,ROADMAP_C_1A_WAVE22_TAVERN_IDS,ROADMAP_C_1A_WAVE22_TAVERN_SPECS} from '../src/building-pool/roadmap-1a/m3-tavern-wave22-roadmap-c.mjs';
 import {validateBlueprint,validatePool} from '../src/building-pool/roadmap-1a/legacy-schema.mjs';
+import {getM1Blueprints} from '../src/building-pool/roadmap-1a/legacy-buildings.mjs';
 import {getHospitalityWave1} from '../src/building-pool/roadmap-1a/m3-hospitality-wave1.mjs';
 import {getHospitalityWave2} from '../src/building-pool/roadmap-1a/m3-hospitality-wave2.mjs';
 import {getHospitalityWave7} from '../src/building-pool/roadmap-1a/m3-hospitality-wave7.mjs';
@@ -163,4 +164,14 @@ test('Stormglass original mountain-large tavern #001 is distinct from accepted h
  const ratios=accepted.map(p=>({id:p.id,ratio:d4(b,p)}));
  for(const ratio of ratios)assert.ok(ratio.ratio<.89,'mountain-large original near-clone '+JSON.stringify(ratio));
  console.log('STORMGLASS_ORIGINAL_MOUNTAIN_TAVERN_D4='+JSON.stringify(ratios));
+});
+
+test('Stormglass legal mountain-tavern 001 does NOT reuse original legacy M1 mountain-tavern 003',()=>{
+ const historical=getM1Blueprints();
+ assert.equal(historical.length,30,'actual unchanged legacy M1 census');
+ const previous=new Set(historical.map(p=>p.id));
+ assert.ok(previous.has('r1:tavern:mountain:large:003'),
+   'missing historical mountain tavern 003 collision witness from original generator');
+ assert.equal(b.id,'r1:tavern:mountain:large:001');
+ assert.ok(!previous.has(b.id),'Stormglass would overwrite an original M1 canonical building ID');
 });
