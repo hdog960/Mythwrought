@@ -37,23 +37,29 @@ test('five adjacent sources each require genuine bounded physical support',()=>{
   let calls=0;
   const physical=p=>{
     calls++;
-    return {x:p.x,z:p.z,top:p.top,estimatedCells:2,
-      writes:[{x:p.x,y:5,z:p.z,material:'stone'},
-              {x:p.x,y:6,z:p.z,material:'slate'}],
+    return {x:p.x,z:p.z,legacyTop:p.legacyTop,top:p.top,cap:p.cap,
+      estimatedCells:p.top-p.legacyTop+1,
+      writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+        x:p.x,y:p.legacyTop+i,z:p.z,
+        material:p.legacyTop+i===p.top?p.cap:'stone'
+      })),
       safeToIntegrate:false,requiresApprovedV8BlockMapping:true};
   };
   const certified=certify(-16,15,179,read,{readSupport:physical});
   assert.ok(certified);
   assert.equal(calls,5);
   assert.equal(certified.physicallyVerified,true);
-  assert.equal(certified.verifiedCells,10);
+  assert.equal(certified.verifiedCells,40);
   assert.equal(certify(-16,15,179,read,{readSupport:p=>
     p.x===-15?null:physical(p)}),null);
 });
 test('malformed or unbounded physical columns cannot certify mountain seams',()=>{
   const original=create(),physical=p=>({
-    x:p.x,z:p.z,top:p.top,estimatedCells:1,
-    writes:[{x:p.x,y:5,z:p.z,material:'stone'}],
+    x:p.x,z:p.z,legacyTop:p.legacyTop,top:p.top,cap:p.cap,
+    estimatedCells:p.top-p.legacyTop+1,
+    writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+      x:p.x,y:p.legacyTop+i,z:p.z,material:p.legacyTop+i===p.top?p.cap:'stone'
+    })),
     safeToIntegrate:false,requiresApprovedV8BlockMapping:true
   });
   for(const broken of [
@@ -63,4 +69,21 @@ test('malformed or unbounded physical columns cannot certify mountain seams',()=
     p=>({...physical(p),writes:[{x:p.x,y:6,z:p.z,material:'stone'}]}),
     p=>({...physical(p),requiresApprovedV8BlockMapping:false})
   ])assert.equal(certify(0,0,179,original,{readSupport:broken}),null);
+});
+
+test('rejects forged cap, missing uplift and exposed wrong subsurface material',()=>{
+  const proposal=create();
+  const good=p=>({x:p.x,z:p.z,top:p.top,cap:p.cap,legacyTop:p.legacyTop,
+    estimatedCells:p.top-p.legacyTop+1,
+    writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+      x:p.x,y:p.legacyTop+i,z:p.z,
+      material:p.legacyTop+i===p.top?p.cap:'stone'})),
+    safeToIntegrate:false,requiresApprovedV8BlockMapping:true});
+  assert.ok(certify(0,0,179,proposal,{readSupport:good}));
+  for(const altered of [
+    p=>({...good(p),cap:'snow'}),
+    p=>({...good(p),legacyTop:6}),
+    p=>({...good(p),writes:good(p).writes.map((w,i)=>i===0?{...w,material:'dirt'}:w)}),
+    p=>({...good(p),estimatedCells:7}),
+  ])assert.equal(certify(0,0,179,proposal,{readSupport:altered}),null);
 });
