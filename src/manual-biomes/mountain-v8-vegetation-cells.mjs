@@ -26,7 +26,7 @@ const pattern=Object.freeze({
  */
 export function planMountainV8PlantCells(proposal,{
   worldMaxY=19,airId=0,readOriginalBlock,protectedAt=()=>false,
-  mountainAt=()=>false
+  mountainAt=()=>false,proposedSurfaceAt
 }={}){
   if(!proposal||proposal.safeToIntegrate!==false||
      proposal.generatorIdentityRequired!=='v8-new-opt-in'||
@@ -35,14 +35,17 @@ export function planMountainV8PlantCells(proposal,{
      !proposal.vegetationSite?.chosen||
      ![proposal.x,proposal.z,proposal.top,worldMaxY,airId].every(valid)||
      typeof readOriginalBlock!=='function'||typeof protectedAt!=='function'||
-     typeof mountainAt!=='function')return null;
+     typeof mountainAt!=='function'||
+     typeof proposedSurfaceAt!=='function')return null;
   const pieces=pattern[proposal.vegetation];
   if(!pieces||pieces.length>MOUNTAIN_V8_PLANT_CELL_LIMIT)return null;
   const cells=[],seen=new Set();
   for(const [dx,dy,dz,material] of pieces){
     const x=proposal.x+dx,y=proposal.top+dy,z=proposal.z+dz;
     const key=x+','+y+','+z;
-    if(y>worldMaxY||seen.has(key)||!mountainAt(x,z)||
+    const proposedTop=proposedSurfaceAt(x,z);
+    if(!valid(proposedTop)||y<=proposedTop||
+       y>worldMaxY||seen.has(key)||!mountainAt(x,z)||
        protectedAt(x,y,z)||readOriginalBlock(x,y,z)!==airId)return null;
     seen.add(key);
     cells.push(Object.freeze({x,y,z,material}));
