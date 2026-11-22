@@ -3,7 +3,8 @@
 // not a settlement, and not proof of a linked, walkable world.
 // Search largest safe radius first; never waive source/gallery/budget gates.
 import {planUnderworldRegion} from './worldwide-network.mjs';
-import {compileMainGalleryPedestrianClearance}
+import {compileMainGalleryPedestrianClearance,
+ compileSelectedStairPedestrianClearance}
  from './combined-stair-footprints.mjs';
 import {isCandidateGeologyMaterial}
  from './protected-entrance-envelope.mjs';
@@ -12,12 +13,15 @@ const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const RADII=Object.freeze([16,12,8,6,4]);
 const key=(x,y,z)=>x+','+y+','+z;
 export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
- source,maxSourceChecks=60000
+ source,maxSourceChecks=60000,selectedStairProposals=null
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||
   ROLES.some(k=>typeof source[k]!=='function')||
-  !INT(maxSourceChecks)||maxSourceChecks<100||maxSourceChecks>100000)
+  !INT(maxSourceChecks)||maxSourceChecks<100||maxSourceChecks>100000||
+  !(selectedStairProposals===null||
+   (Array.isArray(selectedStairProposals)&&selectedStairProposals.length>=1&&
+    selectedStairProposals.length<=8)))
   throw TypeError('Invalid source-aware detached terrace search');
  const city=planUnderworldRegion(seed,rx,rz).cityCandidate;
  if(!city)return Object.freeze({sitePresent:false,seed,rx,rz,
@@ -29,6 +33,12 @@ export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
  if(!index.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:index.reason,inspectedRadii:0,sourceChecks:0,
   worldChanged:false});
+ const selected=selectedStairProposals===null?null:
+  compileSelectedStairPedestrianClearance(selectedStairProposals);
+ if(selected&&!selected.ok)return Object.freeze({sitePresent:true,ok:false,
+  seed,rx,rz,reason:'SELECTED_STAIRS_MUTUALLY_UNSAFE',
+  selectedStairRefusal:selected.reason,inspectedRadii:0,
+  sourceChecks:0,worldChanged:false});
  const cache=new Map(),attempts=[];
  let sourceChecks=0;
  for(const radius of RADII){
@@ -47,6 +57,9 @@ export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
      const kind=y<=floorY?'support':'clearance';
      const clash=index.inspectCell(x,y,z,kind);
      if(clash){invalid='TERRACE_BLOCKS_HORIZONTAL_GALLERY';break outer;}
+     if(selected?.inspectCell(x,y,z,kind)){
+      invalid='TERRACE_BLOCKS_SELECTED_STAIRWAY';break outer;
+     }
     }
    }
   if(invalid){
@@ -96,10 +109,13 @@ export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
    radius,columns:columns.length,sourceChecks,
    inspectedRadii:attempts.length,attempts:Object.freeze(attempts),
    corridorMutualClearanceWith16MainGalleries:true,
+   selectedStairRouteMutualClearanceChecked:!!selected,
+   selectedStairCount:selected?.routeCount??0,
+   selectedStairSourceOwnershipNotVerified:!!selected,
    allSupportAndNineHeadroomSourceOwned:true,
    oldWholeCityPadNotApproved:true,
    entranceRampSourceNotYetApproved:true,
-   interlevelStairMutualClearanceNotYetApproved:true,
+   interlevelStairMutualClearanceNotYetApproved:!selected,
    terrainActuallyModified:false,worldChanged:false,
    originalM7ReaderIdentityVerifiedByCallerOnly:true});
   if(refusal==='TERRACE_ORIGINAL_SOURCE_BUDGET')break;
