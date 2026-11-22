@@ -31,11 +31,14 @@ Added `tests/manual-biomes/enchanted-tree-structural-branches.test.mjs`, **four 
 
 - Previously successful original source-native proof: **21/21 PASS**, reused exclusively for its own revision.
 - New branch source update `217f585d5012e70ca7391e830a5abefc63c045af` for geometry and `aeec831dfb33926b5dedb7471293c984e1f25ee5` for topology tests.
-- One isolated lightweight native [Actions #45033031803](https://github.com/hdog960/Mythwrought/actions/runs/45033031803) source commit `5d01f7d111688d30b635ece1c91252eed7406e85` launched by updating the **existing child-branch-only** native workflow to include the four new cases and earlier **affected** source-native regressions. It was **IN PROGRESS** at initial check. No second run, Chromium, screenshots or whole repository suite.
-- New candidate geometry and all new tests are **provisional until #45033031803 succeeds on this exact source**. Treat any real native failure as a bug to fix, not a reason to weaken assertions.
+- The single new focused native [Actions #45033031803](https://github.com/hdog960/Mythwrought/actions/runs/45033031803), **source commit `5d01f7d111688d30b635ece1c91252eed7406e85`, job `137240608520`, completed SUCCESS**; exact real logs reviewed. **25/25 tests PASS, 0 fail** (previous 21 focused source native + 4 new structural).
+- **Nine style variations across three species, 256 actual physical bark voxels, all face-connected to roots.** Starspire/Moonwillow shafts and elbows, Ancient Giant 2×2 trunk plus all 4 branch beams, two-block headspace and 19-block hard ceiling passed source native.
+- Current exact-head real M7 three-seed Giant census: **12 real eligible Giants, no losses from new rules**, 5 seed 179, 1 seed 7919, 6 seed -88, 48 authentic valid root corners. **2,927 natural tree voxels, 465 source chunk-border voxels, 62 connected cross-chunk pairs**, independent source reader parity PASS.
+- Current native original-mesher six-chunk GPU bytes **963,360 historical vs 1,012,392 connected-tree candidate**, ratio **1.051**; each original `meshChunk` upload stayed under unchanged 8 MiB limit. This measures source mesh data, **not iPhone FPS/p95**.
+- No second run, Chromium, screenshots or whole-repository suite. Later documentation-only checkpoint commits do not change tested source modules; reuse evidence scoped to unchanged source.
 
 ## Outstanding release gates
 
-- Confirm exact source native 25/25 (21 retained + 4 new) or examine genuine failures; remeasure real three-seed Giant census and six-chunk native GPU budget after changed connected branches.
+- The exact-source native 25/25, three-seed Giant census and six-chunk native GPU budget **passed** at the source revision above; no redundant repeat is needed unless source or relevant dependencies change.
 - At milestone: **affected** real original-game WebGL2 viewports including canopy seams, player access and iPhone landscape, only where new branches changed appearance. Do not repeat old Phase 1 and unrelated visual suites.
 - Before launch: explicit versioned generator identity with save/reload compatibility, no old-world reinterpretation; physical iPhone Home Screen PWA streaming, mobile p95, cave/landmark, collision and full required release safety checks.
