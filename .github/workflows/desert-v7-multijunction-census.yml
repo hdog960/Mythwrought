@@ -1,0 +1,34 @@
+name: Desert V7 genuine triple-junction source audit (research only)
+on:
+  push:
+    branches:
+      - research/desert-v7-triple-junction-20261122
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-source-triple-junction-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  genuine-biome-junction-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify no gameplay changes relative to accepted source
+        run: |
+          set -euo pipefail
+          BASE=b88c5ded2a318e809eedf01a72e8e468744bab92
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-v7-multijunction-census.mjs|.github/workflows/desert-v7-multijunction-census.yml)$' || true)
+          test -z "$unexpected"
+          node --check scripts/ci/desert-v7-multijunction-census.mjs
+      - name: Original V6 biome + actual V7 column-plan T-junction census
+        run: node scripts/ci/desert-v7-multijunction-census.mjs
