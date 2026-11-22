@@ -185,3 +185,46 @@ test('bounded search cannot call an untested direct route impossible',()=>{
  assert.equal(q.globalSearchComplete,false);
  assert.equal(q.segments,1);
 });
+
+test('deep center-side landing source veto cannot be masked by a clean thin bridge',()=>{
+ const p=plan(2,0),cell={x:p.to.x-1,y:p.floorY-5,z:p.to.z-1};
+ const match=(x,y,z)=>x===cell.x&&y===cell.y&&z===cell.z;
+ const cases=[
+  [{...stone(),naturalAt:(x,y,z)=>match(x,y,z)?6:1},'UNSAFE_MATERIAL'],
+  [{...stone(),naturalAt:(x,y,z)=>match(x,y,z)?0:1},'OLD_NATURAL_AIR_SUPPORT'],
+  [{...stone(),naturalAt:(x,y,z)=>match(x,y,z)?0:1,
+   authoredAt:(x,y,z)=>match(x,y,z)?0:undefined},'AUTHORED_AIR_SUPPORT'],
+  [{...stone(),editedAt:(x,y,z)=>match(x,y,z)},'PLAYER_EDIT'],
+  [{...stone(),protectedAt:(x,y,z)=>match(x,y,z)},'PROTECTED_LANDMARK']
+ ];
+ for(const [source,refusal] of cases){
+  const r=auditSourceProtectedCityUnderpass(seed,2,0,{
+   source,sourceOwnedDeepSelection:deep(2,0)
+  });
+  assert.equal(r.ok,false);
+  assert.equal(r.reason,'CENTER_SIDE_PAD_ORIGINAL_SOURCE_UNSAFE');
+  assert.equal(r.firstRefusal,refusal);
+  assert.equal(r.underpassSourceVisits,248);
+  assert.equal(r.centerPadSourceVisits,1);
+  assert.deepEqual(r.firstRejectedCell,{
+   x:cell.x,y:cell.y,z:cell.z,kind:'support'
+  });
+  assert.equal(r.worldChanged,false);
+ }
+});
+test('malformed original center-side landing flags and block ID fail closed',()=>{
+ const p=plan(2,0),cell={x:p.to.x-1,y:p.floorY-5,z:p.to.z-1};
+ const match=(x,y,z)=>x===cell.x&&y===cell.y&&z===cell.z;
+ for(const [role,re] of [
+  ['editedAt',/Nonboolean original M7 underpass landing edit source/],
+  ['protectedAt',/Nonboolean original M7 underpass landing landmark source/]]){
+  assert.throws(()=>auditSourceProtectedCityUnderpass(seed,2,0,{
+   source:{...stone(),[role]:(x,y,z)=>match(x,y,z)?0:false},
+   sourceOwnedDeepSelection:deep(2,0)
+  }),re);
+ }
+ assert.throws(()=>auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:{...stone(),naturalAt:(x,y,z)=>match(x,y,z)?null:1},
+  sourceOwnedDeepSelection:deep(2,0)
+ }),/Invalid original M7 underpass landing material/);
+});
