@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {prepareResourceFixture,evaluateResourceFixture} from '../src/resonance/devices48/resource-fixture-v1.mjs';
+const item={id:'drop_1',cell:'cell_1',kind:'ore',quantity:2,playerOwned:false,fixtureApproved:true};
+const base={seed:7,tick:1,deviceId:'collector',mode:'collect',energyDemand:4,items:[item],protectedCells:[]};
+test('eligible proposals never claim world or inventory edits',()=>{const f=prepareResourceFixture(base);assert.deepEqual(evaluateResourceFixture(f,{allocation:4,clearance:true,inventoryBridge:true}),{state:'eligible',proposedItems:f.items,worldChanged:false,inventoryChanged:false,productionBound:false});});
+test('power deficit, clearance or missing inventory bridge safely stop',()=>{const f=prepareResourceFixture(base);for(const input of [{allocation:3,clearance:true,inventoryBridge:true},{allocation:4,clearance:false,inventoryBridge:true},{allocation:4,clearance:true,inventoryBridge:false}]){const result=evaluateResourceFixture(f,input);assert.equal(result.state,'stopped');assert.equal(result.proposedItems.length,0);}});
+test('protect player resources and protected cells',()=>{assert.throws(()=>prepareResourceFixture({...base,items:[{...item,playerOwned:true}]}));assert.throws(()=>prepareResourceFixture({...base,protectedCells:['cell_1']}));assert.throws(()=>prepareResourceFixture({...base,items:[{...item,fixtureApproved:false}]}));});
+test('reject duplicate resources, excess demands and grants',()=>{assert.throws(()=>prepareResourceFixture({...base,items:[item,item]}));assert.throws(()=>prepareResourceFixture({...base,energyDemand:65}));assert.throws(()=>evaluateResourceFixture(prepareResourceFixture(base),{allocation:5,clearance:true,inventoryBridge:true}));});
+test('stable ordering independent of input order',()=>{const other={...item,id:'drop_2',cell:'cell_2'};assert.deepEqual(prepareResourceFixture({...base,items:[item,other]}).items,prepareResourceFixture({...base,items:[other,item]}).items);});
