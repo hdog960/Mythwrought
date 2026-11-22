@@ -248,7 +248,7 @@
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "cd448d72f6cefdca9521437ec5f85a76fb22e10958d07448b7070ebcdfd752d5",
-    "./src/manual-biomes/profile-world.mjs": "e4a5e9d969cc737e51bfc1b3527ab5ea8b66fa81c9887bc1097f3e955b092ef8",
+    "./src/manual-biomes/profile-world.mjs": "7fbfd8cd17a1f93e397c7aa2043ef30a49e44e0b781ea599c03e8df04da2aceb",
     "./src/manual-biomes/shoulder-traversal.mjs": "f54ef77060131d8bfd5b43c5ab232d9ab9049d664d7b3a46642f0cd24bb3bffe",
     "./src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
     "./src/meadow.mjs": "971be34a7b15baaf678265dfc9da2918ef6bc2b72761fc7763f71d94063a3f05",
