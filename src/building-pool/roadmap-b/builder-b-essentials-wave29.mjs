@@ -73,20 +73,6 @@ export function buildStarpetalDoubleGardenOrchidarium(){
    b.put(x,y,z,'partition','live:wood','none',
     {trueSourceBotanicalTrellisDivider:true,climbingPlantsNotSimulated:true});
  }
- // THREE-high Pack4 windows, real sill at y1 and lintel at y5. Each bay
- // remains truly external rather than facing a fake inner greenhouse wall.
- let cells=0,bays=0;
- for(const key of indoor){
-  const [x,z]=key.split(',').map(Number);
-  if((x*17+z*11)%10!==0)continue;
-  const ext=Object.entries(dir).find(([,d])=>!grounded(x+d[0],z+d[1]));
-  if(!ext||[1,2,3,4,5].some(y=>b.clear(x,y,z)))continue;
-  for(const y of [2,3,4]){
-   b.cut(x,y,z);b.put(x,y,z,'window','pack4:030',ext[0],
-    {sourceThreeHighGlassBay:true,physicalPackShapePending:true});
-   cells++;
-  }bays++;
- }
  for(const row of [
   ['north-twilight-archive',16,4,48,16],
   ['west-shade-orchid-room',5,11,22,46],
@@ -117,6 +103,20 @@ export function buildStarpetalDoubleGardenOrchidarium(){
  ]){
   if(!grounded(x,z))throw Error('Starpetal authored greenhouse portal lacks real y0 stone '+K(x,z));
   b.opening(x,z);b.portal(from,to,x,z);
+ }
+ // THREE-high Pack4 windows, real sill at y1 and lintel at y5. Each bay
+ // remains truly external rather than facing a fake inner greenhouse wall.
+ let cells=0,bays=0;
+ for(const key of indoor){
+  const [x,z]=key.split(',').map(Number);
+  if((x*17+z*11)%10!==0)continue;
+  const ext=Object.entries(dir).find(([,d])=>!grounded(x+d[0],z+d[1]));
+  if(!ext||[1,2,3,4,5].some(y=>b.clear(x,y,z)))continue;
+  for(const y of [2,3,4]){
+   b.cut(x,y,z);b.put(x,y,z,'window','pack4:030',ext[0],
+    {sourceThreeHighGlassBay:true,physicalPackShapePending:true});
+   cells++;
+  }bays++;
  }
  for(const [x,z,name] of [[30,8,'empty-silverleaf-counter'],[10,28,'dry-vine-loam-trays'],
   [51,35,'sealed-spore-packets'],[27,53,'unused-orchid-box'],
