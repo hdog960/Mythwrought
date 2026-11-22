@@ -29,20 +29,32 @@ try{
     const page=await context.newPage(),errors=[];
     page.on('pageerror',e=>errors.push(String(e?.message??e)));
     page.on('dialog',d=>d.accept());
-    // Genuine NEW seeded M7 world through the application's own startup
-    // pathway. No synthetic runtime, imported fake world or saved-world rewrite.
-    if(seed!==179)
-      await page.addInitScript(chosen=>{
-        if(location.protocol==='http:'&&location.hostname==='127.0.0.1')
-          localStorage.setItem('mythwrought-v002-selected-seed',String(chosen));
-      },seed);
+    // Never preseed SELECTED_SEED_KEY: the production `isUnclaimedWorldSeed`
+    // guard intentionally treats any previously selected seed as protected.
+    // To prove seed 2026, switch from the real booted M7 seed 179 using the
+    // ORIGINAL GAME menu; never manufacture a profile or bypass a save gate.
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'domcontentloaded',timeout:90000});
       await page.waitForFunction(()=>{
         const api=window.__mythwroughtTest,canvas=document.querySelector('#scene');
-        return api&&canvas&&Number(canvas.dataset.renderedFrames)>2&&
+        return api&&api.snapshot().seed===179&&
+          api.fourBiomeProfile()?.generator==='mythwrought-five-surface-regions-v7'&&
+          canvas&&Number(canvas.dataset.renderedFrames)>2&&
           Number(canvas.dataset.loadedChunks)>=25&&Number(canvas.dataset.pendingChunks)===0;
       },null,{timeout:110000});
+      if(seed!==179){
+        await page.locator('#menu').click();
+        await page.locator('#seedInput').fill(String(seed));
+        await page.locator('#switchWorld').click();
+        await page.waitForFunction(chosen=>{
+          const api=window.__mythwroughtTest,canvas=document.querySelector('#scene');
+          return api&&api.snapshot().seed===chosen&&
+            api.fourBiomeProfile()?.generator==='mythwrought-five-surface-regions-v7'&&
+            canvas&&Number(canvas.dataset.loadedChunks)>=25&&
+            Number(canvas.dataset.pendingChunks)===0;
+        },seed,{timeout:110000});
+        await page.locator('#closeHelp').click();
+      }
       const scene=await page.evaluate(({gx,gy,gz})=>{
         const api=window.__mythwroughtTest;
         const profile=api.fourBiomeProfile();
