@@ -8,6 +8,8 @@ import {planUnderworldRegion,networkAirAt}
  from '../../src/living-underworld/worldwide-network.mjs';
 import {auditSourceProtectedChunkRisk}
  from '../../src/living-underworld/source-protected-chunk-risk.mjs';
+import {summarizeSourceProtectedChunkRisk}
+ from '../../src/living-underworld/source-protected-chunk-aggregate.mjs';
 const seed=179,sites=Object.freeze([
  Object.freeze({biome:'plains',rx:-9,rz:0}),
  Object.freeze({biome:'desert',rx:-3,rz:-9}),
@@ -24,7 +26,7 @@ const source=Object.freeze({
  protectedAt:(x,y,z)=>old.naturalAndLandmarkBlock(x,y,z)!==
   baseBlock(x,y,z,seed)
 });
-const rows=[];
+const rows=[],chunkAudits=[];
 for(const site of sites){
  const hub=planUnderworldRegion(seed,site.rx,site.rz).layers[0].hub;
  const origin=Object.freeze({x:Math.floor(hub.x/16)*16,
@@ -32,6 +34,7 @@ for(const site of sites){
  const audit=auditSourceProtectedChunkRisk({origin,side:16,source,
   candidateAirAt:(x,y,z)=>networkAirAt(seed,x,y,z),
   maxFaceGrowth:1200,maxCells:6000});
+ chunkAudits.push(audit);
  rows.push(Object.freeze({...site,origin,ok:audit.ok,
   sourceHaloCells:audit.sourceHaloCells,
   candidateCarveCells:audit.plannedCarves,
@@ -45,11 +48,16 @@ for(const site of sites){
   proposedSupportPlacementNotModeled:true,
   noNativeGpuBufferCreated:true,oldWorldUnmodified:true}));
 }
+const aggregate=summarizeSourceProtectedChunkRisk(chunkAudits,{
+ expectedChunks:5,maxTotalFaceGrowth:3500,
+ maxTotalSourceQueries:40000,maxTotalApprovedCarves:10000
+});
 const report=Object.freeze({schema:'living-underworld-original-m7-five-biome-one-hub-chunk-risk-v1',
  seed,actualOriginalM7SolidSource:true,
  totalChunks:rows.length,sourceQueries:rows.reduce((n,r)=>n+(r.sourceHaloCells??0),0),
  sourceRejectedCarveCells:rows.reduce((n,r)=>n+(r.sourceRejectedCarveCells??0),0),
- perChunkMaximumNewFaces:1200,rows:Object.freeze(rows),
+ perChunkMaximumNewFaces:1200,
+ aggregateSourceRisk:Object.freeze(aggregate),rows:Object.freeze(rows),
  allGalleryChunksCovered:false,allSupportPlacementCostsCovered:false,
  playerWalkingAndMobileGpuUnverified:true,
  originalM7ConstructorFaultSeeds8675309And13579NotRetested:true,
