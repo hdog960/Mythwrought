@@ -5,7 +5,7 @@ import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
-import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
+import {desertSeamVertexTint,desertSeamBlendWeight,desertSeamPackedTerrainTag,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -337,6 +337,7 @@ export function meshChunk(world,cx,cz){
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
               let rgb=color;
+              let artTag=groundColor?terrainArtMaterial(id):0;
               if(eligibleDesertTop){
                 const wx=x+px,wz=z+pz,key=wx+','+wz+','+y;
                 // Genuine full-cube M7 corners are integers. Never extrapolate
@@ -353,12 +354,19 @@ export function meshChunk(world,cx,cz){
                     });
                     seamVertexDistances.set(key,squared);
                   }
-                  rgb=desertSeamVertexTint(color,squared);
+                  const seamWeight=desertSeamBlendWeight(squared);
+                  if(seamWeight>0){
+                    rgb=desertSeamVertexTint(color,squared);
+                    // Existing ninth float stores shader material. Integer
+                    // remains tag40, fraction interpolates 40/42 artwork only
+                    // for genuine original Desert cap vertices. No new bytes.
+                    artTag=desertSeamPackedTerrainTag(artTag,seamWeight);
+                  }
                 }
               }
               appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
-                groundColor?terrainArtMaterial(id):0);
+                artTag);
             }
           }
           continue;
