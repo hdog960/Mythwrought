@@ -1,0 +1,25 @@
+# MYTHWROUGHT Builder D29 — genuine upper-chord clearance, exterior footing, and load-path requirements
+
+**Date:** 2026-11-22. Isolated source-only proposal. NEVER a buildable structure or approval.
+
+Base: `432b6eb10d3f88edda45195b5abc21cae4c589a0` (`builder-d-d28-unrated-long-bays-isolated-20261122`). Production main, protected draft PRs, other developers, saves, automations, settlements, original W16/17, Pack1–5 and all 285 Builder 4B identifiers stay unchanged. No merge, deployment, browser build, live structure, runtime block, or extra world terrain is created. All 3,644 mandatory strict D4 pair checks and the 132 provisional unregistered IDs remain future gates.
+
+## Why D29 changes direction
+
+D28's **1,101** genuine wall-to-wall Y6 corridors yielded **64** distinct sample spans and **2,533** provisional cells; **2,469** consecutive joints have *zero published moment-strength rating*. The 59,412 roof cells farther than eight steps from original short support proximity remain **uncertified**. D28's hypothetical reduction to 54,916 is a seeded adjacency visualization, not structural coverage. D27 proved seven-box real Pack2-to-roof geometry, with geometric ID61 end-face area 0.36 and ID62/full-cube roof underside contact area 0.2116, but not bending, axial tension, lateral bracing, footings or load capacity.
+
+An uninterrupted x/z sequence of one-cell Pack2 timbers is *not* an engineered beam. End-face contacts transmit no established bending resistance, and there is no triangulated, rated top-chord-and-diagonal truss. A clear opening above an original roof likewise does not prove it is safe to attach anything to that roof.
+
+## D29 authored source modules, read-only
+
+1. `d29-structural-demand-screen.mjs` explicitly requires tributary width, distributed gravity/net uplift/lateral loads, and deflection limit before computing even a numerical demand; it requires independent beam bending/shear/EI, joint bending/shear, gravity/uplift roof fastener transfer, and original foundation gravity/uplift/lateral reaction ratings for any *numerical screening*. Illustrative formulas are for a continuous simply supported beam: **Mmax=q L²/8; Vmax=R=q L/2; EI required = (5 q L⁴ / 384)/(L / chosen deflection ratio)**. Unknown values stay null. Even strong synthetic numbers yield only a mathematical screen — **`structuralReleaseAccepted:false`** and **`constructionAllowed:false`** without exception. A genuinely triangulated truss would require a separate member force and connection stability design, not substitution of this single-member model.
+2. `d29-raised-route-geometry.mjs` reconstructs each selected D28 line from original founded-wall endpoints (Y0–Y6), verifies *every* original Y7 `live:wood` weather-plane, untouched empty Y6, and every Y2 WALK position; counts true Y8/Y9 original voxel occupancies and overhead walking intersections across the endpoints and interior. Refuses any drift from D28's source-native interior upper-tier ledger. Scans only already-empty, outside-original-foundation coordinates next to each rooted end. These external sites have **no original source foundation** and no actual terrain/land certification — never represent them as grounded. It never proposes a Y2–Y6 pier or overwrites original cells.
+3. `d29-original-upper-chord-perimeter-audit.mjs` composes D28 exact original source and the D29 gates for all sixteen originals, totals Y8/Y9 usable *space*, counts separately unbuilt exterior/footing possibilities and preserves old far roof figures. Returns no installable shapes, no movement/collision or player-route acceptance.
+
+## What a physically credible design must still do
+
+An authorized architectural concept would have to triangulate the *upper chord and web* into a stable truss, respect original roof tiers and gameplay roof access, and use genuine new supported perimeter footings or other engineer-verified original-load transfer — while preserving every Y2 WALK and original Y7 wood. It must obtain **real** material geometry/strength ratings and allowable loads, authentic joint bending/shear or pinned truss tension/compression connection ratings, bracing, tested roof diaphragm distribution, verified actual block placement collision and render/picking, foundation reactions, wind/uplift, and independent approval. None is represented by this proposal. Upper-course availability is only a spatial constraint check.
+
+## Targeted verification and release fences
+
+Only new D29 tests: `node --test --test-concurrency=1 tests/building-pool/roadmap-d/d29-structural-demand-screen.pure.test.mjs tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.pure.test.mjs tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.source.test.mjs`. Verify exact original W16/W17, original M2 producer and D28 planner blob IDs in one isolated GitHub Actions push. Existing D28 5/5, D27 6/6, D26 4/4, D25 71/71 were confirmed and must NOT be duplicated. Original-world placement, WebGL2 screenshot, collision selection, and installed iPhone PWA remain untouched and untested. **No continuous structural certification** despite any geometric clearance.

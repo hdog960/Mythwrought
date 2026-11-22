@@ -1,0 +1,50 @@
+name: Builder D29 original Y8/Y9 long-bay physical engineering gate (narrow, isolated)
+on:
+  push:
+    branches:
+      - builder-d-d29-upper-tier-load-gate-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d29-*.mjs'
+      - 'tests/building-pool/roadmap-d/d29-*.test.mjs'
+      - '.github/workflows/roadmap-d-d29-upper-chord-source-only.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d29-source-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-source-node22:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Exact D28 source ancestry and immutable author-owned original source
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          git merge-base --is-ancestor '432b6eb10d3f88edda45195b5abc21cae4c589a0' HEAD
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-4b/m2-distinctive.mjs)" = '4a3bddd06d4d8d91f65279649c7545661c81729d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d28-original-long-bay-architect.mjs)" = '523ec04f36aad72f75d13602b52ce64b1c839a71'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax exactly new D29 files
+        run: |
+          node --check src/building-pool/roadmap-d/d29-structural-demand-screen.mjs
+          node --check src/building-pool/roadmap-d/d29-raised-route-geometry.mjs
+          node --check src/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.mjs
+          node --check tests/building-pool/roadmap-d/d29-structural-demand-screen.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.source.test.mjs
+      - name: Run only new D29 source-native and negative-case engineering tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d29-structural-demand-screen.pure.test.mjs \
+            tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.pure.test.mjs \
+            tests/building-pool/roadmap-d/d29-original-upper-chord-perimeter-audit.source.test.mjs
