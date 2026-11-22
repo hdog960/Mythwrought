@@ -15,6 +15,8 @@ import {selectCityCompatibleDeepLinks}
  from '../../src/living-underworld/source-aware-city-deep-selection.mjs';
 import {auditSourceProtectedGalleryEasementDistrict}
  from '../../src/living-underworld/city-gallery-easement-district.mjs';
+import {surveyCityGalleryFloorCutsets}
+ from '../../src/living-underworld/city-gallery-floor-cutset-survey.mjs';
 const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
@@ -47,6 +49,7 @@ for(const [rx,rz] of regions){
  // source survey already checked every candidate terrace footprint cell.
  const terrace=approved?null:
   proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
+ const cutset=surveyCityGalleryFloorCutsets(seed,rx,rz);
  const fullPad=auditSourceProtectedCityFloorLink(seed,rx,rz,{source});
  // The historically proposed WHOLE ellipse remains a separate HARD veto.
  // This is only an optional connected, three-wide LANDING QUARTER, checked
@@ -71,6 +74,15 @@ for(const [rx,rz] of regions){
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
+  wholeCityEllipseGalleryCutsetAudited:cutset.ok===true,
+  wholeCityEllipsePlannedColumns:cutset.totalColumns??null,
+  wholeCityEllipseBlockedByMainGalleries:cutset.blockedColumns??null,
+  wholeCityEllipseSafeComponents:cutset.potentialConnectedComponents??null,
+  wholeCityLandingComponentColumns:cutset.landingComponentColumns??null,
+  wholeCityCenterComponentColumns:cutset.cityCenterComponentColumns??null,
+  wholeCityLandingAndCenterSameElevationConnected:
+   cutset.landingAndCityCenterOnSameClearFloorComponent===true,
+  wholeCityPlanarCutsetOriginalM7GeologyNotRead:true,
   existingFullCityPadRefusalStillMandatory:fullPad.ok!==true,
   candidateThreeWideLandingDistrictSourceSafe:district.ok===true,
   candidateDistrictRefusal:district.reason??null,
