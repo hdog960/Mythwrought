@@ -45,3 +45,13 @@ test('rounded-key near-match is not true exact opaque full-face coincidence',()=
  }
  assert.equal(check([a,fixture([1,0,0])]).exactOpaqueOppositeFacePairs,1);
 });
+
+test('genuine original Pack5 ceramic grout source box yields exact preview seam only for matching unchosen variant',()=>{
+ const art=[box([0,.015,0,1,.095,1],'grout',[.43,.46,.43,1])];
+ const a=fixture([0,0,0],art,{symbol:'pack5:081',variant:'sunburst-encaustic'});
+ const b=fixture([1,0,0],art,{symbol:'pack5:081',variant:'sunburst-encaustic'});
+ const alt=fixture([1,0,0],art,{symbol:'pack5:081',variant:'moonwoven-glaze'});
+ assert.equal(check([a,b]).exactOpaqueOppositeFacePairs,1);
+ assert.equal(check([a,alt]).exactOpaqueOppositeFacePairs,0);
+ assert.equal(check([a,b]).appliedToActualRenderer,false);
+});
