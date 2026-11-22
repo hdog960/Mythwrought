@@ -4,6 +4,8 @@ import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
+import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
+import {desertSeamVertexTint} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -273,6 +275,25 @@ export function meshChunk(world,cx,cz){
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
           const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
+          // M7 original Desert visual-only feather: when an exposed natural
+          // hardpan face borders real unedited scree at the same surface or
+          // one vertical step, interpolate EXISTING RGB on the boundary edge.
+          // Four cardinal columns, at most three y-level probes each. These
+          // occur only in the synchronous chunk mesh rebuild, never per frame.
+          let screeContact;
+          const findScree=(dx,dz)=>{
+            const ax=x+dx,az=z+dz;
+            for(let h=y-1;h<=y+1;h++)
+              if(!world.edits?.has(worldKey(ax,h,az))&&
+                 blockAt(ax,h,az)===401)return true;
+            return false;
+          };
+          const edgeTint=groundColor&&id===258&&
+            v6BiomeAt(x,z,world.seed)?.name==='desert';
+          if(edgeTint)screeContact={
+            east:findScree(1,0),west:findScree(-1,0),
+            south:findScree(0,1),north:findScree(0,-1)
+          };
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -298,7 +319,9 @@ export function meshChunk(world,cx,cz){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
-              appendVertex(x+px,y+py,z+pz,clamp(color[0]*shade,0,1),clamp(color[1]*shade,0,1),clamp(color[2]*shade,0,1),
+              const rgb=screeContact?
+                desertSeamVertexTint(color,px,pz,screeContact):color;
+              appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
                 groundColor?terrainArtMaterial(id):0);
             }
