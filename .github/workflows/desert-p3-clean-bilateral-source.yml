@@ -51,5 +51,13 @@ jobs:
           node --check candidate/src/voxel.mjs
           node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
           node --check candidate/tests/desert-p3-clean-source-and-invalidation.test.mjs
-      - name: Only new exact clean transplant and M7 visual edit invalidation tests
-        run: cd candidate && node --test tests/desert-p3-clean-source-and-invalidation.test.mjs
+      - name: Only NEW authentic external-chunk RGB edit witness, reuse prior 5/5
+        run: |
+          set -euo pipefail
+          # Exact original-source game and M7 visual refresh were already
+          # validated in Actions #45084078363; do NOT rerun that native suite.
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = c420128045f0facccc7aadfddfb9e80f3beabbad
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          cd candidate
+          node --test --test-name-pattern='real original M7 source-cap mining' tests/desert-p3-clean-source-and-invalidation.test.mjs
