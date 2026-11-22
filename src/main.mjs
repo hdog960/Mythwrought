@@ -439,8 +439,11 @@ function start(nonblockStage=null){
   // Only the localhost VAO experiment uses this page/render-stop fence.
   let near291PageSuspended=false,near291Fatal=false,near291Pending=false;
   let near291LoadEpoch=0;
+  // Local opt-in must not render *control* frames while an async VAO import
+  // is pending: that would contaminate a same-run WebGL2 baseline/A-B trace.
+  // Ordinary public Pages and installed PWA retain their original resume path.
   const near291CanResume=()=>!near291PageSuspended&&!near291Fatal&&
-    near291?.status().phase!=='blocked';
+    (!near291Enabled||near291?.status().phase==='ready');
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
   // Keep accepted M5/legacy module graph free of cave-only imports.
   const caveFarGpu=createCaveFarWallGpu(gl);
@@ -1688,6 +1691,12 @@ function start(nonblockStage=null){
             fatal('Local VAO 291 experiment stopped: '+reason);
             return true;
           }});
+        // Only this certified-ready async completion may wake a localhost
+        // opt-in first frame. Visibility/BFCache/startup cannot bypass it.
+        if(!document.hidden&&!graphicsLost&&near291CanResume()){
+          lastFrame=performance.now();
+          frameDriver.resume();
+        }
       })
       .catch(error=>{
         if(epoch!==near291LoadEpoch||near291PageSuspended)return;
