@@ -62,6 +62,11 @@ test('M7 adapter rejects mismatched generation, cannot mutate and preserves ordi
   assert.throws(()=>createM7MobCollisionReader(null),/original voxel world/);
   assert.equal(reader.get(0,22,0),world.get(0,22,0));
   assert.equal(reader.get(0,0,0),world.get(0,0,0));
+  assert.equal(Object.isFrozen(reader),true,'Reader API must be immutable');
+  assert.equal(reader.set,undefined,'Source voxel mutations must not be exposed');
+  assert.equal(reader.save,undefined,'Source save writes must not be exposed');
+  assert.equal(reader.base,undefined,'Raw mutable base cannot leak through reader');
+  assert.equal(reader.edits,undefined,'Schema-1 edits must be inaccessible');
   assert.equal(Reflect.set(reader,'seed',999),false);
   assert.equal(world.seed,seed);
 });

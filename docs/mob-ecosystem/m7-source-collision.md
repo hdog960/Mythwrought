@@ -11,3 +11,13 @@ The native test reads original FourRegionWorld M7 and Pack2LiveWorld at authenti
 Neither the module nor its tests are production-integrated or CI-accepted until exact-head native results exist. Runtime activation would require a separate cache-versioned PWA integration gate; leave original ecology, world-query, manifest, workers, saves, and other lanes unchanged.
 
 RELEASE HOLD: detached candidate only, no merge or deployment.
+## Read-only facade safety refinement
+
+The earlier unreferenced prototype used a JavaScript Proxy that forwarded
+all function properties, accidentally exposing mutable set/save paths.
+The revised experimental reader exposes only `get`, `getPack2State`,
+`rotationAt` and the bounded collision shape readers used by the original
+creature query. The interface is frozen and does not expose `base`,
+`edits`, world setters or save functions. Strict tests verify the forbidden
+mutation entrypoints remain inaccessible. This is still NOT activated in
+production and retains M7 generation-profile source checks.
