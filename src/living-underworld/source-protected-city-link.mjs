@@ -8,6 +8,8 @@ import {compileMainGalleryPedestrianClearance}
  from './combined-stair-footprints.mjs';
 import {auditProtectedSubsurfaceStairs}
  from './protected-subsurface-stairs.mjs';
+import {auditOriginalCityFloorProvenance}
+ from './original-city-floor-provenance.mjs';
 const INT=Number.isSafeInteger;
 const FIELDS=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 export function auditSourceProtectedCityFloorLink(seed,rx,rz,{
@@ -47,15 +49,31 @@ export function auditSourceProtectedCityFloorLink(seed,rx,rz,{
   editedAt:source.editedAt,protectedAt:source.protectedAt,
   minY:-210,maxY:19,maxCells,stopOnFirstUnsafe:true
  });
- return Object.freeze({sitePresent:true,ok:original.ok===true,
-  reason:original.ok?null:'CITY_LINK_ORIGINAL_M7_SOURCE_UNSAFE',
+ if(!original.ok)return Object.freeze({sitePresent:true,ok:false,
+  reason:'CITY_LINK_ORIGINAL_M7_SOURCE_UNSAFE',
   seed,rx,rz,sourceChecks:original.sourceChecks??0,
   sourceRefusal:original.firstRefusal??original.reason??null,
   sourceExamples:original.examples??[],
+  candidateRampOnly:true,cityFloorSourceApproved:false,
+  noWorldEdits:true,settlementsPlaced:false});
+ // An apparently supported detached floor cannot be accepted until every
+ // original M7 pad support/headroom voxel is source-owned and safely cuttable.
+ const floor=auditOriginalCityFloorProvenance(seed,rx,rz,{
+  source,maxColumns:25000,maxSourceChecks:150000
+ });
+ const sourceChecks=(original.sourceChecks??0)+(floor.sourceChecks??0);
+ return Object.freeze({sitePresent:true,ok:floor.ok===true,
+  reason:floor.ok?null:'CITY_PAD_ORIGINAL_M7_SOURCE_UNSAFE',
+  seed,rx,rz,sourceChecks,
+  rampSourceChecks:original.sourceChecks??0,
+  floorSourceChecks:floor.sourceChecks??0,
+  floorSourceRefusal:floor.firstRefusal??floor.reason??null,
+  floorFirstRejectedCell:floor.firstRejectedCell??null,
+  floorSourceColumns:floor.columns??null,
   detachedPlateauFullyAudited:true,
   detachedRampGeometryAndAirAudited:true,
   galleryInterferenceSafe:true,
-  sourceOwnedFloorAndAirPreflightPassed:original.ok===true,
+  sourceOwnedFloorAndAirPreflightPassed:floor.ok===true,
   builtCityFloorVerified:false,
   linkedToAllDeepAndSurfaceRoutes:false,
   originalM7PlayerWalkingVerified:false,
