@@ -60,7 +60,7 @@ export function planMountainV8Candidate({x,z,seed,legacyTop,biomeWeight,
   const aspect=field(x,z,seed+3301,73);
   const meadow=field(x,z,seed+3449,68)*.73+field(x,z,seed+3467,19)*.27;
   // Deterministic, irregular snowline; independent of the tree system.
-  const snowline=15.5+(aspect-.5)*5.4+(field(x,z,seed+3527,43)-.5)*2.4;
+  const snowline=17.0+(aspect-.5)*5.4+(field(x,z,seed+3527,43)-.5)*2.4;
   const snowy=top>=snowline;
   const cliff=slope>.8||top>=worldMaxY-4;
   const grassy=!snowy&&!cliff&&top<=13&&slope<=.52&&meadow>.47;
