@@ -87,3 +87,35 @@ test('rejects forged cap, missing uplift and exposed wrong subsurface material',
     p=>({...good(p),estimatedCells:7}),
   ])assert.equal(certify(0,0,179,proposal,{readSupport:altered}),null);
 });
+
+
+test('exact physical V8 cliff-face descriptors preserve direction and strata',()=>{
+  const source=(x,z,seed)=>({x,z,seed,legacyTop:5,top:x===1?14:12,
+    cap:x===1?'alpine-grass':'slate',biome:'mountain',
+    safeToIntegrate:false,generatorIdentityRequired:'v8-new-opt-in'});
+  const support=p=>({x:p.x,z:p.z,legacyTop:p.legacyTop,top:p.top,cap:p.cap,
+    estimatedCells:p.top-p.legacyTop+1,
+    writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+      x:p.x,z:p.z,y:p.legacyTop+i,
+      material:p.legacyTop+i===p.top?p.cap:
+        p.cap==='alpine-grass'&&p.legacyTop+i>=p.top-2?'dirt':'stone'
+    })),safeToIntegrate:false,requiresApprovedV8BlockMapping:true});
+  const certificate=certify(0,0,179,source,{readSupport:support});
+  assert.ok(certificate);
+  assert.equal(certificate.greatestStep,2);
+  assert.equal(certificate.exposedFaces.length,2);
+  assert.deepEqual(certificate.exposedFaces.map(v=>[v.x,v.y,v.z,v.toward,v.material]),[
+    [1,13,0,[-1,0],'dirt'],[1,14,0,[-1,0],'alpine-grass']
+  ]);
+});
+test('exposed face provenance refuses a high column without physical cells at contact',()=>{
+  const source=(x,z,seed)=>({x,z,seed,legacyTop:x===1?14:5,top:x===1?14:12,
+    cap:'slate',biome:'mountain',safeToIntegrate:false,
+    generatorIdentityRequired:'v8-new-opt-in'});
+  const support=p=>({x:p.x,z:p.z,legacyTop:p.legacyTop,top:p.top,cap:p.cap,
+    estimatedCells:p.top-p.legacyTop+1,
+    writes:Array.from({length:p.top-p.legacyTop+1},(_,i)=>({
+      x:p.x,z:p.z,y:p.legacyTop+i,material:p.legacyTop+i===p.top?'slate':'stone'
+    })),safeToIntegrate:false,requiresApprovedV8BlockMapping:true});
+  assert.equal(certify(0,0,179,source,{readSupport:support}),null);
+});
