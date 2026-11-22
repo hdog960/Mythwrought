@@ -1,0 +1,61 @@
+name: Builder D27 exact-original composite physical parity (isolated source only)
+on:
+  push:
+    branches:
+      - builder-d-d27-source-physical-parity-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d27-*.mjs'
+      - 'tests/building-pool/roadmap-d/d27-*.test.mjs'
+      - '.github/workflows/roadmap-d-d27-physical-parity.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d27-exact-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  exact-source-only-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify true isolated D26 parent and identical original owner blobs
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'fdf1e6ff43ac125066456bfb8e8b248e171c1edf'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/pack2-integration.mjs)" = 'cb8858688917a409dc1d52acf3730cf63567d48b'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/voxel-shape-interactions.mjs)" = '01be82e6c308e47a35fa6588cc6ed1ebeafca307'
+          test "$(git rev-parse HEAD:src/voxel-shape-fit.mjs)" = 'ec5adc274d8b45c91d3dade81c3d9c2830380849'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d26-livewood-roof-joint-contact.mjs)" = "$(git rev-parse HEAD^:src/building-pool/roadmap-d/d26-livewood-roof-joint-contact.mjs)"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.source.test.mjs)" = "$(git rev-parse HEAD^:tests/building-pool/roadmap-d/d26-livewood-roof-joint-contact.source.test.mjs)"
+          node --input-type=module <<'JS'
+          import {execFileSync} from 'node:child_process';
+          import assert from 'node:assert/strict';
+          const diff=execFileSync('git',['diff','--name-only','HEAD^','HEAD'],{encoding:'utf8'}).trim().split('\n').sort();
+          assert.deepEqual(diff,[
+            '.github/workflows/roadmap-d-d27-physical-parity.yml',
+            'docs/building-pool/roadmap-d/D27_EXACT_SOURCE_COMPOSITE_AND_LONG_BAY_GATE.md',
+            'src/building-pool/roadmap-d/d27-original-wood-loadpath-audit.mjs',
+            'src/building-pool/roadmap-d/d27-source-shape-composite.mjs',
+            'tests/building-pool/roadmap-d/d27-original-wood-loadpath.source.test.mjs',
+            'tests/building-pool/roadmap-d/d27-source-shape-composite.pure.test.mjs'
+          ].sort());
+          JS
+      - name: Focused D27 source-only genuine Node native (no repeated historical suites)
+        run: |
+          node --check src/building-pool/roadmap-d/d27-source-shape-composite.mjs
+          node --check src/building-pool/roadmap-d/d27-original-wood-loadpath-audit.mjs
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d27-source-shape-composite.pure.test.mjs \
+            tests/building-pool/roadmap-d/d27-original-wood-loadpath.source.test.mjs
