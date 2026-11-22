@@ -1,0 +1,42 @@
+name: Desert P3 cross-chunk provenance and cache original-source only
+on:
+  push:
+    branches:
+      - research/desert-p3-cross-chunk-cache-fence-20261122
+    paths:
+      - .github/workflows/desert-p3-cross-chunk-focused.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-cross-chunk-focused
+  cancel-in-progress: false
+jobs:
+  original-v7-cross-chunk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 01bc57e9986f3a9d1ab644858692f2599e67445c
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict exact inherited source and own file scope only
+        run: |
+          set -euo pipefail
+          BASE=01bc57e9986f3a9d1ab644858692f2599e67445c
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/voxel.mjs|tests/desert-p3-cross-chunk-provenance.test.mjs|.github/workflows/desert-p3-cross-chunk-focused.yml|docs/desert/PHASE3_CROSS_CHUNK_SOURCE_AUDIT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/voxel.mjs
+          node --check candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
+      - name: Run ONLY three new genuine original-M7 tests, no browser
+        run: node --test candidate/tests/desert-p3-cross-chunk-provenance.test.mjs
