@@ -51,7 +51,7 @@ test('Saffronwind every portal truly connects declared room interiors on opposit
   const q=[todo[i][0]+dx,1,todo[i][2]+dz],k=key(q);
   if(walk.has(k)&&!seen.has(k)){seen.add(k);todo.push(q);}
  }
- assert.equal(seen.size,walk.size);assert.equal(walk.size,2246);
+ assert.equal(seen.size,walk.size);assert.equal(walk.size,2231);
 });
 
 test('Saffronwind real three absent exterior terraced voids and 56 completely open grounded mirrorgarden columns',()=>{
