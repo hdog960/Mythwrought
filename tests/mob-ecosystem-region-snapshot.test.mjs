@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {getSpecies} from '../src/mobs/species.mjs';
+import {MobEngine} from '../src/mobs/engine.mjs';
 import {proposeRegionalMobSpawn}
   from '../src/mobs/ecosystem-region-proposals.mjs';
 import {planRegionalHabitatCandidate,eligibleHabitatPool}
@@ -132,4 +133,30 @@ test('incomplete, forged, duplicated or corrupted source roster fails closed',()
   assert.throws(()=>deriveRegionalMobState([
     entity('tamed')
   ],region,{isProtected:()=>undefined}),/Invalid original mob protection status/);
+});
+
+test('actual original MobEngine snapshots preserve identity and home-chunk rules',()=>{
+  const world=physicalWorld();
+  const engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const natural=engine.spawn('deer',[8,4,8],{homeChunk:'0,0,0'});
+  const bonded=engine.spawn('glownewt',[9,4,8],{homeChunk:'0,0,0'});
+  assert.ok(natural&&bonded,
+    'Use actual source engine admission, never forged creature snapshots');
+  assert.equal(engine.protectIdentity(bonded),true);
+  const actual=engine.all();
+  assert.equal(actual.length,2);
+  assert.equal(Object.isFrozen(actual[0]),true,
+    'Original MobEngine snapshot references must remain immutable');
+  assert.equal(actual[0].species,getSpecies('deer'));
+  assert.equal(actual[1].species,getSpecies('glownewt'));
+  const derived=deriveRegionalMobState(actual,region);
+  assert.equal(derived.localCounts.get('deer'),1);
+  assert.equal(derived.localCounts.get('glownewt'),0,
+    'Important original engine mob cannot consume renewable population cap');
+  assert.equal(derived.occupiedPositions.length,2,
+    'Important mob still consumes occupancy in exact physical voxels');
+  assert.equal(derived.rosterAvailable,true);
+  assert.deepEqual(derived.occupiedPositions.map(p=>p[0]),[8,9]);
+  assert.equal(engine.counts().total,2,'Read-only bridge never mutates engine');
+  engine.dispose();
 });

@@ -12,3 +12,8 @@ The original seed179 natural birth census (1308 attempts/18 births) is historica
 ## Reusing the existing source M7 21-site native comparison
 
 The detached `tests/mob-ecosystem-m7-multiseed.test.mjs` now calls `deriveRegionalMobState` on an explicit hypothetical empty engine snapshot and uses `proposeMobFromRosterSnapshot` for its already-planned single bounded regional candidate poll per site. It asserts all 40 registered species have explicit local counts, with zero occupancy and available capacity; this avoids accidentally treating missing state as zero. It still uses the exact original generated `FourRegionWorld`, `Pack2LiveWorld`, source biome and cave floors, unmodified `spawnEligible`, original M7 reader and exact save-byte guards. The source world is generated only once for each of the same three seeds; no extra Chromium, screenshots or repeated terrain sweep is added. The detached M7 test is authored but **NOT EXECUTED** by real native Node CI, and its new regional eligibility and natural birth figures remain unknown.
+
+
+## Native-source engine snapshot acceptance fixture
+
+A new focused test constructs the **actual original `MobEngine`**, admits a real source deer and glownewt into a source-like read-only flat world, marks the glownewt important through `engine.protectIdentity`, then supplies authentic frozen `engine.all()` snapshots to the isolated bridge. It asserts species reference identity, home chunk, renewable deer count, protected glownewt exclusion, both real occupied locations and unchanged engine entity count. This is a focused original engine contract test when run under Node, not a fabricated snapshot or a claim of natural spawning in original M7. The test remains detached/unexecuted in native CI until a later milestone.
