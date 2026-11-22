@@ -1,0 +1,7 @@
+# Builder 2A — second M1 biome expansion: six more genuine coordinate-authored candidates
+
+At this intermediate draft PR head, six new isolated M1 blueprint geometries now exist in `m1-biome-expansion.mjs`. IDs: r2:general-store:mountain:large:02; r2:pet-shop:enchanted-forest:large:01; r2:magic-shop:temperate:large:01; r2:potion-shop:snow:small:01; r2:bakery:enchanted-forest:medium:01; r2:bank:snow:medium:01. Each is an actual deterministic integer cell design with category-specific spatial program, complete distinct rooms and two-cell clear three-high walkable routes, physical glass + fixtures, and deliberately varied highland, snow, forest and civic roof elevations, including explicit source-stacked gables and a two-wide gated northern bank vault. No biome130 assumption, NPC/economy magic or active bakery mechanics.
+
+The new Mountain Large General Store variation **02** intentionally leaves the read-only original PR #124 variation **01** source-exact. All original source modules and 15 frozen source SHA256 hashes are preserved. This lane remains theoretical and uses six clearly new physical shapes, not name-only titles or reserved slots.
+
+**Ledger:** 38/420 authored coordinate designs (15 inherited, 23 newly authored), 382 unauthored, zero creator-accepted, zero live-integrated. 96 manual family symbols/106 candidate physical variants are real producer sources, but raised roofing and glass requires separate physical-family/creator iPhone acceptance. No merge or deployment permitted.

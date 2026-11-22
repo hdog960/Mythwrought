@@ -1,0 +1,5 @@
+# Builder 2A M1 original regional market-front designs
+
+Six new genuinely coordinate-authored 2A-only candidates: r2:general-store:snow:medium:02; r2:pet-shop:temperate:medium:01; r2:magic-shop:enchanted-forest:small:01; r2:potion-shop:desert:large:01; r2:bakery:mountain:medium:01; r2:bank:enchanted-forest:large:01. All have independent regional dimensions, real occupied room partitions and circulation, category-specific fixtures, raised roof voxel profiles, recessed rear facade bays and front double-wide recessed porticoes. The temperate pet shop has three distinct physically two-cell empty-stall divider anchors; the enchanted forest bank has a real two-wide 3-high Pack5 vault threshold. No active shop NPC, crafting, combat, saving or world placement.
+
+**True count:** 50 of 420 authored source candidates, 370 not authored, 15 source-exact inherited General Stores and 35 original new architectures. **Zero** creator approved or integrated. The 197 inherited unspecified Pack 5 variants, broad roof spans, window/glazing/support ABI and physical iPhone approval remain unresolved. All work exclusively Builder 2A-owned and draft.
