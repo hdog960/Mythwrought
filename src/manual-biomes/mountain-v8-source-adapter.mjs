@@ -43,8 +43,11 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
     if(climate?.name!=='mountain'||!(climate.weight>=.82)||
        !validInteger(old)||old<2||old>=worldMaxY-2)return null;
     if(protectedAt(px,old,pz)||protectedAt(px,old-1,pz)||
+       protectedAt(px,old-2,pz)||protectedAt(px,old-3,pz)||
        readBlock(px,old,pz)!==ids.GRASS||
-       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-1,pz)))return null;
+       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-1,pz))||
+       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-2,pz))||
+       ![ids.DIRT,ids.STONE].includes(readBlock(px,old-3,pz)))return null;
     // Inspect the complete finite uplift envelope: no overwrites of authored AIR,
     // caves, trees, settlements, structures or unknown voxels.
     for(let y=old+1;y<=worldMaxY-2;y++)
