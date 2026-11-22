@@ -1182,6 +1182,12 @@ export const ROADMAP_D_WAVE16_PLANS=Object.freeze([
         60,
         25,
         58
+      ],
+      [
+        55,
+        77,
+        51,
+        70
       ]
     ],
     "discs": [
@@ -1283,6 +1289,12 @@ export const ROADMAP_D_WAVE16_PLANS=Object.freeze([
         38,
         1,
         16
+      ],
+      [
+        67,
+        61,
+        1,
+        15
       ]
     ],
     "ridges": [
@@ -1291,6 +1303,13 @@ export const ROADMAP_D_WAVE16_PLANS=Object.freeze([
         39,
         19,
         53,
+        12
+      ],
+      [
+        "z",
+        67,
+        55,
+        67,
         12
       ]
     ],
