@@ -1015,13 +1015,19 @@ function start(nonblockStage=null){
       // All ready[] buffers were freshly allocated but NEVER published to
       // chunks or rendered, so no VAO can own them. Retire using the actual
       // original native opaque+water deletion, not a live VAO cache bridge.
-      // Finish every retirement even when an earlier GL deletion throws.
+      // Attempt BOTH opaque and water handles independently: an opaque
+      // delete exception must not skip that chunk's transparent-water buffer,
+      // nor the remaining staged chunks. Reuse the authoritative original
+      // deletion function, never touch a published resident GPU buffer.
       // An uncertain cleanup is fatal; NEVER mask the initiating upload
       // exception that applyBlockAction needs for original voxel rollback.
       let near291CleanupUnverified=false;
       for(const item of ready){
-        try{originalDeleteChunkBuffers(item);}
-        catch(_){near291CleanupUnverified=true;}
+        for(const buffer of [item.buffer,item.waterBuffer]){
+          if(!buffer)continue;
+          try{originalDeleteChunkBuffers({buffer});}
+          catch(_){near291CleanupUnverified=true;}
+        }
       }
       if(near291CleanupUnverified){
         near291Fatal=true;
