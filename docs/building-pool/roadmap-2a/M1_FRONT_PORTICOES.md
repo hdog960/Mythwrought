@@ -1,0 +1,5 @@
+# Builder 2A M1 — recessed two-wide portico entry program
+
+The source-specific WebGL2 exterior review showed that roof additions and REAR wall recesses still left the FRONT of new shops looking rectangular. Eighteen authored candidates now explicitly use distinct 5–7 cell wide true inset entrance assemblies: the front three wall courses are removed, a new inner wall at 2–3 cells of depth is assembled, and two adjacent 3-cell-high clear portal columns connect outside to the interior. Real flank piers remain full-height and each narrow upper spandrel carries `structuralSpanUnverified`. The floor remains under both passage cells. This materially changes FRONT wall geometry and circulation rather than repainting a rectangular box.
+
+The original 15 inherited General Stores plus 11 prior specialist blueprints never opt in and remain source-exact. Portico validation deliberately does not call the masonry spans production-load-bearing, physical-family arches present, or performance and iPhone art approved. Regenerate source-specific cube-proxy browser evidence from the exact new head; earlier 264 captures do not describe these changes.
