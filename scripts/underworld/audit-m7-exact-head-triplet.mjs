@@ -31,8 +31,15 @@ function git(...args){
 const actual=git('rev-parse','HEAD');
 if(actual!==expected)
  throw Error('WRONG_NATIVE_M7_HEAD: expected '+expected+' got '+actual);
-const dirty=git('status','--porcelain','--untracked-files=no');
+const dirty=git('status','--porcelain','--untracked-files=all');
 if(dirty)throw Error('DIRTY_NATIVE_M7_CHECKOUT: refuse uncommitted source');
+// This only verifies Git-visible tracked/untracked files; ignored world
+// saves and device storage remain outside this source-only research gate.
+const verifyAfter=()=>Object.freeze({
+ headUnchanged:git('rev-parse','HEAD')===expected,
+ gitVisibleFilesStillClean:
+  git('status','--porcelain','--untracked-files=all')===''
+});
 const origin=git('rev-parse','--show-toplevel');
 if(resolve(origin)!==root)
  throw Error('Native M7 project root does not match runner location');
@@ -57,7 +64,11 @@ const outcome={expectedHead:expected,actualHead:actual,
  originalM7ReadOnly:true,noGitHubActionsTriggered:true,
  noWorldChangesAuthorized:true,noReleaseApproval:true};
 if(nodeTests.status!==0){
- console.log(JSON.stringify({...outcome,reason:'NATIVE_FOCUSED_TEST_FAILURE',
+ const after=verifyAfter();
+ console.log(JSON.stringify({...outcome,...after,
+  trackedAndUntrackedGitStatusVerified:true,
+  ignoredSavedWorldContentNotChecked:true,
+  reason:'NATIVE_FOCUSED_TEST_FAILURE',
   sourceOrGameplayAcceptance:false}));
  process.exitCode=2;
 }else{
@@ -95,20 +106,29 @@ if(nodeTests.status!==0){
  const allThreeExecutedSuccessfully=entries.every(([name])=>
   executions[name].originalNativeNodeProcessExitedSuccessfully&&
   reports[name]!=null);
- const result={...outcome,trueOriginalM7ScriptsAttempted:entries.length,
+ const after=verifyAfter();
+ const exactSourceStayedUnmodified=after.headUnchanged&&
+  after.gitVisibleFilesStillClean;
+ const result={...outcome,...after,
+  trackedAndUntrackedGitStatusVerified:true,
+  ignoredSavedWorldContentNotChecked:true,
+  trueOriginalM7ScriptsAttempted:entries.length,
   allThreeExecutedSuccessfully,executions,
   originalNativeM7Reports:reports,
   sourceOnlyCandidateAdmission:admission,
   historicalConstructorFaultsStillUnresolved:[8675309,13579],
   actualPlayerWalkingTested:false,actualIphoneGpuTested:false,
   installedPwaAcceptance:false,noReleaseApproval:true,
-  reason:!allThreeExecutedSuccessfully?
+  reason:!exactSourceStayedUnmodified?
+   'GIT_VISIBLE_NATIVE_CHECKOUT_CHANGED_DURING_AUDIT':
+   !allThreeExecutedSuccessfully?
    'ORIGINAL_M7_SCRIPT_EXECUTION_OR_JSON_FAILURE':
    admission?.proposalEvidenceAllPassed?
     'SOURCE_CANDIDATE_RESEARCH_ONLY_NOT_RELEASE':
     'ORIGINAL_M7_SOURCE_OR_COVERAGE_GATES_HOLD'
  };
  console.log(JSON.stringify(result));
- if(!allThreeExecutedSuccessfully||!admission?.proposalEvidenceAllPassed)
+ if(!exactSourceStayedUnmodified||!allThreeExecutedSuccessfully||
+  !admission?.proposalEvidenceAllPassed)
   process.exitCode=2;
 }
