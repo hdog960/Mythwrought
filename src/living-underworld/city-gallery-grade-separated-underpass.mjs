@@ -214,9 +214,13 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
  }
  if(!best)return failure(seed,rx,rz,
   considered<offsets.length?'UNDERPASS_SEARCH_LIMIT_REACHED':
-   'NO_GEOMETRICALLY_SAFE_UNDERPASS_FOUND',{
+   'NO_SAFE_UNDERPASS_TO_NEAREST_CENTER_SIDE_PAD',{
     examinedCandidates:considered,safeCandidates:0,
     globalSearchComplete:considered===offsets.length,
+    // Complete OFFSET search for ONE nearest full-depth pad only;
+    // never claim no future bridge to another safe center-side pad.
+    onlyNearestCenterPadExamined:true,
+    furtherCenterPadAlternativesUnsearched:centerPads.length>1,
     rejectionCounts:Object.freeze(refusals),
     originalM7SourceNotQueried:true
    });
@@ -235,6 +239,8 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
   segments:best.proposal.segments.length,
   inspectedCandidates:considered,safeCandidates:safeCount,
   globalSearchComplete:considered===offsets.length,
+  onlyNearestCenterPadExamined:true,
+  furtherCenterPadAlternativesUnsearched:centerPads.length>1,
   rejectionCounts:Object.freeze(refusals),
   threeWideSupportCells:best.grade.supportCells,
   threeHighClearanceCells:best.grade.clearanceCells,
