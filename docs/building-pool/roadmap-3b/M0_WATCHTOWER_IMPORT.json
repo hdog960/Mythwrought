@@ -1,0 +1,336 @@
+{
+  "schema": "mythwrought.roadmap-3b.m0-inherited.v1",
+  "sourcePR": 122,
+  "legacyHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+  "sourceBlobs": {
+    "m1": "189ac4deb11042534743045b5087a7a7525e3bf1",
+    "assets": "a61597a9c5209edd1c78fe10567711107f9a0b5a",
+    "contract": "d87c47896f53e6ae7e7efd0b7503236607669caf",
+    "roster": "9fd3e885cf4194f55ffacffa0121956483312c5a",
+    "manifest": "deab2505c5be9ad752ab9f01c0f6cc776b19fc66"
+  },
+  "legacyCombinedM1CoordinateSlots": 71293,
+  "note": "Combined source includes 15 blacksmiths owned by 3A; only 15 watchtowers below are imported to 3B. The original combined 71,293 slots must never be attributed wholly to 3B.",
+  "module": "src/building-pool/roadmap-3b/legacy-watchtowers.mjs",
+  "importedCount": 15,
+  "importedWatchtowerCoordinates": 42642,
+  "creatorApproved": 0,
+  "integrated": 0,
+  "designs": [
+    {
+      "id": "r3:watchtower:temperate:small:1",
+      "biome": "temperate",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 15,
+        "height": 20,
+        "depth": 20
+      },
+      "occupiedCoordinates": 1564,
+      "roofStyle": "gabled",
+      "stairSteps": 10,
+      "originalId": "r3:watchtower:temperate:small:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:temperate:medium:1",
+      "biome": "temperate",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 19,
+        "height": 22,
+        "depth": 24
+      },
+      "occupiedCoordinates": 2381,
+      "roofStyle": "gabled",
+      "stairSteps": 12,
+      "originalId": "r3:watchtower:temperate:medium:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:temperate:large:1",
+      "biome": "temperate",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 23,
+        "height": 24,
+        "depth": 28
+      },
+      "occupiedCoordinates": 3365,
+      "roofStyle": "gabled",
+      "stairSteps": 14,
+      "originalId": "r3:watchtower:temperate:large:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:desert:small:1",
+      "biome": "desert",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 17,
+        "height": 20,
+        "depth": 19
+      },
+      "occupiedCoordinates": 1726,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 10,
+      "originalId": "r3:watchtower:desert:small:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:desert:medium:1",
+      "biome": "desert",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 21,
+        "height": 22,
+        "depth": 23
+      },
+      "occupiedCoordinates": 2587,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 12,
+      "originalId": "r3:watchtower:desert:medium:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:desert:large:1",
+      "biome": "desert",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 25,
+        "height": 24,
+        "depth": 27
+      },
+      "occupiedCoordinates": 3619,
+      "roofStyle": "flat-shaded",
+      "stairSteps": 14,
+      "originalId": "r3:watchtower:desert:large:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:snow:small:1",
+      "biome": "snow",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 16,
+        "height": 20,
+        "depth": 22
+      },
+      "occupiedCoordinates": 2040,
+      "roofStyle": "steep-snow",
+      "stairSteps": 10,
+      "originalId": "r3:watchtower:snow:small:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:snow:medium:1",
+      "biome": "snow",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 20,
+        "height": 22,
+        "depth": 26
+      },
+      "occupiedCoordinates": 3093,
+      "roofStyle": "steep-snow",
+      "stairSteps": 12,
+      "originalId": "r3:watchtower:snow:medium:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:snow:large:1",
+      "biome": "snow",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 24,
+        "height": 24,
+        "depth": 30
+      },
+      "occupiedCoordinates": 4309,
+      "roofStyle": "steep-snow",
+      "stairSteps": 14,
+      "originalId": "r3:watchtower:snow:large:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:small:1",
+      "biome": "enchanted-forest",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 18,
+        "height": 20,
+        "depth": 21
+      },
+      "occupiedCoordinates": 1884,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 10,
+      "originalId": "r3:watchtower:enchanted-forest:small:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:medium:1",
+      "biome": "enchanted-forest",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 22,
+        "height": 22,
+        "depth": 25
+      },
+      "occupiedCoordinates": 2780,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 12,
+      "originalId": "r3:watchtower:enchanted-forest:medium:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:enchanted-forest:large:1",
+      "biome": "enchanted-forest",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 26,
+        "height": 24,
+        "depth": 29
+      },
+      "occupiedCoordinates": 3850,
+      "roofStyle": "asymmetric-canopy",
+      "stairSteps": 14,
+      "originalId": "r3:watchtower:enchanted-forest:large:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:mountain:small:1",
+      "biome": "mountain",
+      "size": "small",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 19,
+        "height": 20,
+        "depth": 23
+      },
+      "occupiedCoordinates": 2140,
+      "roofStyle": "terraced",
+      "stairSteps": 10,
+      "originalId": "r3:watchtower:mountain:small:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:mountain:medium:1",
+      "biome": "mountain",
+      "size": "medium",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 23,
+        "height": 22,
+        "depth": 27
+      },
+      "occupiedCoordinates": 3091,
+      "roofStyle": "terraced",
+      "stairSteps": 12,
+      "originalId": "r3:watchtower:mountain:medium:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    },
+    {
+      "id": "r3:watchtower:mountain:large:1",
+      "biome": "mountain",
+      "size": "large",
+      "variant": 1,
+      "envelope": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "width": 27,
+        "height": 24,
+        "depth": 31
+      },
+      "occupiedCoordinates": 4213,
+      "roofStyle": "terraced",
+      "stairSteps": 14,
+      "originalId": "r3:watchtower:mountain:large:1",
+      "sourcePR": 122,
+      "sourceHead": "e35b8eca644f6de06e76ab946103ce64a6b7fb91",
+      "originalSourceBlob": "189ac4deb11042534743045b5087a7a7525e3bf1"
+    }
+  ]
+}
