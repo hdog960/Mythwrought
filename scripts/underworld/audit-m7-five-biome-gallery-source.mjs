@@ -48,7 +48,7 @@ for(const site of sites){
    JSON.stringify({site,realBiome,mouthInRegion}));
  const mutual=auditMutualMainGalleryClearance(seed,site.rx,site.rz);
  const full=auditSourceProtectedMainGalleries(seed,site.rx,site.rz,{
-  source,diagnoseAllGalleries:true,
+  source,diagnoseAllGalleries:true,countEverySourceVeto:true,
   maxTotalSourceChecks:120000,maxFailureExamples:16
  });
  const existing=auditOriginalMainGalleryVoxelReadiness(seed,site.rx,site.rz,{
@@ -74,6 +74,8 @@ for(const site of sites){
   sourceRejectedGalleries:full.sourceRejectedGalleries??null,
   firstRefusalCounts:full.firstRefusalCounts??null,
   sourceRejectionCounts:full.sourceRejectionCounts??null,
+  completedFullSourceCellVetoCensus:full.completeSourceVetoCensus===true,
+  sourceCountMethod:full.sourceCountMethod??'INCOMPLETE',
   inspectedSourceCells:full.sourceChecks,
   firstRefusal:full.failures?.[0]??full.reason??null,
   originalWorldEdited:false,realPlayerWalkingUnverified:true}));
@@ -89,6 +91,14 @@ const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-ga
  sourceRefusals:rows.filter(x=>!x.sourceSafe).length,
  sourceCells:rows.reduce((n,r)=>n+(r.inspectedSourceCells??0),0),
  all80GallerySourceReportsComplete:rows.every(r=>r.all16GallerySourcesDiagnosed),
+ all80FullSourceVoxelCensusesComplete:rows.every(r=>
+  r.completedFullSourceCellVetoCensus),
+ voxelSourceVetoCategoryTotals:rows.reduce((out,r)=>{
+  for(const [category,count] of Object.entries(r.sourceRejectionCounts??{}))
+   if(Number.isSafeInteger(count)&&count>=0)
+    out[category]=(out[category]??0)+count;
+  return out;
+ },{}),
  diagnosedSafeGalleries:rows.reduce((n,r)=>n+(r.sourceSafeGalleries??0),0),
  diagnosedRejectedGalleries:rows.reduce((n,r)=>n+(r.sourceRejectedGalleries??0),0),
  rows:Object.freeze(rows),
