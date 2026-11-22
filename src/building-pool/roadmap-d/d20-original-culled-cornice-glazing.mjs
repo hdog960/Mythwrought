@@ -1,4 +1,5 @@
 // MYTHWROUGHT D20 — original physical Pack3/Pack4 NON-OVERLAPPING window-cornice proposal.
+import {buildD20OriginalWindowWorldMesh} from './d20-original-physical-window-mesh.mjs';
 // Isolated read-only candidate; preserves every original source voxel, Pack asset and save.
 // The original Pack3 cornice (ID120) as a FULL asset overlaps Pack4 glazing. Only source
 // parts which do not touch the original Pack4 visible/selection/collision volumes
@@ -114,7 +115,12 @@ export function planD20SourceSafeWindowCornices(blueprint,originalGlazingPlan,{
    sourceAt:Object.freeze([...choice.at]),sourceTone:p.sourceTone,sourceHex:p.sourceHex,
    originalPartAabb:p.localAabb,
    worldPartAabb:Object.freeze(p.localAabb.map((v,j)=>v+choice.at[j%3]))}));
+  const mesh=buildD20OriginalWindowWorldMesh({at:choice.at,
+   pack3SourceParts:physicalCornice.parts,pack4PhysicalAsset:actual});
+  if(mesh.sourceVertexBytes!==actualSourceBytes)
+   throw Error('Original source-material vertex budget does not match real generated mesh');
   physical.push(Object.freeze({at:Object.freeze([...choice.at]),facing:choice.authoritativeFacadeFacing,
+   originalSourceWorldMesh:mesh,
    originalGlazingId:choice.candidateId,originalGlazingRef:choice.candidateRef,
    originalPack3CorniceId:120,sourcePack3PartCount:15,
    retainedOriginalPack3Parts:physicalCornice.parts.length,
@@ -124,6 +130,8 @@ export function planD20SourceSafeWindowCornices(blueprint,originalGlazingPlan,{
    originalRenderPreviewBytes:actualSourceBytes,
    originalMaterialBoxes:Object.freeze(sourcePoints),
    hasNoVisibleSelectionCollisionOverlapsWithGlass:true,
+   realSourceOpaqueAndTransparentWorldMesh:true,
+   sourceMaterialsAndVertexNormalsUnmodified:true,
    noGlassRemovedOrResized:true,notAnUnmodifiedLivePack3Block:true,
    originalWallLintelRetained:true,sideJambsStillNeedStructuralReview:true,
    loadBearingAccepted:false,renderedInOriginalGame:false,worldPlaced:false}));
