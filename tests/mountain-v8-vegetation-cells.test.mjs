@@ -8,10 +8,11 @@ const ids={AIR:0,GRASS:1,DIRT:2,STONE:3};
 const options={worldMaxY:19,airId:0,readOriginalBlock:()=>0,
   protectedAt:()=>false,mountainAt:()=>true,
   proposedSurfaceAt:()=>10};
-const proposal=(kind='dwarf-conifer')=>({x:7,z:7,top:10,cap:'alpine-grass',
+// Real original source-owned seed179 tile (0,0) root is (2,2).
+const proposal=(kind='dwarf-conifer')=>({x:2,z:2,seed:179,top:10,cap:'alpine-grass',
   snowy:false,cliff:false,slope:.1,vegetation:kind,
-  vegetationSite:{chosen:true},safeToIntegrate:false,
-  generatorIdentityRequired:'v8-new-opt-in'});
+  vegetationSite:{tileX:0,tileZ:0,rootX:2,rootZ:2,chosen:true},
+  safeToIntegrate:false,generatorIdentityRequired:'v8-new-opt-in'});
 test('physical proposals never exceed budget or emit duplicate cells',()=>{
   assert.equal(MAX,18);
   for(const kind of ['dwarf-conifer','alpine-flower','low-heather']){
@@ -25,9 +26,9 @@ test('physical proposals never exceed budget or emit duplicate cells',()=>{
 });
 test('original-world protections, biome edges and sky ceiling reject atomically',()=>{
   for(const patch of [
-    {protectedAt:(x,y,z)=>y===12&&x===7},
+    {protectedAt:(x,y,z)=>y===12&&x===2},
     {readOriginalBlock:(x,y,z)=>y===13?4:0},
-    {mountainAt:(x,z)=>x!==8},
+    {mountainAt:(x,z)=>x!==3},
     {worldMaxY:13}
   ])assert.equal(plant(proposal(),{...options,...patch}),null);
 });
@@ -58,7 +59,20 @@ test('never consume mutable source edits or register an unapproved material',()=
 test('plant never embeds any cell in neighboring proposed V8 raised slopes',()=>{
   const p=proposal();
   assert.ok(plant(p,options));
-  assert.equal(plant(p,{...options,proposedSurfaceAt:(x,z)=>x===8?12:10}),null);
+  assert.equal(plant(p,{...options,proposedSurfaceAt:(x,z)=>x===3?12:10}),null);
   assert.equal(plant(p,{...options,proposedSurfaceAt:()=>null}),null);
   assert.equal(plant(p,{...options,proposedSurfaceAt:undefined}),null);
+});
+
+test('forged chosen roots, foreign seed and mismatched tile metadata cannot spawn plants',()=>{
+  const genuine=proposal('alpine-flower');
+  assert.ok(plant(genuine,options));
+  for(const counterfeit of [
+    {...genuine,x:3},
+    {...genuine,seed:2026},
+    {...genuine,vegetationSite:{...genuine.vegetationSite,rootX:3}},
+    {...genuine,vegetationSite:{...genuine.vegetationSite,tileX:1}},
+    {...genuine,vegetationSite:{...genuine.vegetationSite,chosen:false}},
+    {...genuine,seed:NaN}
+  ])assert.equal(plant(counterfeit,options),null);
 });
