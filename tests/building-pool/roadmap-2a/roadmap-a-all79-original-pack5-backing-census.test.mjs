@@ -81,7 +81,7 @@ test('All 79 source-plaster cells: classify four *actual* Pack5 producer wall-su
    assert.equal(yaw.hypotheticalOrientationOnly,true);
    assert.equal(yaw.plasterSourceStructuralMountCertified,false);
    assert.equal(yaw.underlyingRealWorldSupportUnverified,true);
-   totalsByYaw[i]+=row.sourceWholeWallPlasterCells;
+   totalsByYaw[i]+=yaw.sourceWholeWallPlasterCells;
    missingByYaw[i]+=yaw.sourceNoBackingCount;
   }
   assert.equal(row.lowestSourceNoBackingCountAcrossFourPossibleYaws,
