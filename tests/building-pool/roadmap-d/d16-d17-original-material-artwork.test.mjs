@@ -22,20 +22,18 @@ test('all 16 W16+17 original buildings carry authentic Pack1 stone pixel art, Pa
    const originalLength=b.cells.length;
    const packet=createD16D17OriginalMaterialArtwork(b,resolvers);
    assert.equal(packet.blueprintId,b.id);
-   assert.equal(packet.sampledOriginalPhysicalCells,40);
-   assert.ok(packet.sourceOwnerPackIds.includes(3)&&packet.sourceOwnerPackIds.includes(4));
-   assert.ok(packet.sourceOwnerPackIds.includes(1)||packet.sourceOwnerPackIds.includes(2));
-   assert.ok([0,2].includes(packet.masonryFaceTextures.length));
-   assert.equal(packet.masonryFaceTextures.length===2,packet.sourceOwnerPackIds.includes(1));
-   for(const w of packet.originalPlanedWoodMeshes){
-     assert.equal(w.sourcePack,2);assert.equal(w.originalNumericId,59);
+   assert.equal(packet.sampledOriginalPhysicalCells,44);
+   assert.deepEqual(packet.sourceOwnerPackIds,[1,2,3,4]);
+   assert.equal(packet.masonryFaceTextures.length,2);
+   for(const w of packet.originalHeartwoodBeamMeshes){
+     assert.equal(w.sourcePack,2);assert.equal(w.originalNumericId,61);
      assert.ok(w.authoredWorldVertices instanceof Float32Array);
      assert.equal(w.stride,9);
      assert.ok(w.originalTriangles>0);
      assert.equal(w.originalTriangles,w.authoredWorldVertices.length/27);
      assert.equal(w.worldRegistered,false);woodCount++;
    }
-   assert.ok(packet.originalPlanedWoodMeshes.length+packet.masonryFaceTextures.length>0);
+   assert.equal(packet.originalHeartwoodBeamMeshes.length,4);
    assert.equal(packet.originalPack3ColorParts.length,18);
    assert.equal(packet.originalPack4WorldMeshes.length,14);
    assert.equal(b.cells.length,originalLength,'material artwork must never modify original blueprint cells');
@@ -68,13 +66,13 @@ test('all 16 W16+17 original buildings carry authentic Pack1 stone pixel art, Pa
       packet.iphoneRendererAccepted,packet.finalPhysicalArtworkAccepted,packet.notProductionRegistered],
       [false,false,false,false,true]);
  }
- assert.ok(texCount>=2&&texCount<=32&&texCount%2===0);
- assert.ok(woodCount>0,'source-authored timber facades lost original Pack2 physical grain');
+ assert.equal(texCount,32);
+ assert.equal(woodCount,64,'source-authored timber lintel physical grain lost');
  assert.equal(meshCount,224);
- assert.equal(facadeSampleTotal,640);
+ assert.equal(facadeSampleTotal,704);
  assert.ok(coloredPieces>=288,'original Pack3 authored colored parts missing');
  assert.ok(translucent>0,'missing actual original Pack4 glass alpha triangles');
- assert.ok(signatures.size>=2&&signatures.size<=10,'Pack1 face pixel art census drift');
+ assert.equal(signatures.size,10,'Pack1 five-biome source face pixel artwork census drift');
 });
 test('source authenticity fails closed for forged Pack1 textures or Pack3 color data',()=>{
  const b=sourceBuildings[0];
