@@ -5,7 +5,7 @@ import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
-import {desertSeamVertexTint,nearestNaturalScreeSquared} from './manual-biomes/desert-seam-vertex-tint.mjs';
+import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -323,8 +323,10 @@ export function meshChunk(world,cx,cz){
               checkedVisibleHardpan=true;
               const region=v6BiomeAt(x,z,world.seed);
               if(region?.name==='desert'&&region.weight<=.50&&!hasEdit(x,y,z)){
-                const surfaceTop=originalSurface(x,z);
-                eligibleDesertTop=surfaceTop?.top===y&&surfaceTop.id===258;
+                const sourceSurface=originalSurface(x,z);
+                eligibleDesertTop=canBlendNaturalDesertSurface({
+                  id,edited:false,region,sourceSurface,y
+                });
               }
             }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
