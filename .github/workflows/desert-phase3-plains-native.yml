@@ -1,0 +1,42 @@
+name: Desert Phase 3 Plains-edge focused native proof (isolated)
+on:
+  push:
+    branches:
+      - dev/desert-v7-phase3-natural-shoulders-20261121
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-phase3-plains-native-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  focused-desert-seam-and-preservation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact accepted parent and isolated changed source
+        run: |
+          set -euo pipefail
+          BASE=ce8dad9d3796821f77df0f78c0184a75f6fb707c
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          git diff --name-only "$BASE" HEAD | sort
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/environment-v7.mjs|tests/desert-phase3-plains-shoulder.test.mjs|nonblock-stage-assets.json|.github/workflows/desert-phase3-plains-native.yml)$' || true)
+          test -z "$unexpected"
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check tests/desert-phase3-plains-shoulder.test.mjs
+      - name: Real V7 Plains shoulder and changed-source preservation tests
+        run: |
+          node --test \
+            tests/desert-phase3-plains-shoulder.test.mjs \
+            tests/desert-grass-shoulder-phase2.test.mjs \
+            tests/nonblock-environment-profile.test.mjs \
+            tests/ci/nonblock-cache-manifest.test.mjs
