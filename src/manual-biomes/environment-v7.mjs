@@ -180,6 +180,10 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // terrain/cave baseline, so reusing exact source probes is safe. Never
   // persist this short-lived cache or use it for other biome generations.
   let candidateClearanceCache=null;
+  // Native acceptance can account for actual cache reuse at dense sites.
+  // Normal gameplay never supplies the diagnostic callback, so no per-cell
+  // statistics are updated on the iPhone production path.
+  let diagnosticHits=0,diagnosticMisses=0;
   // The same original source cell can be read for rooting, collision
   // preflight, and 3x3 headroom across several nearby prototype trees.
   // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
@@ -187,8 +191,10 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   const candidateReadCell=(x,y,z)=>{
     candidateClearanceCache??=new EnchantedCandidateSourceCache();
     const key=x+','+y+','+z;
-    if(!candidateClearanceCache.has(key))
+    if(!candidateClearanceCache.has(key)){
+      if(onCandidateCacheSummary)diagnosticMisses++;
       candidateClearanceCache.set(key,readCell(x,y,z));
+    }else if(onCandidateCacheSummary)diagnosticHits++;
     return candidateClearanceCache.get(key);
   };
   // The *default* M7 path keeps its exact historical +/-3 site sampling.
@@ -265,7 +271,9 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       entries:candidateClearanceCache?.size??0,
       peakEntries:candidateClearanceCache?.peakEntries??0,
       evictions:candidateClearanceCache?.evictions??0,
-      limit:candidateClearanceCache?.limit??0
+      limit:candidateClearanceCache?.limit??0,
+      hits:diagnosticHits,
+      misses:diagnosticMisses
     }));
   }
   return cells;
