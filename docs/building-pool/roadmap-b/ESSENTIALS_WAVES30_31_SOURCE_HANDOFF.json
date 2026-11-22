@@ -1,0 +1,197 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.original-waves30-31-source-handoff.v1",
+  "status": "ISOLATED ORIGINAL SOURCE PROVISIONAL; NOT NATIVE OR GAME ACCEPTED",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startingExactHead": "c3375feb1be27bab29af27c8f73be2fc427cdacb",
+  "protectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtInitialReadOnlyVerification": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "authoredOriginals": [
+    {
+      "wave": 30,
+      "id": "r1:lighthouse:temperate:medium:002",
+      "name": "Briarcliff Crescent-Walk Lighthouse",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave30.mjs",
+      "gitBlob": "0b96bf5c00c06c88949c8aa92ebeca9f4eac681e",
+      "size": "medium",
+      "sourceCells": 12933,
+      "sourceRoofCellsWithImmediateSolidBacking": 2982,
+      "sourceWalkableCells": 2978,
+      "rooms": 12,
+      "portals": 17,
+      "independentRoofWings": 7,
+      "originalPavedRooflessWalkableCourts": [
+        144,
+        49
+      ],
+      "additionalPavedUnroofedCrescentCells": 205,
+      "originalPedestrianBFS": "PASS actual walkable from (16,1,66) to (48,1,66)",
+      "tower": "One real 7x9 grounded footprint; continuous solid y1-3 masonry, real 34-tier octagonal perimeter and 24 directly backed Pack3 crown cells",
+      "originalHighStoneFramedPack4Windows": 8,
+      "lowerWindows": 21,
+      "totalWindows": 29,
+      "noPoweredBeaconOrRealSea": true,
+      "focusedOriginalD4": {
+        "priorWaves": [
+          8,
+          9,
+          21
+        ],
+        "eightWayTransforms": 24,
+        "maxIoU": 0.3781127129750983,
+        "threshold": 0.85
+      }
+    },
+    {
+      "wave": 31,
+      "id": "r1:greenhouse:temperate:large:003",
+      "name": "Willowglass Triple-Atrium Conservatory",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave31.mjs",
+      "gitBlob": "b082816b369c0aadd8f950855096d1e6717b16d8",
+      "size": "large",
+      "sourceCells": 14982,
+      "sourceRoofCellsWithImmediateSolidBacking": 3776,
+      "sourceWalkableCells": 3729,
+      "rooms": 12,
+      "portals": 19,
+      "independentRoofWings": 9,
+      "originalPavedRooflessWalkableCourts": [
+        240,
+        90,
+        90
+      ],
+      "originalGroundedTimberRoofBents": 16,
+      "originalPack4UprightGlassCells": 48,
+      "completeFourHighGlassBays": 12,
+      "realFrame": "Original solid y1 sill + y2 through y5 vertical Pack4 panes + genuine solid y6 timber lintel",
+      "sourceRepair": "Reduced exterior wall y1-9 to y1-8 at low porch to resolve actual duplicate roof/wall cell y9 while maintaining immediate y8 roof backing",
+      "noPlantsGrowthHeatIrrigationOrSettlement": true,
+      "focusedOriginalD4": {
+        "priorWaves": [
+          2,
+          23,
+          29
+        ],
+        "eightWayTransforms": 24,
+        "maxIoU": 0.5793594306049822,
+        "threshold": 0.85
+      }
+    }
+  ],
+  "actuallyExecutedAndObserved": {
+    "method": "Isolated synchronous V8 execution of unmodified original GitHub sourcePlan, validateBlueprint and validateAllocation modules, plus original placements source checks; NOT native node:test, WebGL2 or original-game renderer",
+    "originalSourceCompilation": "PASS both Wave30 and Wave31",
+    "actualImmediateSourceRoofBearing": "PASS 6758 new genuine Pack3 roof source cells all have immediately authored y-1 source solid bearing, not complete span load/weather certification",
+    "physicalGroundedUncoveredCourts": "PASS all 613 court cells (193 and 420) have real y0 source foundation, y1 walkable and no y1+ obstruction",
+    "originalPortalsAndCirculation": "PASS original compiler: 24 rooms, 36 two-high source portal links and connected source walkability",
+    "crescentGroundWalkingBFS": "PASS source BFS from original west boardwalk leg to east leg on y1 without imaginary bridge",
+    "lighthouseStructure": "PASS original grounded stone tower, 24 Pack3 backed crown cells, 8 real elevated stone-framed outward glass windows",
+    "greenhouseGlass": "PASS 12 complete real four-high upright Pack4 source glass bays and externally clear original source space, with real y1 and y6 timber framing",
+    "focusedEightWaySameCategoryD4": "PASS 48/48 against six prior authored original lighthouse/greenhouse sources",
+    "immutableB115D92Ownership": "Both IDs verified B115 exclusive, not in D92 or accepted 228",
+    "issueRepaired": "Willowglass actual roof/wall y9 duplicate resolved; Briarcliff physical west courtyard is 49 cells, source metadata and tests corrected from mistakenly asserted 42",
+    "realPackProducerMeshColliderAndMountCertification": "NOT PERFORMED"
+  },
+  "stagedGatesNotExecuted": {
+    "focusedNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves30-31-focused.test.mjs",
+      "blob": "9fe68a86ca9172cf7796d21a32074b03ecdb0db0",
+      "staticSyntax": "PASS",
+      "actualNativeNode": "NOT_RUN"
+    },
+    "singleFullHistoricalD4": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-31-shared-historical-d4.test.mjs",
+      "blob": "dd921787cc0dcf5175ae9861b4fe55fe3092e75a",
+      "originalAcceptedCorpus": 228,
+      "newAuthoredServiceSourceTotal": 31,
+      "additionalNewWaves9to31": 23,
+      "strictEightWayIoUThreshold": 0.85,
+      "originalHistoricalCensusReads": 1,
+      "execution": "NOT_RUN"
+    },
+    "singleDeferredWebGL2Gallery": {
+      "sourceGallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-31-gallery.mjs",
+      "galleryBlob": "a5125feed37e015ce82d5d4d85a26b0eaad5d431",
+      "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-31-gallery.mjs",
+      "auditorBlob": "55aff066eb0770bc489be36065953bf93202f1d5",
+      "wiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-31-gallery-wiring.test.mjs",
+      "wiringBlob": "74bb6b4b1450c6022c9a697008fe771066a79dda",
+      "originalSourcePreviewPaths": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave30-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave31-preview.html"
+      ],
+      "newWave9to31Originals": 23,
+      "originalSourceEvidenceFiles": 26,
+      "genuineChromiumFramesNeeded": 138,
+      "threePhoneViewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "viewsPerOriginal": [
+        "exterior",
+        "cutaway"
+      ],
+      "uniquePNG_SHA256": true,
+      "independentPNGCRC": true,
+      "exactHeadPinned": true,
+      "actualBrowserRun": "NOT_RUN",
+      "actualPNGsCaptured": 0,
+      "sourceProxyNotLiveOriginalGame": true
+    }
+  },
+  "outstandingAcceptance": [
+    "Authentic original repository native Node tests for focused new modules and one strict full historical 228-source eight-way D4 on latest exact head",
+    "Original Pack3/Pack4 producer visible meshes, selection and collision, complete load path/mount/weather acceptance",
+    "One coordinated exact-head real Chromium WebGL2 source-preview 138 PNG capture and independent PNG CRC/SHA and visual review",
+    "Owner-controlled original-game live registration, authorized biome/settlement world placement, iPhone Home Screen PWA and saved-world/performance approval"
+  ],
+  "CI": {
+    "historicalSuccessReusedOnlyForExactProtectedPR407": [
+      44972498965,
+      44972499027
+    ],
+    "newGitHubActionRuns": 0,
+    "newChromiumRuns": 0,
+    "duplicateFull228HistoricalRuns": 0,
+    "requiredGateThresholdsWeakened": false,
+    "workflowFileEdits": 0,
+    "workflowCancellation": 0
+  },
+  "immutableBoundaries": {
+    "acceptedHistorical228Untouched": true,
+    "B115D92FrozenOwnershipUntouched": true,
+    "otherDeveloperBranchesUntouched": true,
+    "fiveAutomationsUntouched": true,
+    "mainUntouched": true,
+    "protectedPR407Untouched": true,
+    "worldSavesUntouched": true,
+    "sharedCIUntouched": true,
+    "noMerge": true,
+    "noDeployment": true,
+    "noNewPR": true
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 31,
+    "newTotalOriginals": 41,
+    "goal": 294,
+    "remainingTotal": 253,
+    "residentialRemaining": 169,
+    "servicesRemaining": 84
+  },
+  "estimatedRemainingFocusedDevelopmentSessions": {
+    "low": 95,
+    "high": 245,
+    "excludesFinalIntegrationAndRelease": true,
+    "uncertain": true
+  }
+}
