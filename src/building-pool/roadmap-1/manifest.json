@@ -1,0 +1,263 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-1.manifest.v1",
+  "title": "Homes & Regional Life",
+  "gate": "v0.10 Gate A OPEN; v0.11 LOCKED",
+  "milestone": "M1 roof lantern daylight aperture and physical candidate review, creator/engine approval OPEN",
+  "status": "45_UNMERGED_CANDIDATES_82_NATIVE_EXACT_SOURCE_ZERO_RISER_GAPS_CREATOR_ACCEPTANCE_OPEN",
+  "target": 885,
+  "authoredBlueprintCount": 45,
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "designsPerSizePerBiome": {
+    "house": 20,
+    "tavern": 5,
+    "inn": 5,
+    "bathhouse": 4,
+    "stable": 5,
+    "farm-barn": 4,
+    "greenhouse": 4,
+    "fishing-lodge": 4,
+    "harbor-office": 4,
+    "lighthouse": 4
+  },
+  "sourceOfTruth": {
+    "main": "ac263720b60641c65b02330348dd76d0ef9cb75e",
+    "checkpoint": "008",
+    "issues": [
+      109,
+      117
+    ],
+    "manualPackPRs": [
+      113,
+      114,
+      112,
+      115,
+      119
+    ],
+    "automatedCatalogPR": 118,
+    "checkedManualCandidatePRs": {
+      "pack1": "113",
+      "pack2": "114",
+      "pack3": "112",
+      "pack4": "115",
+      "pack5": "119"
+    },
+    "auto130": "12 candidate families now in main as opt-in symbolic library, not runtime registered",
+    "manualPackHeads": {
+      "pack1": "54d06cc53aa5dbb76b30452243cbd93c4cb48618",
+      "pack2": "b43e079e7c0fcfd7168f8eb9dfd8a2ce42f87f3e",
+      "pack3": "6e4adfbb9c76fc2a409a0807eb87499a333367d3",
+      "pack4": "4734af9e514b5e4ce28110b9c0042b10434923b9",
+      "pack5": "545bc7e68885a601dd8d5f78231d6e2f1c4a1938"
+    },
+    "checkpoint008": {
+      "status": "main automatic-world physical voxels now active; only pre-existing automation-owned tree/cave/court structures; 12 biome130 candidates unregistered",
+      "comparedAgainst": "caf47776b723a36684edc1a72749e49268ccc688",
+      "overlap": "No Roadmap 1, manual Block Pack, or other building-roadmap paths in checkpoint 008 diff"
+    }
+  },
+  "assetRefPolicy": "live:name | pack1..5:three-digit-family-roster | biome130:three-digit-ordinal; never assign numeric persistent IDs",
+  "outputPaths": [
+    "src/building-pool/roadmap-1/",
+    "tests/building-pool/roadmap-1/",
+    "docs/building-pool/roadmap-1/"
+  ],
+  "integration": false,
+  "worldPlacement": false,
+  "certifiedNode": false,
+  "certifiedChromium": false,
+  "certifiedPhysicalIPhone": false,
+  "candidateBlueprintCount": 45,
+  "creatorAcceptedBlueprintCount": 0,
+  "authoredVoxelPlacements": 52648,
+  "remainingDesigns": 840,
+  "representativesByType": {
+    "house": 15,
+    "tavern": 15,
+    "stable": 15
+  },
+  "testEvidence": {
+    "nativeNode": {
+      "run": "Node v22.16.0 on clean isolated Roadmap 1 exact candidate source, Git blob SHA-matched 4 changed JS/test modules",
+      "cases": "85/85 PASS; 0 fail, 0 skip, 0 todo (82 baseline + 3 physically clear daylight shaft checks)",
+      "exactPRHead": "YES isolated changed code/test files blob parity on draft PR #121 at 5782b97c; NO combined main+PR integration certification"
+    },
+    "chromium": {
+      "renderer": "Genuine Chromium Canvas2D source-derived schematic; WebGL2 context unavailable on all tested software backends",
+      "screenshots": 18,
+      "viewports": [
+        "667x375",
+        "844x390",
+        "932x430"
+      ],
+      "samples": "3 independently authored Enchanted Forest roof lantern candidates × exterior/cutaway × three sizes; earlier 54 other candidate captures retained as previous evidence",
+      "authentic": true,
+      "source": "locally generated on exact tested source; not committed or physical game/WebGL2 proof"
+    },
+    "physicalIPhone": false,
+    "ci": {
+      "exactNewRoadmap1Head": "queued at content commit 5782b97c; final status pending recheck",
+      "coverageNote": "Root Actions only runs root tests/*.test.mjs, does not run Roadmap 1 nested 85-case native tests; isolated native replay separately verified"
+    }
+  },
+  "pending": [
+    "Actual Pack 2/3/4 translucent window cap and 3 roof lantern side/waterproof seals; daylight shafts are now physically open but final light/rain/collision unapproved",
+    "Real load/span and roof-edge seams at post substitutions (210 live-wood risers); final physical structural integration not approved",
+    "Pack4 glass transparency and per-window orientation live schema-1 sidecar not registered",
+    "True source-served Chromium WebGL2 physical candidate meshing, only genuine Canvas2D source previews local",
+    "Clean full latest-main+draft-PR integration and user creator/iPhone controls visual acceptance",
+    "Remaining 840 unique blueprints; no production world placement"
+  ],
+  "mirroredAndRotatedGeometryCheck": {
+    "result": "45/45 distinct under 4 rotations and mirrored counterparts, material-independent",
+    "nativeNodeCases": 2,
+    "visualNearDuplicateReview": "OPEN"
+  },
+  "physicalAccessibility": {
+    "externalEntryToAll45Rooms": "local deterministic pass",
+    "twoHighHeadClearance": "local deterministic pass",
+    "realFoundationSupport": "local deterministic pass",
+    "roomFurnishings": "category-appropriate physical placements",
+    "stables": "four physical empty stall bays",
+    "assetIDs": "symbolic only",
+    "multiCellBed": "15/15 house beds reserve Pack5:082 candidate foot at +Z outside walkable graph; head/foot floor supported; final collision geometry remains UNRESOLVED"
+  },
+  "roofFrame": {
+    "cells": 2883,
+    "horizontalFamily": "pack2:015",
+    "verticalFamily": "pack2:022",
+    "safeSpanApproval": "UNRESOLVED",
+    "engineIntegration": false
+  },
+  "stablePortals": {
+    "openStallBays": 60,
+    "liveWoodGateFlanks": 120,
+    "unbuiltPack5GateFlanks": 0,
+    "pack5Family096": "NOT STARTED at latest PR #119; four symbolic future fixture anchors per stable only",
+    "animals": 0
+  },
+  "nearDuplicateReview": {
+    "metric": "size-normalized category-specific material-independent Jaccard; advisory only",
+    "nearestSimilarity": 0.7199,
+    "nearestPair": [
+      "r1:tavern:temperate:large:003",
+      "r1:tavern:enchanted-forest:large:003"
+    ],
+    "creatorReviewed": false,
+    "exactD4CollisionCount": 0,
+    "previousNearestSimilarity": 0.822
+  },
+  "architecturalRevisions": {
+    "threeAisleGallery": [
+      "r1:house:mountain:large:003",
+      "r1:tavern:mountain:large:003"
+    ],
+    "forestStableButterflyRoof": "r1:stable:enchanted-forest:large:003",
+    "desertRearStableZoning": [
+      "r1:stable:desert:medium:002",
+      "r1:stable:desert:large:003"
+    ],
+    "newBlueprintIDs": 0,
+    "approvedBuildings": 0
+  },
+  "symbolicDependencyPolicy": {
+    "candidateOccupancy": "unresolved only, cannot claim final AABB",
+    "uniqueDependencyRecordPerCandidate": true,
+    "ghostDependenciesRejected": true,
+    "saveSchema": "1 unchanged"
+  },
+  "pack5BedFootprint": {
+    "asset": "pack5:082",
+    "sourcePR": 119,
+    "sourceFile": "src/block-packs/pack-5/residential-furnishings.mjs",
+    "verifiedSourceBlob": "7e7ffa78176f9f8a806c7274b93df6f4963a23ab",
+    "candidateCells": [
+      [
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1
+      ]
+    ],
+    "reservations": 15,
+    "orientation": "north only; maps to Pack5 isolated rotation 0, NOT live saved orientation",
+    "finalCollisionApproved": false,
+    "worldIntegrated": false
+  },
+  "physicalEnvelopeAudit": {
+    "testedCandidateBuildings": 45,
+    "authoredPerimeterSolidProfileCells": 13227,
+    "windowApertures": 180,
+    "unresolvedDoorLeafCells": 45,
+    "unobstructedExteriorEntranceCells": 90,
+    "regionWallCore": {
+      "temperate": "pack2:013",
+      "desert": "pack5:080",
+      "snow": "live:wood",
+      "enchanted-forest": "pack2:013",
+      "mountain": "pack1:006"
+    },
+    "knownIncompatibleFacadeFamilies": [
+      "pack5:079 thin plaster facing",
+      "pack2:014 partial log profile",
+      "pack2:015 narrow horizontal beam profile"
+    ],
+    "candidateAssetGeometrySource": "Pack 1 core-masonry full cube; Pack 2 definitions planed-oak full cube; Pack 5 architectural-surfaces fired brick full collision cube",
+    "fullWeatherSealingApproved": false,
+    "windowSealingApproved": false,
+    "doorSwingApproved": false,
+    "finalMeshIntegrationApproved": false
+  },
+  "glazingFeasibility": {
+    "perimeterWindows": 180,
+    "panesByBiome": {
+      "temperate": "pack4:030",
+      "desert": "pack4:031",
+      "snow": "pack4:030",
+      "enchanted-forest": "pack4:031",
+      "mountain": "pack4:030"
+    },
+    "paneYaw": "north/east/west based on wall; pack4 rotation sidecar unresolved",
+    "raisedLanterns": 3,
+    "unsupportedHorizontalUpPanes": 0,
+    "actualPaneSealApproved": false,
+    "roofDaylightApproved": false,
+    "liveWindowIntegrated": false,
+    "actualDaylightApertures": 3,
+    "solidRoofsBlockingLanterns": 0,
+    "roofLanternWeatherSealApproved": false,
+    "daylightShaftsClearToInterior": true
+  },
+  "roofStepFeasibility": {
+    "exposedHeightStepTargets": 2518,
+    "liveFilledBackingCells": 2518,
+    "previousLiveFilledBackingCells": 2309,
+    "previousUnresolvedBeamPostIntersections": 210,
+    "remainingUnresolvedRiserCells": 0,
+    "substitutedVerticalPostCells": 210,
+    "substitutionMaterial": "live:wood full-cell registered voxel",
+    "candidateOriginal": "pack2:022 slim support post",
+    "substitutionLedger": "per-blueprint architecturalIdentity.roofStepAudit.solidPostSubstitutions",
+    "retainFrameSupportPositions": true,
+    "preservation": "courtyards remain open, 3 authored roof lantern apertures cut through actual roof tiles",
+    "pack3RoofUnderlayHeight": 0.125,
+    "waterproofingApproved": false,
+    "structuralSpanApproved": false,
+    "glassRoofDaylightingApproved": false,
+    "engineIntegration": false
+  }
+}
