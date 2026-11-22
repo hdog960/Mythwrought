@@ -26,7 +26,7 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
      !validInteger(legacyTop)||legacyTop<2||legacyTop>=worldMaxY-2)return null;
   // A nearby cave, landmark, foreign cap or biome seam is not a valid build site.
   const probes=[[x,z],...neighborOffsets.map(([dx,dz])=>[x+dx,z+dz])];
-  const neighboring=[];
+  const neighboring=[],neighborWeights=[];
   for(const [px,pz] of probes){
     const climate=biomeAt(px,pz,seed),old=heightAt(px,pz,seed);
     if(climate?.name!=='mountain'||!(climate.weight>=.82)||
@@ -38,10 +38,13 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
     // caves, trees, settlements, structures or unknown voxels.
     for(let y=old+1;y<=worldMaxY-2;y++)
       if(protectedAt(px,y,pz)||readBlock(px,y,pz)!==ids.AIR)return null;
-    if(px!==x||pz!==z)neighboring.push(old);
+    if(px!==x||pz!==z){
+      neighboring.push(old);neighborWeights.push(climate.weight);
+    }
   }
   const result=planMountainV8Candidate({x,z,seed,legacyTop,
     biomeWeight:biome.weight,neighborTops:neighboring,
+    neighborBiomeWeights:neighborWeights,
     biomeName:biome.name,worldMaxY});
   if(!result)return null;
   // Intentional no in-world tree placement. A bounded, descriptive vegetation
@@ -52,7 +55,8 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
     chance<.62?'low-heather':null:null;
   return Object.freeze({...result,vegetation:kind,
     sourceProvenance:Object.freeze({legacyTop,neighborTops:Object.freeze([...neighboring]),
-      originalGroundIntact:true,protectedEnvelopeClear:true}),
+      originalGroundIntact:true,protectedEnvelopeClear:true,
+      neighborBiomeWeights:Object.freeze([...neighborWeights])}),
     estimatedExtraCells:kind==='dwarf-conifer'?18:kind?2:0,
     // Descriptive only; future renderer/owner must enforce actual mesh budgets.
     safeToIntegrate:false});
