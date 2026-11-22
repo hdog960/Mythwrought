@@ -15,6 +15,12 @@ const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
 const undulation=(angle)=>.5+.5*Math.sin(angle);
 const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
+// The source's largest possible tree admission threshold is Enchanted:
+// .52 + undulation(...)*.34, where undulation is bounded to [0,1].
+// In explicit experimental generation only, roll >= .86 cannot plant
+// a tree in ANY biome. Reject before the costly warped-biome lookup.
+// Do NOT apply this early filter to historical/default M7.
+export const ENCHANTED_TREE_MAX_DENSITY_THRESHOLD=.86;
 
 function sharedShoulder(biome,x,z,seed){
   if(biome.weight>.50)return null;
@@ -174,6 +180,7 @@ function treeVoxels(climate,x,y,z,roll){
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
     onCandidateSiteSummary=null,disableCandidateSiteCulling=false,
+    disableCandidateDensityCulling=false,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
@@ -190,6 +197,8 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // previous exact source's unculled planner within the same live M7 world.
   if(typeof disableCandidateSiteCulling!=='boolean')
     throw Error('Invalid enchanted source site culling comparison flag');
+  if(typeof disableCandidateDensityCulling!=='boolean')
+    throw Error('Invalid enchanted density culling comparison flag');
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
   // Lazily created only when an experimental enchanted tree is present.
@@ -201,7 +210,8 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // Normal gameplay never supplies the diagnostic callback, so no per-cell
   // statistics are updated on the iPhone production path.
   let diagnosticHits=0,diagnosticMisses=0;
-  let sampledSites=0,geometricallyCulledSites=0,biomeLookupSites=0;
+  let sampledSites=0,geometricallyCulledSites=0,
+    densityCulledSites=0,biomeLookupSites=0;
   // The same original source cell can be read for rooting, collision
   // preflight, and 3x3 headroom across several nearby prototype trees.
   // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
@@ -239,6 +249,14 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         z+ENCHANTED_TREE_MAX_RADIUS<minZ||
         z-ENCHANTED_TREE_MAX_RADIUS>maxZ)){
         if(onCandidateSiteSummary)geometricallyCulledSites++;
+        continue;
+      }
+      // Site admission is impossible at or above the maximum threshold
+      // regardless of the warped biome. Density/shape/style rolls remain
+      // bit-for-bit unchanged; this simply avoids a guaranteed rejection.
+      if(experimentalEnchantedTrees&&!disableCandidateDensityCulling&&
+         roll>=ENCHANTED_TREE_MAX_DENSITY_THRESHOLD){
+        if(onCandidateSiteSummary)densityCulledSites++;
         continue;
       }
       if(onCandidateSiteSummary)biomeLookupSites++;
@@ -302,8 +320,8 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
     }
   if(onCandidateSiteSummary){
     onCandidateSiteSummary(Object.freeze({
-      sampledSites,geometricallyCulledSites,biomeLookupSites,
-      experimental:experimentalEnchantedTrees
+      sampledSites,geometricallyCulledSites,densityCulledSites,
+      biomeLookupSites,experimental:experimentalEnchantedTrees
     }));
   }
   if(onCandidateCacheSummary){
