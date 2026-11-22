@@ -50,6 +50,11 @@ jobs:
       - name: Compare same original-game two-site views in actual WebGL2
         run: |
           set -euo pipefail
+          # Original gameplay child predates the isolated screenshot harness.
+          # Copy the SAME uncommitted test into its temporary worktree; do not
+          # change either pinned game source or repository branch.
+          cp candidate/tests/desert-phase3-triple-junction-browser.mjs baseline/tests/
+          cmp candidate/tests/desert-phase3-triple-junction-browser.mjs baseline/tests/desert-phase3-triple-junction-browser.mjs
           cd baseline
           python3 -m http.server 4173 >/tmp/desert-candidate-baseline-http.log 2>&1 &
           server=$!
