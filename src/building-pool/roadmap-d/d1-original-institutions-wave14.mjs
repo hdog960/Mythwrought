@@ -1,0 +1,1480 @@
+// MYTHWROUGHT Builder D Wave14 eight ORIGINAL vacant D0 arcane-academy source plans.
+// Draft-only: no runtime, world, settlement, saves or manual-pack owner edits.
+// All protected 153 historical + 100 prior D1-D13 source objects remain immutable.
+import {buildDistinctive4B} from '../roadmap-4b/m2-distinctive.mjs';
+import {validateBlueprint} from '../roadmap-4b/schema.mjs';
+export const ROADMAP_D_WAVE14_PLANS=Object.freeze([
+  {
+    "t": "arcane-academy",
+    "b": "temperate",
+    "s": "small",
+    "variant": 2,
+    "title": "Mossbrook Lanternbridge Novice Academy",
+    "dim": [
+      68,
+      20,
+      69
+    ],
+    "r": [
+      [
+        28,
+        39,
+        1,
+        66
+      ],
+      [
+        5,
+        30,
+        12,
+        29
+      ],
+      [
+        37,
+        63,
+        29,
+        46
+      ],
+      [
+        9,
+        31,
+        48,
+        65
+      ],
+      [
+        38,
+        59,
+        6,
+        21
+      ],
+      [
+        18,
+        52,
+        24,
+        38
+      ]
+    ],
+    "discs": [
+      [
+        12,
+        37,
+        8,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        12,
+        37,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      34,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        17,
+        21
+      ],
+      [
+        "study-chamber",
+        49,
+        37
+      ],
+      [
+        "mentor-rotunda",
+        34,
+        8
+      ],
+      [
+        "lantern-bridge-archive",
+        18,
+        57
+      ],
+      [
+        "mosslight-chant-lab",
+        50,
+        15
+      ],
+      [
+        "sky-chart-reading",
+        34,
+        55
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        28,
+        13,
+        28,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        17,
+        21
+      ],
+      [
+        49,
+        37
+      ],
+      [
+        34,
+        8
+      ],
+      [
+        18,
+        57
+      ],
+      [
+        50,
+        15
+      ],
+      [
+        34,
+        55
+      ]
+    ],
+    "towers": [
+      [
+        34,
+        11,
+        1,
+        17
+      ],
+      [
+        49,
+        35,
+        1,
+        15
+      ]
+    ],
+    "roof": "mossbrook-lanternbridge-double-beacon-gables"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "temperate",
+    "s": "large",
+    "variant": 1,
+    "title": "Oakspire River Atlas Grand Academy",
+    "dim": [
+      104,
+      24,
+      102
+    ],
+    "r": [
+      [
+        44,
+        57,
+        1,
+        98
+      ],
+      [
+        5,
+        46,
+        9,
+        34
+      ],
+      [
+        55,
+        99,
+        12,
+        37
+      ],
+      [
+        8,
+        46,
+        61,
+        94
+      ],
+      [
+        56,
+        100,
+        65,
+        97
+      ],
+      [
+        24,
+        80,
+        30,
+        66
+      ],
+      [
+        1,
+        25,
+        35,
+        50
+      ],
+      [
+        78,
+        103,
+        43,
+        62
+      ]
+    ],
+    "discs": [
+      [
+        18,
+        48,
+        10,
+        8
+      ],
+      [
+        87,
+        54,
+        10,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        18,
+        48,
+        1,
+        1
+      ],
+      [
+        87,
+        54,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      51,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        18,
+        22
+      ],
+      [
+        "study-chamber",
+        86,
+        23
+      ],
+      [
+        "atlas-master-tower",
+        51,
+        10
+      ],
+      [
+        "river-magic-library",
+        21,
+        80
+      ],
+      [
+        "bridge-survey-workshop",
+        82,
+        82
+      ],
+      [
+        "central-cartography",
+        51,
+        54
+      ],
+      [
+        "west-channel-observatory",
+        11,
+        44
+      ],
+      [
+        "east-canal-archive",
+        93,
+        53
+      ],
+      [
+        "upper-atlas-lore",
+        51,
+        90
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        44,
+        14,
+        33,
+        21
+      ],
+      [
+        "x",
+        57,
+        69,
+        96,
+        75
+      ]
+    ],
+    "peak": [
+      [
+        18,
+        22
+      ],
+      [
+        86,
+        23
+      ],
+      [
+        51,
+        10
+      ],
+      [
+        21,
+        80
+      ],
+      [
+        82,
+        82
+      ],
+      [
+        51,
+        54
+      ],
+      [
+        11,
+        44
+      ],
+      [
+        93,
+        53
+      ],
+      [
+        51,
+        90
+      ]
+    ],
+    "towers": [
+      [
+        51,
+        14,
+        2,
+        21
+      ],
+      [
+        21,
+        80,
+        1,
+        17
+      ],
+      [
+        82,
+        82,
+        1,
+        16
+      ]
+    ],
+    "roof": "oakspire-river-atlas-seven-vaults-and-survey-spire"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "desert",
+    "s": "small",
+    "variant": 2,
+    "title": "Qarash Sandveil Cipher Monastery",
+    "dim": [
+      67,
+      20,
+      66
+    ],
+    "r": [
+      [
+        27,
+        39,
+        1,
+        63
+      ],
+      [
+        5,
+        29,
+        11,
+        24
+      ],
+      [
+        38,
+        64,
+        26,
+        43
+      ],
+      [
+        9,
+        29,
+        42,
+        64
+      ],
+      [
+        43,
+        59,
+        8,
+        24
+      ],
+      [
+        37,
+        46,
+        17,
+        31
+      ],
+      [
+        17,
+        49,
+        21,
+        46
+      ]
+    ],
+    "discs": [
+      [
+        11,
+        34,
+        7,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        11,
+        34,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      33,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        16,
+        17
+      ],
+      [
+        "study-chamber",
+        52,
+        35
+      ],
+      [
+        "cipher-reading",
+        33,
+        8
+      ],
+      [
+        "sand-script-gallery",
+        17,
+        55
+      ],
+      [
+        "mirage-calligraphy",
+        51,
+        17
+      ],
+      [
+        "north-starchart-watch",
+        33,
+        54
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        27,
+        13,
+        23,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        16,
+        17
+      ],
+      [
+        52,
+        35
+      ],
+      [
+        33,
+        8
+      ],
+      [
+        17,
+        55
+      ],
+      [
+        51,
+        17
+      ],
+      [
+        33,
+        54
+      ]
+    ],
+    "towers": [
+      [
+        33,
+        12,
+        1,
+        18
+      ],
+      [
+        52,
+        35,
+        1,
+        14
+      ]
+    ],
+    "roof": "qarash-sandveil-angled-parapets-and-cipher-beacon"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "desert",
+    "s": "large",
+    "variant": 3,
+    "title": "Miraj Duneglass Astral University",
+    "dim": [
+      118,
+      24,
+      109
+    ],
+    "r": [
+      [
+        50,
+        64,
+        1,
+        105
+      ],
+      [
+        4,
+        52,
+        10,
+        38
+      ],
+      [
+        63,
+        113,
+        12,
+        34
+      ],
+      [
+        7,
+        52,
+        66,
+        105
+      ],
+      [
+        64,
+        114,
+        69,
+        106
+      ],
+      [
+        22,
+        90,
+        36,
+        73
+      ],
+      [
+        89,
+        116,
+        42,
+        60
+      ],
+      [
+        1,
+        25,
+        43,
+        60
+      ]
+    ],
+    "discs": [
+      [
+        16,
+        55,
+        11,
+        8
+      ],
+      [
+        101,
+        53,
+        10,
+        8
+      ],
+      [
+        58,
+        87,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        16,
+        55,
+        1,
+        1
+      ],
+      [
+        101,
+        53,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      57,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        19,
+        23
+      ],
+      [
+        "study-chamber",
+        94,
+        24
+      ],
+      [
+        "astral-stair-theory",
+        57,
+        11
+      ],
+      [
+        "dune-law-library",
+        20,
+        86
+      ],
+      [
+        "star-refraction-workshop",
+        94,
+        89
+      ],
+      [
+        "sun-dial-archive",
+        57,
+        53
+      ],
+      [
+        "west-shadow-observatory",
+        11,
+        48
+      ],
+      [
+        "east-mirror-oracle",
+        105,
+        47
+      ],
+      [
+        "upper-duneglass-charting",
+        58,
+        92
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        50,
+        15,
+        33,
+        22
+      ],
+      [
+        "x",
+        64,
+        71,
+        104,
+        79
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        23
+      ],
+      [
+        94,
+        24
+      ],
+      [
+        57,
+        11
+      ],
+      [
+        20,
+        86
+      ],
+      [
+        94,
+        89
+      ],
+      [
+        57,
+        53
+      ],
+      [
+        11,
+        48
+      ],
+      [
+        105,
+        47
+      ],
+      [
+        58,
+        92
+      ]
+    ],
+    "towers": [
+      [
+        57,
+        14,
+        2,
+        21
+      ],
+      [
+        20,
+        86,
+        1,
+        17
+      ],
+      [
+        94,
+        89,
+        1,
+        18
+      ]
+    ],
+    "roof": "miraj-duneglass-sun-drum-and-three-rising-astraria"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "snow",
+    "s": "small",
+    "variant": 2,
+    "title": "Rimewood Aurora Hymn Hall",
+    "dim": [
+      65,
+      20,
+      73
+    ],
+    "r": [
+      [
+        26,
+        37,
+        1,
+        70
+      ],
+      [
+        5,
+        27,
+        10,
+        32
+      ],
+      [
+        36,
+        61,
+        23,
+        43
+      ],
+      [
+        7,
+        27,
+        48,
+        70
+      ],
+      [
+        38,
+        60,
+        5,
+        22
+      ],
+      [
+        18,
+        47,
+        28,
+        50
+      ]
+    ],
+    "discs": [
+      [
+        12,
+        40,
+        7,
+        7
+      ]
+    ],
+    "holes": [
+      [
+        12,
+        40,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      31,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        16,
+        21
+      ],
+      [
+        "study-chamber",
+        50,
+        34
+      ],
+      [
+        "aurora-hymn-practice",
+        31,
+        10
+      ],
+      [
+        "frost-rune-archive",
+        17,
+        60
+      ],
+      [
+        "winter-chant-library",
+        49,
+        13
+      ],
+      [
+        "bell-ice-observatory",
+        31,
+        58
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        26,
+        11,
+        29,
+        19
+      ]
+    ],
+    "peak": [
+      [
+        16,
+        21
+      ],
+      [
+        50,
+        34
+      ],
+      [
+        31,
+        10
+      ],
+      [
+        17,
+        60
+      ],
+      [
+        49,
+        13
+      ],
+      [
+        31,
+        58
+      ]
+    ],
+    "towers": [
+      [
+        31,
+        13,
+        1,
+        18
+      ],
+      [
+        17,
+        58,
+        1,
+        15
+      ]
+    ],
+    "roof": "rimewood-steep-aurora-gables-and-glass-bellcap"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "enchanted-forest",
+    "s": "small",
+    "variant": 2,
+    "title": "Fernwhisper Three-Moon Grove School",
+    "dim": [
+      72,
+      20,
+      69
+    ],
+    "r": [
+      [
+        27,
+        42,
+        1,
+        66
+      ],
+      [
+        4,
+        31,
+        8,
+        29
+      ],
+      [
+        40,
+        69,
+        35,
+        57
+      ],
+      [
+        9,
+        31,
+        50,
+        67
+      ],
+      [
+        42,
+        66,
+        8,
+        25
+      ],
+      [
+        19,
+        51,
+        24,
+        40
+      ]
+    ],
+    "discs": [
+      [
+        14,
+        38,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        14,
+        38,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      35,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        16,
+        20
+      ],
+      [
+        "study-chamber",
+        55,
+        46
+      ],
+      [
+        "three-moon-map-lab",
+        35,
+        9
+      ],
+      [
+        "rootweave-library",
+        19,
+        58
+      ],
+      [
+        "lumenbough-observatory",
+        54,
+        17
+      ],
+      [
+        "forest-lullaby-chamber",
+        35,
+        54
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        27,
+        12,
+        28,
+        18
+      ]
+    ],
+    "peak": [
+      [
+        16,
+        20
+      ],
+      [
+        55,
+        46
+      ],
+      [
+        35,
+        9
+      ],
+      [
+        19,
+        58
+      ],
+      [
+        54,
+        17
+      ],
+      [
+        35,
+        54
+      ]
+    ],
+    "towers": [
+      [
+        35,
+        10,
+        1,
+        17
+      ],
+      [
+        55,
+        46,
+        1,
+        14
+      ]
+    ],
+    "roof": "fernwhisper-three-moon-leaf-lanterns-and-root-arches"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "enchanted-forest",
+    "s": "large",
+    "variant": 3,
+    "title": "Stargrove Luminous Orbital Academy",
+    "dim": [
+      115,
+      25,
+      117
+    ],
+    "r": [
+      [
+        48,
+        64,
+        1,
+        113
+      ],
+      [
+        3,
+        49,
+        13,
+        37
+      ],
+      [
+        63,
+        111,
+        16,
+        42
+      ],
+      [
+        4,
+        49,
+        77,
+        112
+      ],
+      [
+        65,
+        112,
+        78,
+        114
+      ],
+      [
+        20,
+        92,
+        31,
+        80
+      ]
+    ],
+    "discs": [
+      [
+        15,
+        55,
+        11,
+        10
+      ],
+      [
+        101,
+        57,
+        10,
+        9
+      ],
+      [
+        55,
+        93,
+        10,
+        9
+      ]
+    ],
+    "holes": [
+      [
+        15,
+        55,
+        1,
+        1
+      ],
+      [
+        101,
+        57,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      56,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        17,
+        25
+      ],
+      [
+        "study-chamber",
+        96,
+        27
+      ],
+      [
+        "root-observatory",
+        56,
+        11
+      ],
+      [
+        "astral-sylvan-archive",
+        18,
+        95
+      ],
+      [
+        "moonspore-garden",
+        97,
+        98
+      ],
+      [
+        "orbital-lore-reading",
+        56,
+        55
+      ],
+      [
+        "west-lumen-theater",
+        14,
+        48
+      ],
+      [
+        "east-crystal-lab",
+        101,
+        51
+      ],
+      [
+        "nightflower-chart-hall",
+        56,
+        102
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        48,
+        17,
+        36,
+        23
+      ],
+      [
+        "x",
+        64,
+        81,
+        111,
+        86
+      ]
+    ],
+    "peak": [
+      [
+        17,
+        25
+      ],
+      [
+        96,
+        27
+      ],
+      [
+        56,
+        11
+      ],
+      [
+        18,
+        95
+      ],
+      [
+        97,
+        98
+      ],
+      [
+        56,
+        55
+      ],
+      [
+        14,
+        48
+      ],
+      [
+        101,
+        51
+      ],
+      [
+        56,
+        102
+      ]
+    ],
+    "towers": [
+      [
+        56,
+        15,
+        2,
+        22
+      ],
+      [
+        18,
+        95,
+        1,
+        17
+      ],
+      [
+        97,
+        98,
+        1,
+        19
+      ]
+    ],
+    "roof": "stargrove-triple-orbit-spires-over-open-astral-cloisters"
+  },
+  {
+    "t": "arcane-academy",
+    "b": "mountain",
+    "s": "medium",
+    "variant": 3,
+    "title": "Ridgeglass Pilgrim Rune College",
+    "dim": [
+      94,
+      23,
+      92
+    ],
+    "r": [
+      [
+        37,
+        49,
+        1,
+        88
+      ],
+      [
+        6,
+        38,
+        7,
+        31
+      ],
+      [
+        48,
+        88,
+        29,
+        49
+      ],
+      [
+        10,
+        38,
+        54,
+        88
+      ],
+      [
+        51,
+        90,
+        63,
+        89
+      ],
+      [
+        22,
+        74,
+        26,
+        70
+      ]
+    ],
+    "discs": [
+      [
+        11,
+        45,
+        10,
+        8
+      ],
+      [
+        83,
+        58,
+        9,
+        8
+      ]
+    ],
+    "holes": [
+      [
+        11,
+        45,
+        1,
+        1
+      ],
+      [
+        83,
+        58,
+        1,
+        1
+      ]
+    ],
+    "e": [
+      43,
+      1
+    ],
+    "rooms": [
+      [
+        "lecture-hall",
+        19,
+        19
+      ],
+      [
+        "study-chamber",
+        73,
+        39
+      ],
+      [
+        "ridgetop-wind-maps",
+        43,
+        10
+      ],
+      [
+        "stone-rune-archive",
+        21,
+        72
+      ],
+      [
+        "cliffside-glyph-walk",
+        76,
+        78
+      ],
+      [
+        "central-resonance-lore",
+        43,
+        55
+      ],
+      [
+        "west-crest-observatory",
+        13,
+        42
+      ],
+      [
+        "east-echo-conclave",
+        83,
+        65
+      ]
+    ],
+    "div": [
+      [
+        "x",
+        37,
+        11,
+        30,
+        18
+      ]
+    ],
+    "peak": [
+      [
+        19,
+        19
+      ],
+      [
+        73,
+        39
+      ],
+      [
+        43,
+        10
+      ],
+      [
+        21,
+        72
+      ],
+      [
+        76,
+        78
+      ],
+      [
+        43,
+        55
+      ],
+      [
+        13,
+        42
+      ],
+      [
+        83,
+        65
+      ]
+    ],
+    "towers": [
+      [
+        43,
+        12,
+        1,
+        20
+      ],
+      [
+        74,
+        39,
+        1,
+        17
+      ]
+    ],
+    "roof": "ridgeglass-ascent-terraces-and-signal-cairns"
+  }
+].map(p=>Object.freeze(p)));
+
+// These are AUTHORED elevated, roof-supported original coordinate rings, not texture metadata.
+// No extra navigable floors, real Manual Pack mesh family, or furnished final art claimed.
+// The existing original compiler, original windows/rooms/skywells and validator are not modified.
+export function buildWave14Original(p){
+ const base=buildDistinctive4B(p),occupied=new Set(base.cells.map(c=>c.at.join(',')));
+ const cells=[...base.cells];let elevated=0;
+ for(const [cx,cz,r,topY] of p.towers){
+   if(topY>=base.bounds[1]||topY<=10)throw Error('bad elevated crown bounds '+p.title);
+   for(let y=8;y<=topY;y++)for(let x=cx-r;x<=cx+r;x++)for(let z=cz-r;z<=cz+r;z++){
+     if(Math.abs(x-cx)!==r&&Math.abs(z-cz)!==r)continue;
+     const here=[x,y,z].join(',');if(occupied.has(here))continue;
+     if(!occupied.has([x,y-1,z].join(',')))throw Error('unborne tower cell '+p.title+' '+here);
+     const top=y===topY;
+     cells.push({at:[x,y,z],role:top?'trim':'column',asset:top?'live:crystal':'live:stone',facing:'north',feature:'authored-'+p.roof+'-'+(top?'crown':'shaft')});
+     occupied.add(here);elevated++;
+   }
+ }
+ if(elevated<50)throw Error('missing actual elevated original geometry '+p.title);
+ const result=Object.freeze({...base,cells,
+   provenance:{...base.provenance,lane:'roadmap-d',milestone:'D1-wave14',source:'Eight uniquely authored vacant D0 original academy records',
+    method:'independent rectangular/elliptical source footprint and real roof-supported elevated crown rings, unmodified original compiler and full rooms',
+    originalPlan:p.title,physicalCrownCells:elevated,historicalSourcesUnchanged:true,liveIntegration:false,notFinalArt:true}});
+ validateBlueprint(result);
+ return result;
+}
+export const ROADMAP_D_WAVE14_BUILDINGS=Object.freeze(ROADMAP_D_WAVE14_PLANS.map(buildWave14Original));
+export const ROADMAP_D_WAVE14_IDS=Object.freeze(ROADMAP_D_WAVE14_BUILDINGS.map(b=>b.id));
+if(ROADMAP_D_WAVE14_IDS.length!==8||new Set(ROADMAP_D_WAVE14_IDS).size!==8)throw Error('Wave14 needs eight distinct original D0 academy IDs');
