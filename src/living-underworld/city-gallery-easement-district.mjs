@@ -58,6 +58,15 @@ export function planGalleryEasementCityDistrict(seed,rx,rz,{
  if(selectedDeepProposals!==null){
   topology=auditSelectedInterlevelTopology(
    seed,rx,rz,selectedDeepProposals);
+  const originalHub=plan.layers.find(layer=>
+   Math.abs(layer.hub.y-city.y)<=4)?.hub;
+  const accessSegments=sourceAuditedCityAccessRoute.segments,
+   first=accessSegments[0]?.a,
+   last=accessSegments.at(-1)?.b;
+  if(!originalHub||!first||!last||
+   !['x','y','z'].every(k=>first[k]===originalHub[k]&&
+    last[k]===landing[k]))
+   return fail(seed,rx,rz,'CITY_DISTRICT_ACCESS_ANCHOR_MISMATCH');
   if(!topology.ok)return fail(seed,rx,rz,
    'DISTRICT_FOUR_HUB_TOPOLOGY_UNSAFE',{topologyReason:topology.reason});
   selected=compileSelectedStairPedestrianClearance([
@@ -160,7 +169,10 @@ export function planGalleryEasementCityDistrict(seed,rx,rz,{
   rejectedTiles:Object.freeze(refusals),
   tileCenters:Object.freeze(centers),
   fullOriginalEllipseNotApproved:true,
-  detachedCityCenterInSeparateGalleryDividedComponent:true,
+  cityCenterWithinConnectedLandingDistrict:visited.has(KEY(
+   Math.round((city.x-landing.x)/3),
+   Math.round((city.z-landing.z)/3))),
+  detachedCityCenterConnectionNotAssumed:true,
   districtDoesNotReplaceHistoricalFullCityPad:true,
   playerWalkingVerified:false,actualTerrainExcavated:false,
   actualSettlementPlaced:false,sourceTerrainNotQueried:true,
@@ -275,7 +287,9 @@ export function auditSourceProtectedGalleryEasementDistrict(seed,rx,rz,{
   originalDeepLinkAndAccessSourceRightsProvidedByCaller:true,
   originalM7ReaderIdentityByCallerOnly:true,
   originalFullCityFloorStillRejected:true,
-  detachedCityCenterConnectedToLanding:false,
+  detachedCityCenterWithinLandingDistrict:
+   proposed.cityCenterWithinConnectedLandingDistrict,
+  detachedFullCityCenterConnectionNotCertified:true,
   originalVoxelWorldUnmodified:true,
   actualPlayerWalkingUnverified:true,
   settlementActuallyPlaced:false,
