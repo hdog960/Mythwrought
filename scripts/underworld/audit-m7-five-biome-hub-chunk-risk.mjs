@@ -40,6 +40,13 @@ for(const site of sites){
   candidateCarveCells:audit.plannedCarves,
   sourceAllowedCarveCells:audit.approvedCarves,
   sourceRejectedCarveCells:audit.unsafeCarves,
+  ownedInteriorRequestedCarves:audit.interiorRequestedCarves,
+  ownedInteriorApprovedCarves:audit.interiorApprovedCarves,
+  ownedInteriorRejectedCarves:audit.interiorRejectedCarves,
+  haloRequestedProposals:audit.haloRequestedCarves,
+  haloApprovedProposals:audit.haloApprovedCarves,
+  haloRejectedProposals:audit.haloRejectedCarves,
+  sourceCoreCutParity:audit.interiorCutCountMatchesOriginalProjection,
   refusalCounts:audit.counts,refusalExamples:audit.examples,
   oldExposedFaces:audit.baselineFaces,
   approvedOnlyExposedFaces:audit.approvedOnlyProjectedFaces,
@@ -50,12 +57,17 @@ for(const site of sites){
 }
 const aggregate=summarizeSourceProtectedChunkRisk(chunkAudits,{
  expectedChunks:5,maxTotalFaceGrowth:3500,
- maxTotalSourceQueries:40000,maxTotalApprovedCarves:10000
+ maxTotalSourceQueries:40000,maxTotalApprovedCarves:10000,
+ requireInteriorEvidence:true
 });
 const report=Object.freeze({schema:'living-underworld-original-m7-five-biome-one-hub-chunk-risk-v1',
  seed,actualOriginalM7SolidSource:true,
  totalChunks:rows.length,sourceQueries:rows.reduce((n,r)=>n+(r.sourceHaloCells??0),0),
  sourceRejectedCarveCells:rows.reduce((n,r)=>n+(r.sourceRejectedCarveCells??0),0),
+ ownedInteriorApprovedCarves:rows.reduce((n,r)=>n+(r.ownedInteriorApprovedCarves??0),0),
+ haloApprovedProposals:rows.reduce((n,r)=>n+(r.haloApprovedProposals??0),0),
+ haloRejectedProposals:rows.reduce((n,r)=>n+(r.haloRejectedProposals??0),0),
+ coreHaloCutCountsReportedSeparately:true,
  perChunkMaximumNewFaces:1200,
  aggregateSourceRisk:Object.freeze(aggregate),rows:Object.freeze(rows),
  allGalleryChunksCovered:false,allSupportPlacementCostsCovered:false,
