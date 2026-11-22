@@ -251,3 +251,21 @@ test('source regional revision rejection occurs before global clock consumption'
   settleGlobalMobTick(good,{world:w});
   engine.dispose();
 });
+
+test('moving observer during source reconcile cannot consume certified global tick',()=>{
+  const world=flatWorld(),engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  const observer=[8,4,8],clock=createGlobalEcologyClock();
+  const query={...world,residentAt(){observer[0]=100;return true;}};
+  assert.throws(()=>prepareGlobalMobTick({
+    ...options(clock,engine,query),observer
+  }),/Original reconcile observer changed during inspection/);
+  assert.equal(engine.get(id).state,'idle');
+  observer[0]=8;
+  const next=prepareGlobalMobTick({...options(clock,engine,world),observer});
+  assert.equal(next.kind,'cooldown',
+    'The exact same certified global clock remains unconsumed after refusal');
+  settleGlobalMobTick(next,{world});
+  engine.dispose();
+});

@@ -94,3 +94,45 @@ test('source protection callback mutation is rejected despite stable editRevisio
   assert.equal(engine.get(id).important,true);
   engine.dispose();
 });
+
+test('residency callback moving observer rejects stale safe reconciliation',()=>{
+  const w=world(),observer=[8,4,8],engine=new MobEngine(w,179);
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  const query={...w,residentAt(){observer[0]=100;return true;}};
+  assert.throws(()=>inspectOriginalReconcileReadiness({
+    engine,world:query,observer
+  }),/Original reconcile observer changed during inspection/);
+  assert.equal(observer[0],100);
+  assert.equal(engine.get(id).state,'idle',
+    'Read-only inspector must not modify original MobEngine');
+  engine.dispose();
+});
+
+test('isProtected callback cannot move caller observer during away inspection',()=>{
+  const w=world(),observer=[8,4,8],engine=new MobEngine(w,179);
+  const id=engine.spawn('deer',[35,4,8],{dormant:true});
+  assert.ok(id);
+  assert.throws(()=>inspectOriginalReconcileReadiness({
+    engine,world:w,observer,
+    isProtected:()=>{observer[2]=200;return true;}
+  }),/Original reconcile observer changed during inspection/);
+  assert.equal(engine.get(id).state,'dormant');
+  engine.dispose();
+});
+
+test('world revision callback observer mutation refuses before residency scans',()=>{
+  const w=world(),observer=[8,4,8],engine=new MobEngine(w,179);
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  let residencyChecks=0;
+  const query={...w,
+    revision(){observer[0]=100;return 0;},
+    residentAt(){residencyChecks++;return true;}
+  };
+  assert.throws(()=>inspectOriginalReconcileReadiness({
+    engine,world:query,observer
+  }),/Original reconcile observer changed during inspection/);
+  assert.equal(residencyChecks,0);
+  engine.dispose();
+});

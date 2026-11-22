@@ -1,6 +1,8 @@
 // Detached original PopulationManager reconciliation readiness; NO mutations.
 import {MobEngine} from './engine.mjs';
 import {validPoint} from './world-query.mjs';
+import {captureOriginalReconcileObserver,assertOriginalReconcileObserverUnchanged}
+  from './ecosystem-reconcile-observer.mjs';
 import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
   from './ecosystem-roster-integrity.mjs';
 export const ORIGINAL_ACTIVE_RADIUS=18;
@@ -16,16 +18,20 @@ export function inspectOriginalReconcileReadiness({
      typeof world?.revision!=='function'||
      typeof isProtected!=='function')
     throw new TypeError('Invalid original reconcile inputs');
+  // Snapshot source observer BEFORE world revision/residency and protection
+  // callbacks. Never classify distance using mutable caller-owned coordinates.
+  const sourceObserver=captureOriginalReconcileObserver(observer);
   const revision=world.revision();
   if(!Number.isSafeInteger(revision)||revision<0)
     throw new TypeError('Invalid original world revision');
+  assertOriginalReconcileObserverUnchanged(sourceObserver,observer);
   const mobs=engine.all(),required=[];
   const rosterCertificate=captureOriginalMobRoster(mobs);
   for(const mob of mobs){
     if(!validPoint(mob.position)||typeof mob.state!=='string')
       throw new TypeError('Invalid original mob snapshot');
-    const near=Math.hypot(...mob.position.map((v,i)=>v-observer[i]))
-      <=ORIGINAL_ACTIVE_RADIUS;
+    const near=Math.hypot(...mob.position.map(
+      (v,i)=>v-sourceObserver.point[i]))<=ORIGINAL_ACTIVE_RADIUS;
     const resident=world.residentAt(mob.position);
     if(resident!==true&&resident!==false)
       throw new TypeError('Unknown original mob residency');
@@ -47,6 +53,9 @@ export function inspectOriginalReconcileReadiness({
   // Original world editRevision alone cannot detect MobEngine mutations
   // from a residency/protection callback. Re-read the source engine here.
   assertOriginalMobRosterUnchanged(rosterCertificate,engine.all());
+  // Residency/protection may rewrite observer without touching MobEngine or
+  // world revision; reject stale reconcile decisions before global clock use.
+  assertOriginalReconcileObserverUnchanged(sourceObserver,observer);
   return Object.freeze({
     ready:required.length===0,inspected:mobs.length,revision,
     required:Object.freeze(required)
