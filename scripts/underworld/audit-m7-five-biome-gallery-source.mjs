@@ -74,6 +74,9 @@ for(const site of sites){
   sourceRejectedGalleries:full.sourceRejectedGalleries??null,
   firstRefusalCounts:full.firstRefusalCounts??null,
   sourceRejectionCounts:full.sourceRejectionCounts??null,
+  unsafeMaterialByBlockId:full.unsafeMaterialByBlockId??null,
+  otherUnsafeMaterialCells:full.otherUnsafeMaterialCells??null,
+  allUnsafeMaterialIdsEnumerated:full.completeUnsafeMaterialIdCoverage===true,
   completedFullSourceCellVetoCensus:full.completeSourceVetoCensus===true,
   sourceCountMethod:full.sourceCountMethod??'INCOMPLETE',
   inspectedSourceCells:full.sourceChecks,
@@ -93,6 +96,16 @@ const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-ga
  all80GallerySourceReportsComplete:rows.every(r=>r.all16GallerySourcesDiagnosed),
  all80FullSourceVoxelCensusesComplete:rows.every(r=>
   r.completedFullSourceCellVetoCensus),
+ unsafeBlockIdTotals:rows.reduce((out,r)=>{
+  for(const [blockId,count] of Object.entries(r.unsafeMaterialByBlockId??{}))
+   if(Number.isSafeInteger(count)&&count>=0)
+    out[blockId]=(out[blockId]??0)+count;
+  return out;
+ },{}),
+ unsafeBlockIdReportsComplete:rows.every(r=>
+  r.completedFullSourceCellVetoCensus&&r.allUnsafeMaterialIdsEnumerated),
+ unsafeMaterialIdsOverflowTotal:rows.reduce((n,r)=>
+  n+(r.otherUnsafeMaterialCells??0),0),
  voxelSourceVetoCategoryTotals:rows.reduce((out,r)=>{
   for(const [category,count] of Object.entries(r.sourceRejectionCounts??{}))
    if(Number.isSafeInteger(count)&&count>=0)
