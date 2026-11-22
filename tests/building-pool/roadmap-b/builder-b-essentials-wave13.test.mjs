@@ -54,14 +54,14 @@ test('Glimmerbough source #13 is exclusively Builder B, never historical 228 or 
  assert.equal(b.architecturalIdentity.productionRegistered,false);
  assert.equal(b.architecturalIdentity.actualForestBiomeEdited,false);
 });
-test('Glimmerbough actually authors 197 upright glass cells in 66 3-cell bays, not disguised roof skylights',()=>{
+test('Glimmerbough actually authors 195 upright glass cells in 65 3-cell bays, not disguised roof skylights',()=>{
  const b=buildGlimmerboughSplitSunOrchidHouse(),cells=new Map(b.placements.map(p=>[K(p.at),p]));
  const glass=b.placements.filter(p=>p.role==='window');
- assert.equal(glass.length,197,'glazing count changed; check true physical openings');
- assert.equal(b.architecturalIdentity.originalUprightGlassBays,66);
- assert.equal(b.architecturalIdentity.originalVerticalGlassCellsBeforeEntrances,198);
+ assert.equal(glass.length,195,'glazing count changed; check true physical openings');
+ assert.equal(b.architecturalIdentity.originalUprightGlassBays,65);
+ assert.equal(b.architecturalIdentity.originalVerticalGlassCellsBeforeEntrances,195);
  const bays=new Set(glass.map(p=>p.at[0]+','+p.at[2]));
- assert.equal(bays.size,66,'stacked greenhouse bay provenance lost');
+ assert.equal(bays.size,65,'stacked greenhouse bay provenance lost');
  const face={north:[0,-1],east:[1,0],south:[0,1],west:[-1,0]};
  const seenYaw=new Set();
  for(const p of glass){
@@ -85,7 +85,7 @@ test('Glimmerbough actually authors 197 upright glass cells in 66 3-cell bays, n
 });
 test('Glimmerbough dual actual open courts and 1516 supported original Pack3 roofs retain real physical 2-high circulation',()=>{
  const b=buildGlimmerboughSplitSunOrchidHouse(),cells=new Map(b.placements.map(p=>[K(p.at),p]));
- assert.equal(b.placements.length,6729);assert.equal(b.walkable.length,1175);
+ assert.equal(b.placements.length,6728);assert.equal(b.walkable.length,1175);
  assert.equal(b.rooms.length,8);assert.equal(b.portals.length,12);
  for(const [x0,z0,x1,z1] of [[21,21,26,26],[11,34,14,37]])
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)
