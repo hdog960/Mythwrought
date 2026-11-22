@@ -52,3 +52,27 @@ Use one one-time CI-only branch based on this precise source-only commit, Node 2
 No original game source changes; no actual GL shader/renderer/browser run, no pixel screenshots, no world placement, no saved sidecar, no A5 authored source variant/yaw changes, no actual in-game player camera/inputs, no physics, no mixed Pack1–5 structural support or creator approval. Original viewport 844×390 is a **source analytical shader aspect**, not a measured iPhone render. The earlier read-only game browser pilot remains **unexecuted**.
 
 Protected main: \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; protected OPEN DRAFT PR406 code HEAD: \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Roadmap A remains **207/420 SOURCE ONLY, 213 unwritten**, historic 128 commerce, 345 industrial, 315 government; all other builders, five hourly automations, shared workflows, schema1 saves, Home Screen PWA, locked v0.11 untouched. No merge/deploy/cancel.
+
+## Exact native verification and quantified results — 2026-11-22
+
+**Original repo Node 22.16.0** [Actions #45076761838](https://github.com/hdog960/Mythwrought/actions/runs/45076761838) **COMPLETED SUCCESS — 7/7 focused native tests, zero failures**, on CI-only \`roadmap-a-pack5-projection-ray-native-ci-20261122\` exact HEAD \`bfaa657e2e9a2f2f48e83a24f46e1daa41ab3f72\`. Source-only engineering commit \`03d65ffb0ddfcfb8fb60b4fe813e17e363954ff3\` is byte-identical for production-source and own-lane test files. The CI-only child changes just a unique one-time workflow. It invoked source/test syntax checks and seven new tests ONLY; it did **not** run the browser, earlier suites or game/GL.
+
+The exact original-source diagnostic log reads:
+
+\`\`\`json
+{"rays":420,"sourceTriangleVsMainShaderDisagreements":0,"originalSelectionVsMainShaderWarnings":12,"nearNdcTriangleEdgeWarnings":48,"nonNearEdgeSourceVsShader":0,"sourceTriangleHits":393,"projectedCenterHits":393,"selectionHits":387}
+\`\`\`
+
+Interpretation:
+- Four test-only original fired-brick source previews (two original variants, yaw2/3), seven X coordinates, five original \`clampLook()\` yaw input deltas and three original pitch input deltas = **420** checked mathematical camera center rays. Original staged geometry and original main terrain shader **analytical** projection agreed **on all 420**, including **393 actual original-source triangle hits and 393 projected-center hits**.
+- Original independent Pack5 detailed source selection box ray had **387 hits**, with **12** measured source selection-distance/hit differences versus the analytically projected source geometry. The **48** near projected-triangle-edge observations are a separate proximity count, NOT necessarily 48 different rendering bugs, not necessarily a partition of the 12 mismatch cases. Neither count is evidence of actual GPU raster failure, in-game occlusion or user-visible target error.
+- **Zero** original source triangle vs source GLSL mathematical projection differences outside projected triangle edge tolerance (indeed zero overall). This proves only mathematical consistency on this fixed sample grid, not pixel coverage, actual fragment depth, foreground game terrain occlusion, actual render order, touch behavior or active player edit processing.
+- Original **88** previous axis-aligned raw selection-mesh grazing warnings from a different 3,600-ray grid remain recorded separately; they are not superseded or claimed resolved by these 12 camera-projection warnings.
+
+The new original-source suite authenticated exact unchanged \`main.mjs\` shader projection equations, game camera basis uniforms, source terrain \`GL_LEQUAL\` depth and disabled culling, and actual Pack5 triangle draw layout. Independent native non-grazing camera cases validated main-game center forward projection/known triangle distances, invalid behind-camera inputs failed closed, and the zero claims are limited exactly to tested source math.
+
+No real shader compilation, GL rasterization, browser, PWA, save, game scene, A5 building source modification, active gameplay, schema1 write, real iPhone/physical wall-floor-roof support, material/yaw assignment or creator acceptance. No structural release gate was passed.
+
+**Still required:** a separately authorized real original-game **disposable scene** test with actual rendered Pack5 fixture, authentic image pixels and original player selection/occlusion, followed by physical iPhone landscape/installed PWA, mixed Pack1–5 load bearing and creator-approved A5 variants/yaws. Any future game test must not alter protected main or user saved world. The existing manual 844×390 *read-only boot pilot* is a different test: it has NOT been run and by design cannot prove actual Pack5 in-game visibility.
+
+Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`, OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\` preserved. Roadmap A **207/420 SOURCE ONLY; 213 unwritten**, historical 128 commerce, 345 industrial, 315 government, 79 prior A5 physical candidate holds untouched. All other builders, five automations, preexisting shared CI, schema1 saves, PWA and locked v0.11 untouched. No merge/deploy/cancel/creator approval.
