@@ -11,6 +11,9 @@ import {proposedSnowTree} from '../src/manual-biomes/snowy-s3-tree-prototypes.mj
 import {reviewSnowS3WorldChunk} from '../src/manual-biomes/snowy-s3-world-review.mjs';
 import {auditSnowS3Walkway} from '../src/manual-biomes/snowy-s3-walkway-audit.mjs';
 import {planEnvironmentalScenery} from '../src/nonblock/staged-habitats.mjs';
+import {describeCandidateObject} from '../src/nonblock/candidate-scene.mjs';
+import {reviewSnowS3SafeChunk} from '../src/manual-biomes/snowy-s3-integrated-admission.mjs';
+import {surveySnowS4ChunkSeams} from '../src/manual-biomes/snowy-s4-seam-evidence.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
 // One focused source-backed smoke test, not a duplicate full WebGL2 run.
@@ -35,6 +38,20 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
         audited++;
       }
     }
+    // One bounded, complete original-game integrated S3/S5 preview per seed.
+    // Reuse the already constructed world and the exact original non-block
+    // scene host (not a synthetic scene descriptor or duplicate browser run).
+    const integrated=reviewSnowS3SafeChunk(world,0,32,{
+      ...deps,planScenery:planEnvironmentalScenery,
+      describeScene:describeCandidateObject
+    });
+    assert.equal(integrated.safe,true,
+      'Original-world S3/S5 admission needs source repair: '+integrated.reason);
+    assert.equal(integrated.sourceWorldUnchanged,true);
+    const seam=surveySnowS4ChunkSeams(world,
+      {x:13,z:508,width:6,height:6},{biomeAt:v6BiomeAt,terrainHeight});
+    assert.equal(seam.sampled,36);
+    assert.equal(seam.state,'read-only-no-generator-activation');
     const scenery=reviewSnowS5Scenery(world,0,32,{
       planScenery:planEnvironmentalScenery,biomeAt:v6BiomeAt
     });
@@ -46,6 +63,9 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
     const restore=restoreFourRegionWorld(world.save(),profile);
     assert.deepEqual(restore.save(),world.save());
     console.log('SNOWY_S3_S5_REAL_M7',JSON.stringify({seed,walkingAudited:audited,
-      scenery:scenery.summary}));
+      scenery:scenery.summary,
+      admission:{checked:integrated.checked,sourceCandidates:integrated.sourceCandidates,
+        admitted:integrated.admitted.length,rejected:integrated.rejected},
+      seam:seam.counts}));
   }
 });
