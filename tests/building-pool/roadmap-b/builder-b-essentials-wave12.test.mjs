@@ -101,27 +101,6 @@ test('Sunspoke 12 upright Pack4 windows genuinely face exterior and have actual 
   assert.equal(physical.registeredInLiveGame,false);
  }
 });
-test('Sunspoke strict untouched 8-way original historical stable D4 against 228 accepted 1B sources + Meadowstep', {timeout:240000},async()=>{
- const old=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  old.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(old.length,228,'historical 1B corpus modified');
- assert.equal(new Set(old.map(v=>v.id)).size,228);
- const b=buildSunspokeForkedShelterCorralStables();
- assert.ok(!old.some(v=>v.id===b.id),'historical source slot stolen');
- const same=[...old.filter(v=>v.category===b.category),buildMeadowstepSplitAisleStables()];
- assert.ok(same.length>=20,'historical stable corpus disappeared');
- let max=0,closest=null,checked=0;const exact=d4(b,false,0);
- for(const old of same)for(const flip of [false,true])for(let turn=0;turn<4;turn++){
-  const similarity=iou(exact,d4(old,flip,turn));checked++;
-  if(similarity>max){max=similarity;closest=old.id}
-  assert.ok(similarity<.85,'Sunspoke stable exact-source near-duplicate '+old.id+' '+similarity);
- }
- assert.ok(checked>=160,'eight-way historical stable D4 missing comparisons');
- console.log('SUNSPOKE_HISTORICAL_228_STABLE_D4_PASS '+JSON.stringify({
-  accepted:228,compared:checked,closest,maxD4:max,
-  physicalIphone:false,creatorApproved:false,realHorseAI:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
