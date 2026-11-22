@@ -30,7 +30,8 @@ export function surveyMountainV8OriginalWorld(x,z,seed,{world}={}){
        old<3||old>=WORLD_MAX_Y-2)return null;
     for(let y=old-3;y<=old-2;y++){
       const id=source.naturalAndLandmarkBlock(px,y,pz);
-      if(id===BLOCK.AIR)return null; // Existing physical cave must not be buried
+      if(id!==BLOCK.DIRT&&id!==BLOCK.STONE)return null;
+      // Original cave AIR, minerals, landmarks and foreign solids veto uplift
     }
   }
   const outcome=surveyMountainV8Column({
