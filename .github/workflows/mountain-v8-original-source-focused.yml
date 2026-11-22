@@ -35,12 +35,18 @@ jobs:
           node --check src/voxel.mjs
           node --check src/manual-biomes/mountain-v8-tile-census.mjs
           node --check src/manual-biomes/mountain-v8-original-world.mjs
+          node --check src/manual-biomes/mountain-v8-source-adapter.mjs
+          node --check src/manual-biomes/mountain-v8-vegetation-cells.mjs
           node --check tests/mountain-v8-original-world.test.mjs
           node --check tests/mountain-v8-tile-census.test.mjs
           node --check tests/mountain-v8-real-seam-census.test.mjs
-      - name: Only three original VoxelWorld focused native suites
+          node --check tests/mountain-v8-source-adapter.test.mjs
+          node --check tests/mountain-v8-vegetation-cells.test.mjs
+      - name: Only changed V8 source-adapter, flora and original-world native suites
         run: |
           node --test --test-concurrency=1 \
             tests/mountain-v8-original-world.test.mjs \
             tests/mountain-v8-tile-census.test.mjs \
-            tests/mountain-v8-real-seam-census.test.mjs
+            tests/mountain-v8-real-seam-census.test.mjs \
+            tests/mountain-v8-source-adapter.test.mjs \
+            tests/mountain-v8-vegetation-cells.test.mjs
