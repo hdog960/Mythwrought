@@ -91,7 +91,7 @@ test('Tidemark original FORKED quay has 205 roofless and fully walkable stone ce
  assert.deepEqual(b.architecturalIdentity.skyOpenPavedCourts,[132,42]);
  assert.equal(b.architecturalIdentity.sourceUnroofedQuayCells,205);
  assert.equal(b.architecturalIdentity.originalForkedQuayFingers,2);
- for(const [x,z] of [[13,63],[13,60],[17,60],[32,60],[45,60],[48,63],[48,59]]){
+ for(const [x,z] of [[13,63],[13,60],[17,60],[32,60],[45,60],[48,63],[48,61]]){
   assert.equal(m.get(K([x,0,z]))?.role,'foundation','missing genuine wharf floor');
   assert.ok(walk.has(K([x,1,z])),'wharf is a source decoration, not actual walkable stone');
   for(let y=1;y<b.footprint.height;y++)
