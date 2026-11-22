@@ -23,6 +23,8 @@ on:
       - 'tests/living-underworld-lateral-search.test.mjs'
       - 'tests/living-underworld-city-access.test.mjs'
       - 'tests/living-underworld-multidepth-topology.test.mjs'
+      - 'tests/living-underworld-pedestrian-switchback.test.mjs'
+      - 'tests/living-underworld-chunk-exposure.test.mjs'
       - '.github/workflows/living-underworld-baseline.yml'
   workflow_dispatch:
 
@@ -59,6 +61,10 @@ jobs:
           node --check src/living-underworld/region-seam-components.mjs
           node --check src/living-underworld/distributed-biome-regions.mjs
           node --check src/living-underworld/city-access-proposal.mjs
+          node --check src/living-underworld/pedestrian-switchback.mjs
+          node --check src/living-underworld/chunk-exposure-audit.mjs
+          node --check scripts/underworld/audit-pedestrian-routes.mjs
+          node --check scripts/underworld/audit-chunk-exposure.mjs
           node --check scripts/underworld/audit-multidepth-components.mjs
           node --check scripts/underworld/audit-distributed-entrance-terrain.mjs
           node --check scripts/underworld/audit-region-seams.mjs
@@ -66,7 +72,7 @@ jobs:
           node --check scripts/underworld/audit-real-m7-entrance-terrain.mjs
           node --check scripts/underworld/benchmark-node-proposal.mjs
           node --check scripts/underworld/audit-m7-density.mjs
-          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs tests/living-underworld-radial-search.test.mjs tests/living-underworld-geography.test.mjs tests/living-underworld-network-cache-parity.test.mjs tests/living-underworld-lateral-search.test.mjs tests/living-underworld-city-access.test.mjs tests/living-underworld-multidepth-topology.test.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs tests/living-underworld-radial-search.test.mjs tests/living-underworld-geography.test.mjs tests/living-underworld-network-cache-parity.test.mjs tests/living-underworld-lateral-search.test.mjs tests/living-underworld-city-access.test.mjs tests/living-underworld-multidepth-topology.test.mjs tests/living-underworld-pedestrian-switchback.test.mjs tests/living-underworld-chunk-exposure.test.mjs
       - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
         shell: bash
         run: |
@@ -157,6 +163,18 @@ jobs:
         run: |
           mkdir -p artifacts/living-underworld
           node scripts/underworld/audit-multidepth-components.mjs artifacts/living-underworld/DETACHED_MULTIDEPTH_COMPONENTS_96_WINDOWS.json > artifacts/living-underworld/DETACHED_MULTIDEPTH_COMPONENTS_96_WINDOWS.log
+      - name: Dry-run original pedestrian grade failures and proposed switchback steps
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-pedestrian-routes.mjs artifacts/living-underworld/DETACHED_PEDESTRIAN_SWITCHBACK_24_REGION_AUDIT.json > artifacts/living-underworld/DETACHED_PEDESTRIAN_SWITCHBACK_24_REGION_AUDIT.log
+      - name: Dry-run halo-aware 16-cube chunk boundary exposure risk
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-chunk-exposure.mjs artifacts/living-underworld/DETACHED_CHUNK_EXPOSED_FACES_32_CHUNKS.json > artifacts/living-underworld/DETACHED_CHUNK_EXPOSED_FACES_32_CHUNKS.log
       - name: Preserve SHA256 for every actual report, failure and prototype output
         if: always()
         shell: bash
