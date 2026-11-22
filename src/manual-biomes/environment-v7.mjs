@@ -176,6 +176,17 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // terrain/cave baseline, so reusing exact source probes is safe. Never
   // persist this short-lived cache or use it for other biome generations.
   let candidateClearanceCache=null;
+  // The same original source cell can be read for rooting, collision
+  // preflight, and 3x3 headroom across several nearby prototype trees.
+  // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
+  // lookups. No cache exists for the historical M7 tree path.
+  const candidateReadCell=(x,y,z)=>{
+    candidateClearanceCache??=new Map();
+    const key=x+','+y+','+z;
+    if(!candidateClearanceCache.has(key))
+      candidateClearanceCache.set(key,readCell(x,y,z));
+    return candidateClearanceCache.get(key);
+  };
   // The *default* M7 path keeps its exact historical +/-3 site sampling.
   // Explicit Phase 2 prototypes need a +/-4 crown halo; sites outside the
   // original envelope may add ONLY Enchanted candidate voxels, never conifers.
@@ -198,8 +209,9 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       const column=readColumn(x,z);
       if(!column.size)continue;
       const floor=Math.max(...column.keys());
-      const root=readCell(x,floor,z);
-      const grounded=root===column.get(floor)&&readCell(x,floor-1,z)!==BLOCK.AIR;
+      const readNatural=candidate?candidateReadCell:readCell;
+      const root=readNatural(x,floor,z);
+      const grounded=root===column.get(floor)&&readNatural(x,floor-1,z)!==BLOCK.AIR;
       if(!grounded)continue;
       let tree;
       if(candidate){
@@ -212,23 +224,23 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         // The same world readers work across 16-block chunk boundaries.
         if(shaped.footprint.length>1){
           if(!enchantedTreeFootingsSupported(x,floor,z,shaped.footprint,
-            readColumn,readCell,BLOCK.AIR))continue;
+            readColumn,readNatural,BLOCK.AIR))continue;
         }else if(shaped.footprint.some(([dx,dz])=>
-          readCell(x+dx,floor,z+dz)===BLOCK.AIR||
-          readCell(x+dx,floor+1,z+dz)!==BLOCK.AIR))continue;
+          readNatural(x+dx,floor,z+dz)===BLOCK.AIR||
+          readNatural(x+dx,floor+1,z+dz)!==BLOCK.AIR))continue;
         tree=shaped.cells;
       }else{
         if(floor>WORLD_MAX_Y-5)continue;
         tree=treeVoxels(biome.name,x,floor,z,roll);
       }
-      if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
+      if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readNatural(a,b,c)!==BLOCK.AIR))continue;
       // The game treats moonleaf/aetherleaf as true solid cubes. Real
       // player height is 1.78: leave both voxels immediately above nearby
       // M7 ground unobstructed, without changing mineable bark or terrain.
       // Only experimental candidates use this additional headroom filter.
       if(candidate){
         candidateClearanceCache??=new Map();
-        tree=clearEnchantedCanopyForWalking(tree,readCell,BLOCK.AIR,
+        tree=clearEnchantedCanopyForWalking(tree,candidateReadCell,BLOCK.AIR,
           candidateClearanceCache);
       }
       for(const [a,b,c,id] of tree)if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ){
