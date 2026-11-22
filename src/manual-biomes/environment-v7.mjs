@@ -55,6 +55,11 @@ function mountainAlpineMeadow(x,z,seed,top,biome,readBaseline){
   const patch=.8*mountainCoherent(x/64,z/64,seed+7103)+
     .2*mountainCoherent(x/20,z/20,seed+7139);
   if(patch<.54)return false;
+  // A second independently seeded, world-space exposure field breaks up
+  // unusually broad lower meadows into naturally connected stone pockets.
+  // Keep mineable rock exposed even on gentle slopes without adding blocks,
+  // tree-relative grids, cave edits, or terrain-height modifications.
+  if(mountainCoherent(x/11,z/11,seed+30001)<.56)return false;
   const phase=(seed%223)*.19;
   // Neighbor prediction uses only height/biome math, not four recursive
   // full column plans. Keep the extra baseline probes bounded and cave-safe.
