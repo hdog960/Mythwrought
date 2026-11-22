@@ -78,7 +78,7 @@ test('D28 original source refuses forged roof, missing actual navigation, false 
  const oneWalk=b.navigation.find(n=>n.at[1]===2&&roofs.has(n.at[0]+','+n.at[2]));
  assert.ok(oneWalk);
  assert.throws(()=>auditD28OriginalLongBayArchitecture({...b,navigation:b.navigation.filter(n=>n!==oneWalk)},a,s,z),/navigation|WALK/);
- assert.throws(()=>auditD28OriginalLongBayArchitecture({...b,creatorApproved:true},a,s,z),/unregistered/);
+ assert.throws(()=>auditD28OriginalLongBayArchitecture({...b,creatorApproved:true},a,s,z),/D26 requires unplaced authentic D25 unapproved live:wood roof source/);
  for(const options of [{maxInteriorCells:49},{minInteriorCells:12},{maxReportedSpans:9},
   {maxProposedBeamCells:385},{distanceLimit:0},{maximumCandidates:99}])
   assert.throws(()=>auditD28OriginalLongBayArchitecture(b,a,s,z,options),/budget/);
