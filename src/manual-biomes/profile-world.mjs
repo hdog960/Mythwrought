@@ -237,6 +237,15 @@ export class FourRegionWorld extends VoxelWorld{
     }
     return true;
   }
+  // This in-memory development visualization intentionally has NO durable
+  // save format. Reusing the M7 generator identity would regenerate different
+  // naturally grown trees on reload and can orphan historical player edits.
+  // Fail closed until a separately accepted versioned generator migration.
+  save(){
+    if(this.experimentalEnchantedTrees)
+      throw Error('Experimental enchanted tree candidate cannot be saved as historical M7');
+    return super.save();
+  }
   get cachedBiomeColumns(){return this._biomeColumns.size;}
   get generationProfile(){return this.profile;}
 }
