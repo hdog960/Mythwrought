@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 import {BLOCK,meshChunk,chunkCoord} from '../../src/voxel.mjs';
+import {MAX_CHUNK_UPLOAD_BYTES,validateChunkUploadBytes} from '../../src/gpu-recovery.mjs';
 import {FourRegionWorld,fourRegionProfile,
   M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR}
   from '../../src/manual-biomes/profile-world.mjs';
@@ -130,4 +131,54 @@ test('non-enchanted original climate tree chunks remain byte-identical under opt
     assert.deepEqual([...a.entries()],[...b.entries()],
       'snow/mountain/desert/plain tree cells must not change');
   }
+});
+
+test('real original meshChunk upload for experimental tall silhouettes stays under unchanged GPU cap',()=>{
+  const candidate=new FourRegionWorld(seed,profile,{experimentalEnchantedTrees:true});
+  const legacy=new FourRegionWorld(seed,profile);
+  const chunks=[[-2,-33],[-1,-33],[0,-33],[-2,-32],[-1,-32],[0,-32]];
+  let baselineBytes=0,candidateBytes=0;
+  for(const [cx,cz] of chunks){
+    const a=meshChunk(legacy,cx,cz);
+    const b=meshChunk(candidate,cx,cz);
+    assert.ok(a instanceof Float32Array&&b instanceof Float32Array);
+    assert.ok(a.length>0&&b.length>0,'real physical mesh cannot be empty');
+    assert.ok(b.byteLength<=MAX_CHUNK_UPLOAD_BYTES,
+      'candidate may not increase the real GPU upload bound');
+    assert.doesNotThrow(()=>validateChunkUploadBytes(b));
+    assert.ok(b.every(Number.isFinite),'mesh must contain finite native vertex data');
+    baselineBytes+=a.byteLength;candidateBytes+=b.byteLength;
+  }
+  assert.ok(candidateBytes<baselineBytes*2.5,
+    'prototype must avoid explosive GPU mesh growth');
+  console.log('# ENCHANTED PHASE2 GPU '+JSON.stringify({
+    seed,checkedChunks:chunks.length,baselineBytes,candidateBytes,
+    ratio:+(candidateBytes/baselineBytes).toFixed(3),limit:MAX_CHUNK_UPLOAD_BYTES
+  }));
+});
+test('mining ephemeral prototype canopy uses ordinary edits but never permits historical M7 save',()=>{
+  const world=new FourRegionWorld(seed,profile,{experimentalEnchantedTrees:true});
+  const chunks=[[-2,-33],[-1,-33],[0,-33],[-2,-32],[-1,-32],[0,-32]];
+  let sample;
+  for(const [cx,cz] of chunks){
+    const trees=environmentalTreesForChunk(cx,cz,seed,
+      (x,z)=>world._columnPlan(x,z),
+      (x,y,z)=>world._columnPlan(x,z).get(y)??world._environmentBaseline(x,y,z),
+      {experimentalEnchantedTrees:true});
+    for(const [k,id] of trees)if([G.aetherLeaves,G.moonLeaves].includes(id)){
+      const [x,y,z]=k.split(',').map(Number);
+      if(world.get(x,y,z)===id){sample=[x,y,z,id];break;}
+    }
+    if(sample)break;
+  }
+  assert.ok(sample,'must inspect a genuinely generated mineable canopy');
+  const [x,y,z,id]=sample;
+  assert.equal(world.set(x,y,z,BLOCK.AIR),true);
+  assert.equal(world.get(x,y,z),BLOCK.AIR,'mining must create a real temporary edit');
+  assert.ok(world.edits.has(key(x,y,z)));
+  assert.throws(()=>world.save(),/cannot be saved as historical M7/,
+    'candidate cannot be serialized under the old generator identity');
+  const historical=new FourRegionWorld(seed,profile);
+  assert.doesNotThrow(()=>historical.save());
+  assert.equal(historical.edits.size,0);
 });
