@@ -78,9 +78,13 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  // Already checked the access route as selected[0]. Use the same source
  // protection for the terrace, including BOTH directions of cross-route
  // floor/air collision.
+ const remaining=maxTotalSourceChecks-inspected;
+ if(remaining<100)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
+  reason:'CITY_LINK_TOTAL_SOURCE_BUDGET',sourceChecks:inspected,
+  maxTotalSourceChecks,worldChanged:false});
  const terrace=proposeProtectedCityLandingTerrace(seed,rx,rz,{
   source,selectedStairProposals:selected,
-  maxSourceChecks:Math.min(60000,maxTotalSourceChecks-inspected)
+  maxSourceChecks:Math.min(60000,remaining)
  });
  const sourceChecks=inspected+(terrace.sourceChecks??0);
  if(!terrace.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
