@@ -1,0 +1,251 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4a.provenance.v1",
+  "legacyPR": 123,
+  "legacyHead": "564330635f18e10215a3bf93901923fbf5af528d",
+  "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+  "legacySchemaBlobSha": "9293f0fae6254f2fbdb7cf519f2114cab0ade69e",
+  "identityPolicy": "Original r4:* stable IDs retained; no rekey, duplicate, mirror or color-swapped claims",
+  "parityPolicy": "The new M1 coordinate generator is Git-blob byte-identical to legacy PR #123. Exact-head native Node verifies 30 IDs, deterministic source geometry, uniqueness and per-profile references. Per-blueprint geometry signatures are computed by native test, not invented here.",
+  "records": [
+    {
+      "originalId": "r4:civic-hall:temperate:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][0][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:temperate:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][0][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:temperate:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][0][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:desert:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][1][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:desert:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][1][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:desert:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][1][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:snow:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][2][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:snow:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][2][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:snow:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][2][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:enchanted-forest:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][3][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:enchanted-forest:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][3][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:enchanted-forest:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][3][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:mountain:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][4][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:mountain:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][4][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:civic-hall:mountain:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['civic-hall'][4][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:temperate:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][0][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:temperate:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][0][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:temperate:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][0][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:desert:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][1][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:desert:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][1][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:desert:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][1][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:snow:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][2][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:snow:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][2][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:snow:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][2][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:enchanted-forest:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][3][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:enchanted-forest:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][3][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:enchanted-forest:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][3][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:mountain:small:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][4][0]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:mountain:medium:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][4][1]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    },
+    {
+      "originalId": "r4:castle-palace:mountain:large:01",
+      "ownedModule": "src/building-pool/roadmap-4a/m1-blueprints.mjs",
+      "legacySourceModule": "src/building-pool/roadmap-4/m1-blueprints.mjs",
+      "sourceBlobSha": "14ecb6fcfbe5cfeea97976670d14afb93bc6fe45",
+      "sourceProfile": "PLANS['castle-palace'][4][2]",
+      "status": "source-exact migrated candidate; geometry fingerprint computed by native tests; not creator-accepted"
+    }
+  ]
+}

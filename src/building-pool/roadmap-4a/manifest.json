@@ -1,0 +1,113 @@
+{
+  "schema": "mythwrought.building-pool.roadmap-4a.manifest.v1",
+  "title": "Government & State Knowledge",
+  "authority": "theoretical design; no world writer",
+  "baseMain": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "legacyPR": 123,
+  "legacyHead": "564330635f18e10215a3bf93901923fbf5af528d",
+  "infraPR": 178,
+  "infraMerge": "e6bd7c173a4531ba7efc153e5f2eb89870c3b9db",
+  "sourceSchema": "mythwrought.building-pool.roadmap-4.v1",
+  "stableIdPrefix": "r4:",
+  "counts": {
+    "planned": 315,
+    "legacyAuthored": 30,
+    "newlyAuthored": 134,
+    "totalAuthored": 164,
+    "remaining": 151,
+    "creatorAccepted": 0,
+    "integratedBuildings": 0,
+    "m2Original": 120,
+    "m3Original": 12,
+    "m4EarlyOriginal": 2
+  },
+  "biomes": [
+    "temperate",
+    "desert",
+    "snow",
+    "enchanted-forest",
+    "mountain"
+  ],
+  "sizes": [
+    "small",
+    "medium",
+    "large"
+  ],
+  "categories": [
+    {
+      "type": "civic-hall",
+      "perBiomeSize": 5,
+      "total": 75,
+      "inherited": 15,
+      "remaining": 0,
+      "milestone": 2
+    },
+    {
+      "type": "guildhall",
+      "perBiomeSize": 4,
+      "total": 60,
+      "inherited": 0,
+      "remaining": 0,
+      "milestone": 2
+    },
+    {
+      "type": "embassy",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 41,
+      "milestone": 3
+    },
+    {
+      "type": "castle-palace",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 15,
+      "remaining": 26,
+      "milestone": 3
+    },
+    {
+      "type": "grand-archive",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 41,
+      "milestone": 3
+    },
+    {
+      "type": "observatory",
+      "perBiomeSize": 3,
+      "total": 45,
+      "inherited": 0,
+      "remaining": 43,
+      "milestone": 4
+    }
+  ],
+  "paths": [
+    "src/building-pool/roadmap-4a/",
+    "tests/building-pool/roadmap-4a/",
+    "docs/building-pool/roadmap-4a/"
+  ],
+  "sourceProvenance": "provenance.json",
+  "manualPacks": "96 manual families / 106 physical variants incorporated into main via PR #174; resolve runtime shapes via exact integrated catalog; imported blueprint dependency metadata is a preserved historic candidate snapshot",
+  "biome130": "unregistered and non-verified symbols remain symbolic; do not allocate persistent IDs",
+  "gates": {
+    "M0": "Accepted: exact-head Actions #43767981937 passed after fixing owned M0 count/list tests; 30 inherited source-exact designs preserved",
+    "M1": "Technical candidate acceptance: exact-head Actions #43770848853 passed, 180 source-driven Chromium WebGL2 exterior/cutaway proxy captures; physical/creator gates open",
+    "M2": "Theoretical design complete: 75/75 civic halls and 60/60 guildhalls; source-specific 60/60 Chromium WebGL2 PNGs exact-head full/focused Actions #44017406628 and #44017445958 SUCCESS; final premium visual and full physical Pack1–5 acceptance still blocked.",
+    "M3": "14 independently source-authored M3/M4 plans (12 M3, 2 early M4), including 3 new M3 original candidates on top of 161 source-accepted baseline. Cumulative 164/315 theoretical, 151 remaining, 0 creator-approved/0 integrated. New 84-image WebGL2 gallery and physical Pack1–5 variant acceptances pending exact-head verification; no production integration.",
+    "M4": "2 standalone observatory candidates authored early under new M3/M4 isolated module; remaining 43/45. Source technical CI/gallery pending; physical and creator acceptance open.",
+    "M5": "not started",
+    "M6": "creator gate open"
+  },
+  "integration": false,
+  "worldPlacement": false,
+  "creatorVisualApproval": false,
+  "physicalIphoneAcceptance": false,
+  "preservation": [
+    "no source edits outside roadmap-4a",
+    "legacy PR #123 unchanged",
+    "schema-1 saves unchanged",
+    "Gate A v0.10 open; v0.11 locked"
+  ]
+}

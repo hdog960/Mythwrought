@@ -1,0 +1,7 @@
+# Builder 4A M2 — isolated local timber-span correction
+
+Source-level exterior/cutaway audit following genuine 12/12 M2 WebGL2 previews (Actions #43773058035) found three theoretical roof tiles lacking a nearby wall/column/beam within a two-cell span: first civic hall at `(12,4,1)`; first guildhall at `(10,4,19)` and `(11,4,19)`. This is an **architectural load-approximation finding**, not verified real collision/persistent block behavior.
+
+Added explicitly authored transverse timber to the civic public portico between existing end columns and to the guild rear extension between its real source wall anchors. First two design IDs, biome/size, roof silhouette, entries, functional rooms, window sockets, saves and inherited original M1 source remain unchanged. A new native source-specific test checks all roof tiles in **four current M2 designs** have nearby 3D bearing elements and separately audits real merged manual physical-family candidates fail-closed.
+
+The first two M2 preview Git blob pin is updated from `c56550f67cc6d525cd47808ae4c37a7f39190060` to `bb3a641ea75beaa1a01bb19def41eceda7b6b3e1`; therefore **old gallery screenshots are no longer evidence for the repaired head**. The exact repaired-head 12-view Chromium/Mesa WebGL2 gallery must rerun and be inspected; do not claim updated images from prior source. M2 design count remains 34/315. Exact-head CI must pass. No live assets, iPhone hardware or creator approval.
