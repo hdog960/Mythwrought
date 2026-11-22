@@ -16,7 +16,7 @@ test('real photographed Desert/Plains feather edge uses dry sand, never pale sal
   let sampled=0;
   for(const [seed,cx,cz] of BORDERS){
     const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
-    let local=0;
+    let local=0,redCaps=0;
     for(let dz=-3;dz<=3;dz++)for(let dx=-3;dx<=3;dx++){
       const x=cx+dx,z=cz+dz,biome=v6BiomeAt(x,z,seed);
       if(biome?.name!=='desert'||biome.weight>.50)continue;
@@ -25,13 +25,15 @@ test('real photographed Desert/Plains feather edge uses dry sand, never pale sal
       const plan=world._columnPlan(x,z);
       if(!plan.size)continue; // never circumvent protected cave/landmark veto
       const top=Math.max(...plan.keys());
-      assert.equal(plan.get(top),256,
-        'Real original Desert-to-Plains low-weight surface must be dune sand: '+
+      assert.notEqual(plan.get(top),259,
+        'Original Desert-to-Plains feather edge must not generate a bright salt-crust cap: '+
         JSON.stringify({seed,x,z,top,cap:plan.get(top)}));
+      if(plan.get(top)===257)redCaps++;
       assert.notEqual(world.naturalAndLandmarkBlock(x,top,z),BLOCK.GRASS);
       local++;
     }
     assert.ok(local>=10,'Must exercise real original seeded Desert/Plains edge '+seed);
+    assert.ok(redCaps>0,'Original red desert cap variation must survive near Plains '+seed);
     assert.deepEqual(world.save().edits,[],'Terrain verification may not create player edits');
     sampled+=local;
   }

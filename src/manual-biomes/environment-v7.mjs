@@ -25,7 +25,7 @@ function sharedShoulder(biome,x,z,seed){
     if(pair.includes('snow')&&pair.includes('enchanted'))return G.woodlandMoss;
     return 258;
   }
-  return biome.name==='desert'&&touchesPlains?256:null;
+  return biome.name==='desert'&&touchesPlains?'desert-plains':null;
 }
 
 function desertOutcrop(x,z,phase){
@@ -92,8 +92,12 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   // at that height, while other biomes preserve their existing feathering.
   if(blend<.065&&shoulder===null&&biome.name!=='desert')return writes;
   const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
+  // Keep the true red/pale dune caps at the Desert/Plains seam. Only the
+  // conspicuous WHITE salt-crust cap is replaced by earthy hardpan; an
+  // unconditional sand strip would lose the original red mesa variation.
+  const surfaceCap=shoulder==='desert-plains'?(cap===259?258:cap):(shoulder??cap);
   for(let y=old-1;y<=top;y++)
-    writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
+    writes.set(y,y===top?surfaceCap:y>=top-2?subsoil:rock);
   return writes;
 }
 
