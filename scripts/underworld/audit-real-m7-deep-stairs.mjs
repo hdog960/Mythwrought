@@ -51,7 +51,10 @@ const count={total:rows.length,sourceProtected:rows.filter(r=>r.protectedSourceS
  authorshipConflicts:rows.reduce((n,r)=>n+(r.counts?.authored??0),0),
  protectedLandmarkConflicts:rows.reduce((n,r)=>n+(r.counts?.protected??0),0),
  oreOrUnsafeMaterial:rows.reduce((n,r)=>n+(r.counts?.unsafeMaterial??0),0),
- playerEdits:rows.reduce((n,r)=>n+(r.counts?.edited??0),0)};
+ playerEdits:rows.reduce((n,r)=>n+(r.counts?.edited??0),0),
+ authoredAIRSupportRejected:rows.reduce((n,r)=>n+(r.counts?.authoredAirSupport??0),0),
+ oldNaturalCaveAIRSupportRejected:rows.reduce((n,r)=>n+(r.counts?.existingAirSupport??0),0),
+ inconsistentOriginalSourceRejected:rows.reduce((n,r)=>n+(r.counts?.sourceInconsistency??0),0)};
 if(rows.length!==32||failures.length>0)
  throw Error('Invalid genuine-source old-M7 underground survey cohort');
 const report={

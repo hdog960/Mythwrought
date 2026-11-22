@@ -1,0 +1,31 @@
+# Living Underworld Phase 4 — no-destruction walking-chain safety and projected chunk faces
+
+## Starting refs and no duplicate testing
+- Production `main` remains `7016e14cd6289f45eaf7fc6a79a362b47996df65`; protected OPEN DRAFT PR #367 remains `f7de8cfe6c4e055e94bf1ce2398ad7aa97e588e0`, unmerged.
+- This Phase 4 work is on **isolated child** `dev/living-underworld-pedestrian-proof-20261121`, parent exact child `81da50390f2750a3d939e556b73f647a86cf6a81`. It changes only own `src/living-underworld/`, `scripts/underworld/`, `tests/living-underworld-*`, docs and own dedicated workflow.
+- Exact-commit existing evidence reused WITHOUT rerun: root #44972360733 SUCCESS on protected parent, dedicated #44972360755 56/56 native PASS but required M7 20-seed gate stays RED for genuinely refused positive seeds **8675309 and 13579**. This parent evidence does NOT certify new child changes.
+- Under global CI efficiency directive, **no new root, browser, WebGL2, Actions, or screenshot job** is automatically launched by this research; three focused new native tests are prepared in the isolated workflow for future milestone validation.
+
+## Source-backed original AIR preservation
+- In the existing M7 original cave overlay, `environmentCaves.get(x,y,z)` can return **0 (explicit authored AIR)**. Prior optimistic stair ownership code treated that as unowned; adding support blocks could close historical authored cave passage.
+- Corrected detached `auditProtectedSubsurfaceStairs`: any proposed support on authored AIR is **REJECTED**; support on even unowned pre-existing natural AIR is also **REJECTED**. Existing authored AIR in *clearance* is preserved only when the natural reader also says AIR; source contradictions and malformed cave IDs fail closed.
+- Independent source-function execution (seed179 optimized route, 1,896 candidate footprint cells): ordinary stone PASS, authored AIR support REFUSED, natural AIR support REFUSED, authored AIR clearance correctly preserved, authored AIR vs natural ROCK contradiction REFUSED, ore REFUSED, malformed authoring REFUSED, and budget 100 REFUSED. The original 3-wide stair support/clearance checker is unchanged. No old M7 voxel actually touched.
+
+## End-to-end surface-to-lowest cave candidate chain
+- New `auditProtectedUnderworldWalkingChain` joins a 64-way source-vetted above-surface mouth to its *exact* same region upper hub and three optimized depth ramps (indices 16,25,34), with **strict whole-corridor support and headroom provenance** checked independently for the surface gallery and each underground segment.
+- It validates all historical 64-way result fields (64-way `sourceProtected` + `originalM7Edited:false`, earlier legacy `noOriginalCellsChanged:true`) and rejects forged seed, mismatched hub, unapproved mouth, unavailable callbacks, and unsupported grade.
+- The chain forwards ONLY the four source readers `naturalAt,authoredAt,editedAt,protectedAt`. A malicious or mistaken `source.materialAllowed:()=>true` is explicitly ignored; the fixed geology whitelist cannot be widened by caller options.
+- Exact-source deterministic synthetic trial, seed179: **four of four** proposed geometrically supported source-safe corridor stages, **6,316** total checked footprint cells, with no world edits. Injected deep ore correctly causes chain rejection (two deep links unsafe), and forged entrance seed also refuses. This is a *toy all-stone source fixture*, **NOT true M7, player walking, or approved surface-to-city traversal**.
+- Manual `audit-m7-five-biome-walking-chain.mjs` samples exactly five **historically SHA-authenticated real M7** source-safe 64-way mouths (one plains/desert/snow/mountain/enchanted from original seed179, exact mouth coords and regional IDs persisted in source). It must compare newly read old-M7 mouth coordinates to prior SHA256-signed artifact #14733859064; mismatch FAILS, not silently reselects. Only after matching does it evaluate real original M7 full source ownership of all four walking stages. **This manual script has NOT BEEN RUN** and must not be described as actual five-biome accessibility evidence.
+- Existing manual 32-source-route M7 survey now distinguishes **authored AIR support conflicts**, **naturally existing AIR support conflicts**, and **inconsistent source ownership**, without changing world generation.
+
+## Conservative chunk-face effect
+- New `chunk-carve-projection.mjs` reads one `(side+2)^3` halo snapshot and computes both original and future solid occupancy masks from that immutable original snapshot. It only projects removal of candidate **solid** voxels; it never uploads GPU buffers or changes actual world.
+- Reports naive 6-neighbor exposed faces, newly carved interior solid voxels, illustrative unmerged vertex/index bytes and signed face growth. Bounded `maxFaceGrowth` fails closed if exceeded; input readers must be exact booleans.
+- Independent focused source tests: one isolated cavity in an all-solid 8³ chunk creates exactly **six** exposed faces and **840 illustrative bytes**, a five-face growth budget REFUSES it; carving an *already AIR* cell produces ZERO new solid cuts and ZERO face change; bogus source readers fail.
+- Separate **manual** `audit-ramp-chunk-face-delta.mjs` checks 16 chunks at reproducible mid-segment waypoints across four seeds and four proposed links, comparing optimized candidate AIR overlay with existing *detached* cave AIR. It is NOT real M7, device GPU buffer allocation, greedy meshing or installed iPhone frame performance. **Not executed yet.**
+
+## Still blocked
+- Genuine five-biome M7 existing voxel provenance and protected full walking chain remain **UNVERIFIED** until manual run; do not assert true 29 mouths physically walkable.
+- Original M7 positive seed failures remain unmodified and red, deep old-world heritage cave AIR and ore cannot be filled. Before release: exact new-head native, physically consistent source and player collision, real original-game WebGL2 and iPhone Home Screen PWA performance/offline acceptance, visual authenticity, real mesh/chunk buffer budgets.
+- No change to any builder, biome, Codex, five automations, Creative, digging lag, PWA production, historical saves or main. No merge or deployment.

@@ -45,6 +45,8 @@ export function auditProtectedSubsurfaceStairs(proposal,{
   throw Error('Strict original stair auditor missed support-air overlap');
  const visited=new Set(),count={authored:0,edited:0,protected:0,
   unsafeMaterial:0,bounds:0,geologyExcavation:0,supportPlacement:0,
+  authoredAirSupport:0,existingAirSupport:0,
+  authoredAirClearance:0,sourceInconsistency:0,
   preexistingAirClearance:0,preexistingSolidSupport:0};
  const examples=[];
  for(const [kind,set] of [['clearance',air],['support',support]]){
@@ -58,34 +60,50 @@ export function auditProtectedSubsurfaceStairs(proposal,{
    let reason=null;
    if(y<minY||y>maxY){count.bounds++;reason='BOUNDS';}
    else if(editedAt(x,y,z)){count.edited++;reason='PLAYER_EDIT';}
-   else {const owner=authoredAt(x,y,z);
-    if(owner!==undefined&&owner!==0){
-     count.authored++;reason='AUTHORED_SOURCE';
+   else {
+    const owner=authoredAt(x,y,z);
+    // A cave author's explicit AIR (0) is not 'unowned' terrain:
+    // replacing it with support rock would seal a pre-existing passage.
+    // An authored AIR clearance cell is preserved exactly as existing AIR.
+    if(owner!==undefined&&(!integer(owner)||owner<0)){
+      count.sourceInconsistency++;reason='INVALID_AUTHORED_SOURCE';
+    }else if(owner!==undefined&&owner!==0){
+      count.authored++;reason='AUTHORED_SOURCE';
+    }else if(kind==='support'&&owner===0){
+      count.authoredAirSupport++;reason='AUTHORED_AIR_SUPPORT';
     }else if(protectedAt(x,y,z)){
-     count.protected++;reason='PROTECTED_LANDMARK';
+      count.protected++;reason='PROTECTED_LANDMARK';
     }else{
-     const material=naturalAt(x,y,z);
-     if(!materialAllowed(material,x,y,z)){
-      count.unsafeMaterial++;reason='UNSAFE_MATERIAL';
-     }else if(kind==='clearance'){
-      if(material===0)count.preexistingAirClearance++;
-      else count.geologyExcavation++;
-     }else{
-      if(material===0)count.supportPlacement++;
-      else count.preexistingSolidSupport++;
-     }
+      const material=naturalAt(x,y,z);
+      if(!materialAllowed(material,x,y,z)){
+       count.unsafeMaterial++;reason='UNSAFE_MATERIAL';
+      }else if(owner===0&&material!==0){
+       count.sourceInconsistency++;reason='AUTHORED_AIR_MISMATCH';
+      }else if(kind==='clearance'){
+       if(material===0){
+        count.preexistingAirClearance++;
+        if(owner===0)count.authoredAirClearance++;
+       }else count.geologyExcavation++;
+      }else if(material===0){
+       // Do not seal any pre-existing natural cavity, even if the
+       // caller did not tag it as a named authored cave cell.
+       count.existingAirSupport++;reason='EXISTING_AIR_SUPPORT';
+      }else count.preexistingSolidSupport++;
     }
    }
    if(reason&&examples.length<12)examples.push(Object.freeze({x,y,z,kind,reason}));
   }
  }
  const ok=count.authored===0&&count.edited===0&&count.protected===0&&
-  count.unsafeMaterial===0&&count.bounds===0;
+  count.unsafeMaterial===0&&count.bounds===0&&
+  count.authoredAirSupport===0&&count.existingAirSupport===0&&
+  count.sourceInconsistency===0;
  return Object.freeze({ok,reason:ok?null:'PROTECTED_OR_UNSUPPORTED_SOURCE',
   sourceChecks:visited.size,
   supportCells:geometry.supportCells,clearanceCells:geometry.clearanceCells,
   counts:Object.freeze(count),examples:Object.freeze(examples),
   actualSourceIdentityNotAuthenticated:true,
+  authoredAirAndNaturalCaveAirNeverFilled:true,
   candidateOnly:true,notYetWalkable:true,
   proposedExcavationOnly:true,
   existingM7GeneratorUnchanged:true,originalM7Edited:false,
