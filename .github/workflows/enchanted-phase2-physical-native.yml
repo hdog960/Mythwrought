@@ -31,6 +31,9 @@ jobs:
           node --check src/manual-biomes/environment-v7.mjs
           node --check src/manual-biomes/enchanted-tree-candidates.mjs
           node --check tests/manual-biomes/enchanted-tree-structural-branches.test.mjs
+          node --check src/manual-biomes/enchanted-tree-walking-clearance.mjs
+          node --check tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs
+          node --check tests/manual-biomes/enchanted-tree-walking-real-m7.test.mjs
           node --check tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs
           node --check tests/manual-biomes/enchanted-tree-footings-real-m7.test.mjs
       - name: Focused actual-source M7 roots, source seams, prototype saves and prior candidate regression only
@@ -41,4 +44,6 @@ jobs:
             tests/manual-biomes/enchanted-tree-footings-real-m7.test.mjs \
             tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
             tests/manual-biomes/enchanted-tree-structural-branches.test.mjs \
+            tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs \
+            tests/manual-biomes/enchanted-tree-walking-real-m7.test.mjs \
             tests/manual-biomes/enchanted-trees-phase2.test.mjs
