@@ -21,25 +21,39 @@ export function previewSourceEcologyRegion({
     throw new TypeError('Original regional cursor overflow');
   const width=Math.min(regions.length,SOURCE_ECOLOGY_MAX_REGIONS);
   const picked=regions[cursor%width],nextCursor=cursor+1;
-  const valid=isValidRegion(picked);
+  // A region can have getter-backed coordinates. Previously validity, region
+  // key and returned region read that caller object at DIFFERENT times, so a
+  // getter could validate chunk 0 yet return a placement in chunk 1.
+  const fields=['cx','cz','section','feet'];
+  const region=Object.freeze(Object.fromEntries(
+    fields.map(field=>[field,picked?.[field]])));
+  const unchanged=()=>{
+    if(fields.some(field=>!Object.is(picked?.[field],region[field])))
+      throw new TypeError('Original source region changed during selection');
+  };
+  const valid=isValidRegion(region);
   if(typeof valid!=='boolean')
     throw new TypeError('Unverified original region validity');
+  unchanged();
   if(!valid)
     return Object.freeze({reason:'invalid-region',nextCursor,
       key:null,region:null,record:null,evictKey:null});
-  const key=[picked.cx,picked.cz,picked.section].join(',');
+  const key=[region.cx,region.cz,region.section].join(',');
   const known=records.find(([name])=>name===key);
   let evictKey=null;
   if(!known&&records.length===SOURCE_ECOLOGY_MAX_REGIONS){
     const stale=records.find(([,record])=>
       record?.next<=time-SOURCE_ECOLOGY_REPLENISH_SECONDS);
-    if(!stale)
+    if(!stale){
+      unchanged();
       return Object.freeze({reason:'capacity',nextCursor,
         key:null,region:null,record:null,evictKey:null});
+    }
     evictKey=stale[0];
   }
+  // A source ledger or capacity callback can mutate caller region too.
+  // Check immediately before returning the single validated snapshot.
+  unchanged();
   return Object.freeze({reason:'selected',nextCursor,key,
-    region:Object.freeze({
-      cx:picked.cx,cz:picked.cz,section:picked.section,feet:picked.feet
-    }),record:known?.[1]??null,evictKey});
+    region,record:known?.[1]??null,evictKey});
 }

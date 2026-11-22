@@ -26,8 +26,8 @@ function harness(){
   return {w,engine,id,observer,clock,args};
 }
 
-// The original previewSourceEcologyRegion reads cx FOUR times per selected
-// preview: validity twice, key once and the immutable region copy once.
+// The revised previewSourceEcologyRegion reads cx THREE times per selected
+// preview: frozen snapshot once and two explicit identity checks.
 // A getter can change observer on the SECOND selection call without changing
 // the selected region or source world revision.
 test('global reconcile and region poll cannot see different observer positions',()=>{
@@ -37,7 +37,7 @@ test('global reconcile and region poll cannot see different observer positions',
     cz:0,section:0,feet:4};
   assert.throws(()=>prepareGlobalMobTick(h.args([region])),
     /Original reconcile observer changed during inspection/);
-  assert.equal(reads,8);
+  assert.equal(reads,6);
   assert.equal(h.engine.get(h.id).state,'idle',
     'Rejected read-only preflight must not change original engine state');
   h.observer[0]=8;
@@ -54,7 +54,7 @@ test('first source selection callback observer mutation fails before reconciliat
     cz:0,section:0,feet:4};
   assert.throws(()=>prepareGlobalMobTick(h.args([region])),
     /Original reconcile observer changed during inspection/);
-  assert.equal(reads,4);
+  assert.equal(reads,3);
   h.observer[0]=8;
   const retry=prepareGlobalMobTick(h.args([plainRegion()]));
   assert.equal(retry.reason,'selected');
@@ -65,11 +65,11 @@ test('first source selection callback observer mutation fails before reconciliat
 test('global preflight never reenters a fourth region selection after last observer barrier',()=>{
   const h=harness();
   let reads=0;
-  const region={get cx(){if(++reads===13)h.observer[0]=100;return 0;},
+  const region={get cx(){if(++reads===10)h.observer[0]=100;return 0;},
     cz:0,section:0,feet:4};
   const tick=prepareGlobalMobTick(h.args([region]));
   assert.equal(tick.reason,'selected');
-  assert.equal(reads,12,'Three unchanged source selections; not a fourth');
+  assert.equal(reads,9,'Three unchanged source selections; not a fourth');
   assert.equal(h.observer[0],8);
   settleGlobalMobTick(tick,{world:h.w});
   h.engine.dispose();
