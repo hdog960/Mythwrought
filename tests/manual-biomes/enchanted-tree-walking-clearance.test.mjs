@@ -3,7 +3,8 @@
 // opt-in canopy filter without running browser, meshes or other lanes.
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {clearEnchantedCanopyForWalking,ENCHANTED_WALKING_HEADROOM_VOXELS}
+import {clearEnchantedCanopyForWalking,ENCHANTED_WALKING_HEADROOM_VOXELS,
+  ENCHANTED_WALKING_GROUND_NEIGHBORS}
   from '../../src/manual-biomes/enchanted-tree-walking-clearance.mjs';
 import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 import {BLOCK,BODY_HEIGHT,BODY_RADIUS,collides} from '../../src/voxel.mjs';
@@ -35,7 +36,7 @@ test('current baseline landmarks, cliff shoulders and cave unknowns never acquir
     x===1&&y===6?G.woodlandMoss:
     x===2&&y===6?undefined:BLOCK.AIR;
   const after=clearEnchantedCanopyForWalking(original,read,BLOCK.AIR);
-  assert.deepEqual(after,[original[3]],'protect existing pillar, rising terrain and unknown cave provenance');
+  assert.deepEqual(after,[],'nearby protected pillars, terrain and unknown cave data must also protect edge walking');
 });
 test('copy-on-first-cut fast path preserves original array for high clear crowns',()=>{
   const source=[[0,11,0,G.aetherLeaves],[0,12,0,G.moonLeaves],[0,9,0,G.aetherBark]];
@@ -84,4 +85,49 @@ test('actual original full-cube collision rejects low leaves and permits same st
     'clearance makes a previously leaf-blocked standing pose truly walkable');
   assert.equal(collides(world(trim),playerX,feet-.065,playerZ),true,
     'original ground probe must still detect actual supporting terrain');
+});
+
+test('body radius truly intersects cardinal and diagonal leaves beside raised natural ground',()=>{
+  assert.equal(ENCHANTED_WALKING_GROUND_NEIGHBORS.length,9);
+  const supports=[6,7]; // leaf Y=8: player feet 7 or 8
+  for(const supportY of supports)
+    for(const [dx,dz] of ENCHANTED_WALKING_GROUND_NEIGHBORS.slice(1)){
+      const leaf=[dx,8,dz,G.moonLeaves];
+      const read=(x,y,z)=>
+        x===0&&z===0&&y===supportY?BLOCK.STONE:BLOCK.AIR;
+      const filtered=clearEnchantedCanopyForWalking([leaf],read,BLOCK.AIR);
+      assert.deepEqual(filtered,[],'adjacent raised cap must not be covered '+dx+','+dz);
+      const sourceWorld=canopy=>{
+        const leaves=new Map(canopy.map(([x,y,z,id])=>[k(x,y,z),id]));
+        return {get:(x,y,z)=>leaves.get(k(x,y,z))??read(x,y,z)};
+      };
+      // Center remains INSIDE the support column, but .28 radius crosses
+      // its edge or corner into the neighboring solid moonleaf.
+      const x=dx<0?.22:dx>0?.78:.5;
+      const z=dz<0?.22:dz>0?.78:.5;
+      const feet=supportY+1;
+      assert.equal(collides(sourceWorld([leaf]),x,feet,z),true,
+        'the ORIGINAL player collider must witness the obstruction');
+      assert.equal(collides(sourceWorld(filtered),x,feet,z),false,
+        'after source trimming the true player body must fit');
+      assert.equal(collides(sourceWorld(filtered),x,feet-.065,z),true,
+        'original source ground probe must remain supported');
+    }
+});
+test('shared candidate support coordinates are memoized for bounded source lookups',()=>{
+  const source=[];
+  for(let x=0;x<8;x++)for(let z=0;z<8;z++)
+    for(let y=8;y<=10;y++)source.push([x,y,z,G.aetherLeaves]);
+  let calls=0;
+  const result=clearEnchantedCanopyForWalking(source,()=>{
+    calls++;return BLOCK.AIR;
+  },BLOCK.AIR);
+  assert.equal(result,source,'all AIR must leave the original array unmodified');
+  const naive=source.length*ENCHANTED_WALKING_GROUND_NEIGHBORS.length*2;
+  assert.ok(calls<=450,'cache must keep repeated source-ground probes bounded');
+  assert.ok(calls<naive/5,'source-ground reads must be at least fivefold fewer than naive nine-column probes');
+  console.log('# ENCHANTED WALK SOURCE PROBE EFFICIENCY '+JSON.stringify({
+    leaves:source.length,sourceReads:calls,naiveReads:naive,
+    reduction:+(100*(1-calls/naive)).toFixed(1)
+  }));
 });
