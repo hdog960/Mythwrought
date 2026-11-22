@@ -173,6 +173,7 @@ function treeVoxels(climate,x,y,z,roll){
 
 export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
+    onCandidateSiteSummary=null,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
@@ -182,6 +183,9 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   if(onCandidateCacheSummary!==null&&
      typeof onCandidateCacheSummary!=='function')
     throw Error('Invalid enchanted cache diagnostics callback');
+  if(onCandidateSiteSummary!==null&&
+     typeof onCandidateSiteSummary!=='function')
+    throw Error('Invalid enchanted site diagnostics callback');
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
   // Lazily created only when an experimental enchanted tree is present.
@@ -193,6 +197,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   // Normal gameplay never supplies the diagnostic callback, so no per-cell
   // statistics are updated on the iPhone production path.
   let diagnosticHits=0,diagnosticMisses=0;
+  let sampledSites=0,geometricallyCulledSites=0,biomeLookupSites=0;
   // The same original source cell can be read for rooting, collision
   // preflight, and 3x3 headroom across several nearby prototype trees.
   // A fresh chunk-scoped cache prevents repeated cave/landmark/terrain
@@ -214,9 +219,25 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   const radius=experimentalEnchantedTrees?ENCHANTED_TREE_MAX_RADIUS+1:3;
   for(let tx=Math.floor((minX-radius)/8);tx<=Math.floor((maxX+radius)/8);tx++)
     for(let tz=Math.floor((minZ-radius)/8);tz<=Math.floor((maxZ+radius)/8);tz++){
+      if(onCandidateSiteSummary)sampledSites++;
       const roll=treeRoll(tx,tz,seed);
       const x=tx*8+2+Math.floor(treeRoll(tx,tz,seed+51)*4);
       const z=tz*8+2+Math.floor(treeRoll(tx,tz,seed+89)*4);
+      // A source site outside the candidate's genuine +/-4 voxel envelope
+      // cannot write to this chunk, even when its crown is regenerated as
+      // a seam halo. Cull before the costly biome and original terrain
+      // readers. This path is NEVER entered by historical/default M7.
+      // Non-enchanted original conifer/wood trees are smaller than this
+      // envelope, so no original neighbor can be lost by this check.
+      if(experimentalEnchantedTrees&&(
+        x+ENCHANTED_TREE_MAX_RADIUS<minX||
+        x-ENCHANTED_TREE_MAX_RADIUS>maxX||
+        z+ENCHANTED_TREE_MAX_RADIUS<minZ||
+        z-ENCHANTED_TREE_MAX_RADIUS>maxZ)){
+        if(onCandidateSiteSummary)geometricallyCulledSites++;
+        continue;
+      }
+      if(onCandidateSiteSummary)biomeLookupSites++;
       const biome=v6BiomeAt(x,z,seed);
       if(!biome||biome.weight<.65||biome.name==='desert')continue;
       const candidate=experimentalEnchantedTrees&&biome.name==='enchanted';
@@ -275,6 +296,12 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
           resolveEnchantedTreeOverlap(previous,id));
       }
     }
+  if(onCandidateSiteSummary){
+    onCandidateSiteSummary(Object.freeze({
+      sampledSites,geometricallyCulledSites,biomeLookupSites,
+      experimental:experimentalEnchantedTrees
+    }));
+  }
   if(onCandidateCacheSummary){
     onCandidateCacheSummary(Object.freeze({
       entries:candidateClearanceCache?.size??0,
