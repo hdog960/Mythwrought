@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {VoxelWorld} from '../src/voxel.mjs';
 import {createWorldQuery} from '../src/mobs/world-query.mjs';
 import {MobEngine} from '../src/mobs/engine.mjs';
-import {PopulationManager} from '../src/mobs/ecology.mjs';
+import {PopulationManager,spawnEligible} from '../src/mobs/ecology.mjs';
+import {supportedPosition} from '../src/mobs/movement.mjs';
 import {speciesRegistry,getSpecies} from '../src/mobs/species.mjs';
 import {arena} from './mobs/fixture.mjs';
 import {baselineRandom,probeOriginalSpawnRegion,REJECTION_KINDS}
@@ -226,6 +227,31 @@ test('Phase 1 separates blocked initial surface from ground outside narrow heigh
     'High placement must physically intersect the real stone floor');
   assert.ok(noFloor['no-ground-in-height-window']>0,
     'No ground in the 2.5-block search window must be diagnosed separately');
-  assert.equal(blocked.eligible,0);
-  assert.equal(noFloor.eligible,0);
+  assert.equal(Object.values(blocked).reduce((a,b)=>a+b,0),120);
+  assert.equal(Object.values(noFloor).reduce((a,b)=>a+b,0),120);
+  assert.equal(blocked.eligible,0,'Blocked source floor offers no valid initial clearance');
+  // The original arena clears only through y=7. The UNMODIFIED VoxelWorld
+  // still contains raised seeded ground elsewhere in the same chunk; at
+  // feet=15 exactly THREE of the 120 choices are truly supported. A blanket
+  // expectation of zero would reject valid, physically grounded wildlife.
+  assert.equal(noFloor.eligible,3,
+    'Existing seeded natural terrain must not be erased by an invented sky floor');
+  let accepted=0;
+  for(let serial=0;serial<120;serial+=6){
+    const choices=probeOriginalSpawnRegion(world,deer,{
+      seed:61,cx:0,cz:0,section:0,feet:15,
+      observer:[-2,15,3],serial
+    }).choices;
+    for(const choice of choices){
+      if(choice.reason!=='eligible')continue;
+      const position=supportedPosition(world,choice.x,choice.z,16,13.5,deer[0].body);
+      assert.ok(position,'A reported eligible proposal must actually find physical terrain');
+      assert.equal(world.grounded(position,deer[0].body),true,
+        'A successful proposal must be physically supported');
+      assert.equal(spawnEligible(world,deer[0],position,[-2,15,3]),true,
+        'A successful proposal must pass ALL original native ecology rules');
+      accepted++;
+    }
+  }
+  assert.equal(accepted,noFloor.eligible,'Observed births/proposals must match full physics');
 });
