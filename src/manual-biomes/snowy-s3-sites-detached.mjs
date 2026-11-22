@@ -128,7 +128,11 @@ export function proposeSnowS3PhysicalSite(site,{inspect,readCell,isEdited,isProt
     if(!occupied.has(site.x+','+(surface.floor+dy)+','+site.z)||
       !tree.cells.some(([x,y,z,id])=>x===site.x&&
         y===surface.floor+dy&&z===site.z&&id===4))return null;
+  // A frozen exact physical certificate prevents the preview from asking
+  // the tree factory to create a DIFFERENT shape after safety inspection.
+  // Important for protected AIR, live edits and old groves at chunk seams.
+  const cells=Object.freeze(tree.cells.map(c=>Object.freeze([...c])));
   return Object.freeze({key:site.key,x:site.x,z:site.z,style,
-    wind:site.wind,floor:surface.floor,voxelCount:tree.cells.length,
+    wind:site.wind,floor:surface.floor,voxelCount:cells.length,cells,
     kind:'detached-s3-physically-checked-proposal'});
 }
