@@ -54,7 +54,7 @@ export function buildSaltglassTernForkCustomsHouse(){
    b.put(x,y,z,'roof',asset,'north',
     {originalSaltglassTernRoofWing:name,noLiveProducerApproval:true});
   }
- for(const [x,z] of [[16,8],[28,8],[40,8],[8,21],[46,22],[19,37],[35,36],[13,44],[45,46]]){
+ for(const [x,z] of [[16,8],[28,8],[40,8],[8,21],[46,22],[19,37],[35,36],[10,44],[45,46]]){
   const y=roofs.get(key(x,z));
   if(!y)throw Error('Saltglass true roof post has no roof overhead '+key(x,z));
   b.support(x,z,y-1,'live:wood','genuinely-original-source-grounded-rafter');
