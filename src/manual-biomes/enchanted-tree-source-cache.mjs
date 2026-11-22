@@ -5,9 +5,12 @@
 // cave/landmark/terrain source is immutable during a synchronous chunk plan.
 // An evicted key is read from that authoritative source again, never guessed.
 export const ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES=2048;
+// Real nine-chunk native M7 capacity sweep: 1024 stored half as many
+// entries as 2048, with only 231 extra original-source reads (+1.00%).
+export const ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES=1024;
 
 export class EnchantedCandidateSourceCache extends Map {
-  constructor(limit=ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES){
+  constructor(limit=ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES){
     super();
     if(!Number.isInteger(limit)||limit<1||
        limit>ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES)
