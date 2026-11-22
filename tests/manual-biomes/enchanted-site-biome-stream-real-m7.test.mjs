@@ -43,9 +43,26 @@ test('128-entry immutable site memo is seed-scoped, deterministic, bounded and r
  }
  assert.equal(cache.peakEntries,4);
  assert.ok(cache.evictions>=40);
- cache.set('direct:1,2',null);
- cache.set('direct:2,3',null);
+ cache.set('179:1,2',null);
+ cache.set('179:2,3',null);
  assert.equal(cache.size,4,'even direct Map writes must obey the hard cap');
+ const beforeRejection=[...cache];
+ const evictionsBeforeRejection=cache.evictions;
+ const unsealedCenter=Object.freeze({name:'enchanted',weight:1,center:[0,0]});
+ assert.throws(()=>cache.set('179:50,51',unsealedCenter),/immutable/);
+ assert.throws(()=>cache.set('179:50,51',{name:'enchanted',weight:1,center:Object.freeze([0,0])}),/immutable/);
+ assert.throws(()=>cache.set('179:50,51',Object.freeze({name:'plains',weight:1,
+   center:Object.freeze([0,0])})),/immutable/);
+ assert.throws(()=>cache.set('wrong-key',null),/immutable/);
+ assert.throws(()=>cache.getOrRead(9007199254740992,0,179,reader),/lookup/);
+ const directNested=Object.freeze({name:'enchanted',weight:1,
+   center:Object.freeze([0,0])});
+ cache.set('179:50,51',directNested);
+ assert.strictEqual(cache.getOrRead(50,51,179,reader),directNested);
+ assert.equal(cache.size,4);
+ assert.equal(beforeRejection.length,4);
+ assert.equal(cache.evictions,evictionsBeforeRejection+1,
+   'invalid direct writes may never evict a valid classification');
  const nullCache=new EnchantedSiteBiomeCache(2);
  let nullCalls=0;
  assert.equal(nullCache.getOrRead(0,0,179,()=>{nullCalls++;return null;}),null);
