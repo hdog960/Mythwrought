@@ -36,7 +36,7 @@ export function buildWillowglassTripleAtriumConservatory(){
  for(const key of indoor){
   const [x,z]=key.split(',').map(Number);
   if(Object.values(sides).some(([dx,dz])=>!grounded(x+dx,z+dz)))
-   for(let y=1;y<=9;y++)b.put(x,y,z,'wall','live:wood','none',
+   for(let y=1;y<=8;y++)b.put(x,y,z,'wall','live:wood','none',
     {genuineWillowglassEnvelopeTimber:true,weatherSealUnapproved:true});
  }
  // Each distinct roof wing carries a direct solid y-1 source bearer.
