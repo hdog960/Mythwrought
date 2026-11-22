@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizeShapeBoxes} from '../src/movement12/shape-box-adapter.mjs';
+const b={kind:'aabb',min:{x:0,y:0,z:0},max:{x:1,y:0.5,z:1}};
+test('retains fractional collision geometry',()=>assert.deepEqual(normalizeShapeBoxes([b]).boxes[0].max,{x:1,y:0.5,z:1}));
+test('rejects unsupported rotated geometry',()=>assert.equal(normalizeShapeBoxes([{...b,kind:'rotated'}]).reason,'unsupported-shape'));
+test('rejects invalid inverted bounds',()=>assert.equal(normalizeShapeBoxes([{...b,max:{x:-1,y:1,z:1}}]).reason,'invalid-shape-bounds'));
+test('rejects nonfinite bounds',()=>assert.equal(normalizeShapeBoxes([{...b,min:{x:NaN,y:0,z:0}}]).reason,'invalid-shape-bounds'));
+test('rejects budget overrun',()=>assert.equal(normalizeShapeBoxes([b,b],{maxBoxes:1}).reason,'shape-budget'));
+test('copies bounds to avoid mutation of source',()=>{const o=normalizeShapeBoxes([b]);o.boxes[0].max.x=5;assert.equal(b.max.x,1)});
