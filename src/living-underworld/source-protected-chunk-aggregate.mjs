@@ -22,7 +22,10 @@ export function summarizeSourceProtectedChunkRisk(results,{
    ![r.sourceHaloCells,r.plannedCarves,r.unsafeCarves,r.approvedCarves]
     .every(n=>INT(n)&&n>=0)||
    !INT(r.approvedOnlyFaceGrowth)||r.approvedOnlyFaceGrowth<0||
-   typeof r.ok!=='boolean')
+   typeof r.ok!=='boolean'||
+   r.plannedCarves!==r.approvedCarves+r.unsafeCarves||
+   (r.ok&&(r.unsafeCarves!==0||r.reason!=null))||
+   r.side<4||r.side>24)
    return Object.freeze({ok:false,reason:'INVALID_CHUNK_RISK_EVIDENCE',
     atIndex:i,worldChanged:false});
   const key=p.x+','+p.y+','+p.z;
