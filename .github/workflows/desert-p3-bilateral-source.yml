@@ -1,0 +1,44 @@
+name: Desert P3 bilateral original-source RGB-only parity
+on:
+  push:
+    branches:
+      - research/desert-p3-bilateral-provenance-rgb-20261122
+    paths:
+      - .github/workflows/desert-p3-bilateral-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-bilateral-source-only
+  cancel-in-progress: false
+jobs:
+  exact-original-bilateral:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: f97669c071689819bba7740347b95f9e6ea961f5
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin rejected-shader parent and enforce isolated Desert ownership
+        run: |
+          set -euo pipefail
+          ROOT=4c0458c43dbb50b46d90f4f9291535baf681dd9e
+          test "$(git -C baseline rev-parse HEAD)" = f97669c071689819bba7740347b95f9e6ea961f5
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$ROOT" HEAD)" = "$ROOT"
+          unexpected=$(git -C candidate diff --name-only "$ROOT" HEAD | grep -Ev '^(src/main.mjs|src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|src/manual-biomes/desert-bilateral-rgb.mjs|tests/desert-p3-bilateral-source.test.mjs|.github/workflows/desert-p3-bilateral-source.yml|docs/desert/PHASE3_BILATERAL_RGB_RESEARCH_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/main.mjs
+          node --check candidate/src/voxel.mjs
+          node --check candidate/src/manual-biomes/desert-bilateral-rgb.mjs
+          node --check candidate/tests/desert-p3-bilateral-source.test.mjs
+      - name: Execute only four new original-world native regression checks
+        run: node --test candidate/tests/desert-p3-bilateral-source.test.mjs
