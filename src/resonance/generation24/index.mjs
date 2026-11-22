@@ -50,7 +50,7 @@ export function evaluateGenerator(descriptor, inputs={}) {
 export function simulateTicks(descriptor, inputs, ticks) {
   if (!Number.isSafeInteger(ticks) || ticks<0 || ticks>CONTRACT.maxCatchupTicks) throw Error('unsafe tick count');
   const output=evaluateGenerator(descriptor,inputs);
-  const actualTicks=output.consumesFuel?Math.min(ticks,Math.floor(inputs.fuelUnits??0)):ticks;
+  const actualTicks=output.status!=='available' ? 0 : output.consumesFuel ? Math.min(ticks,Math.floor(inputs.fuelUnits)) : ticks;
   return Object.freeze({...output, ticks:actualTicks, generated:output.availablePerTick*actualTicks,
     fuelConsumed:output.fuelCostPerTick*actualTicks});
 }
