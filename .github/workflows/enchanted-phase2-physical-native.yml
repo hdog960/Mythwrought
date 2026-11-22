@@ -1,6 +1,7 @@
-# Standalone Phase 2 experimental tree planner: one targeted original-source
-# site-envelope regression. Reuse prior 30/30 native and matched WebGL2
-# from #45057456018 for unchanged source; no repeated Chromium or broad CI.
+# One isolated original-M7 density-gate source experiment. Reuse existing
+# exact 14/14 native and original WebGL2 results where source is unchanged.
+# This run checks the changed density shortcut and connected climate tracks,
+# not the entire repo, browsers, other developer suites or CI queues.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -14,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  authentic-m7-candidate-site-reach:
+  original-m7-density-and-long-stream:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -25,15 +26,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify exact source and changed test syntax
+      - name: Verify exact changed source and focused syntax
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/environment-v7.mjs
           node --check tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs
-      - name: Actual M7 early-cull byte parity, chunk seams, save and source cost
+          node --check tests/manual-biomes/enchanted-tree-long-stream-density-real-m7.test.mjs
+      - name: Run affected original-source density, 48-chunk parity and 288-chunk climate tracks
         run: |
           node --test \
+            tests/manual-biomes/enchanted-tree-long-stream-density-real-m7.test.mjs \
             tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs \
-            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
-            tests/manual-biomes/enchanted-tree-source-cost.test.mjs \
-            tests/manual-biomes/enchanted-trees-phase2.test.mjs
+            tests/manual-biomes/enchanted-tree-source-cost.test.mjs
