@@ -13,6 +13,8 @@ import {auditSourceProtectedCityFloorLink}
  from '../../src/living-underworld/source-protected-city-link.mjs';
 import {selectCityCompatibleDeepLinks}
  from '../../src/living-underworld/source-aware-city-deep-selection.mjs';
+import {auditSourceProtectedGalleryEasementDistrict}
+ from '../../src/living-underworld/city-gallery-easement-district.mjs';
 const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
@@ -46,6 +48,17 @@ for(const [rx,rz] of regions){
  const terrace=approved?null:
   proposeProtectedCityLandingTerrace(seed,rx,rz,{source});
  const fullPad=auditSourceProtectedCityFloorLink(seed,rx,rz,{source});
+ // The historically proposed WHOLE ellipse remains a separate HARD veto.
+ // This is only an optional connected, three-wide LANDING QUARTER, checked
+ // after the true deep source-owner + city access route proof. Never substitute
+ // a safe quarter for a rejected whole-city floor or claim a settlement.
+ const districtStarted=performance.now();
+ const district=approved?auditSourceProtectedGalleryEasementDistrict(
+  seed,rx,rz,{source,sourceOwnedDeepSelection:deep,
+   maxTotalSourceChecks:150000,marginCells:1,maxDistrictColumns:10000}
+ ):Object.freeze({ok:false,
+  reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
+  sourceChecks:deep.sourceChecks??0,worldChanged:false});
  rows.push(Object.freeze({seed,rx,rz,
   regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7TerrainReadOnly:true,
@@ -58,6 +71,23 @@ for(const [rx,rz] of regions){
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
+  existingFullCityPadRefusalStillMandatory:fullPad.ok!==true,
+  candidateThreeWideLandingDistrictSourceSafe:district.ok===true,
+  candidateDistrictRefusal:district.reason??null,
+  candidateDistrictOriginalSourceRefusal:district.sourceRefusal??null,
+  candidateDistrictFirstRejectedCell:district.firstRejectedCell??null,
+  candidateDistrictAuditElapsedMs:
+   Math.round((performance.now()-districtStarted)*1000)/1000,
+  candidateDistrictCenterTileCount:district.centerTileCount??null,
+  candidateDistrictColumns:district.columns??null,
+  candidateDistrictMarginCells:district.marginCells??1,
+  candidateDistrictFloorSourceChecks:district.floorSourceChecks??0,
+  candidateDistrictTotalOriginalSourceChecks:
+   district.sourceChecks??null,
+  candidateDistrictDeepSourceChecksAlreadyCountedInJoined:
+   district.originalFourHubSourceChecks??deep.sourceChecks??0,
+  candidateDistrictNotWholeFloorOrSettlement:true,
+  candidateDistrictExistingM7WalkingAndGpuUnverified:true,
   threeDeepLinksOriginalM7SourceSelected:approved,
   threeDeepLinkSelectionRefusal:approved?null:
    deep.reason??'UNSPECIFIED_LINK_REFUSAL',
