@@ -35,7 +35,7 @@ test('Bramblecross is an exclusive immutable B115 original medium stable with di
  assert.equal(b.architecturalIdentity.productionRegistered,false);
 });
 test('Bramblecross has 217 true WALKABLE, stone-paved, completely open-sky courtyard cells and explicit 24-cell paths',()=>{
- const b=buildBramblecrossSplitRailCoachStables(),cells=new Map(b.placements.map(p=>[K(p.at),p]));
+ const b=buildBramblecrossSplitRailCoachStables(),cells=new Map(b.placements.map(p=>[K(p.at),p])),walkSet=new Set(b.walkable.map(K));
  assert.equal(b.placements.length,8484);assert.equal(b.walkable.length,1793);
  assert.equal(b.rooms.length,8);assert.equal(b.portals.length,11);
  assert.deepEqual(b.architecturalIdentity.pavedGroundSkyCourts,[182,35]);
@@ -45,7 +45,7 @@ test('Bramblecross has 217 true WALKABLE, stone-paved, completely open-sky court
    assert.equal(cells.get(K([x,0,z]))?.role,'foundation','paved hardstand floor absent');
    for(let y=1;y<b.footprint.height;y++)
     assert.ok(!cells.has(K([x,y,z])),'a purported open-sky hardstand is actually roofed or blocked');
-   assert.ok(b.walkable.some(p=>p[0]===x&&p[2]===z),'yard has physical stone but is not traversable');
+   assert.ok(walkSet.has(K([x,1,z])),'yard has physical stone but is not traversable');
   }
  const sealed=cells.get('39,1,33');
  assert.equal(sealed?.role,'partition','corrected isolated cell reopened');
