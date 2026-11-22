@@ -1,0 +1,5 @@
+# :48 D5 bounded deficit history — source-only
+
+`stepDeficitWindow(previous, frame)` consumes only advisory `previewDeviceDelivery`-style frames, not authenticated :36 receipts. Each tick aggregates requested, observed and deficit units for at most 64 devices and retains eight consecutive simulation ticks. All output is frozen, bounded and explicitly `authoritativeDelivery:false`, `movementAuthorized:false`, `productionBound:false`. Rejects replay, skipped ticks, cross-world frames, malformed accounting, duplicate devices, overdelivery, forged energization and tampered history. No storage ledger mutation, physical action, live UI, renderer, saves, block IDs, settlement work or production integration.
+
+Local equivalent source and eight tests executed with Node: 8/8 passed before GitHub commit. Run `node --test tests/resonance-devices48-deficit-window.test.mjs` on the committed exact HEAD for independent verification. This is not WebGL2 or iPhone evidence. :36 remains owner of real delivery and storage accounting; :48 cannot authorize energy or motion. No merge or deployment.
