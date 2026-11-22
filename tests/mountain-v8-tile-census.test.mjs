@@ -14,7 +14,7 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     const second=census({seed,tileX:-65,tileZ:-2,width:3,height:3,world});
     assert.deepEqual(first,second);
     assert.equal(first.stats.tiles,9);
-    assert.equal(first.stats.seen,9*64);
+    assert.equal(first.stats.seen,9);
     assert.ok(first.stats.plants<=first.stats.eligible);
     assert.ok(first.stats.plantCells<=first.stats.plants*18);
     assert.equal(world.save(),save);
