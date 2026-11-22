@@ -1010,16 +1010,37 @@ function start(nonblockStage=null){
       for(const item of ready)deleteChunkBuffers(item);
       throw err;
     }
-    for(const item of ready){
-      const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
+    // Original voxel rollback does NOT restore published/retired native GPU
+    // handles. In the localhost VAO experiment, detect an exception AFTER
+    // any near publication or C6 invalidation begins and fail closed rather
+    // than silently showing geometry inconsistent with the reverted voxel.
+    // No extra GPU calls, gl.getError drains or C6 owner changes.
+    let near291PublicationStarted=false;
+    try{
+      for(const item of ready){
+        const old=chunks.get(item.key);
+        if(near291Enabled)near291PublicationStarted=true;
+        chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+          buffer:item.buffer,count:item.count,
+          waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+        deleteChunkBuffers(old);
+      }
+      editMeshBatches++;
+      lastEditMeshKeys=ready.map(item=>item.key);
+      if(caveSession||combinedWorld()){
+        if(near291Enabled)near291PublicationStarted=true;
+        caveFarGpu.invalidate();
+      }
+    }catch(error){
+      if(near291Enabled&&near291PublicationStarted){
+        near291Fatal=true;
+        // Keep the original exception for applyBlockAction's voxel rollback;
+        // do NOT pretend native near+far buffer rollback has occurred.
+        try{frameDriver.pause();}catch(_){}
+        try{fatal('Local VAO 291 GPU publication unverified; reload and review before mining');}catch(_){}
+      }
+      throw error;
     }
-    editMeshBatches++;
-    lastEditMeshKeys=ready.map(item=>item.key);
-    if(caveSession||combinedWorld())caveFarGpu.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
