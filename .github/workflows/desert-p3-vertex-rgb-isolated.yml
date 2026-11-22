@@ -1,0 +1,111 @@
+name: Desert P3 isolated vertex RGB original-game acceptance
+on:
+  push:
+    branches:
+      - research/desert-p3-vertex-color-seam-20261122
+    paths:
+      - .github/workflows/desert-p3-vertex-rgb-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-vertex-rgb-isolated
+  cancel-in-progress: false
+jobs:
+  original-mesh-and-webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: 641726d815172abcde7417b22c71e9df250fcd4b
+          path: prior-harness
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original SHA and strict isolated mesh-only source scope
+        run: |
+          set -euo pipefail
+          test "$(git -C baseline rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base 2bd0395d3ef163e9fdc491ab5119b1ee80844194 HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          unexpected=$(git -C candidate diff --name-only 2bd0395d3ef163e9fdc491ab5119b1ee80844194 HEAD | grep -Ev '^(src/voxel.mjs|src/manual-biomes/desert-seam-vertex-tint.mjs|tests/desert-p3-vertex-seam-source.test.mjs|.github/workflows/desert-p3-vertex-rgb-isolated.yml|docs/desert/PHASE3_VERTEX_RGB_SEAM_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/voxel.mjs
+          node --check candidate/src/manual-biomes/desert-seam-vertex-tint.mjs
+      - name: Compare genuine original V7 meshes with immutable candidate (focused)
+        run: node --test candidate/tests/desert-p3-vertex-seam-source.test.mjs
+      - name: Install pinned Chromium only after source parity passes
+        run: |
+          cd baseline
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+          cd ../candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+      - name: Original game baseline vs vertex-only candidate same-camera views
+        run: |
+          set -euo pipefail
+          cp prior-harness/tests/desert-phase3-triple-junction-browser.mjs baseline/tests/
+          cp prior-harness/tests/desert-phase3-triple-junction-browser.mjs candidate/tests/
+          cmp baseline/tests/desert-phase3-triple-junction-browser.mjs candidate/tests/desert-phase3-triple-junction-browser.mjs
+          cd baseline
+          python3 -m http.server 4173 >/tmp/desert-rgb-baseline-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-vertex-rgb node tests/desert-phase3-triple-junction-browser.mjs
+          kill "$server" 2>/dev/null || true
+          cd ../candidate
+          python3 -m http.server 4173 >/tmp/desert-rgb-candidate-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-vertex-rgb node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Verify real composited PNGs and source screenshot provenance
+        run: |
+          cd candidate
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import assert from 'node:assert/strict';
+          import {PNG} from 'pngjs';
+          const a=JSON.parse(fs.readFileSync('../baseline/artifacts/desert-vertex-rgb/after-manifest.json'));
+          const b=JSON.parse(fs.readFileSync('artifacts/desert-vertex-rgb/after-manifest.json'));
+          assert.equal(a.sites.length,2);assert.equal(b.sites.length,2);
+          for(let i=0;i<2;i++){
+            const x=a.sites[i],y=b.sites[i];
+            for(const key of ['seed','x','z','top','cap','other'])assert.equal(x[key],y[key]);
+            assert.equal(x.cap,401);assert.equal(x.data.gameBlock,401);
+            assert.equal(y.data.gameBlock,401);assert.equal(y.cap,401);
+            assert.equal(x.canvasState.daylight,1);assert.equal(y.canvasState.daylight,1);
+            assert.equal(x.canvasState.loadedChunks,25);assert.equal(y.canvasState.loadedChunks,25);
+            const p=fs.readFileSync('../baseline/'+x.file),q=fs.readFileSync(y.file);
+            const m=PNG.sync.read(p),n=PNG.sync.read(q);
+            assert.equal(m.width,932);assert.equal(n.width,932);
+            assert.equal(m.height,430);assert.equal(n.height,430);
+            let changed=0;for(let j=0;j<m.data.length;j+=4){
+              if(m.data[j]!==n.data[j]||m.data[j+1]!==n.data[j+1]||m.data[j+2]!==n.data[j+2])changed++;
+            }
+            console.log('DESERT_VERTEX_WEBGL2 '+JSON.stringify({
+              seed:x.seed,changedPixels:changed,totalPixels:932*430,
+              baselineSHA256:crypto.createHash('sha256').update(p).digest('hex'),
+              candidateSHA256:crypto.createHash('sha256').update(q).digest('hex')
+            }));
+          }
+          EOF
+      - name: Preserve genuine original-game images even if visual gate fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-vertex-rgb-real-game
+          path: |
+            baseline/artifacts/desert-vertex-rgb/**
+            candidate/artifacts/desert-vertex-rgb/**
+          if-no-files-found: warn
+          retention-days: 7
