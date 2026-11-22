@@ -11,7 +11,28 @@ permissions:
   contents: read
 
 jobs:
+  moonwillow-native-source-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original-source Moonwillow structural, player headroom and authentic M7 regression
+        run: |
+          git rev-parse HEAD
+          node --check src/manual-biomes/enchanted-tree-candidates.mjs
+          node --test \
+            tests/manual-biomes/enchanted-tree-structural-branches.test.mjs \
+            tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs \
+            tests/manual-biomes/enchanted-tree-walking-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-trees-phase2.test.mjs
   source-specific-three-tree-original-engine:
+    needs: moonwillow-native-source-gate
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -35,7 +56,9 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-      - name: One exact camera-locked pair each for Starspire, Moonwillow, Ancient Giant
+      - name: One matched Moonwillow pair after source-native acceptance
+        env:
+          ENCHANTED_VISUAL_SPECIES: moonwillow
         run: node scripts/ci/enchanted-phase2-three-tree-matched-webgl2.mjs
       - name: Retain source-bound SHA and original-renderer screenshots or failure
         if: always()
