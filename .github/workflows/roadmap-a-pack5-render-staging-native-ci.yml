@@ -1,0 +1,26 @@
+name: Roadmap A Pack5 original production vertex staging native
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-render-staging-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-render-staging-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-pack5-float32-ray-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Native syntax checks on new own-lane modules and optional browser script (NO Chromium)
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-terrain-ray-staging-producer.mjs
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-game-browser-readiness-core.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-game-readonly-browser.mjs
+      - name: Only new source vertex-staging and changed browser-evidence native tests
+        run: |
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-terrain-ray-staging.test.mjs tests/building-pool/roadmap-2a/roadmap-a-pack5-game-browser-readiness.test.mjs
