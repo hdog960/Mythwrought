@@ -3,11 +3,11 @@
 // NOT authorization for network carving, support placement or GPU acceptance.
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
  from '../../src/manual-biomes/profile-world.mjs';
-import {BLOCK} from '../../src/voxel.mjs';
+import {VoxelWorld,baseBlock} from '../../src/voxel.mjs';
 import {planUnderworldRegion,networkAirAt}
  from '../../src/living-underworld/worldwide-network.mjs';
-import {auditProposedChunkCarveDelta}
- from '../../src/living-underworld/chunk-carve-projection.mjs';
+import {auditSourceProtectedChunkRisk}
+ from '../../src/living-underworld/source-protected-chunk-risk.mjs';
 const seed=179,sites=Object.freeze([
  Object.freeze({biome:'plains',rx:-9,rz:0}),
  Object.freeze({biome:'desert',rx:-3,rz:-9}),
@@ -16,27 +16,39 @@ const seed=179,sites=Object.freeze([
  Object.freeze({biome:'enchanted',rx:-9,rz:-6})
 ]);
 const original=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
+const old=new VoxelWorld(seed);
+const source=Object.freeze({
+ naturalAt:(x,y,z)=>original.naturalAndLandmarkBlock(x,y,z),
+ authoredAt:(x,y,z)=>original.environmentCaves?.get(x,y,z),
+ editedAt:(x,y,z)=>original.edits.has(x+','+y+','+z),
+ protectedAt:(x,y,z)=>old.naturalAndLandmarkBlock(x,y,z)!==
+  baseBlock(x,y,z,seed)
+});
 const rows=[];
 for(const site of sites){
  const hub=planUnderworldRegion(seed,site.rx,site.rz).layers[0].hub;
  const origin=Object.freeze({x:Math.floor(hub.x/16)*16,
   y:Math.floor(hub.y/16)*16,z:Math.floor(hub.z/16)*16});
- const audit=auditProposedChunkCarveDelta({origin,side:16,
-  isSolidAt:(x,y,z)=>original.naturalAndLandmarkBlock(x,y,z)!==BLOCK.AIR,
+ const audit=auditSourceProtectedChunkRisk({origin,side:16,source,
   candidateAirAt:(x,y,z)=>networkAirAt(seed,x,y,z),
   maxFaceGrowth:1200,maxCells:6000});
  rows.push(Object.freeze({...site,origin,ok:audit.ok,
-  sourceHaloCells:audit.originalSourceQueries??null,
-  projectedCarvedCells:audit.newlyCarvedSolidCells??null,
-  oldExposedFaces:audit.baselineFaces??null,
-  candidateExposedFaces:audit.projectedFaces??null,
-  addedExposedFaces:audit.exposedFaceGrowth??null,
+  sourceHaloCells:audit.sourceHaloCells,
+  candidateCarveCells:audit.plannedCarves,
+  sourceAllowedCarveCells:audit.approvedCarves,
+  sourceRejectedCarveCells:audit.unsafeCarves,
+  refusalCounts:audit.counts,refusalExamples:audit.examples,
+  oldExposedFaces:audit.baselineFaces,
+  approvedOnlyExposedFaces:audit.approvedOnlyProjectedFaces,
+  approvedOnlyAddedFaces:audit.approvedOnlyFaceGrowth,
   budgetReason:audit.reason??null,
+  proposedSupportPlacementNotModeled:true,
   noNativeGpuBufferCreated:true,oldWorldUnmodified:true}));
 }
 const report=Object.freeze({schema:'living-underworld-original-m7-five-biome-one-hub-chunk-risk-v1',
  seed,actualOriginalM7SolidSource:true,
  totalChunks:rows.length,sourceQueries:rows.reduce((n,r)=>n+(r.sourceHaloCells??0),0),
+ sourceRejectedCarveCells:rows.reduce((n,r)=>n+(r.sourceRejectedCarveCells??0),0),
  perChunkMaximumNewFaces:1200,rows:Object.freeze(rows),
  allGalleryChunksCovered:false,allSupportPlacementCostsCovered:false,
  playerWalkingAndMobileGpuUnverified:true,
