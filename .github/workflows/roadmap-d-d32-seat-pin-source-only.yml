@@ -1,0 +1,50 @@
+name: Builder D32 source-backed wall seats and unrated pin ports narrow native
+on:
+  push:
+    branches:
+      - builder-d-d32-wall-seat-pin-ports-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d32-*'
+      - 'tests/building-pool/roadmap-d/d32-*'
+      - 'docs/building-pool/roadmap-d/D32_*'
+      - '.github/workflows/roadmap-d-d32-seat-pin-source-only.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d32-isolated-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-owner-seat-ports-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify source parent, original building authors, original Pack2 and D31 owner unchanged
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '5ccc2348493b4fe2505b100e324ddffe7cdab3e4'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-pack2-owner-oblique-preview.mjs)" = '3c06f7b6d8e41b9e3bf194505c82ab9fe686ffb7'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-original-pack2-web-envelope-audit.mjs)" = '0218d5c50df0dc4e62d70694f93cba72e894a299'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check only new D32 modules and tests
+        run: |
+          node --check src/building-pool/roadmap-d/d32-pack2-wall-seat-joint-ports.mjs
+          node --check src/building-pool/roadmap-d/d32-original-wall-seats-pin-port-audit.mjs
+          node --check tests/building-pool/roadmap-d/d32-wall-seat-ports.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d32-original-wall-seats-pin-ports.source.test.mjs
+      - name: ONLY four new pure and two new genuine original source native tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d32-wall-seat-ports.pure.test.mjs \
+            tests/building-pool/roadmap-d/d32-original-wall-seats-pin-ports.source.test.mjs
