@@ -13,15 +13,17 @@ export const ENCHANTED_WALKING_GROUND_NEIGHBORS=Object.freeze([
   [-1,-1],[-1,1],[1,-1],[1,1]
 ].map(offset=>Object.freeze(offset)));
 
-export function clearEnchantedCanopyForWalking(cells,readBaseline,air=0){
+export function clearEnchantedCanopyForWalking(cells,readBaseline,air=0,sharedCache=null){
   if(!Array.isArray(cells)||typeof readBaseline!=='function'||
-     !Number.isInteger(air))throw Error('Invalid enchanted walking clearance input');
+     !Number.isInteger(air)||sharedCache!==null&&!(sharedCache instanceof Map))
+    throw Error('Invalid enchanted walking clearance input');
 
   // Every source terrain/cave/landmark probe is read-only. Crown voxels
   // frequently share nearby support coordinates across several vertical
   // tiers; memoize real source reads for this ONE tree, not globally.
-  // Bounded by the actual candidate's small physical envelope.
-  const baselineCache=new Map();
+  // A caller may share this bounded cache among candidates in ONE chunk.
+  // It is never retained by the world or shared between seeds/loads.
+  const baselineCache=sharedCache??new Map();
   const blocked=(x,y,z)=>{
     const key=x+','+y+','+z;
     if(!baselineCache.has(key))
