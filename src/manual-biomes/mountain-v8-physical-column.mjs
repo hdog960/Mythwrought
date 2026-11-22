@@ -21,8 +21,12 @@ export function planMountainV8PhysicalColumn(proposal,{
      new Set([ids.AIR,ids.GRASS,ids.DIRT,ids.STONE]).size!==4||
      typeof readOriginalBlock!=='function'||typeof protectedAt!=='function')return null;
   const {x,z,legacyTop,top,cap}=proposal;
-  // A natural cap must be supported by a real, original physical subsoil cell.
+  // A natural cap needs a continuous three-layer original foundation.
+  // Exposed or cave-carved AIR beneath it cannot be buried by a V8 uplift.
   const support=readOriginalBlock(x,legacyTop-1,z);
+  for(let d=2;d<=3;d++)
+    if(protectedAt(x,legacyTop-d,z)||
+       readOriginalBlock(x,legacyTop-d,z)===ids.AIR)return null;
   if(readOriginalBlock(x,legacyTop,z)!==ids.GRASS||
      ![ids.DIRT,ids.STONE].includes(support)||
      protectedAt(x,legacyTop-1,z))return null;
@@ -30,9 +34,10 @@ export function planMountainV8PhysicalColumn(proposal,{
   for(let y=legacyTop;y<=top;y++){
     const original=readOriginalBlock(x,y,z);
     if(protectedAt(x,y,z)||original!==(y===legacyTop?ids.GRASS:ids.AIR))return null;
-    // Physical support below top is always a mineable full-cube descriptor;
-    // an uplifted original grass cap becomes solid stone under the new shelf.
-    const material=y===top?cap:'stone';
+    // Alpine grass gets two shallow dirt layers, never a rock-only underlay.
+    // Deeper uplift remains full-cube mineable stone. Snow/rock remain rocky.
+    const material=y===top?cap:
+      cap==='alpine-grass'&&y>=top-2?'dirt':'stone';
     writes.push(Object.freeze({x,y,z,material}));
   }
   return Object.freeze({x,z,legacyTop,top,cap,
