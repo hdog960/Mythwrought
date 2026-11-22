@@ -1,7 +1,6 @@
-// MYTHWROUGHT MOUNTAIN #356: Phase 1 SOURCE-ONLY alpine meadow candidate.
-// Deliberately NOT installed in profile-world/environment-v7: no terrain or
-// save change until actual source, cave, visual and GPU gates are green.
-// The candidate works exclusively with the real V7 column planner output.
+// MYTHWROUGHT MOUNTAIN #356: independent V7 alpine meadow formula check.
+// Match the current guarded live selector exactly without writing edits,
+// changing heights or transforming any stored world/profile.
 // Run with: node --test tests/mountain-v7-alpine-candidate.test.mjs
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -44,7 +43,8 @@ function candidate(x,z,seed,baseline){
     const plan=planEnvironmentalColumn(x+dx,z+dz,seed,baseline,nearby);
     if(!plan.size||Math.abs(Math.max(...plan.keys())-top)>1)return null;
   }
-  if(patches(x,z,seed)<.54)return null;
+  // A second seeded 11-block exposure field preserves rocky lower shelves.
+  if(patches(x,z,seed)<.54||coherent(x/11,z/11,seed+30001)<.56)return null;
   const proposed=new Map(original);
   proposed.set(top,BLOCK.GRASS);
   for(const offset of [1,2])
@@ -67,6 +67,9 @@ test('actual V7 lower mountain columns support independent clustered alpine mead
     if(!normal.size)continue;
     total++;
     const result=candidate(x,z,seed,clean);
+    const top=Math.max(...normal.keys());
+    assert.equal(Boolean(result),normal.get(top)===BLOCK.GRASS,
+      'Independent alpine candidate and actual V7 generator disagree');
     if(result){meadows++;positions.push([x,z,result.top]);}
     else rock++;
     assert.deepEqual([...normal],[...planEnvironmentalColumn(x,z,seed,clean,biome)],
@@ -84,7 +87,7 @@ test('actual V7 lower mountain columns support independent clustered alpine mead
   assert.ok(neighboring>=10, 'Mountain grass candidate is not spatially coherent');
   console.log('MOUNTAIN ALPINE SOURCE CANDIDATE '+JSON.stringify({
     seed,total,meadows,rock,neighboring,examples:positions.slice(0,8),
-    status:'PROTOTYPE ONLY - no live generator edits'
+    status:'INDEPENDENT LIVE GENERATOR PARITY - no world edits'
   }));
 });
 
