@@ -1,0 +1,202 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves32-33-source-engineering-handoff.v1",
+  "status": "ORIGINAL BUILDER B EXCLUSIVE SOURCE ONLY; NO NATIVE TEST OR LIVE GAME ACCEPTANCE",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startingExactHead": "b6ad1a6284b24325375acf0a4a2c676fc93ccb85",
+  "protectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "verifiedMainAtSessionStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "newSourceOriginals": [
+    {
+      "wave": 32,
+      "id": "r1:harbor-office:temperate:medium:002",
+      "title": "Alderquay Split-Pier Harbor Office",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave32.mjs",
+      "gitBlob": "74697d26af72a5580d3ca869a6394e40e0763cfc",
+      "size": "medium",
+      "authoredSourceCells": 12372,
+      "sourceRoofCells": 3123,
+      "sourceWalkableCells": 3199,
+      "rooms": 13,
+      "portals": 18,
+      "independentRoofWings": 8,
+      "groundedRooflessPavedCourts": [
+        169,
+        72
+      ],
+      "additionalPhysicallyPavedSkyOpenWharfCells": 212,
+      "physicallyWalkableCrossDeckBFS": "PASS left endpoint (13,1,66) to right endpoint (50,1,67)",
+      "realTwoHighUprightPack4GlassCells": 42,
+      "completeFramedGlassBays": 21,
+      "originalRepair": "Moved original roof-bearing timber bent from inside open 72-cell court (12,53) to real backed roof cell (10,53)",
+      "focusedEightWaySameCategory": {
+        "priorWaves": [
+          6,
+          14,
+          27
+        ],
+        "transforms": 24,
+        "maxIoU": 0.6163522012578616,
+        "threshold": 0.85
+      },
+      "liveSeaOrTradeEnabled": false
+    },
+    {
+      "wave": 33,
+      "id": "r1:stable:desert:medium:003",
+      "title": "Sunfall Braided-Sand Caravan Stables",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave33.mjs",
+      "gitBlob": "a1f4fc41411ae1eb152c52a57b194a1304ed02c6",
+      "size": "medium",
+      "authoredSourceCells": 12769,
+      "sourceRoofCells": 3257,
+      "sourceWalkableCells": 3422,
+      "rooms": 13,
+      "portals": 18,
+      "independentRoofWings": 8,
+      "groundedRooflessPavedCourts": [
+        225,
+        64
+      ],
+      "additionalPhysicallyPavedSkyOpenBraidedTrackCells": 250,
+      "physicallyWalkableCrossDeckBFS": "PASS west endpoint (16,1,66) to east endpoint (50,1,67)",
+      "trulyGroundedStoneWindbreakPiers": 4,
+      "trueStoneWindbreakCellsInSixTiers": 24,
+      "realTwoHighUprightPack4GlassCells": 48,
+      "completeFramedGlassBays": 24,
+      "focusedEightWaySameCategory": {
+        "priorWaves": [
+          4,
+          12,
+          20
+        ],
+        "transforms": 24,
+        "maxIoU": 0.394646533973919,
+        "threshold": 0.85
+      },
+      "liveAnimalsOrRidingOrWeatherEnabled": false
+    }
+  ],
+  "executedSourceEvidence": {
+    "method": "Authentic original Github-source legacy-stable-schema, schema and sourcePlan/validateBlueprint executed in isolated V8 plus focused original source geometry/D4; not native Node, Chromium or original-game execution",
+    "originalCompiler": "PASS both original sources at exact listed Git blobs",
+    "totalAuthoredSourceCells": 25141,
+    "allSourceRoofCellsImmediatelySupported": 6380,
+    "combinedConnectedWalkableCells": 6621,
+    "originalSkyOpenPavedCourtyardCells": 530,
+    "additionalPavedUnroofedWalkableWharfAndTrackCells": 462,
+    "realTwoHighSourcePortalLinks": 36,
+    "originalSourceRooms": 26,
+    "completeOutwardPack4SourceGlassCells": 90,
+    "completeFramedTwoHighSourceGlassBays": 45,
+    "strictEightWayD4TransformsAgainstPriorOriginalSameCategory": 48,
+    "sourceD4Threshold": 0.85,
+    "actualBFSConnectedPhysicalExternalEndpoints": "PASS both designs",
+    "trueStoneWindbreakSourceTiers": "PASS 24 of 24",
+    "frozenB115ExclusiveOwnership": "PASS both IDs B115 only, no D92, no 228 historical",
+    "actualOriginalPack3Pack4MeshesCollidersAndMountedSelection": "NOT CERTIFIED"
+  },
+  "stagedButUnexecuted": {
+    "focusedNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves32-33-focused.test.mjs",
+      "blob": "8c22f34214f46957e75101506e2f0982a1f6ec2c",
+      "sourceSyntax": "PASS",
+      "realNativeNode": "NOT_EXECUTED"
+    },
+    "singleStrictHistoricalD4": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-33-shared-historical-d4.test.mjs",
+      "blob": "16d1d63dd810cda579be046f6182787c1e593885",
+      "historicalAcceptedSources": 228,
+      "newAuthoredSourcePool": 33,
+      "additionalNewOriginalsWaves9to33": 25,
+      "sourceAllocationStagedCount": 261,
+      "sourceAllocationRemainingCount": 174,
+      "sourceHistoryCensusPasses": 1,
+      "threshold": 0.85,
+      "nativeNode": "NOT_EXECUTED"
+    },
+    "singleCoordinatedSourceProxyGallery": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-33-gallery.mjs",
+      "galleryGitBlob": "4c85a3c872f4cefc1d0c0e84cbd13dc2401eecae",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-33-gallery.mjs",
+      "auditorGitBlob": "49714d2fdca61d48921968d48cf2cf0ed30857c6",
+      "sourceWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-33-gallery-wiring.test.mjs",
+      "sourceWiringGitBlob": "627fc56efb6ab876550742909162515592941bf9",
+      "originalPreviewSourceFiles": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave32-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave33-preview.html"
+      ],
+      "uniqueNewSourceOriginals": 25,
+      "originalSourceEvidenceFiles": 28,
+      "genuineWebGL2FrameCountRequired": 150,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "independentPNGCRC": true,
+      "uniquePNG_SHA256": true,
+      "exactHEADRequired": true,
+      "chromiumRun": "NOT_EXECUTED",
+      "actualPNGArtifacts": 0,
+      "notOriginalLiveGameRendering": true
+    }
+  },
+  "outstandingGates": [
+    "Run authentic exact-commit native Node tests with complete original repository modules, including physical candidates and one strict 228-source historical D4",
+    "Verify original Pack3/4 actual mesh shapes, selection/collider boxes, support/mounting, weather and material IDs in the live game",
+    "One coordinated exact-HEAD original-source WebGL2 150-frame Chromium screenshot gallery plus independent PNG CRC/SHA and visual audit",
+    "Owner-authorized original live game and settlement/biome placement, full walking/collision/navigation, iPhone installed Home Screen PWA performance/offline/saves and creator artwork acceptance"
+  ],
+  "globalCIEfficiency": {
+    "readOnlyProtectedRefsVerifiedExactlyOnce": true,
+    "exactFrozenPR407SuccessesReusedAsHistoricalOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newActionsRuns": 0,
+    "duplicateHistorical228Executions": 0,
+    "chromiumRuns": 0,
+    "sharedWorkflowEdits": 0,
+    "CIJobCancellations": 0,
+    "requiredThresholdsChanged": false
+  },
+  "protectedBoundaries": {
+    "historicAccepted228Untouched": true,
+    "frozenB115D92Untouched": true,
+    "allOtherBuilderAndDeveloperBranchesUntouched": true,
+    "allFiveAutomationsUntouched": true,
+    "originalSavesUntouched": true,
+    "protectedPR407Untouched": true,
+    "productionMainUntouched": true,
+    "noMerge": true,
+    "noDeployment": true
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 33,
+    "totalOriginalsAuthored": 43,
+    "target": 294,
+    "remainingOriginals": 251,
+    "remainingResidential": 169,
+    "remainingBuilderBService": 82
+  },
+  "remainingFocusedSessionsEstimated": {
+    "low": 90,
+    "high": 240,
+    "excludesFinalIntegrationAndRelease": true,
+    "uncertain": true
+  }
+}
