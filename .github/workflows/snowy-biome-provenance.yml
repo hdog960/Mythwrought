@@ -11,6 +11,9 @@ on:
       - 'tests/snowy-biome-provenance.test.mjs'
       - 'tests/snowy-biome-s3-candidates.test.mjs'
       - 'src/manual-biomes/snowy-s3-tree-prototypes.mjs'
+      - 'src/manual-biomes/snowy-s2-cap-candidate.mjs'
+      - 'tests/snowy-biome-s2-candidate.test.mjs'
+      - 'scripts/ci/snowy-s2-census.mjs'
       - '.github/workflows/snowy-biome-provenance.yml'
 
 permissions:
@@ -36,6 +39,8 @@ jobs:
           test "$(git rev-parse HEAD)" = "$SNOW_EXPECTED_HEAD"
           node --check src/voxel.mjs
           node --check scripts/ci/snowy-s0-probe.mjs
+          node --check scripts/ci/snowy-s2-census.mjs
+          node --check src/manual-biomes/snowy-s2-cap-candidate.mjs
           node --check scripts/ci/snowy-s0-webgl2.mjs
           node --check tests/snowy-biome-checkerboard.test.mjs
           node scripts/ci/build-stage-cache-manifest.mjs --check
@@ -43,10 +48,13 @@ jobs:
         run: |
           node --test tests/snowy-biome-checkerboard.test.mjs
           node --test tests/snowy-biome-provenance.test.mjs
+          node --test tests/snowy-biome-s2-candidate.test.mjs
           node --test tests/snowy-biome-s3-candidates.test.mjs
           node --test tests/nonblock-environment-profile.test.mjs
       - name: Real M7 seed and coordinate material provenance (no mocks)
-        run: node scripts/ci/snowy-s0-probe.mjs
+        run: |
+          node scripts/ci/snowy-s0-probe.mjs
+          node scripts/ci/snowy-s2-census.mjs
       - name: Install free pinned Chromium WebGL2 and genuine PNG decoder
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
