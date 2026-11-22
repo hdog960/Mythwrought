@@ -52,7 +52,7 @@ test('real original physical selection is exact visible producer geometry, never
  assert.equal(r.originalSourceVisibleBoxes,r.originalSourceSelectionBoxes);
  assert.ok(r.originalSourceVisibleBoxes>r.originalSourceCollisionBoxes);
  assert.equal(r.actualGamePlayerSelectionOrCollisionMeasured,false);
- assert.equal(r.originalGameWebGL2OrIPhoneMeasured,undefined);
+ assert.equal(r.originalGameWebGL2OrIPhoneMeasured,false);
  assert.equal(r.realIPhoneOrWebGL2Measured,false);
  assert.equal(r.readyForWorldPlacement,false);
 });
