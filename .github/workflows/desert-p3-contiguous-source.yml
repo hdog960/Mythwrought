@@ -1,0 +1,35 @@
+name: Desert P3 contiguous research exact-source focus
+on:
+  push:
+    branches:
+      - research/desert-p3-contiguous-rock-band-20261122
+    paths:
+      - .github/workflows/desert-p3-contiguous-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-contiguous-source
+  cancel-in-progress: false
+jobs:
+  original-v7-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ensure source-only branch against protected gameplay
+        run: |
+          set -euo pipefail
+          BASE=2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-p3-contiguous-band-proposal.mjs|scripts/ci/desert-p3-contiguous-band-source.test.mjs|.github/workflows/desert-p3-contiguous-source.yml|docs/desert/PHASE3_CONTIGUOUS_BAND_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check scripts/ci/desert-p3-contiguous-band-proposal.mjs
+          node --check scripts/ci/desert-p3-contiguous-band-source.test.mjs
+      - name: New two-site original-world interface tests only
+        run: node --test scripts/ci/desert-p3-contiguous-band-source.test.mjs
