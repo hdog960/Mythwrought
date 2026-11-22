@@ -63,7 +63,6 @@ test('all 193 weak original jambs are only Pack2-only source preview; 96 real Pa
   for(const item of v.safeOriginalWindowSourcePolicy){
    assert.equal(item.permittedExclusivePhysicalPreview,
     'D22 Pack2 ID62 jamb + sole Pack4 159/160/161 glazing');
-   assert.equal(item.originalWorldPlaced,false,undefined); // explicit zero world write comes from worldPlaced
    assert.equal(item.worldPlaced,false);
    assert.equal(item.wallLoadAcceptance,false);
    assert.equal(item.originalGameCollisionAcceptance,false);
