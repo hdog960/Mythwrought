@@ -1,0 +1,58 @@
+name: Enchanted Phase 2 Tall Tree Feasibility (isolated draft)
+on:
+  push:
+    branches:
+      - dev/enchanted-forest-overhaul-*
+    paths:
+      - 'src/manual-biomes/enchanted-tree-candidates.mjs'
+      - 'src/manual-biomes/environment-v7.mjs'
+      - 'src/manual-biomes/profile-world.mjs'
+      - 'tests/manual-biomes/enchanted-trees-phase2.test.mjs'
+      - 'scripts/ci/enchanted-trees-phase2-census.mjs'
+      - '.github/workflows/enchanted-forest-phase2-trees.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: enchanted-phase2-tall-trees-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-source-tall-trees:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify protected exact commit and candidate-only source syntax
+        run: |
+          git rev-parse HEAD
+          git status --short
+          node --check src/manual-biomes/enchanted-tree-candidates.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --check tests/manual-biomes/enchanted-trees-phase2.test.mjs
+          node --check scripts/ci/enchanted-trees-phase2-census.mjs
+      - name: Native actual-world tree shapes, Y19, seam, save and GPU regressions
+        run: node --test tests/manual-biomes/enchanted-trees-phase2.test.mjs
+      - name: Genuine unedited M7 and all old profile compatibility tests
+        run: node --test tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/v6-balanced-biomes.test.mjs
+      - name: Proven Phase 1 remains green and original forest floor unaffected
+        run: node --test tests/manual-biomes/enchanted-forest-phase1.test.mjs tests/manual-biomes/enchanted-forest-moss-pockets.test.mjs
+      - name: Census real natural tree sites and original physical chunk materials
+        run: node scripts/ci/enchanted-trees-phase2-census.mjs
+      - name: Upload genuine exact-head candidate feasibility and failure records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enchanted-phase2-tall-tree-native-feasibility
+          path: artifacts/enchanted-forest/phase2-tree-feasibility.json
+          if-no-files-found: warn
+          retention-days: 14
