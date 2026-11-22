@@ -103,17 +103,27 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
    if(!connected){reason='DETOUR_CANDIDATE_AIR_DISCONNECTED';refusals.air++;}
   }
   if(!reason){
-   const audited=auditProtectedSubsurfaceStairs(p,{
-    naturalAt:source.naturalAt,authoredAt:source.authoredAt,
-    editedAt:source.editedAt,protectedAt:source.protectedAt,
-    minY:-210,maxY:19,maxCells:20000,stopOnFirstUnsafe:true
-   });
-   sourceChecks+=audited.sourceChecks??0;
-   if(sourceChecks>maxSourceChecks){
+   // Source-check budget is a hard per-search bound, not a per-route
+   // allowance. Do not start a fresh 20k-cell survey after an earlier
+   // candidate has already consumed nearly all remaining source visits.
+   const remaining=maxSourceChecks-sourceChecks;
+   if(remaining<100){
     reason='DETOUR_SOURCE_QUERY_BUDGET';refusals.budget++;
-   }else if(!audited.ok){
-    reason=audited.firstRefusal??audited.reason??'DETOUR_SOURCE_UNSAFE';
-    refusals.source++;
+   }else{
+    const audited=auditProtectedSubsurfaceStairs(p,{
+     naturalAt:source.naturalAt,authoredAt:source.authoredAt,
+     editedAt:source.editedAt,protectedAt:source.protectedAt,
+     minY:-210,maxY:19,maxCells:Math.min(20000,remaining),
+     stopOnFirstUnsafe:true
+    });
+    sourceChecks+=audited.sourceChecks??0;
+    if(audited.reason==='SOURCE_QUERY_BUDGET_EXCEEDED'||
+       sourceChecks>maxSourceChecks){
+     reason='DETOUR_SOURCE_QUERY_BUDGET';refusals.budget++;
+    }else if(!audited.ok){
+     reason=audited.firstRefusal??audited.reason??'DETOUR_SOURCE_UNSAFE';
+     refusals.source++;
+    }
    }
   }
   if(!reason&&requireTerraceJoin){
@@ -125,7 +135,9 @@ export function searchSourceProtectedCityDetours(seed,rx,rz,{
      maxSourceChecks:Math.min(60000,remaining)
     });
     sourceChecks+=terraceProof.sourceChecks??0;
-    if(!terraceProof.ok){
+    if(sourceChecks>maxSourceChecks){
+     reason='DETOUR_SOURCE_QUERY_BUDGET';refusals.budget++;
+    }else if(!terraceProof.ok){
      reason=terraceProof.reason??'TERRACE_GEOMETRY_OR_SOURCE_UNSAFE';
      refusals.terrace++;
      if(sourceChecks>=maxSourceChecks){
