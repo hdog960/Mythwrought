@@ -42,7 +42,8 @@ for(const [rx,rz] of regions){
   deep.links.every(link=>link.ok===true&&link.selected?.sourceSafe===true);
  const selected=approved?deep.links.map(link=>link.selected.proposal):[];
  const joined=auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
-  source,additionalStairProposals:selected,requireCompleteDeepLinks:true
+  source,additionalStairProposals:selected,
+  requireCompleteDeepLinks:true,useSourceAwareDetour:true
  });
  rows.push(Object.freeze({seed,rx,rz,
   originalM7TerrainReadOnly:true,
@@ -65,6 +66,9 @@ for(const [rx,rz] of regions){
   joinedRouteRefusal:joined.reason??joined.refusal??null,
   joinedSourceChecks:joined.sourceChecks??0,
   joinedTerraceRadius:joined.terraceRadius??null,
+  joinedDetourSourceSafe:joined.useSourceAwareDetour===true&&joined.ok===true,
+  joinedDetourRefusal:joined.detourRefusal??null,
+  joinedDetourAttempted:joined.detourAttempted??joined.detourTestedCandidates??0,
   joinedFourHubCandidateTopologyApproved:joined.completeFourHubCandidateTopologyVerified===true,
   joinedFourHubSourceOwnershipApproved:joined.completeDeepLinkSourceOwnershipVerified===true,
   actuallyBuiltAndWalked:false,
