@@ -72,7 +72,7 @@ test('all 16 genuinely compiled buildings retain six original hand-authored Pack
 test('source-artwork preview rejects forged flat textures, unsupported roof part colors, and overwritten original shape identity',()=>{
  const actual=actualPhysical(all[0]);
  assert.throws(()=>auditD16D17OriginalSurfaceEvidence(actual),/resolvers/);
- const flat=(id,face,size)=>{const x=new Uint8Array(size*size*4);for(let i=0;i<x.length;i+=4){x[i]=80;x[i+1]=80;x[i+2]=80;x[i+3]=255}return x};
+ const flat=(id,face,size)=>{const x=new Uint8Array(size*size*4);for(let i=0;i<x.length;i+=4){x[i]=80;x[i+1]=80;x[i+2]=80;x[i+3]=255}return {id,face,width:size,height:size,pixels:x}};
  assert.throws(()=>auditD16D17OriginalSurfaceEvidence(actual,{...realOpts,masonryTexture:flat}),/lost authored details/);
  const falseRoof=(symbol,orientation)=>{
   const a=resolvePack3BuilderAsset(symbol,orientation);
