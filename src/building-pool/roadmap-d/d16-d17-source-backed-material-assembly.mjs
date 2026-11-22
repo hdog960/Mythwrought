@@ -113,7 +113,20 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
  for(const [n,rows] of [['wall',exterior],['roof',weather],['graded ridge',ridges],['tower crown',crowns]])
    if(rows.length<8)throw Error('No genuinely authored physical '+n+' original positions');
  const samples=[];
- for(const c of sampled(exterior,facadeBudget))samples.push(physicalAt(c,masonryRef,masonryId,'north',1,resolveManualAsset,'external-masonry'));
+ // Preserve original wood/stone authoring intent: wood is ACTUAL Pack2 planks,
+ // not recolored Pack1 masonry. Prefer both physical material families when the
+ // source really has both; no invented wood positions in stone-only structures.
+ const stone=exterior.filter(c=>c.asset!=='live:wood'),timber=exterior.filter(c=>c.asset==='live:wood');
+ let selected;
+ if(stone.length&&timber.length&&facadeBudget>=2){
+   const nWood=Math.max(1,Math.min(facadeBudget-1,Math.round(facadeBudget*timber.length/exterior.length)));
+   selected=[...sampled(stone,facadeBudget-nWood),...sampled(timber,nWood)];
+ }else selected=sampled(exterior,facadeBudget);
+ for(const c of selected){
+   const wood=c.asset==='live:wood';
+   samples.push(physicalAt(c,wood?'pack2:013':masonryRef,wood?59:masonryId,
+      'north',wood?2:1,resolveManualAsset,wood?'original-planed-wood-facade':'external-masonry'));
+ }
  for(const c of sampled(weather,roofBudget))samples.push(physicalAt(c,roofRef,roofId,'north',3,resolveManualAsset,'original-weather-roof'));
  for(const c of sampled(ridges,ridgeBudget))samples.push(physicalAt(c,'pack3:029',115,inferRidgeAxis(c,occupancy),3,resolveManualAsset,'original-graded-ridge'));
  for(const c of sampled(crowns,towerBudget))samples.push(physicalAt(c,'pack3:077',124,'north',3,resolveManualAsset,'original-spire-crown'));
@@ -139,7 +152,7 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
   originalWindowFacadeCorrections:glazing.sampledPhysicalWindows.filter(x=>x.sourceCellFacingIgnored).length,
   underlyingSourceCellsMutated:false,completeWorldStructure:false,
   fullManualFamilyArtworkAccepted:false,worldSupportAndMountsAccepted:false,
-  sourcePacksUsed:Object.freeze([1,3,4]),sourceOnly:true,worldPlaced:false,
+  sourcePacksUsed:Object.freeze([...new Set(samples.map(p=>p.sourceOriginalPack))].sort()),sourceOnly:true,worldPlaced:false,
   creatorArtApproved:false,iphonePerformanceValidated:false,gameplayIntegrated:false
  });
 }
