@@ -194,3 +194,68 @@ test('failed source admission does not permit later settlement replay',()=>{
     /Invalid or stale original regional mob poll/);
   engine.dispose();
 });
+
+test('direct original regional cooldown rejects invalid observer before planning',()=>{
+  const w=world(),engine=engineOf(w);
+  assert.throws(()=>prepareOriginalMobPoll({
+    ...opts(w,engine),observer:[NaN,4,8],spawnOnFirstVisit:false
+  }),/Invalid original regional mob observer/);
+  engine.dispose();
+});
+
+test('newborn juvenile flag cannot be credited as original natural birth',()=>{
+  const w=world(),engine=engineOf(w);
+  let chosen=null;
+  for(let seed=1;seed<=256;seed++){
+    const p=prepareOriginalMobPoll(opts(w,engine,seed));
+    if(p.proposal){chosen=p;break;}
+  }
+  assert.ok(chosen);
+  const id=engine.spawn(chosen.proposal.species.id,chosen.proposal.point,{
+    homeChunk:'0,0,0',juvenile:true
+  });
+  assert.ok(id,'Genuine original engine independently admits a juvenile');
+  assert.throws(()=>settleOriginalMobPoll(chosen,{world:w,spawnedId:id}),
+    /Original natural spawn admission state mismatch/);
+  engine.dispose();
+});
+
+test('damage to a newborn before regional settlement invalidates birth proof',()=>{
+  const w=world(),engine=engineOf(w);
+  let chosen=null;
+  for(let seed=1;seed<=256;seed++){
+    const p=prepareOriginalMobPoll(opts(w,engine,seed));
+    if(p.proposal){chosen=p;break;}
+  }
+  assert.ok(chosen);
+  const id=engine.spawn(chosen.proposal.species.id,chosen.proposal.point,{
+    homeChunk:'0,0,0'
+  });
+  assert.ok(id);
+  assert.equal(engine.damage(id,1),true);
+  assert.throws(()=>settleOriginalMobPoll(chosen,{world:w,spawnedId:id}),
+    /Original natural spawn admission state mismatch/);
+  engine.dispose();
+});
+
+test('actual far original MobEngine birth must be dormant at 18-block source threshold',()=>{
+  const w=world(),engine=engineOf(w),observer=[-12,4,8];
+  let chosen=null;
+  for(let seed=1;seed<=1024;seed++){
+    const p=prepareOriginalMobPoll({
+      ...opts(w,engine,seed),observer
+    });
+    if(p.proposal&&Math.hypot(...p.proposal.point.map(
+      (v,i)=>v-observer[i]))>18){chosen=p;break;}
+  }
+  assert.ok(chosen,'Source meadow must offer an eligible 18–26 block candidate');
+  const id=engine.spawn(chosen.proposal.species.id,chosen.proposal.point,{
+    homeChunk:'0,0,0',dormant:false
+  });
+  assert.ok(id);
+  assert.equal(engine.get(id).state,'idle',
+    'Genuine original engine allows independent awake spawn without dormant flag');
+  assert.throws(()=>settleOriginalMobPoll(chosen,{world:w,spawnedId:id}),
+    /Original natural spawn admission state mismatch/);
+  engine.dispose();
+});

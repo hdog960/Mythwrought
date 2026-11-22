@@ -1,6 +1,9 @@
 // Detached Phase 2 natural-spawn transaction preflight. Does not import or
 // mutate MobEngine, PopulationManager, source world or save sidecars.
 import {MobEngine} from './engine.mjs';
+import {validPoint} from './world-query.mjs';
+import {verifyOriginalNaturalMobAdmission}
+  from './ecosystem-natural-admission.mjs';
 import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
   from './ecosystem-roster-integrity.mjs';
 import {deriveRegionalMobState,proposeMobFromRosterSnapshot}
@@ -11,6 +14,7 @@ import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
 // Keep actual source-engine ownership out of serializable preview objects.
 const owner=new WeakMap();
 const sourceWorlds=new WeakMap();
+const sourceObservers=new WeakMap();
 const fullRosters=new WeakMap();
 const settled=new WeakSet();
 
@@ -60,6 +64,11 @@ export function prepareOriginalMobPoll({
 }={}){
   if(!(engine instanceof MobEngine))
     throw new TypeError('Original MobEngine instance required');
+  // Original PopulationManager validates the 3D player position even during
+  // regional cooldown; never admit a direct plan without that observer.
+  if(!validPoint(observer))
+    throw new TypeError('Invalid original regional mob observer');
+  const sourceObserver=Object.freeze([...observer]);
   const entities=engine.all();
   const rosterCertificate=captureOriginalMobRoster(entities);
   const roster=deriveRegionalMobState(entities,region,{isProtected});
@@ -101,6 +110,7 @@ export function prepareOriginalMobPoll({
   });
   owner.set(prepared,engine);
   sourceWorlds.set(prepared,world);
+  sourceObservers.set(prepared,sourceObserver);
   fullRosters.set(prepared,rosterCertificate);
   return prepared;
 }
@@ -159,6 +169,16 @@ export function settleOriginalMobPoll(plan,{
     // independently admitted ID before checking all prior original fields.
     assertOriginalMobRosterUnchanged(certified,
       afterEntities.filter(entity=>entity.id!==spawnedId));
+    // Original PopulationManager invokes spawn(...,{homeChunk:name,
+    // dormant:distanceTo(observer,point)>18}), never juvenile:true.
+    // Preserve the actual original MobEngine.spawn() initial newborn fields:
+    // a separately engine-admitted juvenile, prematurely moved/damaged mob,
+    // or far-away idle mob is not a certified natural birth.
+    verifyOriginalNaturalMobAdmission({
+      entity:added,proposal:plan.proposal,
+      observer:sourceObservers.get(plan),
+      regionKey:plan.record.regionKey,spawnedId
+    });
     confirmed=true;speciesId=added.species.id;
   }else{
     if(!sameRoster(plan.before,afterEntities))
