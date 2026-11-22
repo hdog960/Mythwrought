@@ -119,7 +119,7 @@ test('authentic 115894-cell original roof distance audit is honest: 91 new sleev
  for(const b of all){
   const p=planD19SourceProvenRoofTrusses(b);
   const e=planD22SecondaryOriginalRoofTrusses(b,{existing:p});
-  const before=auditD22OriginalRoofPlaneReach(b,p,{},{radius:8});
+  const before=auditD22OriginalRoofPlaneReach(b,p,null,{radius:8});
   const after=auditD22OriginalRoofPlaneReach(b,p,e,{radius:8});
   assert.equal(before.blueprintId,b.id);
   assert.equal(before.sourcePlaneCellsUnreachable,0);
