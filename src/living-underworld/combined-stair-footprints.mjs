@@ -210,6 +210,17 @@ export function compileMainGalleryPedestrianClearance(seed,rx,rz,{
   pedestrianHorizontalPairsChecked:MAIN_GALLERY_PAIRS.length,
   distinctGalleryClearanceCells:horizontal.size,
   distinctGallerySupportCells:horizontalSupport.size,
+  // Exact same original stair raster as inspect(proposal), but allow a
+  // whole planar city floor to be checked incrementally without allocating
+  // a 150k-cell duplicate network footprint.
+  inspectCell(x,y,z,kind){
+   if(![x,y,z].every(integer)||!['support','clearance'].includes(kind))
+    throw TypeError('Invalid planned city pad voxel');
+   const crossed=(kind==='support'?horizontal:horizontalSupport).get(key(x,y,z));
+   return crossed===undefined?null:Object.freeze({
+    horizontalPairIndex:crossed,kind
+   });
+  },
   inspect(proposal){
    const q=footprint(proposal);
    if(!q.ok)return Object.freeze({ok:false,
