@@ -171,6 +171,11 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false}={}){
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
+  // Lazily created only when an experimental enchanted tree is present.
+  // All proposals within this one chunk read the same immutable original M7
+  // terrain/cave baseline, so reusing exact source probes is safe. Never
+  // persist this short-lived cache or use it for other biome generations.
+  let candidateClearanceCache=null;
   // The *default* M7 path keeps its exact historical +/-3 site sampling.
   // Explicit Phase 2 prototypes need a +/-4 crown halo; sites outside the
   // original envelope may add ONLY Enchanted candidate voxels, never conifers.
@@ -221,7 +226,11 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       // player height is 1.78: leave both voxels immediately above nearby
       // M7 ground unobstructed, without changing mineable bark or terrain.
       // Only experimental candidates use this additional headroom filter.
-      if(candidate)tree=clearEnchantedCanopyForWalking(tree,readCell,BLOCK.AIR);
+      if(candidate){
+        candidateClearanceCache??=new Map();
+        tree=clearEnchantedCanopyForWalking(tree,readCell,BLOCK.AIR,
+          candidateClearanceCache);
+      }
       for(const [a,b,c,id] of tree)if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ){
         const key=a+','+b+','+c;
         // The old M7 path and non-enchanted trees retain exactly their
