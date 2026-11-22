@@ -22,6 +22,7 @@ test('source-proposed flat stair shares supported landing without crossing air',
  assert.equal(r.selectedStairRouteMutualClearanceChecked,true);
  assert.equal(r.selectedStairCount,1);
  assert.equal(r.selectedStairSourceOwnershipNotVerified,true);
+ assert.equal(r.interlevelStairMutualClearanceNotYetApproved,true);
  assert.equal(r.worldChanged,false);
 });
 test('elevated stair support in terrace headroom is rejected at all sizes',()=>{
