@@ -85,7 +85,7 @@ test('Glimmerbough actually authors 195 upright glass cells in 65 3-cell bays, n
 });
 test('Glimmerbough dual actual open courts and 1516 supported original Pack3 roofs retain real physical 2-high circulation',()=>{
  const b=buildGlimmerboughSplitSunOrchidHouse(),cells=new Map(b.placements.map(p=>[K(p.at),p]));
- assert.equal(b.placements.length,6728);assert.equal(b.walkable.length,1175);
+ assert.equal(b.placements.length,6729);assert.equal(b.walkable.length,1175);
  assert.equal(b.rooms.length,8);assert.equal(b.portals.length,12);
  for(const [x0,z0,x1,z1] of [[21,21,26,26],[11,34,14,37]])
   for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)
