@@ -54,7 +54,12 @@ export function createOpaqueNearLifecycle({gl,attributes,pipelineProgram,origina
   function contextLost(){
     if(phase==='lost')return;
     // WebGL objects have already been invalidated by WebKit. NO GL deletes.
-    renderer.resetForLostContext();phase='lost';generation++;
+    // A previous fatal stop is NOT erased by a context-loss/restore cycle:
+    // GPU context recovery alone cannot prove a failed chunk retirement,
+    // source ownership or already-attempted world rollback is now safe.
+    const previouslyBlocked=phase==='blocked';
+    renderer.resetForLostContext();generation++;
+    if(!previouslyBlocked){phase='lost';reason=null;}
   }
   function contextRestored(newAttributes,newProgram){
     if(phase!=='lost')throw Error('291_NEAR_LIFECYCLE_RESTORE_NOT_LOST');

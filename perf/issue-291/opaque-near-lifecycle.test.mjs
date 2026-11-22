@@ -135,3 +135,35 @@ test('no live integration or browser performance acceptance is claimed',()=>{
  assert.equal(s.liveIntegrationApproved,false);assert.equal(s.nativeRollbackProven,false);
  assert.equal(s.originalBrowserPixelsProven,false);
 });
+
+// Regression for a genuine cross-handler safety gap in the isolated probe:
+// original canvas webglcontextlost/restored must not reset a prior fatal state.
+test('a fatal original buffer retirement remains blocked through context loss and restore',()=>{
+ const gl=fakeGL(),stops=[];
+ const {bridge,records}=setup({gl,del:()=>{throw Error('native delete failed')},
+  stop:x=>{stops.push(x);return true}});
+ const list=records(2);bridge.render(list);
+ assert.throws(()=>bridge.deleteChunkBuffers(list[0]),/BLOCKED/);
+ assert.equal(bridge.status().phase,'blocked');
+ const deletions=gl.calls.deleteVao;
+ bridge.contextLost();
+ assert.equal(bridge.status().phase,'blocked');
+ assert.equal(bridge.status().cache.contextLost,true);
+ assert.equal(gl.calls.deleteVao,deletions);
+ assert.throws(()=>bridge.contextRestored(attrs(),{id:'newProgram'}),/RESTORE_NOT_LOST/);
+ assert.throws(()=>bridge.render(list),/NOT_READY_blocked/);
+ assert.equal(stops.length,1);
+ assert.equal(bridge.status().liveIntegrationApproved,false);
+});
+test('a failed draw stays fatal across multiple graphics loss events, including page lifecycle',()=>{
+ const {bridge,records}=setup({stop:()=>true}),list=records(2);
+ bridge.render(list);
+ assert.throws(()=>bridge.render([{buffer:null,count:3}]),/BLOCKED/);
+ const priorReason=bridge.status().reason;
+ bridge.contextLost();bridge.contextLost();
+ bridge.dispose();
+ assert.equal(bridge.status().phase,'blocked');
+ assert.equal(bridge.status().reason,priorReason);
+ assert.throws(()=>bridge.contextRestored(attrs(),{id:'freshProgram'}),/RESTORE_NOT_LOST/);
+ assert.throws(()=>bridge.deleteChunkBuffers(list[1]),/NOT_READY_blocked/);
+});
