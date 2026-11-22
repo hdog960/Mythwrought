@@ -1,7 +1,8 @@
-# One isolated original-M7 density-gate source experiment. Reuse existing
-# exact 14/14 native and original WebGL2 results where source is unchanged.
-# This rerun checks the original native .52+.34 floating point upper bound and connected climate tracks,
-# not the entire repo, browsers, other developer suites or CI queues.
+# Exact original-M7 experimental-only 128-entry immutable site metadata cache.
+# Scope: original FourRegionWorld streaming generation, cache eviction, actual
+# cave/landmark source integrity. Prior 6/6 density tests and earlier Moonwillow
+# native/WebGL2 proofs are reused where their tree/renderer source is unchanged.
+# No shared workflows, browser runs, broad CI or queue audits.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-density-and-long-stream:
+  original-m7-world-site-memo:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -26,15 +27,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify exact changed source and focused syntax
+      - name: Verify exact original-world and affected source syntax
         run: |
           git rev-parse HEAD
+          node --check src/manual-biomes/enchanted-tree-site-biome-cache.mjs
           node --check src/manual-biomes/environment-v7.mjs
-          node --check tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs
-          node --check tests/manual-biomes/enchanted-tree-long-stream-density-real-m7.test.mjs
-      - name: Run affected original-source density, 48-chunk parity and 288-chunk climate tracks
+          node --check src/manual-biomes/profile-world.mjs
+          node --check tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
+      - name: Source-authentic 192-chunk original-world residency, cave, seam and save proof
         run: |
           node --test \
-            tests/manual-biomes/enchanted-tree-long-stream-density-real-m7.test.mjs \
-            tests/manual-biomes/enchanted-tree-source-site-reach.test.mjs \
+            tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-tree-physical-census-seams.test.mjs \
             tests/manual-biomes/enchanted-tree-source-cost.test.mjs
