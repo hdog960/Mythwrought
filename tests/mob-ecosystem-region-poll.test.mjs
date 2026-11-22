@@ -41,9 +41,8 @@ test('source natural birth counts only after exact real engine admission proof',
     if(candidate.proposal){found=candidate;break;}
   }
   assert.ok(found,'One deterministic original-species proposal must be eligible');
-  const pre=settleOriginalMobPoll(found,{world:w});
-  assert.equal(pre.serial,found.attempts);
-  assert.equal(pre.next,10,'Candidate without actual admission is NOT a birth');
+  assert.equal(found.record.serial,0,'Only confirmed poll settlement consumes trials');
+  assert.equal(found.record.next,10,'An eligible candidate is NOT yet a birth');
   const id=engine.spawn(found.proposal.species.id,found.proposal.point,{
     homeChunk:'0,0,0'
   });
