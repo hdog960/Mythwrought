@@ -107,6 +107,21 @@ export function planD20SourceSafeWindowCornices(blueprint,originalGlazingPlan,{
   const pack4Triangles=(actual.previewMesh.opaque.length+actual.previewMesh.translucent.length)/30;
   if(!Number.isSafeInteger(pack4Triangles)||pack4Triangles<1||pack4Triangles>320)
    throw Error('Pack4 real glazing triangle budget invalid');
+  // The physical windowShape() is not trusted in isolation. It must exactly
+  // match the same original Pack4 builder producer's visible, targeting and
+  // collision volumes; otherwise trimming could leave real glass intersections.
+  const equal=(left,right)=>Array.isArray(left)&&Array.isArray(right)&&
+   left.length===right.length&&left.every((box,i)=>
+     Array.isArray(box)&&Array.isArray(right[i])&&box.length===6&&right[i].length===6&&
+     box.every((v,j)=>Number.isFinite(v)&&Number.isFinite(right[i][j])&&
+       Math.abs(v-right[i][j])<=1e-7));
+  if(!glass||glass.id!==actual.id||glass.rotation!==rot||
+     !equal(glass.visible?.map(x=>x.bounds),actual.visible?.map(x=>x.bounds))||
+     !equal(glass.selection,actual.selection)||!equal(glass.collision,actual.collision))
+   throw Error('Original Pack4 physical source window shape and builder resolver disagree');
+  if(!arch||arch.id!==120||arch.rotation!==rot||
+     !equal(arch.parts?.map(x=>x.box),arch.boxes))
+   throw Error('Original Pack3 physical source cornice has inconsistent authored parts');
   const physicalCornice=partsFromOriginal(arch,glass);
   const actualSourceBytes=(physicalCornice.corniceVisibleTriangles+pack4Triangles)*3*10*4;
   bytes+=actualSourceBytes;
