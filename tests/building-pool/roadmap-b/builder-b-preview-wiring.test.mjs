@@ -17,9 +17,11 @@ const assignments=[
  ['builder-b-essentials-wave6-preview.html','builder-b-essentials-wave6-gallery.mjs',
   ['buildTidehollowCrosswharfHarborOffice'],['builder-b-essentials-wave6.mjs']],
  ['builder-b-essentials-wave7-preview.html','builder-b-essentials-wave7-gallery.mjs',
-  ['buildRimeglassCrescentSunGreenhouse'],['builder-b-essentials-wave7.mjs']]
+  ['buildRimeglassCrescentSunGreenhouse'],['builder-b-essentials-wave7.mjs']],
+ ['builder-b-essentials-wave8-preview.html','builder-b-essentials-wave8-gallery.mjs',
+  ['buildFrostwakeCrownbridgeLighthouse'],['builder-b-essentials-wave8.mjs']]
 ];
-test('all three service source preview pages reference exactly their exported original constructors',()=>{
+test('all eight service source preview pages reference exactly their exported original constructors',()=>{
  for(const [preview,gallery,names,modules] of assignments){
   const doc=read('tests/building-pool/roadmap-b/'+preview);
   const evidence=read('tests/building-pool/roadmap-b/'+gallery);
