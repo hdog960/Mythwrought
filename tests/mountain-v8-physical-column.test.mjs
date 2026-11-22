@@ -5,10 +5,10 @@ const ids={AIR:0,GRASS:1,DIRT:2,STONE:3};
 const sample=(legacyTop=6,top=11,cap='alpine-grass')=>({x:-512,z:16,legacyTop,top,cap,safeToIntegrate:false,generatorIdentityRequired:'v8-new-opt-in'});
 const source=(x,y,z)=>y>6?ids.AIR:y===6?ids.GRASS:ids.DIRT;
 const cfg={worldMaxY:19,ids,readOriginalBlock:source};
-test('authored uplift creates contiguous physical stone supporting a meadow cap',()=>{
+test('authored uplift gives meadow two dirt layers over deep mineable stone',()=>{
  const out=plan(sample(),cfg);assert.ok(out);assert.equal(out.estimatedCells,6);
  assert.deepEqual(out.writes.map(c=>c.y),[6,7,8,9,10,11]);
- assert.deepEqual(out.writes.map(c=>c.material),['stone','stone','stone','stone','stone','alpine-grass']);
+ assert.deepEqual(out.writes.map(c=>c.material),['stone','stone','stone','dirt','dirt','alpine-grass']);
  assert.equal(out.requiresApprovedV8BlockMapping,true);assert.equal(out.safeToIntegrate,false);
 });
 test('unchanged cap requires only one natural material write',()=>{
@@ -39,4 +39,18 @@ test('two contrasting seeded-like shape proposals preserve IDs and never write w
   assert.ok(out.estimatedCells<=LIMIT);
  }
  assert.equal(ordinary.edits.size,0);
+});
+
+test('alpine shallow uplift keeps valid dirt support without thin floating rock',()=>{
+ const p=plan(sample(6,7),cfg);
+ assert.deepEqual(p.writes.map(c=>c.material),['dirt','alpine-grass']);
+ const q=plan(sample(6,8),cfg);
+ assert.deepEqual(q.writes.map(c=>c.material),['dirt','dirt','alpine-grass']);
+ const rock=plan(sample(6,10,'slate'),cfg);
+ assert.ok(rock.writes.slice(0,-1).every(c=>c.material==='stone'));
+});
+test('deep original cave and protected foundation veto even when surface looks safe',()=>{
+ const cave=(x,y,z)=>y===3?ids.AIR:source(x,y,z);
+ assert.equal(plan(sample(),{...cfg,readOriginalBlock:cave}),null);
+ assert.equal(plan(sample(),{...cfg,protectedAt:(x,y,z)=>y===4}),null);
 });
