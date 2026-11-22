@@ -28,12 +28,16 @@ export function certifyMountainV8Seam(x,z,seed,readProposal,{maxStep=2,readSuppo
       if(!physical||physical.safeToIntegrate!==false||
          physical.requiresApprovedV8BlockMapping!==true||
          physical.x!==a||physical.z!==b||physical.top!==p.top||
+         physical.legacyTop!==p.legacyTop||physical.cap!==p.cap||
          !Number.isSafeInteger(physical.estimatedCells)||
          physical.estimatedCells<1||physical.estimatedCells>18||
+         physical.estimatedCells!==p.top-p.legacyTop+1||
          !Array.isArray(physical.writes)||
          physical.writes.length!==physical.estimatedCells||
          physical.writes.some((cell,i)=>cell.x!==a||cell.z!==b||
-           cell.y!==p.legacyTop+i||typeof cell.material!=='string'))return null;
+           cell.y!==p.legacyTop+i||
+           cell.material!==(i===physical.estimatedCells-1?p.cap:
+             p.cap==='alpine-grass'&&p.legacyTop+i>=p.top-2?'dirt':'stone')))return null;
       verifiedCells+=physical.estimatedCells;
       if(verifiedCells>90)return null;
     }
