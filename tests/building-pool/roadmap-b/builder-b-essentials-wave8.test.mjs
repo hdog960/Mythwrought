@@ -99,7 +99,7 @@ test('Eight genuinely upright beacon glass openings use original Pack4 manufactu
   assert.equal(p.realWindowWeatherSealApproved,false);
   assert.ok(v.get(K([x,y-1,z]))?.role==='wall','upper lens missing true stone sill');
   assert.ok(v.get(K([x,y+1,z]))?.role==='wall','upper lens missing true stone lintel');
-  assert.ok(!v.has(K([x+dx,0,z+dz])),'upper lens faces building foundation instead of outside');
+  assert.ok(!v.has(K([x+dx,y,z+dz])),'upper lens faces occupied high-altitude structure rather than clear exterior air');
   const physical=pack4BuilderAsset('pack4:030',{rotation:p.orientation});
   assert.equal(physical.mount,'opening');
   assert.equal(physical.id,159);
