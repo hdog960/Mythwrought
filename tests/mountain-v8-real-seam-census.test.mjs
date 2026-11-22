@@ -10,7 +10,7 @@ import {censusMountainV8Tiles as census}
 
 test('original mountain source is deterministic across actual negative chunk seams',()=>{
   for(const seed of [179,2026]){
-    const world=new VoxelWorld(seed),before=world.save();
+    const world=new VoxelWorld(seed),before=JSON.stringify(world.save());
     let approved=0,vetoed=0,contacts=0;
     // Read the actual cardinal mountain neighborhood; do not invent heights.
     for(const cx of [-33,-32,-31]){
@@ -32,27 +32,27 @@ test('original mountain source is deterministic across actual negative chunk sea
       }
     }
     assert.equal(approved+vetoed,54);
-    assert.equal(world.save(),before);
+    assert.equal(JSON.stringify(world.save()),before);
     console.log('MOUNTAIN V8 REAL SEAM CENSUS '+JSON.stringify({
       seed,approved,vetoed,contacts,saveUnchanged:true}));
   }
 });
 test('bounded tile atlas never performs full-chunk brute-force work',()=>{
-  const seed=179,world=new VoxelWorld(seed),save=world.save();
+  const seed=179,world=new VoxelWorld(seed),save=JSON.stringify(world.save());
   const report=census({seed,tileX:-65,tileZ:-3,width:4,height:4,world});
   assert.ok(report);
   assert.equal(report.stats.seen,16);
   assert.equal(report.stats.tiles,16);
   assert.ok(report.stats.plants<=16);
   assert.ok(report.stats.plantCells<=288);
-  assert.equal(world.save(),save);
+  assert.equal(JSON.stringify(world.save()),save);
 });
 test('wrong biome contacts fail closed without altering original world',()=>{
   const seed=179,world=new VoxelWorld(seed);
-  const before=world.save();
+  const before=JSON.stringify(world.save());
   for(const [x,z] of [[512,0],[0,512],[0,-512],[0,0]]){
     assert.notEqual(v6BiomeAt(x,z,seed)?.name,'mountain');
     assert.equal(survey(x,z,seed,{world}),null);
   }
-  assert.equal(world.save(),before);
+  assert.equal(JSON.stringify(world.save()),before);
 });
