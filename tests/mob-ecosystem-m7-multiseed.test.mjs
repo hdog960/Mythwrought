@@ -18,6 +18,8 @@ import {createM7MobCollisionReader}
   from '../src/mobs/ecosystem-world-geometry.mjs';
 import {eligibleHabitatPool,planHabitatCandidate}
   from '../src/mobs/ecosystem-habitat.mjs';
+import {proposeTerrainAwarePosition}
+  from '../src/mobs/ecosystem-terrain-placement.mjs';
 
 const SURFACE=Object.freeze([
   {biome:'meadow',source:'plains',x:0,z:0},
@@ -79,7 +81,7 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
       const pool=eligibleHabitatPool({biome:site.biome,feet,
         light:site.biome==='cave'?.29:.8});
       assert.ok(pool.length>0,'Source-approved species list is empty');
-      let originalEligible=0,compatibleEligible=0;
+      let originalEligible=0,compatibleEligible=0,terrainAwareEligible=0;
       let originalClear=0,proposedClear=0;
       for(let serial=1;serial<=24;serial++){
         const candidate=planHabitatCandidate(pool,{seed,cx,cz,section,serial});
@@ -97,6 +99,27 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
         const afterEligible=Boolean(second&&
           sectionForY(Math.floor(second[1]))===section&&
           spawnEligible(proposedQuery,candidate.species,second,observer));
+        // The new isolated search may only extend the SAME source-backed
+        // compatible reader. It cannot skip original physics or eligibility.
+        const terrain=proposeTerrainAwarePosition(proposedQuery,{
+          species:candidate.species,x:candidate.x,z:candidate.z,
+          feet,section,observer,kind:site.siteType
+        });
+        if(terrain){
+          assert.equal(sectionForY(Math.floor(terrain.point[1])),section,
+            'Surface search must not cross a vertical residency section');
+          assert.equal(proposedQuery.grounded(terrain.point,candidate.species.body),true,
+            'Terrain-aware improvements must not manufacture ground');
+          assert.equal(spawnEligible(proposedQuery,candidate.species,terrain.point,observer),true,
+            'Every proposed placement must pass original habitat/distance rules');
+          terrainAwareEligible++;
+        }
+        if(afterEligible){
+          assert.ok(terrain,'A valid original compatible position must never disappear');
+          assert.equal(terrain.offset,0,'Preserve exact original supported window first');
+          assert.deepEqual(terrain.point,second,
+            'Previously eligible coordinates must remain byte-equivalent');
+        }
         if(beforeEligible){
           assert.ok(afterEligible,
             'Only source-known formerly-unknown M7 geometry is reclassified; '+
@@ -105,16 +128,21 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
         }
         if(afterEligible)compatibleEligible++;
       }
-      assert.ok(originalEligible<=24&&compatibleEligible<=24);
+      assert.ok(originalEligible<=24&&compatibleEligible<=24&&terrainAwareEligible<=24);
       assert.ok(compatibleEligible>=originalEligible);
-      if(site.siteType==='cave')
+      assert.ok(terrainAwareEligible>=compatibleEligible,
+        'Terrain-aware surface extension must not erase an original valid placement');
+      if(site.siteType==='cave'){
         assert.equal(compatibleEligible,originalEligible,
-          'An M7 surface-ground reader must not mutate deep authored cave physics');
+          'M7 physical-ground reader must not mutate deep authored cave physics');
+        assert.equal(terrainAwareEligible,originalEligible,
+          'Cave physics must retain the exact ORIGINAL single-height window');
+      }
       const item={seed,biome:site.biome,siteType:site.siteType,
         x:site.x,z:site.z,section,feet,poolSize:pool.length,
         proposals:24,originalFoundGround:originalClear,
         compatibleFoundGround:proposedClear,
-        originalEligible,compatibleEligible};
+        originalEligible,compatibleEligible,terrainAwareEligible};
       outcomes.push(item);
       console.log('MYTHWROUGHT_MOB_M7_COLLISION_COMPARISON '+JSON.stringify(item));
     }
@@ -127,9 +155,11 @@ test('three-seed real M7 five-biome and historical-cave collision comparison is 
     proposals:outcomes.length*24,
     originalEligible:outcomes.reduce((a,r)=>a+r.originalEligible,0),
     compatibleEligible:outcomes.reduce((a,r)=>a+r.compatibleEligible,0),
+    terrainAwareEligible:outcomes.reduce((a,r)=>a+r.terrainAwareEligible,0),
     unchangedSourceSaves:true,
     noMobsInjected:true
   };
   assert.ok(summary.compatibleEligible>=summary.originalEligible);
+  assert.ok(summary.terrainAwareEligible>=summary.compatibleEligible);
   console.log('MYTHWROUGHT_MOB_M7_COLLISION_COMPARISON_SUMMARY '+JSON.stringify(summary));
 });
