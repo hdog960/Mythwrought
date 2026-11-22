@@ -12,6 +12,11 @@ const INT=Number.isSafeInteger;
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const RADII=Object.freeze([16,12,8,6,4]);
 const key=(x,y,z)=>x+','+y+','+z;
+const strictSourceFlag=(value,role)=>{
+ if(typeof value!=='boolean')
+  throw TypeError('Nonboolean original M7 terrace '+role+' source');
+ return value;
+};
 export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
  source,maxSourceChecks=60000,selectedStairProposals=null
 }={}){
@@ -78,14 +83,18 @@ export function proposeProtectedCityLandingTerrace(seed,rx,rz,{
     sourceChecks++;
     let reason=null;
     if(y< -210||y>19)reason='WORLD_BOUNDS';
-    else if(source.editedAt(x,y,z))reason='PLAYER_EDIT';
+    else if(strictSourceFlag(source.editedAt(x,y,z),'edit'))
+     reason='PLAYER_EDIT';
     else{
      const owner=source.authoredAt(x,y,z);
      if(owner!==undefined&&(!INT(owner)||owner<0))reason='INVALID_AUTHORED_SOURCE';
      else if(owner!==undefined&&owner!==0)reason='AUTHORED_SOURCE';
-     else if(source.protectedAt(x,y,z))reason='PROTECTED_LANDMARK';
+     else if(strictSourceFlag(source.protectedAt(x,y,z),'landmark'))
+      reason='PROTECTED_LANDMARK';
      else{
       const block=source.naturalAt(x,y,z);
+      if(!INT(block)||block<0)
+       throw TypeError('Invalid original M7 terrace material source');
       if(!isCandidateGeologyMaterial(block))reason='UNSAFE_MATERIAL';
       else if(owner===0&&block!==0)reason='AUTHORED_AIR_MISMATCH';
       else if(kind==='support'&&block===0)
