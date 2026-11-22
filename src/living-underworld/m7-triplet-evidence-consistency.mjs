@@ -9,7 +9,8 @@ const FIELDS=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const SOURCE_VETOES=Object.freeze([
  'oreOrUnsafe','authoredSolid','authoredAirMismatch','originalEdit','landmark'
 ]);
-const SUM=(rows,key)=>rows.reduce((n,r)=>n+r[key],0);
+const SUM=(rows,key)=>rows.reduce((n,r)=>
+ n+(NAT(r?.[key])?r[key]:NaN),0);
 const hist=o=>{
  if(!o||typeof o!=='object'||Array.isArray(o))return null;
  let total=0;
@@ -24,7 +25,8 @@ const hist=o=>{
 const roles=o=>o&&FIELDS.every(k=>NAT(o[k]))&&
  Object.keys(o).length===FIELDS.length;
 const add=(reasons,reason)=>{if(!reasons.includes(reason))reasons.push(reason);};
-const keys=a=>a.map(x=>x.rx+','+x.rz);
+const keys=a=>a.map(x=>x&&INT(x.rx)&&INT(x.rz)?
+ x.rx+','+x.rz:null);
 export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
  const reasons=[];
  // Strict source readings: 16 authentic planned galleries per biome, with
@@ -48,9 +50,17 @@ export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
     r.genuineOriginalReaderCalls>=r.inspectedSourceCells;
    const refusal=safe&&typeof r.sourceSafe==='boolean'&&
     r.sourceSafe===(r.sourceRejectedGalleries===0);
-   const vetoes=materials!==null&&NAT(r.otherUnsafeMaterialCells)&&
+   const countRows=counts&&typeof counts==='object'&&
+    Object.values(counts).every(NAT);
+   const vetoed=['authored','edited','protected','unsafeMaterial',
+    'bounds','authoredAirSupport','existingAirSupport','sourceInconsistency'];
+   const vetoTotal=countRows?vetoed.reduce((n,k)=>n+(counts[k]??NaN),0):NaN;
+   const sourceVetoConsistency=NAT(vetoTotal)&&
+    (r.sourceSafe?vetoTotal===0:vetoTotal>0);
+   const vetoes=sourceVetoConsistency&&materials!==null&&
+    NAT(r.otherUnsafeMaterialCells)&&
     r.allUnsafeMaterialIdsEnumerated===(r.otherUnsafeMaterialCells===0)&&
-    counts&&typeof counts==='object'&&NAT(counts.unsafeMaterial)&&
+    countRows&&NAT(counts.unsafeMaterial)&&
     materials+r.otherUnsafeMaterialCells===counts.unsafeMaterial;
    const asBuilt=NAT(r.oldM7AsBuiltBlockedHeadroomCells)&&
     NAT(r.oldM7AsBuiltMissingSupportCells)&&NAT(r.oldM7AsBuiltEditedCells)&&
@@ -79,7 +89,16 @@ export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
    const allCounts=Object.entries(sumHist).every(([k,n])=>
     g.unsafeBlockIdTotals?.[k]===n)&&
     Object.keys(g.unsafeBlockIdTotals??{}).length===Object.keys(sumHist).length;
-   if(g.sourceCells!==SUM(rows,'inspectedSourceCells')||
+   const sourceCategories=Object.create(null);
+   for(const r of rows)for(const [category,n] of
+    Object.entries(r.sourceRejectionCounts)){
+    sourceCategories[category]=(sourceCategories[category]??0)+n;
+   }
+   const expectedCategories=g.voxelSourceVetoCategoryTotals;
+   const categoryParity=expectedCategories&&typeof expectedCategories==='object'&&
+    Object.keys(sourceCategories).length===Object.keys(expectedCategories).length&&
+    Object.entries(sourceCategories).every(([k,v])=>expectedCategories[k]===v);
+   if(!categoryParity||g.sourceCells!==SUM(rows,'inspectedSourceCells')||
     g.totalOriginalM7ReaderMethodCalls!==SUM(rows,'genuineOriginalReaderCalls')||
     g.sourceSafeRegions!==rows.filter(r=>r.sourceSafe).length||
     g.sourceRefusals!==rows.filter(r=>!r.sourceSafe).length||
@@ -103,6 +122,9 @@ export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
   new Set(keys(c.rows)).size!==2)
   add(reasons,'M7_CITY_SITE_INVENTORY_INVALID');
  else for(const r of c.rows){
+  if(!r||typeof r!=='object'){
+   add(reasons,'M7_CITY_SOURCE_ACCOUNTING_INVALID');continue;
+  }
   if(!NAT(r.fullJoinedCandidateOriginalM7SourceChecks)||
    !NAT(r.fullNetworkCombinationsInspected)||
    !NAT(r.joinedSourceChecks)||!NAT(r.fullPadSourceChecks)||
@@ -137,7 +159,14 @@ export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
     'ownedInteriorApprovedCarves','ownedInteriorRejectedCarves',
     'haloRequestedProposals','haloApprovedProposals',
     'haloRejectedProposals','approvedOnlyAddedFaces'];
-   if(!p||!['x','y','z'].every(a=>INT(p[a])&&p[a]%16===0)||
+   const allVetoes=r?.refusalCounts&&
+    SOURCE_VETOES.every(k=>NAT(r.refusalCounts[k]))&&
+    Object.keys(r.refusalCounts).length===SOURCE_VETOES.length;
+   if(!p||!allVetoes||
+    SOURCE_VETOES.reduce((n,k)=>n+r.refusalCounts[k],0)!==
+     r.sourceRejectedCarveCells||
+    (r.ok&&r.budgetReason!==null)||
+    !['x','y','z'].every(a=>INT(p[a])&&p[a]%16===0)||
     Math.floor(p.x/256)!==r.rx||Math.floor(p.z/256)!==r.rz||
     r.sourceHaloCells!==5832||cns.some(v=>!NAT(r[v]))||
     r.candidateCarveCells!==r.sourceAllowedCarveCells+
