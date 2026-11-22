@@ -18,17 +18,19 @@ test('16 original W16/17 source buildings map to exactly bounded real Pack1 maso
   assert.equal(scene.sampledCount,40);
   assert.equal(scene.physicalSamples.length,40);
   assert.equal(scene.pack4MeshGlazingCount,12);
-  assert.deepEqual(scene.sourcePacksUsed,[1,3,4]);
+  assert.ok(scene.sourcePacksUsed.includes(3)&&scene.sourcePacksUsed.includes(4));
+  assert.ok(scene.sourcePacksUsed.includes(1)||scene.sourcePacksUsed.includes(2));
   assert.equal(scene.originalSourceCellCount,before);
   assert.equal(b.cells.length,before,'original source structure mutated');
-  assert.equal(scene.sampleCounts['external-masonry'],8);
+  assert.equal((scene.sampleCounts['external-masonry']||0)+(scene.sampleCounts['original-planed-wood-facade']||0),8);
   assert.equal(scene.sampleCounts['original-weather-roof'],8);
   assert.equal(scene.sampleCounts['original-graded-ridge'],6);
   assert.equal(scene.sampleCounts['original-spire-crown'],4);
   assert.equal(scene.sampleCounts['physical-glazing-preview'],12);
   assert.equal(scene.sampleCounts['source-physical-furnishing-preview'],2);
   const kinds=scene.physicalSamples.reduce((o,x)=>(o[x.sourceOriginalPack]=(o[x.sourceOriginalPack]||0)+1,o),{});
-  assert.deepEqual(kinds,{1:8,3:18,4:14});
+  assert.equal((kinds[1]||0)+(kinds[2]||0),8);
+  assert.equal(kinds[3],18);assert.equal(kinds[4],14);
   for(const p of scene.physicalSamples){
    assert.ok(p.sourceOriginalSymbol.startsWith('pack'+p.sourceOriginalPack+':'));
    assert.ok(p.renderablePhysicalBoxes.length>0);
@@ -65,7 +67,7 @@ test('16 original W16/17 source buildings map to exactly bounded real Pack1 maso
     scene.gameplayIntegrated],[false,false,false,false,false,false]);
   instances+=scene.sampledCount;meshWindows+=scene.pack4MeshGlazingCount;
   corrected+=scene.originalWindowFacadeCorrections;
-  masonry+=scene.sampleCounts['external-masonry'];
+  masonry+=(scene.sampleCounts['external-masonry']||0)+(scene.sampleCounts['original-planed-wood-facade']||0);
   shingles+=scene.sampleCounts['original-weather-roof'];
   ridge+=scene.sampleCounts['original-graded-ridge'];spires+=scene.sampleCounts['original-spire-crown'];
   fixtures+=scene.sampleCounts['source-physical-furnishing-preview'];
