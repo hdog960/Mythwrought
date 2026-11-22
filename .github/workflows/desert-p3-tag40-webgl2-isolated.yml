@@ -1,0 +1,95 @@
+name: Desert P3 texture-blend two-site original WebGL2 (candidate only)
+on:
+  push:
+    branches:
+      - research/desert-p3-seam-shader-tag40-20261122
+    paths:
+      - .github/workflows/desert-p3-tag40-webgl2-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-tag40-webgl2-isolated
+  cancel-in-progress: false
+jobs:
+  true-game-tag40:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: 641726d815172abcde7417b22c71e9df250fcd4b
+          path: prior-harness
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Require verified exact native source revision, never change protected sources
+        run: |
+          set -euo pipefail
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C prior-harness rev-parse HEAD)" = 641726d815172abcde7417b22c71e9df250fcd4b
+          BASE=8f8f2ade3dcace505de8fbaecf58e353eae4d0da
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(\.github/workflows/desert-p3-tag40-webgl2-isolated.yml|docs/desert/PHASE3_SHADER_TAG40_RESEARCH_CHECKPOINT_20261122.md)$' || true)
+          test -z "$unexpected"
+          node --check candidate/src/main.mjs
+      - name: Pinned Chromium only for two exact original-game shader proof sites
+        run: |
+          cd candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install --with-deps chromium
+      - name: Run original game candidate source with authentic read-only fixed-seed harness
+        run: |
+          set -euo pipefail
+          cp prior-harness/tests/desert-phase3-triple-junction-browser.mjs candidate/tests/
+          cd candidate
+          python3 -m http.server 4173 >/tmp/desert-tag40-webgl2-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_JUNCTION_PHASE=after DESERT_JUNCTION_OUTPUT=artifacts/desert-p3-tag40 node tests/desert-phase3-triple-junction-browser.mjs
+      - name: Validate real PNGs and exact source terrain/material state
+        run: |
+          cd candidate
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import crypto from 'node:crypto';
+          import {PNG} from 'pngjs';
+          const manifest=JSON.parse(fs.readFileSync('artifacts/desert-p3-tag40/after-manifest.json'));
+          assert.equal(manifest.sites.length,2);
+          assert.deepEqual(manifest.sites.map(s=>s.seed),[179,2026]);
+          assert.equal(manifest.browserErrors.length,0);
+          for(const site of manifest.sites){
+            assert.equal(site.cap,401);
+            assert.equal(site.data.gameBlock,401);
+            assert.equal(site.data.generator,'mythwrought-five-surface-regions-v7');
+            assert.equal(site.canvasState.daylight,1);
+            assert.equal(site.canvasState.loadedChunks,25);
+            assert.equal(site.canvasState.pendingChunks,0);
+            const p=fs.readFileSync(site.file);
+            const png=PNG.sync.read(p);
+            assert.equal(png.width,932);assert.equal(png.height,430);
+            let nonBlack=0;
+            for(let j=0;j<png.data.length;j+=4)
+              if(png.data[j]+png.data[j+1]+png.data[j+2]>30)nonBlack++;
+            assert.ok(nonBlack>932*430*.75);
+            console.log('DESERT_P3_TAG40_REAL_WEBGL2 '+JSON.stringify({
+              seed:site.seed,position:[site.x,site.z],
+              originalMaterial:site.cap,loadedChunks:site.canvasState.loadedChunks,
+              pngSHA256:crypto.createHash('sha256').update(p).digest('hex'),
+              nonBlack,totalPixels:png.width*png.height
+            }));
+          }
+          EOF
+      - name: Preserve only two genuine candidate PNGs and manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-tag40-two-site-original-webgl2
+          path: candidate/artifacts/desert-p3-tag40/**
+          if-no-files-found: warn
+          retention-days: 7
