@@ -45,7 +45,10 @@ for(const site of sites){
   throw Error('Historical original M7 biome/mouth site drift: '+
    JSON.stringify({site,realBiome,mouthInRegion}));
  const mutual=auditMutualMainGalleryClearance(seed,site.rx,site.rz);
- const full=auditSourceProtectedMainGalleries(seed,site.rx,site.rz,{source});
+ const full=auditSourceProtectedMainGalleries(seed,site.rx,site.rz,{
+  source,diagnoseAllGalleries:true,
+  maxTotalSourceChecks:120000,maxFailureExamples:16
+ });
  const existing=auditOriginalMainGalleryVoxelReadiness(seed,site.rx,site.rz,{
   materialAt:source.naturalAt,editedAt:source.editedAt
  });
@@ -63,6 +66,11 @@ for(const site of sites){
   mutuallySafe:mutual.ok,checkedPairs:mutual.examined,
   collidingPairs:mutual.conflictingPairs??null,
   sourceSafe:full.ok,galleriesInspected:full.galleriesInspected,
+  all16GallerySourcesDiagnosed:full.diagnosticAll16GalleriesAttempted===true,
+  sourceSafeGalleries:full.sourceSafeGalleries??null,
+  sourceRejectedGalleries:full.sourceRejectedGalleries??null,
+  firstRefusalCounts:full.firstRefusalCounts??null,
+  sourceRejectionCounts:full.sourceRejectionCounts??null,
   inspectedSourceCells:full.sourceChecks,
   firstRefusal:full.failures?.[0]??full.reason??null,
   originalWorldEdited:false,realPlayerWalkingUnverified:true}));
@@ -76,6 +84,9 @@ const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-ga
  asBuiltGalleryRegions:rows.filter(x=>x.oldM7AsBuiltGalleryDeckAndAirPresent).length,
  sourceRefusals:rows.filter(x=>!x.sourceSafe).length,
  sourceCells:rows.reduce((n,r)=>n+(r.inspectedSourceCells??0),0),
+ all80GallerySourceReportsComplete:rows.every(r=>r.all16GallerySourcesDiagnosed),
+ diagnosedSafeGalleries:rows.reduce((n,r)=>n+(r.sourceSafeGalleries??0),0),
+ diagnosedRejectedGalleries:rows.reduce((n,r)=>n+(r.sourceRejectedGalleries??0),0),
  rows:Object.freeze(rows),
  originalM7SeedConstructorFaults8675309And13579NotRetested:true,
  liveGameWalkingUnverified:true,iphoneGpuUnverified:true,
