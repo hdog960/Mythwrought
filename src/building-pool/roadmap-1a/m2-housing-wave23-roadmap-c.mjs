@@ -25,8 +25,8 @@ export const ROADMAP_C_1A_WAVE23_HOUSE_SPECS=Object.freeze([
         15
       ],
       [
-        51,
-        21,
+        50,
+        19,
         63,
         37
       ],
@@ -566,7 +566,7 @@ export const ROADMAP_C_1A_WAVE23_HOUSE_SPECS=Object.freeze([
         "west"
       ],
       [
-        50,
+        49,
         27,
         "east"
       ],
