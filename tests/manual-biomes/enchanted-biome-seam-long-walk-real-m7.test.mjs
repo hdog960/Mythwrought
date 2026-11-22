@@ -34,7 +34,8 @@ function originalSafeSample(world,n){
  // All cave/landmark provenance at this surface remains under the ORIGINAL
  // generator; the candidate cannot fill a source-authored AIR/headroom cell.
  return [n.top+1,n.top+2].every(y=>
-   world._columnPlan(n.x,n.z).get(y)??world._environmentBaseline(n.x,y,n.z)===BLOCK.AIR);
+   (world._columnPlan(n.x,n.z).get(y)??
+    world._environmentBaseline(n.x,y,n.z))===BLOCK.AIR);
 }
 function routeNodes(history,candidate,x,z,dx,steps){
  const nodes=[];
