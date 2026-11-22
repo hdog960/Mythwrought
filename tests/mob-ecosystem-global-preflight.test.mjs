@@ -57,7 +57,10 @@ test('original MobEngine admission is required before the 1.5s birth cooldown',(
       ...options(createGlobalEcologyClock(),engine,world,.5,seed),
       spawnOnFirstVisit:true
     });
-    if(staged.proposal){winner={staged,engine,world,seed};break;}
+    if(staged.proposal &&
+       Math.hypot(...staged.proposal.point.map((v,i)=>v-[8,4,8][i]))<=18){
+      winner={staged,engine,world,seed};break;
+    }
     engine.dispose();
   }
   assert.ok(winner,'Source registry must permit a grounded candidate');
@@ -148,4 +151,55 @@ test('original PopulationManager no-birth attempt cadence matches detached prefl
   assert.equal(observed.some(x=>x.original===6),true);
   originalEngine.dispose();
   proposedEngine.dispose();
+});
+
+test('original global preflight refuses to bypass nearby wake or distant dormancy',()=>{
+  const world=flatWorld();
+  const engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  assert.equal(engine.transition(id,'dormant'),true);
+  const clock=createGlobalEcologyClock();
+  assert.throws(()=>prepareGlobalMobTick(options(clock,engine,world)),
+    /Original ecology reconciliation required/);
+  assert.equal(engine.get(id).state,'dormant',
+    'Read-only source preflight must never invoke original transition');
+  // This is an independent unconsumed research clock; the real manager alone
+  // may wake the animal before another source tick is proposed.
+  const original=new PopulationManager(engine,world);
+  original.advance(.5,[8,4,8],[]);
+  assert.equal(engine.get(id).state,'idle');
+  const after=prepareGlobalMobTick(options(createGlobalEcologyClock(),engine,world));
+  assert.equal(after.kind,'cooldown');
+  settleGlobalMobTick(after,{world});
+  engine.dispose();
+});
+
+test('original source far idle and away-ledger work blocks research tick',()=>{
+  const world=flatWorld(),engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[35,4,8]);
+  assert.ok(id);
+  assert.throws(()=>prepareGlobalMobTick(options(
+    createGlobalEcologyClock(),engine,world
+  )),/Original ecology reconciliation required/);
+  assert.equal(engine.get(id).state,'idle');
+  new PopulationManager(engine,world).advance(.5,[8,4,8],[]);
+  assert.equal(engine.get(id).state,'dormant');
+  assert.throws(()=>prepareGlobalMobTick(options(
+    createGlobalEcologyClock(),engine,world
+  )),/Original ecology reconciliation required/,
+    'Source private away ledger must still be preserved');
+  engine.dispose();
+});
+
+test('invalid original observer is rejected before global clock consumption',()=>{
+  const world=flatWorld(),engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const clock=createGlobalEcologyClock();
+  assert.throws(()=>prepareGlobalMobTick({
+    ...options(clock,engine,world),observer:[Infinity,4,8]
+  }),/Invalid original ecology observer/);
+  const next=prepareGlobalMobTick(options(clock,engine,world));
+  assert.equal(next.kind,'cooldown');
+  settleGlobalMobTick(next,{world});
+  engine.dispose();
 });

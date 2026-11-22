@@ -1,5 +1,8 @@
 // Detached Phase 2: atomic original MobEngine/global ecology preflight.
 // No actual world/mob/save writes, no live PopulationManager replacement.
+import {validPoint} from './world-query.mjs';
+import {inspectOriginalReconcileReadiness}
+  from './ecosystem-reconcile-readiness.mjs';
 import {advanceGlobalEcologyClock,commitGlobalEcologyRegion}
   from './ecosystem-global-clock.mjs';
 import {prepareOriginalMobPoll,settleOriginalMobPoll}
@@ -12,9 +15,21 @@ export function prepareGlobalMobTick({
   clock,seconds,regions,engine,world,seed,observer,biome,light,
   kind='surface',isProtected,spawnOnFirstVisit=false
 }={}){
-  // Source global interval and region rotation belong to the independent
-  // original-world scheduler; this will never call engine.spawn().
+  // Original PopulationManager rejects invalid observers BEFORE touching
+  // its clock; the detached source must not silently advance time either.
+  if(!validPoint(observer))
+    throw new TypeError('Invalid original ecology observer');
   const tick=advanceGlobalEcologyClock(clock,{seconds,regions});
+  // The original #reconcile runs at EVERY due global 0.5s interval, even if
+  // the region list is empty/invalid. This research lane cannot implement
+  // the private #away ledger; stop rather than quietly omit transitions.
+  if(tick.reason!=='interval'){
+    const checked=inspectOriginalReconcileReadiness({
+      engine,world,observer,isProtected
+    });
+    if(!checked.ready)
+      throw new TypeError('Original ecology reconciliation required');
+  }
   if(tick.selection===null){
     return Object.freeze({
       kind:'skipped',clock:tick.clock,reason:tick.reason,
