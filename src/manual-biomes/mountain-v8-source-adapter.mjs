@@ -10,6 +10,15 @@ const hash=(x,z,seed)=>{
   return ((h^(h>>>16))>>>0)/4294967296;
 };
 
+/** One guaranteed candidate coordinate per tile, independently of loop order. */
+export function mountainV8TileRoot(tileX,tileZ,seed){
+  if(![tileX,tileZ,seed].every(validInteger)||seed!==(seed|0))return null;
+  return Object.freeze({
+    rootX:tileX*8+2+Math.floor(hash(tileX,tileZ,seed+7921)*4),
+    rootZ:tileZ*8+2+Math.floor(hash(tileX,tileZ,seed+7927)*4)
+  });
+}
+
 /** Returns null on missing or protected provenance. All callbacks must be read-only.
  * biomeAt(x,z,seed) => {name,weight}; heightAt(x,z,seed) => real old surface.
  * readBlock(x,y,z) => unedited original-world numeric block ID.
@@ -50,8 +59,7 @@ export function surveyMountainV8Column({x,z,seed,worldMaxY=30,biomeAt,
   // Intentional no in-world tree placement. A bounded, descriptive vegetation
   // proposal prevents canopy on cliffs, rock, snow, steeps or protected cells.
   const tileX=Math.floor(x/8),tileZ=Math.floor(z/8);
-  const rootX=tileX*8+2+Math.floor(hash(tileX,tileZ,seed+7921)*4);
-  const rootZ=tileZ*8+2+Math.floor(hash(tileX,tileZ,seed+7927)*4);
+  const {rootX,rootZ}=mountainV8TileRoot(tileX,tileZ,seed);
   // Exactly one site may own this tile; unlike the earlier tile-wide roll,
   // neighboring eligible columns must not all materialize the same plant.
   const chosen=x===rootX&&z===rootZ;
