@@ -6,12 +6,12 @@ export function createMountainV8SurveyCache({seed,read,maxSites=576}={}){
   if(!valid(seed)||seed!==(seed|0)||typeof read!=='function'||
      !valid(maxSites)||maxSites<1||maxSites>576)return null;
   const samples=new Map();
-  let hits=0,misses=0;
+  let hits=0,misses=0,exhausted=0;
   function survey(x,z){
     if(!valid(x)||!valid(z))return null;
     const k=x+','+z;
     if(samples.has(k)){hits++;return samples.get(k);}
-    if(misses>=maxSites)return null; // fail closed, no unbounded iPhone work
+    if(misses>=maxSites){exhausted++;return null;} // distinct from source veto
     misses++;
     const answer=read(x,z,seed);
     // An anomalous foreign/forged source is not eligible for V8 admission.
@@ -25,6 +25,7 @@ export function createMountainV8SurveyCache({seed,read,maxSites=576}={}){
     survey,
     stats:()=>Object.freeze({uniqueSites:misses,cacheHits:hits,
       cachedRejections:[...samples.values()].filter(v=>v===null).length,
+      exhausted,complete:exhausted===0,
       limit:maxSites}),
     safeToIntegrate:false
   });
