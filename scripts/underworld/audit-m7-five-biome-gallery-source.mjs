@@ -80,6 +80,8 @@ for(const site of sites){
   completedFullSourceCellVetoCensus:full.completeSourceVetoCensus===true,
   sourceCountMethod:full.sourceCountMethod??'INCOMPLETE',
   inspectedSourceCells:full.sourceChecks,
+  genuineOriginalReaderCalls:full.totalSourceRoleCalls??null,
+  originalReaderCallsByRole:full.sourceRoleCalls??null,
   firstRefusal:full.failures?.[0]??full.reason??null,
   originalWorldEdited:false,realPlayerWalkingUnverified:true}));
 }
@@ -93,6 +95,13 @@ const report=Object.freeze({schema:'living-underworld-authentic-m7-five-biome-ga
  asBuiltGalleryRegions:rows.filter(x=>x.oldM7AsBuiltGalleryDeckAndAirPresent).length,
  sourceRefusals:rows.filter(x=>!x.sourceSafe).length,
  sourceCells:rows.reduce((n,r)=>n+(r.inspectedSourceCells??0),0),
+ totalOriginalM7ReaderMethodCalls:rows.reduce((n,r)=>
+  n+(r.genuineOriginalReaderCalls??0),0),
+ originalReaderCallCountsByRole:rows.reduce((out,r)=>{
+  for(const [role,n] of Object.entries(r.originalReaderCallsByRole??{}))
+   if(Number.isSafeInteger(n)&&n>=0)out[role]=(out[role]??0)+n;
+  return out;
+ },{}),
  all80GallerySourceReportsComplete:rows.every(r=>r.all16GallerySourcesDiagnosed),
  all80FullSourceVoxelCensusesComplete:rows.every(r=>
   r.completedFullSourceCellVetoCensus),
