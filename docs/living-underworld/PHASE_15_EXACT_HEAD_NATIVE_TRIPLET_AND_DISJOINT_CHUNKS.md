@@ -20,7 +20,7 @@ Attempted native `git ls-remote https://github.com/hdog960/Mythwrought.git HEAD`
 - **17/17** original-source V8 chunk aggregate tests (seven new nonoverlap + ten old) using synthetic chunk risk reports, no real original-world mesh or GPU.
 - **13/13** original-source V8 city source-planner tests (five new budget + eight previous) including original genuine detached stair/cave geometry, but synthetic older-world geology.
 - **7/7** exact-source pure M7 triplet classifier tests with synthesized report fixtures; no actual native original M7 generated.
-- **37/37** distinct focused source-body tests across these six suites overall (17+13+7). This phase did not duplicate the earlier Phase14 32/32 suite or broad CI. The new opt-in Node triplet runner itself has **NOT** been natively executed.
+- **37/37** distinct focused source-body tests across these five suites overall (17+13+7). This phase did not duplicate the earlier Phase14 32/32 suite or broad CI. The new opt-in Node triplet runner itself has **NOT** been natively executed.
 - Historical original M7 artifact remains prior-only and the previous Phase14 32/32 source tests are reused, not rerun.
 
 ## Remaining essential gates
