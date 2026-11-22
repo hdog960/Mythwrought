@@ -8,34 +8,17 @@ import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
 import {terrainHeight,BLOCK} from '../../src/voxel.mjs';
 import {WORLD_MAX_Y} from '../../src/depth.mjs';
 import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
+import {detectHeightShelfRuns} from './desert-v7-shelf-edges.mjs';
 
 const centers=[[179,512,0,'golden'],[2026,384,0,'red']];
-const R=24,WIDTH=2*R+1;
-const OUTSIDE=new Set([BLOCK.AIR]);
-function longestStraightEdge(grid,axis){
-  let best={length:0,start:null,orientation:axis,heightBefore:null,heightAfter:null};
-  for(let outer=0;outer<WIDTH-1;outer++){
-    let run=0,runStart=0,pair=null;
-    function flush(end){
-      if(run>best.length)best={length:run,start:axis==='x'?
-        [runStart-R,outer-R]:[outer-R,runStart-R],
-        orientation:axis,heightBefore:pair?.[0]??null,heightAfter:pair?.[1]??null};
-    }
-    for(let inner=0;inner<=WIDTH;inner++){
-      const v=inner<WIDTH?
-        (axis==='x'?[grid[outer][inner],grid[outer+1][inner]]:
-          [grid[inner][outer],grid[inner][outer+1]]):[null,null];
-      const k=v.every(Number.isInteger)&&Math.abs(v[0]-v[1])>=2?
-        v.join(':'):null;
-      if(k&&k===pair?.join(':'))run++;
-      else{flush(inner);pair=k?v:null;run=k?1:0;runStart=inner;}
-    }
-  }
-  return best;
-}
+const R=48,WIDTH=2*R+1;
+// The previous exact-height-pair metric missed real cliffs that rise or fall
+// as they continue along a line. Use source-derived signed edge runs instead.
 function read(seed,cx,cz,label){
   const world=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
   const grid=Array.from({length:WIDTH},()=>new Array(WIDTH));
+  const legacyGrid=Array.from({length:WIDTH},()=>new Array(WIDTH));
+  const protectedGrid=Array.from({length:WIDTH},()=>new Array(WIDTH));
   const raisedHist={},stepHist={},vetoExamples=[],transect=[],surfaceIds={};
   let veto=0,caveVeto=0,solidVeto=0,unchanged=0,changed=0,cells=0,grass=0;
   for(let dz=-R;dz<=R;dz++)for(let dx=-R;dx<=R;dx++){
@@ -72,6 +55,8 @@ function read(seed,cx,cz,label){
       if(vetoExamples.length<12)vetoExamples.push({x,z,old,top,reason});
     }
     grid[dz+R][dx+R]=top;
+    legacyGrid[dz+R][dx+R]=old;
+    protectedGrid[dz+R][dx+R]=plan.size===0;
     if(dz===0)transect.push({x,old,top,raised,plan:plan.size});
     cells++;
   }
@@ -83,12 +68,18 @@ function read(seed,cx,cz,label){
     }
   }
   assert.equal(cells,WIDTH*WIDTH);
+  assert.equal(grass,0,'Real original V7 Desert surface has natural grass');
   assert.equal(world.save().edits.length,0,'Reading real V7 terrain may not save edits');
   const result={seed,label,center:[cx,cz],width:WIDTH,sourceColumns:cells,
     changes:{unchanged,raised:changed},heightAboveLegacy:raisedHist,
     planVeto:{total:veto,protectedAir:caveVeto,protectedSolid:solidVeto,examples:vetoExamples},
     actualTerrainTopIDs:surfaceIds,adjacentSteps:stepHist,
-    straightShelf: [longestStraightEdge(grid,'x'),longestStraightEdge(grid,'z')],
+    straightShelf: {
+      step2:detectHeightShelfRuns(grid,{legacy:legacyGrid,
+        protectedColumns:protectedGrid,minStep:2,limit:8}),
+      step1:detectHeightShelfRuns(grid,{legacy:legacyGrid,
+        protectedColumns:protectedGrid,minStep:1,limit:8})
+    },
     xTransectZ0:transect, naturalGrassAtTop:grass,savedEdits:0};
   console.log('DESERT_P3_GEOMETRY_SOURCE '+JSON.stringify(result));
 }

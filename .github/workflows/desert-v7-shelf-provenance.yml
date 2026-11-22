@@ -1,0 +1,38 @@
+name: Desert V7 source-only shelf provenance — focused native
+on:
+  push:
+    branches:
+      - research/desert-v7-shelf-provenance-20261122
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desert-shelf-provenance-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  genuine-source-geometry:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm test-only research diff against accepted Phase 3
+        run: |
+          set -euo pipefail
+          BASE=3c1f87c0db53ebafa8fbb52fcb7964c23fd5ba68
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-phase3-geometry-census.mjs|scripts/ci/desert-v7-shelf-edges.mjs|tests/desert-phase3-shelf-edges.test.mjs|.github/workflows/desert-v7-shelf-provenance.yml)$' || true)
+          test -z "$unexpected"
+          node --check scripts/ci/desert-phase3-geometry-census.mjs
+          node --check scripts/ci/desert-v7-shelf-edges.mjs
+          node --check tests/desert-phase3-shelf-edges.test.mjs
+      - name: Focused mathematical shelf-detector contracts
+        run: node --test tests/desert-phase3-shelf-edges.test.mjs
+      - name: Real original M7 97x97 physical terrain sampling, two seeds
+        run: node scripts/ci/desert-phase3-geometry-census.mjs
