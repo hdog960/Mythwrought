@@ -68,7 +68,7 @@ export function buildDuneharpSpiralGranary(){
   b.put(x,y,z,'roof',asset,'north',{originalGranaryRoofWing:name,sourceOnlyWeatherEnvelope:true});
  }
  for(const [x,z] of [[17,7],[28,7],[43,7],[7,22],[16,35],[55,16],[61,25],
-  [32,53],[44,57],[11,53],[19,52],[59,48]]){
+  [32,53],[44,57],[11,53],[21,52],[59,48]]){
   const y=roofed.get(K(x,z));if(!y)throw Error('Duneharp physical rafter post misses source roof '+K(x,z));
   b.support(x,z,y-1,'live:wood','original-large-granary-grounded-post');
  }
