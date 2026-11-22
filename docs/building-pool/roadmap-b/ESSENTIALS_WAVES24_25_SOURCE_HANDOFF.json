@@ -1,0 +1,168 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.original-waves24-25-source-handoff.v1",
+  "state": "ISOLATED SOURCE AUTHORED ONLY — not live-engine registered, producer collider-approved or creator-accepted",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startingHead": "0e3ab9969c4ea5f6dd032f30b596762014fddde8",
+  "protectedParentPR407Head": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "initialReadOnlyRefs": {
+    "productionMain": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+    "draft407": "20755ffa29b520bb8a934270216b17a33dc87367"
+  },
+  "originals": [
+    {
+      "wave": 24,
+      "id": "r1:bathhouse:temperate:medium:002",
+      "title": "Wistermere Crescent Baths",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave24.mjs",
+      "gitBlob": "05c3d62b9b3cb220d07a68642160bfcc9d4ec3eb",
+      "authoredCells": 8674,
+      "originalRoofCells": 2184,
+      "connectedWalkableCells": 2011,
+      "rooms": 9,
+      "portalLinks": 13,
+      "originalSupportedRoofWings": 7,
+      "physicallyGroundedWalkableSkyCourts": [
+        90,
+        25
+      ],
+      "groundedUnlitStoneCupolaTiers": 23,
+      "originalUprightPack4GlassCells": 38,
+      "twoTierFramedGlassBays": 19,
+      "sourceMechanicalInert": true,
+      "focusedD4": {
+        "originalAuthoredPeers": [
+          "Sunshard",
+          "Hearthspan"
+        ],
+        "transforms": 16,
+        "maxIoU": 0.4690909090909091
+      }
+    },
+    {
+      "wave": 25,
+      "id": "r1:stable:snow:small:003",
+      "title": "Rimehook Wind-Shelter Stables",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave25.mjs",
+      "gitBlob": "82da3b64d84e26be9a63cce21c8fd5b928465c4c",
+      "authoredCells": 6629,
+      "originalRoofCells": 1633,
+      "connectedWalkableCells": 1456,
+      "rooms": 8,
+      "portalLinks": 12,
+      "originalSupportedRoofWings": 6,
+      "physicallyGroundedWalkableSkyCourts": [
+        64,
+        25
+      ],
+      "genuineSourceWindbreakPiers": 4,
+      "groundedUnpoweredVaneTiers": 23,
+      "originalUprightPack4GlassCells": 36,
+      "twoTierFramedGlassBays": 18,
+      "sourceAnimalInert": true,
+      "focusedD4": {
+        "originalAuthoredPeers": [
+          "Meadowstep",
+          "Bramblecross"
+        ],
+        "transforms": 16,
+        "maxIoU": 0.34685598377281945
+      }
+    }
+  ],
+  "focusActuallyExecuted": {
+    "mode": "Exact repository original sourcePlan/validateBlueprint and immutable schema modules via isolated JavaScript evaluation; not actual native node:test",
+    "outcome": "PASS for both originals",
+    "originalSourceConnectivity": "PASS; 3467 combined walkable source cells as verified by unchanged original compiler",
+    "originalPhysicalRoofs": "All 3817 combined Pack3 source roof cells physically backed at y−1, not full producer span certification",
+    "originalSkyYards": "PASS all 204 open paved y0 cells have walkable y1 and no authored y1+ obstructions",
+    "genuineGlass": "PASS all 74 upright Pack4 source glass cells have y1 sill/y4 lintel and true original exposed exterior ground",
+    "groundedMarkerAndPosts": "PASS 23 solid stone tiers each; Rimehook four outside-court true source piers",
+    "frozenOwnership": "Both unused exclusive B115 service IDs, no D92 or prior accepted 228 ID reuse",
+    "priorSameCategoryD4": "32 of 32 focused source eight-way mirror/rotation transforms PASS, strict <0.85, complete original 228-source D4 NOT EXECUTED",
+    "sourceABISanity": "Original Pack3 manifest verified roster 23->block candidate109, 25->111, 26->112, all not integrated",
+    "claimedRealPackCollisionOrRealGame": false
+  },
+  "stagedUnexecutedAcceptance": {
+    "focusedNativeFile": "tests/building-pool/roadmap-b/builder-b-essentials-waves24-25-focused.test.mjs",
+    "focusedNativeBlob": "b74ee42c91bcba7c6c74c989472f39d0e1cf69b3",
+    "producerBindingAssertion": "New focused test enforces original Pack3 manifest/roof candidate resolution, Pack4 window AABB/selection source candidates; file parsed, not run by native Node",
+    "oneHistoricNativeFile": "tests/building-pool/roadmap-b/builder-b-originals-waves9-25-shared-historical-d4.test.mjs",
+    "oneHistoricNativeBlob": "155c3dcf93d9fc20d825a862606209cbfa3b7954",
+    "authenticHistoricalAcceptedSourcesToVerify": 228,
+    "authoredServicePoolCount": 25,
+    "additionalServiceOriginalsToCheck": 17,
+    "originalEightWayD4Threshold": 0.85,
+    "sourceBoundGallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-25-gallery.mjs",
+    "galleryGitBlob": "480bddecacf212d0094a7bda407c9319f94fdd14",
+    "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-25-gallery.mjs",
+    "auditorGitBlob": "089193c9c22f43501e2d69ab5f68ba02a92bbb00",
+    "galleryWiringTest": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-25-gallery-wiring.test.mjs",
+    "galleryOriginals": 17,
+    "sourceEvidenceFiles": 20,
+    "genuineWebGL2ProxyPNGFramesPending": 102,
+    "threeLandscapeViewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "exteriorAndCutawayViewsEach": true,
+    "requireUniquePNG_SHA256": 102,
+    "independentPNGCRC": true,
+    "exactHeadPin": true,
+    "nativeNodeExecuted": false,
+    "chromiumExecuted": false,
+    "PNGsProduced": false
+  },
+  "remainingGates": [
+    "Native original Node test runner on full checkout and exact branch head, including focused ownership and Pack3/4 candidate tests",
+    "Single strict unchanged 228 accepted originals 8-way D4 for all 17 newly authored Waves9-25 sources",
+    "Pack1–5 producer true mesh/physical selection, collider and load support / weather acceptance",
+    "One genuine Chrome WebGL2 source-preview capture of 102 unique frames with independent PNG CRC/SHA/exact commit validation; previews remain source-proxy not actual original-game captures",
+    "Original-game world integration, settlement/biome insertion only by authorized owner, full navigation/collision, actual iPhone landscape Home Screen PWA, real perf/offline/saves and creator art review"
+  ],
+  "globalCI": {
+    "initialProtectedRefsAndExactPR407CIReadOnce": true,
+    "priorSuccessfulPR407RunsReusedAsHistoricalEvidenceOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newWorkflowRunsInitiated": 0,
+    "repeatedCIQueueAudits": 0,
+    "duplicateBrowserRuns": 0,
+    "newPRs": 0,
+    "requiredTestsWeakened": false,
+    "sharedWorkflowChanged": false
+  },
+  "boundaries": {
+    "historicalAccepted228Unchanged": true,
+    "frozenBuilderB115Unchanged": true,
+    "frozenBuilderD92Unchanged": true,
+    "otherBuilderBranchesUntouched": true,
+    "allFiveAutomationsUntouched": true,
+    "worldSavesUntouched": true,
+    "productionMainUntouched": true,
+    "protectedPR407Untouched": true,
+    "noMerges": true,
+    "noDeployments": true,
+    "noWorkflowCancellation": true
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 25,
+    "newOriginalsTotal": 35,
+    "totalGoal": 294,
+    "remainingNewOriginals": 259,
+    "remainingResidential": 169,
+    "remainingServiceOriginals": 90
+  },
+  "nextFocus": "Continue owner-exclusive original source engineering and focused tests; defer one strict historical/Chrome milestone until useful coordinated acceptance, without weakening final proof."
+}
