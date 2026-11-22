@@ -4,7 +4,7 @@
 // Plains are null in v6BiomeAt; old sharedShoulder ignored that genuine neighbor.
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {BLOCK,terrainHeight} from '../src/voxel.mjs';
+import {BLOCK,terrainHeight,VoxelWorld} from '../src/voxel.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR,
   M6_BALANCED_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
@@ -42,14 +42,16 @@ test('natural Plains grass and V6 original profiles stay unchanged across both b
   for(const [seed,cx,cz] of BORDERS){
     const v7=new FourRegionWorld(seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
     const v6=new FourRegionWorld(seed,fourRegionProfile(seed,M6_BALANCED_GENERATOR));
+    const original=new VoxelWorld(seed);
     let grass=0,originalProfiles=0;
     for(let dz=-7;dz<=7;dz++)for(let dx=-7;dx<=7;dx++){
       const x=cx+dx,z=cz+dz;
       if(v6BiomeAt(x,z,seed)!==null)continue;
       const y=terrainHeight(x,z,seed);
       if(v7.naturalAndLandmarkBlock(x,y,z)===BLOCK.GRASS)grass++;
-      assert.equal(v6.naturalAndLandmarkBlock(x,y,z),v6.naturalAndLandmarkBlock(x,y,z),
-        'V6 baseline must remain self-deterministic');
+      assert.equal(v6.naturalAndLandmarkBlock(x,y,z),
+        original.naturalAndLandmarkBlock(x,y,z),
+        'Original V6 Plains physical baseline must remain unmodified');
       originalProfiles++;
     }
     assert.ok(grass>0,'Neighbor Plains must retain natural green grass '+seed);
