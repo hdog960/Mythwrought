@@ -84,7 +84,7 @@ export function buildGlassduneSplitQuayRegistry(){
  for(const [x,z,face] of [
   [21,2,'north'],[29,2,'north'],[3,15,'west'],[3,24,'west'],
   [45,25,'east'],[45,28,'east'],[12,43,'south'],[37,44,'south'],
-  [2,35,'west'],[42,42,'east'],[7,38,'west'],[31,2,'north']
+  [2,35,'west'],[42,42,'east'],[2,38,'west'],[31,2,'north']
  ]){
   const [dx,dz]=orientations[face];
   if(!has(x,z)||has(x+dx,z+dz))throw Error('Glassdune low pane faces building '+k(x,z)+' '+face);
