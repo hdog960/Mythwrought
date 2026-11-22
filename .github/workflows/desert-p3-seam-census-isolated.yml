@@ -18,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -26,7 +27,7 @@ jobs:
           set -euo pipefail
           BASE=641726d815172abcde7417b22c71e9df250fcd4b
           test "$(git merge-base "$BASE" HEAD)" = "$BASE"
-          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-p3-authentic-seam-audit.mjs|.github/workflows/desert-p3-seam-census-isolated.yml)$' || true)
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-p3-authentic-seam-audit.mjs|.github/workflows/desert-p3-seam-census-isolated.yml|docs/desert/PHASE3_ORIGINAL_SEAM_GRADIENT_RESEARCH_20261122.md)$' || true)
           test -z "$unexpected"
           node --check scripts/ci/desert-p3-authentic-seam-audit.mjs
       - name: Source-authentic guarded Desert material boundary audit only
