@@ -105,28 +105,6 @@ test('Glimmerbough dual actual open courts and 1516 supported original Pack3 roo
   'packPhysicalCollisionApproved','actualIphoneTested','creatorArtApproved'])
   assert.equal(b.architecturalIdentity[flag],false,'unearned acceptance '+flag);
 });
-test('Glimmerbough strict untouched historical 228 original greenhouse D4 versus Alderglass/Rimeglass',{timeout:240000},async()=>{
- const history=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  history.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(history.length,228,'historical accepted 1B census changed');
- assert.equal(new Set(history.map(x=>x.id)).size,228);
- const b=buildGlimmerboughSplitSunOrchidHouse();
- assert.ok(!history.some(x=>x.id===b.id),'historical source collision');
- const same=[...history.filter(x=>x.category===b.category),
-  buildAlderglassTrellisConservatory(),buildRimeglassCrescentSunGreenhouse()];
- assert.ok(same.length>=22,'historic greenhouse corpus incomplete');
- const current=d4(b,false,0);let checked=0,max=0,nearest=null;
- for(const old of same)for(const flip of [false,true])for(let turn=0;turn<4;turn++){
-  const score=iou(current,d4(old,flip,turn));checked++;
-  if(score>max){max=score;nearest=old.id}
-  assert.ok(score<.85,'Glimmerbough same-category exact-source near clone '+old.id+' '+score);
- }
- assert.ok(checked>=176,'strict D4 coverage insufficient');
- console.log('GLIMMERBOUGH_STRICT_228_GREENHOUSE_D4_PASS '+JSON.stringify({
-  accepted:228,comparisons:checked,closest:nearest,maxD4:max,
-  physicalPack4SourceOnly:true,actualIphone:false,creatorApproved:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
