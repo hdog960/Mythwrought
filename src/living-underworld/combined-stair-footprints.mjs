@@ -326,3 +326,44 @@ export function auditOriginalMainGalleryVoxelReadiness(seed,rx,rz,{
   environmentWorldEdited:false,worldChanged:false,
   deviceGpuAndPwaUnverified:true});
 }
+
+// Standalone opt-in source-agnostic floor/headroom index for up to eight
+// selected walkable stair proposals. This is geometry only: callers must
+// separately authenticate original M7 ownership of every proposed voxel.
+// No mutable world instances or voxel answers are cached.
+export function compileSelectedStairPedestrianClearance(proposals,{
+ maxCells=50000,maxExamples=12
+}={}){
+ if(!Array.isArray(proposals)||proposals.length<1||proposals.length>8||
+  !integer(maxCells)||maxCells<100||maxCells>100000||
+  !integer(maxExamples)||maxExamples<1||maxExamples>24)
+  throw TypeError('Invalid bounded selected-stair clearance index');
+ const combined=auditCombinedStairFootprints(proposals,{maxCells,maxExamples});
+ if(!combined.ok)return Object.freeze({ok:false,reason:combined.reason,
+  crossRouteBlockedCells:combined.crossRouteBlockedCells??null,
+  examinedCells:combined.rawCells??null,worldChanged:false});
+ const supports=new Map(),air=new Map();
+ let rawCells=0;
+ for(let i=0;i<proposals.length;i++){
+  const q=footprint(proposals[i]);
+  if(!q.ok)return Object.freeze({ok:false,reason:q.reason,
+   routeIndex:i,worldChanged:false});
+  rawCells+=q.support.size+q.clearance.size;
+  if(rawCells>maxCells)return Object.freeze({ok:false,
+   reason:'SELECTED_STAIR_FOOTPRINT_BUDGET',rawCells,
+   maxCells,worldChanged:false});
+  for(const cell of q.support)if(!supports.has(cell))supports.set(cell,i);
+  for(const cell of q.clearance)if(!air.has(cell))air.set(cell,i);
+ }
+ return Object.freeze({ok:true,routeCount:proposals.length,
+  rawCells,distinctSupportCells:supports.size,distinctAirCells:air.size,
+  inspectCell(x,y,z,kind){
+   if(![x,y,z].every(integer)||!['support','clearance'].includes(kind))
+    throw TypeError('Invalid selected-stair comparison cell');
+   const routeIndex=(kind==='support'?air:supports).get(key(x,y,z));
+   return routeIndex===undefined?null:Object.freeze({routeIndex,kind});
+  },
+  originalM7SourceOwnershipNotVerified:true,
+  actualPlayerWalkingNotVerified:true,
+  worldChanged:false});
+}
