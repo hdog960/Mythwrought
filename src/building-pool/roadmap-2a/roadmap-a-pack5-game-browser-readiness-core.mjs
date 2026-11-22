@@ -132,9 +132,15 @@ export function requireOriginalPack5ReadonlyBrowserPilot(evidence){
   checkedInt(evidence.originalSourceTriangleRayHitCount)&&
   evidence.originalSourceTriangleRayHitCount<=plan.requiredSourceRayProbes&&
   checkedInt(evidence.originalSourceSelectionTriangleDisagreements)&&
-  evidence.originalSourceSelectionTriangleDisagreements<=plan.requiredSourceRayProbes,
-  'independent original browser JS source ray/triangle census incomplete');
- must(evidence.noGameInteractionsPerformed===true&&
+  evidence.originalSourceSelectionTriangleDisagreements<=plan.requiredSourceRayProbes&&
+  checkedInt(evidence.originalStagedTriangleRayHitCount)&&
+  evidence.originalStagedTriangleRayHitCount<=plan.requiredSourceRayProbes&&
+  evidence.originalIndexedStagedRayDisagreements===0&&
+  evidence.originalStagedTriangleRayHitCount===evidence.originalSourceTriangleRayHitCount,
+  'independent browser original triangle, terrain Float32 staging and source ray census must agree');
+ must(evidence.originalGameLocalStorageStable===true&&
+  evidence.originalGameReadonlySnapshotStable===true&&
+  evidence.noGameInteractionsPerformed===true&&
   evidence.noOriginalGameWorldOrPack5Edits===true&&
   evidence.originalPack5SidecarKeysBefore===0&&
   evidence.originalPack5SidecarKeysAfter===0&&
@@ -155,6 +161,8 @@ export function requireOriginalPack5ReadonlyBrowserPilot(evidence){
   originalCameraTelemetryReadOnly:true,
   originalNativeSourcePreviewRayCount:plan.requiredSourceRayProbes,
   originalSourcePreviewBoundaryWarnings:evidence.originalSourceSelectionTriangleDisagreements,
+  originalGpuFloat32SourceTriangleRayParityVerifiedInBrowser:true,
+  originalStorageValueAndReadonlyWorldSnapshotStable:true,
   actualRenderedPack5PlacementNotExamined:true,
   actualIphoneSafariNotExamined:true,
   visualPack5AppearanceNotAccepted:true,

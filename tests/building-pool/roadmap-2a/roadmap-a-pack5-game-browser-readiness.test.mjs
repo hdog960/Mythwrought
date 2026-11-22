@@ -18,7 +18,10 @@ const simulatedValidBrowserEvidence=()=>({
  camera:{yaw:Math.PI,pitch:0,x:0.5,z:0.5,feet:20,
   unitForwardIsFinite:true,unitForwardLength:1},
  originalSourceRayProbeCount:72,originalFixtureRayHitCount:40,
- originalSourceTriangleRayHitCount:43,originalSourceSelectionTriangleDisagreements:3,
+ originalSourceTriangleRayHitCount:43,
+ originalStagedTriangleRayHitCount:43,originalIndexedStagedRayDisagreements:0,
+ originalSourceSelectionTriangleDisagreements:3,
+ originalGameLocalStorageStable:true,originalGameReadonlySnapshotStable:true,
  noGameInteractionsPerformed:true,noOriginalGameWorldOrPack5Edits:true,
  originalPack5SidecarKeysBefore:0,originalPack5SidecarKeysAfter:0,
  originalPack5LiveInstancesBefore:0,originalPack5LiveInstancesAfter:0,
@@ -70,6 +73,8 @@ test('strict result validator accepts synthetic shape only as READ-ONLY readines
  assert.equal(outcome.originalMainGameWebGL2BootWitness,true);
  assert.equal(outcome.originalNativeSourcePreviewRayCount,72);
  assert.equal(outcome.originalSourcePreviewBoundaryWarnings,3);
+ assert.equal(outcome.originalGpuFloat32SourceTriangleRayParityVerifiedInBrowser,true);
+ assert.equal(outcome.originalStorageValueAndReadonlyWorldSnapshotStable,true);
  assert.equal(outcome.actualRenderedPack5PlacementNotExamined,true);
  assert.equal(outcome.actualIphoneSafariNotExamined,true);
  assert.equal(outcome.realA5WorldPlacementNotApproved,true);
@@ -87,6 +92,9 @@ test('fake original main WebGL2 readiness, wrong viewport, short ray census and 
   {...x,originalSourceRayProbeCount:71},
   {...x,originalFixtureRayHitCount:73},
   {...x,originalSourceSelectionTriangleDisagreements:73},
+  {...x,originalStagedTriangleRayHitCount:44},
+  {...x,originalStagedTriangleRayHitCount:73},
+  {...x,originalIndexedStagedRayDisagreements:1},
   {...x,camera:{...x.camera,yaw:NaN}},
   {...x,camera:{...x.camera,unitForwardLength:.8}},
   {...x,schema:'fake'}
@@ -95,6 +103,8 @@ test('fake original main WebGL2 readiness, wrong viewport, short ray census and 
 test('browser gate forbids real game input, world writes, Pack5 sidecars, in-game fixtures and fake approvals',()=>{
  const x=simulatedValidBrowserEvidence();
  for(const bad of [
+  {...x,originalGameLocalStorageStable:false},
+  {...x,originalGameReadonlySnapshotStable:false},
   {...x,noGameInteractionsPerformed:false},
   {...x,noOriginalGameWorldOrPack5Edits:false},
   {...x,originalPack5SidecarKeysBefore:1},
@@ -122,6 +132,12 @@ test('manual browser harness has no game debug mutator/UI toggle, never runs thr
  assert.ok(runner.includes("requireOriginalPack5ReadonlyBrowserPilot(complete)"));
  assert.ok(runner.includes("originalGameGpuPixelProbeWasForPack5Fixture:false"));
  assert.ok(runner.includes("originalPack5SidecarKeysAfter"));
+ assert.ok(runner.includes("originalGameLocalStorageStable:storageState()===storageBefore"));
+ assert.ok(runner.includes("originalStagedTriangleRayHitCount:stagedTriangleHits"));
+ assert.ok(runner.includes("originalIndexedStagedRayDisagreements:indexedStagedRayDisagreements"));
+ assert.ok(runner.includes("const realShaderStaging=pack5TerrainVertices(originalMesh)"));
+ assert.ok(runner.includes("png.readUInt32BE(16),png.readUInt32BE(20)"));
+ assert.ok(runner.includes("Original-game screenshot is not PNG"));
  for(const forbidden of [
   'window.__mythwroughtTest.placeFixture(',
   'window.__mythwroughtTest.placePack5TestFixture(',

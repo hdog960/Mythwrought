@@ -67,14 +67,23 @@ try{
    k.startsWith('mythwrought.pack5.builder.seed.'));
   const beforeKeys=sidecarKeys().length;
   const beforeInstances=Number(gameCanvas?.dataset.pack5VisibleInstances??0);
+  const storageState=()=>JSON.stringify(Object.keys(localStorage).sort().map(k=>
+   [k,localStorage.getItem(k)]));
+  const storageBefore=storageState();
+  const readonlySnapshotDigest=s=>JSON.stringify({
+   seed:s?.seed,pack3PhysicalBlocks:s?.pack3PhysicalBlocks,
+   manual14PhysicalBlocks:s?.manual14PhysicalBlocks
+  });
+  const originalReadonlyDigest=readonlySnapshotDigest(originalSnapshot);
 
   const [{clampLook,forwardVector},{makePack5Fixture},
    {PACK5_BUILDER_FAMILIES,resolvePack5BuilderAsset},
-   {sourceRayTriangleDistance}]=await Promise.all([
+   {sourceRayTriangleDistance},{pack5TerrainVertices}]=await Promise.all([
     import('/src/camera.mjs'),
     import('/src/block-packs/pack-5/fixture.mjs'),
     import('/src/pack5-integration/catalog.mjs'),
-    import('/src/building-pool/roadmap-2a/roadmap-a-pack5-ray-selection-core.mjs')
+    import('/src/building-pool/roadmap-2a/roadmap-a-pack5-ray-selection-core.mjs'),
+    import('/src/pack5-integration/terrain-buffer.mjs')
   ]);
   const first=Number(gameCanvas.dataset.cameraYaw),
    second=Number(gameCanvas.dataset.cameraPitch);
@@ -90,11 +99,22 @@ try{
    }
    return nearest;
   };
+  const stagedRayAt=(buffer,origin,direction)=>{
+   let nearest=null;
+   for(let i=0;i<buffer.length;i+=27){
+    const point=n=>[buffer[i+9*n],buffer[i+9*n+1],buffer[i+9*n+2]];
+    const d=sourceRayTriangleDistance(origin,direction,
+     point(0),point(1),point(2));
+    if(d!==null&&(nearest===null||d<nearest))nearest=d;
+   }
+   return nearest;
+  };
   const variants=['hearth-running-bond','kiln-soldier-course'];
   const yawAlternatives=[2,3];
   const edges=[0.01999995,0.02,0.02000005,0.97999995,0.98,0.98000005];
   const touchDeltas=[-1,0,1];
-  let probes=0,fixtureHits=0,triangleHits=0,disagreements=0;
+  let probes=0,fixtureHits=0,triangleHits=0,disagreements=0,
+   stagedTriangleHits=0,indexedStagedRayDisagreements=0;
   for(const variant of variants)for(const yaw of yawAlternatives){
    const isolatedFixture=makePack5Fixture(PACK5_BUILDER_FAMILIES);
    const fixtureOnly=isolatedFixture.place('pack5:080',[0,0,0],yaw,variant);
@@ -102,15 +122,24 @@ try{
     throw Error('Original browser test-only Pack5 fixture failed');
    const {descriptor,mesh}=resolvePack5BuilderAsset('pack5:080',variant);
    const originalMesh=mesh(descriptor,{rotation:yaw});
+   const realShaderStaging=pack5TerrainVertices(originalMesh);
+   if(realShaderStaging.length!==originalMesh.indices.length*9||
+    realShaderStaging.byteLength>384*1024)
+    throw Error('Original Pack5 shader staging changed');
    for(const x of edges)for(const pixelDelta of touchDeltas){
     const camera=clampLook(Math.PI,0,pixelDelta,0,1,.008);
     const facing=forwardVector(camera.yaw,camera.pitch);
     const rayOrigin=[x,.5,2];
     const selection=isolatedFixture.raycast(rayOrigin,facing,6)?.distance??null;
     const triangle=originalRayAt(originalMesh,rayOrigin,facing);
+    const stagedTriangle=stagedRayAt(realShaderStaging,rayOrigin,facing);
     probes++;
     if(selection!==null)fixtureHits++;
     if(triangle!==null)triangleHits++;
+    if(stagedTriangle!==null)stagedTriangleHits++;
+    if((triangle===null)!==(stagedTriangle===null)||
+     triangle!==null&&stagedTriangle!==null&&Math.abs(triangle-stagedTriangle)>1e-10)
+     indexedStagedRayDisagreements++;
     if((selection===null)!==(triangle===null)||
       selection!==null&&triangle!==null&&Math.abs(selection-triangle)>0.0000001)
      disagreements++;
@@ -132,7 +161,12 @@ try{
    originalSourceRayProbeCount:probes,
    originalFixtureRayHitCount:fixtureHits,
    originalSourceTriangleRayHitCount:triangleHits,
+   originalStagedTriangleRayHitCount:stagedTriangleHits,
+   originalIndexedStagedRayDisagreements:indexedStagedRayDisagreements,
    originalSourceSelectionTriangleDisagreements:disagreements,
+   originalGameLocalStorageStable:storageState()===storageBefore,
+   originalGameReadonlySnapshotStable:
+    readonlySnapshotDigest(debug?.snapshot?.())===originalReadonlyDigest,
    noGameInteractionsPerformed:true,
    noOriginalGameWorldOrPack5Edits:true,
    originalPack5SidecarKeysBefore:beforeKeys,
@@ -151,6 +185,11 @@ try{
  const screenshot=path.join(out,'original-unchanged-main-844x390.png');
  await page.screenshot({path:screenshot,animations:'disabled'});
  const png=await import('node:fs/promises').then(fs=>fs.readFile(screenshot));
+ assert.ok(png.length>4096,'Original-game screenshot unexpectedly tiny');
+ assert.deepEqual([...png.subarray(0,8)],[137,80,78,71,13,10,26,10],
+  'Original-game screenshot is not PNG');
+ assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],[844,390],
+  'Original-game screenshot dimensions do not match requested viewport');
  const evidence={plan,sourceMeshPreflight:meshGate,observations:complete,verdict,
   screenshot:{file:path.basename(screenshot),
    sha256:createHash('sha256').update(png).digest('hex')},
