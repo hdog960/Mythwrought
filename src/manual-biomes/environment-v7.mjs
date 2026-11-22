@@ -10,6 +10,7 @@ import {EnchantedCandidateSourceCache,
   ENCHANTED_CANDIDATE_SOURCE_CACHE_MAX_ENTRIES as MAX_SOURCE_CACHE,
   ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES as DEFAULT_SOURCE_CACHE}
   from './enchanted-tree-source-cache.mjs';
+import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -184,6 +185,7 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
   {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
     onCandidateSiteSummary=null,disableCandidateSiteCulling=false,
     disableCandidateDensityCulling=false,
+    candidateSiteBiomeCache=null,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
@@ -202,6 +204,10 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
     throw Error('Invalid enchanted source site culling comparison flag');
   if(typeof disableCandidateDensityCulling!=='boolean')
     throw Error('Invalid enchanted density culling comparison flag');
+  if(candidateSiteBiomeCache!==null&&(
+    !experimentalEnchantedTrees||
+    !(candidateSiteBiomeCache instanceof EnchantedSiteBiomeCache)))
+    throw Error('Invalid experimental Enchanted site biome cache');
   const minX=cx*16,minZ=cz*16,maxX=minX+15,maxZ=minZ+15;
   const cells=new Map();
   // Lazily created only when an experimental enchanted tree is present.
@@ -263,7 +269,13 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         continue;
       }
       if(onCandidateSiteSummary)biomeLookupSites++;
-      const biome=v6BiomeAt(x,z,seed);
+      // Immutable V6 name/weight is independent of caves, terrain and edits.
+      // Share ONLY that classification between adjacent experimental chunks.
+      // Every grounding, AIR, cave, landmark and collision read below stays
+      // freshly sourced per plan. Historical M7 uses its original direct path.
+      const biome=candidateSiteBiomeCache?
+        candidateSiteBiomeCache.getOrRead(x,z,seed,v6BiomeAt):
+        v6BiomeAt(x,z,seed);
       if(!biome||biome.weight<.65||biome.name==='desert')continue;
       const candidate=experimentalEnchantedTrees&&biome.name==='enchanted';
       if(!candidate&&(tx<oldTxMin||tx>oldTxMax||tz<oldTzMin||tz>oldTzMax))
