@@ -3,6 +3,8 @@
 // connected pedestrian route. All source provenance stays caller-bound to the
 // original M7 reader; no edits, biome or settlement placement ever occur.
 import {planUnderworldRegion} from './worldwide-network.mjs';
+import {auditSelectedInterlevelTopology}
+ from './source-network-topology.mjs';
 import {auditCityAccessRamp} from './city-access-proposal.mjs';
 import {auditProtectedSubsurfaceStairs} from './protected-subsurface-stairs.mjs';
 import {compileMainGalleryPedestrianClearance,
@@ -15,16 +17,26 @@ const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const same=(a,b)=>a&&b&&a.x===b.x&&a.y===b.y&&a.z===b.z;
 
 export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
- source,additionalStairProposals=[],maxTotalSourceChecks=60000
+ source,additionalStairProposals=[],requireCompleteDeepLinks=false,
+ maxTotalSourceChecks=60000
 }={}){
  if(!INT(seed)||seed!==(seed|0)||![rx,rz].every(INT)||
   !source||typeof source!=='object'||ROLES.some(k=>typeof source[k]!=='function')||
   !Array.isArray(additionalStairProposals)||additionalStairProposals.length>7||
+  typeof requireCompleteDeepLinks!=='boolean'||
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<1000||
   maxTotalSourceChecks>100000)
   throw TypeError('Invalid protected rare-cavern pedestrian link');
  const city=planUnderworldRegion(seed,rx,rz).cityCandidate;
  if(!city)return Object.freeze({sitePresent:false,seed,rx,rz,worldChanged:false});
+ // A partial set of arbitrary stairway proposals is never equivalent to
+ // three real interlevel links joining all four source-network hubs.
+ const topology=requireCompleteDeepLinks?
+  auditSelectedInterlevelTopology(seed,rx,rz,additionalStairProposals):null;
+ if(topology&&!topology.ok)return Object.freeze({sitePresent:true,
+  ok:false,seed,rx,rz,reason:'DEEP_INTERLEVEL_TOPOLOGY_UNSAFE',
+  topologyRefusal:topology.reason,sourceChecks:0,
+  worldChanged:false,playerWalkingUnverified:true});
  const access=auditCityAccessRamp(seed,rx,rz);
  if(access.ok!==true||access.sitePresent!==true||!access.hub||!access.landing||
   access.candidateStairDeckValid!==true||access.routeAirFaceConnected!==true||
@@ -33,6 +45,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
    reason:'DETACHED_CITY_ACCESS_GEOMETRY_UNSAFE',
    accessReasons:access.reasons??[],sourceChecks:0,worldChanged:false});
  const landing={x:city.x+20,y:city.y-7,z:city.z+20};
+ if(!planUnderworldRegion(seed,rx,rz).layers.some(l=>same(l.hub,access.hub)))
+  return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
+   reason:'CITY_ACCESS_NOT_JOINED_TO_SOURCE_HUB',
+   sourceChecks:0,worldChanged:false});
  if(!same(access.landing,landing))
   return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
    reason:'CITY_LANDING_MISMATCH',sourceChecks:0,worldChanged:false});
@@ -95,6 +111,10 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,
   terraceRadius:terrace.radius,terraceColumns:terrace.columns,
   sourceChecks,selectedStairCount:selected.length,
+  requireCompleteDeepLinks,
+  completeFourHubCandidateTopologyVerified:topology?.ok===true,
+  completeDeepLinkSourceOwnershipVerified:topology?.ok===true,
+  fourHubRouteNotYetPlayerWalkable:true,
   combinedStairAndTerraceMutualClearanceChecked:true,
   mainGalleryMutualClearanceChecked:true,
   originalM7SourceProvenanceCheckedByCaller:true,
