@@ -1,0 +1,227 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves26-27-authored-original-source-handoff.v1",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startingHEAD": "d4473fe79358f9e7163c89ef4998f40a858c17b6",
+  "protectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainAtStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "status": "ISOLATED SOURCE ONLY — native Node tests, real Pack mesh ABI, game, iPhone and creator acceptance remain pending",
+  "originalSourceBuildings": [
+    {
+      "wave": 26,
+      "id": "r1:fishing-lodge:temperate:medium:002",
+      "title": "Tidemark Forked-Quay Fishing Lodge",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave26.mjs",
+      "gitBlob": "58f5f71cd1b71e07ae13cf7e189bd43f3ffcda1d",
+      "sourceCells": 11254,
+      "sourcePack3RoofsWithImmediateBacking": 2823,
+      "connectedGroundWalkableCells": 2841,
+      "rooms": 12,
+      "portalLinks": 17,
+      "originalRoofWings": 7,
+      "originalGenuineUnroofedQuayCells": 205,
+      "quayGeometry": "Two source-paved projected stone wharf fingers linked by a real y0 crossdeck; endpoints confirmed walkable y1 and sky clear",
+      "groundedRooflessPavedCourtyards": [
+        132,
+        42
+      ],
+      "groundedUnlitStoneSignalTiers": 23,
+      "uprightPack4WindowCells": 34,
+      "actualDoubleTierFramedWindowBays": 17,
+      "original8WayD4": {
+        "priorNewSourceIDs": [
+          "r1:fishing-lodge:temperate:small:002",
+          "r1:fishing-lodge:desert:small:002",
+          "r1:fishing-lodge:snow:small:002"
+        ],
+        "transformsExecutedInIsolatedJS": 24,
+        "maxIoU": 0.3957286432160804,
+        "threshold": 0.85
+      },
+      "sourceSimulation": {
+        "water": false,
+        "boats": false,
+        "fishCatch": false,
+        "liveEconomy": false,
+        "realTerrainPlacement": false,
+        "realGameRegistration": false
+      }
+    },
+    {
+      "wave": 27,
+      "id": "r1:harbor-office:desert:medium:002",
+      "title": "Saffronwind Double-Tower Harbor Registry",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave27.mjs",
+      "gitBlob": "bbecfbe6326215b5ab725dc4e8d0e223f1d32e6a",
+      "sourceCells": 12926,
+      "sourcePack3RoofsWithImmediateBacking": 2853,
+      "connectedGroundWalkableCells": 2583,
+      "rooms": 10,
+      "portalLinks": 14,
+      "originalRoofWings": 8,
+      "groundedRooflessPavedCourtyards": [
+        132,
+        36
+      ],
+      "stoneTowerHeights": [
+        25,
+        29
+      ],
+      "fullyGroundedOctagonalStoneTowers": 2,
+      "towerGroundBases": "Both 7x9 footprints have complete real stone y0 footing and solid source cells from y1 to y3",
+      "towerPhysicalRing": "Each true twenty-four-cell octagonal perimeter shaft is continuous from y4 through original top",
+      "individuallyBackedPack3CrownCells": [
+        24,
+        24
+      ],
+      "realHighUprightPack4Windows": 12,
+      "realHighWindowDistribution": [
+        6,
+        6
+      ],
+      "lowerUprightPack4WindowCells": 24,
+      "allUprightWindowCells": 36,
+      "original8WayD4": {
+        "priorNewSourceIDs": [
+          "r1:harbor-office:temperate:small:003",
+          "r1:harbor-office:desert:small:002",
+          "r1:harbor-office:snow:small:002"
+        ],
+        "transformsExecutedInIsolatedJS": 24,
+        "maxIoU": 0.35654761904761906,
+        "threshold": 0.85
+      },
+      "originalRepair": "Roof-bearing pier moved from uncovered x30,z50 to actual source-roof x27,z50. Real upper windows passed outward XY/Z and physical sill/lintel checks.",
+      "sourceSimulation": {
+        "liveCustoms": false,
+        "realSea": false,
+        "upperTowerStairs": false,
+        "activeBeacon": false,
+        "saveChanges": false,
+        "realGameRegistered": false
+      }
+    }
+  ],
+  "executedNow": {
+    "method": "Direct isolated V8 execution of original GitHub-returned sourcePlan/validateBlueprint and original schema, using exact original Git blobs rather than native Node runner",
+    "originalFullCompiler": "PASS for new Waves26 and27",
+    "roofImmediateSourceBearing": "PASS — 5676 newly authored Pack3 roof cells supported at y−1, not full structural/wind certification",
+    "physicalGroundAndWalking": "PASS — 19 room/portal-source constraints valid via original blueprint validator; all original approved walkable cells mutually connected",
+    "realSkyOpenPavedCourtyards": "PASS original ground y0, walkable y1, all y1+ empty",
+    "groundedForkedQuay": "PASS source 205 unique unroofed quay cells and checked walkable two quay tips plus crossing deck",
+    "groundedTowersAndHighWindows": "PASS two source-continuous octagonal solid bases and full-height tower walls; 24 direct-backed Pack3 crown cells and 6 high source-framed windows per tower",
+    "lowerWindowFrameAndExterior": "PASS all original y1 sills/y4 lintels and exterior air; high windows retained original stone y−1 sill/y+1 lintel",
+    "focusedNewSameCategoryEightWayD4": "PASS 48/48 against six previous actually authored same-category service sources. Full original accepted 228 D4 NOT RUN",
+    "frozenSourceIdOwnership": "Both original IDs in B115 and not in D92 or 228 historically accepted",
+    "finalProducerPhysicalCertification": false
+  },
+  "stagedNotExecuted": {
+    "focusedNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves26-27-focused.test.mjs",
+      "gitBlob": "ab1b1961e2f87c0bfa464ab768da047bb88156ae",
+      "staticJSParser": "PASS",
+      "nativeNodeRunner": "NOT_EXECUTED"
+    },
+    "sharedOriginalHistory": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-27-shared-historical-d4.test.mjs",
+      "gitBlob": "1e10f4bd8c0c4e2b868d7bf06c984d71d43ba0d5",
+      "acceptedFullCorpus": 228,
+      "newOriginalSourceConstructors": 27,
+      "additionalNewSourceComparisonTargets": 19,
+      "sameCategory8WayThreshold": 0.85,
+      "expectedAllocation": {
+        "authored": 255,
+        "remaining": 180
+      },
+      "singleHistoricalCensus": true,
+      "actualNodeRunner": "NOT_EXECUTED"
+    },
+    "deferredOneCoordinatedWebGL2": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-27-gallery.mjs",
+      "galleryGitBlob": "28c269a71fd94205e3405693cf066ba55529366d",
+      "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-27-gallery.mjs",
+      "auditorGitBlob": "2169269da05b670bbd31589d5e5168ae497fc07f",
+      "constructorWiring": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-27-gallery-wiring.test.mjs",
+      "constructorWiringBlob": "c6f86816882a94a0fa397d8ecb19ef1c977584cd",
+      "newWavePreviews": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave26-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave27-preview.html"
+      ],
+      "actualSourceBoundOriginals": 19,
+      "exactGitHeadRequired": true,
+      "sourceEvidenceFiles": 22,
+      "realChromiumPNGFramesRequired": 114,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "PNGCRC": true,
+      "PNG_SHA256": true,
+      "independentAudit": true,
+      "actualChromiumScreenshotsGenerated": 0,
+      "sourceProxyNotActualGame": true
+    }
+  },
+  "acceptanceStillOpen": [
+    "Actual full checkout native Node test on exact new head (focused physical, Pack3/Pack4 ABI, and shared historical 228-source 8-way D4)",
+    "Actual Pack1–5 physical candidate visible/selection/collider envelopes and mounted roof weather/load proof",
+    "One genuine source-bound 114-frame Chromium WebGL2/PNG CRC/SHA independent exact-head visual run",
+    "Owner-approved live world/settlement placement (not assigned to this source-only lane)",
+    "Original game movement and saved-world ABI, iPhone landscape installed PWA, real performance, artwork and creator review"
+  ],
+  "globalCIEfficiency": {
+    "initialReadOnlyProtectedRefsVerified": true,
+    "priorSuccessfulFrozenPR407Runs": [
+      44972498965,
+      44972499027
+    ],
+    "thoseRunsNotClaimedAsNewHeadEvidence": true,
+    "allExpensiveOldGalleryDraftsUnexecuted": true,
+    "oneConsolidatedNewHistoricalDraftOnly": true,
+    "noNewCIJobs": true,
+    "noCIQueuePolling": true,
+    "noChromiumCapture": true,
+    "noTestRequirementsWeakened": true,
+    "noWorkflowCancellation": true
+  },
+  "boundaries": {
+    "productionMainUntouched": true,
+    "draft407Untouched": true,
+    "otherBuilderLanesUntouched": true,
+    "otherDevelopersBranchesUntouched": true,
+    "allFiveHourlyAutomationsUntouched": true,
+    "sharedCIRulesUntouched": true,
+    "existingSavesUntouched": true,
+    "noNewPR": true,
+    "noMerge": true,
+    "noDeployment": true
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 27,
+    "totalNewOriginals": 37,
+    "totalNewOriginalTarget": 294,
+    "remainingNewOriginals": 257,
+    "remainingResidential": 169,
+    "remainingServices": 88
+  },
+  "estimates": {
+    "approxRemainingFocusedSourceSessionsLowerBound": 105,
+    "approxRemainingFocusedSourceSessionsUpperBound": 255,
+    "excludesFinalIntegrationAcceptance": true,
+    "uncertain": true
+  }
+}
