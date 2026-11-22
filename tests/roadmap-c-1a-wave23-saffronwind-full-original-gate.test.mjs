@@ -92,11 +92,16 @@ test('Saffronwind original real concave source volumes, open portals, roof suppo
  assert.equal(physical.worldPlaced,false);assert.equal(physical.productionReady,false);
 });
 test('Saffronwind historical-278 material-agnostic partition and silhouette normalized uniqueness retains strict thresholds',()=>{
- const b=pending[0],P=partitions(b),S=silhouette(b);
+ const b=pending[0],P=partitions(b),S=silhouette(b),metrics=[];
  for(const other of accepted){
  const pi=iou(P,partitions(other)),si=iou(S,silhouette(other));
- assert.ok(pi<.88,'partition near-copy '+other.id+' '+pi);
- assert.ok(si<.975,'outline near-copy '+other.id+' '+si);
+ metrics.push({id:other.id,partitionIoU:pi,outlineIoU:si});
+ }
+ console.log('SAFFRONWIND_FULL_278_OUTLINE_TOP='+JSON.stringify([...metrics].sort((a,b)=>b.outlineIoU-a.outlineIoU).slice(0,10)));
+ console.log('SAFFRONWIND_FULL_278_PARTITION_TOP='+JSON.stringify([...metrics].sort((a,b)=>b.partitionIoU-a.partitionIoU).slice(0,10)));
+ for(const m of metrics){
+ assert.ok(m.partitionIoU<.88,'partition near-copy '+m.id+' '+m.partitionIoU);
+ assert.ok(m.outlineIoU<.975,'outline near-copy '+m.id+' '+m.outlineIoU);
  }
 });
 
