@@ -77,17 +77,17 @@ export function auditSourceProtectedCityTerraceAccess(seed,rx,rz,{
  const combined=compileSelectedStairPedestrianClearance(selected,{maxCells:50000});
  if(!combined.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_LINK_AND_SELECTED_STAIRS_UNSAFE',
-  refusal:combined.reason,sourceChecks:0,worldChanged:false});
+  refusal:combined.reason,sourceChecks:detour?.sourceChecks??0,worldChanged:false});
  const galleries=compileMainGalleryPedestrianClearance(seed,rx,rz);
  if(!galleries.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:'CITY_GALLERY_INDEX_UNSAFE',
-  refusal:galleries.reason,sourceChecks:0,worldChanged:false});
+  refusal:galleries.reason,sourceChecks:detour?.sourceChecks??0,worldChanged:false});
  for(let i=0;i<selected.length;i++){
   const collision=galleries.inspect(selected[i]);
   if(!collision.ok)return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
    reason:'CITY_LINK_OR_SELECTED_STAIRS_BLOCK_GALLERY',
    routeIndex:i,blockedCells:collision.blockedCells??null,
-   sourceChecks:0,worldChanged:false});
+   sourceChecks:detour?.sourceChecks??0,worldChanged:false});
  }
  // Inspect ORIGINAL M7 ownership of the actual approach and ALL caller
  // selected stairways, not just the future terrace. A user supplied
