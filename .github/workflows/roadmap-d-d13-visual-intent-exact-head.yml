@@ -1,0 +1,36 @@
+name: MYTHWROUGHT Builder D D13 visual-intent literal-head native audit (draft-only)
+on:
+  pull_request:
+    paths:
+      - 'src/building-pool/roadmap-d/d13-visual-art-direction.mjs'
+      - 'tests/building-pool/roadmap-d/d13-visual-art-direction.test.mjs'
+      - 'docs/building-pool/roadmap-d/D13_VISUAL_READINESS_AUDIT.md'
+      - '.github/workflows/roadmap-d-d13-visual-intent-exact-head.yml'
+permissions:
+  contents: read
+concurrency:
+  group: mythwrought-builder-d-d13-visual-intent-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  literal-head-native-visual-intent:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout literal PR branch HEAD, never synthetic PR merge ref
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - name: Demand literal checkout SHA equals protected event HEAD
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          actual="$(git rev-parse HEAD)"
+          test -n "$EXPECTED_SHA"
+          test "$actual" = "$EXPECTED_SHA"
+          echo "Literal branch HEAD verified: $actual"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native original D13 ID ownership and fail-closed visual-state contract
+        run: node --test tests/building-pool/roadmap-d/d13-visual-art-direction.test.mjs
