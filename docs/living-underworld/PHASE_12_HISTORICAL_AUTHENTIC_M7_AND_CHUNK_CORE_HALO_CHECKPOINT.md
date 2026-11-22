@@ -14,7 +14,7 @@ Recovered GitHub Actions artifact **#14733859064** from the protected developmen
 - ZIP SHA256 `abe6339ab9d8483cb7e3996c37018c88be0868ff33886870e316d04f60bef9b6`.
 - **39/39** archive entries pass ZIP CRC and **38/38** SHA256 manifest entries verify after normalizing the bundle's `artifacts/living-underworld/` name prefix.
 - Historical genuine `FourRegionWorld` original source baseline over 20 seeds: **18 constructed successfully, 2 failed**; `2965/1430784=0.207229043657% original underground AIR`. The real constructor failures remain seed **8675309** (authored source collision) and **13579** (protected landmark) in historical logs, NOT repaired or waived.
-- Historical 120-region strict original-M7 entrance cohort: original 4-way safe **5/120**, 64-way safe **29/120**, broken out plains 10, desert 5, snow 3, mountain 4, enchanted 7 for 64-way. These were **SURFACE source-safe proposals only**, not deep walking; uncarved original world.
+- Historical 120-region 64-way radial original-M7 cohort: first 4-way safe **5/120**, 64-way safe **29/120**, broken out plains 10, desert 5, snow 3, mountain 4, enchanted 7 for 64-way. A DIFFERENT stricter initial surface-envelope survey recorded **4/120** first-choice safe, so these are not the same pass metric. All were **SURFACE source-safe proposals only**, not deep walking; uncarved original world.
 - Authenticated seed179 historical 64-way safe entrances, one per biome, at:
   - plains region(-9,0) mouth(-2149,5,181); accepted after 24 tries
   - desert region(-3,-9) mouth(-547,4,-2150); accepted on first try
