@@ -51,3 +51,14 @@ test('sparse root remains inside its exact tile and refuses overflow/aliases',()
  assert.equal(tileRoot(0,Number.MIN_SAFE_INTEGER,179),null);
  assert.equal(tileRoot(Infinity,0,179),null);
 });
+
+test('all five source probes reject buried cave, foreign ore and protected underlay',()=>{
+ const original=(x,y,z)=>y>5?ids.AIR:y===5?ids.GRASS:ids.DIRT;
+ for(const patch of [
+  {readBlock:(x,y,z)=>x===12&&y===2?ids.AIR:original(x,y,z)},
+  {readBlock:(x,y,z)=>z===4&&y===3?6:original(x,y,z)},
+  {readBlock:(x,y,z)=>x===8&&z===8&&y===2?4:original(x,y,z)},
+  {protectedAt:(x,y,z)=>x===8&&z===12&&y===3}
+ ])assert.equal(survey(make(patch)),null);
+ assert.ok(survey(make()));
+});
