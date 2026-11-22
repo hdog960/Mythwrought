@@ -1,0 +1,167 @@
+{
+  "schema": "mythwrought.builder-b.1b-wave20-21-new-original-source.v1",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "startedAt": "0f9f3ad7745b05636897db79532074d8504b9762",
+  "checkpointParentBeforeHandoff": "6e8b66df05d15fb1f09e4484e290b83f2d687dd3",
+  "protectedPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "productionMainFrozen": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "state": "SOURCE_AUTHORED_PROVISIONAL_NOT_NATIVE_OR_GAME_ACCEPTED",
+  "structures": [
+    {
+      "wave": 20,
+      "id": "r1:stable:temperate:medium:001",
+      "name": "Bramblecross Split-Rail Coach Stables",
+      "gitBlob": "75de2ba3025a0687bb1a2bc2b068630273dd28e4",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave20.mjs",
+      "size": "medium",
+      "cells": 8484,
+      "roofs": 1900,
+      "connectedWalkable": 1793,
+      "rooms": 8,
+      "portals": 11,
+      "uprightPack4Panes": 20,
+      "distinctRoofWings": 6,
+      "rooflessGroundedStoneHardstandCourts": [
+        182,
+        35
+      ],
+      "groundedConnectingPathColumns": 24,
+      "originalIssueRepaired": "Truly isolated (39,33) ground pedestrian pocket became grounded y1–4 structural pier",
+      "focusedSameCategoryEightWayD4": {
+        "prior": [
+          "Meadowstep",
+          "Sunspoke"
+        ],
+        "comparedTransforms": 16,
+        "maxIoU": 0.33817034700315457
+      }
+    },
+    {
+      "wave": 21,
+      "id": "r1:lighthouse:desert:small:002",
+      "name": "Sunscar Open-Oculus Lanternwatch",
+      "gitBlob": "12f32773ea258a3eea1eaf0be28656bf8cd6dd64",
+      "sourcePath": "src/building-pool/roadmap-b/builder-b-essentials-wave21.mjs",
+      "size": "small",
+      "cells": 6700,
+      "roofs": 1465,
+      "connectedWalkable": 1292,
+      "rooms": 7,
+      "portals": 9,
+      "uprightLowerPack4Panes": 15,
+      "originalHighUprightPack4Panes": 8,
+      "groundedOctagonTowerCrownCells": 24,
+      "sourceTowerWallHeight": 29,
+      "physicallyPavedSkyOpenCourt": 56,
+      "originalIssueRepaired": "Corrected high-Pane clear-air validation to use original Z outward vector (x+dx,y,z+dz)",
+      "focusedSameCategoryEightWayD4": {
+        "prior": [
+          "Frostwake",
+          "Saltreach"
+        ],
+        "comparedTransforms": 16,
+        "maxIoU": 0.372992700729927
+      }
+    }
+  ],
+  "exactOriginalSourceFocusedVerification": {
+    "method": "Original V8-executed repository sourcePlan, validateBlueprint, validateAllocation with exact original module blobs; not native Node test runner",
+    "genuineSourceCompiler": "PASS for Waves20 and21",
+    "fullSourceRoofImmediateBearing": "PASS, zero missing support cells",
+    "rooflessPavedCourtyards": "PASS, all 273 new courtyard columns are actual grounded walkable and sky-clear",
+    "doorPhysicalTwoHighAndSourceCirculation": "PASS using unchanged original source validator",
+    "lowerAndHighUprightPack4GlassExterior": "PASS original source facades and stone sills/lintels",
+    "ownershipB115ExclusiveAndD92Excluded": "PASS source ledger",
+    "focusedPriorSameCategoryD4": "PASS 32 eight-way transformations",
+    "canonicalAcceptedHistorical228D4": "NOT RUN"
+  },
+  "changedNativeTests": {
+    "perWavePhysical": [
+      {
+        "file": "tests/building-pool/roadmap-b/builder-b-essentials-wave20.test.mjs",
+        "blob": "eeb74e6d84e528bffb34d80fd53f484636c46c61"
+      },
+      {
+        "file": "tests/building-pool/roadmap-b/builder-b-essentials-wave21.test.mjs",
+        "blob": "6ec7ff60470fdd68cdf2901054d3ad30c2f10f8e"
+      }
+    ],
+    "singleSharedHistorical": {
+      "file": "tests/building-pool/roadmap-b/builder-b-originals-waves9-21-shared-historical-d4.test.mjs",
+      "blob": "488db30d344a43ac6aed43c4dc19a243d529a77c",
+      "acceptedCensus": 228,
+      "originalNewTotalBeforeHistoricalCheck": 21,
+      "newUnacceptedWave9to21": 13,
+      "strictThreshold": 0.85,
+      "censusReadsOnlyOnce": true,
+      "state": "STAGED_NOT_RUN",
+      "supersedes": "Prior Waves9-19 same full historical corpus test, deleted from isolated branch"
+    },
+    "browserSource": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-21-gallery.mjs",
+      "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-21-gallery.mjs",
+      "wiring": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-21-gallery-wiring.test.mjs",
+      "visualsNeeded": 78,
+      "originalBuildings": 13,
+      "sourceEvidenceFiles": 16,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "uniquePNG_SHA256": 78,
+      "PNGCRC": true,
+      "exactHeadPinned": true,
+      "originalPreviewFiles": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave20-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave21-preview.html"
+      ],
+      "state": "STAGED_STATIC_SYNTAX_ONLY_NO_CHROMIUM_OR_PNG"
+    },
+    "efficientStructuralChecks": "Optimized original real courtyard walkability native tests from O(n²) scans to precomputed lookup sets, without relaxing physical sky/no-obstruction assertions."
+  },
+  "requiredAcceptanceStillOpen": [
+    "Native Node focused exact-head tests for all new original source modules",
+    "Actual canonical 228 original accepted same-category 8-way D4 on exact head",
+    "Real Pack1–5 producer mesh/typed physical selection and collider provenance plus live support/weather envelope",
+    "One coordinated genuine 78-frame Chromium WebGL2 source preview and independent PNG CRC/SHA/exact-head audit",
+    "Future original gameplay world integration with collision/navigation, iPhone landscape PWA performance, save compatibility and creator artwork approval"
+  ],
+  "safety": {
+    "otherBuildersChanged": false,
+    "automationsChanged": false,
+    "protectedBranchesChanged": false,
+    "productionMainChanged": false,
+    "sharedCIChanged": false,
+    "savesChanged": false,
+    "workflowCancellation": false,
+    "merge": false,
+    "deployment": false,
+    "newPR": false,
+    "actualNewCIInitiated": false,
+    "creatorApproval": false,
+    "finalAssetAcceptance": false
+  },
+  "progress": {
+    "newResidentialAuthored": 10,
+    "newServiceAuthored": 21,
+    "newTotalOriginals": 31,
+    "goalNewOriginals": 294,
+    "remainingNewOriginals": 263,
+    "residentialRemaining": 169,
+    "serviceRemaining": 94
+  }
+}
