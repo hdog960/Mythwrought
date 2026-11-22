@@ -19,6 +19,11 @@ function faceKey(source,face){
   source.color.map(encode).join(','),face.axis,encode(face.plane),
   ...face.rect.map(encode)].join('|');
 }
+// Rounded keys are ONLY a candidate bucket. A near-coincident face is NOT exact.
+// Deliberately accept false negatives rather than remove an unproven visible face.
+const exactFace=(a,b)=>a.face.plane===b.face.plane&&
+ a.face.rect.every((n,i)=>n===b.face.rect[i])&&
+ a.rgba.every((n,i)=>n===b.rgba[i]);
 const add=(a,b)=>a.map((x,i)=>x+b[i]);
 /** Fixtures must have original producer geometry and EXPLICIT variants; no A5 source blueprint IDs. */
 export function auditExactPack5SeamCandidates(fixtures,{maxFixtures=96,maxBoxes=8192}={}){
@@ -58,7 +63,7 @@ export function auditExactPack5SeamCandidates(fixtures,{maxFixtures=96,maxBoxes=
    for(let axis=0;axis<3;axis++)for(const positive of [false,true]){
     const f=face(b,axis,positive),key=faceKey(source,f);
     if(!faceBuckets.has(key))faceBuckets.set(key,{negative:[],positive:[]});
-    faceBuckets.get(key)[positive?'positive':'negative'].push({instanceIndex,boxIndex});
+    faceBuckets.get(key)[positive?'positive':'negative'].push({instanceIndex,boxIndex,face:f,rgba:[...source.color]});
    }
   }
  }
@@ -66,7 +71,7 @@ export function auditExactPack5SeamCandidates(fixtures,{maxFixtures=96,maxBoxes=
  for(const [key,group] of faceBuckets){
   const used=new Set();
   for(const plus of group.positive){
-   const ix=group.negative.findIndex((minus,i)=>!used.has(i)&&minus.instanceIndex!==plus.instanceIndex);
+   const ix=group.negative.findIndex((minus,i)=>!used.has(i)&&minus.instanceIndex!==plus.instanceIndex&&exactFace(plus,minus));
    if(ix<0)continue;
    used.add(ix);
    candidates.push({faceIdentity:key,positive:plus,negative:group.negative[ix],
