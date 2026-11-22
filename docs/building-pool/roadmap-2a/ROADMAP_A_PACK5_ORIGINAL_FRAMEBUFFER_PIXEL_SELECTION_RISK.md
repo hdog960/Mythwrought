@@ -51,3 +51,39 @@ Previously verified and reused: original 8/8 exact 12-warning source classifier 
 Actual original game renderer may produce no fragments, sample pixel centers differently due to GPU coverage/precision/clipping/depth/fog, or terrain may occlude Pack5. Nearest source pixel ray is **not** original player's own mine/place target; only a separately authorized disposable original-game Pack5 fixture + WebGL2 actual image/depth/picking/HUD interaction can verify that. A physical iPhone Safari Home Screen PWA acceptance is a separate device gate. The previous optional read-only main-game boot/browser pilot is still unrun, and does NOT place a Pack5 fixture if run.
 
 No real A5 designs, author material/yaw choices, mixed Pack1–5 wall/floor/roof support, structural load, actual physics or creator acceptance. Roadmap A remains **207/420 SOURCE ONLY with 213 unwritten**; historic 128 commerce / 345 industrial / 315 government, original 79 A5 candidates all untouched. Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; protected OPEN DRAFT PR406 CODE HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Other builders, five hourly automations, preexisting shared workflows, schema1 saves, installed iPhone PWA and locked v0.11 untouched. No merges, deploys, CI cancellations, source/gameplay/world edits or approval.
+
+## Actual authenticated source-native checkpoint — November 22, 2026
+
+Source-only engineering commit \`6a38fd57fd8e19a81e326ad98789c0ee09809686\` is a direct child of the previous exact isolated \`384067cac7479bdc6fea989b92b4d74a3901dd46\`. A **separate CI-only child** \`roadmap-a-pack5-framebuffer-pixel-native-ci-20261122\` exact HEAD \`ae3c4cf13fd5518a91983d31e144130044d261ed\` contains identical source code and only a one-time branch-exclusive workflow file. Native original-repository GitHub Actions [#45084143116](https://github.com/hdog960/Mythwrought/actions/runs/45084143116) **COMPLETED SUCCESS — nine focused Node 22.16.0 tests PASS, zero fail**, with new source/test syntax checks passing. No full CI, browser, actual GPU or other developer runs executed.
+
+**Exact source-only native diagnostic:** original **12 exact warning witnesses**, **108** independently sampled nearest framebuffer pixel-center mathematical rays across four unchanged original frame-buffer size profiles; **103** genuine source staged-triangle ray intersections; **97** original source detailed Pack5 selection-box ray intersections; **0** original staged-triangle ray versus main shader analytically projected triangle discrepancies; **14** source selection-versus-projected-triangle warnings across these 108 mathematical sample points. **12/12 warning witnesses had at least one nearby mathematical source triangle hit; zero witnesses had no nearby triangle hit.** The original player center-ray warnings remained **12**. The 717×331 (battery, DPR 3) profile is the unique odd×odd source-profile test with a pixel mathematically centered on the crosshair for all twelve witnesses; 844×390 (balanced, DPR 1) has **four** nearby pixel centers, none precisely at (0,0).
+
+Original fixed source profile and count report:
+
+\`\`\`json
+{
+ "profileSizes":[
+  {"preset":"balanced","dpr":1,"framebuffer":[844,390],"crosshairAtPixelCenter":false},
+  {"preset":"balanced","dpr":3,"framebuffer":[1266,585],"crosshairAtPixelCenter":false},
+  {"preset":"battery","dpr":3,"framebuffer":[717,331],"crosshairAtPixelCenter":true},
+  {"preset":"economy","dpr":3,"framebuffer":[548,253],"crosshairAtPixelCenter":false}
+ ],
+ "totals":{
+  "originalWarningWitnesses":12,"actualFramePixelSamples":108,
+  "pixelSourceTriangleHits":103,"pixelSourceSelectionHits":97,
+  "pixelSourceVsProjectedTriangleDisagreements":0,
+  "selectionVsProjectedPixelTriangleWarnings":14,
+  "sourceOriginalCenterRayWarningRemains":12,
+  "warningsWithAnyNearPixelSourceTriangleHit":12,
+  "warningsWithNoNearPixelSourceTriangleHit":0,
+  "originalCenterCrosshairAtPixelCenterProfiles":12
+ },
+ "priorIndependent3600SourceGridWarnings":88,"realGpuPixelsObserved":false
+}
+\`\`\`
+
+**Interpretation boundary:** The word "pixel" refers here ONLY to evaluating source authored geometry at hypothetical *pixel-center coordinates output by the unchanged original render-budget math*. No fragment shader was run. A source triangle can mathematically intersect a pixel-center camera ray yet still be occluded, clipped, blended, culled by a different rule, absent from a loaded GPU page, or fail actual WebGL2 raster coverage. Even the mathematically center-aligned battery framebuffer is **not** physical iPhone evidence. The 14 warnings are separate samples from the previous 12 original center warnings and the earlier **88** warnings in a different 3,600-source-ray grid; they are **not** counts of unique on-screen failures, and their populations must not be added.
+
+The original game uses the forward-vector center ray for actual player edits, not any pixel-center ray. Actual original viewport scaling and graphics depth, Pack5 page residency, world terrain occlusion, HUD target, mobile controls and game playback remain untested. A separate authorized disposable-game real Pack5 fixture acceptance test, with authentic pixel readback and original player interaction, is still necessary. Future live test design should check source camera precision and the actual game render framebuffer together without writing a user save. No source shape hitbox or GPU shader was changed in this checkpoint.
+
+**Preservation:** protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`; Roadmap A **207/420 SOURCE ONLY with 213 unwritten**, historic 128 commerce/345 industrial/315 government and original 79 A5 source candidates, other builders, five automations, all shared CI, schema1 saved worlds, installed PWA and locked v0.11 untouched. No real A5 material/yaw choices, structural approval, merge, deploy, CI cancellation, actual world edits or source gameplay changes.
