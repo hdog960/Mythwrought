@@ -29,7 +29,21 @@ jobs:
           BASE=ce8dad9d3796821f77df0f78c0184a75f6fb707c
           test "$(git merge-base "$BASE" HEAD)" = "$BASE"
           git diff --name-only "$BASE" HEAD | sort
-          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/environment-v7.mjs|tests/desert-phase3-plains-shoulder.test.mjs|nonblock-stage-assets.json|.github/workflows/desert-phase3-plains-native.yml)$' || true)
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/environment-v7.mjs|tests/desert-phase3-plains-shoulder.test.mjs|nonblock-stage-assets.json|.github/workflows/desert-phase3-plains-native.yml|scripts/ci/desert-phase3-geometry-census.mjs) || true)
+          test -z "$unexpected"
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check tests/desert-phase3-plains-shoulder.test.mjs
+          node --check scripts/ci/desert-phase3-geometry-census.mjs
+      - name: Original M7 source-world terrain geometry, two real photographed interiors
+        run: node scripts/ci/desert-phase3-geometry-census.mjs
+      - name: Real V7 Plains shoulder and changed-source preservation tests
+        run: |
+          node --test \
+            tests/desert-phase3-plains-shoulder.test.mjs \
+            tests/desert-grass-shoulder-phase2.test.mjs \
+            tests/nonblock-environment-profile.test.mjs \
+            tests/ci/nonblock-cache-manifest.test.mjs
+ || true)
           test -z "$unexpected"
           node --check src/manual-biomes/environment-v7.mjs
           node --check tests/desert-phase3-plains-shoulder.test.mjs
