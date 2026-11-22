@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewDeviceDelivery as preview} from '../src/resonance/devices48/delivery-preview-v1.mjs';
+const request=(deviceId='lamp',demand=5)=>({deviceId,worldId:'world',tick:10,demand,enabled:true,movementAuthorized:false});
+const observation=(deviceId='lamp',delivered=5)=>({deviceId,worldId:'world',tick:10,delivered,authoritative:false,movementAuthorized:false});
+const run=(requests=[request()],observations=[observation()])=>preview({worldId:'world',simulationTick:10,requests,observations});
+test('matching observation remains strictly non-authoritative',()=>{const r=run();assert.equal(r.devices[0].candidateSatisfied,true);assert.equal(r.devices[0].energized,false);assert.equal(r.movementAuthorized,false);assert.equal(r.authoritativeDelivery,false);assert.ok(Object.isFrozen(r.devices));});
+test('missing delivery yields deficit and never energizes',()=>{const r=run([request()],[]);assert.equal(r.devices[0].deficit,5);assert.equal(r.devices[0].candidateSatisfied,false);});
+test('partial delivery yields exact integer deficit',()=>{assert.equal(run([request('lamp',7)],[observation('lamp',3)]).devices[0].deficit,4);});
+test('overdelivery rejected',()=>assert.throws(()=>run([request()],[observation('lamp',6)])));
+test('foreign device rejected',()=>assert.throws(()=>run([request()],[observation('other')])));
+test('stale observation rejected',()=>assert.throws(()=>run([request()],[{...observation(),tick:9}])));
+test('forged authority rejected',()=>assert.throws(()=>run([request()],[{...observation(),authoritative:true}])));
+test('forged motion rejected',()=>assert.throws(()=>run([{...request(),movementAuthorized:true}],[])));
+test('duplicate requests and observations rejected',()=>{assert.throws(()=>run([request(),request()],[]));assert.throws(()=>run([request()],[observation(),observation()]));});
+test('invalid fractions and oversized demand rejected',()=>{assert.throws(()=>run([{...request(),demand:0.5}],[]));assert.throws(()=>run([request('lamp',1000001)],[]));});
+test('disabled demand must be zero',()=>assert.throws(()=>run([{...request(),enabled:false}],[])));
+test('deterministic order independent of insertion order',()=>{const a=request('a'),z=request('z');assert.deepEqual(run([z,a],[]).devices.map(x=>x.deviceId),['a','z']);});
