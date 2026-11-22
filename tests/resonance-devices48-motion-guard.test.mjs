@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {guardMotionStep} from '../src/resonance/devices48/motion-guard-v1.mjs';
+const state=()=>({id:'lift1',seed:7,kind:'lift',position:0,travel:2,speed:0.25,tick:0});
+const run=(s,opts={})=>guardMotionStep(s,{desired:1},{seed:7,tick:1,allocation:{id:'lift1',tick:1,mode:'running'},clearance:()=>true,...opts});
+test('verified bounded sweep advances only after all clearances',()=>{let calls=[];let s=run(state(),{clearance:x=>(calls.push(x),true)});assert.equal(s.position,0.25);assert.equal(s.sweepSamples,2);assert.equal(calls.length,2);});
+test('obstruction rejects entire motion atomically',()=>{let s=run(state(),{clearance:x=>x.sample!==2});assert.equal(s.position,0);assert.equal(s.status,'blocked');});
+test('power loss holds position without collision claims',()=>{let s=run(state(),{allocation:{id:'lift1',tick:1,mode:'stopped'}});assert.equal(s.position,0);assert.equal(s.status,'unpowered');assert.equal(s.sweepVerified,false);});
+test('stale allocation and world mismatch fail closed',()=>{assert.throws(()=>run(state(),{allocation:{id:'lift1',tick:0,mode:'running'}}));assert.throws(()=>run(state(),{seed:8}));});
+test('unknown clearance is never treated as safe',()=>{assert.equal(run(state(),{clearance:()=>undefined}).status,'blocked');});
