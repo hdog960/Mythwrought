@@ -10,6 +10,7 @@ import {auditSourceProtectedChunkRisk}
  from '../../src/living-underworld/source-protected-chunk-risk.mjs';
 import {summarizeSourceProtectedChunkRisk}
  from '../../src/living-underworld/source-protected-chunk-aggregate.mjs';
+const runStarted=performance.now();
 const seed=179,sites=Object.freeze([
  Object.freeze({biome:'plains',rx:-9,rz:0}),
  Object.freeze({biome:'desert',rx:-3,rz:-9}),
@@ -28,6 +29,7 @@ const source=Object.freeze({
 });
 const rows=[],chunkAudits=[];
 for(const site of sites){
+ const siteStarted=performance.now();
  const hub=planUnderworldRegion(seed,site.rx,site.rz).layers[0].hub;
  const origin=Object.freeze({x:Math.floor(hub.x/16)*16,
   y:Math.floor(hub.y/16)*16,z:Math.floor(hub.z/16)*16});
@@ -36,6 +38,7 @@ for(const site of sites){
   maxFaceGrowth:1200,maxCells:6000});
  chunkAudits.push(audit);
  rows.push(Object.freeze({...site,origin,ok:audit.ok,
+  regionChunkAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   sourceHaloCells:audit.sourceHaloCells,
   candidateCarveCells:audit.plannedCarves,
   sourceAllowedCarveCells:audit.approvedCarves,
@@ -62,6 +65,7 @@ const aggregate=summarizeSourceProtectedChunkRisk(chunkAudits,{
 });
 const report=Object.freeze({schema:'living-underworld-original-m7-five-biome-one-hub-chunk-risk-v1',
  seed,actualOriginalM7SolidSource:true,
+ fullAuditElapsedMs:Math.round((performance.now()-runStarted)*1000)/1000,
  totalChunks:rows.length,sourceQueries:rows.reduce((n,r)=>n+(r.sourceHaloCells??0),0),
  sourceRejectedCarveCells:rows.reduce((n,r)=>n+(r.sourceRejectedCarveCells??0),0),
  ownedInteriorApprovedCarves:rows.reduce((n,r)=>n+(r.ownedInteriorApprovedCarves??0),0),
