@@ -29,7 +29,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '4843ce63cd0f5af7d725eb7a2de01a77422afbd2');
+    'c6dadfb31daf37ec0923514b20ff6d84c09a5dc1');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -247,4 +247,53 @@ test('visibility/context restoration and BFCache can rearm before readiness, nev
   assert.ok(visibility.includes('}else if(!graphicsLost){'));
   assert.ok(contextRestored.includes('graphicsLost=false;graphicsRestoreCount++;'));
   assert.ok(pageshow.includes('near291PageSuspended=false;'));
+});
+
+test('fatal local VAO is stopped BEFORE every original edit-side effect',()=>{
+  const start=source.indexOf('  function edit(mode){');
+  const end=source.indexOf("    if(mode==='mine'&&mobRenderer",start);
+  assert.ok(start>=0&&end>start);
+  const prologue=source.slice(start,end);
+  const fence=prologue.indexOf('if(near291Enabled&&near291Fatal){');
+  const oldEditGate=prologue.indexOf('if(!help.hidden||exploration.isOpen()');
+  assert.ok(fence>=0&&fence<oldEditGate);
+  assert.ok(prologue.includes("message('Local VAO 291 graphics stopped; edits blocked until reload');return;"));
+  inOrder('if(near291Enabled&&near291Fatal){',
+    "if(mode==='mine'&&mobRenderer&&!mobRuntimeError)",
+    "if(pack5Mode&&pack5Builder){",
+    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,');
+});
+
+test('a queued frame cannot advance player time after local fatal GPU loss',()=>{
+  const start=source.indexOf('  function draw(now){');
+  const end=source.indexOf('    const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));',start);
+  assert.ok(start>=0&&end>start);
+  const entry=source.slice(start,end);
+  assert.ok(entry.includes('if(near291Enabled&&near291Fatal)return;'));
+  const originalFence=entry.slice(entry.indexOf('if(near291Enabled&&near291Fatal)return;')).trim();
+  const fn=new Function('near291Enabled','near291Fatal',originalFence+"\nreturn 'continue';");
+  assert.equal(fn(true,true),undefined);
+  assert.equal(fn(true,false),'continue');
+  assert.equal(fn(false,true),'continue');
+});
+
+test('fatal stream retirement aborts IN-FLIGHT frame before original mobs/C6/water',()=>{
+  const begin=source.indexOf('      stream();\n',source.indexOf('  function draw(now){'));
+  const end=source.indexOf('      if(help.hidden&&!exploration.isOpen()&&mobSession',begin);
+  assert.ok(begin>=0&&end>begin);
+  const snippet=source.slice(begin,end);
+  assert.ok(snippet.includes('if(near291Enabled&&near291Fatal)return;'));
+  assert.ok(snippet.indexOf('stream();')<snippet.indexOf('if(near291Enabled&&near291Fatal)return;'));
+  assert.ok(snippet.indexOf('if(near291Enabled&&near291Fatal)return;')<
+    snippet.indexOf('mobEnvironment=atmosphere;'));
+  const run=new Function('enabled','fatalFromStream',`
+    let near291Enabled=enabled,near291Fatal=false,mobEnvironment=null;
+    const atmosphere={marker:'original-atmosphere'};
+    const stream=()=>{near291Fatal=fatalFromStream;};
+    `+snippet+`
+    return mobEnvironment?.marker??null;
+  `);
+  assert.equal(run(true,true),undefined,'local native retirement fatal must abort this frame');
+  assert.equal(run(true,false),'original-atmosphere','healthy local rendering still proceeds');
+  assert.equal(run(false,true),'original-atmosphere','public control unchanged by opt-in fence');
 });
