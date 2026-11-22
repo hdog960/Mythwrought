@@ -5,7 +5,7 @@ import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
-import {desertSeamVertexTint} from './manual-biomes/desert-seam-vertex-tint.mjs';
+import {desertSeamVertexTint,nearestNaturalScreeSquared} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
 import {FULL_CUBE,raycastShapes} from './voxel-shape-interactions.mjs';
 // Existing world generators import WORLD_MIN_Y to clamp legacy seeded caves.
@@ -210,7 +210,29 @@ export function meshChunk(world,cx,cz){
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
   const unifiedTerrain=profile?.generator===M7_ENVIRONMENT_GENERATOR;
-  const groundTints=new Map();
+  // Cached ONLY for this synchronous surface-mesh rebuild. No cross-chunk
+  // mutable cache or per-frame source queries. Original plans decide whether
+  // a surface is real and protected rather than cave-exposed subsoil.
+  const sourceWorld=world.base?.generationProfile?world.base:world;
+  const sourceCaps=new Map(),seamVertexDistances=new Map();
+  const hasEdit=(x,y,z)=>world.edits?.has(worldKey(x,y,z))||
+    sourceWorld.edits?.has(worldKey(x,y,z));
+  function originalSurface(x,z){
+    const key=x+','+z;
+    if(sourceCaps.has(key))return sourceCaps.get(key);
+    let cap=null;
+    if(typeof sourceWorld._columnPlan==='function'){
+      const plan=sourceWorld._columnPlan(x,z);
+      if(plan.size){
+        let top=-Infinity;
+        for(const y of plan.keys())if(y>top)top=y;
+        cap={top,id:plan.get(top)};
+      }
+    }
+    sourceCaps.set(key,cap);
+    return cap;
+  }
+    const groundTints=new Map();
   function groundTint(x,z){
     const key=x+','+z;
     if(!groundTints.has(key))groundTints.set(key,.91+
@@ -275,14 +297,10 @@ export function meshChunk(world,cx,cz){
         if(isBiome130BlockId(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
           const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
-          // M7 original Desert visual-only feather: when an exposed natural
-          // hardpan face borders real unedited scree at the same surface or
-          // one vertical step, interpolate EXISTING RGB on the boundary edge.
-          // Four cardinal columns, at most three y-level probes each. These
-          // occur only in the synchronous chunk mesh rebuild, never per frame.
-          // No biome lookups for completely occluded hardpan: this step must
-          // only run after at least one actual triangle survives face culling.
-          let screeContact,checkedVisibleHardpan=false;
+          // Strict surface-only Desert visual fade. Protected cave/landmark
+          // vetoes, player edits and underground exposed subsoil never tint.
+          // Calculate only once after the first actually surviving face.
+          let eligibleDesertTop=false,checkedVisibleHardpan=false;
           // Source-accurate union surface geometry; full neighboring legacy
           // solids hide only true boundary faces, preserving internal shapes.
           for(let t=0;t<surface.indices.length;t+=3){
@@ -303,18 +321,10 @@ export function meshChunk(world,cx,cz){
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
             if(!checkedVisibleHardpan&&groundColor&&id===258){
               checkedVisibleHardpan=true;
-              if(v6BiomeAt(x,z,world.seed)?.name==='desert'){
-                const findScree=(dx,dz)=>{
-                  const ax=x+dx,az=z+dz;
-                  for(let h=y-1;h<=y+1;h++)
-                    if(!world.edits?.has(worldKey(ax,h,az))&&
-                       blockAt(ax,h,az)===401)return true;
-                  return false;
-                };
-                screeContact={
-                  east:findScree(1,0),west:findScree(-1,0),
-                  south:findScree(0,1),north:findScree(0,-1)
-                };
+              const region=v6BiomeAt(x,z,world.seed);
+              if(region?.name==='desert'&&region.weight<=.50&&!hasEdit(x,y,z)){
+                const surfaceTop=originalSurface(x,z);
+                eligibleDesertTop=surfaceTop?.top===y&&surfaceTop.id===258;
               }
             }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
@@ -324,8 +334,26 @@ export function meshChunk(world,cx,cz){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
               const shade=lit*(groundColor?groundTint(x+px,z+pz):1);
-              const rgb=screeContact?
-                desertSeamVertexTint(color,px,pz,screeContact):color;
+              let rgb=color;
+              if(eligibleDesertTop){
+                const wx=x+px,wz=z+pz,key=wx+','+wz+','+y;
+                // Genuine full-cube M7 corners are integers. Never extrapolate
+                // color across unverified non-cube shape vertices.
+                if(Number.isInteger(wx)&&Number.isInteger(wz)){
+                  let squared=seamVertexDistances.get(key);
+                  if(squared===undefined){
+                    squared=nearestNaturalScreeSquared(wx,wz,y,(ax,az,sourceY)=>{
+                      const original=originalSurface(ax,az);
+                      return original?.id===401&&
+                        Math.abs(original.top-sourceY)<=1&&
+                        !hasEdit(ax,original.top,az)&&
+                        blockAt(ax,original.top,az)===401;
+                    });
+                    seamVertexDistances.set(key,squared);
+                  }
+                  rgb=desertSeamVertexTint(color,squared);
+                }
+              }
               appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
                 groundColor?terrainArtMaterial(id):0);
