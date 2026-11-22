@@ -17,7 +17,7 @@ export function auditShapeMotionEvidence({start,end,halfWidth,height,shapes,maxS
    if(s<=lo||s>=hi)initial=false;
    if(v===0){if(s<lo||s>hi){exit=-1;break;}continue;}
    const t1=(lo-s)/v,t2=(hi-s)/v,near=Math.min(t1,t2),far=Math.max(t1,t2);
-   if(near>enter){enter=near;normal={axis,sign:v>0?-1:1};}
+   if(near>=enter&&near<=1){enter=near;normal={axis,sign:v>0?-1:1};}
    exit=Math.min(exit,far);
   }
   if(initial){contacts.push({index:i,time:0,initialOverlap:true});continue;}
@@ -25,7 +25,7 @@ export function auditShapeMotionEvidence({start,end,halfWidth,height,shapes,maxS
    // Tangential or separating boundary contacts must not block motion.
    const axis=normal.axis,v=end[axis]-start[axis];
    const boundary=v>0?b.min[axis]-upper[axis]:b.max[axis]+pad[axis];
-   if(enter===0&&Math.abs(start[axis]-boundary)<1e-10&&v*normal.sign>=0)continue;
+   if(enter===0&&Math.abs(start[axis]-boundary)<1e-10&&v*normal.sign>0)continue;
    contacts.push({index:i,time:enter,normal,initialOverlap:false});
   }
  }

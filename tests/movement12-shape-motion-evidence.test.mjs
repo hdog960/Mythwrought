@@ -10,3 +10,6 @@ test('rejects nonfinite movement',()=>assert.equal(audit({...base,end:{x:Infinit
 test('rejects over-budget shapes',()=>assert.equal(audit({...base,maxShapes:0}).reason,'shape-budget'));
 test('clear parallel motion',()=>assert.equal(audit({...base,start:{x:0,y:0,z:3},end:{x:3,y:0,z:3}}).contacts.length,0));
 test('reports initial overlap',()=>assert.equal(audit({...base,start:{x:1,y:0,z:0},end:{x:1,y:0,z:0}}).contacts[0].initialOverlap,true));
+test('boundary moving inward is a contact',()=>assert.equal(audit({...base,start:{x:0.8,y:0,z:0},end:{x:1.2,y:0,z:0}}).contacts.length,1));
+test('boundary moving outward is clear',()=>assert.equal(audit({...base,start:{x:0.8,y:0,z:0},end:{x:0,y:0,z:0}}).contacts.length,0));
+test('boundary tangent is clear',()=>assert.equal(audit({...base,start:{x:0.8,y:0,z:0},end:{x:0.8,y:0,z:0.2}}).contacts.length,0));
