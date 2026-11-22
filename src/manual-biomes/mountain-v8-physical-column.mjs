@@ -24,9 +24,11 @@ export function planMountainV8PhysicalColumn(proposal,{
   // A natural cap needs a continuous three-layer original foundation.
   // Exposed or cave-carved AIR beneath it cannot be buried by a V8 uplift.
   const support=readOriginalBlock(x,legacyTop-1,z);
-  for(let d=2;d<=3;d++)
+  for(let d=2;d<=3;d++){
+    const underlying=readOriginalBlock(x,legacyTop-d,z);
     if(protectedAt(x,legacyTop-d,z)||
-       readOriginalBlock(x,legacyTop-d,z)===ids.AIR)return null;
+       (underlying!==ids.DIRT&&underlying!==ids.STONE))return null;
+  }
   if(readOriginalBlock(x,legacyTop,z)!==ids.GRASS||
      ![ids.DIRT,ids.STONE].includes(support)||
      protectedAt(x,legacyTop-1,z))return null;
