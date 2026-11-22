@@ -1,0 +1,26 @@
+name: Roadmap A Pack5 projected-contact footprint (isolated Node)
+
+# CI-only child of the source-only Roadmap A producer branch.
+# Avoids re-running the exact prior 40 passing source/native tests.
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-footprint-native-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-footprint-native.yml'
+permissions:
+  contents: read
+jobs:
+  focused-pack5-producer-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: New exact-source geometry and original Pack5 producer only
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-footprint-core.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-pack5-footprint-producer.test.mjs
