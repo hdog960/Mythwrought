@@ -65,3 +65,32 @@ test('unknown residency, invalid protection and edited voxel revision refuse',()
   }),/World revision changed/);
   engine.dispose();
 });
+
+test('engine mutation inside residentAt is detected even with unchanged voxel revision',()=>{
+  const w=world(),engine=new MobEngine(w,179);
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  let called=false;
+  const query={...w,residentAt(){if(!called){
+    called=true;engine.transition(id,'dormant');
+  }return true;}};
+  assert.throws(()=>inspectOriginalReconcileReadiness({
+    engine,world:query,observer
+  }),/Original MobEngine roster changed during inspection/);
+  assert.equal(engine.get(id).state,'dormant');
+  engine.dispose();
+});
+
+test('source protection callback mutation is rejected despite stable editRevision',()=>{
+  const w=world(),engine=new MobEngine(w,179);
+  const id=engine.spawn('glownewt',[35,4,8],{dormant:true});
+  assert.ok(id);
+  assert.throws(()=>inspectOriginalReconcileReadiness({
+    engine,world:w,observer,isProtected:mob=>{
+      engine.protectIdentity(mob.id);
+      return true;
+    }
+  }),/Original MobEngine roster changed during inspection/);
+  assert.equal(engine.get(id).important,true);
+  engine.dispose();
+});

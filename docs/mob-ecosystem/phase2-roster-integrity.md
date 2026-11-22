@@ -1,0 +1,7 @@
+# Original engine roster integrity during detached reconciliation
+
+Original MobEngine exposes no revision counter for entity mutations. A world-query `revision()` can stay unchanged even if residency or protection callbacks change an original mob during a due global tick, making previously inspected state stale. New pure, dependency-free `ecosystem-roster-integrity.mjs` captures branded, frozen copies of all fields in authentic `MobEngine.all()` snapshots, checks exact species reference identity, state, home chunk, important/juvenile flags, position, origin, velocity, yaw, health, grounded and motion mode, and enforces original engine maximum 128 entities and unique IDs.
+
+`inspectOriginalReconcileReadiness` now verifies the original engine still has the SAME state after all world residency/protection callbacks and edit-revision checks. If any engine mutation occurred, it fails closed. It never calls spawn/transition or mutates world/saves. Five focused dependency-free tests were run with **actual local Node 22.16.0 node --test** (5/5 PASS) before commit, and two source-engine mutation fixtures were authored for a future original-checkout runner. The local native subset is NOT a full repository or actual M7 world acceptance. Original away-ledger ownership remains unimplemented and nonempty stale histories remain a release blocker.
+
+All prior protected source/PWA acceptance requirements remain mandatory.

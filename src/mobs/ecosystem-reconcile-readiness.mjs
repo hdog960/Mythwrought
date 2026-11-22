@@ -1,6 +1,8 @@
 // Detached original PopulationManager reconciliation readiness; NO mutations.
 import {MobEngine} from './engine.mjs';
 import {validPoint} from './world-query.mjs';
+import {captureOriginalMobRoster,assertOriginalMobRosterUnchanged}
+  from './ecosystem-roster-integrity.mjs';
 export const ORIGINAL_ACTIVE_RADIUS=18;
 export const ORIGINAL_AWAY_GRACE=6;
 
@@ -18,6 +20,7 @@ export function inspectOriginalReconcileReadiness({
   if(!Number.isSafeInteger(revision)||revision<0)
     throw new TypeError('Invalid original world revision');
   const mobs=engine.all(),required=[];
+  const rosterCertificate=captureOriginalMobRoster(mobs);
   for(const mob of mobs){
     if(!validPoint(mob.position)||typeof mob.state!=='string')
       throw new TypeError('Invalid original mob snapshot');
@@ -41,6 +44,9 @@ export function inspectOriginalReconcileReadiness({
   }
   if(world.revision()!==revision)
     throw new TypeError('World revision changed during reconcile inspection');
+  // Original world editRevision alone cannot detect MobEngine mutations
+  // from a residency/protection callback. Re-read the source engine here.
+  assertOriginalMobRosterUnchanged(rosterCertificate,engine.all());
   return Object.freeze({
     ready:required.length===0,inspected:mobs.length,revision,
     required:Object.freeze(required)
