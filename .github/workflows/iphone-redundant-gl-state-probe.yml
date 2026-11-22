@@ -1,0 +1,39 @@
+name: Original-current-main overwritten GPU state calls pixel and guarded-upload probe (NO RELEASE)
+on:
+  push:
+    branches:
+      - probe/iphone-redundant-gl-state-291-20261121
+permissions:
+  contents: read
+jobs:
+  source-original-gpu-state-overwrite-proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Demand current main exact parent with no original game or strict test changes
+        run: |
+          test "$(git rev-parse HEAD^)" = "7016e14cd6289f45eaf7fc6a79a362b47996df65"
+          git diff --exit-code 7016e14cd6289f45eaf7fc6a79a362b47996df65 HEAD -- src/ index.html styles.css sw-m5.js tests/
+          node --check scripts/ci/iphone-redundant-gl-state-probe.mjs
+      - name: Install original Chromium WebGL2 and PNG pixel checker
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Compare authentic GPU upload and real edit latency with redundant GL state calls removed only in test response
+        run: |
+          python3 -m http.server 4173 --directory . >/tmp/mw-gl-overwrite.log 2>&1 &
+          node scripts/ci/iphone-redundant-gl-state-probe.mjs
+      - name: Preserve original game screenshot, per-edit native upload-stage and save evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-main-overwritten-gl-state-source-pixels-uploads
+          path: artifacts/iphone-redundant-gl-state-probe/
+          if-no-files-found: warn
+          retention-days: 14
