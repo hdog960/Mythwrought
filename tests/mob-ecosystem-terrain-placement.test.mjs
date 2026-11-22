@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import {getSpecies} from '../src/mobs/species.mjs';
 import {supportedPosition} from '../src/mobs/movement.mjs';
 import {spawnEligible} from '../src/mobs/ecology.mjs';
-import {proposeTerrainAwarePosition,M7_SURFACE_WINDOW_OFFSETS}
+import {proposeTerrainAwarePosition,M7_SURFACE_WINDOW_OFFSETS,
+  ORIGINAL_MAX_SPAWN_DISTANCE}
   from '../src/mobs/ecosystem-terrain-placement.mjs';
 
 function sourceFloorWorld(floor=4){
@@ -88,4 +89,61 @@ test('terrain-aware cave contract retains original single-window behavior',()=>{
   assert.throws(()=>proposeTerrainAwarePosition(world,{
     species,x,z,feet,section:-2,observer,kind:'surface'
   }),/Surface proposal must use section 0/);
+});
+
+test('terrain-aware placement avoids redundant overlapping original voxel reads',()=>{
+  const species=getSpecies('deer'),observer=[0,8,0],x=8,z=8,feet=8;
+  let baselineReads=0;
+  const baseline={
+    ...sourceFloorWorld(4),
+    volume(point,body){baselineReads++;return point[1]<4?'solid':'clear';}
+  };
+  // Baseline reproduces the same five sequential original supportedPosition
+  // queries without shared memoization, stopping on first real eligibility.
+  let first=null;
+  for(const offset of M7_SURFACE_WINDOW_OFFSETS){
+    const point=supportedPosition(baseline,x,z,feet+1+offset,feet-1.5+offset,species.body);
+    if(point&&spawnEligible(baseline,species,point,observer)){first=point;break;}
+  }
+  assert.ok(first,'Must compare against an actual valid original source floor');
+  let optimizedReads=0;
+  const optimized={
+    ...sourceFloorWorld(4),
+    volume(point,body){optimizedReads++;return point[1]<4?'solid':'clear';}
+  };
+  const result=proposeTerrainAwarePosition(optimized,{
+    species,x,z,feet,section:0,observer,kind:'surface'
+  });
+  assert.deepEqual(result.point,first,'Caching must retain EXACT source physics');
+  assert.ok(optimizedReads<baselineReads,
+    'Overlapping vertical windows should reuse original verified voxel results');
+  assert.ok(baselineReads-optimizedReads>0);
+});
+
+test('terrain-aware far-distance rejection performs zero original body reads',()=>{
+  const species=getSpecies('deer');
+  assert.equal(ORIGINAL_MAX_SPAWN_DISTANCE,26);
+  let reads=0;
+  const world={
+    ...sourceFloorWorld(4),
+    volume(point,body){reads++;return point[1]<4?'solid':'clear';}
+  };
+  const result=proposeTerrainAwarePosition(world,{
+    species,x:28,z:0,feet:4,section:0,observer:[0,4,0],kind:'surface'
+  });
+  assert.equal(result,null);
+  assert.equal(reads,0,'Guaranteed >26 horizontal separation must never scan');
+});
+
+test('memoized unknown terrain remains unknown and is never reclassified',()=>{
+  const species=getSpecies('deer');
+  let reads=0;
+  const world={
+    ...sourceFloorWorld(4),
+    volume(point){reads++;return 'unknown';}
+  };
+  assert.equal(proposeTerrainAwarePosition(world,{
+    species,x:8,z:8,feet:8,section:0,observer:[0,8,0],kind:'surface'
+  }),null);
+  assert.ok(reads>0);
 });
