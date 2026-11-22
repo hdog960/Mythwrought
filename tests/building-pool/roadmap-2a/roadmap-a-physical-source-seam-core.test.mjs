@@ -33,3 +33,15 @@ test('deterministic candidate count with test fixture order changed',()=>{
  assert.equal(check(a).exactOpaqueOppositeFacePairs,2);
  assert.equal(check(a.toReversed()).exactOpaqueOppositeFacePairs,2);
 });
+
+test('rounded-key near-match is not true exact opaque full-face coincidence',()=>{
+ const a=fixture([0,0,0]);
+ for(const altered of [
+  box([.0000003,0,0,1,1,1]),
+  box([0,.0000003,0,1,1,1]),
+  box([0,0,0,1,1,1],'mortar',[.4000003,.4,.4,1])
+ ]){
+   assert.equal(check([a,fixture([1,0,0],[altered])]).exactOpaqueOppositeFacePairs,0);
+ }
+ assert.equal(check([a,fixture([1,0,0])]).exactOpaqueOppositeFacePairs,1);
+});
