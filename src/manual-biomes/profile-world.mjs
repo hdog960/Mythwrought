@@ -10,6 +10,7 @@ import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,planEnvironmentalColumn} from './environment-v7.mjs';
+import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
@@ -74,6 +75,12 @@ export class FourRegionWorld extends VoxelWorld{
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
       this._environmentTreeChunks=new Map();
+      // Only immutable original V6 classifications may survive between
+      // prototype chunk builds. Physical source roots, cave/landmark AIR,
+      // tree overlaps and user edits are always recomputed per chunk.
+      // Historical M7 worlds allocate no additional cache.
+      if(this.experimentalEnchantedTrees)
+        this._environmentCandidateSiteBiomes=new EnchantedSiteBiomeCache();
       this._environmentOases=new Map();
     }
   }
@@ -184,7 +191,8 @@ export class FourRegionWorld extends VoxelWorld{
       cells=environmentalTreesForChunk(cx,cz,this.seed,
         (a,c)=>this._columnPlan(a,c),
         (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
-        {experimentalEnchantedTrees:this.experimentalEnchantedTrees});
+        {experimentalEnchantedTrees:this.experimentalEnchantedTrees,
+          candidateSiteBiomeCache:this._environmentCandidateSiteBiomes??null});
       this._environmentTreeChunks.set(key,cells);
       if(this._environmentTreeChunks.size>64)
         this._environmentTreeChunks.delete(this._environmentTreeChunks.keys().next().value);
