@@ -5,7 +5,7 @@ import {
   SKY_ISLAND_MAX_VIEW_RADIUS_CHUNKS,
   skyIslandSectionForY,skyIslandSectionBounds,skyIslandMeshKey,skyIslandBodyRegions,
   verifySkyIslandFlightSpace,planSkyIslandResidency,planSkyIslandMeshJobs
-} from '../src/floating-islands/sky-runtime-adapter.mjs';
+} from '../../src/floating-islands/sky-runtime-adapter.mjs';
 
 test('exact upper world coverage Y20..256 uses fifteen no-gap slices',()=>{
   assert.equal(SKY_ISLAND_MIN_Y,20);assert.equal(SKY_ISLAND_MAX_Y,256);
