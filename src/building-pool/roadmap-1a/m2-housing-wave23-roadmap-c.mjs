@@ -22,7 +22,7 @@ export const ROADMAP_C_1A_WAVE23_HOUSE_SPECS=Object.freeze([
         0,
         0,
         15,
-        14
+        15
       ],
       [
         51,
@@ -672,7 +672,7 @@ export const ROADMAP_C_1A_WAVE23_HOUSE_SPECS=Object.freeze([
         "z": 48,
         "room": "west-dune-guest-room",
         "asset": "pack5:082",
-        "variant": "saffron-quilt"
+        "variant": "wanderer-quilt"
       },
       {
         "x": 21,
@@ -733,14 +733,14 @@ export const ROADMAP_C_1A_WAVE23_HOUSE_SPECS=Object.freeze([
         "z": 49,
         "room": "east-family-sleeping",
         "asset": "pack5:082",
-        "variant": "saffron-quilt"
+        "variant": "wanderer-quilt"
       },
       {
         "x": 52,
         "z": 49,
         "room": "east-family-sleeping",
         "asset": "pack5:082",
-        "variant": "saffron-quilt"
+        "variant": "wanderer-quilt"
       },
       {
         "x": 59,
