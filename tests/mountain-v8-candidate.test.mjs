@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planMountainV8Candidate as plan} from '../src/manual-biomes/mountain-v8-candidate.mjs';
 const args=(x,z,seed=179)=>({x,z,seed,legacyTop:5,biomeWeight:1,
-  neighborTops:[13,12,13,12],worldMaxY:30});
+  neighborTops:[5,5,5,5],worldMaxY:30});
 test('V8 proposal deterministic and independent of traversal order',()=>{
   const sites=Array.from({length:225},(_,i)=>args((i%15)*4-28,Math.floor(i/15)*4-28));
   const forward=sites.map(plan),reverse=[...sites].reverse().map(plan).reverse();
@@ -33,7 +33,20 @@ test('protected caves and other biomes fail closed, no V7 identity mutation',()=
 });
 test('neighbor slope checks reject grassy cliffs without modifying source columns',()=>{
   const a=args(8,-24),original=structuredClone(a);
-  const steep=plan({...a,neighborTops:[1,1,1,1]});
+  const steep=plan({...a,neighborTops:[0,0,0,0]});
   assert.ok(steep.cliff);assert.notEqual(steep.cap,'alpine-grass');
   assert.deepEqual(a,original);
+});
+
+test('nonrecursive V8 neighbor prediction is bounded and deterministic',()=>{
+  const p=plan(args(-24,28));
+  assert.equal(p.proposedNeighborTops.length,4);
+  assert.ok(p.proposedNeighborTops.every(y=>Number.isInteger(y)&&y>=0&&y<=28));
+  const weights=[1,.98,.91,.86];
+  const varied=plan({...args(-24,28),neighborBiomeWeights:weights});
+  assert.equal(varied.proposedNeighborTops.length,4);
+  assert.ok(varied.proposedNeighborTops.every(y=>Number.isInteger(y)));
+  assert.deepEqual(varied,plan({...args(-24,28),neighborBiomeWeights:weights}));
+  assert.equal(plan({...args(0,0),neighborBiomeWeights:[1,1,NaN,1]}),null);
+  assert.equal(plan({...args(0,0),neighborTops:[5,-1,5,5]}),null);
 });
