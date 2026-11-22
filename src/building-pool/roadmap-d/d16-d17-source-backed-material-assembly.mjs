@@ -113,19 +113,23 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
  for(const [n,rows] of [['wall',exterior],['roof',weather],['graded ridge',ridges],['tower crown',crowns]])
    if(rows.length<8)throw Error('No genuinely authored physical '+n+' original positions');
  const samples=[];
- // Preserve original wood/stone authoring intent: wood is ACTUAL Pack2 planks,
- // not recolored Pack1 masonry. Prefer both physical material families when the
- // source really has both; no invented wood positions in stone-only structures.
- const stone=exterior.filter(c=>c.asset!=='live:wood'),timber=exterior.filter(c=>c.asset==='live:wood');
- let selected;
- if(stone.length&&timber.length&&facadeBudget>=2){
-   const nWood=Math.max(1,Math.min(facadeBudget-1,Math.round(facadeBudget*timber.length/exterior.length)));
-   selected=[...sampled(stone,facadeBudget-nWood),...sampled(timber,nWood)];
- }else selected=sampled(exterior,facadeBudget);
- for(const c of selected){
-   const wood=c.asset==='live:wood';
-   samples.push(physicalAt(c,wood?'pack2:013':masonryRef,wood?59:masonryId,
-      'north',wood?2:1,resolveManualAsset,wood?'original-planed-wood-facade':'external-masonry'));
+ // Original W16/W17 exterior walls are STONE in every biome. Preserve their
+ // source roles, even in enchanted forest; do not invent wooden walls.
+ for(const c of sampled(exterior,facadeBudget))
+   samples.push(physicalAt(c,masonryRef,masonryId,'north',1,resolveManualAsset,'external-masonry'));
+ // Actual original wooden lintel BEAMS are separately authored at y=4. Use
+ // Pack2's real directional heartwood beam candidate (ID61), not a plank cube.
+ const sourceBeams=blueprint.cells.filter(c=>c.role==='beam'&&c.asset==='live:wood'&&c.feature==='lintel');
+ if(sourceBeams.length<4)throw Error('Missing source-authored original timber lintel coordinates');
+ const windowDirections=new Map(blueprint.openings.filter(o=>o.kind==='window')
+    .map(o=>[key(o.at),o.facing]));
+ for(const c of sampled(sourceBeams,4)){
+   const openingFace=windowDirections.get(key([c.at[0],c.at[1]-1,c.at[2]]));
+   const oriented=openingFace==='east'||openingFace==='west'?'east':'north';
+   const placement=physicalAt(c,'pack2:015',61,oriented,2,resolveManualAsset,'original-heartwood-lintel-beam');
+   samples.push(Object.freeze({...placement,
+     originalWindowFacingUsed:Boolean(openingFace),
+     orientationNeedsReview:!openingFace}));
  }
  for(const c of sampled(weather,roofBudget))samples.push(physicalAt(c,roofRef,roofId,'north',3,resolveManualAsset,'original-weather-roof'));
  for(const c of sampled(ridges,ridgeBudget))samples.push(physicalAt(c,'pack3:029',115,inferRidgeAxis(c,occupancy),3,resolveManualAsset,'original-graded-ridge'));
@@ -142,7 +146,7 @@ export function assembleD16D17OriginalPhysicalPreview(blueprint,{
    samples.push(Object.freeze({...physicallyResolved,
      originalRealPack4WorldMesh:originalPack4WorldMesh(c,originalPack4)}));
  }
- if(samples.length>facadeBudget+roofBudget+ridgeBudget+towerBudget+windowBudget+2)
+ if(samples.length>facadeBudget+4+roofBudget+ridgeBudget+towerBudget+windowBudget+2)
    throw Error('Unbounded physical sample packet');
  const counts=Object.freeze(samples.reduce((o,row)=>(o[row.sampleKind]=(o[row.sampleKind]||0)+1,o),{}));
  return Object.freeze({format:'mythwrought.builder-d.w16-w17.manual-physical-assembly.v1',
