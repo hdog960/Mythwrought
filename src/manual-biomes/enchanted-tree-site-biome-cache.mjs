@@ -17,6 +17,17 @@ export class EnchantedSiteBiomeCache extends Map {
     this.evictions=0;
     this.peakEntries=0;
   }
+  set(key,biome){
+    // Enforce the cap on ALL writes, not only getOrRead, so no direct
+    // caller can accidentally grow this experimental metadata map.
+    if(!super.has(key)&&this.size>=this.limit){
+      super.delete(this.keys().next().value);
+      this.evictions++;
+    }
+    super.set(key,biome);
+    this.peakEntries=Math.max(this.peakEntries,this.size);
+    return this;
+  }
   getOrRead(x,z,seed,readBiome){
     if(![x,z,seed].every(Number.isInteger)||seed!==(seed|0)||
        typeof readBiome!=='function')
@@ -34,12 +45,7 @@ export class EnchantedSiteBiomeCache extends Map {
        !Number.isFinite(biome.weight)))
       throw Error('Unstable Enchanted site biome result');
     this.misses++;
-    if(this.size>=this.limit){
-      super.delete(this.keys().next().value);
-      this.evictions++;
-    }
-    super.set(key,biome);
-    if(this.size>this.peakEntries)this.peakEntries=this.size;
+    this.set(key,biome);
     return biome;
   }
 }
