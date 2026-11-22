@@ -44,15 +44,19 @@ test('opt-in only on localhost and 127.0.0.1; public Pages always original contr
   one('let near291=null;');
 });
 test('the exact original near opaque draw loop survives as the A/B control',()=>{
-  one('else for(const c of chunks.values()){\n        gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);');
+  const start=source.indexOf('if(near291)near291.render(chunks.values());');
+  const end=source.indexOf('canvas.dataset.c6FarDrawn=',start);
+  assert.ok(start>=0&&end>start);
+  const near=source.slice(start,end);
+  assert.ok(near.includes('else for(const c of chunks.values()){\n        gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);'));
   for(const line of [
     'gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);',
     'gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);',
     'gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);',
     'gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);'
-  ])one(line);
+  ])assert.equal(near.split(line).length-1,1);
+  assert.equal(near.split('gl.drawArrays(gl.TRIANGLES,0,c.count);').length-1,1);
   one('if(near291)near291.render(chunks.values());');
-  one('gl.drawArrays(gl.TRIANGLES,0,c.count);');
 });
 test('original near-buffer ownership and water retirement never displaced',()=>{
   inOrder('function originalDeleteChunkBuffers(chunk){',
