@@ -184,3 +184,50 @@ test('radius-three distance pruning is appearance-equivalent to exact previous e
   result:'both color functions exactly invariant for every representative mask'
  }));
 });
+
+
+test('physical boundary edits and original protected AIR veto remain bit-exact under cache pruning',()=>{
+ for(const [seed,cx,cz] of sites){
+  const old=new OldWorld(seed,oldProfile(seed,M7));
+  const next=new NewWorld(seed,newProfile(seed,M7));
+  const edits=seed===179?
+    [[-786,4,-1774,401,400],[-786,4,-1775,258,257]]:
+    [[-2848,7,-774,401,400]];
+  for(const [x,y,z,source,replacement] of edits){
+   assert.equal(old.get(x,y,z),source,'Original source-backed edit witness must exist');
+   assert.equal(next.get(x,y,z),source);
+   assert.ok(old.set(x,y,z,replacement));
+   assert.ok(next.set(x,y,z,replacement));
+   assert.equal(next.get(x,y,z),replacement);
+  }
+  assert.deepEqual(next.save().edits,old.save().edits);
+  assert.equal(next.save().edits.length,edits.length);
+  const affected=seed===179?[[cx,cz],[cx+1,cz]]:
+    [[cx,cz],[cx-1,cz]];
+  const measured=[];
+  for(const [x,z] of affected){
+   const a=oldMesh(old,x,z),b=newMesh(next,x,z);
+   assert.deepEqual(b,a,'Player-edited screen border must remain Float32 bit-identical');
+   assert.ok(next.cachedBiomeColumns<=1024);
+   assert.deepEqual(next.save().edits,old.save().edits);
+   measured.push({chunk:[x,z],vertices:a.length/9,bytes:a.byteLength});
+  }
+  let vetoes=0;
+  if(seed===179){
+   for(let z=-1790;z<=-1758;z++)for(let x=-802;x<=-770;x++){
+    const a=old._columnPlan(x,z),b=next._columnPlan(x,z);
+    if(a.size===0){
+      vetoes++;
+      assert.equal(b.size,0,'Original guarded environment AIR must remain vetoed');
+    }
+   }
+   assert.ok(vetoes>0,'Must witness actual rejected original surface columns');
+  }
+  console.log('DESERT_P3_CROSS_CHUNK_EDIT_VETO '+JSON.stringify({
+   seed,edits:edits.map(([x,y,z,from,to])=>({x,y,z,from,to})),
+   savedRows:next.save().edits.length,
+   checkedOriginalVetoColumns:vetoes,affected:measured,
+   originalCache:old.cachedBiomeColumns,candidateCache:next.cachedBiomeColumns
+  }));
+ }
+});
