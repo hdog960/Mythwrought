@@ -1,0 +1,42 @@
+name: Desert P3 authentic two-site seam census (isolated)
+on:
+  push:
+    branches:
+      - research/desert-p3-seam-gradient-audit-20261122
+    paths:
+      - .github/workflows/desert-p3-seam-census-isolated.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-seam-census-isolated
+  cancel-in-progress: false
+jobs:
+  real-v7-seam-census:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce isolated scope and exact gameplay inheritance
+        run: |
+          set -euo pipefail
+          BASE=641726d815172abcde7417b22c71e9df250fcd4b
+          test "$(git merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git diff --name-only "$BASE" HEAD | grep -Ev '^(scripts/ci/desert-p3-authentic-seam-audit.mjs|.github/workflows/desert-p3-seam-census-isolated.yml)$' || true)
+          test -z "$unexpected"
+          node --check scripts/ci/desert-p3-authentic-seam-audit.mjs
+      - name: Source-authentic guarded Desert material boundary audit only
+        run: |
+          node scripts/ci/desert-p3-authentic-seam-audit.mjs | tee desert-p3-seam-report.log
+      - name: Upload small text evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-authentic-seam-audit
+          path: desert-p3-seam-report.log
+          if-no-files-found: warn
+          retention-days: 7
