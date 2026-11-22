@@ -140,3 +140,54 @@ test('unrecognized JSON schemas and malformed SHA are never native evidence',()=
  assert.throws(()=>check({actualHead:'not-a-sha'}),
   /Authenticated full 40-hex M7 HEADs required/);
 });
+
+test('forged gallery voxel and reader totals cannot pass a declared complete census',()=>{
+ const g=gallery();g.sourceCells+=1;
+ const r=check({gallery:g});
+ assert.equal(r.reportRowArithmeticReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('M7_GALLERY_AGGREGATES_DO_NOT_MATCH_ROWS'));
+});
+test('a gallery cannot claim a complete ore ID histogram with absent vetoed IDs',()=>{
+ const g=gallery();
+ g.rows[0].sourceRejectionCounts.unsafeMaterial=3;
+ const r=check({gallery:g});
+ assert.equal(r.reportRowArithmeticReconciled,false);
+ assert.equal(r.galleryAccountingReconciled,false);
+ assert.ok(r.reasonCodes.includes('M7_GALLERY_ROW_SOURCE_ARITHMETIC_INVALID'));
+});
+test('source clean region cannot impersonate already built walkable deck',()=>{
+ const g=gallery();
+ g.rows[0].oldM7AsBuiltBlockedHeadroomCells=2;
+ g.rows[0].oldM7AsBuiltHeadroomBlockedByBlockId={'3':2};
+ const r=check({gallery:g});
+ assert.equal(r.reportRowArithmeticReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+});
+test('wrong but superficially successful city connector index list is rejected',()=>{
+ const c=city();c.rows[0].threeDeepLinkSelectedIndexList=[16,25,25];
+ const r=check({city:c});
+ assert.equal(r.cityAccountingReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('M7_CITY_DEEP_LINK_TOPOLOGY_INCONSISTENT'));
+});
+test('overreported core excavation in a real M7 cohort fails arithmetic',()=>{
+ const k=chunk();k.rows[2].ownedInteriorApprovedCarves=2;
+ const r=check({chunk:k});
+ assert.equal(r.chunkAccountingReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('M7_CHUNK_CORE_HALO_ARITHMETIC_INVALID'));
+});
+test('aggregate projected faces cannot be inflated independently of chunk rows',()=>{
+ const k=chunk();k.aggregateSourceRisk.faceGrowth++;
+ const r=check({chunk:k});
+ assert.equal(r.chunkAccountingReconciled,false);
+ assert.equal(r.proposalEvidenceAllPassed,false);
+ assert.ok(r.reasonCodes.includes('M7_CHUNK_AGGREGATE_DOES_NOT_MATCH_ROWS'));
+});
+test('invalid original chunk coordinate outside declared region is a refusal',()=>{
+ const k=chunk();k.rows[1].origin.x=16;
+ const r=check({chunk:k});
+ assert.equal(r.chunkAccountingReconciled,false);
+ assert.equal(r.releaseApproved,false);
+});
