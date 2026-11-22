@@ -3,6 +3,7 @@ import {WORLD_MAX_Y} from '../depth.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {buildEnchantedTreeCandidate,ENCHANTED_TREE_MAX_RADIUS} from './enchanted-tree-candidates.mjs';
+import {enchantedTreeFootingsSupported} from './enchanted-tree-footings.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -198,9 +199,14 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         // Deterministic species choice independent of the legacy density roll.
         const shaped=buildEnchantedTreeCandidate(x,floor,z,treeRoll(tx,tz,seed+151));
         if(!shaped)continue;
-        // A two-by-two ancient trunk may only stand on genuinely supported
-        // terrain: no suspended roots or collision with an elevated neighbor.
-        if(shaped.footprint.some(([dx,dz])=>
+        // Historical one-root Starspire/Moonwillow checks stay untouched.
+        // For the 2x2 Ancient Giant, every corner must be a genuine M7
+        // surface cap with physical subsoil, not a cave void or landmark roof.
+        // The same world readers work across 16-block chunk boundaries.
+        if(shaped.footprint.length>1){
+          if(!enchantedTreeFootingsSupported(x,floor,z,shaped.footprint,
+            readColumn,readCell,BLOCK.AIR))continue;
+        }else if(shaped.footprint.some(([dx,dz])=>
           readCell(x+dx,floor,z+dz)===BLOCK.AIR||
           readCell(x+dx,floor+1,z+dz)!==BLOCK.AIR))continue;
         tree=shaped.cells;
