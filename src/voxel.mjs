@@ -411,9 +411,14 @@ export function meshChunk(world,cx,cz){
                   let d2=screeWarmDistances.get(key);
                   if(d2===undefined){
                     d2=nearestDesertHardpanSquared(wx,wz,y,(ax,az,sourceY)=>{
+                      // Original V6 biome selection is deterministic and
+                      // independent of guarded column plans and player edits.
+                      // Fail cheap before invoking _columnPlan on non-Desert
+                      // probes; does not alter any material/color outcomes.
+                      const biome=v6BiomeAt(ax,az,world.seed);
+                      if(biome?.name!=='desert'||biome.weight>.50)return false;
                       const source=originalSurface(ax,az);
                       if(source?.id!==258||Math.abs(source.top-sourceY)>1)return false;
-                      const biome=v6BiomeAt(ax,az,world.seed);
                       return canUseDesertHardpanCue({
                         sourceSurface:source,region:biome,
                         edited:hasEdit(ax,source.top,az),
