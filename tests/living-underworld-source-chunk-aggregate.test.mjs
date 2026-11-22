@@ -54,3 +54,15 @@ test('unbounded or malformed evidence refuses without accepting an allocation',(
  assert.equal(summarizeSourceProtectedChunkRisk([r(0,{approvedCarves:-1})]).reason,
   'INVALID_CHUNK_RISK_EVIDENCE');
 });
+test('conservation of proposed source cuts is required for every chunk',()=>{
+ const rows=Array.from({length:5},(_,i)=>r(i));
+ rows[1]=r(1,{plannedCarves:8,approvedCarves:1,unsafeCarves:0});
+ assert.equal(summarizeSourceProtectedChunkRisk(rows).reason,
+  'INVALID_CHUNK_RISK_EVIDENCE');
+});
+test('a self-declared successful chunk cannot hide refused source cuts',()=>{
+ const rows=Array.from({length:5},(_,i)=>r(i));
+ rows[2]=r(2,{plannedCarves:2,approvedCarves:1,unsafeCarves:1});
+ assert.equal(summarizeSourceProtectedChunkRisk(rows).reason,
+  'INVALID_CHUNK_RISK_EVIDENCE');
+});
