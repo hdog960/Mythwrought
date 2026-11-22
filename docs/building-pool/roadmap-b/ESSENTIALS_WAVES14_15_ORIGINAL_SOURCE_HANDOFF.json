@@ -1,0 +1,148 @@
+{
+  "schema": "mythwrought.builder-b.1b-waves14-15-source-provisional.v1",
+  "project": "MYTHWROUGHT Builder B Roadmap B",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "exactSourceParentAtHandoff": "d33e0d7a5b8cab76c7b13654de3462e7f7ad9e5c",
+  "protectedParentDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "status": "ISOLATED_SOURCE_ONLY_NOT_ACCEPTED",
+  "originals": [
+    {
+      "wave": 14,
+      "id": "r1:harbor-office:desert:small:002",
+      "name": "Glassdune Split-Quay Registry",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave14.mjs",
+      "gitBlob": "2f7d73dfb9fefaf9e04d2136d2a883bfbde4f1e9",
+      "sourceCells": 7280,
+      "originalSupportedPack3Roofs": 1529,
+      "connectedWalkableCells": 1173,
+      "rooms": 8,
+      "portals": 12,
+      "lowerUprightPack4Windows": 12,
+      "elevatedUprightPack4Windows": 8,
+      "skyOpenSourceCourtyards": [
+        30,
+        16
+      ],
+      "substantialOriginalStructure": "Seven asymmetric source roof wings, grounded high masonry signal tower, honest unlit vertical glass, forked dry ledger exchange",
+      "correctedGenuinePhysicalDefect": "Low glass moved to true west-exterior source facade",
+      "novelty": {
+        "comparedTo": "Tidehollow earlier original harbor office",
+        "eightWayD4": 8,
+        "maxIoU": 0.2644230769230769
+      }
+    },
+    {
+      "wave": 15,
+      "id": "r1:harbor-office:snow:small:002",
+      "name": "Icehaven Bifurcated Snow Customs House",
+      "file": "src/building-pool/roadmap-b/builder-b-essentials-wave15.mjs",
+      "gitBlob": "4b726dbf2b834b82fc9942f8c793e886b497b6fa",
+      "sourceCells": 6675,
+      "originalSupportedPack3Roofs": 1533,
+      "connectedWalkableCells": 1204,
+      "rooms": 8,
+      "portals": 12,
+      "lowerUprightPack4Windows": 11,
+      "elevatedUprightPack4Windows": 0,
+      "skyOpenSourceCourtyards": [
+        36,
+        15
+      ],
+      "substantialOriginalStructure": "Seven varied winter roof wings, full twenty grounded source-cell masonry warning mast and separate inert cap, two real open snowdrift courts",
+      "correctedGenuinePhysicalDefect": "Moved portal out of nonexistent source ice courtyard onto grounded east shoulder",
+      "novelty": {
+        "comparedTo": [
+          "Tidehollow temperate source",
+          "Glassdune desert source"
+        ],
+        "eightWayD4": 16,
+        "maxIoU": 0.35149156939040205
+      }
+    }
+  ],
+  "focusChecksExecuted": {
+    "sourceModules": "Authenticated unchanged original sourcePlan and blueprint schema evaluated with candidate source modules; both PASS",
+    "roofSupport": "PASS each authored Pack3 roof with actual y-1 bearing source cell",
+    "uprightGlass": "PASS original exterior facades and 8 high dry-registry windows",
+    "courtyard": "PASS 46 Glassdune and 51 Icehaven entirely absent authored ground columns",
+    "circulation": "PASS canonical original blueprint validator connected walkable source and 2-high physical portals",
+    "exclusiveOwnership": "PASS both reserved frozen Builder B 115 IDs, neither in 92 Builder D nor previously accepted historical sources",
+    "localNovelty": "PASS 24 total original eight-way same-category comparisons; canonical full 228 corpus NOT executed",
+    "visualSourceStaticPreflight": "PASS one combined Waves9-15 42-frame source gallery and independent auditor JS parse/provenance/wiring; NO screenshots actually captured"
+  },
+  "nativeTestsStaged": [
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave14.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave15.test.mjs",
+    "tests/building-pool/roadmap-b/builder-b-essentials-wave9-15-gallery-wiring.test.mjs"
+  ],
+  "visualEvidencePlan": {
+    "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-15-gallery.mjs",
+    "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-15-gallery.mjs",
+    "sevenOriginals": "1B Waves9–15",
+    "realChromiumFramesNeeded": 42,
+    "viewports": [
+      [
+        667,
+        375
+      ],
+      [
+        844,
+        390
+      ],
+      [
+        932,
+        430
+      ]
+    ],
+    "views": [
+      "exterior",
+      "cutaway"
+    ],
+    "uniquePNGHashesNeeded": 42,
+    "sourceProvenanceFiles": 10,
+    "screenshotCRCAndSHA256": true,
+    "exactHeadPin": true,
+    "runStatus": "NOT_EXECUTED"
+  },
+  "requiredAcceptanceOutstanding": [
+    "Run exact native Node tests on original repository checkout with complete imports",
+    "Execute authentic historical 228 1B source same-category unrelaxed 8-way D4",
+    "Original physical Pack3/4 visible, selection and collision ABI verification",
+    "Run genuine 42-frame original source Chromium/WebGL2 captures on milestone exact-head and independently audit CRC/SHA",
+    "Original real-game, actual iPhone landscape, saves/offline/PWA/performance and creator art acceptance when integrating"
+  ],
+  "claims": {
+    "fullHistoricD4Passed": false,
+    "actualNodeRunnerPassed": false,
+    "actualChromiumScreenshotCaptured": false,
+    "realGamePlaced": false,
+    "realIPhoneTested": false,
+    "creatorArtApproved": false,
+    "productionRegistered": false,
+    "beaconPowered": false,
+    "merged": false,
+    "deployed": false,
+    "actionsLaunched": false,
+    "existingCIReexecuted": false,
+    "workflowModified": false
+  },
+  "freeze": {
+    "historicAccepted1B": 228,
+    "exclusiveBuilderB": 115,
+    "exclusiveBuilderD": 92,
+    "productionMainUnchanged": true,
+    "protectedDraftPRHeadsUnchanged": true,
+    "otherDeveloperWorkModified": false,
+    "fiveAutomationsModified": false
+  },
+  "progress": {
+    "newResidentialOriginals": 10,
+    "newServiceOriginals": 15,
+    "totalNewOriginals": 25,
+    "targetNewOriginals": 294,
+    "serviceRemaining": 100,
+    "residentialRemaining": 169,
+    "totalRemaining": 269
+  },
+  "policy": "No PR created; no new GitHub Actions triggered. Reuse exact authenticated PR407 pass only on prior unchanged Wave8 source; new Wave14/15 currently provisional. Earliest meaningful 42-frame browser acceptance should supersede unpublished duplicate 6/12/24/30-frame gallery milestones."
+}
