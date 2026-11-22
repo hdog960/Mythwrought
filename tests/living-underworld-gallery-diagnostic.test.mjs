@@ -62,3 +62,29 @@ test('diagnostic mode must be explicitly boolean',()=>{
   source:ore,diagnoseAllGalleries:'yes'
  }),/Invalid source-protected gallery survey/);
 });
+test('read-only gallery diagnostic cannot overrun remaining cell budget by a whole gallery',()=>{
+ let materialReads=0;
+ const r=auditSourceProtectedMainGalleries(seed,rx,rz,{
+  source:{...ore,naturalAt:()=>{materialReads++;return 1;}},
+  diagnoseAllGalleries:true,maxTotalSourceChecks:100
+ });
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'SOURCE_GALLERY_TOTAL_BUDGET');
+ assert.ok(r.sourceChecks<=101);
+ assert.ok(materialReads<=100);
+ assert.equal(r.diagnosticAll16GalleriesAttempted,false);
+ assert.equal(r.rows.length,0);
+});
+test('partial successes are retained but cannot certify missing galleries',()=>{
+ const r=auditSourceProtectedMainGalleries(seed,rx,rz,{
+  source:{...ore,naturalAt:()=>1},
+  diagnoseAllGalleries:true,maxTotalSourceChecks:1700
+ });
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'SOURCE_GALLERY_TOTAL_BUDGET');
+ assert.ok(r.rows.length>=1&&r.rows.length<16);
+ assert.equal(r.sourceSafeGalleries,r.rows.length);
+ assert.equal(r.sourceRejectedGalleries,0);
+ assert.ok(r.sourceChecks<=1701);
+ assert.equal(r.diagnosticAll16GalleriesAttempted,false);
+});
