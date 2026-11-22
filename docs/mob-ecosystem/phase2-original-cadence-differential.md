@@ -1,0 +1,5 @@
+# Original PopulationManager × global clock differential
+
+Source-only Node test `tests/mob-ecosystem-original-cadence-differential.test.mjs` imports the original `PopulationManager`, `MobEngine`, implemented 40-species roster, and detached source global/cadence modules. It runs identical calls and source region inputs in a deliberately blocked world (unknown voxel bodies and no ground), **never creates creatures**, and compares genuine original `advance().evaluated` to the detached source clock's attempts.
+
+One 12-call three-region schedule verifies fractional ticker timing and 0-vs-6 attempts, with 12/12 V8 source-level comparisons independently executed on exact original source in this session. A second 65-tick test verifies the original first-64 selection window excludes the deliberately invalid 65th candidate and returns to region zero. Authored native Node tests on detached commits remain unexecuted in native CI; no authentic M7 terrain/birth acceptance inferred. No production, save, world, offline PWA, other developer or workflow changes.
