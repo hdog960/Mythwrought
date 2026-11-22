@@ -1,5 +1,5 @@
 # Exact original-M7 experimental-only 128-entry immutable site metadata cache.
-# Scope: original FourRegionWorld streaming generation, cache eviction, actual
+# Scope: 96 original FourRegionWorld chunk builds per seed (>64 cache), cache eviction, actual
 # cave/landmark source integrity. Prior 6/6 density tests and earlier Moonwillow
 # native/WebGL2 proofs are reused where their tree/renderer source is unchanged.
 # No shared workflows, browser runs, broad CI or queue audits.
