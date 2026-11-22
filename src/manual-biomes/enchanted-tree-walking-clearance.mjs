@@ -1,16 +1,35 @@
-// Opt-in Enchanted Forest crown clearance for the original full-cube
-// player collider (BODY_HEIGHT=1.78). A walking player standing with feet
-// immediately above a real surface cap occupies the first TWO air voxels.
-// Only discard candidate LEAVES too close to an already-authored solid below.
-// Never move terrain, hollow caves, alter roots/branches, or change M7 defaults.
+// Phase 2 opt-in Enchanted Forest leaf clearance for the ORIGINAL full-cube
+// player collider (BODY_RADIUS=.28 and BODY_HEIGHT=1.78).
+// A real player may straddle a cardinal/diagonal block boundary; therefore
+// a two-voxel-high clear space over walkable terrain requires examining the
+// 3x3 adjacent ground columns, not just the leaf's own X/Z column.
+// Only candidate leaves are pruned. Bark, cave AIR, terrain, original trees,
+// landmarks, saved worlds and the historical M7 generator are never edited.
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 
 export const ENCHANTED_WALKING_HEADROOM_VOXELS=2;
+export const ENCHANTED_WALKING_GROUND_NEIGHBORS=Object.freeze([
+  [0,0],[-1,0],[1,0],[0,-1],[0,1],
+  [-1,-1],[-1,1],[1,-1],[1,1]
+].map(offset=>Object.freeze(offset)));
 
 export function clearEnchantedCanopyForWalking(cells,readBaseline,air=0){
   if(!Array.isArray(cells)||typeof readBaseline!=='function'||
      !Number.isInteger(air))throw Error('Invalid enchanted walking clearance input');
-  // Copy-on-first-removal keeps the common unmodified canopy allocation-free.
+
+  // Every source terrain/cave/landmark probe is read-only. Crown voxels
+  // frequently share nearby support coordinates across several vertical
+  // tiers; memoize real source reads for this ONE tree, not globally.
+  // Bounded by the actual candidate's small physical envelope.
+  const baselineCache=new Map();
+  const blocked=(x,y,z)=>{
+    const key=x+','+y+','+z;
+    if(!baselineCache.has(key))
+      baselineCache.set(key,readBaseline(x,y,z));
+    return baselineCache.get(key)!==air;
+  };
+
+  // No copies for trees whose leaves already have genuine player headroom.
   let kept=null;
   for(let i=0;i<cells.length;i++){
     const cell=cells[i];
@@ -18,8 +37,18 @@ export function clearEnchantedCanopyForWalking(cells,readBaseline,air=0){
        !cell.every(Number.isInteger))
       throw Error('Invalid enchanted canopy voxel');
     const [x,y,z,id]=cell;
-    if((id===G.aetherLeaves||id===G.moonLeaves)&&
-       (readBaseline(x,y-1,z)!==air||readBaseline(x,y-2,z)!==air)){
+    let blocksWalking=false;
+    if(id===G.aetherLeaves||id===G.moonLeaves){
+      for(const [dx,dz] of ENCHANTED_WALKING_GROUND_NEIGHBORS){
+        // At a real natural foot position, original full-cube collisions
+        // contact the candidate leaf whenever it occupies either body layer.
+        // Fail closed on unknown baseline readings: they are NOT known AIR.
+        if(blocked(x+dx,y-1,z+dz)||blocked(x+dx,y-2,z+dz)){
+          blocksWalking=true;break;
+        }
+      }
+    }
+    if(blocksWalking){
       if(kept===null)kept=cells.slice(0,i);
     }else if(kept!==null)kept.push(cell);
   }
