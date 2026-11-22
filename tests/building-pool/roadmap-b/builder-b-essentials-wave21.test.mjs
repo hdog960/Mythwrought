@@ -32,7 +32,7 @@ test('Sunscar distinct true reserved Builder B desert lighthouse with no histori
  assert.equal(b.architecturalIdentity.productionRegistered,false);
 });
 test('Sunscar 24-cell TRUE tower ring with vertical grounded masonry, 8 elevated openings and 24 original Pack3 crown cells',()=>{
- const b=buildSunscarOpenOculusLanternwatch(),m=new Map(b.placements.map(p=>[K(p.at),p]));
+ const b=buildSunscarOpenOculusLanternwatch(),m=new Map(b.placements.map(p=>[K(p.at),p])),walkSet=new Set(b.walkable.map(K));
  assert.equal(b.placements.length,6700);assert.equal(b.walkable.length,1292);
  assert.equal(b.rooms.length,7);assert.equal(b.portals.length,9);
  const crown=b.placements.filter(p=>p.directlyGroundBackedTowerCrown);
@@ -54,7 +54,7 @@ test('Sunscar 24-cell TRUE tower ring with vertical grounded masonry, 8 elevated
   assert.equal(m.get(K([x,0,z]))?.role,'foundation','authored sun court floor missing');
   for(let y=1;y<b.footprint.height;y++)
    assert.ok(!m.has(K([x,y,z])),'sun court incorrectly roofed or blocked');
-  assert.ok(b.walkable.some(p=>p[0]===x&&p[2]===z),'paved sky court not traversable');
+  assert.ok(walkSet.has(K([x,1,z])),'paved sky court not traversable');
  }
 });
 test('Sunscar 8 HIGH original exterior Pack4 glass cells have authentic stone sills/lintels, and 15 lower exterior windows',()=>{
