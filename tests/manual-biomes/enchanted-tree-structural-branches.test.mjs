@@ -112,3 +112,30 @@ test('canopies leave the two standing/player head voxels unobstructed away from 
       'repeated world generation must be deterministic');
   }
 });
+
+test('Moonwillow has eight separated hanging moonleaf curtains and four true bark arms',()=>{
+  const drapes=[[-3,0,4],[3,0,4],[0,-3,4],[0,3,4],
+    [-2,-2,4],[2,2,4],[-2,2,3],[2,-2,3]];
+  for(const roll of [.63,.75,.81,.82,.99]){
+    const tree=buildEnchantedTreeCandidate(0,3,0,roll);
+    assert.equal(tree.species,ENCHANTED_TREE_CANDIDATE_KIND.MOONWILLOW);
+    const bend=roll<.81?-1:1,top=tree.trunkHeight;
+    const at=new Map(tree.cells.map(([x,y,z,id])=>[coord(x,y,z),id]));
+    assert.ok(tree.cells.length<=ENCHANTED_TREE_MAX_CELLS);
+    for(const [dx,dz,hang] of drapes){
+      assert.equal(at.get(coord(bend+dx,3+top-hang,dz)),G.moonLeaves,
+        'hanging strand must reach its visibly different authored low tip');
+    }
+    for(const dir of [-1,1]){
+      for(const dx of [1,2])
+        assert.equal(at.get(coord(bend+dir*dx,3+top-1,0)),G.aetherBark);
+      for(const dz of [1,2])
+        assert.equal(at.get(coord(bend,3+top-1,dir*dz)),G.aetherBark);
+    }
+    assert.ok(tree.cells.every(([x,y,z,id])=>
+      id===G.aetherBark||y>=6),'all curtain leaves stay above a player body on level root ground');
+    assert.ok(tree.cells.every(([x,y,z])=>
+      Math.abs(x)<=4&&Math.abs(z)<=4&&y<=WORLD_MAX_Y));
+    assert.deepEqual(buildEnchantedTreeCandidate(0,3,0,roll).cells,tree.cells);
+  }
+});
