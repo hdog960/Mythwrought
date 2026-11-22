@@ -35,7 +35,8 @@ export function inspectOriginalM7TripletAccounting({gallery,city,chunk}={}){
  if(!Array.isArray(rows)||rows.length!==5)add(reasons,'M7_GALLERY_COUNT_INVALID');
  else{
   const bad=rows.some(r=>{
-   const counts=r?.sourceRejectionCounts;
+   if(!r||typeof r!=='object'||Array.isArray(r))return true;
+   const counts=r.sourceRejectionCounts;
    const materials=hist(r?.unsafeMaterialByBlockId);
    const readers=r?.originalReaderCallsByRole;
    const safe=NAT(r?.sourceSafeGalleries)&&NAT(r?.sourceRejectedGalleries)&&
