@@ -222,8 +222,11 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         // historical write order. Only overlapping experimental Enchanted
         // crowns use order-independent ownership: physical bark always
         // survives incoming leaves, even across neighboring chunk rebuilds.
-        cells.set(key,candidate?
-          resolveEnchantedTreeOverlap(cells.get(key),id):id);
+        // Most cells are unique. Avoid ranking or allocating anything
+        // until an actual candidate overlap exists (cheap iPhone fast path).
+        const previous=candidate?cells.get(key):undefined;
+        cells.set(key,previous===undefined?id:
+          resolveEnchantedTreeOverlap(previous,id));
       }
     }
   return cells;
