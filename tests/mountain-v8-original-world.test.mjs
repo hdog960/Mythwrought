@@ -47,3 +47,11 @@ test('rejects already edited, foreign seed and invalid coordinates without touch
   assert.equal(survey(-512,0,179,{world}),null);
   assert.equal(world.edits.size,1);
 });
+
+test('rejects profiled world subclasses even when save maps happen to be empty',()=>{
+  class ProfiledWorld extends VoxelWorld{}
+  const profiled=new ProfiledWorld(179);
+  assert.equal(profiled.edits.size,0);
+  assert.equal(survey(-512,0,179,{world:profiled}),null,
+    'An opt-in profile must never masquerade as the pristine legacy source');
+});
