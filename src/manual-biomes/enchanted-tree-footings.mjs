@@ -8,6 +8,14 @@ export function enchantedTreeFootingsSupported(x,floor,z,footprint,readColumn,re
     footprint.length<1||footprint.length>4||
     typeof readColumn!=='function'||typeof readCell!=='function')
     throw Error('Invalid enchanted tree footing probe');
+  // Current multi-root tree is precisely the Ancient Giant 2x2 trunk.
+  // An accidentally duplicated/missing offset must never bypass a corner.
+  if(footprint.length>1){
+    if(footprint.length!==4)throw Error('Invalid Ancient Giant root footprint');
+    const pad=new Set(footprint.map(([dx,dz])=>dx+','+dz));
+    if(pad.size!==4||!['0,0','1,0','0,1','1,1'].every(k=>pad.has(k)))
+      throw Error('Invalid Ancient Giant root footprint');
+  }
   for(const offset of footprint){
     if(!Array.isArray(offset)||offset.length!==2||
       !offset.every(Number.isInteger))
@@ -18,10 +26,11 @@ export function enchantedTreeFootingsSupported(x,floor,z,footprint,readColumn,re
     // it is NOT the real M7 ground cap for this adjacent root column.
     if(!(column instanceof Map)||!column.has(floor))return false;
     const cap=column.get(floor);
-    if(cap===air||readCell(px,floor,pz)!==cap)return false;
+    if(!Number.isInteger(cap)||cap===air||readCell(px,floor,pz)!==cap)return false;
     // The entire root pad must be supported by physical subsoil. A hidden
     // gallery or cave void directly under one corner is not a usable footing.
-    if(readCell(px,floor-1,pz)===air)return false;
+    const below=readCell(px,floor-1,pz);
+    if(!Number.isInteger(below)||below===air)return false;
     // Refuse a slope, pre-existing pillar, or landmark above the cap. The
     // trunk must never overlay a protected block or bridge a step change.
     if(readCell(px,floor+1,pz)!==air)return false;
