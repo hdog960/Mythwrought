@@ -1,0 +1,20 @@
+name: Roadmap A Pack5 original footprint corrected test only
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-footprint-producer-native-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-footprint-producer-native.yml'
+permissions:
+  contents: read
+jobs:
+  original-pack5-footprint-corrected-producer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only the 5 corrected original-source producer assertions
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-footprint-producer.test.mjs
