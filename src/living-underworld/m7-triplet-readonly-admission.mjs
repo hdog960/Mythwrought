@@ -62,6 +62,9 @@ export function classifyExactHeadOriginalM7Triplet({
    yes(r.completedFullSourceCellVetoCensus));
  if(!fullyDiagnosed)reasons.push('ORIGINAL_GALLERY_VOXEL_CENSUS_INCOMPLETE');
  const citySourceSafe=cityCohort&&c.rows.every(r=>
+  // The independently checked ORIGINAL city floor/access provenance is
+  // mandatory alongside the detached connected three-stair candidate.
+  yes(r.existingFullPadAndAccessSourceSafe)&&
   yes(r.threeDeepLinksOriginalM7SourceSelected)&&
   yes(r.joinedCityTerraceAndActualApproachSourceSafe)&&
   yes(r.joinedFourHubCandidateTopologyApproved)&&
