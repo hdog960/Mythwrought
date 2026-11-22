@@ -131,3 +131,36 @@ test('shared candidate support coordinates are memoized for bounded source looku
     reduction:+(100*(1-calls/naive)).toFixed(1)
   }));
 });
+
+test('one-chunk shared support cache cuts repeated reads without changing multiple crowns',()=>{
+  const group=(firstX,lastX)=>{
+    const cells=[];
+    for(let x=firstX;x<=lastX;x++)for(let z=-1;z<=3;z++)
+      for(let y=8;y<=10;y++)cells.push([x,y,z,G.moonLeaves]);
+    return cells;
+  };
+  const a=group(-2,3),b=group(2,7);
+  const ground=(x,y,z)=>x===4&&z===1&&y===6?BLOCK.STONE:BLOCK.AIR;
+  let separateReads=0,sharedReads=0;
+  const aSeparate=clearEnchantedCanopyForWalking(a,(...args)=>{
+    separateReads++;return ground(...args);
+  },BLOCK.AIR);
+  const bSeparate=clearEnchantedCanopyForWalking(b,(...args)=>{
+    separateReads++;return ground(...args);
+  },BLOCK.AIR);
+  const cache=new Map();
+  const shared=(...args)=>{sharedReads++;return ground(...args);};
+  const aShared=clearEnchantedCanopyForWalking(a,shared,BLOCK.AIR,cache);
+  const bShared=clearEnchantedCanopyForWalking(b,shared,BLOCK.AIR,cache);
+  assert.deepEqual(aShared,aSeparate);
+  assert.deepEqual(bShared,bSeparate);
+  assert.ok(sharedReads<separateReads,
+    'candidate trees with overlapping support neighborhoods must reuse a source probe');
+  assert.ok(cache.size===sharedReads,'one cache entry per genuine source read');
+  assert.throws(()=>clearEnchantedCanopyForWalking(a,ground,BLOCK.AIR,{}),
+    /Invalid enchanted walking clearance input/);
+  console.log('# ENCHANTED SHORT-LIVED CANDIDATE CACHE '+JSON.stringify({
+    separateReads,sharedReads,sourceReadSavings:separateReads-sharedReads,
+    percentSaved:+(100*(1-sharedReads/separateReads)).toFixed(1)
+  }));
+});
