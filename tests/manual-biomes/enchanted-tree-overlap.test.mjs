@@ -22,9 +22,13 @@ test('all candidate overlap triples commute, including multi-chunk sites in diff
     assert.equal(ordered,merge(merge(c,a),b));
   }
 });
-test('no tree, air or non-enchanted tree materials receive new overwrite semantics',()=>{
+test('existing non-enchanted trees are never replaced by opt-in enchanted canopy spillover',()=>{
   assert.equal(merge(undefined,G.aetherBark),G.aetherBark);
-  assert.equal(merge(G.coldNeedles,G.moonLeaves),G.moonLeaves);
+  for(const original of [G.coldNeedles,G.snowyNeedles,0,3,258])
+    for(const incoming of [G.aetherBark,G.aetherLeaves,G.moonLeaves])
+      assert.equal(merge(original,incoming),original,
+        'experimental canopy cannot overwrite a prior non-enchanted voxel');
+  // The original caller deliberately retains its own write-order semantics:
+  // unrelated non-candidate writes are never passed through this function.
   assert.equal(merge(G.aetherBark,G.coldNeedles),G.coldNeedles);
-  assert.equal(merge(0,G.aetherLeaves),G.aetherLeaves);
 });
