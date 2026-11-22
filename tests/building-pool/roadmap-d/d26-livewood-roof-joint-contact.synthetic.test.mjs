@@ -63,7 +63,7 @@ test('D26 rejects forged source, roof replacement, overlapping channels and beam
  const orient={...primary,proposedBeamCells:primary.proposedBeamCells.map((c,i)=>
   i===0?{...c,orientation:'east'}:c)};
  assert.throws(()=>auditD26OriginalWoodRoofJoints(b,orient,secondary,d25),/interrupted/);
- const wrong={...primary,proposedTrussSpans:primary.proposedTrussSpans.map(s=>({...s,bearingEnd:[7,6,0]}))};
+ const wrong={...primary,proposedTrussSpans:primary.proposedTrussSpans.map(s=>({...s,bearingEnd:[12,6,0]}))};
  assert.throws(()=>auditD26OriginalWoodRoofJoints(b,wrong,secondary,d25),/endpoint continuity/);
  assert.throws(()=>auditD26OriginalWoodRoofJoints({...b,worldPlaced:true},primary,secondary,d25),/unplaced/);
  assert.throws(()=>auditD26OriginalWoodRoofJoints(b,primary,secondary,d25,{maxPreviewSites:100}),/budget/);

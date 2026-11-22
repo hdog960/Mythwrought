@@ -26,7 +26,9 @@ jobs:
           EXPECTED: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED"
-          test "$(git rev-parse HEAD^)" = '474a7206d3345628c42eea71d21cd96ca7ce6b35'
+          test "$(git rev-parse HEAD^)" = '780e92397427e188aec8b5618d67e6b47bcc9d18'
+          test "$(git rev-parse HEAD^^)" = '474a7206d3345628c42eea71d21cd96ca7ce6b35'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d26-livewood-roof-joint-contact.mjs)" = '5469c4ec785ff83dfe6a8b550adedcfb80d18e59'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d25-original-livewood-roof-zones.mjs)" = '93284baae402bf99d239e6ba8cf327e4b9513ce5'
           test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
           test "$(git rev-parse HEAD:src/pack2-integration.mjs)" = 'cb8858688917a409dc1d52acf3730cf63567d48b'
