@@ -1,0 +1,25 @@
+# MYTHWROUGHT Roadmap A — all 79 genuine Pack5 wall-backed source compatibility census
+
+**Isolated source-only downstream DRAFT.** Protected parent PR #401 exact HEAD `88d59f951f0837cf6c187ff328e6c990bbcb35e9`, Actions #44965558089 SUCCESS 920/920 full repository tests and 191/191 focused, genuine artifact #14732055826 SHA256 `aa411f12d48ad8937d7e2badc1c49a6c77876bed83a2a01bd699b6876ff8d531`. Three representative source rows passed exact A5 provenance checks and 4 real plaster mount offsets, CI merge commit `5ebac3dee48d3b0b400ef30f3992090d76ca3fc0` verified parent and head.
+
+## Scope — all 79 EXISTING authored source designs, seven cohorts
+
+This draft does **not** create new houses, shops, geometry, world placements, installation modules, roads, NPCs or variants. It calculates a **read-only source coverage census** across the existing 79 Wave01–07 source models and the exact current `MANUAL_FIVE_PACK` original producer, requiring every source geometry SHA256 and original source module file SHA256 to match the **unchanged 207-record A5** handoff. Preserve the original 128 historic commerce source records and 213 still-unwritten canonical commerce IDs. Old 171 metadata records, new 36 A5 records, industrial 345 and government 315 must be immutable.
+
+For all 79 source structures, for each `kind:'wall'` voxel with material `pack5:079` (wall-mounted plaster with thin real collision, NOT a structural one-cell wall), evaluate all four **possible** physical yaw orientations `north/east/south/west`. Obtain real support offsets directly from `resolveManualFivePackAsset` for **both** original Pack5 plaster variants (`chalk-lime`, `hand-troweled`). Assert the two source variants agree on backing offsets; neither variant or orientation may be assigned to a structure. At each candidate source voxel, classify original neighboring source cells at the *actual* required support coordinate as:
+- No source voxel exists at the required backing coordinate
+- Another plaster source wall exists but is NOT proven physically load-bearing
+- Another source wall exists, its producer physical support not yet proven
+- Another source voxel exists but is not proven to support plaster
+
+Only first category proves absence of an original source cell; **none** proves future physical world support. An adjacent world voxel, an engineered structural backing, or a material reassignment could change the result, but **none is invented or inserted in this report**.
+
+Compare exact source material counts, roof-base categories, ceramic-floor underlying source cells and unresolved Pack5 source variant counts across every model with the previously independently authenticated all79 physical producer risk report PR #390. Past accepted aggregate provenance: 1,115,590 original source voxels; 105,584 `pack5:079` source wall-plaster cells; 117,048 full-brick `pack5:080` cells labeled roofs; 34,751 `pack5:081` thin ceramic tiles used as floors; 257,449 Pack5 cells lack required authored physical variant; 138,698 original base roof cells lack immediately underlying SOURCE wall; do NOT call the 138,698 structurally unsupported. The combined source counts remain 207/420 only at source-planning status.
+
+## Strict native gate and artifact
+
+`tests/building-pool/roadmap-2a/roadmap-a-all79-original-pack5-backing-census.test.mjs` must independently reconstruct the source-wave 10+9+12×5 models; cross-verify ALL 79 current source voxel geometry SHA256 against A5, all seven original module file SHA256; exact seven cohort records and five biomes, original roof/missing-variant totals; all 79 × all four genuine physical producer rotations, each support offset and 105,584 original plaster-cell classifications per orientation; source roof and tile underlying classifications; no physical material choice and no hidden producer substitute. Export `artifacts/roadmap-a-physical-all79/ROADMAP_A_ALL79_FOUR_YAW_REAL_PACK5_SOURCE_BACKING_CENSUS.json` with full per-design source fingerprints and an independently calculable SHA256.
+
+**This is a READ-ONLY source census, not a placement, integration, repair, real Pack mesh proof or real performance gate.** The original source-only cube screenshots and six unassigned true Pack5 material witness images are not installed 79 commerce buildings. Wall backing, roof span/bearing, actual building material variants, doorway functionality, real physical Pack collision, cumulative triangles/GPU uploads/frame time, real iPhone Home Screen PWA performance and creator-art acceptance remain explicitly **UNACCEPTED**. Physical absence of a source cell at a required local offset must not be conflated with an absent future support in a game world.
+
+Production `main` protected `7016e14cd6289f45eaf7fc6a79a362b47996df65`, v0.11 locked. Do not merge, deploy, register world structures, edit schema-1 saves/PWA, original five automations, any builder branch or original source design. If native CI fails, repair a **genuine** issue on a new isolated downstream draft; never relax counts or falsify art/physics acceptance.
