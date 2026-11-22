@@ -113,10 +113,13 @@ test('protected apertures cannot be counted as unprotected clifflines',()=>{
   const protectionReasons=[['air','none'],['air','none'],
     ['none','none'],['none','none']];
   const result=detectHeightShelfRuns(grid,{protectedColumns,protectionReasons});
-  assert.equal(result.edgeCensus.totalSteepEdges,3);
+  // The right-hand column also contains one genuine perpendicular
+  // 5→7 elevation, so four steep edges exist, not just the three x-edges.
+  assert.equal(result.edgeCensus.totalSteepEdges,4);
   assert.equal(result.edgeCensus.protectedEdges,1);
-  assert.equal(result.edgeCensus.unprotectedEdges,2);
+  assert.equal(result.edgeCensus.unprotectedEdges,3);
   assert.equal(result.longestUnprotected[0].length,2);
+  assert.ok(result.longestUnprotected.some(run=>run.axis==='z'&&run.length===1));
 });
 
 test('unprotected subsections inside long mixed-protection cliffs must not disappear',()=>{
