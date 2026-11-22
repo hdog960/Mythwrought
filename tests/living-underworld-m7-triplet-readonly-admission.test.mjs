@@ -16,6 +16,11 @@ const gallery=()=>({
  sourceCells:7740,totalOriginalM7ReaderMethodCalls:30960,
  diagnosedSafeGalleries:80,diagnosedRejectedGalleries:0,
  unsafeBlockIdTotals:{},unsafeMaterialIdsOverflowTotal:0,
+ voxelSourceVetoCategoryTotals:{
+  authored:0,edited:0,protected:0,unsafeMaterial:0,
+  bounds:0,authoredAirSupport:0,existingAirSupport:0,
+  sourceInconsistency:0
+ },
  originalReaderCallCountsByRole:{naturalAt:7740,authoredAt:7740,
   editedAt:7740,protectedAt:7740},
  rows:pairs.map(([biome,rx,rz])=>({
@@ -27,7 +32,11 @@ const gallery=()=>({
   inspectedSourceCells:1548,genuineOriginalReaderCalls:6192,
   originalReaderCallsByRole:{naturalAt:1548,authoredAt:1548,
    editedAt:1548,protectedAt:1548},
-  sourceRejectionCounts:{unsafeMaterial:0},
+  sourceRejectionCounts:{
+   authored:0,edited:0,protected:0,unsafeMaterial:0,
+   bounds:0,authoredAirSupport:0,existingAirSupport:0,
+   sourceInconsistency:0
+  },
   unsafeMaterialByBlockId:{},otherUnsafeMaterialCells:0,
   allUnsafeMaterialIdsEnumerated:true,
   oldM7AsBuiltGalleryDeckAndAirPresent:true,
@@ -73,7 +82,9 @@ const chunk=()=>({
   ownedInteriorRequestedCarves:1,ownedInteriorApprovedCarves:1,
   ownedInteriorRejectedCarves:0,haloRequestedProposals:0,
   haloApprovedProposals:0,haloRejectedProposals:0,
-  approvedOnlyAddedFaces:6,oldWorldUnmodified:true
+  approvedOnlyAddedFaces:6,oldWorldUnmodified:true,
+  budgetReason:null,refusalCounts:{oreOrUnsafe:0,authoredSolid:0,
+   authoredAirMismatch:0,originalEdit:0,landmark:0}
  }))
 });
 const check=(overrides={})=>classifyExactHeadOriginalM7Triplet({
