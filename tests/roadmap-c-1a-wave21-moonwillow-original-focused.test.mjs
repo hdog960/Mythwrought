@@ -163,5 +163,5 @@ test('Moonwillow original enchanted-forest-large inn #005 is distinct from accep
    ['r1:inn:enchanted-forest:large:001','r1:inn:enchanted-forest:large:002','r1:inn:enchanted-forest:large:003','r1:inn:enchanted-forest:large:004']);
  const ratios=accepted.map(p=>({id:p.id,ratio:d4(b,p)}));
  for(const ratio of ratios)assert.ok(ratio.ratio<.89,'enchanted-forest-large original near-clone '+JSON.stringify(ratio));
- console.log('MOONWILLOW_ORIGINAL_SNOW_LARGE_D4='+JSON.stringify(ratios));
+ console.log('MOONWILLOW_ORIGINAL_ENCHANTED_LARGE_D4='+JSON.stringify(ratios));
 });
