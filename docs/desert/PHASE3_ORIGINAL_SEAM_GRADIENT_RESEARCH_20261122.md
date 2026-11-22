@@ -17,3 +17,8 @@ The new branch-scoped workflow was committed, but at checkpoint authoring the Gi
 
 ## Next step
 Obtain exact run ID/status/log for the new isolated workflow, review authentic scree/hardpan boundary counts and witness pairs, and decide whether an optional constrained **Desert-only** material transition can be justified without weakening Mountain scree priority, anti-salt Plains fix or protected cave/landmark veto. Any proposed gameplay change requires separate isolated child and small genuine visual check; preserve protected main and other developer lanes. No merges/deployments/cancellations are authorized.
+
+## Actual first run and narrow CI correction
+- First focused run #45046469631, at `e8dfdd2ae44f877446a2c990c9e6f8b545557822`, completed **failure before audit execution**. The exact log reports `fatal: Not a valid commit name 641726d815172abcde7417b22c71e9df250fcd4b` during ancestry check after shallow default checkout. This is a workflow setup failure, **not** a terrain, test, or material failure.
+- Corrective isolated workflow commit `412755ba76ec7e76364a54b11ba67352ef7721b7` adds `fetch-depth: 0` for real ancestor access and includes this own checkpoint document in the allowed branch path list; preserves the safety assertion that any unauthorized gameplay change fails. No shared CI was touched.
+- The corrected workflow is intended to run once on its own branch push; **do not claim its result until the exact run is observed**. Existing WebGL2 success #45044303938 and original native 20/20 are unchanged and reused.
