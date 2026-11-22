@@ -66,3 +66,24 @@ test('original Schema-1 save returns fresh objects but equal deterministic bytes
   assert.equal(world.edits.size,0);
   assert.equal(world.rotations.size,0);
 });
+
+test('real original VoxelWorld observer reports a single source veto without altering the save',()=>{
+ const world=new VoxelWorld(179),before=JSON.stringify(world.save());
+ const boundary=[];
+ assert.equal(survey(0,0,179,{world,onVeto:issue=>boundary.push(issue)}),null);
+ assert.equal(boundary.length,1);
+ assert.equal(boundary[0].reason,'biome-boundary');
+ const points=[[-512,0],[-516,0],[-520,0],[-488,24]];
+ for(const [x,z] of points){
+  const observed=[];
+  const result=survey(x,z,179,{world,onVeto:issue=>observed.push(issue)});
+  assert.equal(observed.length,result?0:1);
+  if(observed.length){
+   assert.equal(typeof observed[0].reason,'string');
+   assert.ok(observed[0].reason.length>0);
+  }
+ }
+ assert.equal(JSON.stringify(world.save()),before);
+ assert.equal(world.edits.size,0);
+ assert.equal(world.rotations.size,0);
+});
