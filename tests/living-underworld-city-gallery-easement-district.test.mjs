@@ -118,7 +118,7 @@ test('source-conserving district (2,1) stays below existing 150k original budget
  assert.equal(r.originalFourHubSourceChecks,12711);
  assert.equal(r.floorSourceChecks,63585);
  assert.equal(r.sourceChecks,76296);
- assert.equal(r.originalFullCityFloorStillRejected,true);
+ assert.equal(r.historicalFullCityFloorNotReevaluatedOrReplacedHere,true);
  assert.equal(r.actualPlayerWalkingUnverified,true);
 });
 test('an inadequate global budget fails BEFORE any original district terrain reads',()=>{
