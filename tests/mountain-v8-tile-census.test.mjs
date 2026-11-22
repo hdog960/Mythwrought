@@ -16,6 +16,7 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.equal(first.stats.tiles,9);
     assert.equal(first.stats.seen,9);
     assert.ok(first.stats.sourceSites>=9&&first.stats.sourceSites<=81);
+    assert.equal(first.stats.sourceBudgetExhausted,0);
     assert.ok(first.stats.sourceCacheHits>=0);
     assert.ok(first.stats.cachedSourceVetoes<=first.stats.sourceSites);
     assert.ok(first.stats.plants<=first.stats.eligible);
