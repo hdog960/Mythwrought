@@ -1,0 +1,46 @@
+name: Mountain V8 original VoxelWorld focused native acceptance
+
+# Single isolated-branch source gate. The exact workflow creation push is the
+# only automatic trigger: normal V8 commits must NOT retrigger expensive tests.
+on:
+  push:
+    branches:
+      - mountain-v8-proposal-isolated-20261121
+    paths:
+      - .github/workflows/mountain-v8-original-source-focused.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-voxel-world:
+    if: github.ref == 'refs/heads/mountain-v8-proposal-isolated-20261121'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact isolated source (read only)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Node 22 original repository runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and test syntax only
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/voxel.mjs
+          node --check src/manual-biomes/mountain-v8-tile-census.mjs
+          node --check src/manual-biomes/mountain-v8-original-world.mjs
+          node --check tests/mountain-v8-original-world.test.mjs
+          node --check tests/mountain-v8-tile-census.test.mjs
+          node --check tests/mountain-v8-real-seam-census.test.mjs
+      - name: Only three original VoxelWorld focused native suites
+        run: |
+          node --test --test-concurrency=1 \
+            tests/mountain-v8-original-world.test.mjs \
+            tests/mountain-v8-tile-census.test.mjs \
+            tests/mountain-v8-real-seam-census.test.mjs
