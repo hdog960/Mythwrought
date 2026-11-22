@@ -105,6 +105,8 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       cells:physical.estimatedCells}));
   }
   const readCosts=cache.stats();
+  if(!readCosts.complete)throw Error('Mountain V8 source census budget exhausted');
+  stats.sourceBudgetExhausted=readCosts.exhausted;
   stats.sourceSites=readCosts.uniqueSites;
   stats.sourceCacheHits=readCosts.cacheHits;
   stats.cachedSourceVetoes=readCosts.cachedRejections;
