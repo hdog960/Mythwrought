@@ -28,6 +28,16 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
   reason:'MUTUAL_GALLERY_GEOMETRY_UNSAFE',mutual,
   galleriesInspected:0,sourceChecks:0,worldChanged:false});
  const plan=planUnderworldRegion(seed,rx,rz);
+ const sourceRoleCalls={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
+ const countedSource=Object.freeze(Object.fromEntries(FIELDS.map(role=>
+  [role,(x,y,z)=>{
+   sourceRoleCalls[role]++;
+   return source[role](x,y,z);
+  }])));
+ const readerCallSummary=()=>Object.freeze({
+  sourceRoleCalls:Object.freeze({...sourceRoleCalls}),
+  totalSourceRoleCalls:Object.values(sourceRoleCalls).reduce((n,v)=>n+v,0)
+ });
  const rows=[],failures=[];let sourceChecks=0,sourceRejectedGalleries=0;
  const firstRefusalTypes=Object.create(null);
  const countTotals=Object.create(null);
@@ -57,12 +67,14 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    sourceRejectionCounts:Object.freeze({...countTotals}),
    ...materialSummary(),
    diagnosticAll16GalleriesAttempted:false,
+   ...readerCallSummary(),
    worldChanged:false,nativePlayerWalkingVerified:false});
   // The ORIGINAL immutable fixed geology allowlist cannot be widened by a
   // caller. Limit each next source raster by the REMAINING global cell budget.
+  const callsBefore={...sourceRoleCalls};
   const checked=auditProtectedSubsurfaceStairs(proposal,{
-   naturalAt:source.naturalAt,authoredAt:source.authoredAt,
-   editedAt:source.editedAt,protectedAt:source.protectedAt,
+   naturalAt:countedSource.naturalAt,authoredAt:countedSource.authoredAt,
+   editedAt:countedSource.editedAt,protectedAt:countedSource.protectedAt,
    minY:-210,maxY:19,maxCells:Math.min(maxCellsPerGallery,remaining),
    // The default stays cheap and fail-first. The explicit research option
    // exhaustively classifies eligible, completed per-gallery source cells,
@@ -91,7 +103,10 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    else otherUnsafeMaterialCells+=count;
   }
   otherUnsafeMaterialCells+=checked.otherUnsafeMaterialCells??0;
+  const callsDuring=Object.freeze(Object.fromEntries(
+   FIELDS.map(role=>[role,sourceRoleCalls[role]-callsBefore[role]])));
   rows.push(Object.freeze({galleryIndex:index,ok:checked.ok,
+   originalSourceRoleCalls:callsDuring,
    sourceChecks:checked.sourceChecks??0,
    refusal:checked.firstRefusal??checked.examples?.[0]?.reason??
     checked.reason??null,
@@ -121,6 +136,7 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
     reason:'GALLERY_SOURCE_PROVENANCE_UNSAFE',
     galleriesInspected:rows.length,sourceChecks,
     failures:Object.freeze(failures),rows:Object.freeze(rows),
+    ...readerCallSummary(),
     mutuallyCollisionFree:true,worldChanged:false,
     nativePlayerWalkingVerified:false});
   }
@@ -136,6 +152,7 @@ export function auditSourceProtectedMainGalleries(seed,rx,rz,{
    'FULL_COMPLETED_GALLERY_SOURCE_VOXELS':'FIRST_REFUSAL_PER_GALLERY',
   firstRefusalCounts:Object.freeze({...firstRefusalTypes}),
   sourceRejectionCounts:Object.freeze({...countTotals}),
+  ...readerCallSummary(),
   ...materialSummary(),
   countsRepresentAllEligibleCells:countEverySourceVeto,
   rows:Object.freeze(rows),failures:Object.freeze(failures),
