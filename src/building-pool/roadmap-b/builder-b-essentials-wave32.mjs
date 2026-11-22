@@ -59,7 +59,7 @@ export function buildAlderquaySplitPierHarborOffice(){
  // Independently anchored timber bents inside actual roof footprints,
  // not decorative columns floating over a quay or source sky court.
  for(const [x,z] of [[19,8],[32,9],[47,8],[10,19],[15,40],
-  [52,34],[26,55],[42,55],[12,53],[59,20],[9,12],[44,23]]){
+  [52,34],[26,55],[42,55],[10,53],[59,20],[9,12],[44,23]]){
   const y=roofed.get(K(x,z));
   if(!y)throw Error('Alderquay original timber bent misses real supported roof '+K(x,z));
   b.support(x,z,y-1,'live:wood','physical-bent-under-original-roof');
