@@ -13,9 +13,14 @@ export function nearestNaturalScreeSquared(wx,wz,y,originalScreeAt){
     throw Error('Desert seam query requires integral source vertices');
   let best=Infinity;
   for(let x=wx-3;x<=wx+2;x++)for(let z=wz-3;z<=wz+2;z++){
-    if(!originalScreeAt(x,z,y))continue;
     const dx=wx-x-.5,dz=wz-z-.5,d2=dx*dx+dz*dz;
-    if(d2<best)best=d2;
+    // Geometry cannot affect either three-block RGB fade at or outside its
+    // radius; skip the original guarded column lookup entirely. Likewise,
+    // once a closer real source is found, equal/farther cues cannot win.
+    // Returning Infinity instead of an out-of-radius distance is visually
+    // identical: both blend helpers already return unchanged source color.
+    if(d2>=DESERT_SEAM_RADIUS*DESERT_SEAM_RADIUS||d2>=best)continue;
+    if(originalScreeAt(x,z,y))best=d2;
   }
   return best;
 }
