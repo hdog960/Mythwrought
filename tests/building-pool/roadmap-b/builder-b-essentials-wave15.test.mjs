@@ -100,27 +100,6 @@ test('Icehaven real vertical facade panes face exterior and have actual Pack4 03
   assert.equal(asset.registeredInLiveGame,false);
  }
 });
-test('Icehaven unrelaxed original historical 228 same-category eight-way D4 plus Tidehollow and Glassdune', {timeout:240000},async()=>{
- const historic=[...get1BCandidates(),createStoneveinSwitchbackBaths()];
- for(let i=1;i<=15;i++){
-  const mod=await import('../../../src/building-pool/roadmap-b/wave'+i+'-community-b1.mjs');
-  historic.push(...mod['getRoadmapBWave'+i+'B1']());
- }
- assert.equal(historic.length,228,'canonical historical service census changed');
- assert.equal(new Set(historic.map(x=>x.id)).size,228);
- const b=buildIcehavenBifurcatedSnowCustoms();
- assert.ok(!historic.some(x=>x.id===b.id),'historical accepted 1B slot stolen');
- const same=[...historic.filter(x=>x.category===b.category),buildTidehollowCrosswharfHarborOffice(),buildGlassduneSplitQuayRegistry()];
- assert.ok(same.length>=22,'historical harbor office category missing');
- const now=d4(b,false,0);let max=0,closest=null,checked=0;
- for(const old of same)for(const flip of [false,true])for(let turn=0;turn<4;turn++){
-  const score=iou(now,d4(old,flip,turn));checked++;
-  if(score>max){max=score;closest=old.id;}
-  assert.ok(score<.85,'Icehaven original winter customs geometry near-clone '+old.id+' '+score);
- }
- assert.ok(checked>=176,'historical eight-way category comparison missing');
- console.log('ICEHAVEN_STRICT_228_HARBOR_OFFICE_D4_PASS '+JSON.stringify({
-  accepted:228,transforms:checked,maxIoU:max,closest,
-  iPhoneAccepted:false,productionRegistered:false,creatorApproved:false
- }));
-});
+
+// Strict original 228-source D4 for Waves9–19 is covered once by
+// builder-b-originals-waves9-19-shared-historical-d4.test.mjs.
