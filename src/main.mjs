@@ -959,8 +959,27 @@ function start(nonblockStage=null){
       if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
-      if(buffer)gl.deleteBuffer(buffer);
-      if(waterBuffer)gl.deleteBuffer(waterBuffer);
+      if(!near291Enabled){
+        // Installed PWA / public Pages keep the original GPU cleanup path.
+        if(buffer)gl.deleteBuffer(buffer);
+        if(waterBuffer)gl.deleteBuffer(waterBuffer);
+        throw error;
+      }
+      // Both handles are still local temporaries; no chunks.set or VAO owns
+      // them. Attempt each independent deletion even if the first throws.
+      // A failed cleanup cannot replace the initiating upload exception:
+      // original voxel rollback must see the original failing operation.
+      let uncertainNear291Cleanup=false;
+      for(const staged of [buffer,waterBuffer]){
+        if(!staged)continue;
+        try{gl.deleteBuffer(staged);}
+        catch(_){uncertainNear291Cleanup=true;}
+      }
+      if(uncertainNear291Cleanup){
+        near291Fatal=true;
+        try{frameDriver.pause();}catch(_){}
+        try{fatal('Local VAO 291 internal staged upload cleanup unverified; reload before mining');}catch(_){}
+      }
       throw error;
     }
   }
