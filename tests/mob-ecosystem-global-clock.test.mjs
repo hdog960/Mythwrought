@@ -8,7 +8,7 @@ import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
   settleRegionalEcologyPoll}
   from '../src/mobs/ecosystem-region-cadence.mjs';
 import {createGlobalEcologyClock,advanceGlobalEcologyClock,
-  commitGlobalEcologyRegion,ORIGINAL_MAX_REGION_RECORDS,
+  previewGlobalEcologyTick,commitGlobalEcologyRegion,ORIGINAL_MAX_REGION_RECORDS,
   ORIGINAL_MAX_TIME_ADVANCE} from '../src/mobs/ecosystem-global-clock.mjs';
 
 const ids=speciesRegistry.filter(s=>s.implementation==='preview').map(s=>s.id);
@@ -214,4 +214,29 @@ test('original global tick and real MobEngine admission grant one birth cooldown
   assert.equal(engine.counts().total,1,
     'A proposal-only adapter must not manufacture a second creature');
   engine.dispose();
+});
+
+test('certified global due preview does not consume original clock or issue region',()=>{
+  const original=createGlobalEcologyClock(),regions=[location(0)];
+  assert.deepEqual(previewGlobalEcologyTick(original,{seconds:.49,regions}),
+    {time:.49,due:false});
+  assert.deepEqual(previewGlobalEcologyTick(original,{seconds:.5,regions}),
+    {time:.5,due:true});
+  assert.deepEqual(previewGlobalEcologyTick(original,{seconds:.5,regions}),
+    {time:.5,due:true});
+  const actual=at(original,.5,regions);
+  assert.equal(actual.reason,'selected');
+  assert.equal(actual.selection.key,'0,0,0');
+  assert.throws(()=>previewGlobalEcologyTick(original,{
+    seconds:.5,regions
+  }),/Invalid original ecology global advance/);
+  commitGlobalEcologyRegion(actual.clock,actual.selection,recordFor(actual.selection));
+});
+test('untrusted clock or invalid input cannot claim a due source tick',()=>{
+  assert.throws(()=>previewGlobalEcologyTick({
+    time:0,next:.5
+  },{seconds:.5,regions:[location(0)]}),/Invalid original ecology global advance/);
+  assert.throws(()=>previewGlobalEcologyTick(createGlobalEcologyClock(),{
+    seconds:-1,regions:[location(0)]
+  }),/Invalid original ecology global advance/);
 });

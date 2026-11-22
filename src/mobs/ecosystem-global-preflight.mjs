@@ -3,8 +3,8 @@
 import {validPoint} from './world-query.mjs';
 import {inspectOriginalReconcileReadiness}
   from './ecosystem-reconcile-readiness.mjs';
-import {advanceGlobalEcologyClock,commitGlobalEcologyRegion}
-  from './ecosystem-global-clock.mjs';
+import {previewGlobalEcologyTick,advanceGlobalEcologyClock,
+  commitGlobalEcologyRegion} from './ecosystem-global-clock.mjs';
 import {prepareOriginalMobPoll,settleOriginalMobPoll}
   from './ecosystem-region-poll.mjs';
 
@@ -19,17 +19,18 @@ export function prepareGlobalMobTick({
   // its clock; the detached source must not silently advance time either.
   if(!validPoint(observer))
     throw new TypeError('Invalid original ecology observer');
-  const tick=advanceGlobalEcologyClock(clock,{seconds,regions});
-  // The original #reconcile runs at EVERY due global 0.5s interval, even if
-  // the region list is empty/invalid. This research lane cannot implement
-  // the private #away ledger; stop rather than quietly omit transitions.
-  if(tick.reason!=='interval'){
+  // Only the certified clock can preview a tick. #reconcile must refuse
+  // BEFORE that clock is consumed, so the identical original tick can be
+  // attempted after its rightful owner resolves wake/away obligations.
+  const forecast=previewGlobalEcologyTick(clock,{seconds,regions});
+  if(forecast.due){
     const checked=inspectOriginalReconcileReadiness({
       engine,world,observer,isProtected
     });
     if(!checked.ready)
       throw new TypeError('Original ecology reconciliation required');
   }
+  const tick=advanceGlobalEcologyClock(clock,{seconds,regions});
   if(tick.selection===null){
     return Object.freeze({
       kind:'skipped',clock:tick.clock,reason:tick.reason,

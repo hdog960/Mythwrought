@@ -164,12 +164,14 @@ test('original global preflight refuses to bypass nearby wake or distant dormanc
     /Original ecology reconciliation required/);
   assert.equal(engine.get(id).state,'dormant',
     'Read-only source preflight must never invoke original transition');
+  // Because source reconciliation was refused BEFORE clock consumption,
+  // a same-clock retry is possible after original manager resolves it.
   // This is an independent unconsumed research clock; the real manager alone
   // may wake the animal before another source tick is proposed.
   const original=new PopulationManager(engine,world);
   original.advance(.5,[8,4,8],[]);
   assert.equal(engine.get(id).state,'idle');
-  const after=prepareGlobalMobTick(options(createGlobalEcologyClock(),engine,world));
+  const after=prepareGlobalMobTick(options(clock,engine,world));
   assert.equal(after.kind,'cooldown');
   settleGlobalMobTick(after,{world});
   engine.dispose();
@@ -201,5 +203,21 @@ test('invalid original observer is rejected before global clock consumption',()=
   const next=prepareGlobalMobTick(options(clock,engine,world));
   assert.equal(next.kind,'cooldown');
   settleGlobalMobTick(next,{world});
+  engine.dispose();
+});
+
+test('refused due tick preserves original source clock, not just new replacement',()=>{
+  const world=flatWorld(),engine=new MobEngine(world,179,{maxEntities:32,maxActive:8});
+  const id=engine.spawn('deer',[9,4,8]);
+  assert.ok(id);
+  assert.equal(engine.transition(id,'dormant'),true);
+  const clock=createGlobalEcologyClock();
+  assert.throws(()=>prepareGlobalMobTick(options(clock,engine,world)),
+    /Original ecology reconciliation required/);
+  assert.equal(engine.transition(id,'idle'),true);
+  const tick=prepareGlobalMobTick(options(clock,engine,world));
+  assert.equal(tick.kind,'cooldown');
+  assert.equal(tick.clock.time,.5);
+  settleGlobalMobTick(tick,{world});
   engine.dispose();
 });

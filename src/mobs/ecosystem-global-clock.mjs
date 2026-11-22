@@ -3,11 +3,13 @@
 // Mirrors the original 0.5s world ticker, 64-item rotating region selection,
 // capped time advancement and earliest-eligible stale region eviction.
 import {sectionForY} from '../depth.mjs';
+import {SOURCE_MAX_ECOLOGY_TIME_ADVANCE,previewSourceEcologyTick}
+  from './ecosystem-tick-preview.mjs';
 import {ORIGINAL_ECOLOGY_POLL_INTERVAL,ORIGINAL_ECOLOGY_REPLENISH_SECONDS,
   inspectRegionalEcologySchedule} from './ecosystem-region-cadence.mjs';
 
 export const ORIGINAL_MAX_REGION_RECORDS=64;
-export const ORIGINAL_MAX_TIME_ADVANCE=1;
+export const ORIGINAL_MAX_TIME_ADVANCE=SOURCE_MAX_ECOLOGY_TIME_ADVANCE;
 const certified=new WeakSet();
 const consumed=new WeakSet();
 const pending=new WeakSet();
@@ -39,18 +41,30 @@ export function createGlobalEcologyClock(){
   return clock(0,ORIGINAL_ECOLOGY_POLL_INTERVAL,0,[]);
 }
 
+// Preview the exact original capped time advance without touching certified
+// source clock ownership. A rejected #reconcile is NOT permitted to consume
+// the only valid global tick and force a restarted/forged research clock.
+export function previewGlobalEcologyTick(state,{
+  seconds,regions
+}={}){
+  if(!certifiedClock(state)||!Array.isArray(regions)||
+     !Number.isFinite(seconds)||seconds<0)
+    throw new TypeError('Invalid original ecology global advance');
+  return previewSourceEcologyTick({
+    time:state.time,next:state.next,seconds
+  });
+}
+
 // One source advance() call; do not replay the same clock or skip an outstanding
 // due region. The returned ticket owns the selection, not a mutable shared
 // cursor/roster. An empty or invalid region still consumes the 0.5s global tick.
 export function advanceGlobalEcologyClock(state,{
   seconds,regions
 }={}){
-  if(!certifiedClock(state)||!Number.isFinite(seconds)||seconds<0||
-    !Array.isArray(regions))
-    throw new TypeError('Invalid original ecology global advance');
+  const forecast=previewGlobalEcologyTick(state,{seconds,regions});
   consumed.add(state);
-  const time=state.time+Math.min(ORIGINAL_MAX_TIME_ADVANCE,seconds);
-  if(time<state.next)
+  const time=forecast.time;
+  if(!forecast.due)
     return Object.freeze({
       clock:clock(time,state.next,state.cursor,state.entries),
       selection:null,reason:'interval'
