@@ -16,6 +16,10 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     assert.equal(first.stats.tiles,9);
     assert.equal(first.stats.seen,9);
     assert.ok(first.stats.plants<=first.stats.eligible);
+    assert.equal(first.stats.eligible+first.stats.rejected+
+      first.stats.terrainRejected,first.stats.tiles);
+    assert.ok(first.stats.terrainCells<=first.stats.eligible*18);
+    assert.ok(first.stats.terrainCells>=first.stats.eligible);
     assert.ok(first.stats.plantCells<=first.stats.plants*18);
     assert.equal(world.save(),save);
     assert.equal(world.edits.size,0);
@@ -24,7 +28,8 @@ test('seeded V8 original-world site census is bounded, read-only and determinist
     console.log('MOUNTAIN V8 REAL TILE CENSUS '+JSON.stringify({
       seed,tiles:first.stats.tiles,checked:first.stats.seen,
       eligible:first.stats.eligible,plants:first.stats.plants,
-      plantCells:first.stats.plantCells,rejected:first.stats.rejected
+      plantCells:first.stats.plantCells,terrainCells:first.stats.terrainCells,
+      terrainRejected:first.stats.terrainRejected,rejected:first.stats.rejected
     }));
   }
 });
