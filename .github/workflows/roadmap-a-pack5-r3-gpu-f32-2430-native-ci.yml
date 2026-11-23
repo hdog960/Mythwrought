@@ -1,0 +1,24 @@
+name: Roadmap A original R3 exact real-world Float32 full 2430-ray native check
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-r3-gpu-f32-2430-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-r3-gpu-f32-2430-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-original-float32-world-triangle-fidelity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Check new source/test syntax without broad CI
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
+      - name: Only eleven exact R3 original source geometry tests and full 2430-player-ray diagnosis
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
