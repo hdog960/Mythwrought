@@ -1,4 +1,4 @@
-# Corrected only a Desert test fixture that mislabeled a real warped-biome
+# Corrected Desert fixture to replay exact prior accepted source search bounds
 # start. Reuse passing seed -88 directed survey from #45092615665 and
 # prior source/native graph admissions. No repeated broad CI or Chromium.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
