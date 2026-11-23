@@ -872,3 +872,45 @@ test('read-only local acceptance interface cannot claim real WebGL or iPhone cer
   assert.ok(!exactLocal291PerfSource.includes('gl.getError()'));
   assert.ok(!exactLocal291PerfSource.includes('save();'));
 });
+
+test('failed original guarded water upload is NOT counted as a successful GPU sample',()=>{
+  const {scope,perf}=local291PerfFixture();
+  const start=source.indexOf('  function uploadPack2Chunk(vertices,water){');
+  const end=source.indexOf('  let editMeshBatches=0;',start);
+  assert.ok(start>=0&&end>start);
+  const make=new Function('scope','with(scope){'+source.slice(start,end)+
+    '\nreturn uploadPack2Chunk;}');
+  let t=0,calls=0;
+  const failure=Error('291_ORIGINAL_GUARDED_WATER_UPLOAD_FAILURE');
+  Object.assign(scope,{
+    near291Perf:perf.data,near291RecordUpload:perf.upload,
+    near291Enabled:false,performance:{now:()=>{t+=2;return t;}},
+    gl:{deleteBuffer:()=>{}},
+    uploadChunkBuffer:()=>{
+      calls++;
+      if(calls===2)throw failure;
+      return {};
+    }
+  });
+  assert.throws(()=>make(scope)(new Float32Array(9),new Float32Array(9)),
+    e=>e===failure);
+  assert.equal(perf.read().successfulGuardedUploads,1);
+  assert.equal(perf.read().rollingSuccessfulUploadP95Ms,2);
+  assert.equal(perf.read().releaseCertified,false);
+});
+test('hidden, context loss, and BFCache pagehide reset original measured frame epoch',()=>{
+  const lines=source.split('\n');
+  const positions=lines.flatMap((line,i)=>line.includes('if(near291Perf)near291Perf.prevFrame=null;')?[i]:[]);
+  assert.equal(positions.length,3);
+  const labels=[
+    "document.addEventListener('visibilitychange',",
+    "canvas.addEventListener('webglcontextlost',",
+    "window.addEventListener('pagehide',"
+  ];
+  for(let i=0;i<labels.length;i++){
+    const anchor=source.indexOf(labels[i]);
+    const next=source.indexOf('if(near291Perf)near291Perf.prevFrame=null;',anchor);
+    assert.ok(anchor>=0&&next>anchor);
+    assert.ok(next-anchor<250,labels[i]+' must reset before background time is sampled');
+  }
+});
