@@ -1,0 +1,46 @@
+name: Desert P3 original-source corner and GPU edit publication fence
+on:
+  push:
+    branches:
+      - research/desert-p3-runtime-corner-gpu-fence-20261122
+    paths:
+      - .github/workflows/desert-p3-original-corner-gpu.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-original-corner-gpu
+  cancel-in-progress: false
+jobs:
+  original-v7-corner-and-gpu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9739feabd8555c7928c62e0673e0d256e2bd1999
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin original clean branch, exact game and existing GPU buffer uploader
+        run: |
+          set -euo pipefail
+          BASE=9739feabd8555c7928c62e0673e0d256e2bd1999
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/desert-seam-invalidation.mjs|tests/desert-p3-runtime-corner-gpu-source.test.mjs|.github/workflows/desert-p3-original-corner-gpu.yml|docs/desert/PHASE3_RUNTIME_CORNER_GPU_AUDIT_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/gpu-recovery.mjs)" = 422ef73e383bda78ff94607abb858e3c8a57c2d1
+          test "$(git -C candidate rev-parse HEAD:src/storybook-materials.mjs)" = a06a1f3408d99521485a48d2d84a577a7ac588c8
+          node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
+          node --check candidate/tests/desert-p3-runtime-corner-gpu-source.test.mjs
+      - name: NEW only: actual V7 corners and exact main upload fault-injection checks
+        run: cd candidate && node --test tests/desert-p3-runtime-corner-gpu-source.test.mjs
