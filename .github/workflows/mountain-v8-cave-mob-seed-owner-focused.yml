@@ -1,0 +1,33 @@
+name: Mountain V8 isolated cave-mob seed owner protection
+# One narrow original source regression; no broad CI or production changes.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-cave-mob-seed-owner-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-cave-mob-claim:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout isolated original repository at exact commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Original Node 22 runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source HEAD, syntax and only six new cave-mob ownership tests
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-extra-seed-owner-audit.mjs
+          node --check src/manual-biomes/mountain-v8-opt-in-seed-preflight.mjs
+          node --check tests/mountain-v8-extra-seed-owner-audit.test.mjs
+          node --test --test-concurrency=1 tests/mountain-v8-extra-seed-owner-audit.test.mjs
