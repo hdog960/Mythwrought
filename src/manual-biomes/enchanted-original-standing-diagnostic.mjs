@@ -86,3 +86,37 @@ export function diagnoseOriginalM7Standing(world,x,z){
   }
   return result;
 }
+
+// Separate research-only physical standing accessor. Never treat a missing
+// M7 overlay as missing physical terrain; some legacy GRASS columns have
+// intentionally zero environmental writes. Require unchanged original
+// cave/headroom AIR, real world.get surface, full-body collision and
+// genuine original ground probe. A nonempty overlay retains EXACT older
+// helper admission (no fallback through a rejected authored M7 overlay).
+// This does NOT change the production world/physics, is NOT a cave bridge,
+// and is not independently a real walking-route acceptance.
+export function originalM7PhysicalGroundCap(world,x,z){
+  if(world?.profile?.generator!==M7_ENVIRONMENT_GENERATOR||
+     !Number.isSafeInteger(x)||!Number.isSafeInteger(z)||
+     typeof world._columnPlan!=='function'||
+     typeof world._environmentBaseline!=='function')
+    throw Error('Invalid original M7 physical ground cap');
+  const col=world._columnPlan(x,z);
+  if(!(col instanceof Map))
+    throw Error('Unexpected original M7 physical column source');
+  if(col.size)return originalM7PedestrianCap(world,x,z);
+  const y=terrainHeight(x,z,world.seed);
+  if(y<3||y>WORLD_MAX_Y-3)return null;
+  // Authoritative M7 original source cave/landmark preservation:
+  // a source-authored AIR removes the legacy terrain or protected headroom
+  // and may not be replaced by an inferred flat/solid voxel.
+  if(world._environmentBaseline(x,y,z)===BLOCK.AIR||
+     world._environmentBaseline(x,y+1,z)!==BLOCK.AIR||
+     world._environmentBaseline(x,y+2,z)!==BLOCK.AIR)
+    return null;
+  const feet=y+1,px=x+.5,pz=z+.5;
+  if(world.get(x,y,z)===BLOCK.AIR||
+     collides(world,px,feet,pz)||
+     !collides(world,px,feet-GROUND_PROBE,pz))return null;
+  return Object.freeze({x,z,surface:y,feet});
+}
