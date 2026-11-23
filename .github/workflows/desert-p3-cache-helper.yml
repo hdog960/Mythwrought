@@ -1,0 +1,42 @@
+name: Desert P3 native PWA release manifest preflight (helper only)
+on:
+  push:
+    branches:
+      - research/desert-p3-release-cache-preflight-20261123
+    paths:
+      - .github/workflows/desert-p3-cache-helper.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-cache-helper
+  cancel-in-progress: false
+jobs:
+  native-cache-manifest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate official full-shell asset hashes and require new offline modules
+        run: |
+          set -euo pipefail
+          node --check sw-m5.js
+          node --check sw-nonblock-stage.js
+          node --check src/app-update.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs
+          node --test tests/ci/nonblock-cache-manifest.test.mjs
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const m=JSON.parse(fs.readFileSync('nonblock-stage-assets.json','utf8')); assert.equal(m.version,'20261123-v37'); for(const f of ['desert-bilateral-rgb.mjs','desert-seam-vertex-tint.mjs','desert-seam-invalidation.mjs'])assert.match(m.assets['./src/manual-biomes/'+f],/^[a-f0-9]{64}$/); console.log('DESERT_RELEASE_CACHE_SOURCE_VERIFIED',Object.keys(m.assets).length)"
+      - name: Emit exact canonical generated JSON for single atomic release PR commit
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const s=readFileSync('nonblock-stage-assets.json','utf8');
+          console.log('DESERT_MANIFEST_BEGIN');
+          for(const line of s.trimEnd().split('\n'))
+            console.log('DESERT_MANIFEST_LINE '+line);
+          console.log('DESERT_MANIFEST_END');
+          NODE
