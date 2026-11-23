@@ -71,3 +71,46 @@ The **actual original construction-layer source meshAt**, original GPU nine-Floa
 Continue the same real-own-lane source module. Preserve the previous green source/renderer coordinate and hit-set check but classify ALL **208** both-hit warnings by: **signed selection-ahead vs strict-triangle-ahead distance**, **same versus different original authored source box ownership**, and **whether the original selected AABB entry point is <=0.000002 from its own tangential authored box edge**. Compute the original source strict triangle index and its physical source box owner using exact 12-triangle/box rendering contract; independently calculate original entry face with original ray normalization and exact slab plane, retain at most twelve witness rows but classify all 208. Refuse any non-reconciling partitions or new strict source mesh/selection hit-set drift. Add two new focused native cases (now **13**) and print all measured classification counts; **do not invent the category counts ahead of the original native CI**.
 
 These classifications can identify boundary-grazing original selection ahead of the nearest source triangle, overlapping brick art and source numerical differences. They are **still only source math on a private read-only all-air world**, not true WebGL2 raster fragments or actual player HUD selection; do not introduce arbitrary box padding, relax original reach or ray occlusion, or select production original A5 building art/yaw.
+
+## Final exact original-source second-stage acceptance — 13/13 PASS
+
+**Original complete-repository GitHub Actions [#45109732948](https://github.com/hdog960/Mythwrought/actions/runs/45109732948) COMPLETED SUCCESS, 13/13 focused native Node 22.16.0 tests PASS, zero failed.** New two-file syntax green. Isolated source implementation child \`ecc989d2e41779a2af194b4553f5512b4c1a11bb\` directly follows previous authentic \`8c8b49381ad3ac405d51be2ce312d9ff19b6e92f\`. Dedicated unique CI-only branch \`roadmap-a-pack5-hearth-yaw3-distance-ownership-native-ci-20261122\`, exact HEAD **\`ba53a509fe31cfc158aafec6f1285910b8f3d921\`**. One new workflow exists only on the CI child; protected shared CI untouched.
+
+All previously verified 2,610-ray and exact authored world-space Float32 mesh hit/miss gates remained enforced. The source-only diagnostic classified **EVERY 208 strict-geometry both-hit nearest-distance warning** into three independent paired partitions:
+
+| Original source-only category (pairs, not disjoint across rows) | Count |
+|---|---:|
+| Original detailed selection hits a nearer source surface than nearest strict triangle | **139** |
+| Strict world-Float32 triangle hits a nearer source surface than original selection | **69** |
+| Original first selected box and first strict triangle belong to SAME original-authored physical box | **111** |
+| Original first selected box and first strict triangle belong to DIFFERENT original-authored physical boxes | **97** |
+| Original selected AABB slab entry within **2×10⁻⁶ block units** of one of its transverse face edges | **93** |
+| Original selected AABB slab entry farther from that specific transverse edge threshold | **115** |
+
+All pairs reconcile to **exactly 208** warnings. Original authentic strict source hit/miss still **2,472 hits and 138 misses in both paths**, **zero strict triangle-only misses**, **zero detailed selection-only strict misses**, **zero original live-style layer vs independent exact AABB slab parity disagreements**. Largest absolute nearest-hit distance difference **0.04648851144099986 block units** (not an original real-game pixel difference). All **1,512** original world GPU vertices and **42** authored source boxes still match their exact source physical rotated box endpoints and one-page **54,432 GPU-byte** budget. Original construction-layer terrain occlusion and maximum 6-block reach code paths remain unchanged, but actual non-air terrain world occlusion was NOT exercised.
+
+Representative original source-owned warning:
+
+\`\`\`json
+{
+  "localAim":[0,0.033002000000000004,0.965],
+  "originalWorldFloat32StrictTriangleDistance":2.609049032289619,
+  "originalDetailedSelectionDistance":2.588342313528873,
+  "triangleMinusSelectionBlockUnits":0.020706718760746146,
+  "firstSelectedAuthoredBoxIndex":18,
+  "firstStrictTriangleAuthoredBoxIndex":15,
+  "selectedSlabEntryAxis":0,
+  "selectedSlabTransverseSeamMargin":1.1102230246251565e-16,
+  "mathematicalSourceOnly":true
+}
+\`\`\`
+
+The selected and rendered source **nearest faces can come from different overlapping genuine physical brick pieces**, and on many rays source slab boundaries are extremely close to authored seams. These are candidate explanations for nearest-hit distance disagreements, not proven game defects. The distinct **115 non-seam** warnings and **97 differing-owner** warnings are legitimate next precise original-source research targets; they should be source-classified using face ownership, depth and hidden/interior face visibility BEFORE any renderer or player-picking modification. If a strict original hit and original detailed selection both exist, a few centimeters of first-hit distance difference does not mean MINE fails; it can reflect overlapping authored decoration, internal box faces or numerical edge selection.
+
+### Strict scope and proposed next step
+
+**No new actual game WebGL2 session, screenshots, rendered pixel data, physical iPhone Safari, Home Screen PWA or performance tests** occurred in this native source-only session. The earlier genuine R3 game fixture/PNG acceptance #45092582089 remains separate and its overstrong strict-center-ray defect interpretation remains withdrawn after source-barycentric autopsy. No currently demonstrated strict triangle-only selection defect justifies a source AABB padding, geometry-shader or raycaster patch. Do not select production A5 brick art/rotation, alter user worlds, expand empty-air hitboxes, bypass terrain occlusion/reach, or claim 208 unique gameplay bugs.
+
+Next original-source engineering should prioritize the **largest 97 different-box-owner** warnings and **115 non-2e-6-seam** warnings: independently identify source part-face orientation/overlap and test whether the nearest strict triangle is an exposed GPU-relevant surface or an internal face hidden by nearer bricks/terrain. A bounded disposable original-game actual pixel/player targeting test should be justified by a *genuine source strict/selection hit-set gap or clearly visible first-surface depth mismatch*, not by mixed original source numerical tolerance warnings. Continue only on detached, owner-isolated branches with targeted tests and explicit acceptance gates.
+
+Original Roadmap A progress remains **207/420 SOURCE ONLY; 213 unwritten**, historic 128 commerce / 345 industrial / 315 government and original 79 A5 building-source candidate review holds unchanged. Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`, protected OPEN DRAFT PR406 CODE HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\` and all other builders, five hourly automations, pre-existing workflows, original game rendering/physics, schema1 saves, installed iPhone Home Screen PWA and locked v0.11 untouched. No merge, deploy, source world placement, CI cancellation or creator structural approval occurred.
