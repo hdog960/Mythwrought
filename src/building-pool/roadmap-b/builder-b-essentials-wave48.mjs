@@ -19,8 +19,8 @@ export function buildFrostmerefoldFourCourtWinterConservatory(){
   ['northwest-snowwood-outrigger',3,5,22,30,15,'pack3:026'],
   ['northeast-froststone-drying',48,5,64,31,17,'pack3:025'],
   ['south-transverse-cloister',23,61,45,70,20,'pack3:023'],
-  ['west-intermediate-propagation',10,32,20,56,16,'pack3:026'],
-  ['east-intermediate-specimen',47,30,59,55,18,'pack3:025']
+  ['west-intermediate-propagation',2,31,12,57,16,'pack3:026'],
+  ['east-intermediate-specimen',57,31,66,56,18,'pack3:025']
  ],courts=[
   ['north-recessed-sky-court',29,20,38,31],
   ['west-open-rest-court',12,46,20,55],
