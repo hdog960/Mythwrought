@@ -566,6 +566,7 @@ function start(nonblockStage=null){
       // staging transaction after the source-real successful deep MINE.
       if(firstEditUploads){
         if(firstEditUploads.overflow)w.uploadOverflow=true;
+        if(firstEditUploads.faults)w.uploadFaults+=firstEditUploads.faults;
         for(const value of firstEditUploads.samples)near291TrialUpload(value);
       }else w.invalid=true; // missing first-edit source capture
     }
@@ -589,6 +590,12 @@ function start(nonblockStage=null){
     }
     const phase=near291Perf.mineWindow.phase;
     if(phase==='active'||phase==='closing')near291TrialUpload(duration);
+  }
+  function near291RecordUploadFailure(){
+    if(!near291Perf)return;
+    if(near291FirstEditUploads){near291FirstEditUploads.faults++;return;}
+    const w=near291Perf.mineWindow;
+    if(w.phase==='active'||w.phase==='closing')w.uploadFaults++;
   }
   function near291PerfSnapshot(){
     if(!near291Perf)return null;
@@ -650,7 +657,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
-      protocol:'291-local-4viewport-v2',
+      protocol:'291-local-4viewport-v3',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
@@ -1187,6 +1194,9 @@ function start(nonblockStage=null){
       }
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
+      // This is only the original uploadPack2Chunk() failure boundary.
+      // A failed native upload cannot be hidden by successful-upload p95.
+      if(near291Perf)near291RecordUploadFailure();
       if(!near291Enabled){
         // Installed PWA / public Pages keep the original GPU cleanup path.
         if(buffer)gl.deleteBuffer(buffer);
@@ -1516,7 +1526,7 @@ function start(nonblockStage=null){
     // Source uploadPack2Chunk() runs synchronously inside the real edit.
     // The first edit is not yet proven successful until apply+save return.
     if(near291MineStart!==null&&near291Perf.mineWindow.phase==='idle')
-      near291FirstEditUploads={samples:[],overflow:false};
+      near291FirstEditUploads={samples:[],overflow:false,faults:0};
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     let result;
     try{
