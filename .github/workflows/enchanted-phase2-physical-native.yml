@@ -30,7 +30,7 @@ jobs:
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
           node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
-      - name: Only corrected authentic Desert target-directed traversal
+      - name: Only physically admitted Desert route with bounded unbiased fallback
         run: |
-          node --test --test-name-pattern="target-directed search retains" \
+          node --test --test-name-pattern="bounded directional search explicitly falls back" \
             tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
