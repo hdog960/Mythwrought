@@ -1,0 +1,117 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave46-isolated-original-source-handoff.v1",
+  "status": "ISOLATED PROVISIONAL ORIGINAL SOURCE; no native original-repo Node, genuine 228 historical novelty sweep, WebGL2, physical producer or iPhone acceptance",
+  "protectedSourceParent": "1d6c39617390651223217b5cde4f9acca3791253",
+  "independentIsolatedBranch": "builder-b-wave46-cattailreach-isolated-20261122",
+  "sourceCommit": "9d3a8653f5464a6ccce0c45139ec70758ea83087",
+  "nativeTestStagingCommit": "2bc3e03d66bc8d531900dd2b3b62ed7df131c45a",
+  "protectedDraftPR407": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "protectedMain": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "original": {
+    "wave": 46,
+    "name": "Cattailreach Three-Finger Dry Fishing Lodge",
+    "frozenExclusiveBuilderB115ID": "r1:fishing-lodge:temperate:small:003",
+    "path": "src/building-pool/roadmap-b/builder-b-essentials-wave46.mjs",
+    "originalGitBlob": "5aa1cd1d87aceaff7275a483c9884cee4e04a3d1",
+    "sourceFootprint": [
+      43,
+      25,
+      50
+    ],
+    "sourceVoxelPlacements": 5490,
+    "originalPack3RoofCells": 1119,
+    "immediatelyBackedOriginalRoofCandidates": 1119,
+    "distinctSourceRoofWings": 7,
+    "groundedWalkableSourceCells": 1201,
+    "namedRooms": 14,
+    "twoHighGroundedSourcePortals": 16,
+    "completeSkyOpenGroundedCourts": [
+      64,
+      36,
+      36
+    ],
+    "stoneFoundedOpenCourtCells": 136,
+    "separateGroundedTimberJettyBands": 3,
+    "trueFiveHighGroundedTimberMooringPosts": 6,
+    "exteriorOnlyTransverseBFS": true,
+    "candidatePack4WindowCells": 66,
+    "genuinelyFramedThreeHighPaneBays": 22,
+    "completeDesignSourceOnly": true,
+    "liveWater": false,
+    "liveFishing": false,
+    "liveNpcJobs": false,
+    "pack3AndPack4InstalledPhysicalABIApproved": false,
+    "realPlayerOrBoatNavigation": false,
+    "liveGameWorldPlacement": false,
+    "originalIphoneHomeScreenPwaTested": false,
+    "creatorVisualSignoff": false
+  },
+  "executedSourceOnlyChecks": {
+    "method": "JS V8 faithfully modeled original sourcePlan put, cut, opening, room, portal, support and finish while executing exact authored JS function body used in committed file; did NOT import native original repository schema, validators, engine or original source peers",
+    "compileAndNoDuplicateCell": true,
+    "occupiedVoxelAndRoofCandidateCounts": true,
+    "realSolidImmediatelyUnderEveryRoof": true,
+    "all136SkyOpenGroundedCourts": true,
+    "all16TwoHighGroundedPortals": true,
+    "allSixFiveHighSolidTimberPosts": true,
+    "realOutdoorOnlyCrosswalkBFS": true,
+    "continuousAll1201WalkableCellsBFS": true,
+    "all14RoomGraphNodesReachableFromOutside": true,
+    "all66Pack4CellsUprightAndSourceFramed": true,
+    "preservedFrozenB115D92Id": true,
+    "actualOriginalNativeNode": false,
+    "strictD4AgainstRealOriginalPeers": false,
+    "full228AcceptedHistoricalSweep": false
+  },
+  "stagedNativeNodeFocused": {
+    "path": "tests/building-pool/roadmap-b/builder-b-essentials-wave46-focused.test.mjs",
+    "gitBlob": "c62529e8ec49e817884b4d9e1785d79156e24a6b",
+    "tests": 8,
+    "checks": [
+      "genuine frozen ownership",
+      "native exact source totals and portal clearance",
+      "7 original backed roof wings",
+      "136 unroofed court columns",
+      "three-finger outdoor-only crossing",
+      "six solid timber posts",
+      "66 framed and unresolved Pack4 candidate panes",
+      "48 strict D4 comparisons against waves 3,10,16,26,28,39"
+    ],
+    "originalNode22ActualRun": false,
+    "realOldPeerD4Executed": false,
+    "noRelaxedThreshold": true
+  },
+  "pendingAcceptance": [
+    "One original repository native Node22 focused 8-test run at exact new source HEAD; fix any genuine original validation/graph or peer-D4 failures first",
+    "Reuse one coordinated full 228 accepted historical originality gate extended only once to Wave46 when next wave cohort is ready, no duplicate identical full suites",
+    "Original installed Pack3/Pack4 visible mesh/selection/collider/weather/support ABI and 3D navigation vs actual original game, still unresolved",
+    "Coordinate any original-source browser screenshots with existing 222-frame gallery to avoid duplicate runs; no PNGs, Chromium or original game test executed for Wave46",
+    "Creator-authorized actual settlement integration, installed Home Screen PWA on iPhone, saves/performance and visual signoff remain pending"
+  ],
+  "efficientTesting": {
+    "newGithubActionsRunsTriggeredManually": 0,
+    "newChromiumRuns": 0,
+    "duplicated228OriginalHistoricalScans": 0,
+    "oldCIResultsReusedWithoutExaggeration": true
+  },
+  "protected": {
+    "productionMainUntouched": true,
+    "PR407Untouched": true,
+    "priorBuilderBBranchUntouched": true,
+    "otherDeveloperLanesUntouched": true,
+    "automationsUntouched": true,
+    "noMerge": true,
+    "noDeploy": true,
+    "noNewPR": true
+  },
+  "progress": {
+    "originalsStagedOrAuthoredBefore": 55,
+    "originalsStagedOrAuthoredNow": 56,
+    "totalGoal": 294,
+    "remaining": 238,
+    "residentialOriginals": 10,
+    "residentialRemaining": 169,
+    "B115ServicesAuthored": 46,
+    "B115ServicesRemaining": 69
+  }
+}
