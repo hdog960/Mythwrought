@@ -441,7 +441,7 @@ function start(nonblockStage=null){
   const near291Measure=['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('measure-291')==='1';
   const near291Perf=near291Measure?{
-    viewport:'',frames:new Float32Array(2048),mines:new Float32Array(128),
+    viewport:'',frames:new Float64Array(2048),mines:new Float32Array(128),
     uploads:new Float32Array(2048),
     frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,prevFrame:null
   }:null;
