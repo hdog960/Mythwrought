@@ -1,0 +1,47 @@
+name: Desert P3 authentic original M7 cave and climate source protection
+on:
+  push:
+    branches:
+      - research/desert-p3-authentic-protected-climates-20261122
+    paths:
+      - .github/workflows/desert-p3-protected-climates-original.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-protected-climates-original
+  cancel-in-progress: false
+jobs:
+  native-original-protection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9e457b1f4018e9d1113ed550725b816d5f9cc842
+          path: accepted-research
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Protect source-original frozen Git blobs and isolated-only changes
+        run: |
+          set -euo pipefail
+          BASE=9e457b1f4018e9d1113ed550725b816d5f9cc842
+          test "$(git -C accepted-research rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(tests/desert-p3-original-protected-climates.test.mjs|.github/workflows/desert-p3-protected-climates-original.yml|docs/desert/PHASE3_ORIGINAL_CAVE_CLIMATE_PROTECTION_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/gpu-recovery.mjs)" = 422ef73e383bda78ff94607abb858e3c8a57c2d1
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test ! -f candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/tests/desert-p3-original-protected-climates.test.mjs
+      - name: Original-world only novel real cave and climate admission source witnesses
+        run: cd candidate && node --test tests/desert-p3-original-protected-climates.test.mjs
