@@ -1,0 +1,206 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves42-43-authentic-original-source-handoff.v1",
+  "status": "ISOLATED SOURCE-ONLY ENGINEERING: NOT ACCEPTED IN LIVE GAME, NO NATIVE NODE OR CHROMIUM RESULTS",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartingExactHEAD": "4ca5e41181856f527bc738ea8ce3b27b949a1a36",
+  "originalProtectedPR407HEAD": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "protectedProductionMainAtStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "originals": [
+    {
+      "wave": 42,
+      "name": "Greenbarrow Three-Lane Stonecrop Granary",
+      "id": "r1:farm-barn:temperate:medium:004",
+      "originalFile": "src/building-pool/roadmap-b/builder-b-essentials-wave42.mjs",
+      "originalGitBlob": "634ae454ddc981c4096451e4082cbf1951a39c91",
+      "sourceCells": 12031,
+      "originalImmediatelyBackedPack3Roofs": 3084,
+      "connectedSourceWalkableCells": 3192,
+      "roofWingCount": 8,
+      "originalRooms": 15,
+      "realTwoHighPortalLinks": 22,
+      "trulyUnroofedPavedAndWalkableCourts": [
+        121,
+        56,
+        56
+      ],
+      "realGroundedAdditionalExteriorSourceLanes": 221,
+      "actualExteriorOnlyCardinalWalking": "PASS y1 (17,65) to (51,65) restricted outside corridor z>=63, not through indoor source roofs",
+      "originalStoneCropMarkers": "2 distinct grounded eight-tier solid stone columns, backed unpowered Pack3 cap at y9",
+      "originalUprightPack4WindowCells": 60,
+      "completeThreeHighExteriorSourceGlassBays": 20,
+      "sourceRepair": "Center-lane portal moved from unpaved original (33,55) to physically grounded stone (33,56)",
+      "focusedEarlierOriginalD4": [
+        1,
+        22,
+        38
+      ],
+      "originalEightWayD4": 24,
+      "maximumOriginalIoU": 0.5883561643835616,
+      "threshold": 0.85,
+      "liveCropGrowth": false,
+      "activeGrainMachinery": false,
+      "realProducerMeshOrCollidersCertified": false
+    },
+    {
+      "wave": 43,
+      "name": "Suncradle Offset-Basin Bathhouse",
+      "id": "r1:bathhouse:desert:medium:003",
+      "originalFile": "src/building-pool/roadmap-b/builder-b-essentials-wave43.mjs",
+      "originalGitBlob": "366c682ada198b4f422f0ef2c825862f1f4e19ef",
+      "sourceCells": 8056,
+      "originalImmediatelyBackedPack3Roofs": 2018,
+      "connectedSourceWalkableCells": 2037,
+      "roofWingCount": 7,
+      "originalRooms": 14,
+      "realTwoHighPortalLinks": 21,
+      "trulyUnroofedPavedAndWalkableCourts": [
+        81,
+        56,
+        56
+      ],
+      "actualExteriorOnlyCardinalWalking": "PASS y1 (13,53) to (40,53) constrained to genuine exterior z>=51, not through indoor source roofs",
+      "originalDryStoneBasins": "2 distinct original stone 5x5 perimeter rings with one source air notch each; 15 real stone y1 rim cells per ring; 30 cells total; no water",
+      "originalUprightPack4WindowCells": 42,
+      "completeThreeHighExteriorSourceGlassBays": 14,
+      "idCollisionPrevented": "Original preliminary small desert 004 ID matched existing Wave5 small desert bathhouse. Corrected to medium desert 003, frozen B115-only and not historical accepted 228. Original 43-source read-only scan confirms uniqueness; original Wave5 unchanged.",
+      "focusedEarlierOriginalD4": [
+        5,
+        18,
+        35
+      ],
+      "originalEightWayD4": 24,
+      "maximumOriginalIoU": 0.48650674662668664,
+      "threshold": 0.85,
+      "workingBathWater": false,
+      "liveHeatingOrSteam": false,
+      "realProducerMeshOrCollidersCertified": false
+    }
+  ],
+  "actualExecuted": {
+    "method": "Unmodified original repository legacy-stable-schema, schema and m2-community-structures/sourcePlan loaded through authentic GitHub blobs into isolated JS V8; strict original validateBlueprint + physical per-cell and same-category eight-way D4 checked. NOT native original Node runner.",
+    "validOriginalSourceBlueprints": 2,
+    "sourceCells": 20087,
+    "sourceImmediateYMinusOneBackedRoofCells": 5102,
+    "originalConnectedWalkableSourceCells": 5229,
+    "openSkyPhysicallyGroundedPavedCourtCells": 426,
+    "originalOutwardUprightPack4SourceWindowCells": 102,
+    "completePhysicallyFramed3HighGlassBays": 34,
+    "realOriginalTwoHighPortals": 43,
+    "sourceRooms": 29,
+    "sourceOriginalExteriorOnlyCardinalBFS": "PASS both complete real walking routes",
+    "originalStoneMarkerAndBasinEvidence": "PASS two grounded 8-tier stonecrop markers, true directly backed Pack3 caps and both 15-stone empty basin rims",
+    "originalStrictEightWayD4": "PASS 48/48 against six already-authored original same-category sources, max 0.5883561643835616 under original threshold 0.85",
+    "independentPreviouslyAuthoredServiceIDRead": "Read-only 43 separate original Wave1–43 source files in three batches: all have one distinct canonical r1 1B ID; Wave5 duplicate of preliminary Wave43 source identified and repaired. No changes to earlier waves.",
+    "frozenOwnership": "Both corrected IDs explicitly present in B115; neither in frozen D92 nor previously accepted 228",
+    "nativeNode": "NOT_EXECUTED",
+    "actualOriginalPackMeshSelectionCollider": "NOT_CERTIFIED",
+    "realChromiumPNGs": 0,
+    "actualIphoneInstalledPWA": "NOT_TESTED"
+  },
+  "stagedButNotExecuted": {
+    "originalFocusedNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves42-43-focused.test.mjs",
+      "blob": "8cc5823ee6cd81a0bdbdbd4d60d0ff229ee5ccb6",
+      "staticParse": "PASS",
+      "scope": "Seven original-source tests: ID collision regression against Wave5, B115/D92 ownership, 5102 backed roofs, 426 sky-open cells, exterior-only cardinal walking, 102 complete framed panes, 2 grounded markers/30 dry rim stones, 48 strict local D4",
+      "actualNativeNode": false
+    },
+    "singleAccepted228History": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-43-shared-historical-d4.test.mjs",
+      "blob": "9399f0105432d2dda172f5cf84d3217eddf28684",
+      "acceptedOriginalSources": 228,
+      "stagedAuthoredBuilderBServiceOriginals": 43,
+      "newServiceOriginalSourcesWaves9to43": 35,
+      "strictSourceEightWayD4Threshold": 0.85,
+      "singleHistoricalLoad": true,
+      "uniqueNewOriginalIDsExpected": 43,
+      "originalSourceAllocation": 271,
+      "remainingOriginalSourceAllocation": 164,
+      "nativeNode": false
+    },
+    "oneConsolidatedWebGL2SourceProxy": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-43-gallery.mjs",
+      "galleryBlob": "225a948a56535ffbe61d1f742120ddd080d12bb2",
+      "auditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-43-gallery.mjs",
+      "auditorBlob": "4a90efd70aee34dd0224a5ac8a016f6c21e9dd86",
+      "wiring": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-43-gallery-wiring.test.mjs",
+      "wiringBlob": "c62986863766a4b3bf766c0d3d889601680a2e08",
+      "newExactSourcePreviews": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave42-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave43-preview.html"
+      ],
+      "authoredSourceOriginals": 35,
+      "sourceEvidenceFiles": 38,
+      "requiredUniqueRealSourceBoundPNGFrames": 210,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "views": [
+        "exterior",
+        "cutaway"
+      ],
+      "exactGitHEADAndPNGCRC": true,
+      "independentUniquePNGSHA": true,
+      "realBrowser": false,
+      "actualPNGCount": 0,
+      "notOriginalGameRendering": true
+    }
+  },
+  "outstandingRequiredTests": [
+    "Run targeted original complete-repository Node tests on exact branch HEAD, including one unchanged accepted 228-source historical 8-way D4 census; avoid duplicate redundant CI",
+    "Verify original Pack3 and Pack4 physical mesh orientation, real support/weather load, collider/selection, source palette and ray parity in actual game",
+    "Coordinate one real Chromium source-proxy WebGL2 gallery 210-frame PNG/CRC/SHA acceptance, not equivalent to original game",
+    "Creator-authorized original engine and world placement, original physical navigation, biome/settlement interfaces, saved-world and offline PWA, iPhone Home Screen performance, visual and creator acceptance"
+  ],
+  "globalCIEfficiency": {
+    "protectedHeadsReadOnceAtStart": true,
+    "previousPR407GreenActionsReusedHistoricalOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newActionsLaunched": 0,
+    "ChromiumRuns": 0,
+    "duplicatedHistorical228ScanRuns": 0,
+    "sharedWorkflowChanges": 0,
+    "jobCancellations": 0,
+    "requiredGatesUnweakened": true
+  },
+  "protected": {
+    "historical228Untouched": true,
+    "frozenB115D92LedgerUntouched": true,
+    "earlierBuilderBOriginalsUntouched": true,
+    "otherDeveloperBranchesUntouched": true,
+    "allFiveAutomationsUntouched": true,
+    "productionMainUntouched": true,
+    "protectedDraftPR407Untouched": true,
+    "originalSavedWorldsUntouched": true,
+    "noMerge": true,
+    "noDeploy": true
+  },
+  "progress": {
+    "newResidentialOriginals": 10,
+    "newBuilderBServiceOriginals": 43,
+    "allNewOriginalsAuthoredOrStaged": 53,
+    "goal": 294,
+    "remainingTotal": 241,
+    "remainingResidential": 169,
+    "remainingServices": 72
+  },
+  "estimatedFocusedSessionsRemaining": {
+    "low": 65,
+    "high": 215,
+    "excludingFinalPhysicalIntegrationRelease": true,
+    "uncertain": true
+  }
+}
