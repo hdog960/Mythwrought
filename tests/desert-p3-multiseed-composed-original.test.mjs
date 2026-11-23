@@ -14,6 +14,7 @@ import {Pack2LiveWorld} from '../src/pack2-world.mjs';
 import {pack2WaterSectionVertices,pack2NormalizeState}
   from '../src/pack2-integration.mjs';
 import {createPack3RuntimeStage} from '../src/builder-assets/pack3-runtime.mjs';
+import {PACK3_BUILDER_SYMBOLS} from '../src/builder-assets/pack3.mjs';
 import {combinePack3ChunkMesh,PACK3_MAX_ADDED_VERTICES_PER_CHUNK}
   from '../src/builder-assets/pack3-live.mjs';
 import {createManual14Layer} from '../src/builder-assets/manual14-layer.mjs';
@@ -217,7 +218,7 @@ test('source-exact composed M7 edit staging with real Pack2 water, Pack3 origina
  for(const at of candidates){
   if(world.get(...at)!==BLOCK.AIR)continue;
   if(!pack3Asset){
-   try{pack3.placeMany([{at,asset:'pack3:109',orientation:'north'}]);
+   try{pack3.placeMany([{at,asset:PACK3_BUILDER_SYMBOLS[0],orientation:'north'}]);
     pack3Asset=at;continue;}catch(e){throw Error('Original Pack3 real asset rejected: '+e.message);}
   }
   if(!separateWater&&at.join(',')!==pack3Asset.join(',')){
