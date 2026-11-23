@@ -165,3 +165,31 @@ test('original in-memory cave/headroom obstruction invalidates route replay inst
  assert.deepEqual(history.save(),{schema:1,seed,
    edits:[[obstruction[0],obstruction[1],obstruction[2],BLOCK.STONE]]});
 });
+
+test('source-fixed four-diagonal historical Desert witness replays without any per-leg teleport',()=>{
+ const seed=7919,historical=world(seed),prototype=world(seed,true);
+ const source=[];
+ for(let i=0;i<=4;i++){
+   const original=originalM7PedestrianCap(historical,225+i,-592-i);
+   assert.ok(original,'previous exact-source historic Desert diagonal leg must be real');
+   source.push(original);
+ }
+ assert.equal(biome(source[0].x,source[0].z,seed),'desert');
+ assert.equal(biome(source.at(-1).x,source.at(-1).z,seed),'enchanted');
+ const old=originalM7PhysicsRouteReplay(historical,source);
+ assert.equal(old.ok,true,'historical four-diagonal route must truly walk');
+ assert.equal(old.legs,4);
+ const candidate=originalM7PhysicsRouteReplay(prototype,source);
+ assert.equal(candidate.ok,true,
+   'opt-in Enchanted trees must not obstruct this accepted historical crossing');
+ assert.equal(candidate.ticks,old.ticks);
+ assert.ok(Math.abs(candidate.finalFeet-old.finalFeet)<.15);
+ assert.deepEqual(historical.save(),{schema:1,seed,edits:[]});
+ assert.throws(()=>prototype.save(),/cannot be saved as historical M7/);
+ console.log('# ENCHANTED M7 PHYSICS REPLAY CANONICAL DESERT '+JSON.stringify({
+  seed,start:[source[0].x,source[0].z],
+  end:[source.at(-1).x,source.at(-1).z],legs:old.legs,
+  originalTicks:old.ticks,candidateTicks:candidate.ticks,
+  sourceGroundCapEveryLeg:true,continuousOriginalVelocity:true
+ }));
+});
