@@ -39,7 +39,7 @@ test('exact original guard first veto: untouched WOOD above old top is preserved
 
 test('suppressed legacy grove leaves no original guard veto; does NOT imply repair authorization',()=>{
   const v=make();
-  v.original.set(key(15,9,2),5);
+  v.original.set(key(15,9,2),7);
   v.baseline.set(key(15,9,2),0);
   const a=audit(v.world,rect,v.deps),row=a.rows.find(r=>r.x===15&&r.z===2);
   assert.equal(row.firstVeto,null);
@@ -72,7 +72,7 @@ test('cave AIR under original top is a protected subsurface guard veto',()=>{
 test('edited top excluded by topology and preserved; other originals still classified',()=>{
   const v=make();
   v.edits.set(key(15,6,2),0);
-  v.original.set(key(16,8,2),5);
+  v.original.set(key(16,8,2),7);
   const before=JSON.stringify(v.world.save());
   const a=audit(v.world,rect,v.deps);
   assert.equal(a.grassCells,3);
@@ -83,7 +83,7 @@ test('edited top excluded by topology and preserved; other originals still class
 
 test('negative original chunk coordinates are retained and stable',()=>{
   const v=make(new Set(['-17,2','-16,2']));
-  v.original.set(key(-17,8,2),5);
+  v.original.set(key(-17,8,2),7);
   const a=audit(v.world,{x:-19,z:0,width:8,height:6},v.deps);
   assert.equal(a.grassCells,2);
   assert.deepEqual(a.rows.map(r=>[r.x,r.z]),[[-17,2],[-16,2]]);
@@ -142,4 +142,15 @@ test('invalid original material ID is rejected rather than attributed',()=>{
   const v=make();
   v.baseline.set(key(15,8,2),999999);
   assert.throws(()=>audit(v.world,rect,v.deps),/Invalid original M7 baseline/);
+});
+
+test('original CRYSTAL ID 5 is an elevated landmark, never misread as LEAVES ID 7',()=>{
+  const v=make();
+  v.original.set(key(15,8,2),5);
+  const a=audit(v.world,rect,v.deps),row=a.rows.find(r=>r.x===15&&r.z===2);
+  assert.equal(row.cause,'other-elevated-original');
+  assert.equal(row.maskedLegacyWoodOrLeaves,0);
+  assert.equal(a.summary.unsuppressedWoodOrLeaves,0);
+  assert.equal(a.summary.otherElevatedOriginal,1);
+  assert.equal(v.world.get(15,8,2),5);
 });
