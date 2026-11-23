@@ -100,8 +100,23 @@ export function classifyExactHeadOriginalM7Triplet({
    r.candidateThinUnderpassCenterLandingSourceVisits));
  if(!cityThinUnderpassExactCoordinateCoverageSafe)
   reasons.push('RARE_CITY_UNDERPASS_SOURCE_COORDINATE_HOLD');
+ const cityThinUnderpassIndependentFootprintSafe=
+  cityThinUnderpassExactCoordinateCoverageSafe&&c.rows.every(r=>
+   yes(r.candidateThinUnderpassIndependentGeometryMatched)&&
+   yes(r.candidateThinUnderpassIndependentSourceCoordinatesVerified)&&
+   r.candidateThinUnderpassExpectedBridgeDistinctCells===
+    r.candidateThinUnderpassBridgeDistinctCells&&
+   r.candidateThinUnderpassExpectedPadDistinctCells===
+    r.candidateThinUnderpassPadDistinctCells&&
+   r.candidateThinUnderpassExpectedOverlapCells===
+    r.candidateThinUnderpassBridgePadOverlapCells&&
+   r.candidateThinUnderpassExpectedCombinedDistinctCells===
+    r.candidateThinUnderpassCombinedDistinctCells);
+ if(!cityThinUnderpassIndependentFootprintSafe)
+  reasons.push('RARE_CITY_UNDERPASS_INDEPENDENT_FOOTPRINT_HOLD');
  const cityThinUnderpassHypotheticalMovementSafe=citySourceSafe&&
   cityThinUnderpassExactCoordinateCoverageSafe&&
+  cityThinUnderpassIndependentFootprintSafe&&
   c.rows.every(r=>{
    const bridge=r.candidateThinUnderpassSourceVisits,
     pad=r.candidateThinUnderpassCenterLandingSourceVisits,
@@ -167,6 +182,7 @@ export function classifyExactHeadOriginalM7Triplet({
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   cityThinUnderpassHypotheticalMovementSafe,
   cityThinUnderpassExactCoordinateCoverageSafe,
+  cityThinUnderpassIndependentFootprintSafe,
   cityThinUnderpassRealM7WalkingUnverified:true,
   chunkRiskSafe,
   proposalEvidenceAllPassed:nativeTripletReportsPresent&&
