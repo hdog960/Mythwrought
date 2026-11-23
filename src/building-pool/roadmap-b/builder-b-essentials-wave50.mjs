@@ -58,6 +58,11 @@ export function buildVesperfrostFourCourtDryBathhouse(){
   const p=first.get(name);
   if(!p)throw Error('Vesperfrost roof wing is occluded '+name);
   b.support(p[0],p[1],p[2]-1,'live:stone','vesperfrost-source-bearing-post-'+name);
+  // b.support records the real support plan but may leave unfilled tiers.
+  // Close actual y1..roof-1 stone load path, without replacing occupied cells.
+  for(let y=1;y<p[2];y++)if(b.clear(p[0],y,p[1]))
+   b.put(p[0],y,p[1],'support','live:stone','none',
+    {physicallyContinuousVesperfrostPost:name,sourceOnlyLoadCertification:false});
  }
  const basins=[
  ['west-inner-dry-plunge',16,25],['east-inner-dry-plunge',54,25],
