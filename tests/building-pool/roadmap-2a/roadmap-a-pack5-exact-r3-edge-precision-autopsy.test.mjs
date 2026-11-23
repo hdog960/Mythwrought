@@ -4,6 +4,7 @@ import {forwardVector} from '../../../src/camera.mjs';
 import {
  ORIGINAL_R3_REAL_GAME_EDGE,pureOriginalRayBoxDistance,
  originalTriangleBarycentric,buildOriginalR3BrickSourcePreview,
+ originalR3ActualGpuWorldFloat32Staging,auditOriginalR3CompletePlayerPoseSeamGrid,
  auditExactOriginalR3MeshBoxPrecision,attestUnchangedOriginalRayImplementations
 } from '../../../src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs';
 
@@ -11,7 +12,7 @@ const evidence=auditExactOriginalR3MeshBoxPrecision();
 
 test('authenticates unchanged original Pack5 slab, barycentric edge and real Float32 source vertex contracts',()=>{
  const c=attestUnchangedOriginalRayImplementations();
- assert.equal(c.contractCount,4);
+ assert.equal(c.contractCount,5);
  assert.equal(c.originalAuthoredSelectionSlabsUnchanged,true);
  assert.equal(c.originalBarycentricToleranceExactlyRead,true);
  assert.equal(c.originalMeshFloat32PositionsExactlyRead,true);
@@ -122,6 +123,58 @@ test('seven exact authored seam micro-shifts preserve original-vs-F32 slab-vs-ba
  assert.equal(evidence.exactOriginalEdgeShiftGrid[3].sourceRelaxedTriangleOnly,true);
  console.log('ROADMAP_A_ORIGINAL_R3_EDGE_SEAM_SHIFT_GRID '+JSON.stringify(
   evidence.exactOriginalEdgeShiftGrid));
+});
+test('original real GPU world vertices require extra Float32 rounding AFTER adding the 3,14,0 brick anchor',()=>{
+ const local=buildOriginalR3BrickSourcePreview(),w=ORIGINAL_R3_REAL_GAME_EDGE;
+ const world=originalR3ActualGpuWorldFloat32Staging(local.staged,[...w.anchor]);
+ assert.ok(world instanceof Float32Array);
+ assert.equal(world.length,local.staged.length);
+ let changed=0;
+ for(let i=0;i<world.length;i+=9)for(let k=0;k<3;k++){
+  assert.equal(world[i+k],Math.fround(local.staged[i+k]+w.anchor[k]));
+  if(world[i+k]!==local.staged[i+k]+w.anchor[k])changed++;
+ }
+ assert.ok(changed>0,'the original game GPU world-space Float32 rounding must be observable');
+ assert.equal(evidence.originalRealGpuWorldStagingWritesFloat32Again,true);
+ assert.equal(evidence.originalR3ResearchStagedWorldAdditionWasDouble,true);
+ assert.ok(evidence.originalActualGpuWorldFloat32StagedTriangle===null||
+  Number.isFinite(evidence.originalActualGpuWorldFloat32StagedTriangle.distance));
+ assert.ok(evidence.strictOriginalActualGpuWorldFloat32StagedTriangle===null||
+  Number.isFinite(evidence.strictOriginalActualGpuWorldFloat32StagedTriangle.distance));
+ console.log('ROADMAP_A_ORIGINAL_R3_TRUE_GPU_WORLD_FLOAT32 '+JSON.stringify({
+  researchStrict:evidence.strictlyInsideAuthoredFloat32SourceTriangle?.distance??null,
+  realGpuWorldFloat32Strict:evidence.strictOriginalActualGpuWorldFloat32StagedTriangle?.distance??null,
+  realGpuWorldFloat32Relaxed:evidence.originalActualGpuWorldFloat32StagedTriangle?.distance??null,
+  worldCoordinateRoundingChangedValues:changed
+ }));
+});
+test('all 2430 original R3 player pose rays are reconstructed with BOTH actual GPU world-F32 and earlier research-double positions',()=>{
+ const full=auditOriginalR3CompletePlayerPoseSeamGrid();
+ const totals=full.exactSourceCounters;
+ assert.equal(totals.sourceRays,2430);
+ assert.equal(full.authoringYCoordinateSamples,27);
+ assert.equal(full.authoringZCoordinateSamples,30);
+ assert.equal(full.threeOriginalMicroOffsetsPerCoordinate,3);
+ assert.equal(totals.originalRelaxedTriangleOnly,2);
+ assert.equal(totals.originalBothHitDistanceWarnings,146);
+ assert.equal(totals.originalSelectionOnly,0);
+ assert.equal(totals.originalBothHits,2301);
+ assert.equal(totals.originalBothMiss,127);
+ assert.equal(full.allOriginalTriangleOnlyWitnesses.length,2);
+ assert.ok(totals.originalStrictTriangleOnly<=totals.sourceRays);
+ assert.ok(totals.actualGpuWorldFloat32StrictTriangleOnly<=totals.sourceRays);
+ assert.ok(totals.originalFloat32BoxWouldHitAtRelaxedOnly<=2);
+ for(const row of full.allOriginalTriangleOnlyWitnesses){
+  assert.equal(row.originalAuthoredSelectionDistance,null);
+  assert.ok(Number.isFinite(row.originalSourceTriangleDistance));
+  assert.ok(Number.isFinite(row.relaxedTriangleMinimumBarycentric));
+  assert.equal(typeof row.strictTriangleWouldPick,'boolean');
+  assert.equal(row.previousSourceHelperWouldPick,true);
+ }
+ console.log('ROADMAP_A_R3_TRUE_RENDERER_FLOAT32_FULL_2430_PLAYER_RAYS '+JSON.stringify({
+  sourceTotals:totals,allOriginalTriangleOnlyWitnesses:full.allOriginalTriangleOnlyWitnesses,
+  firstStrictActualGpuWorldTriangleOnly:full.strictTriangleOriginalSelectionGaps.slice(0,8)
+ }));
 });
 test('diagnostic read-only proposed alternatives never modify production geometry, physical supports, saves, reach or structural approvals',()=>{
  assert.equal(evidence.sourceOnly,true);
