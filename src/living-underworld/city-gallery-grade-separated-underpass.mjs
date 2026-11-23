@@ -352,9 +352,16 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  // Each old-world bridge and pad callback now has an observable role count.
  // Reader identity remains caller-verified: this is not a native M7 claim.
  const sourceRoleCalls={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
+ // Take one stable per-role callback snapshot before the first voxel read.
+ // Dynamic replacements on the caller object cannot silently switch
+ // geology/edit/landmark authorities halfway through this source census.
+ const originalRoleReaders=Object.freeze({
+  naturalAt:source.naturalAt,authoredAt:source.authoredAt,
+  editedAt:source.editedAt,protectedAt:source.protectedAt
+ });
  const read=(role,x,y,z)=>{
   sourceRoleCalls[role]++;
-  return source[role](x,y,z);
+  return originalRoleReaders[role](x,y,z);
  };
  const observed=Object.freeze({
   naturalAt:(x,y,z)=>read('naturalAt',x,y,z),
