@@ -1,0 +1,66 @@
+# MYTHWROUGHT Enchanted Phase 2, isolated ORIGINAL legacy landmark
+# provenance and genuine two-leg player approach. No production changes.
+# Separate one new native source/test job; accepted long border/6-step cave
+# suites are reused and NOT re-executed.
+name: Enchanted Phase 2 Original Landmark Walk Native
+on:
+  push:
+    branches:
+      - research/enchanted-p2-deeper-source-landmark-walk-20261123
+    paths:
+      - .github/workflows/enchanted-p2-original-landmark-walk-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  real-original-landmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original walking/landmark generators and new source syntax
+        id: guard
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-route.mjs)" = "21f368cc0532a124e7d2ba0f3e55548386c2682f"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/voxel-landmarks.mjs)" = "f4907793f1e2b8a3cb882254020b7cba720658b0"
+          node --check src/manual-biomes/enchanted-original-landmark-walk-evidence.mjs
+          node --check tests/manual-biomes/enchanted-original-landmark-neighbor-real-m7.test.mjs
+      - name: Execute only new source-authentic landmark physics and edit veto
+        id: native
+        run: node --test tests/manual-biomes/enchanted-original-landmark-neighbor-real-m7.test.mjs
+      - name: Publish exact isolated native status/run locator
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GUARD: ${{ steps.guard.outcome }}
+          NATIVE: ${{ steps.native.outcome }}
+        run: |
+          if [ "$GUARD" = success ] && [ "$NATIVE" = success ]; then
+            export RESULT=success
+            export SUMMARY="2 original M7 landmark-source and actual-physics test bodies passed"
+          else
+            export RESULT=failure
+            export SUMMARY="Original M7 landmark source or authentic physics test failed"
+          fi
+          python3 - <<'PY' > /tmp/enchanted-landmark-native.json
+          import json,os
+          print(json.dumps({"state":os.environ["RESULT"],
+            "context":"enchanted-p2-real-landmark-walk-native",
+            "description":os.environ["SUMMARY"],
+            "target_url":os.environ["GITHUB_SERVER_URL"]+"/"+os.environ["GITHUB_REPOSITORY"]+"/actions/runs/"+os.environ["GITHUB_RUN_ID"]}))
+          PY
+          curl --fail-with-body -fsS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --data-binary @/tmp/enchanted-landmark-native.json \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" >/dev/null
