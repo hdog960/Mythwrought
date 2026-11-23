@@ -5,6 +5,7 @@
 import {readFourRegionProfile,isUnclaimedWorldSeed}
   from './profile-storage.mjs';
 import {loadWorldSafe} from '../persistence.mjs';
+import {auditMountainV8ExtraSeedOwners} from './mountain-v8-extra-seed-owner-audit.mjs';
 
 const verdict=(seed,reason,knownStorageUnclaimed=false)=>Object.freeze({
   seed,reason,knownStorageUnclaimed,
@@ -36,6 +37,11 @@ export function inspectMountainV8OptInSeed(storage,seed){
       return verdict(seed,'existing-or-recovered-original-save');
     if(!isUnclaimedWorldSeed(storage,seed,loaded))
       return verdict(seed,'existing-selected-seed-or-owner-sidecar');
+    // The original unclaimed checker does not enumerate the separate cave-mob
+    // roster key, nor its independent backup. Preserve abandoned/partial
+    // cave-world saves even without their regular cave profile sidecar.
+    if(auditMountainV8ExtraSeedOwners(storage,seed).claim)
+      return verdict(seed,'existing-cave-mob-roster-or-backup');
     return verdict(seed,'read-only-unclaimed-candidate',true);
   }catch(_){
     // Never downgrade a damaged/contradictory original to 'unused'.
