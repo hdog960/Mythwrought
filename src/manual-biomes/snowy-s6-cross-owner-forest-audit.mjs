@@ -30,10 +30,17 @@ export function auditSnowS6CrossOwnerForest(world,cx,cz,deps={},options={}){
     !(world.edits instanceof Map)||typeof world.save!=='function'||
     typeof world.get!=='function'||typeof world.environmentCaves?.get!=='function'||
     typeof deps.collides!=='function'||typeof deps.proposedSnowTree!=='function'||
-    options?.reverse!==undefined&&typeof options.reverse!=='boolean')
+    options?.reverse!==undefined&&typeof options.reverse!=='boolean'||
+    options?.stepPlayer!==undefined&&typeof options.stepPlayer!=='function'||
+    options?.width!==undefined&&options.width!==3&&options.width!==2||
+    options?.height!==undefined&&options.height!==2)
     return fail('original-M7-forest-source-contract-required');
   const startSave=JSON.stringify(world.save());
-  const box=[[cx,cz],[cx+1,cz],[cx,cz+1],[cx+1,cz+1]];
+  // A 3x2 original-window opt-in verifies multi-owner original-world
+  // movement. Default remains the EXACT earlier 2x2 original acceptance.
+  const width=options.width??2,height=options.height??2,box=[];
+  for(let dz=0;dz<height;dz++)for(let dx=0;dx<width;dx++)
+    box.push([cx+dx,cz+dz]);
   if(box.some(([x,z])=>!integer(x)||!integer(z)))return fail('original-chunk-window-unbounded');
   const ordered=options.reverse?[...box].reverse():box;
   const previews=new Map(),ownerIds=new Set();
@@ -135,6 +142,41 @@ export function auditSnowS6CrossOwnerForest(world,cx,cz,deps={},options={}){
   }
   if(stagedCells.size!==cellOwners.size)
     return fail('original-cross-owner-physical-union-incomplete');
+  // Original stepPlayer is injected by the genuine full-repository gate, NOT
+  // simulated. Each local player path is independent; the voxel read-through
+  // includes the ENTIRE accepted union from every original owner.
+  let stepFrames=0,walkedTrees=0,originalClearStarts=0;
+  const walks=[];
+  if(options.stepPlayer){
+    for(const tree of all){
+      let selected=null;
+      for(const [dx,dz] of [[0,-2.5],[0,2.5],[-2.5,0],[2.5,0]]){
+        const state={x:tree.x+dx+.5,z:tree.z+dz+.5,feet:tree.floor+1,
+          yaw:0,pitch:0,vX:0,vY:0,vZ:0,onGround:true,coyote:.09,
+          jumpBuffer:0};
+        try{
+          if(deps.collides(world,state.x,state.feet,state.z)||
+            deps.collides(staged,state.x,state.feet,state.z))continue;
+          originalClearStarts++;
+          const start=[state.x,state.z,state.feet];
+          for(let tick=0;tick<45;tick++){
+            options.stepPlayer(staged,state,{forward:1,strafe:0,jump:false},1/60);
+            if(![state.x,state.z,state.feet].every(Number.isFinite)||
+              deps.collides(staged,state.x,state.feet,state.z))
+              return fail('genuine-original-stepPlayer-penetration-or-invalid-pose',
+                {treeKey:tree.key,atTick:tick});
+            stepFrames++;
+          }
+          selected=freeze({treeKey:tree.key,owner:tree.owner,start:freeze(start),
+            end:freeze([state.x,state.z,state.feet]),frames:45});
+          walkedTrees++;
+          break;
+        }catch(error){return fail('genuine-original-stepPlayer-callback-failed',
+          {treeKey:tree.key,detail:String(error?.message??error)});}
+      }
+      if(selected)walks.push(selected);
+    }
+  }
   for(const [x,y,z,cave,block,edit] of source){
     const current=world.environmentCaves.get(x,y,z);
     if((current===undefined?null:current)!==cave||
@@ -144,12 +186,15 @@ export function auditSnowS6CrossOwnerForest(world,cx,cz,deps={},options={}){
   if(JSON.stringify(world.save())!==startSave)
     return fail('original-schema-1-save-mutated-during-forest-audit');
   return freeze({kind:'detached-S6-cross-owner-original-body-forest',
-    safe:true,window:freeze([cx,cz,2,2]),chunks:freeze(chunks),
+    safe:true,window:freeze([cx,cz,width,height]),chunks:freeze(chunks),
     distinctOwnerReviews:owners.size,distinctAcceptedTrees:all.length,
     physicalCells:stagedCells.size,styleCounts:freeze(styles),
     trees:freeze(all.map(t=>freeze({key:t.key,owner:t.owner,style:t.style,
       x:t.x,z:t.z,floor:t.floor,physicalCells:t.cells.length}))),
     bodyProbes,protectedDirectedPortalPairs:protectedPairs,
+    originalStepPlayerSourceUsed:Boolean(options.stepPlayer),
+    originalStepFrames:stepFrames,originalWalkedTrees:walkedTrees,
+    originalClearWalkStarts:originalClearStarts,walks:freeze(walks),
     originalSourceUnchanged:true,readOnly:true,notLiveM7:true,
     noWholeWorldApproval:true,noIPhoneOrVisualApproval:true,
     writerEnabled:false});

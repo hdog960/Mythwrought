@@ -1,0 +1,39 @@
+name: Snow S6 six-chunk exact original conifer owner and stepPlayer gate
+on:
+  push:
+    branches:
+      - research/snow-s6-six-chunk-player-physics-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s6-six-chunk-player-native.yml'
+      - 'src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs'
+      - 'tests/snowy-s6-six-chunk-step-player.test.mjs'
+      - 'tests/snowy-s6-six-chunk-original-m7.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s6-original-six-chunk-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  six-chunk-read-only-original:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact isolated HEAD, unchanged original physics and source syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/physics.mjs)" = 199cab89fc1e6ab67d12a56c62795ef0ac4b50d7
+          node --check src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs
+          node --check tests/snowy-s6-six-chunk-step-player.test.mjs
+          node --check tests/snowy-s6-six-chunk-original-m7.test.mjs
+      - name: Updated owner compatibility and six-chunk focused contract regressions
+        run: |
+          node --test tests/snowy-s6-cross-owner-forest-audit.test.mjs tests/snowy-s6-six-chunk-step-player.test.mjs
+      - name: Genuine original two-seed six-chunk owners and original stepPlayer
+        run: node --test tests/snowy-s6-six-chunk-original-m7.test.mjs
