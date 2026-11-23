@@ -55,8 +55,7 @@ export function searchOriginalM7PedestrianBorder(world,{
   seed=world?.seed, x,z, targetBiome=null,
   radius=12,maxVisits=ENCHANTED_ORIGINAL_PATH_MAX_VISITS,
   maxSteps=ENCHANTED_ORIGINAL_PATH_MAX_STEPS,
-  minDisplacement=5,maxRoutes=ENCHANTED_ORIGINAL_PATH_MAX_ROUTES,
-  goalX=null,goalZ=null
+  minDisplacement=5,maxRoutes=ENCHANTED_ORIGINAL_PATH_MAX_ROUTES
 }={}){
   if(!Number.isInteger(seed)||seed!==(seed|0)||
      seed!==world?.seed||!Number.isSafeInteger(x)||!Number.isSafeInteger(z)||
@@ -65,16 +64,13 @@ export function searchOriginalM7PedestrianBorder(world,{
      !Number.isInteger(maxSteps)||maxSteps<1||maxSteps>ENCHANTED_ORIGINAL_PATH_MAX_STEPS||
      !Number.isInteger(minDisplacement)||minDisplacement<1||minDisplacement>radius*2||
      !Number.isInteger(maxRoutes)||maxRoutes<1||maxRoutes>ENCHANTED_ORIGINAL_PATH_MAX_ROUTES||
-     (goalX===null)!==(goalZ===null)||
-     goalX!==null&&(!Number.isSafeInteger(goalX)||!Number.isSafeInteger(goalZ))||
      targetBiome!==null&&(typeof targetBiome!=='string'||targetBiome==='enchanted'&&
        sourceBiome(x,z,seed)==='enchanted'))
     throw Error('Invalid original M7 bounded pedestrian path query');
   const startBiome=sourceBiome(x,z,seed);
   const start=originalM7PedestrianCap(world,x,z);
   const stats={sourceBiome:startBiome,targetBiome,seed,origin:[x,z],
-    radius,maxVisits,maxSteps,minDisplacement,goalX,goalZ,
-    prioritized:goalX!==null,visited:0,supported:0,
+    radius,maxVisits,maxSteps,minDisplacement,visited:0,supported:0,
     rejectedGround:0,rejectedHeight:0,rejectedCorner:0,
     rejectedSweep:0,proposals:0,truncated:false};
   if(!start)return {routes:[],stats:{...stats,startSupported:false}};
@@ -82,14 +78,6 @@ export function searchOriginalM7PedestrianBorder(world,{
   const parents=new Map([[key(x,z),null]]);
   const depths=new Map([[key(x,z),0]]);
   const queue=[key(x,z)],routes=[];
-  // With a known border crossing, prefer the opposite-bank source
-  // coordinates rather than exhaustively expanding an isotropic circle.
-  // The heuristic only changes traversal order: it NEVER changes source
-  // ground, player collision, or admission. No unbounded route state.
-  const score=id=>{
-    const n=nodes.get(id),d=depths.get(id);
-    return d*.35+Math.hypot(n.x-goalX,n.z-goalZ);
-  };
   const sampled=new Map([[key(x,z),start]]);
   const ground=(a,b)=>{
     const k=key(a,b);
@@ -97,18 +85,8 @@ export function searchOriginalM7PedestrianBorder(world,{
     const support=originalM7PedestrianCap(world,a,b);
     sampled.set(k,support);return support;
   };
-  for(let cursor=0;cursor<maxVisits&&queue.length>0;cursor++){
-    let at;
-    if(goalX===null)at=queue.shift();
-    else {
-      let best=0,bestValue=Infinity;
-      for(let i=0;i<queue.length;i++){
-        const value=score(queue[i]);
-        if(value<bestValue){bestValue=value;best=i;}
-      }
-      at=queue.splice(best,1)[0];
-    }
-    const here=nodes.get(at),d=depths.get(at);
+  for(let cursor=0;cursor<queue.length&&cursor<maxVisits;cursor++){
+    const at=queue[cursor],here=nodes.get(at),d=depths.get(at);
     stats.visited++;
     const biome=sourceBiome(here.x,here.z,seed);
     // Require a meaningful spatial crossing, not a one-voxel border
@@ -158,6 +136,6 @@ export function searchOriginalM7PedestrianBorder(world,{
       queue.push(id);stats.supported++;
     }
   }
-  stats.truncated=queue.length>0&&stats.visited>=maxVisits;
+  stats.truncated=queue.length>maxVisits;
   return {routes,stats};
 }
