@@ -2,6 +2,8 @@
 // are used against actual loaded voxel chunks, not the preview's fake scene.
 // All new persistence is a per-seed, checksummed sidecar; Schema-1 is untouched.
 import {createMobHostView} from './host-view.mjs';
+import {createM7MobCollisionReader} from './ecosystem-world-geometry.mjs';
+import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {MobEngine,DEFAULT_ACTIVE_MOBS} from './engine.mjs';
 import {BehaviorController} from './behavior.mjs';
 import {MobCombat} from './combat.mjs';
@@ -55,7 +57,15 @@ export function createLiveMobSession({
     throw TypeError('Invalid live mob host');
   const key=mobSaveKey(seed,worldKind);
   let damaged=false,readOnly=false,damageCooldown=0,health=100,lastStored='',elapsed=0;
-  const query=createMobHostView(world,{
+  // Original M7 ground IDs 400–410 are physical full cubes, but the generic
+  // source mob shape reader treats them as unknown. Only the exact opt-in M7
+  // world receives the existing immutable, source-backed collision adapter.
+  // Legacy/other profiles keep their original world reader byte-semantically.
+  const generator=world.base?.generationProfile?.generator??
+    world.generationProfile?.generator;
+  const collisionWorld=generator===M7_ENVIRONMENT_GENERATOR?
+    createM7MobCollisionReader(world):world;
+  const query=createMobHostView(collisionWorld,{
     resident,revision:()=>world.editRevision||0,
     biomeAt(point){
       const biome=classifyLiveBiome(biomeAt(point),point[1],caveAt(point)?.underground);

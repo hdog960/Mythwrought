@@ -1,4 +1,4 @@
-// Experimental M7 mob collision reader, never imported by live gameplay.
+// Explicit opt-in M7 mob collision reader, used only for exact M7 live worlds.
 // Source-established player physics treats registered M7 terrain ID 400-410
 // as full-cube solid; world-query.mjs currently treats those IDs as unknown.
 import {BLOCK} from '../voxel.mjs';
