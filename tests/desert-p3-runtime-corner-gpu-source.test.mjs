@@ -28,8 +28,11 @@ function exactFunction(source,name){
  const found=source.indexOf(marker);
  assert.ok(found>=0,'Original source function missing: '+name);
  assert.equal(source.indexOf(marker,found+1),-1,'Ambiguous source function: '+name);
- const start=found,body=source.indexOf('{',found);
- assert.ok(body>found);
+ // Function parameters can contain destructured objects such as
+ // {rotation=0}={}. Locate the BODY by the actual closing ') {' token,
+ // never the first parameter-list curly brace.
+ const start=found,body=source.indexOf('){',found)+1;
+ assert.ok(body>found&&source[body]==='{');
  let level=0;
  for(let i=body;i<source.length;i++){
   if(source[i]==='{')level++;
