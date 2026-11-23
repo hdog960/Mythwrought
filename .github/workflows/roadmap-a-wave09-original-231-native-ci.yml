@@ -1,0 +1,38 @@
+name: Roadmap A Wave09 twelve original source structures and 231 metadata first native gate
+on:
+  push:
+    branches:
+      - roadmap-a-wave09-original-source-231-native-ci-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave09-original-231-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-wave09-231-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Original Wave09 new source and focused test syntax only
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave09.mjs
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-231-provisional.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave09.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-231-provisional.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave09-protected-128-only-d4.test.mjs
+      - name: EIGHT scoped original Wave09 source, 219 provenance and historical new-only D4 tests
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-wave09.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-a5-231-provisional.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-wave09-protected-128-only-d4.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave09-231-original-source-provenance-r1
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_231_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
