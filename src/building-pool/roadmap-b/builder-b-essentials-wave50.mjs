@@ -63,9 +63,11 @@ export function buildVesperfrostFourCourtDryBathhouse(){
  ['west-inner-dry-plunge',16,25],['east-inner-dry-plunge',54,25],
  ['southwest-stone-cooling-basin',19,57],['southeast-stone-cooling-basin',51,57]
  ];let basinStone=0,rimStone=0;
+ const basinReserved=new Set();
  for(const [name,cx,cz] of basins)for(let x=cx-2;x<=cx+2;x++)for(let z=cz-2;z<=cz+2;z++){
   if(!indoor.has(key(x,z))||b.clear(x,0,z)||!b.clear(x,1,z)||!b.clear(x,2,z))
    throw Error('Basin lacks real y0 support and free y1-2 '+name+' '+key(x,z));
+  basinReserved.add(key(x,z));
   b.put(x,1,z,'furnishing','live:stone','none',
    {originalSolidDryBasinBottom:name,operatingWaterSystem:false});basinStone++;
   if(x===cx-2||x===cx+2||z===cz-2||z===cz+2){
@@ -80,7 +82,7 @@ export function buildVesperfrostFourCourtDryBathhouse(){
  ['z',58,14,55,[18,19,30,31,40,41,50,51]]
  ])for(let i=lo;i<=hi;i++){
   const x=axis==='x'?fixed:i,z=axis==='z'?fixed:i;
-  if(!indoor.has(key(x,z))||holes.includes(i))continue;
+  if(!indoor.has(key(x,z))||basinReserved.has(key(x,z))||holes.includes(i))continue;
   for(let y=1;y<=5;y++)if(b.clear(x,y,z))
    b.put(x,y,z,'partition','live:wood','none',{dryOriginalDivider:true,powered:false});
  }
