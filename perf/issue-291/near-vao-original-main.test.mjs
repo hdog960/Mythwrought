@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'ecf4aa61668d56b7f8afb5d1081ac9622412f079');
+    'c06808f84fc37bad52f5ff784a360a8c1e43b6c7');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1646,4 +1646,82 @@ test('source original exact render identity never certifies production release',
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.nativeGpuRollbackProven,false);
   assert.equal(snap.browserPixelParityProven,false);
+});
+
+
+test('active source-saved deep MINE followed by CSS resize remains disqualified after reset',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[1,-31,3],previous:3,next:0});
+  scope.canvas.clientWidth=932;scope.canvas.width=932;
+  const snap=perf.read();
+  assert.equal(snap.trueSavedDeepMines,0);
+  assert.equal(snap.mineFrameWindow.phase,'idle');
+  assert.equal(snap.interruptionCount,1);
+  assert.equal(snap.continuousForegroundRun,false);
+  perf.mine(9,{cell:[2,-31,3],previous:3,next:0});
+  assert.equal(perf.read().mineFrameWindow.savedMines,1);
+  assert.equal(perf.read().continuousForegroundRun,false);
+});
+test('world-seed switches cannot erase previous interrupted trial across repeated resets',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-31,3],previous:3,next:0});
+  scope.world.seed=180;
+  assert.equal(perf.read().interruptionCount,1);
+  perf.mine(9,{cell:[2,-31,3],previous:3,next:0});
+  scope.world.seed=181;
+  const snap=perf.read();
+  assert.equal(snap.interruptionCount,2);
+  assert.equal(snap.continuousForegroundRun,false);
+  assert.equal(snap.trueSavedDeepMines,0);
+});
+test('CSS change during the two final genuine RAF gaps cannot restart a clean trial',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  for(let i=0;i<100;i++){
+    perf.mine(8,{cell:[i,-24,2],previous:3,next:0});
+    perf.frame((i+1)*16);
+  }
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  scope.canvas.clientHeight=430;
+  const reset=perf.read();
+  assert.equal(reset.interruptionCount,1);
+  assert.equal(reset.continuousForegroundRun,false);
+  assert.equal(reset.trueSavedDeepMines,0);
+});
+test('a completed 100-mine source trial cannot be relabeled as uninterrupted after viewport change',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  for(let i=0;i<100;i++){
+    perf.mine(8,{cell:[i,-24,2],previous:3,next:0});
+    perf.frame((i+1)*16);
+  }
+  perf.frame(1616);
+  assert.equal(perf.read().mineFrameWindow.phase,'complete');
+  scope.canvas.clientWidth=932;
+  const reset=perf.read();
+  assert.equal(reset.interruptionCount,1);
+  assert.equal(reset.continuousForegroundRun,false);
+  assert.equal(reset.trueSavedDeepMines,0);
+});
+test('viewport adjustments before any original saved MINE still start a clean local trial',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  scope.canvas.clientWidth=932;
+  const reset=perf.read();
+  assert.equal(reset.mineFrameWindow.phase,'idle');
+  assert.equal(reset.interruptionCount,0);
+  assert.equal(reset.continuousForegroundRun,true);
+  perf.mine(8,{cell:[1,-21,2],previous:3,next:0});
+  assert.equal(perf.read().mineFrameWindow.savedMines,1);
+});
+test('prior visibility interruption cannot be laundered even by a pre-mine identity reset',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.frame(16);
+  perf.interrupt();
+  assert.equal(perf.read().interruptionCount,1);
+  scope.canvas.clientWidth=932;
+  const reset=perf.read();
+  assert.equal(reset.interruptionCount,1);
+  assert.equal(reset.continuousForegroundRun,false);
 });
