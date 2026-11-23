@@ -128,3 +128,43 @@ test('identical staged inputs are deterministic and neither real-world nor PWA c
  assert.equal(a.livePack2Biome130Pack3Pack5NonblockCollidersNotSimulated,true);
  assert.equal(a.originalWorldModified,false);
 });
+
+
+test('seven spaced elevation rises support full original-controller travel in both directions',()=>{
+ const r=auditCandidateUnderpassContinuousStepPlayer({
+  accessProposal:route([0,-60,0],[10,-60,0]),
+  underpassProposal:route([10,-60,0],[80,-53,0]),
+  centerSidePad:p(80,-53,0),floorY:-54
+ });
+ assert.equal(r.ok,true);
+ assert.equal(r.routeWaypoints,81);
+ assert.equal(r.gradeElevationEdges,7);
+ assert.equal(r.totalFrames,2398);
+ assert.equal(r.stepEvents,7);
+ assert.equal(r.landings,7);
+ assert.equal(r.directions[0].waypointsReached,80);
+ assert.equal(r.directions[1].waypointsReached,80);
+});
+test('seven downward grades require real falling and original reverse stepping',()=>{
+ const r=auditCandidateUnderpassContinuousStepPlayer({
+  accessProposal:route([0,-60,0],[10,-60,0]),
+  underpassProposal:route([10,-60,0],[80,-67,0]),
+  centerSidePad:p(80,-67,0),floorY:-68
+ });
+ assert.equal(r.ok,true);
+ assert.equal(r.gradeElevationEdges,7);
+ assert.equal(r.totalFrames,2398);
+ assert.equal(r.stepEvents,7);assert.equal(r.landings,7);
+});
+test('seven diagonal rises preserve original axis-resolved movement without teleporting',()=>{
+ const r=auditCandidateUnderpassContinuousStepPlayer({
+  accessProposal:route([0,-60,0],[10,-60,0]),
+  underpassProposal:route([10,-60,0],[80,-53,70]),
+  centerSidePad:p(80,-53,70),floorY:-54
+ });
+ assert.equal(r.ok,true);
+ assert.equal(r.gradeElevationEdges,7);
+ assert.equal(r.totalFrames,3211);
+ assert.equal(r.stepEvents,7);assert.equal(r.landings,7);
+ assert.equal(r.completeForwardAndReverseWithoutPositionReset,true);
+});
