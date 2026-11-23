@@ -1,0 +1,5 @@
+# :48 D2 advisory lift reset readiness v1
+
+Source-only, opt-in, unregistered. Consumes the existing `resonance48-lift-stop-history-v1` observation history. Requires 3 consecutive clear observations by default (configurable 2–16); any obstruction resets the count. Rejects discontinuous ticks, forged authority, altered summaries, cross-world/invalid identity and tampered observations. The clear streak is **not** continuous collision proof. The output always has `resetAuthorized:false`, `movementAuthorized:false`, `authoritativeDelivery:false`, `physicsBound:false`, `productionBound:false`. Never transport passengers or mutate voxels.
+
+Local isolated equivalent Node execution: 10/10 passed before commit, with import path adjusted for local fixture directory. The exact committed test has NOT been run. Do not claim genuine WebGL2 or mobile captures. The prior #417 root workflow failed staged non-block gameplay/profile checks while full WebGL2 passed. :36 authoritative delivery and owner-approved physics remain integration blockers.
