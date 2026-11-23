@@ -10,7 +10,7 @@ export const ROADMAP_C_1A_WAVE24_INN_SPECS=Object.freeze([
     "category": "inn",
     "biome": "temperate",
     "size": "large",
-    "index": 6,
+    "index": 5,
     "title": "Cloverreach Twin-Bell Orchard Inn",
     "w": 70,
     "d": 60,
