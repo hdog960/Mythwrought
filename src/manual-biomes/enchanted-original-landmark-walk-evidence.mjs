@@ -103,6 +103,11 @@ export function surveyOriginalM7LandmarkWalks(world,{
     if(stats.sourceSites>=maxSourceSites||
        stats.approachAttempts>=maxApproachAttempts||
        walks.length>=maxWalks){stats.truncated=true;break;}
+    // Filter by the actual historical V6 biome BEFORE generating a costly
+    // original landmark chunk; no unverified vegetation is admitted.
+    if(requiredBiome!==null&&
+       (v6BiomeAt(cx*16+(kind==='waystone'?7:8),cz*16+8,world.seed)?.name??
+         'plains')!==requiredBiome)continue;
     const source=originalM7LandmarkSourceAt(world,cx,cz,kind);
     if(!source)continue;
     stats.sourceSites++;stats.realSourceVoxels+=source.preservedOriginalVoxels;
