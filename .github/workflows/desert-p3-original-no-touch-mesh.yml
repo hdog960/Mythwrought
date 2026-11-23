@@ -1,0 +1,43 @@
+name: Desert P3 accepted-gameplay original unrelated-climate mesh parity
+on:
+  push:
+    branches:
+      - research/desert-p3-authentic-protected-climates-20261122
+    paths:
+      - .github/workflows/desert-p3-original-no-touch-mesh.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-original-no-touch-mesh
+  cancel-in-progress: false
+jobs:
+  native-original-full-vertex-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: accepted
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate frozen source genealogy and strictly audit-only scope
+        run: |
+          set -euo pipefail
+          test "$(git -C accepted rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base 9e457b1f4018e9d1113ed550725b816d5f9cc842 HEAD)" = 9e457b1f4018e9d1113ed550725b816d5f9cc842
+          unexpected=$(git -C candidate diff --name-only 9e457b1f4018e9d1113ed550725b816d5f9cc842 HEAD | grep -Ev '^(tests/desert-p3-original-protected-climates.test.mjs|tests/desert-p3-unrelated-original-mesh-parity.test.mjs|.github/workflows/desert-p3-protected-climates-original.yml|.github/workflows/desert-p3-original-no-touch-mesh.yml|docs/desert/PHASE3_ORIGINAL_CAVE_CLIMATE_PROTECTION_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/tests/desert-p3-unrelated-original-mesh-parity.test.mjs
+      - name: Compare every actual emitted GPU Float32 field at ten unrelated original V7 chunks
+        run: cd candidate && node --test tests/desert-p3-unrelated-original-mesh-parity.test.mjs
