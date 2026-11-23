@@ -13,6 +13,7 @@ const plantMaterials=Object.freeze([
   'conifer-needles'
 ]);
 const allMaterials=Object.freeze([...terrainMaterials,...plantMaterials]);
+export const MOUNTAIN_V8_DESCRIPTOR_MATERIALS=allMaterials;
 const neighbors=Object.freeze([
   Object.freeze([1,0,0]),Object.freeze([-1,0,0]),
   Object.freeze([0,1,0]),Object.freeze([0,-1,0]),
