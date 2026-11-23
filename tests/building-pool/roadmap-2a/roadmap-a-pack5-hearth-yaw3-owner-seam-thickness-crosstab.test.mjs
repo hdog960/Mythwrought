@@ -134,6 +134,52 @@ test('original read-only evaluator rejects invalid rays and reports strict rende
  assert.ok(shot.selected>0&&shot.selected<=6);
  assert.ok(shot.rendered>0&&shot.rendered<=6);
 });
+test('all 50 robust-different-box-away-from-seam warnings receive exact strict triangle barycentric margin classification',()=>{
+ const d=report.separatelyLabeledMarginalBarycentricExploration;
+ assert.equal(d.assessedOriginalRobustDifferentNonSeamRows,50);
+ assert.equal(d.anyCandidateActuallyStrongEnough,false);
+ assert.equal(d.marginBuckets.atLeast1e5,0);
+ assert.equal(Object.values(d.marginBuckets).reduce((n,v)=>n+v,0),50);
+ assert.ok(Number.isFinite(d.firstTriangleStrictBarycentricMarginMin)&&
+  d.firstTriangleStrictBarycentricMarginMin>=0);
+ assert.ok(Number.isFinite(d.firstTriangleStrictBarycentricMarginMax)&&
+  d.firstTriangleStrictBarycentricMarginMax<1e-5);
+ assert.equal(d.originalStrongStrictMarginThreshold,1e-5);
+ assert.equal(report.result.qualifiedOriginalSourceCandidateRows,0);
+ assert.equal(d.theseAreNotStrongBrowserAcceptanceCandidates,true);
+ console.log('ROADMAP_A_HEARTH_WEAK_50_STRICT_SOURCE_MARGIN_DISTRIBUTION '+JSON.stringify({
+  count:d.assessedOriginalRobustDifferentNonSeamRows,
+  marginMin:d.firstTriangleStrictBarycentricMarginMin,
+  marginMax:d.firstTriangleStrictBarycentricMarginMax,
+  marginBuckets:d.marginBuckets,sourceOnly:true
+ }));
+});
+test('no relaxed exploratory 3x3 owner stability result can override the unchanged strong barycentric gate',()=>{
+ const d=report.separatelyLabeledMarginalBarycentricExploration;
+ assert.ok(d.exploratoryNineRayOriginalCandidateGroups<=4);
+ assert.equal(d.exploratoryNineRayOriginalCandidateGroups,d.exploratoryNineRaySourceOnly.length);
+ assert.ok(d.exploratoryNineRayOwnerStableIgnoringStrictMargin<=d.exploratoryNineRayOriginalCandidateGroups);
+ for(const candidate of d.exploratoryNineRaySourceOnly){
+  assert.equal(candidate.nineProbeOriginalSourceRows.length,9);
+  assert.equal(candidate.actualGameGpuFragmentsOrPlayerHudObserved,false);
+  assert.equal(candidate.stableAllNine,false);
+  assert.equal(candidate.ownerStableAllNineIgnoringStrongBarycentricRequirement,
+   candidate.nineProbeOriginalSourceRows.every(x=>
+    x.ownerFaceAndDepthSignPreservedEvenIfBarycentricMarginal));
+ }
+ assert.equal(report.result.distinctNineRayCandidates,0);
+ assert.equal(report.result.originalNineRayCandidatesStable,0);
+ console.log('ROADMAP_A_HEARTH_WEAK_50_EXPLORATORY_NINE_RAY '+JSON.stringify({
+  originalSourceCandidateGroups:d.exploratoryNineRayOriginalCandidateGroups,
+  ownerStableIgnoringStrongMargin:d.exploratoryNineRayOwnerStableIgnoringStrictMargin,
+  candidates:d.exploratoryNineRaySourceOnly.map(x=>({
+   center:x.originalAuthoredLocalCenter,
+   ownerStableAllNine:x.ownerStableAllNineIgnoringStrongBarycentricRequirement,
+   signedDepth:x.signedDepth,barycentricMargin:x.strictBarycentricMargin
+  })),
+  originalGpuObserved:false,realGameBrowserRun:false
+ }));
+});
 test('source-only candidate cannot be labeled as real browser pixel, terrain, mobile or production selection validation',()=>{
  const flags=report.result;
  assert.equal(flags.genuineStrictTriangleOnlyOriginalSelectionMisses,0);

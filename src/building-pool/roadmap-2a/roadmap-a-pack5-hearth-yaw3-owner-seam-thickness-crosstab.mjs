@@ -41,17 +41,19 @@ function summarizeNine(w,evaluate){
  const deltas=[-BASE.jitter,0,BASE.jitter],rows=[];
  for(const dy of deltas)for(const dz of deltas){
   const aim=[0,w.localTarget[1]+dy,w.localTarget[2]+dz];
-  const hit=evaluate(aim),robust=hit.sameHitMembership&&
+  const hit=evaluate(aim),ownerStable=hit.sameHitMembership&&
    Number.isFinite(hit.selected)&&Number.isFinite(hit.rendered)&&
    hit.originalDetailedSelectionBox===w.originalSelectionSourceBox&&
    hit.originalStrictTriangleBox===w.originalTriangleSourceBox&&
    hit.originalStrictTriangleFace===w.boxFaceIndex&&
    Math.sign(hit.signedTriangleMinusSelection)===sign(w)&&
-   Math.abs(hit.signedTriangleMinusSelection)>=BASE.minSourceFirstDistanceDelta&&
+   Math.abs(hit.signedTriangleMinusSelection)>=BASE.minSourceFirstDistanceDelta;
+  const robust=ownerStable&&
    hit.originalStrictBarycentricMinimum>=BASE.minSourceBarycentricForCandidate;
   rows.push({dy,dz,strictAndSelectionBothHit:hit.sameHitMembership&&
    hit.selected!==null&&hit.rendered!==null,
    originalFaceOwnerAndSignPreserved:robust,
+   ownerFaceAndDepthSignPreservedEvenIfBarycentricMarginal:ownerStable,
    selectedSourceBox:hit.originalDetailedSelectionBox??null,
    strictTriangleSourceBox:hit.originalStrictTriangleBox??null,
    strictTriangleFace:hit.originalStrictTriangleFace??null,
@@ -66,6 +68,8 @@ function summarizeNine(w,evaluate){
   selectedBoxTangentialMargin:w.originalSelectedBoxTangentialClearance,
   strictBarycentricMargin:w.sourceStrictTriangleMinimumBarycentric,
   stableAllNine:rows.every(r=>r.originalFaceOwnerAndSignPreserved),
+  ownerStableAllNineIgnoringStrongBarycentricRequirement:
+   rows.every(r=>r.ownerFaceAndDepthSignPreservedEvenIfBarycentricMarginal),
   nineProbeOriginalSourceRows:rows,
   actualGameGpuFragmentsOrPlayerHudObserved:false};
 }
@@ -163,6 +167,50 @@ export function auditOriginalHearthYaw3Full208CrossTab(){
  }
  const evaluate=createOriginalHearthYaw3SourceFaceProbe();
  const nineSamples=chosen.map(w=>summarizeNine(w,evaluate));
+ // A separate DIAGNOSTIC, not the accepted-candidate shortlist.
+ // These may be strict on a single mathematical ray but are too close
+ // to the barycentric boundary for a strong source-grounded browser gate.
+ const fragileOriginalSourceRows=raw.filter(w=>keyOf(w)==='different|far|robust');
+ verify(fragileOriginalSourceRows.length===totals.differentAndNonSeamAndRobust,
+  'original robust/different/far source witness rows changed');
+ const marginBuckets={atMost1e10:0,above1e10AtMost1e8:0,
+  above1e8Below1e6:0,atLeast1e6Below1e5:0,atLeast1e5:0};
+ let minMargin=Infinity,maxMargin=-Infinity;
+ for(const w of fragileOriginalSourceRows){
+  const m=w.sourceStrictTriangleMinimumBarycentric;
+  verify(m>=0&&Number.isFinite(m),'non-strict original source witness admitted');
+  minMargin=Math.min(minMargin,m);maxMargin=Math.max(maxMargin,m);
+  if(m<=1e-10)marginBuckets.atMost1e10++;
+  else if(m<=1e-8)marginBuckets.above1e10AtMost1e8++;
+  else if(m<1e-6)marginBuckets.above1e8Below1e6++;
+  else if(m<1e-5)marginBuckets.atLeast1e6Below1e5++;
+  else marginBuckets.atLeast1e5++;
+ }
+ const exploratoryRows=fragileOriginalSourceRows.slice().sort((a,b)=>
+  Math.abs(b.signedTriangleMinusSelectionDistance)-
+  Math.abs(a.signedTriangleMinusSelectionDistance));
+ const exploratoryChosen=[],exploratoryGroups=new Set();
+ for(const w of exploratoryRows){
+  const id=groupKey(w);
+  if(exploratoryGroups.has(id))continue;
+  exploratoryGroups.add(id);exploratoryChosen.push(w);
+  if(exploratoryChosen.length===4)break;
+ }
+ const exploratoryNineResults=exploratoryChosen.map(w=>summarizeNine(w,evaluate));
+ const exploratoryOwnerStable=exploratoryNineResults.filter(
+  x=>x.ownerStableAllNineIgnoringStrongBarycentricRequirement).length;
+ const weakBarycentricDiagnostics={
+  assessedOriginalRobustDifferentNonSeamRows:fragileOriginalSourceRows.length,
+  firstTriangleStrictBarycentricMarginMin:Number.isFinite(minMargin)?minMargin:null,
+  firstTriangleStrictBarycentricMarginMax:Number.isFinite(maxMargin)?maxMargin:null,
+  marginBuckets,originalStrongStrictMarginThreshold:BASE.minSourceBarycentricForCandidate,
+  anyCandidateActuallyStrongEnough:fragileOriginalSourceRows.some(
+   x=>x.sourceStrictTriangleMinimumBarycentric>=BASE.minSourceBarycentricForCandidate),
+  exploratoryNineRayOriginalCandidateGroups:exploratoryChosen.length,
+  exploratoryNineRayOwnerStableIgnoringStrictMargin:exploratoryOwnerStable,
+  exploratoryNineRaySourceOnly:exploratoryNineResults,
+  theseAreNotStrongBrowserAcceptanceCandidates:true
+ };
  const resultBins=Object.fromEntries(Object.entries(tab).map(([key,bin])=>[key,{
   count:bin.n,selectedFirst:bin.selectedFirst,triangleFirst:bin.triangleFirst,
   signedDepthSum:bin.signedDepthSum,maxAbsSignedDepth:bin.maxAbsSignedDepth,
@@ -178,6 +226,7 @@ export function auditOriginalHearthYaw3Full208CrossTab(){
   thresholds:BASE,totals,originalEightBinCrossTab:resultBins,
   allNineteenStableThreeYOffsetGroups:stableGroups,
   boundedNineRaySourcePerturbationResults:nineSamples,
+  separatelyLabeledMarginalBarycentricExploration:weakBarycentricDiagnostics,
   scannedDistinctOriginalSourceGroups:byGroup.size,
   result:{
    genuineStrictTriangleOnlyOriginalSelectionMisses:base.actualStrictMeshVsOriginalSelectionHitMissDisagreement,
