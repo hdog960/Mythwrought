@@ -56,3 +56,36 @@ A further own-lane revision is being authored with a fail-closed **direct count 
 For scientific diagnosis ONLY, probe at most four **separate original Y/Z groups** selected by largest absolute source distance from those 50 marginal rows, with a separate 3×3 ±2e-6 original local Y/Z aim perturbation. Report both whether first original selection-box owner, strict triangle-box/face owner and signed depth persist **ignoring** the strong barycentric margin, and whether they persist WITH it (the latter is still necessary for any downstream meaningful original-game fixture). If weak-only source ownership persists, do not call it a GPU-visible surface, a correct MINE target, a physical collision error, a browser acceptance case or a production repair. Tests and exact native outputs must be validated before publishing final checkpoint.
 
 This is one physically authored research-only Pack5:080 variant \`hearth-running-bond\` yaw3 in a fresh all-air, read-only original source construction layer with unchanged 6-block reach/occlusion source path. No original user worlds, actual WebGL2 browser/PNG, physical iPhone Safari, installed PWA, source building A5 authoring choice, structural approval or production renderer/selection changes.
+
+## FINAL original source margin/3×3 follow-up: 12/12 PASS, no strong candidate
+
+**Actual exact original-repository [GitHub Actions #45170849731](https://github.com/hdog960/Mythwrought/actions/runs/45170849731) COMPLETED SUCCESS: 12/12 targeted Node 22.16.0 native tests PASS, zero failed, source/test syntax green.** New CI-only child \`roadmap-a-hearth-yaw3-marginal-50-native-r2-20261123\` exact HEAD **\`1364c781d8907434f94af45acbbf6ce53e449579\`**, source implementation \`5d0d5a7a8910079effb23d0a15e466b3bb050160\`. This second CI executed ONLY the changed 12-test original cross-tab suite, NOT duplicate previous 11 original face-source cases, broad CI, real Chromium or game GPU. First original cross-tab [#45170354083](https://github.com/hdog960/Mythwrought/actions/runs/45170354083) remains separately verified **21/21 PASS** (ten original new cross-tab plus eleven directly affected previous face-audit cases). Its exact CI-only HEAD was \`c48f41b42fa62a5c3bc30024cc7872e22ba61dfd\`; first research source implementation was \`b1be23c26342d4a9dbbeaaf09b4d279d31826b02\`.
+
+The second revision classified all **50** previously observed robust original selected-box interval / DIFFERENT physical box first-source ownership / FAR-from-selected-tangential-seam warnings by ORIGINAL strictly intersected renderer-world Float32 triangle **minimum barycentric margin**:
+
+| Strict mathematical first triangle margin (source-only) | Exact original ray count |
+|---|---:|
+| ≤ 1×10⁻¹⁰ | **0** |
+| >1×10⁻¹⁰ through 1×10⁻⁸ | **28** |
+| >1×10⁻⁸ through <1×10⁻⁶ | **7** |
+| ≥1×10⁻⁶ through <1×10⁻⁵ | **15** |
+| ≥1×10⁻⁵ (strong source acceptance minimum) | **0** |
+
+Exact measured minimum **3.348565562067687×10⁻¹⁰**; maximum **0.000006935774732819144**. **All 50 mathematically strict hits are extremely close to an authored triangle barycentric boundary by the preselected robustness threshold**. The original strict-mesh numerical hit/miss math itself remains valid; do not misrepresent these as the old R3 *negative* barycentric tolerance artifacts. This yaw3 research deals with positive but very small strict barycentrics, not deliberately relaxed source intersections.
+
+Without weakening the strong gate, the follow-up selected at most four distinct original Y/Z groups with the greatest absolute first-hit source-distance disagreements and performed **nine new original-source layer-ray/triangle-ray evaluations per group** at ±2×10⁻⁶ local Y and Z shifts. Centers and source-only signed depth:
+
+1. [0,0.954,0.03], triangle minus selection **-0.04648851144099986** blocks, strict margin 1.7646103264963448e-9.
+2. [0,0.910002,0.03], signed depth **-0.046152458142997066** blocks, strict margin 1.7646100414214771e-9.
+3. [0,0.812002,0.03], signed depth **-0.045434222303117** blocks, strict margin 1.7646107908220188e-9.
+4. [0,0.784002,0.03], signed depth **-0.04523690086220533** blocks, strict margin 1.764610124688204e-9.
+
+**ZERO of the four exploratory 3×3 source clusters preserved the same first original detailed-selected physical source box, strict triangle physical source box/face and meaningful signed depth ordering across all nine probes**, even when the strong barycentric requirement was ignored. This explicitly fails to establish robust continuous-camera source first-face evidence. Any report of four successful "edge defect" witnesses would be false. The original 19 prior stable three-Y *source owner groups* remain valid but do not override this new separate 3×3 strict-margin gate.
+
+### Engineering conclusion and ownership holds
+
+The original hearth/yaw3 source-only study has now supplied physically honest authored **eight-bin cross-tab** and bounded near-edge stability classification, while retaining identical original strict triangle versus original selection HIT SETS over all 2610 original source rays. The largest first-hit source distance (~0.0465 blocks) is therefore not grounds for an original renderer/selection patch: its strict triangle barycentric margin is only ~1.76e-9 and it fails the 3×3 source owner/face stability test.
+
+**No new disposable actual original-game Chromium should run based on these weak-only candidates**. Before such a browser case, find a different original source variant/view with mathematically robust positive strict barycentric first-surface geometry, stable source face/owner/depth under neighboring camera perturbations, original six-block reach and genuine non-AIR terrain occlusion. If none can be verified, preserve original production selection and focus Roadmap A on the **213 unwritten original source designs** and owner-approved later integration/structural gates.
+
+No original game runtime, shader, original physical mesh, original selection AABBs, player physics, saved worlds, installed iPhone Home Screen PWA, shared CI, other builder branches or five automations modified. Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`, OPEN DRAFT PR406 CODE HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\` remain unchanged. Roadmap A **207/420 SOURCE ONLY; 213 unwritten**, original 79 A5 source candidates, historic 128 commerce/345 industrial/315 government unchanged. No merge, deploy, actual user-world edits, production A5 material/yaw assignment, or structural approval.
