@@ -1,0 +1,53 @@
+name: Builder D42 original W16-W17 root barrier and winding evidence ONLY
+on:
+  push:
+    branches:
+      - builder-d-d42-original-root-barrier-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d42-*'
+      - 'tests/building-pool/roadmap-d/d42-*'
+      - 'docs/building-pool/roadmap-d/D42_*'
+      - '.github/workflows/roadmap-d-d42-barriers-native.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d42-authentic-source-barrier-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-d42-authentic-source-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Authenticate literal D41 parent and immutable source owner blobs
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '07fc2ba2871b46789becc2691ce9fd80284447a5'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/voxel-shape-fit.mjs)" = 'ec5adc274d8b45c91d3dade81c3d9c2830380849'
+          test "$(git rev-parse HEAD:src/voxel-shape-interactions.mjs)" = '01be82e6c308e47a35fa6588cc6ed1ebeafca307'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-swept-exterior-capture.mjs)" = '172284f5f5eb1727b6d510159afdc992cfd5f0da'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d41-finite-route-failure-certificate.mjs)" = 'e3f28fd6258badaeb36980e1eb3fc30c8789af8f'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d41-original-root-failure-audit.mjs)" = '27b31f478e7ef912ed6927ba75e934d06474a9c1'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax-check only D42's two new sources and two new tests
+        run: |
+          node --check src/building-pool/roadmap-d/d42-root-barrier-witness.mjs
+          node --check src/building-pool/roadmap-d/d42-original-root-barrier-audit.mjs
+          node --check tests/building-pool/roadmap-d/d42-barrier-witness.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d42-original-barriers.source.test.mjs
+      - name: Execute ONLY new D42 pure and genuine W16-W17 original source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d42-barrier-witness.pure.test.mjs \
+            tests/building-pool/roadmap-d/d42-original-barriers.source.test.mjs
