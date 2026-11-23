@@ -1,0 +1,34 @@
+name: Snow S6 exact four-chunk original conifer owner audit
+on:
+  push:
+    branches:
+      - research/snow-s6-four-chunk-owner-physics-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s6-cross-owner-native.yml'
+      - 'src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs'
+      - 'tests/snowy-s6-cross-owner-forest-audit.test.mjs'
+      - 'tests/snowy-s6-cross-owner-original-m7.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s6-crossowner-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-owner-physics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0, ref: ${{ github.sha }}}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Exact branch source and syntax (no broad suite)
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs
+          node --check tests/snowy-s6-cross-owner-forest-audit.test.mjs
+          node --check tests/snowy-s6-cross-owner-original-m7.test.mjs
+      - name: New targeted canonical-owner source fixture regressions
+        run: node --test tests/snowy-s6-cross-owner-forest-audit.test.mjs
+      - name: Genuine original M7 cross-owner physical and source acceptance
+        run: node --test tests/snowy-s6-cross-owner-original-m7.test.mjs
