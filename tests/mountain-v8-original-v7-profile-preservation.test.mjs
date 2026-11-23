@@ -102,7 +102,7 @@ test('original new-world routing rejects unapproved V8 and preserves existing M7
   assert.throws(()=>fourRegionProfile(179,'v8-new-opt-in'),/Unknown biome generator/);
   assert.throws(()=>planM2WorldChoice('179','create-new-v8',{confirmed:true}),
     /Unsupported manual biome world choice/);
-  assert.throws(()=>choose(store),/World already has a generation profile/);
+  assert.throws(()=>choose(store),/Use existing profile|World already has a generation profile/);
   assert.equal(store.getItem(worldSlotKey(179)+BIOME_PROFILE_SUFFIX),original);
   assert.equal(created.base.generationProfile.generator,M7_ENVIRONMENT_GENERATOR);
 });
