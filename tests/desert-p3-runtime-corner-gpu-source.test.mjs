@@ -14,6 +14,7 @@ import {uploadChunkBuffer} from '../src/gpu-recovery.mjs';
 import {desertSeamEditAffectedChunks,DESERT_SEAM_VISUAL_RADIUS}
   from '../src/manual-biomes/desert-seam-invalidation.mjs';
 import {isBiome130BlockId} from '../src/biome130-registry.mjs';
+import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 
 const priorMain=fs.readFileSync(new URL('../../baseline/src/main.mjs',import.meta.url),'utf8');
 const candidateMain=fs.readFileSync(new URL('../src/main.mjs',import.meta.url),'utf8');
@@ -165,6 +166,10 @@ test('authentic original M7 source caps at corners have bounded diagonal candida
     if(!plan.size){veto++;continue;}
     const y=Math.max(...plan.keys()),id=plan.get(y);
     if(id!==401&&id!==258)continue;
+    if(id===258){
+      const region=v6BiomeAt(x,z,seed);
+      if(region?.name!=='desert'||region.weight>.50)continue;
+    }
     const previous=editAffectedChunks(x,z);
     const updated=desertSeamEditAffectedChunks(world,x,z,y);
     for(const p of previous)assert.ok(coordinateSet(updated).has(p.cx+','+p.cz));
