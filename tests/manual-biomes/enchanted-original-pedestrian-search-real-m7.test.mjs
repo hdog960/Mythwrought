@@ -322,3 +322,113 @@ test('stratified bounded REAL M7 search examines every Enchanted border category
      missingPairsRemainUnknown:true,
      pwaAndPhysicalIphoneNotMeasured:true}));
 });
+
+test('target-directed bounded original M7 traversal explores seed -88 Plains border without invented physics',()=>{
+ const seed=-88,history=newWorld(seed),candidate=newWorld(seed,true);
+ const borders=boundaries(seed).filter(b=>
+   [b.from,b.to].sort().join('/')==='enchanted/plains');
+ assert.ok(borders.length>=20);
+ const audit={seed,borders:borders.length,anchorsTried:0,
+   historicallySupported:0,sourceProposals:0,originalPhysicsPass:0,
+   experimentalPhysicsPass:0,legitimateBarkExclusions:0,
+   originalPhysicsRejects:0,totalVisited:0,truncated:0};
+ const samples=[],accepted=[];
+ outer:
+ for(const b of borders){
+  for(const side of [-1,1]){
+   for(const dist of [3,5,7,9]){
+    for(const dz of [0,-4,4,-8,8]){
+     const ox=b.x+side*dist,oz=b.z+dz;
+     const from=side===-1?b.from:b.to,to=side===-1?b.to:b.from;
+     if(sourceBiome(ox,oz,seed)!==from)continue;
+     audit.anchorsTried++;
+     const cap=originalM7PedestrianCap(history,ox,oz);
+     if(!cap)continue;
+     audit.historicallySupported++;
+     const result=searchOriginalM7PedestrianBorder(history,{
+       seed,x:ox,z:oz,targetBiome:to,
+       goalX:b.x-side*8,goalZ:b.z+dz,
+       radius:16,maxVisits:256,maxSteps:28,
+       maxRoutes:4,minDisplacement:6
+     });
+     audit.totalVisited+=result.stats.visited;
+     audit.sourceProposals+=result.routes.length;
+     if(result.stats.truncated)audit.truncated++;
+     if(samples.length<10)samples.push({anchor:[ox,oz],
+       baselineFeet:cap.feet,border:[b.x,b.z],
+       sourceBiome:from,targetBiome:to,
+       proposals:result.routes.length,visited:result.stats.visited,
+       rejectedHeight:result.stats.rejectedHeight,
+       rejectedGround:result.stats.rejectedGround,
+       rejectedCorner:result.stats.rejectedCorner,
+       rejectedSweep:result.stats.rejectedSweep,
+       truncated:result.stats.truncated});
+     for(const nodes of result.routes){
+      if(candidateBarkAcrossRealPlayer(candidate,nodes)){
+       audit.legitimateBarkExclusions++;continue;
+      }
+      const old=walkGenuineOriginalPlayer(history,nodes);
+      if(!old.ok){audit.originalPhysicsRejects++;continue;}
+      audit.originalPhysicsPass++;
+      const now=walkGenuineOriginalPlayer(candidate,nodes);
+      assert.equal(now.ok,true,
+       'prototype would obstruct physically proven original seed -88 path '+
+        JSON.stringify({b,from,to,old,now,nodes}));
+      assert.ok(Math.abs(old.finalFeet-now.finalFeet)<=.15);
+      audit.experimentalPhysicsPass++;
+      accepted.push({start:[ox,oz],end:[nodes.at(-1).x,nodes.at(-1).z],
+        old,prototype:now});
+      if(accepted.length>=2)break outer;
+     }
+     if(audit.historicallySupported>=20)break outer;
+    }
+   }
+  }
+ }
+ assert.ok(audit.anchorsTried>20,
+   'seed -88 must have a real broader Plains border survey');
+ assert.ok(audit.historicallySupported>=5,
+   'new search must inspect multiple genuine original-world standing sites');
+ assert.ok(audit.totalVisited<=audit.historicallySupported*256);
+ assert.deepEqual(history.save(),{schema:1,seed,edits:[]});
+ assert.throws(()=>candidate.save(),/cannot be saved as historical M7/);
+ console.log('# ENCHANTED ORIGINAL M7 SEED MINUS88 DIRECTED BORDER '+
+   JSON.stringify({audit,samples,accepted,
+     acceptedOnlyAfterRealUnchangedStepPlayer:true,
+     noTerrainOrCaveModifications:true,
+     physicalIphoneUnmeasured:true}));
+});
+
+test('target-directed search retains actual original M7 Desert crossing evidence',()=>{
+ const seed=7919,old=newWorld(seed),prototype=newWorld(seed,true);
+ const starts=[[225,-592],[226,-592],[225,-595]];
+ const results=[];
+ for(const [x,z] of starts){
+  assert.equal(sourceBiome(x,z,seed),'desert',
+   'known original desert start must stay in true V6 climate');
+  const proposal=searchOriginalM7PedestrianBorder(old,{
+   seed,x,z,targetBiome:'enchanted',
+   goalX:x+12,goalZ:z-2,minDisplacement:5,
+   radius:15,maxVisits:256,maxSteps:26,maxRoutes:4
+  });
+  for(const route of proposal.routes){
+   if(candidateBarkAcrossRealPlayer(prototype,route))continue;
+   const historic=walkGenuineOriginalPlayer(old,route);
+   if(!historic.ok)continue;
+   const candidate=walkGenuineOriginalPlayer(prototype,route);
+   assert.equal(candidate.ok,true);
+   assert.equal(candidate.legs,historic.legs);
+   results.push({start:[x,z],end:[route.at(-1).x,route.at(-1).z],
+     oldTicks:historic.ticks,newTicks:candidate.ticks,
+     legs:historic.legs,diagonal:historic.diagonal,
+     sourceVisited:proposal.stats.visited});
+   break;
+  }
+ }
+ assert.ok(results.length>=1,
+   'directed mode must retain physically walkable original Desert/Enchanted paths');
+ assert.deepEqual(old.save(),{schema:1,seed,edits:[]});
+ assert.throws(()=>prototype.save(),/cannot be saved as historical M7/);
+ console.log('# ENCHANTED ORIGINAL M7 DIRECTED DESERT PHYSICS '+JSON.stringify({
+   results,realStepPlayer:true,originalSourceUnchanged:true}));
+});
