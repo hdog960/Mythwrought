@@ -83,6 +83,7 @@ const city=()=>({
   candidateThinUnderpassActualReaderMethodCalls:rz===0?1532:1644,
   candidateThinUnderpassExpectedReaderCallsPerRole:rz===0?383:411,
   candidateThinUnderpassNoReaderCallsDuringSyntheticMotion:true,
+  candidateThinUnderpassOriginalReaderBindingsUnchanged:true,
   candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
   fullJoinedCandidateOriginalM7SourceChecks:8815,
   fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
