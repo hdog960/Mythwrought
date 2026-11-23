@@ -1,7 +1,3 @@
-import {auditCandidateUnderpassStepPlayer}
- from '../src/living-underworld/city-underpass-step-player-fixture.mjs';
-import {auditCandidateUnderpassContinuousStepPlayer}
- from '../src/living-underworld/city-underpass-continuous-walk-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planGradeSeparatedCityUnderpass,
@@ -35,6 +31,19 @@ const plan=(rx,rz)=>{
    sourceOwnedDeepSelection:deep(rx,rz)
   }));
  return planned.get(key);
+};
+// One exact detached source-backed synthetic case per historical site, shared
+// by the original-source proof and movement witness tests. No duplicate
+// expensive 290-candidate planner pass or repeated controller frames.
+const coupled=new Map();
+const joinedSourceAndMovement=(rx,rz)=>{
+ const key=rx+','+rz;
+ if(!coupled.has(key))coupled.set(key,
+  auditSourceProtectedCityUnderpass(seed,rx,rz,{
+   source:stone(),sourceOwnedDeepSelection:deep(rx,rz),
+   auditHypotheticalMovement:true
+  }));
+ return coupled.get(key);
 };
 
 test('seed179 (2,0) bypass bends around the selected access route with a full-depth center pad',()=>{
@@ -112,9 +121,7 @@ test('independent full 5x5 15-high center-pad margin and thin bridge preserve al
  }
 });
 test('full (2,0) candidate source proof conserves 8815+248+135 exact visits',()=>{
- const r=auditSourceProtectedCityUnderpass(seed,2,0,{
-  source:stone(),sourceOwnedDeepSelection:deep(2,0)
- });
+ const r=joinedSourceAndMovement(2,0);
  assert.equal(r.ok,true);
  assert.equal(r.sourceChecks,9198);
  assert.equal(r.originalFourHubSourceChecks,8815);
@@ -134,16 +141,28 @@ test('full (2,0) candidate source proof conserves 8815+248+135 exact visits',()=
  assert.equal(r.originalPlayerAabbCollisionHeight,1.78);
  assert.equal(r.originalPlayerAabbFixtureBodySamples,622);
  assert.equal(r.originalPlayerAabbElevationChangesStillRequireStepPlayer,7);
+ assert.equal(r.originalSourceChecksPassed,true);
+ assert.equal(r.hypotheticalMovementAuditRequested,true);
+ assert.equal(r.hypotheticalOriginalMotionSimulated,true);
+ assert.equal(r.hypotheticalGradeElevationEdges,7);
+ assert.equal(r.hypotheticalGradeForwardChecks,7);
+ assert.equal(r.hypotheticalGradeReverseChecks,7);
+ assert.equal(r.hypotheticalContinuousWalkDirections,2);
+ assert.ok(r.hypotheticalContinuousWalkFrames>0);
+ assert.equal(r.actualOriginalM7PlayerMotionNotVerified,true);
  assert.equal(r.releaseApproved,false);
 });
 test('full (2,1) source candidate counts 12711+276+135 and no original edits',()=>{
- const r=auditSourceProtectedCityUnderpass(seed,2,1,{
-  source:stone(),sourceOwnedDeepSelection:deep(2,1)
- });
+ const r=joinedSourceAndMovement(2,1);
  assert.equal(r.ok,true);
  assert.equal(r.sourceChecks,13122);
  assert.equal(r.underpassSourceVisits,276);
  assert.equal(r.centerPadSourceVisits,135);
+ assert.equal(r.originalSourceChecksPassed,true);
+ assert.equal(r.hypotheticalMovementAuditRequested,true);
+ assert.equal(r.hypotheticalGradeElevationEdges,7);
+ assert.equal(r.hypotheticalContinuousWalkDirections,2);
+ assert.ok(r.hypotheticalContinuousWalkFrames>0);
  assert.equal(r.originalWorldUnchanged,true);
  assert.equal(r.actualPlayerWalkingUnverified,true);
 });
@@ -265,46 +284,48 @@ test('malformed original center-side landing flags and block ID fail closed',()=
 });
 
 
-// Phase 22: reuse this file's EXACT ORIGINAL DETACHED seed-179 geometry and
-// synthetic all-stone old-world reader. This deliberately DOES NOT certify
-// genuine original M7, authored AIR, existing edits, GPU or an installed PWA.
-// No redundant second planner scan: deep() and plan() caches are shared above.
-for(const [rx,rz,expectedFrom,expectedTo] of [
- [2,0,{x:643,y:-132,z:151},{x:625,y:-132,z:133}],
- [2,1,{x:669,y:-182,z:418},{x:649,y:-182,z:396}]
+// Phase23 native site witness: REAL original detached planner + sealed
+// original stepPlayer + full ORIGINAL source-role gate were coupled above.
+// The all-stone callback is still SYNTHETIC, not authentic FourRegionWorld.
+// The opt-in original-M7 read-only script separately calls a genuine M7
+// source reader, without a new fourth original-world script.
+for(const [rx,rz,expectedFrom,expectedTo,expectedVisits] of [
+ [2,0,{x:643,y:-132,z:151},{x:625,y:-132,z:133},9198],
+ [2,1,{x:669,y:-182,z:418},{x:649,y:-182,z:396},13122]
 ]){
- test('seed179 ORIGINAL detached site ('+rx+','+rz+
-  ') checks all 7 grade edges in both directions and complete physical walking',()=>{
-  const selected=deep(rx,rz),r=plan(rx,rz);
+ test('seed179 detached site ('+rx+','+rz+
+  ') requires source-protected seven-grade complete walking with no duplicate run',()=>{
+  const selected=deep(rx,rz),geometric=plan(rx,rz);
+  const proof=joinedSourceAndMovement(rx,rz);
   assert.equal(selected.ok,true);
-  assert.equal(r.ok,true);
-  assert.deepEqual(r.from,expectedFrom);
-  assert.deepEqual(r.to,expectedTo);
-  assert.equal(r.originalPlayerAabbFixtureSkippedElevationEdges,7);
-  const args={
-   accessProposal:selected.joined.sourceAuditedCityAccessRouteGeometry,
-   underpassProposal:r.proposal,
-   centerSidePad:r.centerSidePad,floorY:r.floorY
-  };
-  const grade=auditCandidateUnderpassStepPlayer(args);
-  assert.equal(grade.ok,true,
-   'Exact ORIGINAL detached site per-edge original stepPlayer refused: '+
-    JSON.stringify(grade));
-  assert.equal(grade.elevationEdges,7);
-  assert.equal(grade.forwardChecks,7);
-  assert.equal(grade.reverseChecks,7);
-  assert.equal(grade.actualOriginalStepPlayerInvoked,true);
-  assert.equal(grade.genuineWorldWalkingProven,false);
-  const continuous=auditCandidateUnderpassContinuousStepPlayer(args);
-  assert.equal(continuous.ok,true,
-   'Exact ORIGINAL detached site uninterrupted player walking refused: '+
-    JSON.stringify(continuous));
-  assert.equal(continuous.gradeElevationEdges,7);
-  assert.equal(continuous.completeForwardAndReverseWithoutPositionReset,true);
-  assert.equal(continuous.directions.length,2);
-  assert.equal(continuous.authenticOriginalM7WorldTested,false);
-  assert.equal(continuous.realWorldWalkabilityProven,false);
-  assert.equal(continuous.originalWorldModified,false);
-  assert.equal(continuous.noWorldWrites,true);
+  assert.equal(geometric.ok,true);
+  assert.deepEqual(geometric.from,expectedFrom);
+  assert.deepEqual(geometric.to,expectedTo);
+  assert.equal(geometric.originalPlayerAabbFixtureSkippedElevationEdges,7);
+  assert.equal(proof.ok,true,
+   'Original detached source plus prospective real movement refused: '+
+    JSON.stringify(proof));
+  assert.equal(proof.sourceChecks,expectedVisits);
+  assert.equal(proof.originalSourceChecksPassed,true);
+  assert.equal(proof.hypotheticalGradeElevationEdges,7);
+  assert.equal(proof.hypotheticalGradeForwardChecks,7);
+  assert.equal(proof.hypotheticalGradeReverseChecks,7);
+  assert.equal(proof.hypotheticalContinuousWalkDirections,2);
+  assert.ok(proof.hypotheticalContinuousWalkFrames>0);
+  assert.equal(proof.hypotheticalOnlyStagedAirStoneAndNoLiveOverlays,true);
+  assert.equal(proof.actualOriginalM7PlayerMotionNotVerified,true);
+  assert.equal(proof.actualPlayerWalkingUnverified,true);
+  assert.equal(proof.oldFullCityFloorStillRejected,true);
+  assert.equal(proof.worldChanged,false);
  });
 }
+
+test('opt-in original-player gate rejects invalid flag before any M7 source read',()=>{
+ let read=0;
+ assert.throws(()=>auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:{...stone(),naturalAt:()=>{read++;return 1;}},
+  sourceOwnedDeepSelection:deep(2,0),
+  auditHypotheticalMovement:1
+ }),/Invalid original M7 pedestrian underpass reader/);
+ assert.equal(read,0);
+});
