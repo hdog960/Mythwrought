@@ -20,6 +20,25 @@ const key=r=>r&&Number.isSafeInteger(r.rx)&&Number.isSafeInteger(r.rz)?
 const seed179=r=>r&&r.seed===179;
 const distinct=(items,property)=>Array.isArray(items)&&
  new Set(items.map(property)).size===items.length;
+const verifiedSourceCoordinates=(r,bridge,pad)=>{
+ const stages=r?.candidateThinUnderpassStageRoleCells;
+ const duplicates=r?.candidateThinUnderpassStageDuplicateCalls;
+ const overlap=r?.candidateThinUnderpassBridgePadOverlapCells;
+ if(!Number.isSafeInteger(bridge)||!Number.isSafeInteger(pad)||
+   bridge<1||pad!==135||!yes(r?.candidateThinUnderpassCoordinateCoveragePassed)||
+   !yes(r?.candidateThinUnderpassRoleCoordinateIdentityPassed)||
+   r.candidateThinUnderpassBridgeDistinctCells!==bridge||
+   r.candidateThinUnderpassPadDistinctCells!==pad||
+   !Number.isSafeInteger(overlap)||overlap<0||
+   overlap>Math.min(bridge,pad)||
+   r.candidateThinUnderpassCombinedDistinctCells!==bridge+pad-overlap)
+  return false;
+ return ['bridge','pad'].every(stage=>
+  stages?.[stage]!=null&&duplicates?.[stage]!=null&&
+  ['naturalAt','authoredAt','editedAt','protectedAt'].every(role=>
+   stages[stage][role]===(stage==='bridge'?bridge:pad)&&
+   duplicates[stage][role]===0));
+};
 export function classifyExactHeadOriginalM7Triplet({
  expectedHead,actualHead,gallery,city,chunk
 }={}){
@@ -75,7 +94,14 @@ export function classifyExactHeadOriginalM7Triplet({
  // even when this optional route fails its PLAYER-size future walking
  // fixture. The pinned exact-HEAD runner must require BOTH evidence
  // tracks, while this result NEVER claims actual original-M7 walking.
+ const cityThinUnderpassExactCoordinateCoverageSafe=citySourceSafe&&
+  c.rows.every(r=>verifiedSourceCoordinates(r,
+   r.candidateThinUnderpassSourceVisits,
+   r.candidateThinUnderpassCenterLandingSourceVisits));
+ if(!cityThinUnderpassExactCoordinateCoverageSafe)
+  reasons.push('RARE_CITY_UNDERPASS_SOURCE_COORDINATE_HOLD');
  const cityThinUnderpassHypotheticalMovementSafe=citySourceSafe&&
+  cityThinUnderpassExactCoordinateCoverageSafe&&
   c.rows.every(r=>{
    const bridge=r.candidateThinUnderpassSourceVisits,
     pad=r.candidateThinUnderpassCenterLandingSourceVisits,
@@ -140,6 +166,7 @@ export function classifyExactHeadOriginalM7Triplet({
   fullGallerySourceCensusVerified:fullyDiagnosed,
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   cityThinUnderpassHypotheticalMovementSafe,
+  cityThinUnderpassExactCoordinateCoverageSafe,
   cityThinUnderpassRealM7WalkingUnverified:true,
   chunkRiskSafe,
   proposalEvidenceAllPassed:nativeTripletReportsPresent&&
