@@ -27,7 +27,7 @@ test('one original-game 844x390 browser viewport with no user profile or deploye
 test('research-only source version kiln soldier yaw2 is explicit and is not registered in production buildings',()=>{
  assert.ok(script.includes("testOnlyVariant:'kiln-soldier-course'"));
  assert.ok(script.includes('testOnlyRotation:2'));
- assert.ok(script.includes("source.place('pack5:080',cell,2,'kiln-soldier-course')"));
+ assert.ok(script.includes("fixture.place('pack5:080',cell,2,'kiln-soldier-course')"));
  assert.ok(script.includes("orientation:2,variant:'kiln-soldier-course'"));
  assert.ok(script.includes('productionA5VariantYawChosen:false'));
  assert.ok(script.includes('sidecarContainsExactOriginalVariant:true')===false);
