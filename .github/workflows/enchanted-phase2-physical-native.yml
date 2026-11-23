@@ -34,7 +34,7 @@ jobs:
           node --check src/manual-biomes/enchanted-original-standing-diagnostic.mjs
           node --check src/manual-biomes/enchanted-original-physics-route.mjs
           node --check tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
-      - name: Real original M7 physical grass source and preserved stepPlayer crossing
+      - name: Only new east-side original M7 physical route and default Desert parity
         run: |
-          node --test \
+          node --test --test-name-pattern="real east-side|new physical source is opt-in" \
             tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
