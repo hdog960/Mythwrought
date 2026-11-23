@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'ae175cd1103f4ed22176b1abc98fc6d1310938de');
+    '8407fd084b52262c0cfd4bb15746d155ef584181');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -913,4 +913,33 @@ test('hidden, context loss, and BFCache pagehide reset original measured frame e
     assert.ok(anchor>=0&&next>anchor);
     assert.ok(next-anchor<360,labels[i]+' must reset before background time is sampled');
   }
+});
+
+test('real source frame slow count tracks the exact same 2048-slot p95 ring',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.frame(40); // One genuine slow frame above the original 33.4ms threshold.
+  assert.equal(perf.read().rollingSlowFrames,1);
+  assert.equal(perf.read().rollingFrameCount,1);
+  for(let i=0;i<2048;i++)perf.frame(40+16*(i+1));
+  const end=perf.read();
+  assert.equal(end.frameGapsRecorded,2049);
+  assert.equal(end.rollingFrameCount,2048);
+  assert.equal(end.rollingSlowFrames,0);
+  assert.equal(end.rollingFrameP95Ms,16);
+});
+test('source-original viewport/seed transitions clear accumulated slow frame evidence',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.frame(45);
+  assert.equal(perf.read().rollingSlowFrames,1);
+  scope.canvas.clientHeight=430;
+  assert.equal(perf.read().rollingSlowFrames,0);
+  assert.equal(perf.read().rollingFrameCount,0);
+  perf.frame(100);perf.frame(144);
+  assert.equal(perf.read().rollingSlowFrames,1);
+  scope.world.seed=181;
+  const snap=perf.read();
+  assert.equal(snap.rollingSlowFrames,0);
+  assert.equal(snap.rollingFrameCount,0);
+  assert.equal(snap.protocol,'291-local-4viewport-v1');
 });
