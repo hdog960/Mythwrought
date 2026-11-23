@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectLampGrantContinuity as inspect} from '../src/resonance/devices48/lamp-grant-continuity-v1.mjs';
+const lamp=(id='a',demand=3,grant=3,requestedOn=true)=>({id,demand,grant,requestedOn});
+const frame=(tick,lamps=[lamp()],worldId='w')=>({tick,lamps,worldId});
+test('never authorizes activation',()=>{const r=inspect(frame(1));assert.equal(r.valid,true);assert.equal(r.activationAuthorized,false);assert.equal(r.entries[0].activationAuthorized,false)});
+test('deficit is observable',()=>{const r=inspect(frame(1,[lamp('a',5,2)]));assert.equal(r.deficit,3);assert.equal(r.entries[0].state,'deficit')});
+test('off lamp remains off',()=>assert.equal(inspect(frame(1,[lamp('a',3,3,false)])).entries[0].state,'off'));
+test('transition is deterministic',()=>{const r=inspect(frame(2,[lamp('a',3,0)]),frame(1));assert.equal(r.entries[0].priorState,'observed-sufficient');assert.equal(r.entries[0].changed,true)});
+test('skipped tick rejected',()=>assert.equal(inspect(frame(3),frame(1)).valid,false));
+test('cross world rejected',()=>assert.equal(inspect(frame(2),frame(1,[lamp()],'other')).valid,false));
+test('duplicates rejected',()=>assert.equal(inspect(frame(1,[lamp(),lamp()])).valid,false));
+test('roster change rejected',()=>assert.equal(inspect(frame(2,[lamp('b')]),frame(1)).valid,false));
+test('overgrant rejected',()=>assert.equal(inspect(frame(1,[lamp('a',1,2)])).valid,false));
+test('fractional grant rejected',()=>assert.equal(inspect(frame(1,[lamp('a',3,.5)])).valid,false));
+test('roster bounded',()=>assert.equal(inspect(frame(1,Array.from({length:9},(_,i)=>lamp(String(i))))).valid,false));
+test('stable sorted order',()=>assert.deepEqual(inspect(frame(1,[lamp('b'),lamp('a')])).entries.map(x=>x.id),['a','b']));
+test('immutable output',()=>{const r=inspect(frame(1));assert.ok(Object.isFrozen(r)&&Object.isFrozen(r.entries)&&Object.isFrozen(r.entries[0]))});

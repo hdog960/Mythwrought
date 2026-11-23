@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewIntertickCorridor} from '../src/resonance/devices48/intertick-corridor-v1.mjs';
+const b=(x,X)=>({min:{x,y:0,z:0},max:{x:X,y:2,z:1}});
+const frame=(tick,actors=[])=>({productionBound:false,worldId:'w',deviceId:'lift',tick,start:b(0,1),end:b(3,4),occupants:actors.map(([id,x])=>({id,worldId:'w',tick,bounds:b(x,x+0.5)}))});
+const seq=()=>({productionBound:false,frames:[frame(10),frame(11)]});
+test('clear frames advisory only',()=>{const r=previewIntertickCorridor(seq());assert.equal(r.previewClear,true);assert.equal(r.mayActuate,false);assert.equal(r.frames.length,2)});
+test('intermediate tick obstruction retained',()=>{const s=seq();s.frames=[frame(10),frame(11,[['player',2]]),frame(12)];const r=previewIntertickCorridor(s);assert.deepEqual(r.blockers,['player']);assert.equal(r.frames[2].previewClear,true)});
+test('stable blocker order',()=>{const s=seq();s.frames=[frame(10,[['z',2]]),frame(11,[['a',2]])];assert.deepEqual(previewIntertickCorridor(s).blockers,['a','z'])});
+test('gap rejected',()=>{const s=seq();s.frames[1].tick=12;assert.throws(()=>previewIntertickCorridor(s))});
+test('cross world rejected',()=>{const s=seq();s.frames[1].worldId='other';assert.throws(()=>previewIntertickCorridor(s))});
+test('device switch rejected',()=>{const s=seq();s.frames[1].deviceId='other';assert.throws(()=>previewIntertickCorridor(s))});
+test('production binding rejected',()=>assert.throws(()=>previewIntertickCorridor({...seq(),productionBound:true})));
+test('frame production binding rejected',()=>{const s=seq();s.frames[1].productionBound=true;assert.throws(()=>previewIntertickCorridor(s))});
+test('forged authority rejected',()=>{const s=seq();s.frames[1].authoritativeDelivery=true;assert.throws(()=>previewIntertickCorridor(s))});
+test('oversized sequence rejected',()=>{const s=seq();s.frames=Array.from({length:17},(_,i)=>frame(i));assert.throws(()=>previewIntertickCorridor(s))});
+test('tick overflow rejected',()=>{const s=seq();s.frames=[frame(Number.MAX_SAFE_INTEGER),frame(Number.MAX_SAFE_INTEGER)];assert.throws(()=>previewIntertickCorridor(s))});
+test('missing frames rejected',()=>assert.throws(()=>previewIntertickCorridor({productionBound:false,frames:[]})));
