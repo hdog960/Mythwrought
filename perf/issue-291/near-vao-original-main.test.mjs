@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '640eb74638d3feb2a54dff1403f302bd56302c36');
+    '392a5e52fdfb8a7b66482562c51e63a249975d2a');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -750,7 +750,8 @@ const createLocal291Perf=new Function('scope','with(scope){'+
   '\nreturn {frame:near291RecordFrame,'+
   'mine:(duration,result,pending)=>near291RecordMine(duration,result,'+
   '(pending===undefined?{samples:[],overflow:false,faults:0}:pending)),'+
-  'interrupt:near291Interrupt,'+
+  'interrupt:near291Interrupt,noteEdit:near291NoteEdit,'+
+  'abortMine:near291AbortMineTrial,'+
   'upload:near291RecordUpload,fail:near291RecordUploadFailure,'+
   'startFirst:()=>{near291FirstEditUploads={samples:[],overflow:false,faults:0};'+
     'return near291FirstEditUploads;},'+
@@ -770,7 +771,7 @@ function local291PerfFixture({
   const scope={
     enabled,URLSearchParams:URLParams,location:{hostname,search},
     document:{hidden:false},help:{hidden:true},
-    exploration:{isOpen:()=>false},graphicsLost:false,
+    exploration:{isOpen:()=>false},graphicsLost:false,g2Active:()=>false,
     canvas:{clientWidth:956,clientHeight:440,width:956,height:440},
     world:{seed:179},player:{feet:-30},BLOCK:{AIR:0},
     frameHistory:{stats:()=>({frames:4,p95Ms:18})},
@@ -950,7 +951,7 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   const snap=perf.read();
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
-  assert.equal(snap.protocol,'291-local-4viewport-v3');
+  assert.equal(snap.protocol,'291-local-4viewport-v4');
 });
 
 test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
@@ -1211,7 +1212,7 @@ test('original trial frame summary is frozen, numeric, and not release certified
   perf.frame(0);perf.mine(13,{cell:[0,-19,2],previous:3,next:0});
   const snap=perf.read();
   assert.equal(Object.isFrozen(snap.mineFrameWindow),true);
-  assert.equal(snap.protocol,'291-local-4viewport-v3');
+  assert.equal(snap.protocol,'291-local-4viewport-v4');
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.browserPixelParityProven,false);
 });
@@ -1428,4 +1429,128 @@ test('source original successful deep MINE timing preserves double precision, no
   perf.mine(90.00006,{cell:[1,-30,1],previous:3,next:0});
   assert.equal(perf.read().miningActionP95Ms,90.00006);
   assert.ok(perf.read().mineFrameWindow.phase==='active');
+});
+
+
+test('an authentic second deep MINE action has a pending admission only until saved',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(9,{cell:[1,-31,5],previous:3,next:0});
+  assert.equal(perf.read().mineFrameWindow.phase,'active');
+  perf.noteEdit('mine');
+  assert.equal(perf.read().mineFrameWindow.editPending,true);
+  perf.mine(11,{cell:[2,-31,5],previous:3,next:0});
+  const trial=perf.read().mineFrameWindow;
+  assert.equal(trial.editPending,false);
+  assert.equal(trial.savedMines,2);
+  assert.equal(trial.invalid,false);
+  assert.equal(trial.invalidReason,null);
+});
+test('failed voxel MINE after trial admission invalidates on the next genuine RAF',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[1,-25,5],previous:3,next:0});
+  perf.noteEdit('mine');
+  // original blocked/mob-hit/unsaved branch returns without near291RecordMine
+  perf.frame(16);
+  const trial=perf.read().mineFrameWindow;
+  assert.equal(trial.phase,'interrupted');
+  assert.equal(trial.invalid,true);
+  assert.equal(trial.interrupted,true);
+  assert.equal(trial.invalidReason,'unsaved-or-nondeep-edit');
+  assert.equal(trial.savedMines,1);
+});
+test('a second attempted edit before a successful saved MINE fails closed',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(7,{cell:[1,-40,7],previous:3,next:0});
+  perf.noteEdit('mine');
+  perf.noteEdit('mine'); // prior unconfirmed action never reached saved completion
+  const r=perf.read().mineFrameWindow;
+  assert.equal(r.phase,'interrupted');
+  assert.equal(r.invalidReason,'off-plan-edit');
+});
+test('placing a voxel or non-MINE action amid deep-mining trial invalidates parity',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[2,-41,1],previous:3,next:0});
+  perf.noteEdit('place');
+  const trial=perf.read().mineFrameWindow;
+  assert.equal(trial.phase,'interrupted');
+  assert.equal(trial.invalidReason,'off-plan-edit');
+  assert.equal(trial.savedMines,1);
+});
+test('a 101st attempted edit before final two frame gaps invalidates the closing trial',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  for(let i=0;i<100;i++){
+    if(i>0)perf.noteEdit('mine');
+    perf.mine(5,{cell:[i,-45,0],previous:3,next:0});
+    perf.frame((i+1)*16);
+  }
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  perf.noteEdit('mine');
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+  assert.equal(perf.read().mineFrameWindow.invalidReason,'off-plan-edit');
+});
+test('short Settings overlay marks source mining trial invalid immediately',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-42,1],previous:3,next:0});
+  perf.abortMine('settings-opened');
+  const before=perf.read().mineFrameWindow;
+  assert.equal(before.phase,'interrupted');
+  assert.equal(before.invalidReason,'settings-opened');
+  perf.frame(12); // brief interval cannot silently turn into a successful p95
+  const after=perf.read().mineFrameWindow;
+  assert.equal(after.phase,'interrupted');
+  assert.equal(after.savedMines,1);
+});
+test('help overlay active on a drawn frame fails the incomplete test closed',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-42,1],previous:3,next:0});
+  scope.help.hidden=false;
+  perf.frame(16);
+  assert.equal(perf.read().mineFrameWindow.invalidReason,'foreground-excluded');
+  assert.equal(perf.read().continuousForegroundRun,false);
+});
+test('exploration overlay pauses mine-window admission even if less than one frame elapsed',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-42,1],previous:3,next:0});
+  scope.exploration.isOpen=()=>true;
+  perf.frame(8);
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+  assert.equal(perf.read().mineFrameWindow.invalid,true);
+});
+test('creative flight during trial invalidates voxel mining-world comparison',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-42,1],previous:3,next:0});
+  scope.g2Active=()=>true;
+  perf.frame(16);
+  assert.equal(perf.read().mineFrameWindow.invalidReason,'creative-flight');
+});
+test('source original Settings and blur handlers actively fence the experiment only',()=>{
+  const menu=source.indexOf("document.getElementById('menu').onclick=()=>{");
+  const close=source.indexOf("document.getElementById('closeHelp').onclick",menu);
+  assert.ok(menu>0&&close>menu);
+  const handler=source.slice(menu,close);
+  assert.ok(handler.includes("if(near291Perf)near291AbortMineTrial('settings-opened');"));
+  assert.ok(handler.includes('cancelAllPointers();help.hidden=false;'));
+  const blur=source.slice(source.indexOf("window.addEventListener('blur',()=>{"));
+  assert.ok(blur.startsWith("window.addEventListener('blur',()=>{"));
+  assert.ok(blur.includes("if(near291Perf)near291AbortMineTrial('window-blur');"));
+  assert.ok(blur.includes('cancelAllPointers();'));
+  assert.ok(source.includes("if(near291Perf)near291NoteEdit(mode); // read-only trial admission only"));
+});
+test('invalidated source A/B is reset by viewport change without changing schema-1 saves',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[1,-42,1],previous:3,next:0});
+  perf.abortMine('window-blur');
+  assert.equal(perf.read().mineFrameWindow.invalidReason,'window-blur');
+  scope.canvas.clientWidth=932;
+  const fresh=perf.read();
+  assert.equal(fresh.mineFrameWindow.phase,'idle');
+  assert.equal(fresh.mineFrameWindow.invalidReason,null);
+  assert.equal(fresh.mineFrameWindow.editPending,false);
+  assert.equal(fresh.trueSavedDeepMines,0);
+  assert.equal(fresh.releaseCertified,false);
 });
