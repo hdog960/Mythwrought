@@ -1,0 +1,36 @@
+name: Mountain V8 preflight original V7 compatibility regression (isolated)
+# Only the newly-authored original V7 profile/Pack2/save/physics tests.
+# Single isolated push trigger at initial workflow creation; no repeated broad CI.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-original-v7-compatibility-focused.yml
+
+permissions:
+  contents: read
+
+jobs:
+  original-v7-compatibility:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Checkout exact isolated original repository (no pushed edits)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Node 22 original source runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate exact source HEAD and test syntax
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check tests/mountain-v8-original-v7-profile-preservation.test.mjs
+      - name: Run only six original V7 profile save and physics regression tests
+        run: |
+          node --test --test-concurrency=1 tests/mountain-v8-original-v7-profile-preservation.test.mjs
