@@ -28,6 +28,10 @@ export function inspectMountainV8OptInSeed(storage,seed){
     return verdict(seed,'unverifiable-original-storage');
 
   try{
+    // The read-only scan must not certify a seed while another tab is adding
+    // or removing a saved owner key mid-preflight. This is not a transactional
+    // lock: the eventual authorized creator must recheck atomically on write.
+    const initialOwnerKeyCount=storage.length;
     // Damaged or contradictory original M2-M7 profile sidecars fail closed.
     if(readFourRegionProfile(storage,seed))
       return verdict(seed,'existing-original-generation-profile');
@@ -42,6 +46,8 @@ export function inspectMountainV8OptInSeed(storage,seed){
     // cave-world saves even without their regular cave profile sidecar.
     if(auditMountainV8ExtraSeedOwners(storage,seed).claim)
       return verdict(seed,'existing-cave-mob-roster-or-backup');
+    if(storage.length!==initialOwnerKeyCount)
+      throw new Error('Original owner key census changed during preflight');
     return verdict(seed,'read-only-unclaimed-candidate',true);
   }catch(_){
     // Never downgrade a damaged/contradictory original to 'unused'.
