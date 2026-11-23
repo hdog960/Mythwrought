@@ -53,7 +53,7 @@ const helper=`window.__mythwroughtTest=Object.freeze({
 assert.equal(main.split(hook).length-1,1,'Original local-only acceptance hook moved');
 const alteredMain=main.replace(hook,helper);
 const candidates=[{seed:179,ice:[-144,8,528]},
-  {seed:2026,ice:[-160,7,480]}];
+  {seed:2026,ice:[-144,9,504]}];
 const viewport={width:956,height:440};
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
@@ -76,7 +76,8 @@ async function take(seed,ice,stage,preferred){
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e?.message??e)));
   page.on('dialog',d=>d.accept());
-  // Desert P3 index uses main.mjs?mw-release=20261123-desert-p3-v1.\n  await page.route('**/src/main.mjs*',async route=>{
+  // Desert P3 index has a release-query main module.
+  await page.route('**/src/main.mjs*',async route=>{
     routeMain++;
     const resp=await route.fetch(),body=await resp.text();
     assert.equal(resp.status(),200);
