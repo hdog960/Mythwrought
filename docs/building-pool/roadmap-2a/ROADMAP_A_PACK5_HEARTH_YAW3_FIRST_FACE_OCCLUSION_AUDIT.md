@@ -29,3 +29,45 @@ The original displayed *surface* is a GPU rasterized, depth-tested scene, not me
 Do NOT modify original authored material/rotation, original production selection boxes, original terrain collision, original six-block player reach, collision support, original shader, mobile performance bounds, saves or original-world data. Do NOT choose A5 art/yaw, count warning rows as unique in-game bugs, pad selection into empty air or substitute triangle raycasting without verifying occlusion. A new one-context disposable actual original-game pixel/selection case should first be justified by a physically meaningful, strict exposed renderer-coordinate first-face anomaly that persists under a bounded change of source aim and has correct ownership, depth/occlusion and six-block reach. Otherwise retain original selection behavior.
 
 Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; protected OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`; existing shared workflows, other builders, five automations, schema1 saves, installed PWA, locked v0.11 remain untouched. Roadmap A still **207/420 SOURCE ONLY; 213 unwritten**, original 79 A5 source physical candidates and historical 128 commerce/345 industrial/315 government unmodified. No merge, deployment, CI cancellation or creator structural approval.
+
+## Exact new original-repo native findings and limits — 2026-11-22 local / 2026-11-23 UTC
+
+**[Original-repository GitHub Actions #45113935884](https://github.com/hdog960/Mythwrought/actions/runs/45113935884) SUCCESS: 11/11 NEW focused native Node 22.16.0 tests passed, zero failed; own-lane source/test syntax passed.** Genuine original full GitHub checkout, dedicated only-once branch-specific CI child \`roadmap-a-hearth-yaw3-first-face-native-ci-20261122\` exact HEAD **\`11b36cd2c18d781c8e538b9edb6a254ffe254dff\`**. The child contains byte-for-byte the isolated own-lane implementation from \`f456ca3a03436913f661999d085619709962039a\`, plus only a unique CI workflow file; no existing shared workflows or other teams were changed. No original browser, WebGL2 runtime, GPU raster/depth or physical iPhone ran in this session.
+
+**Complete authenticated source-output ledger:**
+
+| Original hearth/yaw3 physical source category | Count |
+|---|---:|
+| All bounded source rays, same original grid | **2,610** |
+| Mathematically strict true renderer-world Float32 triangle hits | **2,472** |
+| Original detailed physical selection hits | **2,472** |
+| Both-hit nearest-distance warnings > 2×10⁻⁷ original source blocks | **208** |
+| Original hit/miss differences (strict renderer math vs original selection) | **0** |
+| Original live-style selection vs independent strict authored slab disagreement | **0** |
+| Selected source face before strict triangle | **139** |
+| Strict triangle before selection | **69** |
+| Same original physical box owner / different original physical box owner | **111 / 97** |
+| Original selected slab within/farther than 2×10⁻⁶ original transverse seam | **93 / 115** |
+| Physical ray intersects selected box for ≤ 1×10⁻⁵ source blocks | **48** |
+| Physical ray intersects selected box for > 1×10⁻⁵ source blocks | **160** |
+| Nearest strict source triangle facing **toward / away from** source camera | **208 / 0** |
+| Strict ray point 1×10⁻⁵ before triangle lies strictly inside another authored source box | **0** |
+| Strict ray point 1×10⁻⁵ before triangle lies strictly inside the same authored box | **0** |
+| Strict ray point 1×10⁻⁵ before triangle is outside all authored box interiors | **208** |
+| First strict source triangle contact outside own authored source box by > 1×10⁻⁵ blocks | **0** |
+| First strict source triangle contact outside own authored source box by > 1×10⁻⁷ blocks | **19** |
+| Largest strict triangle point-to-original-own-box exterior distance | **4.348754885086237×10⁻⁷ blocks** |
+| Different original Y/Z source-coordinate groups containing one or more warnings | **122** |
+| Original Y/Z source-coordinate groups with SAME selected owner, triangle owner, face and distance ordering at all 3 original small Y offsets | **19** |
+
+**Explanation of the physical source results:**
+1. The **48** original selected-box ray intervals of 1e-5 blocks or thinner are legitimate numerical-grazing candidates, particularly since the previous original source audit measured 93 selected transverse edge contacts within 2e-6. The **160** thicker selected-box intersections must not automatically be classified as tangential artifacts based only on first-face numerical distance. The overlap between the different classifications is not yet exhaustively cross-tabulated.
+2. All 208 nearest strict source triangles are front-facing by their original-authored geometric face normal, and at a point 1e-5 source blocks *before* triangle intersection the ray is outside the STRICT interiors of all 42 physical authored boxes. These are **source volume samples** and do not establish actual WebGL raster coverage, culling, depth buffer visibility, hidden opaque surface behavior, or original playable game screen rendering.
+3. The geometric contact with its owner authored selection box is always within **4.35e-7 source block units**. Nineteen strict triangle contacts are over 1e-7 outside the **double-precision authored box boundary**, consistent with very small Float32 world-position differences. ZERO are beyond the deliberately conservative 1e-5 macroscopic drift threshold. This directly constrains any claim that true authored source triangle geometry has materially drifted away from original detailed selection geometry.
+4. **Only 19 out of 122 source Y/Z groups with warnings** retained identical face owners, face ID and nearer-source ordering under ALL three ±2e-6 Y offsets. Those groups are repeated **mathematical source ray measurements**, not unique player-visible bug cases and not evidence of stability under all continuous camera perturbations.
+
+**No original-game patch warranted.** The test verified only this one research variant/yaw, one original R3-like eye and bounded original face-grid. The 208 warnings are differences of *first mathematical hit distance*, even though exact hit/miss membership is identical on all 2,610 rays; source-authored brick details overlap and many rays graze physical boundaries. Producing a truly justified game bug requires separately verified original-game rendering/occlusion and a demonstrable incorrect original player target in an authenticated disposable scene. A source triangle point 1e-5 before a face being outside all boxes is **not** a GPU visibility proof. Preserve original physics, original six-block reach and terrain occlusion, avoid padding AABBs into empty space, and do NOT choose final original A5 art/yaw or rewrite original renderer.
+
+**Next isolated task, only if substantive:** cross-tab original source warnings by selected-box *thin versus robust crossing*, different/same source box owner and face orientation; identify any robust different-owner warning with strong strict barycentric margin and consistent ±Y/Z source perturbations, then design one narrow disposable actual-original-game original HUD/visual pixel gate if such a hypothesis is meaningful. Do not run duplicate broad CI. Other physical variants, original terrain, structural loads, real iPhone Safari/Home Screen PWA and production release remain untested.
+
+Protected main \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`; Roadmap A remains **207/420 SOURCE ONLY, 213 unwritten** with original 79 A5 physical candidates and historic 128 commerce/345 industrial/315 government unchanged. Other developers, all five hourly automations, shared workflows, schema1 real saves, installed PWA and locked v0.11 untouched. No merge/deploy/original game modification/CI cancellation/structural or art acceptance.
