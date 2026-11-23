@@ -176,6 +176,23 @@ test('both exact seed179 candidate sites account every original callback once, w
   assert.equal(r.sourceReaderCallsUnchangedDuringHypotheticalMotion,true);
   assert.equal(r.sourceReaderRoleBindingsUnchanged,true);
   assert.equal(r.underpassReaderIdentityCallerAuthenticatedOnly,true);
+  assert.equal(r.underpassCoordinateCoveragePassed,true);
+  assert.equal(r.underpassSourceRoleCoordinatesIdentical,true);
+  assert.equal(r.underpassBridgeDistinctCells,bridgeCalls);
+  assert.equal(r.underpassPadDistinctCells,padCalls);
+  assert.equal(Number.isSafeInteger(r.underpassBridgePadOverlapCells),true);
+  assert.ok(r.underpassBridgePadOverlapCells>=0);
+  assert.ok(r.underpassBridgePadOverlapCells<=padCalls);
+  assert.equal(r.underpassCombinedDistinctCells,
+   bridgeCalls+padCalls-r.underpassBridgePadOverlapCells);
+  for(const [stage,expected] of [['bridge',bridgeCalls],['pad',padCalls]]){
+   assert.deepEqual(r.underpassExactStageRoleCells[stage],{
+    naturalAt:expected,authoredAt:expected,editedAt:expected,protectedAt:expected
+   });
+   assert.deepEqual(r.underpassExactStageDuplicateCalls[stage],{
+    naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0
+   });
+  }
   assert.deepEqual(r.underpassActualReaderCallsByRole,{
    naturalAt:visits,authoredAt:visits,editedAt:visits,protectedAt:visits
   });
