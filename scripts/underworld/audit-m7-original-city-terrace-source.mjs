@@ -144,6 +144,8 @@ for(const [rx,rz] of regions){
    underpass.expectedUnderpassReaderCallsPerRole??null,
   candidateThinUnderpassNoReaderCallsDuringSyntheticMotion:
    underpass.sourceReaderCallsUnchangedDuringHypotheticalMotion===true,
+  candidateThinUnderpassOriginalReaderBindingsUnchanged:
+   underpass.sourceReaderRoleBindingsUnchanged===true,
   candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
