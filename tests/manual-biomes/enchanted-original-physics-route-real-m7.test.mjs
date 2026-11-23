@@ -36,7 +36,7 @@ test('real source-physics search validates bounds and genuine old M7 standing be
  const old=world(7919);
  const n=originalM7PedestrianCap(old,225,-592);
  assert.ok(n,'known Desert/Enchanted old-world witness must be original-grounded');
- assert.equal(biome(n.x,n.z,7919),'desert');
+ assert.equal(biome(n.x,n.z,7919),'enchanted');
  assert.equal(collides(old,n.x+.5,n.feet,n.z+.5),false);
  assert.throws(()=>searchOriginalM7PhysicsAdmittedRoutes(old,{
   x:225,z:-592,maxVisits:LIMIT.visits+1
@@ -61,13 +61,13 @@ test('real source-physics search validates bounds and genuine old M7 standing be
  assert.deepEqual(old.save(),{schema:1,seed:7919,edits:[]});
 });
 
-test('original unchanged stepPlayer physically admits Desert-to-Enchanted connected routes and optional trees must preserve them',()=>{
+test('original unchanged stepPlayer physically admits Enchanted-to-Desert connected routes and optional trees must preserve them',()=>{
  const seed=7919,history=world(seed),candidate=world(seed,true);
  const starts=[[225,-592],[225,-595],[226,-592]];
  const audit=[],accepted=[];
  for(const [x,z] of starts){
-  assert.equal(biome(x,z,seed),'desert');
-  const options={seed,x,z,targetBiome:'enchanted',radius:10,
+  assert.equal(biome(x,z,seed),'enchanted');
+  const options={seed,x,z,targetBiome:'desert',radius:10,
    maxVisits:128,maxSteps:16,maxRoutes:3,
    maxEdgeAttempts:280,maxPhysicsTicks:8192,minDisplacement:4};
   const search=searchOriginalM7PhysicsAdmittedRoutes(history,options);
@@ -76,7 +76,7 @@ test('original unchanged stepPlayer physically admits Desert-to-Enchanted connec
   for(const route of search.routes){
    const initial=route.path[0],end=route.path.at(-1);
    assert.equal(initial.x,x);assert.equal(initial.z,z);
-   assert.equal(biome(end.x,end.z,seed),'enchanted');
+   assert.equal(biome(end.x,end.z,seed),'desert');
    assert.ok(route.path.length-1>=4);
    assert.equal(route.ticksPerLeg.length,route.path.length-1);
    assert.ok(route.ticksPerLeg.every(t=>t>=1&&t<=LIMIT.edgeTicks));
@@ -101,11 +101,13 @@ test('original unchanged stepPlayer physically admits Desert-to-Enchanted connec
  // A source-admission search is NOT required to find every walkable route
  // within a limited budget. A verified old-state replay, not graph count,
  // determines acceptance. Previous unchanged physics Desert evidence remains.
- console.log('# ENCHANTED M7 PHYSICS ADMITTED DESERT FOREST '+JSON.stringify({
+ console.log('# ENCHANTED M7 PHYSICS ADMITTED ENCHANTED TO DESERT '+JSON.stringify({
    audit,accepted,allAcceptedPathsFullyReplayed:true,
    discoveryIncompleteIfNone:true,physicalIphoneUnmeasured:true
  }));
  assert.ok(audit.every(x=>x.physicsTicks<=8192));
+ assert.ok(accepted.length>=1,
+   'new stepPlayer-admitted search must discover a genuine original Enchanted-to-Desert walk');
  assert.deepEqual(history.save(),{schema:1,seed,edits:[]});
  assert.throws(()=>candidate.save(),/cannot be saved as historical M7/);
 });
@@ -166,7 +168,7 @@ test('original in-memory cave/headroom obstruction invalidates route replay inst
    edits:[[obstruction[0],obstruction[1],obstruction[2],BLOCK.STONE]]});
 });
 
-test('source-fixed four-diagonal historical Desert witness replays without any per-leg teleport',()=>{
+test('source-fixed four-diagonal historical Enchanted-to-Desert witness replays without any per-leg teleport',()=>{
  const seed=7919,historical=world(seed),prototype=world(seed,true);
  const source=[];
  for(let i=0;i<=4;i++){
@@ -174,8 +176,8 @@ test('source-fixed four-diagonal historical Desert witness replays without any p
    assert.ok(original,'previous exact-source historic Desert diagonal leg must be real');
    source.push(original);
  }
- assert.equal(biome(source[0].x,source[0].z,seed),'desert');
- assert.equal(biome(source.at(-1).x,source.at(-1).z,seed),'enchanted');
+ assert.equal(biome(source[0].x,source[0].z,seed),'enchanted');
+ assert.equal(biome(source.at(-1).x,source.at(-1).z,seed),'desert');
  const old=originalM7PhysicsRouteReplay(historical,source);
  assert.equal(old.ok,true,'historical four-diagonal route must truly walk');
  assert.equal(old.legs,4);
