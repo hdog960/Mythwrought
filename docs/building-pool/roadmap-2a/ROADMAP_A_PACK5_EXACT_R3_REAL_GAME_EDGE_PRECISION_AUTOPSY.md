@@ -1,0 +1,48 @@
+# Roadmap A — exact original R3 real-game triangle-only edge physical precision autopsy
+
+## Source of truth and exact authenticated actual-game witness
+
+The user-approved original game disposable WebGL2 test [Actions #45092582089](https://github.com/hdog960/Mythwrought/actions/runs/45092582089), R3 Chromium SwiftShader, completed **SUCCESS 8/8 native + genuine actual-game edge MINE** on CI-only HEAD \`ac1c2d96b4f37141a841da0611158c0bccd6f24a\`. Its original uploaded [artifact #14782385585](https://github.com/hdog960/Mythwrought/actions/runs/45092582089/artifacts/14782385585) was **actually downloaded and the original JSON inspected** in this session, not merely inferred from log summaries. Authentic original evidence JSON SHA256 \`62708fb82618278225cbc1b092ba68e4ff204ced436fed2fa30f2de2e6d5103d\`.
+
+Exact measured original-game source shape/ray sample:
+
+- Original Pack5 physical symbol \`pack5:080\`, existing source-authored \`kiln-soldier-course\` test-only variant, yaw2. In disposable game placed at **[3,14,0]** through unchanged original five-pack builder (verified schema1 and seed-scoped private sidecar); *this is not an A5 building material or orientation decision*.
+- **Original real-game player eye [0.5, 13.55, 0.5]**; original camera yaw \`1.757786033928741\`, pitch \`0.5099378275702837\` radians. Original test-only target relative to the brick \`[0,0.972998,0.027]\`.
+- Original **Float32 GPU staged mesh triangle ray hit \`2.915244810989979\` world block units**, original **detailed physical AABB selection null**, and **actual original in-game MINE button at this exact edge retained the brick**, with real game message \`No Pack 5 shaped object targeted\`.
+- Original real game rendered the brick into a 540×335 actual canvas with **1,908 GPU vertices, 68,688 resident bytes, 1 GPU draw call**, and measured 37 strongly changed screenshot pixels within the 9×9 crosshair-near region. This does NOT mean a GPU pixel exactly at the mathematical center ray was observed. After returning to the brick center original game MINE removed it; temporary private-sidecar reload confirmed absence.
+- The previous R3 source grid tested 2,430 rays, with 2 original source-triangle-only cases, 146 hit-distance comparisons and zero selection-only; separate 12/14/88 historical source grid warnings remain distinct.
+
+## New genuine original-source, zero-production-mutation engineering
+
+\`src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs\` replays **the exact authenticated original-game ray**, from the *existing* original \`forwardVector()\`, using the *existing* original \`PACK5_BUILDER_FAMILIES\`, \`makePack5Fixture()\`, \`resolvePack5BuilderAsset('pack5:080','kiln-soldier-course')\`, \`orientedParts()\`, \`pack5TerrainVertices()\`, and original source \`sourceRayTriangleDistance()\`. Source makes **no changes** to original game \`main.mjs\`, production AABB/raycast, mesh, shader, selection, collision, save, or sidecar.
+
+It independently calculates four **separately identified** physical ray categories:
+
+1. **Unchanged fixture detailed AABB selection** (authoritative on-screen player MINE control, with normal world occlusion in the real game). Model separately reimplements exact original double-precision three-axis slab test against unchanged original rotated authored selection boxes to guard against hidden fixture changes. It must reproduce **NULL** at the original R3 miss.
+2. **Float32-quantized source AABB** — same original physical boxes only, with their coordinate endpoints rounded using JavaScript \`Math.fround\` as the original GPU source mesh vertices are; for forensic comparison ONLY, no production hitbox/selection padding or GPU selection claim. If it admits the ray while authored boxes miss, the source precision change is a plausible contributor, not proof that a GPU fragment was rasterized.
+3. **Original source-authored Float32 triangle ray with the already-existing \`sourceRayTriangleDistance()\` barycentric slack** \`u>=-1e-7,v>=-1e-7,u+v<=1+1e-7\`; it must reproduce authentic original R3 hit distance **2.915244810989979** within 2e-6. That original helper is SOURCE RESEARCH ONLY, not the actual original live player selection implementation. The relaxed barycentric epsilon may admit rays that are mathematically outside the triangle by an extremely small amount; do not equate it with true GPU pixel coverage.
+4. **Independent STRICT triangle barycentric intersection** with no permissive edge inequalities, from the exact same genuine original Float32 staged triangle positions, identifying whether the relaxed source ray hit survives a stricter mathematical interpretation. If it does not, the earlier source "triangle-only" category is inherently an uncertain near-edge analytic artifact, even while the original game definitely rendered adjacent pixels and the original MINE missed.
+
+For the exact R3 ray, independently report nearest actual authored box, Float32 quantized box, strict/tolerant triangle distances and triangle barycentric margins, reconstructed world hitpoint and geometric distance from that point to the original authored selection-box union. Repeat the exact original input at **seven authored face-Y perturbations** [-1e-5,-2e-6,-1e-6,0,+1e-6,+2e-6,+1e-5] without moving an actual game/player/world; classify every valid independent comparison and report a bounded JSON native diagnostic.
+
+The two forensic alternate models are read-only *ideas*, **NOT production repairs or authorizations**: picking the nearest actual triangle could hit internal hidden faces or bypass original terrain occlusion, original six-block reach, original shape/collision ownership and mobile CPU budget. Snapping source AABB coordinates to Float32 could introduce empty-space hits and change support/collision expectations. Neither can be merged as a "fix" without new source and true-game RED/GREEN acceptance proving no new incorrect picks. **Never pad hitboxes into empty air or weaken original checks to make tests pass.**
+
+## Targeted original-repository tests
+
+\`tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs\` (eight NEW native tests):
+- Fail closed on unchanged original fixture / barycentric helper / Float32 mesh code drift.
+- Verify exact authenticated artifact SHA, original camera and original in-game R3 source witness all reproduce with existing original repository source.
+- Verify exactly 1,908 genuine Float32 stage vertices, 636 original render triangles and actual original authored box count.
+- Explicitly distinguish strict triangle mathematical hit vs original tolerant triangle hit and original authored box vs Float32 source-box.
+- Original independent signed ray/box slab unit examples, pathological NaN/zero rays.
+- Independent mathematical triangle barycentric interior/outside/parallel cases.
+- Seven original near-edge authored face-Y shifts and no silent selection changes.
+- Strict guarantee no original gameplay/save/iPhone/production/source-building changes or structural acceptance.
+
+Run **only** one exact native Node 22.16.0 original checkout on a dedicated CI-only child branch; compile/syntax-check only the two new files and run the eight new tests. Reuse the fully verified previous genuine game [#45092582089], initial real default game [#45089024663], prior native warnings [#45084143116], [#45078516025], [#45076761838], [#45073277516], [#45061280438], [#45057409771], [#45055300060], [#45049471293], [#45044721507] and historical original Pack5/footprint/V8 evidence; DO NOT rerun them. Native source-only autopsy never claims a new actual game/GPU/iPhone run.
+
+## Protected ownership / remaining Roadmap A gates
+
+Production main stays exact \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; protected OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Only own-lane new research source, tests and document; no shared workflow edits (CI-only child owns a unique workflow), other builders, five hourly automations, schema1 saves, installed PWA, locked v0.11 or original world mutation, no merge/deployment/cancellation.
+
+Roadmap A remains **207/420 SOURCE ONLY with 213 unwritten**; historical 128 commerce/345 industrial/315 government unchanged, original 79 A5 candidates and final art/structural choices still reserved. Next engineering step depends on exact native classification: investigate the source-authenticated cause, prepare *isolated* alternative non-padding ray ownership with full terrain occlusion/6-block reach/CPU boundedness, then if warranted one further disposable **original game** real on/off-pixel/MINE RED/GREEN test. iPhone Safari installed PWA and actual mixed Pack1–5 structural loading remain separate acceptance gates.
