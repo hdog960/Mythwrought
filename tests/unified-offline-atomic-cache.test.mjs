@@ -8,7 +8,7 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261121-unified-environment-rc7';
+const RELEASE='20261123-desert-p3-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
 const PREVIOUS='mythwrought-m5-shell-20261120-five-systems-rc11';
 const ROOT='https://example.test/Mythwrought/';
