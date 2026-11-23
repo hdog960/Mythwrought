@@ -7,7 +7,7 @@ const viewports=[[956,440],[932,430],[844,390],[916,412]];
 function sample(viewport,mode='original-control'){
   const isVao=mode==='experimental-vao';
   return {
-    protocol:'291-local-4viewport-v4',mode,viewportCss:[...viewport],
+    protocol:'291-local-4viewport-v5',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
     trueSavedDeepMines:100,
     // Hypothetical test-only fixture. Real measurements must come from the
@@ -26,7 +26,8 @@ function sample(viewport,mode='original-control'){
       successfulGuardedUploads:224,successfulGuardedUploadP95Ms:isVao?22:28,
       maxUploadSamples:4096,uploadOverflow:false,uploadFaults:0,
       maxFrameSamples:16384,overflow:false,invalid:false,interrupted:false,
-      editPending:false,invalidReason:null},
+      editPending:false,invalidReason:null,
+      renderIdentity:[...viewport,'balanced',2]},
     successfulGuardedUploads:224,rollingSuccessfulUploadP95Ms:isVao?22:28,
     fatal:false,graphicsLost:false,pageSuspended:false,
     continuousForegroundRun:true,interruptionCount:0,
@@ -277,7 +278,7 @@ test('missing, invalid and malformed mining-native upload window cannot pass',()
   verify(x=>x.pairs[0].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=NaN,
     /mining-bound guarded upload p95/);
 });
-test('strict v4 source protocol rejects stale v2 mined frame snapshots',()=>{
+test('strict v5 source protocol rejects stale v2 mined frame snapshots',()=>{
   verify(x=>x.pairs[1].control.protocol='291-local-4viewport-v2',/protocol/);
 });
 test('numeric summary uses trial uploads, never unrelated rolling upload counters',()=>{
@@ -320,7 +321,7 @@ test('full precision legal boundary upload value of exactly 33ms is admissible',
   assert.equal(r.releaseCertified,false);
 });
 
-test('strict v4 protocol rejects stale v3 source snapshots',()=>{
+test('strict v5 protocol rejects stale v3 source snapshots',()=>{
   verify(x=>x.pairs[0].candidate.protocol='291-local-4viewport-v3',/protocol/);
 });
 test('an original edit that never became a saved deep MINE blocks certification',()=>{
@@ -345,4 +346,40 @@ test('an interrupted originally recorded edit never changes the release HOLD',()
   assert.equal(result.metricGatesPassed,false);
   assert.equal(result.releaseCertified,false);
   assert.ok(result.failures.some(x=>/real mining-frame trial/.test(x)));
+});
+
+test('missing physical render identity never certifies a mining-window p95',()=>{
+  verify(x=>delete x.pairs[0].control.mineFrameWindow.renderIdentity,/stable original physical/);
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.renderIdentity=null,/stable original physical/);
+  verify(x=>x.pairs[2].control.mineFrameWindow.renderIdentity=[],/stable original physical/);
+});
+test('mid-trial canvas backing size mismatch fails even with matching CSS dimensions',()=>{
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.renderIdentity[0]=800,
+    /stable original physical/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.renderIdentity[1]=600,
+    /stable original physical/);
+});
+test('same CSS and backing pixels but different render presets cannot compare',()=>{
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.renderIdentity[2]='economy',
+    /render preset\/DPR differ/);
+  verify(x=>x.pairs[1].control.mineFrameWindow.renderIdentity[2]='',
+    /stable original physical/);
+});
+test('same pixels and same preset but different DPR cannot compare',()=>{
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.renderIdentity[3]=3,
+    /render preset\/DPR differ/);
+  verify(x=>x.pairs[1].control.mineFrameWindow.renderIdentity[3]=NaN,
+    /stable original physical/);
+  verify(x=>x.pairs[1].control.mineFrameWindow.renderIdentity[3]=0,
+    /stable original physical/);
+});
+test('complete real canvas backing identity is reported, never as release approval',()=>{
+  const result=evaluateIssue291FourViewportAB(make());
+  assert.equal(result.metricGatesPassed,true);
+  assert.equal(result.releaseCertified,false);
+  assert.deepEqual(result.comparisons[0].renderIdentity,[956,440,'balanced',2]);
+  assert.equal(Object.isFrozen(result.comparisons[0].renderIdentity),true);
+});
+test('strict v5 rejects prior v4 source snapshot even if numerical values are perfect',()=>{
+  verify(x=>x.pairs[3].candidate.protocol='291-local-4viewport-v4',/protocol/);
 });
