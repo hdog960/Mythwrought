@@ -31,6 +31,8 @@ import {auditCandidateUnderpassContinuousStepPlayer}
  from './city-underpass-continuous-walk-fixture.mjs';
 import {createUnderpassReaderCellCensus}
  from './source-role-coordinate-census.mjs';
+import {deriveExpectedUnderpassSourceCoordinates}
+ from './source-footprint-coordinate-witness.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -351,13 +353,44 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     requiredAdditional,
    maxTotalSourceChecks,originalM7ReaderIdentityByCallerOnly:true
   });
+ // Independent read-free raster is derived BEFORE any original source
+ // callbacks. Four role readers must inspect this EXACT proposed bridge
+ // and full-depth pad geometry, not merely identical arbitrary coordinates.
+ let expectedFootprint;
+ try{
+  expectedFootprint=deriveExpectedUnderpassSourceCoordinates({
+   bridgeProposal:planned.proposal,
+   centerSidePad:planned.centerSidePad,floorY:planned.floorY
+  });
+ }catch(error){
+  return failure(seed,rx,rz,'UNDERPASS_INDEPENDENT_GEOMETRY_INVALID',{
+   sourceChecks:previous,independentGeometryReason:'INVALID_PROPOSAL',
+   originalSourceReaderCallsForNewBridge:0
+  });
+ }
+ if(!expectedFootprint.ok||
+    expectedFootprint.bridgeCells!==planned.originalVoxelSourceVisitsRequired||
+    expectedFootprint.bridgeSupportCells!==planned.threeWideSupportCells||
+    expectedFootprint.bridgeAirCells!==planned.threeHighClearanceCells||
+    expectedFootprint.padCells!==planned.centerSidePadOriginalSourceVisitsRequired)
+  return failure(seed,rx,rz,'UNDERPASS_INDEPENDENT_GEOMETRY_MISMATCH',{
+   sourceChecks:previous,independentGeometryReason:
+    expectedFootprint.reason??'SOURCE_FOOTPRINT_COUNTS_DRIFT',
+   originalSourceReaderCallsForNewBridge:0
+  });
  // Each old-world bridge and pad callback now has an observable role count.
  // Reader identity remains caller-verified: this is not a native M7 claim.
  const sourceRoleCalls={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
  // Exact coordinate sets are independent of the prior total call counters.
  // The strict source auditor must inspect each of the same original cells
  // through all four roles; bridge/pad overlap is explicitly allowed.
- const coverage=createUnderpassReaderCellCensus({maxCellsPerStage:20000});
+ const coverage=createUnderpassReaderCellCensus({
+  maxCellsPerStage:20000,
+  expectedStageCoordinates:{
+   bridge:expectedFootprint.bridgeCoordinates,
+   pad:expectedFootprint.padCoordinates
+  }
+ });
  let coverageStage='bridge';
  // Take one stable per-role callback snapshot before the first voxel read.
  // Dynamic replacements on the caller object cannot silently switch
@@ -484,10 +517,16 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  const exactCoordinateCoverage=coverage.audit({
   bridgeCells:audited.sourceChecks,padCells:padSourceVisits
  });
- if(!exactCoordinateCoverage.ok)
+ if(!exactCoordinateCoverage.ok||
+    !exactCoordinateCoverage.independentGeometryFootprintPassed||
+    exactCoordinateCoverage.bridgePadOverlapCells!==
+     expectedFootprint.expectedOverlapCells||
+    exactCoordinateCoverage.combinedDistinctCells!==
+     expectedFootprint.expectedCombinedUniqueCells)
   return failure(seed,rx,rz,'UNDERPASS_SOURCE_ROLE_CELL_COVERAGE_REFUSED',{
    sourceChecks:total+padSourceVisits,
-   coordinateCoverageReason:exactCoordinateCoverage.reason,
+   coordinateCoverageReason:exactCoordinateCoverage.reason??
+    'INDEPENDENT_GEOMETRIC_OVERLAP_MISMATCH',
    coordinateCoverageFirstMismatch:exactCoordinateCoverage.firstMismatch,
    originalSourceChecksPassed:false,
    underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
@@ -568,6 +607,14 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   underpassExactStageRoleCells:exactCoordinateCoverage.stageRoleDistinctCells,
   underpassExactStageDuplicateCalls:exactCoordinateCoverage.stageRoleDuplicateCalls,
   underpassSourceRoleCoordinatesIdentical:true,
+  underpassIndependentGeometryMatched:true,
+  underpassIndependentSourceReaderCoordinatesVerified:
+   exactCoordinateCoverage.independentGeometryFootprintPassed,
+  underpassExpectedBridgeDistinctCells:expectedFootprint.bridgeCells,
+  underpassExpectedPadDistinctCells:expectedFootprint.padCells,
+  underpassExpectedOverlapCells:expectedFootprint.expectedOverlapCells,
+  underpassExpectedCombinedDistinctCells:
+   expectedFootprint.expectedCombinedUniqueCells,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
    motionWalk?.originalStepPlayerExecuted===true,
