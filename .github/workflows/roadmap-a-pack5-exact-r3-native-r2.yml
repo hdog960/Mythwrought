@@ -1,0 +1,24 @@
+name: Roadmap A original R3 ray barycentric vs physical box native R2
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-exact-r3-native-r2-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-exact-r3-native-r2.yml'
+permissions:
+  contents: read
+jobs:
+  true-original-packed-triangle-boundary-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Changed exact original R3 physical test and source syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
+      - name: Only nine original-source test cases, strict vs barycentric epsilon
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
