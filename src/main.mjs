@@ -449,6 +449,8 @@ function start(nonblockStage=null){
     // Diagnostic-only, exact 100 source-saved deep mines; never a release
     // certificate or an alternate save/mesh path.
     meshCpuMs:new Float64Array(100),saveCpuMs:new Float64Array(100),
+    // Diagnostic-only native upload total for EACH source-saved edit, not streaming.
+    editGpuUploadMs:new Float64Array(100),editGpuUploadCalls:new Uint16Array(100),
     loadedSections:new Uint16Array(100),phaseMines:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
@@ -639,6 +641,9 @@ function start(nonblockStage=null){
     if(w.phase!=='active'&&w.phase!=='closing')return;
     if(!phase||!Number.isFinite(phase.meshMs)||phase.meshMs<0||
        !Number.isFinite(phase.saveMs)||phase.saveMs<0||
+       !Number.isFinite(phase.gpuMs)||phase.gpuMs<0||
+       !Number.isSafeInteger(phase.gpuCalls)||phase.gpuCalls<0||
+       phase.gpuCalls>4096||
        !Number.isSafeInteger(phase.loadedSections)||phase.loadedSections<0){
       w.invalid=true;
       if(w.invalidReason===null)w.invalidReason='phase-invalid';
@@ -654,10 +659,18 @@ function start(nonblockStage=null){
     const i=w.phaseMines++;
     w.meshCpuMs[i]=phase.meshMs;
     w.saveCpuMs[i]=phase.saveMs;
+    w.editGpuUploadMs[i]=phase.gpuMs;
+    w.editGpuUploadCalls[i]=phase.gpuCalls;
     w.loadedSections[i]=phase.loadedSections;
   }
   function near291RecordUpload(duration){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
+    // Count native uploads only inside an existing original edit; unchanged
+    // stream uploads continue into the separate per-trial GPU history.
+    if(near291EditPhase){
+      near291EditPhase.gpuMs+=duration;
+      near291EditPhase.gpuCalls++;
+    }
     near291CheckViewport();
     near291Perf.uploads[near291Perf.uploadCount%near291Perf.uploads.length]=duration;
     near291Perf.uploadCount++;
@@ -714,6 +727,12 @@ function start(nonblockStage=null){
           near291Perf.mineWindow.phaseMines,true),
         schemaSaveP95Ms:percentile(near291Perf.mineWindow.saveCpuMs,
           near291Perf.mineWindow.phaseMines,true),
+        perMineNativeUploadSumP95Ms:percentile(
+          near291Perf.mineWindow.editGpuUploadMs,
+          near291Perf.mineWindow.phaseMines,true),
+        maxNativeUploadCallsPerMine:near291Perf.mineWindow.phaseMines?
+          Math.max(...near291Perf.mineWindow.editGpuUploadCalls.slice(
+            0,near291Perf.mineWindow.phaseMines)):null,
         maxRebuiltLoadedSections:near291Perf.mineWindow.phaseMines?
           Math.max(...near291Perf.mineWindow.loadedSections.slice(
             0,near291Perf.mineWindow.phaseMines)):null,
@@ -1625,8 +1644,10 @@ function start(nonblockStage=null){
       }
     }
     const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;
-    if(near291MineStart!==null)
+    if(near291MineStart!==null){
       near291EditPhase={meshMs:0,loadedSections:0};
+      near291EditPhase.gpuMs=0;near291EditPhase.gpuCalls=0;
+    }
     // Source uploadPack2Chunk() runs synchronously inside the real edit.
     // The first edit is not yet proven successful until apply+save return.
     if(near291MineStart!==null&&near291Perf.mineWindow.phase==='idle')
@@ -1656,6 +1677,8 @@ function start(nonblockStage=null){
       near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);
       near291RecordMinePhase({
         meshMs:near291SavedPhase?.meshMs,saveMs:near291SaveMs,
+        gpuMs:near291SavedPhase?.gpuMs,
+        gpuCalls:near291SavedPhase?.gpuCalls,
         loadedSections:near291SavedPhase?.loadedSections
       });
     }
