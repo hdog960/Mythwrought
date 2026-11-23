@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewAssemblyObstructions as check} from '../src/resonance/devices48/assembly-obstruction-preview-v1.mjs';
+const base=()=>({worldId:'world',deviceId:'lift',productionBound:false,parts:[{x:0,y:0,z:0}],delta:{x:3,y:0,z:0},obstacles:[]});
+const obstacle=(id,x,kind='actor')=>({id,kind,worldId:'world',x,y:0,z:0});
+test('empty fixture remains advisory',()=>{const r=check(base());assert.equal(r.clearPreview,true);assert.equal(r.mayActuate,false)});
+test('intermediate obstruction blocks',()=>{const r=check({...base(),obstacles:[obstacle('a',2)]});assert.equal(r.clearPreview,false);assert.equal(r.blockers[0].id,'a')});
+test('distant obstruction ignored',()=>assert.equal(check({...base(),obstacles:[obstacle('far',20)]}).clearPreview,true));
+test('stable blocker order',()=>{const r=check({...base(),obstacles:[obstacle('z',2),obstacle('a',1)]});assert.deepEqual(r.blockers.map(b=>b.id),['a','z']);assert.ok(Object.isFrozen(r.blockers))});
+test('cross-world rejected',()=>assert.throws(()=>check({...base(),obstacles:[{...obstacle('a',1),worldId:'other'}]})));
+test('duplicate ids rejected',()=>assert.throws(()=>check({...base(),obstacles:[obstacle('a',1),obstacle('a',2)]})));
+test('invalid kind rejected',()=>assert.throws(()=>check({...base(),obstacles:[obstacle('a',1,'invented')]})));
+test('fractional obstacle rejected',()=>assert.throws(()=>check({...base(),obstacles:[obstacle('a',1.5)]})));
+test('forged authority rejected',()=>assert.throws(()=>check({...base(),authoritativeDelivery:true})));
+test('forged production rejected',()=>assert.throws(()=>check({...base(),productionBound:true})));
+test('too many obstacles rejected',()=>assert.throws(()=>check({...base(),obstacles:Array.from({length:257},(_,i)=>obstacle('a'+i,i))})));
+test('obstacle cannot mutate output',()=>{const r=check({...base(),obstacles:[obstacle('a',1)]});assert.ok(Object.isFrozen(r.blockers[0]))});
