@@ -1,0 +1,65 @@
+name: Snow S4 isolated original M7 native acceptance
+on:
+  push:
+    branches:
+      - research/snow-s4-physical-edge-original-native-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s4-isolated-original-native.yml'
+      - 'src/manual-biomes/snowy-s4-physical-edge-preview.mjs'
+      - 'tests/snowy-s4-physical-edge-preview.test.mjs'
+      - 'tests/snowy-s4-physical-edge-original-m7.test.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: snow-s4-authentic-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  read-only-original-m7:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original full-checkout identity and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/manual-biomes/snowy-s4-physical-edge-preview.mjs
+          node --check tests/snowy-s4-physical-edge-preview.test.mjs
+          node --check tests/snowy-s4-physical-edge-original-m7.test.mjs
+          test -f src/manual-biomes/profile-world.mjs
+          test -f src/manual-caves/opt-in-runtime.mjs
+      - id: local
+        name: Focused S4 physical source-contract tests
+        continue-on-error: true
+        run: node --test tests/snowy-s4-physical-edge-preview.test.mjs
+      - id: native_s3
+        name: Previously blocked original S3 full-source provenance
+        if: always()
+        continue-on-error: true
+        run: node --test tests/snowy-s3-real-m7-provenance.test.mjs
+      - id: native_s3_s5
+        name: Previously blocked original S3/S5/S4 physics and scene gate
+        if: always()
+        continue-on-error: true
+        run: node --test tests/snowy-s3-s5-real-m7-gate.test.mjs
+      - id: native_s4
+        name: Original M7 physical snow-edge witness, seeds 179 and 2026
+        if: always()
+        continue-on-error: true
+        run: node --test tests/snowy-s4-physical-edge-original-m7.test.mjs
+      - name: Report exact native gate outcomes without weakening any failure
+        if: always()
+        run: |
+          printf 'S4 fixture=%s S3 original=%s S3-S5 original=%s S4 original=%s\n' \
+            '${{ steps.local.outcome }}' '${{ steps.native_s3.outcome }}' \
+            '${{ steps.native_s3_s5.outcome }}' '${{ steps.native_s4.outcome }}'
+          test '${{ steps.local.outcome }}' = success
+          test '${{ steps.native_s3.outcome }}' = success
+          test '${{ steps.native_s3_s5.outcome }}' = success
+          test '${{ steps.native_s4.outcome }}' = success
