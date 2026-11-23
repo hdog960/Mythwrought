@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'b91cb27aa1290c003bcaabd809e94802f1f8ea4b');
+    '8057cb0cf445915c6f5d5ca21fb6f44c3f51b556');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -123,7 +123,11 @@ test('local-only original test interface reports bounded experiment status',()=>
 });
 test('original source save, mine and mandatory GPU upload remain unchanged',()=>{
   one('const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
-  one("const persisted=save();\n    const label=BLOCK_NAMES[result.block]||'block';");
+  one("const persisted=save();");
+  one("const label=BLOCK_NAMES[result.block]||'block';");
+  inOrder('const persisted=save();',
+    'near291RecordMine(performance.now()-near291MineStart);',
+    "const label=BLOCK_NAMES[result.block]||'block';");
   one('buffer=uploadChunkBuffer(gl,vertices);');
 });
 
@@ -726,4 +730,128 @@ test('actual original native bounded retry rejects repeated early GPU retries',(
   assert.equal(retry.ready('original',350),true);
   retry.success('original');
   assert.equal(retry.stats().recovered,1);
+});
+
+
+// Real ORIGINAL main-module read-only A/B performance helpers extracted at
+// exact source blob. They remain disabled on all public GitHub Pages/PWA
+// sessions and measure only real future browser events, not fabricated FPS.
+const local291PerfStart=source.indexOf('  // Independent localhost-only measurement switch');
+const local291PerfEnd=source.indexOf('  let near291=null;',local291PerfStart);
+assert.ok(local291PerfStart>=0&&local291PerfEnd>local291PerfStart);
+const exactLocal291PerfSource=source.slice(local291PerfStart,local291PerfEnd);
+const createLocal291Perf=new Function('scope','with(scope){'+
+  'let near291Enabled=scope.enabled,near291Fatal=false,'+
+  'near291PageSuspended=false,near291=null;'+exactLocal291PerfSource+
+  '\nreturn {frame:near291RecordFrame,mine:near291RecordMine,'+
+  'upload:near291RecordUpload,read:near291PerfSnapshot,'+
+  'data:near291Perf};}');
+function local291PerfFixture({
+  search='?measure-291=1',hostname='localhost',enabled=false
+}={}){
+  const URLParams=typeof URLSearchParams==='function'?URLSearchParams:
+    class {
+      constructor(q){this.q=q;}
+      get(k){const hit=this.q.replace(/^\?/,'').split('&')
+        .find(p=>p.split('=')[0]===k);
+        return hit?hit.split('=')[1]:null;}
+    };
+  const scope={
+    enabled,URLSearchParams:URLParams,location:{hostname,search},
+    document:{hidden:false},help:{hidden:true},
+    exploration:{isOpen:()=>false},graphicsLost:false,
+    canvas:{clientWidth:956,clientHeight:440,width:956,height:440},
+    world:{seed:179},player:{feet:-30},
+    frameHistory:{stats:()=>({frames:4,p95Ms:18})},
+    meshCadence:{stats:()=>({meshes:2})},
+    chunks:new Map(),pending:new Map(),
+    frameDriver:{snapshot:()=>({running:true})}
+  };
+  return {scope,perf:createLocal291Perf(scope)};
+}
+test('localhost-only instrumentation disabled by default and on public Pages',()=>{
+  assert.equal(local291PerfFixture({search:''}).perf.read(),null);
+  assert.equal(local291PerfFixture({hostname:'hdog960.github.io'}).perf.read(),null);
+  assert.equal(local291PerfFixture({search:''}).perf.data,null);
+});
+test('same original baseline and local VAO capture exact frame/mine/upload p95',()=>{
+  for(const enabled of [false,true]){
+    const {perf}=local291PerfFixture({enabled});
+    for(const f of [0,16,32,90])perf.frame(f);
+    for(const m of [10,20,40])perf.mine(m);
+    for(const u of [3,8,9])perf.upload(u);
+    const summary=perf.read();
+    assert.equal(summary.mode,enabled?'experimental-vao':'original-control');
+    assert.equal(summary.frameGapsRecorded,3);
+    assert.equal(summary.rollingFrameP95Ms,58);
+    assert.equal(summary.trueSavedDeepMines,3);
+    assert.equal(summary.miningActionP95Ms,40);
+    assert.equal(summary.guardedUploadCalls,3);
+    assert.equal(summary.rollingGuardedUploadP95Ms,9);
+    assert.equal(summary.releaseCertified,false);
+    assert.equal(summary.nativeGpuRollbackProven,false);
+  }
+});
+test('viewport or seed change resets every recorded sample and comparison count',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.frame(16);perf.mine(20);perf.upload(30);
+  scope.canvas.clientWidth=932;
+  assert.equal(perf.read().trueSavedDeepMines,0);
+  assert.equal(perf.read().frameGapsRecorded,0);
+  assert.equal(perf.read().guardedUploadCalls,0);
+  perf.mine(45);scope.world.seed=180;
+  assert.equal(perf.read().trueSavedDeepMines,0);
+});
+test('foreground frame gap excludes background and paused control samples',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(10);scope.document.hidden=true;perf.frame(20);
+  scope.document.hidden=false;
+  perf.frame(900);perf.frame(918);
+  assert.equal(perf.read().frameGapsRecorded,1);
+  assert.equal(perf.read().rollingFrameP95Ms,18);
+});
+test('strict bounded mine and upload rings preserve lifetime counts',()=>{
+  const {perf}=local291PerfFixture();
+  for(let i=0;i<170;i++)perf.mine(i);
+  for(let i=0;i<2120;i++)perf.upload(1);
+  assert.equal(perf.read().trueSavedDeepMines,170);
+  assert.equal(perf.read().maxMineSamples,128);
+  assert.equal(perf.read().guardedUploadCalls,2120);
+  assert.equal(perf.read().maxUploadSamples,2048);
+  assert.equal(perf.read().rollingGuardedUploadP95Ms,1);
+});
+test('exact original uploadPack2Chunk measures both unmodified guarded GL uploads',()=>{
+  const {scope,perf}=local291PerfFixture();
+  const start=source.indexOf('  function uploadPack2Chunk(vertices,water){');
+  const end=source.indexOf('  let editMeshBatches=0;',start);
+  assert.ok(start>=0&&end>start);
+  const make=new Function('scope','with(scope){'+source.slice(start,end)+
+    '\nreturn uploadPack2Chunk;}');
+  let now=0;
+  Object.assign(scope,{near291Perf:perf.data,near291RecordUpload:perf.upload,
+    near291Enabled:false,performance:{now:()=>{now+=2;return now;}},
+    gl:{deleteBuffer:()=>{}},
+    uploadChunkBuffer:()=>({})});
+  const uploaded=make(scope)(new Float32Array(9),new Float32Array(9));
+  assert.equal(uploaded.count,1);
+  assert.equal(perf.read().guardedUploadCalls,2);
+  assert.equal(perf.read().rollingGuardedUploadP95Ms,2);
+});
+test('original real deep mine timing is captured only after success and save',()=>{
+  inOrder("const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;",
+    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
+    'if(!result.ok){message(result.reason);return;}',
+    'const persisted=save();',
+    "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
+    'near291RecordMine(performance.now()-near291MineStart);');
+  assert.ok(source.includes('near291RecordFrame(now); // inert unless local ?measure-291=1'));
+});
+test('read-only local acceptance interface cannot claim real WebGL or iPhone certification',()=>{
+  one('nearPerformance291(){return near291PerfSnapshot();}');
+  const snapshot=local291PerfFixture().perf.read();
+  assert.equal(snapshot.readOnly,true);
+  assert.equal(snapshot.browserPixelParityProven,false);
+  assert.equal(snapshot.releaseCertified,false);
+  assert.ok(!exactLocal291PerfSource.includes('gl.getError()'));
+  assert.ok(!exactLocal291PerfSource.includes('save();'));
 });
