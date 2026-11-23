@@ -139,3 +139,73 @@ test('original M7 real physics cross-biome walking uses authenticated legacy sou
   installedIphoneNotTested:true
  }));
 });
+
+test('real east-side seed -88 Plains seam uses unchanged original stepPlayer and never rewrites old M7 ground',()=>{
+ const history=old(),experimental=candidate(),site={x:252,z:-600,dir:'east'};
+ const checked=[],crossings=[];
+ for(const dz of [0,-4,4,-8,8]){
+  const z=site.z+dz,edge=firstPlains(site.x,z,site.dir);
+  if(edge===null)continue;
+  for(const back of [2,3,4]){
+   const x=edge-back;
+   if(name(x,z)!=='enchanted')continue;
+   const source=originalM7PhysicalGroundCap(history,x,z);
+   const target=originalM7PhysicalGroundCap(history,edge,z);
+   if(!source||!target)continue;
+   const options={seed,x,z,targetBiome:'plains',
+     groundMode:'physical',corridor:{direction:'east',width:3,backtrack:1},
+     radius:9,maxVisits:112,maxSteps:18,maxRoutes:2,
+     maxEdgeAttempts:250,maxPhysicsTicks:5200,
+     minDisplacement:2,maxArrivalsPerCell:1};
+   const search=searchOriginalM7PhysicsAdmittedRoutes(history,options);
+   checked.push({start:[x,z],edge:[edge,z],
+     sourceFeet:source.feet,plainsFeet:target.feet,
+     routes:search.routes.length,visited:search.stats.visited});
+   for(const route of search.routes){
+    const end=route.path.at(-1);
+    assert.equal(name(end.x,end.z),'plains');
+    const oldRun=originalM7PhysicsRouteReplay(history,route.path,
+      {groundMode:'physical'});
+    assert.equal(oldRun.ok,true);
+    assert.deepEqual(oldRun,route.physics);
+    const candidateRun=originalM7PhysicsRouteReplay(experimental,route.path,
+      {groundMode:'physical'});
+    if(!candidateRun.ok)continue;
+    assert.equal(candidateRun.ticks,oldRun.ticks);
+    crossings.push({start:[x,z],end:[end.x,end.z],
+      legs:oldRun.legs,originalTicks:oldRun.ticks,
+      experimentalTicks:candidateRun.ticks});
+   }
+   if(crossings.length>=3)break;
+  }
+  if(crossings.length>=3)break;
+ }
+ assert.ok(checked.length>=1,'real positive-X M7 standing starts must be considered');
+ assert.ok(crossings.length>=1,
+   'physical historical/experimental positive-X Enchanted Plains cross must be genuine');
+ assert.deepEqual(history.save(),{schema:1,seed,edits:[]});
+ assert.throws(()=>experimental.save(),/cannot be saved as historical M7/);
+ console.log('# ENCHANTED REAL M7 EAST-SIDE ENCHANTED PLAINS PHYSICAL CROSS '+JSON.stringify({
+   checked,crossings,sourceOriginalStepPlayer:true,
+   physicalIphoneNotTested:true
+ }));
+});
+
+test('new physical source is opt-in and old Enchanted Desert stepPlayer search is bit-exact',()=>{
+ const historic=new FourRegionWorld(7919,
+  fourRegionProfile(7919,M7_ENVIRONMENT_GENERATOR));
+ const opts={seed:7919,x:225,z:-592,targetBiome:'desert',radius:10,
+   maxVisits:128,maxSteps:16,maxRoutes:3,
+   maxEdgeAttempts:280,maxPhysicsTicks:8192,minDisplacement:4};
+ const defaultResult=searchOriginalM7PhysicsAdmittedRoutes(historic,opts);
+ const explicitOverlay=searchOriginalM7PhysicsAdmittedRoutes(historic,
+   {...opts,groundMode:'overlay'});
+ assert.deepEqual(defaultResult,explicitOverlay,
+   'new opt-in original physical cap must preserve original overlay route results exactly');
+ assert.equal(defaultResult.routes.length,3);
+ assert.deepEqual(historic.save(),{schema:1,seed:7919,edits:[]});
+ console.log('# ENCHANTED REAL M7 OLD DESERT DEFAULT UNCHANGED '+
+   JSON.stringify({accepted:defaultResult.routes.length,
+     visited:defaultResult.stats.visited,physicsTicks:defaultResult.stats.physicsTicks,
+     exactOverlayDefaultParity:true}));
+});
