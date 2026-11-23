@@ -171,7 +171,7 @@ test('overall source budget fails BEFORE a bridge or center-pad source read',()=
  const r=auditSourceProtectedCityUnderpass(seed,2,0,{
   source:{...stone(),naturalAt:()=>{oldReads++;return 1;}},
   sourceOwnedDeepSelection:deep(2,0),
-  maxTotalSourceChecks:9197
+  maxTotalSourceChecks:9197,auditHypotheticalMovement:true
  });
  assert.equal(r.ok,false);
  assert.equal(r.reason,'UNDERPASS_ORIGINAL_SOURCE_BUDGET');
@@ -253,13 +253,15 @@ test('deep center-side landing source veto cannot be masked by a clean thin brid
  ];
  for(const [source,refusal] of cases){
   const r=auditSourceProtectedCityUnderpass(seed,2,0,{
-   source,sourceOwnedDeepSelection:deep(2,0)
+   source,sourceOwnedDeepSelection:deep(2,0),
+   auditHypotheticalMovement:true
   });
   assert.equal(r.ok,false);
   assert.equal(r.reason,'CENTER_SIDE_PAD_ORIGINAL_SOURCE_UNSAFE');
   assert.equal(r.firstRefusal,refusal);
   assert.equal(r.underpassSourceVisits,248);
   assert.equal(r.centerPadSourceVisits,1);
+  assert.notEqual(r.hypotheticalOriginalMotionSimulated,true);
   assert.deepEqual(r.firstRejectedCell,{
    x:cell.x,y:cell.y,z:cell.z,kind:'support'
   });
