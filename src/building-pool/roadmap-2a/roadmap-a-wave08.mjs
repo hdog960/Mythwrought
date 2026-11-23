@@ -526,6 +526,12 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         48,
         14,
         49
+      ],
+      [
+        16,
+        30,
+        13,
+        19
       ]
     ],
     "cuts": [
@@ -1282,47 +1288,53 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
     "roof": "pack3:026",
     "rects": [
       [
-        13,
-        37,
+        11,
+        40,
         0,
-        14
+        11
       ],
       [
         0,
-        20,
-        12,
-        38
+        16,
+        8,
+        31
       ],
       [
-        32,
+        35,
         48,
+        16,
+        40
+      ],
+      [
+        8,
+        46,
+        36,
+        45
+      ],
+      [
+        15,
+        36,
         11,
         39
       ],
       [
-        11,
-        44,
-        38,
-        45
-      ],
-      [
-        17,
-        36,
-        14,
+        0,
+        22,
+        29,
         40
       ]
     ],
     "cuts": [
       [
-        24,
-        30,
         22,
-        28
+        29,
+        18,
+        26
       ],
       [
-        3,
-        8,
-        30,
+        41,
+        45,
+        29,
         34
       ]
     ],
@@ -1377,10 +1389,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
     "roofs": [
       [
         [
-          13,
-          37,
+          11,
+          40,
           0,
-          14
+          11
         ],
         "x",
         7,
@@ -1390,9 +1402,9 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       [
         [
           0,
-          20,
-          12,
-          38
+          16,
+          8,
+          31
         ],
         "z",
         5,
@@ -1401,10 +1413,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          32,
+          35,
           48,
-          11,
-          39
+          16,
+          40
         ],
         "x",
         6,
@@ -1413,9 +1425,9 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          11,
-          44,
-          38,
+          8,
+          46,
+          36,
           45
         ],
         "z",
