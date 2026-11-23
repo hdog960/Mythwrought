@@ -1,0 +1,268 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.waves44-45-authentic-original-source-handoff.v1",
+  "status": "ISOLATED, PROVISIONAL B115 SOURCE ONLY. Real native Node, installed Pack3/4 geometry/selection/collider, live original-game/settlement, Chromium gallery, iPhone/PWA acceptance NOT executed.",
+  "branch": "builder-b-wave9-saltreach-source-20261121",
+  "sessionStartExactHEAD": "f233473c79b510e252b26080d051a97ab905afcc",
+  "protectedOpenDraftPR407ExactHEAD": "20755ffa29b520bb8a934270216b17a33dc87367",
+  "mainAtSessionStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+  "architecturalContractBoundary": "Authoritative Builder 1B original schema covers seven physical service categories. No verified residential authoring contract was found in this isolated repo lane; historic 169 residential remainder is unchanged, not invented or overwritten.",
+  "originals": [
+    {
+      "wave": 44,
+      "name": "Alderbrook Double-Horseshoe Coaching Stables",
+      "frozenExclusiveB115Id": "r1:stable:temperate:large:005",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave44.mjs",
+      "originalGitBlob": "93ab1f367f525c1bf9e6d29fc27226742199afaf",
+      "originalAuthoredPlacements": 14830,
+      "originalImmediateBackedPack3RoofCells": 3778,
+      "originalConnectedWalkableCells": 4055,
+      "distinctOriginalRoofWings": 9,
+      "originalRooms": 16,
+      "originalTwoHighPortals": 23,
+      "originalPavedSkyOpenCourts": [
+        272,
+        90,
+        90
+      ],
+      "additionalActualPavedUnroofedExerciseCells": 214,
+      "sourceExteriorOnlyBFS": "PASS real y1 walking from (17,72) to (59,72) restricted to external z>=70; no indoor path shortcut",
+      "actualPhysicalUnoccupiedStallGates": 8,
+      "realTwoHighWalkableStallGateLocations": {
+        "west": [
+          [
+            17,
+            1,
+            20
+          ],
+          [
+            17,
+            1,
+            28
+          ],
+          [
+            17,
+            1,
+            36
+          ],
+          [
+            17,
+            1,
+            44
+          ]
+        ],
+        "east": [
+          [
+            52,
+            1,
+            20
+          ],
+          [
+            52,
+            1,
+            28
+          ],
+          [
+            52,
+            1,
+            36
+          ],
+          [
+            52,
+            1,
+            44
+          ]
+        ]
+      },
+      "sourceCorrectnessRepair": "One eastern gate at (52,1,20) was re-blocked by a later partition; all eight original gates recut after partitions. Original compiler and all eight genuine y1 walking/clear y2 checks passed on corrected exact source.",
+      "originalSolidGroundedSevenTierStoneHitchPosts": 2,
+      "originalUprightPack4WindowCells": 76,
+      "completeFourHighFramedExteriorGlassBays": 19,
+      "strictSourceSameCategoryD4": {
+        "comparedOlderWaves": [
+          4,
+          20,
+          33
+        ],
+        "eightWayComparisons": 24,
+        "maxIoU": 0.5713229859571323,
+        "threshold": 0.85
+      },
+      "animalsOrRidingSimulated": false,
+      "workingGrooming": false,
+      "actualPack3Pack4LiveColliderSelectionCertified": false,
+      "worldPlaced": false
+    },
+    {
+      "wave": 45,
+      "name": "Graywake Double-Return Beacon Lodge",
+      "frozenExclusiveB115Id": "r1:lighthouse:temperate:medium:003",
+      "path": "src/building-pool/roadmap-b/builder-b-essentials-wave45.mjs",
+      "originalGitBlob": "9819b87057cef9852236eab670158b32ad3cbf93",
+      "originalAuthoredPlacements": 14298,
+      "originalImmediateBackedPack3RoofCells": 3428,
+      "originalConnectedWalkableCells": 3639,
+      "distinctOriginalRoofWings": 8,
+      "originalRooms": 16,
+      "originalTwoHighPortals": 23,
+      "originalPavedSkyOpenCourts": [
+        208,
+        90,
+        81
+      ],
+      "additionalActualPavedUnroofedDoubleReturnCells": 189,
+      "sourceExteriorOnlyBFS": "PASS real y1 walking from (14,71) to (55,71) using strictly outdoor z>=69; no indoor borrowed shortcuts",
+      "trueMasonryTower": "Original 7x9 full y0 stone foundation, physically filled lower body y1-3, 24-member eight-corner-cut octagonal perimeter at every y4..31, directly backed 24 Pack3 crowns y32, no invented live upper staircase",
+      "trueGroundedSourceStoneTowerHeight": 31,
+      "originalPack3CrownCells": 24,
+      "originalHighStoneFramedPack4WindowCells": 6,
+      "originalUprightPack4WindowCells": 60,
+      "lowWindowPack4Cells": 54,
+      "completeThreeHighFramedExteriorGlassBays": 18,
+      "strictSourceSameCategoryD4": {
+        "comparedOlderWaves": [
+          9,
+          30,
+          36
+        ],
+        "eightWayComparisons": 24,
+        "maxIoU": 0.5250529287226535,
+        "threshold": 0.85
+      },
+      "poweredBeacon": false,
+      "oceanOrWindSimulation": false,
+      "actualPack3Pack4LiveColliderSelectionCertified": false,
+      "worldPlaced": false
+    }
+  ],
+  "actuallyExecutedOriginalSourceChecks": {
+    "method": "Immutable original Git blobs for legacy-stable-schema, original schema and M2 sourcePlan/unchanged validateBlueprint evaluated in isolated JavaScript V8, plus actual source-cell physical geometry and local strict eight-way same-category originality. NOT a native Node run, real producer/collider or original-game session.",
+    "originalBlueprintCompiler": "PASS both corrected exact sources",
+    "totalOriginalAuthoredPlacements": 29128,
+    "originalImmediatelySolidBackedRoofCells": 7206,
+    "originalSourceConnectedWalkableCells": 7694,
+    "fullyStoneGroundedWalkableAndUncoveredSkyCourtCells": 831,
+    "additionalOutsideSourceGroundedPedestrianCells": 403,
+    "sourceRooms": 32,
+    "originalTwoHighPortals": 46,
+    "originalUprightPack4WindowCells": 136,
+    "completeLowFramedVerticalSourceGlassBays": 37,
+    "additionalHighStoneFramedGlassCells": 6,
+    "trueSourceGroundedEightStallEntrances": "PASS all eight at exact corrected HEAD with no occupied y1/y2 and genuine grounded walk",
+    "trueTowerContinuityAndCrown": "PASS 31-tier true y0-3 stone lower body, all y4-31 octagonal wall source layers, 24 directly supported crowns, six stone-framed high windows",
+    "exteriorOnlyWalking": "PASS both full cross-links from authentic outdoor y1 source paths, without crossing indoor routes",
+    "strictEightWayFocusedD4": "PASS 48 of 48 against six authored same-category prior original sources; max IoU 0.5713229859571323 vs unchanged <0.85",
+    "frozenB115D92": "PASS two B115 exclusively assigned IDs, absent frozen D92 and accepted historical 228; earlier Wave1–43 source IDs left untouched",
+    "sourcePhysicalProducerABI": "All Pack3 and Pack4 candidate placements remain unresolved; no real installed physical mesh/collision/selection, weather support or live runtime admission claimed.",
+    "actualNativeNode": "NOT_EXECUTED",
+    "originalSourceWebGL2Chromium": "NOT_EXECUTED",
+    "installedIphoneHomeScreenPwa": "NOT_TESTED"
+  },
+  "newlyStagedButNotExecuted": {
+    "focusedNativeNodeTest": {
+      "path": "tests/building-pool/roadmap-b/builder-b-essentials-waves44-45-focused.test.mjs",
+      "originalGitBlob": "a028c4de9eacc113d12f4300c3280e217257fd58",
+      "focusedContracts": 8,
+      "scope": "Unchanged source ownership, 7206 real roof backing, 831 completely open courts and 46 two-high portals, genuinely external-only walking, all eight stall gates after late partitions, masonry tower and six high framed windows, 136 Pack4 cells in 37 lower complete framed bays and six high windows, strict 48 local D4 transforms",
+      "sourceJSSyntax": "PASS",
+      "actualNativeNode": false
+    },
+    "oneConsolidatedAccepted228History": {
+      "path": "tests/building-pool/roadmap-b/builder-b-originals-waves9-45-shared-historical-d4.test.mjs",
+      "originalGitBlob": "18372f47e98d4ae22dc0604a89e1f821cbaba735",
+      "immutableAcceptedHistoricalOriginalCount": 228,
+      "sourceAuthoredB115ServiceOriginals": 45,
+      "newlyAuthoredWaves9Through45": 37,
+      "expectedUniqueAuthoredServiceIDs": 45,
+      "strictD4Threshold": 0.85,
+      "originalHistoricalReadOnce": true,
+      "historicalPlusStagedTotal": 273,
+      "remainingServiceAllocationOf435": 162,
+      "retiredOnlySupersededUnexecutedWaves9Through43": true,
+      "actualNativeNode": false
+    },
+    "oneDeferredWebGL2SourceBoundProof": {
+      "gallery": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-45-gallery.mjs",
+      "galleryBlob": "2aad1515ac91b1b9c29aa5185da300e15d148fc7",
+      "independentAuditor": "tests/building-pool/roadmap-b/audit-builder-b-essentials-wave9-45-gallery.mjs",
+      "independentAuditorBlob": "63e3f8a8226a7d4b15424e29e1928c4d50813ad3",
+      "directOriginalConstructorWiring": "tests/building-pool/roadmap-b/builder-b-essentials-wave9-45-gallery-wiring.test.mjs",
+      "directSourceWiringBlob": "83a4799af4db526f188381f3070edfaddbf3f1d0",
+      "originalSourceBoundPreviews": [
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave44-preview.html",
+        "tests/building-pool/roadmap-b/builder-b-essentials-wave45-preview.html"
+      ],
+      "newOriginalSourceDesigns": 37,
+      "originalSourceProvenanceFiles": 40,
+      "expectedGenuineDistinctPNGFrames": 222,
+      "viewports": [
+        [
+          667,
+          375
+        ],
+        [
+          844,
+          390
+        ],
+        [
+          932,
+          430
+        ]
+      ],
+      "sourceViews": [
+        "exterior",
+        "cutaway"
+      ],
+      "exactGitCommitRequired": true,
+      "independentPNGCRC": true,
+      "independentDistinctPNGSHA256": true,
+      "actualChromiumRuns": 0,
+      "actualPNGsProduced": 0,
+      "notAnOriginalLiveGameVisualCertificate": true
+    }
+  },
+  "outstandingRequiredAcceptance": [
+    "One exact-head complete-original-repository native Node focused regression run plus one shared strict 228 historical original D4 source census. Staged parsing is not native acceptance.",
+    "Original Pack3/Pack4 installed visible/selection/collider AABB, yaw/mount backing, real shader, support and weather/collision parity. Explicitly UNRESOLVED.",
+    "One coordinated genuine 222-PNG Chromium WebGL2 source-proxy capture, audited against exact source HEAD and independent CRC/SHA. Source proxy is not original-game visual acceptance.",
+    "Actual game/settlement placement only with creator-authorized integration; verified player-body/navigation, existing saves, offline and iPhone installed Home Screen PWA performance, visual art signoff."
+  ],
+  "efficientCI": {
+    "priorPR407SuccessesHistoricalOnly": [
+      44972498965,
+      44972499027
+    ],
+    "newActionsRuns": 0,
+    "newChromiumRuns": 0,
+    "duplicateBroad228HistoricalRuns": 0,
+    "sharedCIWorkflowsEdited": 0,
+    "jobCancellations": 0,
+    "requiredTestsAndStrictThresholdsPreserved": true
+  },
+  "protectedBoundary": {
+    "canonicalAccepted228Untouched": true,
+    "frozenB115D92Untouched": true,
+    "allOtherBuilderBranchesUntouched": true,
+    "fiveAutomationsUntouched": true,
+    "productionMainUntouched": true,
+    "protectedOpenDraftPR407Untouched": true,
+    "existingSavesAndSchema1Untouched": true,
+    "noMerge": true,
+    "noDeploy": true,
+    "noNewPR": true
+  },
+  "progress": {
+    "residentialOriginalsAuthoredOrStaged": 10,
+    "serviceB115OriginalsAuthoredOrStaged": 45,
+    "totalNewOriginalsAuthoredOrStaged": 55,
+    "goal": 294,
+    "remainingNewOriginals": 239,
+    "remainingResidential": 169,
+    "remainingB115Services": 70
+  },
+  "remainingFocusedDevelopmentSessionsEstimate": {
+    "minimum": 60,
+    "maximum": 210,
+    "excludesPhysicalFinalIntegrationRelease": true,
+    "uncertainty": "High; no proven residential authoring contract in this isolated source lane"
+  }
+}
