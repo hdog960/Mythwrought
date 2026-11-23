@@ -76,7 +76,8 @@ async function take(seed,ice,stage,preferred){
   const page=await context.newPage(),errors=[];
   page.on('pageerror',e=>errors.push(String(e?.message??e)));
   page.on('dialog',d=>d.accept());
-  // Desert P3 index uses main.mjs?mw-release=20261123-desert-p3-v1.\n  await page.route('**/src/main.mjs*',async route=>{
+  // Desert P3 index has a release-query main module.
+  await page.route('**/src/main.mjs*',async route=>{
     routeMain++;
     const resp=await route.fetch(),body=await resp.text();
     assert.equal(resp.status(),200);
