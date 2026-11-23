@@ -3,6 +3,7 @@
 // The 9-float vertex layout is sourced from genuine src/voxel.mjs. This audit
 // computes a FULL-CUBE-EQUIVALENT CPU staging proxy, not actual V8 GPU bytes.
 // Future non-cube vegetation geometry requires separate mesh/registry approval.
+import {MOUNTAIN_V8_PLANT_PATTERNS} from './mountain-v8-vegetation-cells.mjs';
 export const MOUNTAIN_V8_PROXY_VERTEX_FLOATS=9;
 export const MOUNTAIN_V8_PROXY_FACE_BYTES=6*9*4;
 const valid=n=>Number.isSafeInteger(n);
@@ -97,6 +98,16 @@ export function auditMountainV8PhysicalDescriptors(proposal,physical,seam,
       !valid(proposal.estimatedExtraCells)||
       plant.estimatedCells>proposal.estimatedExtraCells||
       proposal.estimatedExtraCells>18)return null;
+    // Material membership alone is insufficient: the original source-owned
+    // flower, heather and dwarf-conifer use exact relative positions and
+    // materials. A forged full-cube descriptor must never pass this gate.
+    const pattern=MOUNTAIN_V8_PLANT_PATTERNS[proposal.vegetation];
+    if(!pattern||pattern.length!==plant.estimatedCells)return null;
+    for(let i=0;i<pattern.length;i++){
+      const [dx,dy,dz,material]=pattern[i],cell=plant.cells[i];
+      if(!cell||cell.x!==proposal.x+dx||cell.y!==proposal.top+dy||
+         cell.z!==proposal.z+dz||cell.material!==material)return null;
+    }
     plantCells=plant.cells;
   }
   const cells=new Map(),materialCells=Object.fromEntries(
