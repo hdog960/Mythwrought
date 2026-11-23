@@ -133,3 +133,33 @@ test('empty grass sample is valid but never enables writes',()=>{
     legitimateLowBlendNoShoulder:0,unexplainedEmptyPlan:0});
   assert.equal(r.writerEnabled,false);
 });
+
+test('maximum 128 physical columns stay bounded and remain non-writing',()=>{
+  const grass=new Set();
+  for(let z=0;z<8;z++)for(let x=-16;x<0;x++)grass.add(x+','+z);
+  const v=fixture({grass,weight:.36});
+  let caveReads=0;
+  const old=v.world.environmentCaves.get;
+  v.world.environmentCaves.get=(...args)=>{caveReads++;return old(...args);};
+  const r=inspect(v.world,{x:-16,z:0,width:16,height:8},v.deps);
+  assert.equal(r.sampled,128);
+  assert.equal(r.grassCells,128);
+  assert.equal(r.counts.legitimateLowBlendNoShoulder,128);
+  assert.ok(caveReads<=128*170,'bounded original cave reads');
+  assert.equal(r.writerEnabled,false);
+});
+
+test('saved edit or historical stone never receives a transition-write certificate',()=>{
+  const v=fixture({weight:.36});
+  v.legacy.set(key(15,8,2),3);
+  v.edits.set(key(16,6,2),0);
+  const before=JSON.stringify(v.world.save());
+  const r=inspect(v.world,rect,v.deps);
+  assert.equal(r.grassCells,1);
+  assert.equal(r.counts.protectedOriginalSource,1);
+  assert.equal(r.cells[0].guardCategory,'other-elevated-original');
+  assert.equal(r.cells[0].authorizingTerrainWrites,false);
+  assert.equal(v.world.get(15,8,2),3);
+  assert.equal(v.world.get(16,6,2),0);
+  assert.equal(JSON.stringify(v.world.save()),before);
+});
