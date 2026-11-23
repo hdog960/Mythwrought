@@ -77,7 +77,10 @@ test('original unchanged stepPlayer physically admits Enchanted-to-Desert connec
    const initial=route.path[0],end=route.path.at(-1);
    assert.equal(initial.x,x);assert.equal(initial.z,z);
    assert.equal(biome(end.x,end.z,seed),'desert');
-   assert.ok(route.path.length-1>=4);
+   assert.ok(route.path.length-1>=3,
+     'minimum four-block displacement may be achieved in three true diagonals');
+   assert.ok(Math.hypot(end.x-x,end.z-z)>=4,
+     'accepted original-physics route must cross a meaningful physical distance');
    assert.equal(route.ticksPerLeg.length,route.path.length-1);
    assert.ok(route.ticksPerLeg.every(t=>t>=1&&t<=LIMIT.edgeTicks));
    assert.equal(route.physics.ok,true);
