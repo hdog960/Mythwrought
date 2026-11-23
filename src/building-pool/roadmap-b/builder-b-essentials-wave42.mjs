@@ -116,7 +116,7 @@ export function buildGreenbarrowThreeLaneStonecropGranary(){
   ['central-grainless-rake-walk','southwest-unused-husk-vault',25,50],
   ['central-grainless-rake-walk','southeast-silent-sort-chamber',41,50],
   ['southwest-unused-husk-vault','west-source-grounded-lane',18,56],
-  ['central-grainless-rake-walk','center-source-grounded-lane',33,55],
+  ['central-grainless-rake-walk','center-source-grounded-lane',33,56],
   ['southeast-silent-sort-chamber','east-source-grounded-lane',50,56],
   ['west-source-grounded-lane','true-outdoor-original-fork-bar',21,64],
   ['center-source-grounded-lane','true-outdoor-original-fork-bar',33,64],
