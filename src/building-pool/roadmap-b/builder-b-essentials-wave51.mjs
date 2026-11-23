@@ -158,7 +158,7 @@ export function buildSuncairnThreeCrownBeaconRelay(){
   ['west-sandglass-chart-cabinet','southwest-dry-keeper-gallery',21,49],
   ['east-unlit-signal-archive','southeast-unpowered-mirror-room',60,49],
   ['southwest-dry-keeper-gallery','southern-three-crown-colonnade',33,65],
-  ['southeast-unpowered-mirror-room','southern-three-crown-colonnade',46,65],
+  ['southeast-unpowered-mirror-room','southern-three-crown-colonnade',47,65],
   ['northwest-shaded-beacon-annex','west-outer-solar-screen',12,34],
   ['northeast-dust-dry-lookout','east-outer-solar-screen',68,34],
   ['southwest-dry-keeper-gallery','west-actual-stone-tower-approach',20,69],
