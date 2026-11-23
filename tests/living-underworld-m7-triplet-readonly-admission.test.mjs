@@ -106,6 +106,26 @@ const city=()=>({
   candidateThinUnderpassPriorDeepReaderCohortInProcessOnly:true,
   candidateThinUnderpassPriorDeepReaderCohortAuthenticM7Unverified:true,
   candidateThinUnderpassPriorDeepSourceReaderCohortRefusal:null,
+  candidateThinUnderpassCrossAuditLedgerSafe:true,
+  candidateThinUnderpassCrossAuditLedgerReason:null,
+  candidateThinUnderpassCrossAuditLedgerFirstMismatch:null,
+  candidateThinUnderpassCrossAuditLedgerPriorCalls:{
+   naturalAt:rz===0?8815:12711,authoredAt:rz===0?8815:12711,
+   editedAt:rz===0?8815:12711,protectedAt:rz===0?8815:12711
+  },
+  candidateThinUnderpassCrossAuditLedgerUnderpassCalls:{
+   naturalAt:rz===0?383:411,authoredAt:rz===0?383:411,
+   editedAt:rz===0?383:411,protectedAt:rz===0?383:411
+  },
+  candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole:{
+   naturalAt:12,authoredAt:12,editedAt:12,protectedAt:12
+  },
+  candidateThinUnderpassCrossAuditLedgerComparedReturnCount:48,
+  candidateThinUnderpassCrossAuditLedgerTotalCalls:
+   4*((rz===0?8815:12711)+(rz===0?383:411)),
+  candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged:true,
+  candidateThinUnderpassCrossAuditLedgerCallerOnly:true,
+  candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries:true,
   candidateThinUnderpassExpectedCombinedDistinctCells:
    (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
@@ -165,6 +185,7 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.cityThinUnderpassIndependentFootprintSafe,true);
  assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,true);
  assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
@@ -550,5 +571,56 @@ test('Phase28 four-role in-process continuity never authenticates original M7 wo
  assert.equal(r.original20SeedConstructorGateAccepted,false);
  assert.equal(r.iPhoneGpuVerified,false);
  assert.equal(r.installedPwaVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase29 a prior deep source value discrepancy holds despite authentic original underpass cell parity',()=>{
+ const c=city();
+ c.rows[1].candidateThinUnderpassCrossAuditLedgerSafe=false;
+ c.rows[1].candidateThinUnderpassCrossAuditLedgerReason='ORIGINAL_SOURCE_LEDGER_VALUE_CHANGED';
+ c.rows[1].candidateThinUnderpassCrossAuditLedgerFirstMismatch={
+  role:'naturalAt',coordinate:'625,-132,133',firstPhase:'prior',secondPhase:'underpass'
+ };
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.proposalEvidenceAllPassed,true);
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_PRIOR_TO_BRIDGE_SOURCE_VALUE_HOLD'));
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase29 the earlier-source ledger must account exactly for every original prior and underpass source callback',()=>{
+ for(const mutation of [
+  row=>row.candidateThinUnderpassCrossAuditLedgerTotalCalls--,
+  row=>row.candidateThinUnderpassCrossAuditLedgerUnderpassCalls.naturalAt--,
+  row=>row.candidateThinUnderpassCrossAuditLedgerUnderpassCalls.editedAt++,
+  row=>row.candidateThinUnderpassCrossAuditLedgerPriorCalls.protectedAt=0,
+  row=>row.candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole.authoredAt=-1,
+  row=>row.candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole.naturalAt=999999,
+  row=>row.candidateThinUnderpassCrossAuditLedgerComparedReturnCount++,
+  row=>row.candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged=false,
+  row=>row.candidateThinUnderpassCrossAuditLedgerCallerOnly=false,
+  row=>row.candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries=false,
+  row=>{delete row.candidateThinUnderpassCrossAuditLedgerSafe}
+ ]){
+  const c=city();mutation(c.rows[0]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase29 zero actual prior-to-underpass repeated coordinates are allowed when both original source audits are complete',()=>{
+ const c=city();
+ c.rows[0].candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole={
+  naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0
+ };
+ c.rows[0].candidateThinUnderpassCrossAuditLedgerComparedReturnCount=0;
+ const r=check({city:c});
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,true);
+ assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
 });
