@@ -47,3 +47,10 @@ New `scripts/ci/snow-s6-original-webgl2-intercept.mjs` boots the actual full Myt
 5. Require real iPhone installed Home Screen PWA validation, WebGL2 GPU/memory/frame times, player collision, save/edit/restore, authored cave geology and original historical grove preservation BEFORE discussing an authorized merge/deployment.
 
 **Handoff outcome:** Real source/native cross-owner proof and first original-game WebGL2 visual prototype are green; live game remains unchanged. Reuse exact-HEAD results, no duplicate broad CI on identical code.
+
+
+## Concurrent production release drift noted AFTER Snow test acceptance
+
+Final external GitHub verification found the expected production baseline `7016e14cd6289f45eaf7fc6a79a362b47996df65` was independently advanced by one commit to `db4bbcc32156e5df311f733bcaa53d559c17313b` **without any Snow action**. The new commit is a separate Desert Phase 3 authorized release PR #463, titled `Release: Desert V7 Phase 3 bilateral RGB and safe near-edge refresh (#463)`; it modifies original `src/voxel.mjs`, `src/manual-biomes/environment-v7.mjs`, `profile-world.mjs`, `main.mjs`, PWA files and Desert tests. This happened concurrently while this detached Snow thread ran.
+
+**Do not revert or move the newer production main.** No change to either original Snow source/test blob or the protected OPEN DRAFT PR #358 `59e449be7e73b25f259c4c72855cfb638a056517` occurred from this lane. All Snow native/browser evidence here is valid for the EXACT isolated branch source tree prior to the Desert release commit. Before future integration or production color rendering, reconcile the newer Desert source ownership and original WebGL/PWA contracts rather than assuming the old `7016e14` source is still current. This handoff append is documentation-only, not a retest or merge.
