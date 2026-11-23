@@ -48,6 +48,19 @@ test('four genuinely generated 64-tile alpine atlases retain diverse safe geomet
     assert.ok(report.stats.plantCells<=18*report.stats.plants);
     assert.ok(report.stats.terrainCells<=18*report.stats.eligible);
     assert.ok(report.stats.seamExposedFaces<=8*report.stats.eligible);
+    assert.equal(report.stats.physicalDescriptorSites,report.stats.eligible);
+    assert.equal(report.stats.sourceCertifiedDescriptorFaces,
+      report.stats.seamExposedFaces);
+    assert.equal(count(report.stats.physicalMaterialCells),
+      report.stats.terrainCells+report.stats.plantCells);
+    assert.equal(count(report.stats.physicalMaterialCubeFaces),
+      report.stats.fullCubeProxyFaces);
+    assert.ok(report.stats.fullCubeProxyBytes<=report.stats.fullCubeNaiveBytes);
+    assert.equal(report.stats.fullCubeProxyBytes,
+      report.stats.fullCubeProxyFaces*216);
+    assert.equal(report.stats.fullCubeNaiveBytes-
+      report.stats.fullCubeProxyBytes,
+      report.stats.fullCubeInternalPairs*432);
     assert.equal(count(report.stats.seamVetoReasons),report.stats.seamRejected);
     assert.equal(count(report.stats.rootSourceVetoReasons),report.stats.rejected);
     assert.equal(count(report.stats.seamSourceVetoReasons),
@@ -70,6 +83,8 @@ test('four genuinely generated 64-tile alpine atlases retain diverse safe geomet
     const proposedCellLimitBytes=(report.stats.terrainCells+
       report.stats.plantCells)*6*6*9*4;
     assert.ok(proposedCellLimitBytes<=64*36*1296);
+    assert.equal(report.stats.fullCubeNaiveBytes,proposedCellLimitBytes,
+      'Material descriptor naive full-cube proxy differs from physical cells');
     snapshots.push({seed,label,originalV7MeshBytes:originalMesh.byteLength,
       originalV7MeshSHA256:originalHash,proposedCellLimitBytes});
     reports.push(report);
@@ -103,6 +118,14 @@ test('four genuinely generated 64-tile alpine atlases retain diverse safe geomet
       seamVetoReasons:reasons(own,'seamVetoReasons'),
       rootSourceVetoReasons:reasons(own,'rootSourceVetoReasons'),
       seamSourceVetoReasons:reasons(own,'seamSourceVetoReasons'),
+      physicalDescriptorSites:sum(own,'physicalDescriptorSites'),
+      sourceCertifiedDescriptorFaces:sum(own,'sourceCertifiedDescriptorFaces'),
+      fullCubeProxyFaces:sum(own,'fullCubeProxyFaces'),
+      fullCubeProxyBytes:sum(own,'fullCubeProxyBytes'),
+      fullCubeNaiveBytes:sum(own,'fullCubeNaiveBytes'),
+      fullCubeInternalPairs:sum(own,'fullCubeInternalPairs'),
+      physicalMaterialCells:reasons(own,'physicalMaterialCells'),
+      physicalMaterialCubeFaces:reasons(own,'physicalMaterialCubeFaces'),
       unchangedOriginalChunkMeshes:2}));
   }
   assert.equal(snapshots.length,4);
