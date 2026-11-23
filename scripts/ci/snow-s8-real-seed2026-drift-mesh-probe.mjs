@@ -29,9 +29,20 @@ const originalMeshProfile='const unifiedTerrain=profile?.generator===M7_ENVIRONM
 assert.equal(voxel.split(originalMeshProfile).length-1,1,
   'Pinned post-Desert mesh scope changed');
 const cachedMeshProfile=originalMeshProfile+"\n  const snowS7OwnerCache=unifiedTerrain?createSnowS7MeshTintReview(world,cx,cz,{biomeAt:v6BiomeAt}):null;";
-const winterColor="const groundColor=snowS7OwnerCache?.colorFor(x,y,z,id)??(unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined);";
-const alteredVoxel=winterImport+voxel.replace(originalMeshProfile,cachedMeshProfile).replace(token,winterColor);
+// Preserve ORIGINAL material/UV/face-lighting decisions for glacier ID276.
+// The earlier S7 experiment wrongly made originally ungrounded glacier a
+// terrain-art material merely by using the pigment as groundColor.
+const snowPigment='const snowS8Pigment=snowS7OwnerCache?.colorFor(x,y,z,id);';
+const originalFaceColor='const color=groundColor??biome130Color(id,x,y,z,face);';
+assert.equal(voxel.split(originalFaceColor).length-1,1,
+  'Pinned original material/UV face-color source changed');
+const alteredVoxel=winterImport+
+  voxel.replace(originalMeshProfile,cachedMeshProfile)
+    .replace(token,token+'\\n          '+snowPigment)
+    .replace(originalFaceColor,
+      'const color=snowS8Pigment??groundColor??biome130Color(id,x,y,z,face);');
 assert.equal(alteredVoxel.split('snowS7OwnerCache?.colorFor(x,y,z,id)').length-1,1);
+assert.equal(alteredVoxel.split(originalFaceColor).length-1,0);
 // Browser-only M7 diagnostic hook: original meshChunk against the SAME
 // isolated player-edited 276 block. The helper is installed identically in
 // original and candidate pages. No other runtime APIs are modified.
