@@ -461,7 +461,7 @@ function start(nonblockStage=null){
   // Buffer only the FIRST candidate's synchronous GPU uploads until its
   // real deep MINE and schema-1 save have both succeeded. Idle uploads
   // before the first source-real edit must never enter this A/B trial.
-  let near291FirstEditUploads=null,near291LastFirstEditUploads=null;
+  let near291FirstEditUploads=null;
   function near291Viewport(){
     return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
   }
@@ -1528,20 +1528,15 @@ function start(nonblockStage=null){
     if(near291MineStart!==null&&near291Perf.mineWindow.phase==='idle')
       near291FirstEditUploads={samples:[],overflow:false,faults:0};
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
-    let result;
+    let result,firstEditUploads=null;
     try{
       result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     }finally{
-      // The *original* exception remains unchanged. No stale first-edit
-      // upload buffer can survive an exceptional edit or contaminate stream.
-      // The local candidate stays available only in this edit's scope.
-      if(near291FirstEditUploads!==null){
-        near291LastFirstEditUploads=near291FirstEditUploads;
-        near291FirstEditUploads=null;
-      }
+      // Even an original thrown edit error cannot leak a pending first-mine
+      // GPU upload batch into the next draw. The capture is edit-local.
+      firstEditUploads=near291FirstEditUploads;
+      near291FirstEditUploads=null;
     }
-    const firstEditUploads=near291LastFirstEditUploads;
-    near291LastFirstEditUploads=null;
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
