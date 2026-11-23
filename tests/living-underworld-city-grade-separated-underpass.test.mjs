@@ -10,6 +10,8 @@ import {compileMainGalleryPedestrianClearance,
  from '../src/living-underworld/combined-stair-footprints.mjs';
 import {auditSupportedEntranceStairs}
  from '../src/living-underworld/walkable-entrance-stairs.mjs';
+import {deriveExpectedUnderpassSourceCoordinates}
+ from '../src/living-underworld/source-footprint-coordinate-witness.mjs';
 
 const seed=179;
 const stone=()=>({naturalAt:()=>1,authoredAt:()=>undefined,
@@ -178,6 +180,19 @@ test('both exact seed179 candidate sites account every original callback once, w
   assert.equal(r.underpassReaderIdentityCallerAuthenticatedOnly,true);
   assert.equal(r.underpassCoordinateCoveragePassed,true);
   assert.equal(r.underpassSourceRoleCoordinatesIdentical,true);
+  assert.equal(r.underpassIndependentGeometryMatched,true);
+  assert.equal(r.underpassIndependentSourceReaderCoordinatesVerified,true);
+  assert.equal(r.underpassExpectedBridgeDistinctCells,bridgeCalls);
+  assert.equal(r.underpassExpectedPadDistinctCells,padCalls);
+  assert.equal(r.underpassExpectedOverlapCells,r.underpassBridgePadOverlapCells);
+  assert.equal(r.underpassExpectedCombinedDistinctCells,r.underpassCombinedDistinctCells);
+  const q=plan(rx,rz),independent=deriveExpectedUnderpassSourceCoordinates({
+   bridgeProposal:q.proposal,centerSidePad:q.centerSidePad,floorY:q.floorY
+  });
+  assert.equal(independent.ok,true);
+  assert.equal(independent.bridgeCells,bridgeCalls);
+  assert.equal(independent.padCells,padCalls);
+  assert.equal(independent.expectedOverlapCells,r.underpassBridgePadOverlapCells);
   assert.equal(r.underpassBridgeDistinctCells,bridgeCalls);
   assert.equal(r.underpassPadDistinctCells,padCalls);
   assert.equal(Number.isSafeInteger(r.underpassBridgePadOverlapCells),true);
