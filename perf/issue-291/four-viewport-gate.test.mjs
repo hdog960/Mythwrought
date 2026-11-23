@@ -245,6 +245,9 @@ test('both post-save RAF gaps are required before numerical acceptance',()=>{
   },/real mining-frame trial/);
   const data=make();
   data.pairs[0].candidate.mineFrameWindow.frameGapsRecorded=101;
+  // This fixture verifies the two-final-RAF boundary, not slow-frame rate.
+  // At 1/101 it would correctly fail the new rate guard vs 2/400.
+  data.pairs[0].candidate.mineFrameWindow.slowFrames=0;
   const result=evaluateIssue291FourViewportAB(data);
   assert.equal(result.metricGatesPassed,true);
   assert.equal(result.releaseCertified,false);
@@ -382,4 +385,56 @@ test('complete real canvas backing identity is reported, never as release approv
 });
 test('strict v5 rejects prior v4 source snapshot even if numerical values are perfect',()=>{
   verify(x=>x.pairs[3].candidate.protocol='291-local-4viewport-v4',/protocol/);
+});
+
+
+test('equal slow-frame count but doubled late-frame rate must fail closed',()=>{
+  verify(x=>{
+    const {control,candidate}=x.pairs[0];
+    control.mineFrameWindow.frameGapsRecorded=400;
+    control.mineFrameWindow.slowFrames=2;
+    candidate.mineFrameWindow.frameGapsRecorded=200;
+    candidate.mineFrameWindow.slowFrames=2;
+  },/slow-frame rate regression/);
+});
+test('fewer slow frames can still be a rate regression with fewer candidate frames',()=>{
+  verify(x=>{
+    const {control,candidate}=x.pairs[1];
+    control.mineFrameWindow.frameGapsRecorded=400;
+    control.mineFrameWindow.slowFrames=2;
+    candidate.mineFrameWindow.frameGapsRecorded=101;
+    candidate.mineFrameWindow.slowFrames=1;
+  },/slow-frame rate regression/);
+});
+test('more VAO frames with unchanged slow-frame count passes both comparisons',()=>{
+  const x=make();
+  x.pairs[1].control.mineFrameWindow.frameGapsRecorded=400;
+  x.pairs[1].candidate.mineFrameWindow.frameGapsRecorded=480;
+  const r=evaluateIssue291FourViewportAB(x);
+  assert.equal(r.metricGatesPassed,true);
+  assert.equal(r.releaseCertified,false);
+  assert.equal(r.comparisons[1].controlSlowFrameRate,2/400);
+  assert.equal(r.comparisons[1].candidateSlowFrameRate,1/480);
+});
+test('equal slow-frame rates with fewer candidate slow frames are admissible',()=>{
+  const x=make();
+  x.pairs[3].control.mineFrameWindow.frameGapsRecorded=400;
+  x.pairs[3].control.mineFrameWindow.slowFrames=2;
+  x.pairs[3].candidate.mineFrameWindow.frameGapsRecorded=200;
+  x.pairs[3].candidate.mineFrameWindow.slowFrames=1;
+  const r=evaluateIssue291FourViewportAB(x);
+  assert.equal(r.metricGatesPassed,true);
+  assert.equal(r.releaseCertified,false);
+  assert.equal(r.comparisons[3].controlSlowFrameRate,r.comparisons[3].candidateSlowFrameRate);
+});
+test('all four landscape viewports independently veto slow-frame rate regression',()=>{
+  for(let i=0;i<4;i++){
+    verify(x=>{
+      const {control,candidate}=x.pairs[i];
+      control.mineFrameWindow.slowFrames=2;
+      control.mineFrameWindow.frameGapsRecorded=400;
+      candidate.mineFrameWindow.slowFrames=1;
+      candidate.mineFrameWindow.frameGapsRecorded=101;
+    },/slow-frame rate regression/);
+  }
 });
