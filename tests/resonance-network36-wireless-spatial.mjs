@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {enumerateWirelessCandidates as run} from '../src/resonance/network36/wireless-spatial.mjs';
+const ep=(id,x,y=0,z=0)=>({id,x,y,z,loaded:true});
+const tx=(id,x,radius=3,y=0,z=0)=>({...ep(id,x,y,z),radius});
+test('inclusive radius and excluded beyond radius',()=>{const r=run({transmitters:[tx('t',0)],endpoints:[ep('a',3),ep('b',4)]});assert.deepEqual(r.pairs,[{transmitterId:'t',endpointId:'a'}]);});
+test('negative-coordinate bucket boundaries',()=>assert.deepEqual(run({transmitters:[tx('t',-1)],endpoints:[ep('e',-4)]}).pairs,[{transmitterId:'t',endpointId:'e'}]));
+test('three-dimensional Euclidean distance',()=>assert.deepEqual(run({transmitters:[tx('t',0,5)],endpoints:[ep('e',3,4,0),ep('f',3,3,0)]}).pairs,[{transmitterId:'t',endpointId:'f'}]));
+test('permutation-independent deterministic output',()=>{const a={transmitters:[tx('z',1),tx('a',0)],endpoints:[ep('y',2),ep('b',3)]};assert.deepEqual(run(a),run({transmitters:[...a.transmitters].reverse(),endpoints:[...a.endpoints].reverse()}));});
+test('reject duplicate identities across descriptor types',()=>assert.throws(()=>run({transmitters:[tx('x',0)],endpoints:[ep('x',1)]})));
+test('reject unloaded and nonintegral positions',()=>{assert.throws(()=>run({endpoints:[{...ep('x',0),loaded:false}]}));assert.throws(()=>run({endpoints:[ep('x',0.5)]}));});
+test('reject invalid radius and oversized envelope',()=>{assert.throws(()=>run({transmitters:[tx('x',0,17)]}));assert.throws(()=>run({endpoints:[ep('x',0)],maxNodes:0}));});
+test('fail closed instead of returning partial results on comparison budget',()=>assert.throws(()=>run({transmitters:[tx('t',0)],endpoints:[ep('a',1),ep('b',2)],maxComparisons:1}),/budget/));
+test('distant buckets avoid quadratic comparison',()=>{const r=run({transmitters:[tx('t',0)],endpoints:[ep('far',10000)]});assert.equal(r.comparisons,0);assert.deepEqual(r.pairs,[]);});
