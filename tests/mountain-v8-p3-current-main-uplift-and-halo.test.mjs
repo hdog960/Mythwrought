@@ -9,7 +9,7 @@ import {auditMountainV8P3Uplift as uplift,
   auditMountainV8ExistingP3EditHalo as halo,
   V8_P3_SOURCE_HEAD as CURRENT,V8_P3_HALO_SOURCE_BLOB as HALO_BLOB}
   from '../src/manual-biomes/mountain-v8-p3-uplift-and-halo-audit.mjs';
-import {surveyMountainV8Column}
+import {surveyMountainV8Column,mountainV8TileRoot}
   from '../src/manual-biomes/mountain-v8-source-adapter.mjs';
 const root=process.env.MYTHWROUGHT_P3_MAIN_ROOT;
 if(!root)throw Error('Pinned current-main original checkout required');
@@ -44,7 +44,7 @@ const findSite=()=>{
   for(const [tx0,tz0] of ranges)
     for(let tz=tz0;tz<tz0+8;tz++)
       for(let tx=tx0;tx<tx0+8;tx++){
-        const x=tx*8+3,z=tz*8+3;
+        const {rootX:x,rootZ:z}=mountainV8TileRoot(tx,tz,seed);
         const p=survey(x,z);
         if(!p)continue;
         const proof=uplift(p,{originalWorld:original,...cfg});
