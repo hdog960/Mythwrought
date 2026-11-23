@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'f678d27316f2eba5f58f1ca77730a7a83e017eb8');
+    'b4ee0cc13957da7d9fc4a3d6a6708cb7c9c48305');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1357,7 +1357,7 @@ test('authentic original source edit arms upload pending before apply and clears
   const order=[
     "near291FirstEditUploads={samples:[],overflow:false,faults:0};",
     "result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,",
-    "near291LastFirstEditUploads=near291FirstEditUploads;",
+    "firstEditUploads=near291FirstEditUploads;",
     "near291FirstEditUploads=null;",
     "const persisted=save();",
     "near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);"
