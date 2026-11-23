@@ -1,0 +1,61 @@
+name: Snow S8 detached seed2026 shader drift and native mesh timing
+on:
+  push:
+    branches:
+      - research/snow-s8-seed2026-drift-mesh-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s8-seed2026-mesh-drift.yml'
+      - 'src/manual-biomes/snowy-s8-natural-drift-material-research.mjs'
+      - 'tests/snowy-s8-drift-source-contract.test.mjs'
+      - 'scripts/ci/snow-s8-real-seed2026-drift-mesh-probe.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s8-seed2026-mesh-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-webgl2-drift-and-mesh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Checkout exact independent Desert production for original game
+        uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict exact HEADs, preserved Snow S7 source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s7-mesh-tint-source-cache.mjs)" = f5a538405085d994d52c1f68bafd587edf182e30
+          node --check scripts/ci/snow-s8-real-seed2026-drift-mesh-probe.mjs
+          node --check src/manual-biomes/snowy-s8-natural-drift-material-research.mjs
+          node --check tests/snowy-s8-drift-source-contract.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: New exact original storybook snow shader-only source contract
+        run: node --test tests/snowy-s8-drift-source-contract.test.mjs
+      - name: Install pinned headless Chromium WebGL2 and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Exact post-Desert seed2026 real game S7 cache versus S8 snowdrift and mesh time
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s8-real-game.log 2>&1 &
+          node scripts/ci/snow-s8-real-seed2026-drift-mesh-probe.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Publish exact native screenshots and mesh timing artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s8-seed2026-drift-mesh-${{ github.sha }}
+          path: artifacts/snow-s8-seed2026-real-mesh-shader/
+          if-no-files-found: ignore
+          retention-days: 7
