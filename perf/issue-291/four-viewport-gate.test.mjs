@@ -7,7 +7,7 @@ const viewports=[[956,440],[932,430],[844,390],[916,412]];
 function sample(viewport,mode='original-control'){
   const isVao=mode==='experimental-vao';
   return {
-    protocol:'291-local-4viewport-v1',mode,viewportCss:[...viewport],
+    protocol:'291-local-4viewport-v2',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
     trueSavedDeepMines:100,
     // Hypothetical test-only fixture. Real measurements must come from the
@@ -18,6 +18,12 @@ function sample(viewport,mode='original-control'){
     frameGapsRecorded:400,rollingFrameCount:400,
     rollingFrameP95Ms:isVao?18:22,
     rollingSlowFrames:isVao?1:2,
+    // These are hypothetical *mining-bound* frame windows; the candidate
+    // renders more frames in the same 100 original voxel edit actions.
+    mineFrameWindow:{phase:'complete',savedMines:100,
+      frameGapsRecorded:isVao?430:400,frameP95Ms:isVao?18:22,
+      slowFrames:isVao?1:2,elapsedMs:isVao?7000:9000,
+      maxFrameSamples:16384,overflow:false,invalid:false,interrupted:false},
     successfulGuardedUploads:224,rollingSuccessfulUploadP95Ms:isVao?22:28,
     fatal:false,graphicsLost:false,pageSuspended:false,
     continuousForegroundRun:true,interruptionCount:0,
@@ -71,20 +77,29 @@ test('only equal seed and genuine edit count runs compare',()=>{
   verify(x=>x.pairs[1].candidate.seed=4021,/seed differs/);
   verify(x=>x.pairs[2].control.seed=4021,/seed differs/);
   verify(x=>x.pairs[2].candidate.trueSavedDeepMines=99,/fewer than 100/);
-  verify(x=>x.pairs[2].candidate.trueSavedDeepMines=111,/counts are unequal/);
+  verify(x=>x.pairs[2].candidate.trueSavedDeepMines=111,
+    /exactly 100 saved deep MINE actions/);
 });
-test('frame window count and parity are required',()=>{
-  verify(x=>x.pairs[1].candidate.frameGapsRecorded=99,/real foreground frame window/);
-  verify(x=>x.pairs[1].candidate.frameGapsRecorded=399,/observation counts are unequal/);
-  verify(x=>x.pairs[1].candidate.rollingFrameCount=0,/real foreground frame window/);
+test('only complete 100-edit mining frame windows count, not idle RAF diagnostics',()=>{
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.frameGapsRecorded=99,
+    /real mining-frame trial/);
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.maxFrameSamples=0,
+    /real mining-frame trial/);
+  const value=make();
+  value.pairs[1].candidate.frameGapsRecorded=2;
+  value.pairs[1].candidate.rollingFrameP95Ms=240;
+  const outcome=evaluateIssue291FourViewportAB(value);
+  assert.equal(outcome.metricGatesPassed,true);
+  assert.equal(outcome.releaseCertified,false);
 });
-test('no slow-frame regression or invalid slow-frame counts',()=>{
-  verify(x=>x.pairs[3].candidate.rollingSlowFrames=3,/slow-frame regression/);
-  verify(x=>x.pairs[3].candidate.rollingSlowFrames=401,/inconsistent slow-frame/);
+test('no slow-frame regression in 100 authentic edits, and valid frame counters',()=>{
+  verify(x=>x.pairs[3].candidate.mineFrameWindow.slowFrames=3,/slow-frame regression/);
+  verify(x=>x.pairs[3].candidate.mineFrameWindow.slowFrames=500,
+    /real mining-frame trial/);
 });
 test('10 percent action improvement AND 10 percent frame improvement required each',()=>{
   verify(x=>x.pairs[2].candidate.miningActionP95Ms=91,/action p95/);
-  verify(x=>x.pairs[2].candidate.rollingFrameP95Ms=21,/frame p95/);
+  verify(x=>x.pairs[2].candidate.mineFrameWindow.frameP95Ms=21,/frame p95/);
   verify(x=>x.pairs[2].control.miningActionP95Ms=0,/finite positive action/);
 });
 test('guarded upload p95 bound applies to both runs at every viewport',()=>{
@@ -173,4 +188,46 @@ test('missing or forged continuous foreground proof fails closed',()=>{
   verify(x=>x.pairs[1].control.interruptionCount=-1,/hidden, suspended or context-lost/);
   verify(x=>x.pairs[3].candidate.continuousForegroundRun=false,/hidden, suspended or context-lost/);
   verify(x=>x.pairs[2].candidate.interruptionCount=1,/hidden, suspended or context-lost/);
+});
+
+test('a genuine faster VAO with DIFFERENT frame counts must not be rejected',()=>{
+  const data=make();
+  const pair=data.pairs[0];
+  pair.control.mineFrameWindow.frameGapsRecorded=340;
+  pair.candidate.mineFrameWindow.frameGapsRecorded=480;
+  pair.control.mineFrameWindow.slowFrames=2;
+  pair.candidate.mineFrameWindow.slowFrames=1;
+  const result=evaluateIssue291FourViewportAB(data);
+  assert.equal(result.metricGatesPassed,true);
+  assert.equal(result.releaseCertified,false);
+  assert.equal(result.comparisons[0].controlTrialFrames,340);
+  assert.equal(result.comparisons[0].candidateTrialFrames,480);
+});
+test('idle smooth frames cannot manufacture a 10 percent mining-frame improvement',()=>{
+  verify(x=>{
+    x.pairs[0].candidate.rollingFrameP95Ms=5;
+    x.pairs[0].candidate.mineFrameWindow.frameP95Ms=21;
+  },/frame p95/);
+});
+test('pre-mine jank in diagnostic history does not invalidate bounded mining window',()=>{
+  const d=make();
+  d.pairs[1].control.rollingFrameP95Ms=900;
+  d.pairs[1].candidate.rollingFrameP95Ms=1000;
+  assert.equal(evaluateIssue291FourViewportAB(d).metricGatesPassed,true);
+});
+test('incomplete, unclosed or overflowed 100-mine windows fail closed',()=>{
+  verify(x=>delete x.pairs[0].candidate.mineFrameWindow,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.phase='active',/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.savedMines=99,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.overflow=true,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.invalid=true,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.interrupted=true,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.elapsedMs=0,/real mining-frame trial/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.frameP95Ms=NaN,/real mining-frame trial/);
+});
+test('frame counts may differ; missed-frame count still cannot increase for 100 edits',()=>{
+  verify(x=>{
+    x.pairs[0].candidate.mineFrameWindow.frameGapsRecorded=540;
+    x.pairs[0].candidate.mineFrameWindow.slowFrames=3;
+  },/slow-frame regression/);
 });
