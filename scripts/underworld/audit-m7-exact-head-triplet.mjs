@@ -58,6 +58,7 @@ const tests=Object.freeze([
  'tests/living-underworld-city-gallery-easement-district.test.mjs',
  'tests/living-underworld-city-gallery-floor-cutset.test.mjs',
  'tests/living-underworld-city-grade-separated-underpass.test.mjs',
+ 'tests/living-underworld-underpass-pedestrian-footgraph.test.mjs',
  'tests/living-underworld-m7-triplet-readonly-admission.test.mjs'
 ]);
 const nodeTests=call(process.execPath,['--test',...tests],180000);
