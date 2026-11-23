@@ -20,6 +20,7 @@ function sample(viewport,mode='original-control'){
     rollingSlowFrames:isVao?1:2,
     successfulGuardedUploads:224,rollingSuccessfulUploadP95Ms:isVao?22:28,
     fatal:false,graphicsLost:false,pageSuspended:false,
+    continuousForegroundRun:true,interruptionCount:0,
     readOnly:true,releaseCertified:false,nativeGpuRollbackProven:false,
     browserPixelParityProven:false,
     nearStatus:isVao?{phase:'ready',cache:{vaoSupported:true}}:null
@@ -157,4 +158,19 @@ test('positive hypothetical fixture reports 100 exact witnesses but no certifica
   assert.equal(r.metricGatesPassed,true);
   assert.equal(r.releaseCertified,false);
   for(const row of r.comparisons)assert.equal(row.witnessedMineActions,100);
+});
+
+test('recovered WebGL context cannot erase original run interruption history',()=>{
+  verify(x=>{
+    const run=x.pairs[1].candidate;
+    run.graphicsLost=false;run.pageSuspended=false;run.fatal=false;
+    run.interruptionCount=1;
+    run.continuousForegroundRun=false;
+  },/hidden, suspended or context-lost/);
+});
+test('missing or forged continuous foreground proof fails closed',()=>{
+  verify(x=>delete x.pairs[1].candidate.interruptionCount,/hidden, suspended or context-lost/);
+  verify(x=>x.pairs[1].control.interruptionCount=-1,/hidden, suspended or context-lost/);
+  verify(x=>x.pairs[3].candidate.continuousForegroundRun=false,/hidden, suspended or context-lost/);
+  verify(x=>x.pairs[2].candidate.interruptionCount=1,/hidden, suspended or context-lost/);
 });
