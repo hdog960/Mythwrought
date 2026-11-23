@@ -1,13 +1,13 @@
 // MYTHWROUGHT Builder B Wave43 — Suncradle Offset-Basin Bathhouse.
-// Original frozen B115 DESERT SMALL bathhouse: two GENUINE empty stone
+// Original frozen B115 DESERT MEDIUM bathhouse: two GENUINE empty stone
 // basin rings indoors, seven asymmetric source-backed Pack3 wing roofs,
 // three completely sky-open paved stone courts and connected U-shaped
 // outdoor stone resting terrace; real 3-high upright Pack4 framed glass.
 // NO heating, actual water/steam, pumps, climate, AI, Pack producer or saves.
 import {sourcePlan} from '../roadmap-1b/m2-community-structures.mjs';
-export const SUNCRADLE_OFFSET_BASIN_ID='r1:bathhouse:desert:small:004';
+export const SUNCRADLE_OFFSET_BASIN_ID='r1:bathhouse:desert:medium:003';
 export function buildSuncradleOffsetBasinBathhouse(){
- const b=sourcePlan('bathhouse','desert','small',4,'Suncradle Offset-Basin Bathhouse',54,39,56);
+ const b=sourcePlan('bathhouse','desert','medium',3,'Suncradle Offset-Basin Bathhouse',54,39,56);
  const wings=[
  ['northern-sand-entry-cloister',13,3,41,16,14,'pack3:023'],
  ['west-copper-inert-washroom',4,10,20,45,12,'pack3:026'],
