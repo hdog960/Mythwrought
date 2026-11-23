@@ -1,8 +1,8 @@
-# Isolated Phase 2 original-M7 source classification ONLY.
-# The exact 52 rejected near-Plains original source positions are diagnosed
-# with a read-only helper, alongside certified original standing references.
-# Reuse native #45109852257 (9/9), #45110157768 (8/8), #45110354373 (1/1).
-# No production/physics/cave changes, broad CI, Chromium, other jobs.
+# MYTHWROUGHT Enchanted Phase 2 source-owned, read-only original-M7
+# standing diagnostics and physically replayed legacy-ground traversal.
+# New opt-in groundMode=physical only, original mode remains unchanged.
+# Focus ONLY two tests in newly added source test file; reuse previously
+# accepted source/cave/Moonwillow/physics runs. No broad CI/Chromium.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-52-standing-source-causes:
+  original-m7-physical-grass-boundary:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -27,13 +27,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify original BFS unchanged and exact diagnostic syntax
+      - name: Authenticate unchanged accepted research BFS and source syntax
         run: |
           git rev-parse HEAD
           test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
           node --check src/manual-biomes/enchanted-original-standing-diagnostic.mjs
-          node --check tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
-      - name: Only corrected 52-position original M7 guard attribution (reuse prior 1/1 certified reference test)
+          node --check src/manual-biomes/enchanted-original-physics-route.mjs
+          node --check tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
+      - name: Real original M7 physical grass source and preserved stepPlayer crossing
         run: |
-          node --test --test-name-pattern="the exact prior 52 original" \
-            tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
+          node --test \
+            tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
