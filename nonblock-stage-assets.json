@@ -3,7 +3,7 @@
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "adcf082ddc016e9a11d1becfdb6fbd172344b0f109ad9d4c2b1b41f463ba86b1",
     "./src/environment-ground.mjs": "90b3375fc29c1cae061681ccb2d2ddbd77926e884478a4dcbf29c5c5e731b6dc",
-    "./src/manual-biomes/environment-v7.mjs": "cda3ad834f356b3382bcbd22441659b6e630aa0a8328a7e3a25584b8bdfd0302",
+    "./src/manual-biomes/environment-v7.mjs": "b3d288782c870ec81e3e542b1f13cdfaed3a1c1c979c3fcb04e3d75302e9c307",
     "./src/manual-biomes/environment-oasis.mjs": "6627e772dbded074cb85cf99c79f9f92e61c21cb50c43f392dac1526f6c3e42f",
     "./src/nonblock/candidate-effects.mjs": "2bcbdff0a68c595521d619f10f0f1671ac358e79af812af74b20df875462b424",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
@@ -248,7 +248,7 @@
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "cd448d72f6cefdca9521437ec5f85a76fb22e10958d07448b7070ebcdfd752d5",
-    "./src/manual-biomes/profile-world.mjs": "a9e01d11a093555fd3b28f805c44c5e77130e1f45664b27c5e5f66579d3d8403",
+    "./src/manual-biomes/profile-world.mjs": "7fbfd8cd17a1f93e397c7aa2043ef30a49e44e0b781ea599c03e8df04da2aceb",
     "./src/manual-biomes/shoulder-traversal.mjs": "f54ef77060131d8bfd5b43c5ab232d9ab9049d664d7b3a46642f0cd24bb3bffe",
     "./src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
     "./src/meadow.mjs": "971be34a7b15baaf678265dfc9da2918ef6bc2b72761fc7763f71d94063a3f05",
