@@ -446,6 +446,10 @@ function start(nonblockStage=null){
     phase:'idle',savedMines:0,frames:new Float64Array(16384),
     uploads:new Float64Array(4096),uploadCount:0,uploadOverflow:false,
     uploadFaults:0,
+    // Diagnostic-only, exact 100 source-saved deep mines; never a release
+    // certificate or an alternate save/mesh path.
+    meshCpuMs:new Float64Array(100),saveCpuMs:new Float64Array(100),
+    loadedSections:new Uint16Array(100),phaseMines:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
     overflow:false,invalid:false,interrupted:false,
@@ -459,6 +463,9 @@ function start(nonblockStage=null){
     frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,
     interruptionCount:0,prevFrame:null
   }:null;
+  // Only an active localhost measured MINE may own this scratch object.
+  // It is cleared in edit()'s existing finally even if voxel staging throws.
+  let near291EditPhase=null;
   // Buffer only the FIRST candidate's synchronous GPU uploads until its
   // real deep MINE and schema-1 save have both succeeded. Idle uploads
   // before the first source-real edit must never enter this A/B trial.
@@ -626,6 +633,29 @@ function start(nonblockStage=null){
       if(w.savedMines===100){w.phase='closing';w.closingFramesRemaining=2;}
     }
   }
+  function near291RecordMinePhase(phase){
+    if(!near291Perf)return;
+    const w=near291Perf.mineWindow;
+    if(w.phase!=='active'&&w.phase!=='closing')return;
+    if(!phase||!Number.isFinite(phase.meshMs)||phase.meshMs<0||
+       !Number.isFinite(phase.saveMs)||phase.saveMs<0||
+       !Number.isSafeInteger(phase.loadedSections)||phase.loadedSections<0){
+      w.invalid=true;
+      if(w.invalidReason===null)w.invalidReason='phase-invalid';
+      return;
+    }
+    // Never let a source-irrelevant or duplicate sample masquerade as a
+    // completed saved deep MINE. Exact slot identity is mine #1...#100.
+    if(w.phaseMines!==w.savedMines-1||w.phaseMines>=w.meshCpuMs.length){
+      w.invalid=true;
+      if(w.invalidReason===null)w.invalidReason='phase-count-mismatch';
+      return;
+    }
+    const i=w.phaseMines++;
+    w.meshCpuMs[i]=phase.meshMs;
+    w.saveCpuMs[i]=phase.saveMs;
+    w.loadedSections[i]=phase.loadedSections;
+  }
   function near291RecordUpload(duration){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
     near291CheckViewport();
@@ -679,6 +709,14 @@ function start(nonblockStage=null){
       mineFrameWindow:Object.freeze({
         phase:near291Perf.mineWindow.phase,
         savedMines:near291Perf.mineWindow.savedMines,
+        phaseMines:near291Perf.mineWindow.phaseMines,
+        meshGenerationP95Ms:percentile(near291Perf.mineWindow.meshCpuMs,
+          near291Perf.mineWindow.phaseMines,true),
+        schemaSaveP95Ms:percentile(near291Perf.mineWindow.saveCpuMs,
+          near291Perf.mineWindow.phaseMines,true),
+        maxRebuiltLoadedSections:near291Perf.mineWindow.phaseMines?
+          Math.max(...near291Perf.mineWindow.loadedSections.slice(
+            0,near291Perf.mineWindow.phaseMines)):null,
         successfulGuardedUploads:near291Perf.mineWindow.uploadCount,
         successfulGuardedUploadP95Ms:percentile(near291Perf.mineWindow.uploads,
           near291Perf.mineWindow.uploadCount,true),
@@ -1307,6 +1345,7 @@ function start(nonblockStage=null){
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
+    const near291MeshStarted=near291EditPhase?performance.now():null;
     const batch=[];
     for(const section of verticalEditSections(y))
       for(const {cx,cz} of editAffectedChunks(x,z)){
@@ -1316,6 +1355,10 @@ function start(nonblockStage=null){
         const water=meshPlayableWater(cx,cz,section);
         batch.push({key,cx,cz,section,vertices,water});
       }
+    if(near291MeshStarted!==null){
+      near291EditPhase.meshMs+=Math.max(0,performance.now()-near291MeshStarted);
+      near291EditPhase.loadedSections+=batch.length;
+    }
     const ready=[];
     try{
       for(const item of batch){
@@ -1582,15 +1625,19 @@ function start(nonblockStage=null){
       }
     }
     const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;
+    if(near291MineStart!==null)
+      near291EditPhase={meshMs:0,loadedSections:0};
     // Source uploadPack2Chunk() runs synchronously inside the real edit.
     // The first edit is not yet proven successful until apply+save return.
     if(near291MineStart!==null&&near291Perf.mineWindow.phase==='idle')
       near291FirstEditUploads={samples:[],overflow:false,faults:0};
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
-    let result,firstEditUploads=null;
+    let result,firstEditUploads=null,near291SavedPhase=null;
     try{
       result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     }finally{
+      near291SavedPhase=near291EditPhase;
+      near291EditPhase=null;
       // Even an original thrown edit error cannot leak a pending first-mine
       // GPU upload batch into the next draw. The capture is edit-local.
       firstEditUploads=near291FirstEditUploads;
@@ -1599,11 +1646,19 @@ function start(nonblockStage=null){
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
+    const near291SaveStarted=near291MineStart!==null?performance.now():null;
     const persisted=save();
+    const near291SaveMs=near291SaveStarted===null?null:
+      Math.max(0,performance.now()-near291SaveStarted);
     // Sample ONLY a real successful source MINE into deep Y, after actual
     // schema-1 save succeeds; no synthetic placements, mob hits or retries.
-    if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)
+    if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5){
       near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);
+      near291RecordMinePhase({
+        meshMs:near291SavedPhase?.meshMs,saveMs:near291SaveMs,
+        loadedSections:near291SavedPhase?.loadedSections
+      });
+    }
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
