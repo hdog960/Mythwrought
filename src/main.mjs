@@ -448,7 +448,8 @@ function start(nonblockStage=null){
     uploadFaults:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
-    overflow:false,invalid:false,interrupted:false
+    overflow:false,invalid:false,interrupted:false,
+    editPending:false,invalidReason:null
   });
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float64Array(2048),mines:new Float64Array(128),
@@ -478,6 +479,28 @@ function start(nonblockStage=null){
     near291Perf.mineWindow=near291NewMineWindow();
     near291Perf.prevFrame=null;
   }
+  function near291AbortMineTrial(reason){
+    if(!near291Perf)return;
+    const w=near291Perf.mineWindow;
+    if(w.phase!=='active'&&w.phase!=='closing')return;
+    w.invalid=true;w.interrupted=true;w.phase='interrupted';
+    w.editPending=false;
+    if(w.invalidReason===null)w.invalidReason=reason;
+    near291Perf.interruptionCount++;
+    w.prevFrame=null;
+  }
+  function near291NoteEdit(mode){
+    if(!near291Perf)return;
+    const w=near291Perf.mineWindow;
+    if(w.phase!=='active'&&w.phase!=='closing')return;
+    if(w.editPending||w.phase==='closing'||mode!=='mine'){
+      near291AbortMineTrial('off-plan-edit');
+      return;
+    }
+    // Every action begun during a 100-mine trial must finish as a real
+    // successfully saved deep MINE before the next eligible source RAF.
+    w.editPending=true;
+  }
   function near291Interrupt(){
     if(!near291Perf)return;
     const w=near291Perf.mineWindow;
@@ -492,7 +515,15 @@ function start(nonblockStage=null){
   function near291RecordFrame(now){
     if(!near291Perf)return;
     near291CheckViewport();
+    const wBefore=near291Perf.mineWindow;
+    if(wBefore.editPending)near291AbortMineTrial('unsaved-or-nondeep-edit');
+    if((wBefore.phase==='active'||wBefore.phase==='closing')&&g2Active())
+      near291AbortMineTrial('creative-flight');
     if(document.hidden||!help.hidden||exploration.isOpen()||graphicsLost){
+      // These foreground exclusions are NOT ordinary renderer samples.
+      // Even a brief Settings/exploration overlay cannot be counted as
+      // mining-frame p95 if WebKit resumes before a huge gap occurs.
+      near291AbortMineTrial('foreground-excluded');
       near291Perf.prevFrame=null;return;
     }
     const previous=near291Perf.prevFrame;
@@ -571,6 +602,7 @@ function start(nonblockStage=null){
       }else w.invalid=true; // missing first-edit source capture
     }
     if(w.phase==='active'){
+      w.editPending=false; // original deep voxel edit + save succeeded
       w.savedMines++;
       if(w.savedMines===100){w.phase='closing';w.closingFramesRemaining=2;}
     }
@@ -643,6 +675,8 @@ function start(nonblockStage=null){
         overflow:near291Perf.mineWindow.overflow,
         invalid:near291Perf.mineWindow.invalid,
         interrupted:near291Perf.mineWindow.interrupted,
+        editPending:near291Perf.mineWindow.editPending,
+        invalidReason:near291Perf.mineWindow.invalidReason,
         maxFrameSamples:near291Perf.mineWindow.frames.length
       }),
       frameGapsRecorded:near291Perf.frameCount,
@@ -660,7 +694,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
-      protocol:'291-local-4viewport-v3',
+      protocol:'291-local-4viewport-v4',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
@@ -1389,6 +1423,7 @@ function start(nonblockStage=null){
     }
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(near291Perf)near291NoteEdit(mode); // read-only trial admission only
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -2268,7 +2303,10 @@ function start(nonblockStage=null){
     if(g2Active())g2Controls=dispatchG2Control(g2Controls,
       {type:'key',code:e.code,pressed:false});
   });
-  window.addEventListener('blur',cancelAllPointers);
+  window.addEventListener('blur',()=>{
+    if(near291Perf)near291AbortMineTrial('window-blur');
+    cancelAllPointers();
+  });
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
       near291Interrupt();
@@ -2807,7 +2845,11 @@ function start(nonblockStage=null){
       updatePack2SelectionUI();
     };
   }
-  document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
+  document.getElementById('menu').onclick=()=>{
+    gameplayRecorder?.interrupt('Settings opened');
+    if(near291Perf)near291AbortMineTrial('settings-opened');
+    cancelAllPointers();help.hidden=false;
+  };
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
