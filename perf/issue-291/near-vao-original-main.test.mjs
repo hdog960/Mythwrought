@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'c06808f84fc37bad52f5ff784a360a8c1e43b6c7');
+    'b446d64911a8992bf4f54a820cabba952c530ee5');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -752,7 +752,7 @@ const createLocal291Perf=new Function('scope','with(scope){'+
   '(pending===undefined?{samples:[],overflow:false,faults:0}:pending)),'+
   'interrupt:near291Interrupt,noteEdit:near291NoteEdit,'+
   'auditRender:near291CheckRenderIdentity,'+
-  'abortMine:near291AbortMineTrial,'+
+  'abortMine:near291AbortMineTrial,phase:near291RecordMinePhase,'+
   'upload:near291RecordUpload,fail:near291RecordUploadFailure,'+
   'startFirst:()=>{near291FirstEditUploads={samples:[],overflow:false,faults:0};'+
     'return near291FirstEditUploads;},'+
@@ -1724,4 +1724,111 @@ test('prior visibility interruption cannot be laundered even by a pre-mine ident
   const reset=perf.read();
   assert.equal(reset.interruptionCount,1);
   assert.equal(reset.continuousForegroundRun,false);
+});
+
+
+test('original-source diagnostic phases exist only in the localhost opt-in window',()=>{
+  const main=source.slice(source.indexOf('  const near291Measure='),source.indexOf('  let near291=null;'));
+  assert.ok(main.includes('meshCpuMs:new Float64Array(100)'));
+  assert.ok(main.includes('saveCpuMs:new Float64Array(100)'));
+  assert.ok(main.includes('loadedSections:new Uint16Array(100)'));
+  assert.equal(local291PerfFixture({search:''}).perf.read(),null);
+  assert.equal(local291PerfFixture({hostname:'hdog960.github.io'}).perf.read(),null);
+});
+test('original source times real synchronous mesh CPU before upload and preserves original stage order',()=>{
+  const begin=source.indexOf('  function refreshEditedMeshes(x,z,y=0){');
+  const finish=source.indexOf('  function refreshPhysicalChunk(',begin);
+  const body=source.slice(begin,finish);
+  const a=body.indexOf('const near291MeshStarted=near291EditPhase?performance.now():null;');
+  const b=body.indexOf('const vertices=meshPlayableChunk(cx,cz,section);');
+  const c=body.indexOf('near291EditPhase.meshMs+=Math.max(0,performance.now()-near291MeshStarted);');
+  const d=body.indexOf('ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});');
+  assert.ok(a>=0&&b>a&&c>b&&d>c);
+  assert.ok(body.includes('near291EditPhase.loadedSections+=batch.length;'));
+  assert.ok(body.includes('deleteChunkBuffers(old);'));
+});
+test('original source clears edit scratch in original finally and logs only after save success',()=>{
+  const begin=source.indexOf("    const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;");
+  const finish=source.indexOf('  let lastStreamingCenter=',begin);
+  const body=source.slice(begin,finish);
+  const a=body.indexOf('near291EditPhase={meshMs:0,loadedSections:0};');
+  const b=body.indexOf('result=applyBlockAction(');
+  const c=body.indexOf('near291EditPhase=null;');
+  const d=body.indexOf('const persisted=save();');
+  const e=body.indexOf('near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);');
+  const f=body.indexOf('near291RecordMinePhase({');
+  assert.ok(a>=0&&b>a&&c>b&&d>c&&e>d&&f>e);
+  assert.ok(body.includes('if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)'));
+});
+test('mesh and schema-save phase histograms are genuine bounded 100-source-mine diagnostics',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  for(let i=1;i<=100;i++){
+    perf.mine(10,{cell:[i,-31,2],previous:3,next:0});
+    perf.phase({meshMs:i,saveMs:i/10,loadedSections:i%4});
+    perf.frame(i*16);
+  }
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.savedMines,100);
+  assert.equal(w.phaseMines,100);
+  assert.equal(w.meshGenerationP95Ms,95);
+  assert.equal(w.schemaSaveP95Ms,9.5);
+  assert.equal(w.maxRebuiltLoadedSections,3);
+  assert.equal(w.invalid,false);
+});
+test('unsaved or unrelated phase outside a source-MINE trial is never admitted',()=>{
+  const {perf}=local291PerfFixture();
+  perf.phase({meshMs:7,saveMs:3,loadedSections:2});
+  assert.equal(perf.read().mineFrameWindow.phaseMines,0);
+  assert.equal(perf.read().mineFrameWindow.meshGenerationP95Ms,null);
+  perf.frame(0);
+  perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:9,saveMs:2,loadedSections:1});
+  assert.equal(perf.read().mineFrameWindow.phaseMines,1);
+});
+test('missing negative or infinite source phase marks the trial invalid, never fabricates CPU time',()=>{
+  for(const invalid of [null,{meshMs:-1,saveMs:2,loadedSections:1},
+    {meshMs:Infinity,saveMs:2,loadedSections:1},
+    {meshMs:1,saveMs:NaN,loadedSections:1},
+    {meshMs:1,saveMs:2,loadedSections:-1}]){
+    const {perf}=local291PerfFixture();
+    perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+    perf.phase(invalid);
+    const w=perf.read().mineFrameWindow;
+    assert.equal(w.invalid,true);
+    assert.equal(w.invalidReason,'phase-invalid');
+    assert.equal(w.phaseMines,0);
+  }
+});
+test('duplicated per-mine phase can never overwrite the first saved original sample',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:11,saveMs:4,loadedSections:2});
+  perf.phase({meshMs:3,saveMs:1,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,true);
+  assert.equal(w.invalidReason,'phase-count-mismatch');
+  assert.equal(w.phaseMines,1);
+  assert.equal(w.meshGenerationP95Ms,11);
+});
+test('CSS or seed session reset clears phase histories but preserves interruption veto',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:11,saveMs:4,loadedSections:2});
+  scope.canvas.clientWidth=932;
+  const reset=perf.read();
+  assert.equal(reset.mineFrameWindow.phaseMines,0);
+  assert.equal(reset.mineFrameWindow.meshGenerationP95Ms,null);
+  assert.equal(reset.interruptionCount,1);
+  assert.equal(reset.continuousForegroundRun,false);
+});
+test('phase measurements cannot certify original GPU rollback, pixel parity or PWA release',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:11,saveMs:4,loadedSections:2});
+  const snap=perf.read();
+  assert.equal(snap.releaseCertified,false);
+  assert.equal(snap.nativeGpuRollbackProven,false);
+  assert.equal(snap.browserPixelParityProven,false);
+  assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
 });
