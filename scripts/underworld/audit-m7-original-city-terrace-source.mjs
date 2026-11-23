@@ -117,6 +117,19 @@ for(const [rx,rz] of regions){
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
   candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
   candidateThinUnderpassNoPlayerWalkingOrGpuVerified:true,
+  candidateThinUnderpassOriginalPlayerAabbFixturePassed:
+   underpass.originalPlayerAabbSealedFixturePassed===true,
+  candidateThinUnderpassOriginalPlayerAabbRadius:
+   underpass.originalPlayerAabbCollisionRadius??null,
+  candidateThinUnderpassOriginalPlayerAabbHeight:
+   underpass.originalPlayerAabbCollisionHeight??null,
+  candidateThinUnderpassOriginalPlayerBodySamples:
+   underpass.originalPlayerAabbFixtureBodySamples??null,
+  candidateThinUnderpassOriginalPlayerFlatSweeps:
+   underpass.originalPlayerAabbFixtureFlatSweeps??null,
+  candidateThinUnderpassUnverifiedPlayerElevationEdges:
+   underpass.originalPlayerAabbElevationChangesStillRequireStepPlayer??null,
+  candidateThinUnderpassRealStepPlayerAndWorldOverlaysNotTested:true,
   wholeCityEllipseGalleryCutsetAudited:cutset.ok===true,
   wholeCityEllipsePlannedColumns:cutset.totalColumns??null,
   wholeCityEllipseBlockedByMainGalleries:cutset.blockedColumns??null,
