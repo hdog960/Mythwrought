@@ -4,6 +4,7 @@ import {inspectMountainV8OptInSeed as inspect}
   from '../src/manual-biomes/mountain-v8-opt-in-seed-preflight.mjs';
 import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
 import {worldSlotKey,SELECTED_SEED_KEY} from '../src/seeds.mjs';
+import {saveFingerprint,SAVE_JOURNAL_SUFFIX} from '../src/persistence.mjs';
 import {activateFourRegionProfile,BIOME_PROFILE_SUFFIX}
   from '../src/manual-biomes/profile-storage.mjs';
 import {M7_ENVIRONMENT_GENERATOR,fourRegionProfile}
@@ -95,4 +96,17 @@ test('missing storage enumeration cannot certify an unused seed',()=>{
 test('invalid original world seed is rejected before reading storage',()=>{
   for(const seed of [1.5,2**33,NaN,Infinity,'179'])
     assert.throws(()=>inspect(storage(),seed),/Invalid original world seed/);
+});
+
+test('damaged primary and valid original journal remain protected and read-only',()=>{
+  const seed=2026,store=storage(),world=new VoxelWorld(seed);
+  assert.equal(world.set(0,-100,0,BLOCK.AIR),true);
+  const raw=JSON.stringify(world.save());
+  store.setItem(worldSlotKey(seed),'{damaged-primary');
+  store.setItem(worldSlotKey(seed)+SAVE_JOURNAL_SUFFIX,
+    JSON.stringify({version:1,seed,checksum:saveFingerprint(raw),raw}));
+  const out=inspectWithoutWrites(store,seed);
+  assert.equal(out.reason,'existing-or-recovered-original-save');
+  assert.equal(out.knownStorageUnclaimed,false);
+  assert.equal(store.getItem(worldSlotKey(seed)),'{damaged-primary');
 });
