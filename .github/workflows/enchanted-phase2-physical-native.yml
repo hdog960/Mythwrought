@@ -1,7 +1,6 @@
-# Only target-directed read-only original-M7 terrain search was changed.
-# Reuse previously verified native graph 2/2 #45092293445 and stratified
-# per-biome test 1/1 #45092467293. Test seed -88 Plains border with
-# actual physics, and preserve earlier Desert route, not broad CI/Chromium.
+# Corrected only a Desert test fixture that mislabeled a real warped-biome
+# start. Reuse passing seed -88 directed survey from #45092615665 and
+# prior source/native graph admissions. No repeated broad CI or Chromium.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -31,7 +30,7 @@ jobs:
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
           node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
-      - name: Only new target-directed genuine M7 Plains and Desert traversals
+      - name: Only corrected authentic Desert target-directed traversal
         run: |
-          node --test --test-name-pattern="target-directed" \
+          node --test --test-name-pattern="target-directed search retains" \
             tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
