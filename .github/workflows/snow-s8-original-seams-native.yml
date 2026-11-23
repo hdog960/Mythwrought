@@ -1,0 +1,41 @@
+name: Snow S8 original post-Desert snow-to-desert and mountain seam
+on:
+  push:
+    branches:
+      - research/snow-s8-post-desert-real-seams-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s8-original-seams-native.yml'
+      - 'tests/snowy-s8-post-desert-original-climate-seams.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s8-original-seams-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  authentic-current-original-seams:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Exact pinned independent production Desert source checkout
+        uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check exact source identity, source-only no main writes
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s7-mesh-tint-source-cache.mjs)" = f5a538405085d994d52c1f68bafd587edf182e30
+          node --check tests/snowy-s8-post-desert-original-climate-seams.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Two original seeds, both real one-cell winter geological seam types
+        run: |
+          node --test tests/snowy-s8-post-desert-original-climate-seams.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
