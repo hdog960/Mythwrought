@@ -42,5 +42,5 @@ jobs:
           test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
           test ! -f candidate/src/manual-biomes/desert-seam-shader.mjs
           node --check candidate/tests/desert-p3-composed-gpu-rollback-original.test.mjs
-      - name: Only three new real composed-source staging and fault injection cases
+      - name: Validate original composed-source GPU rollback with same-realm Float32Array fixture
         run: cd candidate && node --test tests/desert-p3-composed-gpu-rollback-original.test.mjs
