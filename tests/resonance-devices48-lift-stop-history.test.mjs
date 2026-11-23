@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluateLiftStopHistory} from '../src/resonance/devices48/lift-stop-history-v1.mjs';
+const frame=(tick,clearCandidate=true)=>({contract:'resonance48-lift-intertick-occupancy-v1',worldId:'world1',fromTick:tick,toTick:tick+1,clearCandidate,movementAuthorized:false,passengerTransportAuthorized:false,continuousCollisionProven:false,physicsBound:false,authoritativeDelivery:false,productionBound:false});
+const run=frames=>evaluateLiftStopHistory({worldId:'world1',liftId:'lift1',frames});
+test('clear frames remain advisory and immutable',()=>{const r=run([frame(0),frame(1)]);assert.equal(r.consecutiveClear,2);assert.equal(r.movementAuthorized,false);assert.equal(r.stopRequired,false);assert.ok(Object.isFrozen(r.observations));assert.ok(Object.isFrozen(r.observations[0]));});
+test('obstruction latches stop at latest tick',()=>{const r=run([frame(0),frame(1,false)]);assert.equal(r.stopRequired,true);assert.equal(r.firstBlockedTick,2);assert.equal(r.consecutiveClear,0);});
+test('clear after obstruction does not authorize movement',()=>{const r=run([frame(0,false),frame(1),frame(2)]);assert.equal(r.stopRequired,false);assert.equal(r.firstBlockedTick,1);assert.equal(r.movementAuthorized,false);assert.equal(r.consecutiveClear,2);});
+test('skipped tick rejected',()=>assert.throws(()=>run([frame(0),frame(2)])));
+test('cross world rejected',()=>assert.throws(()=>run([{...frame(0),worldId:'other'}])));
+test('forged movement authority rejected',()=>assert.throws(()=>run([{...frame(0),movementAuthorized:true}])));
+test('forged power delivery rejected',()=>assert.throws(()=>run([{...frame(0),authoritativeDelivery:true}])));
+test('forged continuous collision proof rejected',()=>assert.throws(()=>run([{...frame(0),continuousCollisionProven:true}])));
+test('wrong contract rejected',()=>assert.throws(()=>run([{...frame(0),contract:'other'}])));
+test('invalid bounded history rejected',()=>{assert.throws(()=>run([]));assert.throws(()=>run(Array.from({length:17},(_,i)=>frame(i))));});
+test('invalid tick and identity rejected',()=>{assert.throws(()=>run([{...frame(0),toTick:4}]));assert.throws(()=>evaluateLiftStopHistory({worldId:'world1',liftId:'!',frames:[frame(0)]}));});
+test('input order matters and repeated frame rejected',()=>assert.throws(()=>run([frame(0),frame(0)])));
