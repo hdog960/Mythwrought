@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '4a6ab235c14077e547cce945ea4e7a8447ee35a6');
+    'b2ece34723fe1e0a2264e0d0968510726c75b90d');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -941,7 +941,7 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   const snap=perf.read();
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
-  assert.equal(snap.protocol,'291-local-4viewport-v1');
+  assert.equal(snap.protocol,'291-local-4viewport-v2');
 });
 
 test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
@@ -1080,4 +1080,122 @@ test('source viewport/seed resets discard old interrupted A/B session, not saved
   perf.mine(10,{cell:[3,-23,8],previous:3,next:0});
   scope.world.seed=181;
   assert.equal(perf.read().mineWitness.length,0);
+});
+
+test('original saved-mine window is idle before source-original deep block actions',()=>{
+  const {perf}=local291PerfFixture();
+  for(let i=0;i<200;i++)perf.frame(i*16);
+  const snap=perf.read();
+  assert.equal(snap.mineFrameWindow.phase,'idle');
+  assert.equal(snap.mineFrameWindow.savedMines,0);
+  assert.equal(snap.mineFrameWindow.frameGapsRecorded,0);
+  assert.equal(snap.mineFrameWindow.frameP95Ms,null);
+  assert.equal(snap.frameGapsRecorded,199);
+});
+test('exact original collector closes AFTER 100 saved edits plus their final RAF gap',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[0,-28,0],previous:3,next:0});
+  assert.equal(perf.read().mineFrameWindow.phase,'active');
+  for(let i=1;i<100;i++){
+    perf.frame(i*16);
+    perf.mine(8,{cell:[i,-28,0],previous:3,next:0});
+  }
+  let win=perf.read().mineFrameWindow;
+  assert.equal(win.savedMines,100);
+  assert.equal(win.phase,'closing');
+  assert.equal(win.frameGapsRecorded,99);
+  perf.frame(1600);
+  win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'complete');
+  assert.equal(win.frameGapsRecorded,100);
+  assert.equal(win.frameP95Ms,16);
+  assert.equal(win.elapsedMs,1600);
+  assert.equal(win.slowFrames,0);
+  assert.equal(win.overflow,false);
+  assert.equal(win.interrupted,false);
+  assert.equal(perf.read().mineWitness.length,100);
+});
+test('idle frames after 100th true source mine never dilute the closed trial p95',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(10,{cell:[0,-25,2],previous:3,next:0});
+  for(let i=1;i<100;i++){
+    perf.frame(i*16);
+    perf.mine(10,{cell:[i,-25,2],previous:3,next:0});
+  }
+  perf.frame(1600);
+  const closed=perf.read().mineFrameWindow;
+  for(let i=1;i<200;i++)perf.frame(1600+i*90);
+  const later=perf.read();
+  assert.equal(later.mineFrameWindow.frameGapsRecorded,closed.frameGapsRecorded);
+  assert.equal(later.mineFrameWindow.frameP95Ms,closed.frameP95Ms);
+  assert.ok(later.rollingFrameP95Ms>closed.frameP95Ms);
+});
+test('first and last real deep mining frame stalls both remain inside the A/B trial',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(10,{cell:[0,-20,7],previous:3,next:0});
+  perf.frame(50);
+  for(let i=1;i<100;i++){
+    perf.mine(10,{cell:[i,-20,7],previous:3,next:0});
+    perf.frame(50+i*16);
+  }
+  const snap=perf.read().mineFrameWindow;
+  assert.equal(snap.phase,'complete');
+  assert.equal(snap.savedMines,100);
+  assert.equal(snap.frameGapsRecorded,100);
+  assert.equal(snap.slowFrames,1);
+});
+test('source-hidden or WebGL/BFCache interruption forbids resumed mining trial',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[0,-40,3],previous:3,next:0});
+  perf.frame(16);perf.interrupt();
+  const interrupted=perf.read().mineFrameWindow;
+  assert.equal(interrupted.phase,'interrupted');
+  assert.equal(interrupted.interrupted,true);
+  perf.frame(32);
+  for(let i=1;i<100;i++)perf.mine(8,{cell:[i,-40,3],previous:3,next:0});
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+  assert.equal(perf.read().mineFrameWindow.savedMines,1);
+});
+test('huge original foreground gap cannot vanish from true mining window',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(6,{cell:[0,-30,1],previous:3,next:0});
+  perf.frame(1201);
+  assert.equal(perf.read().mineFrameWindow.invalid,true);
+  assert.equal(perf.read().mineFrameWindow.frameGapsRecorded,0);
+});
+test('original minetrial frame samples remain bounded even without 100 edits',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(6,{cell:[0,-28,4],previous:3,next:0});
+  for(let i=1;i<=16385;i++)perf.frame(i*16);
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'active');
+  assert.equal(win.frameGapsRecorded,16384);
+  assert.equal(win.maxFrameSamples,16384);
+  assert.equal(win.overflow,true);
+});
+test('viewport and seed resets clear only local A/B trial evidence, never world saves',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(7,{cell:[0,-20,0],previous:3,next:0});
+  perf.frame(16);
+  scope.canvas.clientHeight=430;
+  let snap=perf.read();
+  assert.equal(snap.mineFrameWindow.phase,'idle');
+  assert.equal(snap.mineFrameWindow.frameGapsRecorded,0);
+  assert.equal(snap.mineFrameWindow.savedMines,0);
+  perf.mine(9,{cell:[1,-20,0],previous:3,next:0});
+  scope.world.seed=1001;
+  snap=perf.read();
+  assert.equal(snap.mineFrameWindow.phase,'idle');
+  assert.equal(snap.mineFrameWindow.savedMines,0);
+  assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
+});
+test('original trial frame summary is frozen, numeric, and not release certified',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(13,{cell:[0,-19,2],previous:3,next:0});
+  const snap=perf.read();
+  assert.equal(Object.isFrozen(snap.mineFrameWindow),true);
+  assert.equal(snap.protocol,'291-local-4viewport-v2');
+  assert.equal(snap.releaseCertified,false);
+  assert.equal(snap.browserPixelParityProven,false);
 });
