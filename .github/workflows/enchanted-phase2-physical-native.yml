@@ -1,8 +1,7 @@
-# Isolated original-M7 proven bounded BFS source restored exactly to
-# native accepted blob from Actions #45092293445. Retain the source-real
-# stratified Enchanted/Desert acceptance from Actions #45092467293.
-# Run these THREE focused original physics/source tests only: no browser,
-# full suite, other developer workflows, CI cancellation or deployment.
+# ENCHANTED PHASE 2: isolated original source, physics per-edge admission.
+# Only new source and its tests. Reuse accepted old BFS #45093229883,
+# Moonwillow native/WebGL2, 288-chunk voxel and cache source evidence.
+# No broad suite, other developer workflows, Chromium or deployment.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-restored-bfs-crossings:
+  original-m7-per-edge-physics-research:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -27,13 +26,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify exactly restored native source and three focused test bodies
+      - name: Exact unchanged M7 and new source syntax
         run: |
           git rev-parse HEAD
-          git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs
+          node --check src/manual-biomes/enchanted-original-physics-route.mjs
+          node --check tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
           test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
-          node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
-          node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
-      - name: Proven source-grounded M7 bounds, original stepPlayer and all-climate survey
-        run: |
-          node --test tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
+      - name: Source-authentic original M7 per-edge physics routes and capped seed -88
+        run: node --test tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
