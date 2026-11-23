@@ -33,5 +33,10 @@ jobs:
           test "$(git hash-object src/manual-biomes/enchanted-original-route-evidence.mjs)" = "9511e0a3709812f24f26edeb011fb105ec44a434"
           node --check src/manual-biomes/enchanted-original-authored-mouth-audit.mjs
           node --check tests/manual-biomes/enchanted-original-authored-mouth-real-m7.test.mjs
-      - name: Only two new original M7 authored mouth and real physics source cases
-        run: node --test tests/manual-biomes/enchanted-original-authored-mouth-real-m7.test.mjs
+          node --check src/manual-biomes/enchanted-original-physics-tick-trace.mjs
+          node --check tests/manual-biomes/enchanted-original-physics-tick-trace-real-m7.test.mjs
+      - name: Only four new original M7 source/physics test bodies
+        run: |
+          node --test \
+            tests/manual-biomes/enchanted-original-authored-mouth-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-original-physics-tick-trace-real-m7.test.mjs
