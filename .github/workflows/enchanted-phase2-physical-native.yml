@@ -1,7 +1,7 @@
 # Enchanted Phase 2 isolated original-M7 source-grounded path search only.
-# One new read-only bounded AABB source-path helper and its original real
-# stepPlayer admission tests. Reuse #45088942632 and #45089099828:
-# no repeated unchanged legacy tests, browser galleries or broad CI.
+# Changed test only: stratified real original-M7 path discovery by climate
+# and seed. Prior 2/2 new bounded path source gate #45092293445 passed.
+# Reuse prior source/physics evidence; no repeated tests, broad CI or browser.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  source-real-bounded-pedestrian-paths:
+  source-real-stratified-climate-pedestrian-survey:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -31,5 +31,7 @@ jobs:
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
           node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
-      - name: Only changed source-real bounded climate pedestrian admission
-        run: node --test tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
+      - name: Only new original M7 per-climate physical survey
+        run: |
+          node --test --test-name-pattern="stratified bounded REAL M7" \
+            tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
