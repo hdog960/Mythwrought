@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {summarizeLampBudget as summarize} from '../src/resonance/devices48/lamp-bank-budget-v1.mjs';
+const frame=lamps=>({worldId:'worldA',tick:3,lamps});
+const lamp=(deviceId,desiredOn,demand,observedGrant)=>({deviceId,desiredOn,demand,observedGrant});
+test('full grant lights preview',()=>{const r=summarize(frame([lamp('a',true,1,1)]));assert.equal(r.previewLitCount,1);assert.equal(r.previewDeficit,0);assert.equal(r.activationAuthorized,false)});
+test('deficit darkens preview',()=>{const r=summarize(frame([lamp('a',true,2,1)]));assert.equal(r.previewLitCount,0);assert.equal(r.previewDeficit,1)});
+test('off cannot request',()=>assert.throws(()=>summarize(frame([lamp('a',false,1,0)]))));
+test('off stays dark',()=>assert.equal(summarize(frame([lamp('a',false,0,0)])).previewLitCount,0));
+test('sorted IDs',()=>assert.deepEqual(summarize(frame([lamp('b',true,1,1),lamp('a',true,1,0)])).lamps.map(x=>x.deviceId),['a','b']));
+test('duplicate rejected',()=>assert.throws(()=>summarize(frame([lamp('a',true,1,1),lamp('a',true,1,1)]))));
+test('forged authority rejected',()=>assert.throws(()=>summarize({...frame([lamp('a',true,1,1)]),authoritativeDelivery:true})));
+test('negative grant rejected',()=>assert.throws(()=>summarize(frame([lamp('a',true,1,-1)]))));
+test('roster bounded',()=>assert.throws(()=>summarize(frame(Array.from({length:9},(_,i)=>lamp('l'+i,true,1,1))))));
+test('immutable output',()=>{const r=summarize(frame([lamp('a',true,1,1)]));assert.ok(Object.isFrozen(r));assert.ok(Object.isFrozen(r.lamps));assert.ok(Object.isFrozen(r.lamps[0]))});
+test('aggregate arithmetic',()=>{const r=summarize(frame([lamp('a',true,2,1),lamp('b',true,3,3)]));assert.deepEqual([r.previewDemand,r.previewUsed,r.previewDeficit,r.previewLitCount],[5,4,1,1])});
