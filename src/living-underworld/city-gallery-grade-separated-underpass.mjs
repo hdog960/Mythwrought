@@ -37,7 +37,6 @@ const failure=(seed,rx,rz,reason,extra={})=>Object.freeze({
  ok:false,sitePresent:true,seed,rx,rz,reason,...extra,
  existingMainGalleryModified:false,existingM7Modified:false,
  cityFloorApproved:false,settlementPlaced:false,
- hypotheticalOriginalMotionSimulated:false,
  actualPlayerWalkingVerified:false,worldChanged:false
 });
 const cityEllipse=(c,x,z)=>{
