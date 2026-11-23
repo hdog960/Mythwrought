@@ -1,0 +1,55 @@
+name: Builder D39 immutable original wall multi-course loop and backface ONLY
+on:
+  push:
+    branches:
+      - builder-d-d39-multicourse-root-topology-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d39-*'
+      - 'tests/building-pool/roadmap-d/d39-*'
+      - 'docs/building-pool/roadmap-d/D39_*'
+      - '.github/workflows/roadmap-d-d39-multicourse-root-source.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d39-unique-original-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-source-owned-d39-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Pin exact D38 parent, unmodified W16/17, original Pack2/voxel and source-only inherited gates
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '00a3dcbfef26b2277114afb22752cb95becc7c58'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d35-owner-wall-termination-and-bridge.mjs)" = '17dcde1a58ed6ac3b41d4996da581db9a89c8943'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d37-wall-pullout-fastener-contract.mjs)" = '3a1c59605504cce9f8debeff6c0344a00411bb8d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d38-wall-anchor-route-contract.mjs)" = '03d879502a67c030b866c43aaeae9f225b0de727'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d38-original-anchor-path-audit.mjs)" = '02b361e2b1ccf0e874a7314d94611b8f4a8475d3'
+          test "$(git rev-parse HEAD:src/voxel-shape-fit.mjs)" = 'ec5adc274d8b45c91d3dade81c3d9c2830380849'
+          test "$(git rev-parse HEAD:src/voxel-shape-interactions.mjs)" = '01be82e6c308e47a35fa6588cc6ed1ebeafca307'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check new D39 source and targeted tests ONLY
+        run: |
+          node --check src/building-pool/roadmap-d/d39-actual-multicourse-wall-loop.mjs
+          node --check src/building-pool/roadmap-d/d39-original-uncertified-wall-loop-audit.mjs
+          node --check tests/building-pool/roadmap-d/d39-original-wall-loop.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d39-original-multicourse.source.test.mjs
+      - name: ONLY four new pure and two new genuine original W16-W17 source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d39-original-wall-loop.pure.test.mjs \
+            tests/building-pool/roadmap-d/d39-original-multicourse.source.test.mjs
