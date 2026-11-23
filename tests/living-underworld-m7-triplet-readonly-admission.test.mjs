@@ -85,6 +85,21 @@ const city=()=>({
   candidateThinUnderpassNoReaderCallsDuringSyntheticMotion:true,
   candidateThinUnderpassOriginalReaderBindingsUnchanged:true,
   candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
+  candidateThinUnderpassCoordinateCoveragePassed:true,
+  candidateThinUnderpassRoleCoordinateIdentityPassed:true,
+  candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
+  candidateThinUnderpassPadDistinctCells:135,
+  candidateThinUnderpassBridgePadOverlapCells:12,
+  candidateThinUnderpassCombinedDistinctCells:(rz===0?248:276)+135-12,
+  candidateThinUnderpassStageRoleCells:{
+   bridge:{naturalAt:rz===0?248:276,authoredAt:rz===0?248:276,
+    editedAt:rz===0?248:276,protectedAt:rz===0?248:276},
+   pad:{naturalAt:135,authoredAt:135,editedAt:135,protectedAt:135}
+  },
+  candidateThinUnderpassStageDuplicateCalls:{
+   bridge:{naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0},
+   pad:{naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0}
+  },
   fullJoinedCandidateOriginalM7SourceChecks:8815,
   fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
   fullPadSourceChecks:200,
@@ -125,6 +140,7 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.reportRowArithmeticReconciled,true);
  assert.equal(r.proposalEvidenceAllPassed,true);
  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
@@ -356,5 +372,46 @@ test('Phase24 fabricated totals, skipped methods and unexpected motion reads ref
   const r=check({city:c});
   assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
   assert.equal(r.releaseApproved,false);
+ }
+});
+
+test('Phase25 a prior seven-grade physics pass cannot hide mismatched source coordinates',()=>{
+ const c=city();
+ c.rows[0].candidateThinUnderpassStageRoleCells.bridge.naturalAt--;
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.proposalEvidenceAllPassed,true);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_SOURCE_COORDINATE_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+});
+test('Phase25 stage overlap and combined distinct cells must be internally consistent',()=>{
+ for(const mutate of [
+  row=>row.candidateThinUnderpassBridgePadOverlapCells=-1,
+  row=>row.candidateThinUnderpassBridgePadOverlapCells=136,
+  row=>row.candidateThinUnderpassCombinedDistinctCells++,
+  row=>row.candidateThinUnderpassBridgeDistinctCells--,
+  row=>row.candidateThinUnderpassPadDistinctCells=134
+ ]){
+  const c=city();mutate(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase25 skipped pad roles, duplicate bridge queries and absent stage evidence hold',()=>{
+ for(const mutate of [
+  row=>row.candidateThinUnderpassStageRoleCells.pad.protectedAt--,
+  row=>row.candidateThinUnderpassStageDuplicateCalls.bridge.editedAt++,
+  row=>row.candidateThinUnderpassCoordinateCoveragePassed=false,
+  row=>row.candidateThinUnderpassRoleCoordinateIdentityPassed=false,
+  row=>{delete row.candidateThinUnderpassStageRoleCells.bridge},
+  row=>{row.candidateThinUnderpassStageDuplicateCalls.pad=null}
+ ]){
+  const c=city();mutate(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
  }
 });
