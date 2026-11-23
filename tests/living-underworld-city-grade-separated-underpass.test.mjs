@@ -1,3 +1,7 @@
+import {auditCandidateUnderpassStepPlayer}
+ from '../src/living-underworld/city-underpass-step-player-fixture.mjs';
+import {auditCandidateUnderpassContinuousStepPlayer}
+ from '../src/living-underworld/city-underpass-continuous-walk-fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {planGradeSeparatedCityUnderpass,
@@ -259,3 +263,49 @@ test('malformed original center-side landing flags and block ID fail closed',()=
   sourceOwnedDeepSelection:deep(2,0)
  }),/Invalid original M7 underpass landing material/);
 });
+
+
+// Phase 22: reuse this file's EXACT ORIGINAL DETACHED seed-179 geometry and
+// synthetic all-stone old-world reader. This deliberately DOES NOT certify
+// genuine original M7, authored AIR, existing edits, GPU or an installed PWA.
+// No redundant second planner scan: deep() and plan() caches are shared above.
+for(const [rx,rz,expectedFrom,expectedTo] of [
+ [2,0,{x:643,y:-132,z:151},{x:625,y:-132,z:133}],
+ [2,1,{x:669,y:-182,z:418},{x:649,y:-182,z:396}]
+]){
+ test('seed179 ORIGINAL detached site ('+rx+','+rz+
+  ') checks all 7 grade edges in both directions and complete physical walking',()=>{
+  const selected=deep(rx,rz),r=plan(rx,rz);
+  assert.equal(selected.ok,true);
+  assert.equal(r.ok,true);
+  assert.deepEqual(r.from,expectedFrom);
+  assert.deepEqual(r.to,expectedTo);
+  assert.equal(r.originalPlayerAabbFixtureSkippedElevationEdges,7);
+  const args={
+   accessProposal:selected.joined.sourceAuditedCityAccessRouteGeometry,
+   underpassProposal:r.proposal,
+   centerSidePad:r.centerSidePad,floorY:r.floorY
+  };
+  const grade=auditCandidateUnderpassStepPlayer(args);
+  assert.equal(grade.ok,true,
+   'Exact ORIGINAL detached site per-edge original stepPlayer refused: '+
+    JSON.stringify(grade));
+  assert.equal(grade.elevationEdges,7);
+  assert.equal(grade.forwardChecks,7);
+  assert.equal(grade.reverseChecks,7);
+  assert.equal(grade.actualOriginalStepPlayerInvoked,true);
+  assert.equal(grade.genuineWorldWalkingProven,false);
+  const continuous=auditCandidateUnderpassContinuousStepPlayer(args);
+  assert.equal(continuous.ok,true,
+   'Exact ORIGINAL detached site uninterrupted player walking refused: '+
+    JSON.stringify(continuous));
+  assert.equal(continuous.gradeElevationEdges,7);
+  assert.equal(continuous.completeForwardAndReverseWithoutPositionReset,true);
+  assert.equal(continuous.directions.length,2);
+  assert.equal(continuous.originalM7SourceAuthenticated,undefined);
+  assert.equal(continuous.authenticOriginalM7WorldTested,false);
+  assert.equal(continuous.realWorldWalkabilityProven,false);
+  assert.equal(continuous.originalWorldModified,false);
+  assert.equal(continuous.noWorldWrites,true);
+ });
+}
