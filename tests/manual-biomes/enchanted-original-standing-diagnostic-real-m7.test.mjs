@@ -57,14 +57,13 @@ test('the exact prior 52 original seed -88 Enchanted border rejection sites are 
     const original=originalM7PedestrianCap(world,x,z);
     assert.equal(original,null,'exact prior near-edge original cap was rejected');
     const d=diagnoseOriginalM7Standing(world,x,z);
-    const e=diagnoseOriginalM7Standing(alternative,x,z);
     assert.equal(d.originalCapMatches,true);
-    // The audit is scoped to original standing provenance; it does not
-    // sample or infer newer optional tree occupancy from an M7 baseline.
-    assert.equal(e.overlaySize,d.overlaySize);
-    assert.equal(e.reason,d.reason,
-      'original source/overlay rejection must not depend on opt-in candidate trees');
-    assert.equal(d.overlayTop,e.overlayTop);
+    // The diagnostic deliberately refuses experimental worlds. Their
+    // ORIGINAL column plan still must match historical M7 exactly,
+    // without treating opt-in candidate collision as the same admission.
+    assert.deepEqual([...alternative._columnPlan(x,z)],
+      [...world._columnPlan(x,z)],
+      'experimental candidate must never rewrite original M7 source overlay');
     assert.equal(d.legacyTop,terrainHeight(x,z,seed));
     assert.ok(d.fallback.probes<=ENCHANTED_STANDING_DIAGNOSTIC_MAX_PROBES+1);
     assert.ok(d.reason!=='accepted');
