@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '640eb74638d3feb2a54dff1403f302bd56302c36');
+    '73da604008cfb7601ccf8c55e3f5502610c48cb6');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -915,7 +915,7 @@ test('hidden, context loss, and BFCache pagehide latch source interruption befor
     "window.addEventListener('pagehide',"
   ];
   const sourceCalls=source.split('near291Interrupt();').length-1;
-  assert.equal(sourceCalls,3);
+  assert.equal(sourceCalls,6);
   for(const label of labels){
     const anchor=source.indexOf(label);
     const next=source.indexOf('near291Interrupt();',anchor);
@@ -950,7 +950,7 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   const snap=perf.read();
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
-  assert.equal(snap.protocol,'291-local-4viewport-v3');
+  assert.equal(snap.protocol,'291-local-4viewport-v4');
 });
 
 test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
@@ -1050,13 +1050,16 @@ test('new exact source only captures real saved original deep MINE result; no sy
   assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
 });
 
-test('real source interruption history starts clean until the first eligible measured sample',()=>{
+test('real source interruption latch applies only DURING genuinely saved deep mine trial',()=>{
   const {perf}=local291PerfFixture();
   perf.interrupt();
   assert.equal(perf.read().interruptionCount,0);
   assert.equal(perf.read().continuousForegroundRun,true);
   perf.frame(0);perf.frame(16);
   assert.equal(perf.read().frameGapsRecorded,1);
+  perf.interrupt(); // opening settings before starting work is legitimate
+  assert.equal(perf.read().interruptionCount,0);
+  perf.mine(9,{cell:[1,-35,4],previous:3,next:0});
   perf.interrupt();
   const snap=perf.read();
   assert.equal(snap.interruptionCount,1);
@@ -1211,7 +1214,7 @@ test('original trial frame summary is frozen, numeric, and not release certified
   perf.frame(0);perf.mine(13,{cell:[0,-19,2],previous:3,next:0});
   const snap=perf.read();
   assert.equal(Object.isFrozen(snap.mineFrameWindow),true);
-  assert.equal(snap.protocol,'291-local-4viewport-v3');
+  assert.equal(snap.protocol,'291-local-4viewport-v4');
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.browserPixelParityProven,false);
 });
@@ -1428,4 +1431,88 @@ test('source original successful deep MINE timing preserves double precision, no
   perf.mine(90.00006,{cell:[1,-30,1],previous:3,next:0});
   assert.equal(perf.read().miningActionP95Ms,90.00006);
   assert.ok(perf.read().mineFrameWindow.phase==='active');
+});
+
+
+test('actual original backing framebuffer width change resets mining A/B despite identical CSS',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(5,{cell:[1,-30,3],previous:3,next:0});
+  perf.upload(12);
+  assert.equal(perf.read().trueSavedDeepMines,1);
+  assert.equal(perf.read().mineFrameWindow.phase,'active');
+  const oldCss=[scope.canvas.clientWidth,scope.canvas.clientHeight];
+  scope.canvas.width=1912;
+  const snap=perf.read();
+  assert.deepEqual(snap.viewportCss,oldCss);
+  assert.deepEqual(snap.viewportPixels,[1912,440]);
+  assert.equal(snap.trueSavedDeepMines,0);
+  assert.equal(snap.mineFrameWindow.phase,'idle');
+  assert.equal(snap.mineFrameWindow.successfulGuardedUploads,0);
+  assert.equal(snap.mineWitness.length,0);
+});
+test('original Safari backing framebuffer height change independently resets source trial',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.mine(6,{cell:[2,-30,3],previous:3,next:0});
+  scope.canvas.height=880;
+  assert.equal(perf.read().trueSavedDeepMines,0);
+  assert.equal(perf.read().mineFrameWindow.phase,'idle');
+  assert.equal(perf.read().mineFrameWindow.savedMines,0);
+});
+test('original settings overlay active during deep mining immediately poisons foreground trial',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[2,-40,4],previous:3,next:0});
+  scope.help.hidden=false;
+  perf.frame(16);
+  let state=perf.read();
+  assert.equal(state.mineFrameWindow.phase,'interrupted');
+  assert.equal(state.mineFrameWindow.interrupted,true);
+  assert.equal(state.interruptionCount,1);
+  scope.help.hidden=true;
+  perf.frame(32);
+  state=perf.read();
+  assert.equal(state.continuousForegroundRun,false);
+  assert.equal(state.mineFrameWindow.phase,'interrupted');
+});
+test('original exploration map pause prevents accepting a recovered mining trial',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(8,{cell:[2,-40,4],previous:3,next:0});
+  scope.exploration.isOpen=()=>true;
+  perf.frame(20);
+  assert.equal(perf.read().mineFrameWindow.interrupted,true);
+  assert.equal(perf.read().interruptionCount,1);
+  scope.exploration.isOpen=()=>false;
+  perf.frame(36);
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+});
+test('original settings and map callback source latch before any following draw',()=>{
+  one("onOpen:()=>{near291Interrupt();cancelAllPointers();}");
+  one("document.getElementById('menu').onclick=()=>{near291Interrupt();");
+  const begin=source.indexOf("  function near291RecordFrame(now){");
+  const end=source.indexOf("  function near291TrialUpload(duration){",begin);
+  const real=source.slice(begin,end);
+  assert.ok(real.includes("if(w.phase==='active'||w.phase==='closing')near291Interrupt();"));
+  assert.ok(real.includes("document.hidden||!help.hidden||exploration.isOpen()||graphicsLost"));
+});
+test('opening settings before start or after completed mine trial cannot invalidate it',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.interrupt(); // user visited settings before start
+  assert.equal(perf.read().continuousForegroundRun,true);
+  perf.frame(16);
+  const candidate=perf.startFirst();
+  perf.upload(7);
+  perf.mine(8,{cell:[0,-30,0],previous:3,next:0},perf.finishFirst());
+  for(let i=1;i<100;i++){
+    perf.frame(16+i*16);
+    perf.mine(8,{cell:[i,-30,0],previous:3,next:0});
+  }
+  perf.frame(1616);perf.frame(1632);
+  assert.equal(perf.read().mineFrameWindow.phase,'complete');
+  perf.interrupt(); // viewing stats AFTER completion is not a regression
+  const summary=perf.read();
+  assert.equal(summary.mineFrameWindow.phase,'complete');
+  assert.equal(summary.continuousForegroundRun,true);
+  assert.equal(summary.interruptionCount,0);
+  assert.equal(summary.trueSavedDeepMines,100);
 });
