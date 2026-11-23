@@ -186,6 +186,12 @@ for(const [rx,rz] of regions){
   candidateThinUnderpassSourceOverlapTotalComparisons:
    underpass.underpassSourceOverlapTotalComparisons??null,
   candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly:true,
+  candidateThinUnderpassSourceOverlapRefusal:
+   underpass.overlapValueReason??null,
+  candidateThinUnderpassSourceOverlapFirstMismatch:
+   underpass.overlapValueFirstMismatch??null,
+  candidateThinUnderpassSourceOverlapRefusedSharedCells:
+   underpass.overlapValueObservedSharedCells??null,
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
   candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
