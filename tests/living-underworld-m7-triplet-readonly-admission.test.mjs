@@ -76,6 +76,14 @@ const city=()=>({
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:rz===0?8815:12711,
   candidateThinUnderpassTotalSourceVisits:
    rz===0?8815+248+135:12711+276+135,
+  candidateThinUnderpassActualReaderCallsByRole:{
+   naturalAt:rz===0?383:411,authoredAt:rz===0?383:411,
+   editedAt:rz===0?383:411,protectedAt:rz===0?383:411
+  },
+  candidateThinUnderpassActualReaderMethodCalls:rz===0?1532:1644,
+  candidateThinUnderpassExpectedReaderCallsPerRole:rz===0?383:411,
+  candidateThinUnderpassNoReaderCallsDuringSyntheticMotion:true,
+  candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
   fullJoinedCandidateOriginalM7SourceChecks:8815,
   fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
   fullPadSourceChecks:200,
@@ -320,4 +328,32 @@ test('Phase23 future sealed player geometry remains not a real-world/PWA accepta
  assert.equal(r.iPhoneGpuVerified,false);
  assert.equal(r.installedPwaVerified,false);
  assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase24 original source reader role census is mandatory and independent of passing physics',()=>{
+ const r=check();
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ for(const role of ['naturalAt','authoredAt','editedAt','protectedAt']){
+  const c=city();c.rows[0].candidateThinUnderpassActualReaderCallsByRole[role]--;
+  const result=check({city:c});
+  assert.equal(result.citySourceSafe,true);
+  assert.equal(result.cityThinUnderpassHypotheticalMovementSafe,false,role);
+  assert.equal(result.releaseApproved,false);
+ }
+});
+test('Phase24 fabricated totals, skipped methods and unexpected motion reads refuse',()=>{
+ for(const mutate of [
+  row=>{row.candidateThinUnderpassActualReaderMethodCalls--},
+  row=>{row.candidateThinUnderpassExpectedReaderCallsPerRole++},
+  row=>{row.candidateThinUnderpassNoReaderCallsDuringSyntheticMotion=false},
+  row=>{row.candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly=false},
+  row=>{row.candidateThinUnderpassActualReaderCallsByRole=null},
+  row=>{delete row.candidateThinUnderpassActualReaderCallsByRole.naturalAt}
+ ]){
+  const c=city();mutate(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
 });
