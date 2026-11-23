@@ -141,7 +141,8 @@ function transverseClearance(eye,unit,box,entry){
  ]));
  return {margin,seamWithin2e6:margin<=2e-6};
 }
-export function auditOriginalHearthYaw3SourceFirstFaceOwnership(){
+export function auditOriginalHearthYaw3SourceFirstFaceOwnership({includeFullWarningRows=false}={}){
+ ensure(typeof includeFullWarningRows==='boolean','invalid witness option');
  const c=HEARTH_SOURCE_FACE_STUDY,original=buildOriginalHearthYaw3ReadOnlyLayer();
  const reference=auditOriginalHearthYaw3StrictWorldRayGrid();
  ensure(original.trueWorldStage.length/9===1512&&original.boxes.length===42&&
@@ -174,6 +175,7 @@ export function auditOriginalHearthYaw3SourceFirstFaceOwnership(){
   maxTriangleContactDistanceOutsideOwnAuthoredBox:0};
  const examples={differentBox:[],sameBox:[],triangleAhead:[],
   selectionAhead:[],priorBoxInterior:[],unoccludedTriangle:[]};
+ const fullWarningRows=[];
  const rayGroup=new Map();
  for(let iy=0;iy<yy.length;iy++)for(let iz=0;iz<zz.length;iz++){
   const group=[];
@@ -250,8 +252,10 @@ export function auditOriginalHearthYaw3SourceFirstFaceOwnership(){
     otherSourceBoxesContainingRayBeforeTriangle:priorOther.slice(0,8),
     originalTriangleHitpointOutsideOwnAuthoredBoxDistance:ownContactSeparation,
     mathematicallyStrictSourceOnly:true,actualGpuRasterPixelMeasured:false};
+   if(includeFullWarningRows)fullWarningRows.push({...witness,
+     originalGridYIndex:iy,originalGridZIndex:iz,originalOffsetSourceY:shift});
    const groups=[
-    differentOwner?'differentBox':'sameBox',
+     differentOwner?'differentBox':'sameBox',
     strict<selection?'triangleAhead':'selectionAhead',
     priorSame||priorOther.length?'priorBoxInterior':'unoccludedTriangle'];
    for(const name of groups)if(examples[name].length<8)
@@ -300,7 +304,8 @@ export function auditOriginalHearthYaw3SourceFirstFaceOwnership(){
   originalRayGrid:{originalYLevels:yy.length,originalZLevels:zz.length,
    originalOffsets:[...c.sampleOffsets],total:totals.rays},
   totals,examples,
-  interpretation:{
+   ...(includeFullWarningRows?{fullWarningRows}:{}),
+   interpretation:{
    insideOtherBoxBeforeTriangleIsSourceVolumeOcclusionOnlyNotGPUVisibility:true,
    strictTrianglePointMayBeOnAuthoredFaceButNotRenderedFragment:true,
    originalShaderCullingAndDepthNotExecuted:true,
@@ -330,4 +335,42 @@ export function attestOriginalNearestFaceSourceOwnership(){
  return {unchangedOriginalSourceContracts:required.length,
   originalTriangleBoxGroupingTwelveTrianglesPerAuthoredBox:true,
   sourceMathAndGpuPixelEvidenceAreNeverEquated:true};
+}
+
+
+/** Original read-only source ray evaluator on genuine hearth/yaw3 Float32
+ * renderer-world mesh and original Pack5 detailed 6-block raycast.
+ * This neither reads/writes user worlds nor observes GPU pixels. */
+export function createOriginalHearthYaw3SourceFaceProbe(){
+ const c=HEARTH_SOURCE_FACE_STUDY,source=buildOriginalHearthYaw3ReadOnlyLayer();
+ ensure(source.boxes.length===42&&source.trueWorldStage.length/9===1512,
+  'original authenticated source mesh changed');
+ return function inspect(localTarget){
+  ensure(Array.isArray(localTarget)&&localTarget.length===3&&
+   localTarget.every(Number.isFinite)&&localTarget[0]===0&&
+   localTarget[1]>=-.01&&localTarget[1]<=1.01&&
+   localTarget[2]>=-.01&&localTarget[2]<=1.01,
+   'invalid bounded source-only local aim');
+  const eye=[...c.eye],{yaw,pitch,vector,unit}=unitRay(eye,add([...c.anchor],localTarget)),
+   original=source.layer.raycast(eye,vector,6)?.distance??null,
+   box=sourceBoxFirst(eye,vector,source.boxes),
+   triangle=originalStrictFirstFace(eye,vector,source.trueWorldStage),
+   selected=box?.distance??null,rendered=triangle?.distance??null;
+  ensure(same(original,selected),'source probe original physical box parity drift');
+  if(!box||!triangle)return {localTarget,yaw,pitch,selected,rendered,
+   sameHitMembership:box===null&&triangle===null,sourceOnly:true};
+  const seam=transverseClearance(eye,unit,source.boxes[box.boxIndex],box);
+  ensure(seam,'original selected physical box seam unavailable');
+  return {localTarget,yaw,pitch,selected,rendered,
+   signedTriangleMinusSelection:rendered-selected,
+   originalDetailedSelectionBox:box.boxIndex,
+   originalStrictTriangleBox:triangle.boxIndex,
+   originalStrictTriangleFace:triangle.boxFaceIndex,
+   originalStrictBarycentricMinimum:triangle.minimumBarycentric,
+   originalNearestStrictTriangleFacesEye:triangle.faceTowardEye,
+   originalSelectedBoxThickness:box.throughThickness,
+   originalSelectedTangentialClearance:seam.margin,
+   sameHitMembership:true,sourceOnly:true,
+   actualGPUOrOriginalWorldPixelsMeasured:false};
+ };
 }
