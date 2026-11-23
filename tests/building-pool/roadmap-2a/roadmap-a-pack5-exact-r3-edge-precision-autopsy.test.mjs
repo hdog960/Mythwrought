@@ -12,7 +12,7 @@ const evidence=auditExactOriginalR3MeshBoxPrecision();
 
 test('authenticates unchanged original Pack5 slab, barycentric edge and real Float32 source vertex contracts',()=>{
  const c=attestUnchangedOriginalRayImplementations();
- assert.equal(c.contractCount,5);
+ assert.equal(c.contractCount,6);
  assert.equal(c.originalAuthoredSelectionSlabsUnchanged,true);
  assert.equal(c.originalBarycentricToleranceExactlyRead,true);
  assert.equal(c.originalMeshFloat32PositionsExactlyRead,true);

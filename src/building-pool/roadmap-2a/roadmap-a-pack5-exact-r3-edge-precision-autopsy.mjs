@@ -111,9 +111,15 @@ export function originalR3ActualGpuWorldFloat32Staging(localStaged,anchor){
  return world;
 }
 function nearestBox(eye,ray,boxes){
+ // Authentic original fixture.raycast first normalizes even the ostensibly
+ // unit forwardVector. Its IEEE-754 normalization can change a grazing box
+ // hit: do not silently skip this step in our independent slab comparison.
+ const length=Math.hypot(...ray);
+ fail(Number.isFinite(length)&&length>0,'original source ray normalization must remain finite');
+ const unit=ray.map(v=>v/length);
  let best=null,index=null;
  for(let k=0;k<boxes.length;k++){
-  const t=pureOriginalRayBoxDistance(eye,ray,boxes[k]);
+  const t=pureOriginalRayBoxDistance(eye,unit,boxes[k]);
   if(t!==null&&(best===null||t<best)){best=t;index=k;}
  }
  return {distance:best,index};
@@ -246,6 +252,7 @@ export function attestUnchangedOriginalRayImplementations(){
  const mesh=readFileSync(new URL('../../block-packs/pack-5/architectural-surfaces.mjs',import.meta.url),'utf8');
  const required=[
   [fixture,"if(Math.abs(d)<1e-12){if(origin[a]<box[a]||origin[a]>box[a+3])return null;continue;}"],
+  [fixture,"const unit=direction.map(v=>v/length);"],
   [ray,"if(u < -1e-7||u>1+1e-7)return null;"],
   [ray,"if(v < -1e-7||u+v>1+1e-7)return null;"],
   [mesh,"p.push(vertex[0]?x1:x0,vertex[1]?y1:y0,vertex[2]?z1:z0);"],
