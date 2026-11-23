@@ -114,9 +114,28 @@ export function classifyExactHeadOriginalM7Triplet({
     r.candidateThinUnderpassCombinedDistinctCells);
  if(!cityThinUnderpassIndependentFootprintSafe)
   reasons.push('RARE_CITY_UNDERPASS_INDEPENDENT_FOOTPRINT_HOLD');
+ // Independent Phase27 source-value snapshot: equal role coordinates alone
+ // cannot prove that underlying M7 geology/edits/ownership stayed stable.
+ const cityThinUnderpassOverlapSourceValuesSafe=
+  cityThinUnderpassIndependentFootprintSafe&&c.rows.every(r=>{
+   const overlap=r.candidateThinUnderpassExpectedOverlapCells;
+   const counts=r.candidateThinUnderpassSourceOverlapComparisonsByRole;
+   return Number.isSafeInteger(overlap)&&overlap>=0&&
+    yes(r.candidateThinUnderpassSourceOverlapValuesStable)&&
+    yes(r.candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly)&&
+    r.candidateThinUnderpassSourceOverlapExpectedSharedVoxels===overlap&&
+    r.candidateThinUnderpassSourceOverlapComparedSharedVoxels===overlap&&
+    r.candidateThinUnderpassSourceOverlapTotalComparisons===4*overlap&&
+    counts!=null&&typeof counts==='object'&&
+    ['naturalAt','authoredAt','editedAt','protectedAt'].every(role=>
+     counts[role]===overlap);
+  });
+ if(!cityThinUnderpassOverlapSourceValuesSafe)
+  reasons.push('RARE_CITY_UNDERPASS_SOURCE_OVERLAP_VALUE_HOLD');
  const cityThinUnderpassHypotheticalMovementSafe=citySourceSafe&&
   cityThinUnderpassExactCoordinateCoverageSafe&&
   cityThinUnderpassIndependentFootprintSafe&&
+  cityThinUnderpassOverlapSourceValuesSafe&&
   c.rows.every(r=>{
    const bridge=r.candidateThinUnderpassSourceVisits,
     pad=r.candidateThinUnderpassCenterLandingSourceVisits,
@@ -183,6 +202,7 @@ export function classifyExactHeadOriginalM7Triplet({
   cityThinUnderpassHypotheticalMovementSafe,
   cityThinUnderpassExactCoordinateCoverageSafe,
   cityThinUnderpassIndependentFootprintSafe,
+  cityThinUnderpassOverlapSourceValuesSafe,
   cityThinUnderpassRealM7WalkingUnverified:true,
   chunkRiskSafe,
   proposalEvidenceAllPassed:nativeTripletReportsPresent&&
