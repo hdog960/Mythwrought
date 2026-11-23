@@ -1,0 +1,42 @@
+name: Mountain V8 isolated opt-in and source registry preflight
+# ONE focused native full-checkout execution on workflow creation only.
+# Normal code/doc commits do not trigger this job. No workflow_dispatch,
+# no PR trigger, no broad root suite or iPhone simulation.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-integration-preflight-focused.yml
+
+permissions:
+  contents: read
+
+jobs:
+  original-source-opt-in:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact isolated original source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Native Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source identity and narrow syntax checks
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-opt-in-seed-preflight.mjs
+          node --check src/manual-biomes/mountain-v8-registry-ownership-audit.mjs
+          node --check tests/mountain-v8-opt-in-seed-preflight.test.mjs
+          node --check tests/mountain-v8-registry-ownership-audit.test.mjs
+      - name: Exactly eight original-seed plus three registry focused tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/mountain-v8-opt-in-seed-preflight.test.mjs \
+            tests/mountain-v8-registry-ownership-audit.test.mjs
