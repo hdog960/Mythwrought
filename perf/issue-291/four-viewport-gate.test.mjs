@@ -231,3 +231,14 @@ test('frame counts may differ; missed-frame count still cannot increase for 100 
     x.pairs[0].candidate.mineFrameWindow.slowFrames=3;
   },/slow-frame regression/);
 });
+
+test('both post-save RAF gaps are required before numerical acceptance',()=>{
+  verify(x=>{
+    x.pairs[0].candidate.mineFrameWindow.frameGapsRecorded=100;
+  },/real mining-frame trial/);
+  const data=make();
+  data.pairs[0].candidate.mineFrameWindow.frameGapsRecorded=101;
+  const result=evaluateIssue291FourViewportAB(data);
+  assert.equal(result.metricGatesPassed,true);
+  assert.equal(result.releaseCertified,false);
+});
