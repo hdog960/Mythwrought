@@ -1,0 +1,18 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {auditHudEvidenceSequence as audit, REQUIRED_VIEWPORTS} from "../src/resonance/devices48/hud-evidence-sequence-v1.mjs";
+const frame=(tick,revision,blocked=false)=>REQUIRED_VIEWPORTS.map((viewport,i)=>({viewport,tick,revision,world:"w",layout:"l",safe:!(blocked&&i===1),obstructions:blocked&&i===1?["thumb-left"]:[]}));
+const run=observations=>audit({observations,expectedWorld:"w",expectedLayout:"l"});
+test("deterministic canonical ordering and frozen display-only results",()=>{const a=run([...frame(2,2),...frame(1,1)]);const b=run([...frame(1,1),...frame(2,2)].reverse());assert.deepEqual(a,b);assert.equal(a.authority,"display-only");assert.equal(a.provenance,"caller-supplied-unverified");assert.ok(Object.isFrozen(a.frames[0].samples[0]));});
+test("blocked viewport rejects aggregate",()=>assert.equal(run(frame(1,1,true)).safe,false));
+test("missing viewport rejects",()=>assert.throws(()=>run(frame(1,1).slice(0,2))));
+test("duplicate viewport rejects",()=>assert.throws(()=>run([...frame(1,1),frame(1,1)[0]])));
+test("stale revisions reject",()=>assert.throws(()=>run([...frame(1,2),...frame(2,1)])));
+test("same tick competing revision rejects",()=>assert.throws(()=>run([...frame(1,1),...frame(1,2)])));
+test("cross world rejects",()=>assert.throws(()=>run(frame(1,1).map((x,i)=>i===0?{...x,world:"other"}:x))));
+test("unsafe mismatch rejects",()=>assert.throws(()=>run(frame(1,1).map((x,i)=>i===0?{...x,safe:false}:x))));
+test("prototype/accessor records reject",()=>assert.throws(()=>run(frame(1,1).map((x,i)=>i===0?Object.assign(Object.create({evil:true}),x):x))));
+test("unknown fields reject",()=>assert.throws(()=>run(frame(1,1).map((x,i)=>i===0?{...x,authorized:true}:x))));
+test("duplicate obstruction rejects",()=>assert.throws(()=>run(frame(1,1,true).map((x,i)=>i===1?{...x,obstructions:["a","a"]}:x))));
+test("nonfinite ticks reject",()=>assert.throws(()=>run(frame(1,1).map((x,i)=>i===0?{...x,tick:Infinity}:x))));
+test("bounded frames reject",()=>assert.throws(()=>run(Array.from({length:33},(_,i)=>frame(i,i)).flat())));

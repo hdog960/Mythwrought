@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewResonanceHud} from '../src/resonance/devices48/status-hud-v1.mjs';
+const sample=(width=667,height=375,missing=0)=>({viewport:{width,height},worldId:'w',networkId:'n',observations:[{worldId:'w',networkId:'n',tick:1,revision:0,produced:8,used:4,stored:3,requested:4+missing,missing,canActuate:false}]});
+for(const [w,h] of [[667,375],[844,390],[932,430]])test(`bounded landscape ${w}x${h}`,()=>{const r=previewResonanceHud(sample(w,h));assert.equal(r.ok,true);assert.equal(r.box.x+r.box.width<=w,true);assert.equal(r.box.x>100,true);assert.equal(r.box.y+r.box.height<60,true);assert.equal(r.canActuate,false);assert.equal(Object.isFrozen(r.labels),true)});
+test('deficit changes palette without authority',()=>{const r=previewResonanceHud(sample(667,375,2));assert.equal(r.state,'POWER LOW');assert.equal(r.palette,'amber-gold');assert.equal(r.labels[3].text,'NEED 2')});
+test('reject unsupported portrait',()=>assert.equal(previewResonanceHud(sample(375,667)).ok,false));
+test('reject forged actuation',()=>{const a=sample();a.observations[0].canActuate=true;assert.equal(previewResonanceHud(a).ok,false)});
+test('reject inconsistent power accounting',()=>{const a=sample();a.observations[0].missing=1;assert.equal(previewResonanceHud(a).ok,false)});
+test('reject duplicate ticks',()=>{const a=sample();a.observations.push({...a.observations[0]});assert.equal(previewResonanceHud(a).ok,false)});
+test('reject cross world',()=>{const a=sample();a.observations[0].worldId='other';assert.equal(previewResonanceHud(a).ok,false)});
+test('reject missing observations',()=>{const a=sample();a.observations=[];assert.equal(previewResonanceHud(a).ok,false)});
+test('reject invalid viewport',()=>assert.equal(previewResonanceHud({...sample(),viewport:null}).ok,false));
+test('reject invalid root',()=>assert.equal(previewResonanceHud(null).ok,false));
+test('output immutable',()=>{const r=previewResonanceHud(sample());assert.ok(Object.isFrozen(r));assert.ok(Object.isFrozen(r.box));assert.ok(Object.isFrozen(r.labels[0]))});
