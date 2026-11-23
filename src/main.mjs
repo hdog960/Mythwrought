@@ -463,7 +463,11 @@ function start(nonblockStage=null){
   // before the first source-real edit must never enter this A/B trial.
   let near291FirstEditUploads=null;
   function near291Viewport(){
-    return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
+    // Same CSS viewport may gain/lose backing pixels after Safari DPR,
+    // iOS browser chrome or dynamic resolution changes. Never mix these
+    // different GPU workloads in one control/VAO mine trial.
+    return canvas.clientWidth+'x'+canvas.clientHeight+'|'+
+      canvas.width+'x'+canvas.height+'|'+world.seed;
   }
   function near291CheckViewport(){
     if(!near291Perf)return;
@@ -493,6 +497,12 @@ function start(nonblockStage=null){
     if(!near291Perf)return;
     near291CheckViewport();
     if(document.hidden||!help.hidden||exploration.isOpen()||graphicsLost){
+      const w=near291Perf.mineWindow;
+      // Pausing the foreground by opening settings/map or losing graphics
+      // must NOT silently remove slow gaps from a valid mining trial.
+      // The three original pagehide/visibility/contextlost event fences
+      // also call near291Interrupt, but this closes their timing races.
+      if(w.phase==='active'||w.phase==='closing')near291Interrupt();
       near291Perf.prevFrame=null;return;
     }
     const previous=near291Perf.prevFrame;
@@ -660,7 +670,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
-      protocol:'291-local-4viewport-v3',
+      protocol:'291-local-4viewport-v4',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
