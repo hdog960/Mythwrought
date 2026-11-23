@@ -1,0 +1,45 @@
+name: Mountain V8 P3 original uplift halo provenance corrected focused
+# Recheck ONLY original 11 source tests after 10/11 initial run surfaced
+# forged generator identity admission bug in new isolated audit.
+# Strict exact two-checkout source; no broad CI, no other owner modifications.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-uplift-halo-identity-corrected-focused.yml
+permissions:
+  contents: read
+jobs:
+  exact-original-uplift-halo:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated original V8 source exact commit
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Checkout exact immutable Desert P3 current main without changes
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Original native Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact SHAs and original 11-case corrective source test only
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-uplift-and-halo-audit.mjs
+          node --check isolated/tests/mountain-v8-p3-current-main-uplift-and-halo.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-current-main-uplift-and-halo.test.mjs
