@@ -36,10 +36,21 @@ export function desertSeamEditAffectedChunks(world,x,z,y){
   // every old geometry seam refresh including the cardinal edge set.
   if(maxX-minX>1||maxZ-minZ>1)
     throw Error('Desert color seam unexpectedly exceeds one neighboring chunk');
+  const centerX=x+.5,centerZ=z+.5;
+  const radiusSquared=DESERT_SEAM_VISUAL_RADIUS*DESERT_SEAM_VISUAL_RADIUS;
   for(let cx=minX;cx<=maxX;cx++)
     for(let cz=minZ;cz<=maxZ;cz++){
       const key=cx+','+cz;
-      if(!coords.has(key))coords.set(key,{cx,cz});
+      if(coords.has(key))continue; // Never discard a genuine geometry seam.
+      // The source cue fades to zero at radius three. A diagonal chunk
+      // outside the TRUE circular footprint cannot change any top vertex,
+      // even though the old rectangular halo covered it. Preserve the
+      // original cardinal geometry refresh independently of this test.
+      const nearestX=Math.max(cx*CHUNK_SIZE,Math.min(centerX,(cx+1)*CHUNK_SIZE));
+      const nearestZ=Math.max(cz*CHUNK_SIZE,Math.min(centerZ,(cz+1)*CHUNK_SIZE));
+      const dx=nearestX-centerX,dz=nearestZ-centerZ;
+      if(dx*dx+dz*dz>=radiusSquared)continue;
+      coords.set(key,{cx,cz});
     }
   if(coords.size>5)throw Error('Desert visual seam edit batch too broad');
   return [...coords.values()];
