@@ -95,6 +95,7 @@ export function classifyExactHeadOriginalM7Triplet({
     r.candidateThinUnderpassExpectedReaderCallsPerRole===expectedRoleCalls&&
     r.candidateThinUnderpassActualReaderMethodCalls===expectedRoleCalls*4&&
     yes(r.candidateThinUnderpassNoReaderCallsDuringSyntheticMotion)&&
+    yes(r.candidateThinUnderpassOriginalReaderBindingsUnchanged)&&
     yes(r.candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly);
    return sourceReaderParityValid&&
     yes(r.candidateThinUnderpassHypotheticalPlayerGateRequested)&&
