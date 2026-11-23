@@ -9,7 +9,12 @@ function sample(viewport,mode='original-control'){
   return {
     protocol:'291-local-4viewport-v1',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
-    trueSavedDeepMines:100,miningActionP95Ms:isVao?85:100,
+    trueSavedDeepMines:100,
+    // Hypothetical test-only fixture. Real measurements must come from the
+    // original source and are NEVER supplied by this test generator.
+    mineWitness:Array.from({length:100},(_,i)=>[i,-20,0,3,0]),
+    mineWitnessOverflow:false,mineWitnessInvalid:false,
+    miningActionP95Ms:isVao?85:100,
     frameGapsRecorded:400,rollingFrameCount:400,
     rollingFrameP95Ms:isVao?18:22,
     rollingSlowFrames:isVao?1:2,
@@ -107,4 +112,49 @@ test('missing/fabricated input cannot trigger metric pass or full release',()=>{
     assert.equal(r.metricGatesPassed,false);
     assert.equal(r.releaseCertified,false);
   }
+});
+
+test('equal mine count but different original block coordinates fails closed',()=>{
+  verify(x=>x.pairs[1].candidate.mineWitness[29][0]=999,
+    /saved deep-MINE cell\/previous-ID order differs/);
+});
+test('same mine cells but different previous block material fails closed',()=>{
+  verify(x=>x.pairs[0].candidate.mineWitness[17][3]=8,
+    /saved deep-MINE cell\/previous-ID order differs/);
+});
+test('same blocks but different original mining order fails closed',()=>{
+  verify(x=>{
+    const a=x.pairs[2].candidate.mineWitness;
+    [a[0],a[99]]=[a[99],a[0]];
+  },/saved deep-MINE cell\/previous-ID order differs/);
+});
+test('missing or incomplete original source mine trace cannot pass by count alone',()=>{
+  verify(x=>delete x.pairs[2].candidate.mineWitness,/complete unique ordered/);
+  verify(x=>x.pairs[2].candidate.mineWitness.pop(),/complete unique ordered/);
+  verify(x=>x.pairs[2].candidate.mineWitnessOverflow=true,/complete unique ordered/);
+  verify(x=>x.pairs[2].candidate.mineWitnessInvalid=true,/complete unique ordered/);
+});
+test('duplicate saved mine cells are not accepted as 100 distinct deep edits',()=>{
+  verify(x=>x.pairs[3].control.mineWitness[99]=[...x.pairs[3].control.mineWitness[0]],
+    /complete unique ordered/);
+});
+test('invalid deep cell coordinates, previous IDs and non-AIR next reject evidence',()=>{
+  verify(x=>x.pairs[1].control.mineWitness[2][1]=0,/complete unique ordered/);
+  verify(x=>x.pairs[1].control.mineWitness[2][0]=NaN,/complete unique ordered/);
+  verify(x=>x.pairs[1].control.mineWitness[2][3]=0,/complete unique ordered/);
+  verify(x=>x.pairs[1].control.mineWitness[2][4]=3,/complete unique ordered/);
+});
+test('more than 128 saved deep edits require new run, not a truncated witness',()=>{
+  verify(x=>{
+    for(const run of [x.pairs[0].control,x.pairs[0].candidate]){
+      run.trueSavedDeepMines=129;
+      run.mineWitnessOverflow=true;
+    }
+  },/complete unique ordered/);
+});
+test('positive hypothetical fixture reports 100 exact witnesses but no certification',()=>{
+  const r=evaluateIssue291FourViewportAB(make());
+  assert.equal(r.metricGatesPassed,true);
+  assert.equal(r.releaseCertified,false);
+  for(const row of r.comparisons)assert.equal(row.witnessedMineActions,100);
 });
