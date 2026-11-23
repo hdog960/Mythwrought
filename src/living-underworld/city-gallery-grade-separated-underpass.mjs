@@ -359,6 +359,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   naturalAt:source.naturalAt,authoredAt:source.authoredAt,
   editedAt:source.editedAt,protectedAt:source.protectedAt
  });
+ const readerBindingsUnchanged=()=>ROLES.every(role=>
+  source[role]===originalRoleReaders[role]);
+ if(!readerBindingsUnchanged())
+  return failure(seed,rx,rz,'UNDERPASS_READER_ROLE_BINDING_CHANGED',{
+   sourceChecks:previous,originalSourceReaderVoxelsRead:0,
+   readerIdentityCallerAuthenticatedOnly:true
+  });
  const read=(role,x,y,z)=>{
   sourceRoleCalls[role]++;
   return originalRoleReaders[role](x,y,z);
@@ -451,6 +458,12 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  // Strict source-role completeness: every safe audited bridge/pad voxel
  // must have been observed by all FOUR original reader methods.
  const sourceCallsBeforeMotion=snapshot();
+ if(!readerBindingsUnchanged())
+  return failure(seed,rx,rz,'UNDERPASS_READER_ROLE_BINDING_CHANGED',{
+   sourceChecks:total+padSourceVisits,
+   underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
+   readerIdentityCallerAuthenticatedOnly:true
+  });
  const expectedRoleCalls=audited.sourceChecks+padSourceVisits;
  if(ROLES.some(role=>sourceCallsBeforeMotion[role]!==expectedRoleCalls))
   return failure(seed,rx,rz,'UNDERPASS_ORIGINAL_READER_ROLE_PARITY_REFUSED',{
@@ -476,7 +489,7 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    centerSidePad:planned.centerSidePad,floorY:planned.floorY
   };
   motionGrade=auditCandidateUnderpassStepPlayer(args);
-  if(!sourceCallsUnchanged())
+  if(!sourceCallsUnchanged()||!readerBindingsUnchanged())
    return failure(seed,rx,rz,'HYPOTHETICAL_GRADE_TOUCHED_ORIGINAL_READER',{
     originalSourceChecksPassed:true,sourceChecks,
     underpassActualReaderCallsByRole:snapshot(),
@@ -496,7 +509,7 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     oldWorldPhysicalMotionUnverified:true
    });
   motionWalk=auditCandidateUnderpassContinuousStepPlayer(args);
-  if(!sourceCallsUnchanged())
+  if(!sourceCallsUnchanged()||!readerBindingsUnchanged())
    return failure(seed,rx,rz,'HYPOTHETICAL_WALK_TOUCHED_ORIGINAL_READER',{
     originalSourceChecksPassed:true,sourceChecks,
     underpassActualReaderCallsByRole:snapshot(),
@@ -521,7 +534,9 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
   underpassActualReaderMethodCalls:sourceCallsTotal,
   expectedUnderpassReaderCallsPerRole:expectedRoleCalls,
-  sourceReaderCallsUnchangedDuringHypotheticalMotion:sourceCallsUnchanged(),
+  sourceReaderCallsUnchangedDuringHypotheticalMotion:
+   sourceCallsUnchanged()&&readerBindingsUnchanged(),
+  sourceReaderRoleBindingsUnchanged:readerBindingsUnchanged(),
   underpassReaderIdentityCallerAuthenticatedOnly:true,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
