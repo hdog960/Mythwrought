@@ -44,7 +44,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     for (const [label,run,mode] of [['control',control,'original-control'],
                                     ['candidate',candidate,'experimental-vao']]) {
       if (run.mode !== mode) fail(label + ' renderer identity is incorrect');
-      if (run.protocol !== '291-local-4viewport-v4') fail(label + ' protocol is not certified for comparison');
+      if (run.protocol !== '291-local-4viewport-v5') fail(label + ' protocol is not certified for comparison');
       if (viewportKey(run.viewportCss) !== target) fail(label + ' CSS viewport differs from expected');
       if (!viewportKey(run.viewportPixels)) fail(label + ' physical buffer viewport is not landscape');
       if (run.fatal !== false || run.graphicsLost !== false || run.pageSuspended !== false)
@@ -70,6 +70,14 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       // Faster rendering naturally changes frame count; equality of total
       // frame count is NOT a valid A/B constraint.
       const trial=run.mineFrameWindow;
+      const render=trial?.renderIdentity;
+      if (!Array.isArray(render) || render.length!==4 ||
+          !viewportKey(render.slice(0,2)) ||
+          render[0]!==run.viewportPixels?.[0] ||
+          render[1]!==run.viewportPixels?.[1] ||
+          typeof render[2]!=='string' || render[2].length===0 ||
+          !validPositive(render[3]))
+        fail(label + ' lacks a stable original physical canvas/preset/DPR profile');
       if (!trial || trial.phase!=='complete' || trial.savedMines!==100 ||
           trial.overflow!==false || trial.invalid!==false ||
           trial.interrupted!==false || trial.editPending!==false ||
@@ -110,6 +118,9 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     if (commonSeed === null && validCount(control.seed)) commonSeed = control.seed;
     if (JSON.stringify(control.viewportPixels) !== JSON.stringify(candidate.viewportPixels))
       fail('Original physical rendering viewport differs between control and VAO');
+    if (JSON.stringify(control.mineFrameWindow?.renderIdentity) !==
+        JSON.stringify(candidate.mineFrameWindow?.renderIdentity))
+      fail('Control and VAO original physical render preset/DPR differ');
     if (control.trueSavedDeepMines !== candidate.trueSavedDeepMines)
       fail('Control and VAO saved deep-MINE counts are unequal');
     if (JSON.stringify(control.mineWitness) !== JSON.stringify(candidate.mineWitness))
@@ -138,6 +149,8 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       candidateUploadP95Ms:candidate.mineFrameWindow?.successfulGuardedUploadP95Ms??null,
       controlTrialUploads:control.mineFrameWindow?.successfulGuardedUploads??null,
       candidateTrialUploads:candidate.mineFrameWindow?.successfulGuardedUploads??null,
+      renderIdentity:Array.isArray(control.mineFrameWindow?.renderIdentity)?
+        Object.freeze([...control.mineFrameWindow.renderIdentity]):null,
       controlTrialFrames:control.mineFrameWindow?.frameGapsRecorded??null,
       candidateTrialFrames:candidate.mineFrameWindow?.frameGapsRecorded??null,
       controlTrialElapsedMs:control.mineFrameWindow?.elapsedMs??null,
