@@ -43,13 +43,12 @@ jobs:
           test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
           test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
           node --check candidate/tests/desert-p3-multiseed-composed-original.test.mjs
-      - name: Reuse prior 8-seed terrain PASS, test only corrected real composed GPU fixture
+      - name: Reuse previous original-source passes and test only new populated Manual14 composition
         run: |
           set -euo pipefail
-          # #45097880727 already authenticated the unchanged 8-seed source
-          # climate/cave/diagonal test. The second correction fixes ONLY test
-          # x,z,y argument order at the original visual-halo selector call.
-          # No broad re-run on this exact gameplay-independent logic.
+          # Multiseed original terrain #45097880727 and actual Pack2+Pack3
+          # composition #45098028767 already passed. Only the NEW real
+          # Manual14 populated overlay case needs another focused run.
           test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
           cd candidate
-          node --test --test-name-pattern='source-exact composed M7' tests/desert-p3-multiseed-composed-original.test.mjs
+          node --test --test-name-pattern='composed original Manual14' tests/desert-p3-multiseed-composed-original.test.mjs
