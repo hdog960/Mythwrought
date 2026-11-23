@@ -16,11 +16,16 @@ import {deriveExpectedUnderpassSourceCoordinates}
 const seed=179;
 const stone=()=>({naturalAt:()=>1,authoredAt:()=>undefined,
  editedAt:()=>false,protectedAt:()=>false});
-const prior=new Map(),planned=new Map();
+const prior=new Map(),planned=new Map(),readerSources=new Map();
+const selectedOriginalSource=(rx,rz)=>{
+ const key=rx+','+rz;
+ if(!readerSources.has(key))readerSources.set(key,stone());
+ return readerSources.get(key);
+};
 const deep=(rx,rz)=>{
  const key=rx+','+rz;
  if(!prior.has(key))prior.set(key,selectCityCompatibleDeepLinks(
-  seed,rx,rz,{source:stone()}));
+  seed,rx,rz,{source:selectedOriginalSource(rx,rz)}));
  const p=prior.get(key);
  assert.equal(p.ok,true);
  assert.deepEqual(p.chosen.map(x=>x.index),[16,25,34]);
@@ -42,8 +47,9 @@ const joinedSourceAndMovement=(rx,rz)=>{
  const key=rx+','+rz;
  if(!coupled.has(key))coupled.set(key,
   auditSourceProtectedCityUnderpass(seed,rx,rz,{
-   source:stone(),sourceOwnedDeepSelection:deep(rx,rz),
-   auditHypotheticalMovement:true
+   source:selectedOriginalSource(rx,rz),
+   sourceOwnedDeepSelection:deep(rx,rz),
+   auditHypotheticalMovement:true,requireSourceReaderContinuity:true
   }));
  return coupled.get(key);
 };
@@ -182,6 +188,11 @@ test('both exact seed179 candidate sites account every original callback once, w
   assert.equal(r.underpassSourceRoleCoordinatesIdentical,true);
   assert.equal(r.underpassIndependentGeometryMatched,true);
   assert.equal(r.underpassIndependentSourceReaderCoordinatesVerified,true);
+  assert.equal(r.sourceReaderCohortProvenanceRequested,true);
+  assert.equal(r.sourceReaderCohortProvenanceVerified,true);
+  assert.equal(r.sourceReaderCohortExactMatchingRoles,4);
+  assert.equal(r.sourceReaderCohortInProcessIdentityOnly,true);
+  assert.equal(r.sourceReaderCohortAuthenticM7WorldNotVerified,true);
   assert.equal(r.underpassSourceOverlapValuesStable,true);
   assert.equal(r.underpassSourceOverlapExpectedSharedVoxels,
    r.underpassBridgePadOverlapCells);
@@ -258,6 +269,36 @@ test('seed179 original detached site (2,0) rejects two SAFE stone IDs changing o
  assert.equal(r.sourceChecks,9198);
  assert.notEqual(r.hypotheticalOriginalMotionSimulated,true);
  assert.equal(r.worldChanged,false);
+});
+test('original seed179 deep selector and underpass must share EXACT four source reader functions before any new voxel reads',()=>{
+ const expected=deep(2,0);
+ let calls=0;
+ const wrong={
+  naturalAt:()=>{calls++;return 1},
+  authoredAt:()=>{calls++;return undefined},
+  editedAt:()=>{calls++;return false},
+  protectedAt:()=>{calls++;return false}
+ };
+ const r=auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:wrong,sourceOwnedDeepSelection:expected,
+  requireSourceReaderContinuity:true,auditHypotheticalMovement:true
+ });
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'UNDERPASS_DEEP_SOURCE_READER_COHORT_REFUSED');
+ assert.equal(r.readerCohortReason,'DEEP_SOURCE_READER_COHORT_ROLE_CHANGED');
+ assert.equal(r.readerCohortFirstRole,'naturalAt');
+ assert.equal(r.originalBridgeSourceCallsDuringCohortCheck,0);
+ assert.equal(calls,0);
+ assert.equal(r.worldChanged,false);
+});
+test('Phase28 original site reader lineage option rejects malformed flags before any source query',()=>{
+ let invoked=0;
+ assert.throws(()=>auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:{...stone(),naturalAt:()=>{invoked++;return 1}},
+  sourceOwnedDeepSelection:deep(2,0),
+  requireSourceReaderContinuity:'yes'
+ }),/Invalid original M7 pedestrian underpass reader/);
+ assert.equal(invoked,0);
 });
 test('original terrain reader role replacement during bridge source checks refuses before physics',()=>{
  const mutable=stone();
