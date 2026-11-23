@@ -38,7 +38,7 @@ assert.equal(voxel.split(originalFaceColor).length-1,1,
   'Pinned original material/UV face-color source changed');
 const alteredVoxel=winterImport+
   voxel.replace(originalMeshProfile,cachedMeshProfile)
-    .replace(token,token+'\\n          '+snowPigment)
+    .replace(token,token+'\n          '+snowPigment)
     .replace(originalFaceColor,
       'const color=snowS8Pigment??groundColor??biome130Color(id,x,y,z,face);');
 assert.equal(alteredVoxel.split('snowS7OwnerCache?.colorFor(x,y,z,id)').length-1,1);
