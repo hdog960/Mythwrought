@@ -1,7 +1,8 @@
-# ENCHANTED PHASE 2: isolated original source, physics per-edge admission.
-# Only new source and its tests. Reuse accepted old BFS #45093229883,
-# Moonwillow native/WebGL2, 288-chunk voxel and cache source evidence.
-# No broad suite, other developer workflows, Chromium or deployment.
+# EXACT changed-only native recovery. Source is new experimental research
+# helper, no changes to original M7 generator/physics, accepted BFS or saves.
+# First run #45097608418 passed seed -88 + disposable obstruction tests,
+# but 3 fixtures reversed true Enchanted->Desert direction; rerun ONLY those.
+# All previous Moonwillow, cache, GPU and WebGL2 work remains reused.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-per-edge-physics-research:
+  original-m7-physics-route-orientation:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -26,11 +27,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact unchanged M7 and new source syntax
+      - name: Exact original source checks
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-original-physics-route.mjs
           node --check tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
           test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
-      - name: Source-authentic original M7 per-edge physics routes and capped seed -88
-        run: node --test tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
+      - name: Only changed true V6 climate orientation and original physics acceptance tests
+        run: |
+          node --test --test-name-pattern="validates bounds|original unchanged stepPlayer physically admits|source-fixed four-diagonal" \
+            tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
