@@ -14,8 +14,11 @@ import {originalM7PhysicalGroundCap} from './enchanted-original-standing-diagnos
 import {originalM7AuthoredCaveFloorCap} from './enchanted-original-cave-descent-evidence.mjs';
 
 export const M7_FULL_SOURCE_WALK_BOUNDS=Object.freeze({
-  authoredSteps:64,spiralSteps:12,waypoints:80,
-  ticksPerLeg:48,allTicks:3840
+  // Detached research-only expansion for the *unchanged* original deep
+  // spiral. 112 steps reaches the first original -30 chamber approach.
+  // This does not authorize or alter any cave, save or production world.
+  authoredSteps:64,spiralSteps:112,waypoints:144,
+  ticksPerLeg:48,allTicks:6500
 });
 const validWorld=w=>w?.profile?.generator===M7_ENVIRONMENT_GENERATOR&&
   Number.isInteger(w.seed)&&w.seed===(w.seed|0)&&
