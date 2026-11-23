@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '562c01cfdda29cb42b617d73df22d7bb8311c706');
+    '4a6ab235c14077e547cce945ea4e7a8447ee35a6');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -747,6 +747,7 @@ const createLocal291Perf=new Function('scope','with(scope){'+
   'let near291Enabled=scope.enabled,near291Fatal=false,'+
   'near291PageSuspended=false,near291=null;'+exactLocal291PerfSource+
   '\nreturn {frame:near291RecordFrame,mine:near291RecordMine,'+
+  'interrupt:near291Interrupt,'+
   'upload:near291RecordUpload,read:near291PerfSnapshot,'+
   'data:near291Perf};}');
 function local291PerfFixture({
@@ -898,20 +899,19 @@ test('failed original guarded water upload is NOT counted as a successful GPU sa
   assert.equal(perf.read().rollingSuccessfulUploadP95Ms,2);
   assert.equal(perf.read().releaseCertified,false);
 });
-test('hidden, context loss, and BFCache pagehide reset original measured frame epoch',()=>{
-  const lines=source.split('\n');
-  const positions=lines.flatMap((line,i)=>line.includes('if(near291Perf)near291Perf.prevFrame=null;')?[i]:[]);
-  assert.equal(positions.length,3);
+test('hidden, context loss, and BFCache pagehide latch source interruption before recovery',()=>{
   const labels=[
     "document.addEventListener('visibilitychange',",
     "canvas.addEventListener('webglcontextlost',",
     "window.addEventListener('pagehide',"
   ];
-  for(let i=0;i<labels.length;i++){
-    const anchor=source.indexOf(labels[i]);
-    const next=source.indexOf('if(near291Perf)near291Perf.prevFrame=null;',anchor);
+  const sourceCalls=source.split('near291Interrupt();').length-1;
+  assert.equal(sourceCalls,3);
+  for(const label of labels){
+    const anchor=source.indexOf(label);
+    const next=source.indexOf('near291Interrupt();',anchor);
     assert.ok(anchor>=0&&next>anchor);
-    assert.ok(next-anchor<360,labels[i]+' must reset before background time is sampled');
+    assert.ok(next-anchor<360,label+' must latch before background time is sampled');
   }
 });
 
@@ -1039,4 +1039,45 @@ test('new exact source only captures real saved original deep MINE result; no sy
   assert.ok(!real.includes('world.set('));
   assert.ok(!exactLocal291PerfSource.includes('world.set('));
   assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
+});
+
+test('real source interruption history starts clean until the first eligible measured sample',()=>{
+  const {perf}=local291PerfFixture();
+  perf.interrupt();
+  assert.equal(perf.read().interruptionCount,0);
+  assert.equal(perf.read().continuousForegroundRun,true);
+  perf.frame(0);perf.frame(16);
+  assert.equal(perf.read().frameGapsRecorded,1);
+  perf.interrupt();
+  const snap=perf.read();
+  assert.equal(snap.interruptionCount,1);
+  assert.equal(snap.continuousForegroundRun,false);
+  assert.equal(snap.frameGapsRecorded,1);
+});
+test('source context restoration cannot remove an existing hidden-page interruption latch',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.mine(10,{cell:[5,-21,6],previous:3,next:0});
+  perf.interrupt();
+  scope.graphicsLost=true;
+  scope.graphicsLost=false;scope.document.hidden=false;
+  assert.equal(perf.read().continuousForegroundRun,false);
+  assert.equal(perf.read().interruptionCount,1);
+  perf.mine(11,{cell:[6,-21,6],previous:3,next:0});
+  assert.equal(perf.read().trueSavedDeepMines,2);
+  assert.equal(perf.read().continuousForegroundRun,false);
+});
+test('source viewport/seed resets discard old interrupted A/B session, not saved world',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.mine(6,{cell:[2,-23,8],previous:3,next:0});
+  perf.interrupt();
+  assert.equal(perf.read().interruptionCount,1);
+  scope.canvas.clientWidth=932;
+  const reset=perf.read();
+  assert.equal(reset.interruptionCount,0);
+  assert.equal(reset.continuousForegroundRun,true);
+  assert.equal(reset.mineWitness.length,0);
+  assert.equal(reset.trueSavedDeepMines,0);
+  perf.mine(10,{cell:[3,-23,8],previous:3,next:0});
+  scope.world.seed=181;
+  assert.equal(perf.read().mineWitness.length,0);
 });
