@@ -7,7 +7,7 @@ const viewports=[[956,440],[932,430],[844,390],[916,412]];
 function sample(viewport,mode='original-control'){
   const isVao=mode==='experimental-vao';
   return {
-    protocol:'291-local-4viewport-v2',mode,viewportCss:[...viewport],
+    protocol:'291-local-4viewport-v3',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
     trueSavedDeepMines:100,
     // Hypothetical test-only fixture. Real measurements must come from the
@@ -23,6 +23,8 @@ function sample(viewport,mode='original-control'){
     mineFrameWindow:{phase:'complete',savedMines:100,
       frameGapsRecorded:isVao?430:400,frameP95Ms:isVao?18:22,
       slowFrames:isVao?1:2,elapsedMs:isVao?7000:9000,
+      successfulGuardedUploads:224,successfulGuardedUploadP95Ms:isVao?22:28,
+      maxUploadSamples:4096,uploadOverflow:false,uploadFaults:0,
       maxFrameSamples:16384,overflow:false,invalid:false,interrupted:false},
     successfulGuardedUploads:224,rollingSuccessfulUploadP95Ms:isVao?22:28,
     fatal:false,graphicsLost:false,pageSuspended:false,
@@ -103,9 +105,12 @@ test('10 percent action improvement AND 10 percent frame improvement required ea
   verify(x=>x.pairs[2].control.miningActionP95Ms=0,/finite positive original saved-MINE action/);
 });
 test('guarded upload p95 bound applies to both runs at every viewport',()=>{
-  verify(x=>x.pairs[2].candidate.rollingSuccessfulUploadP95Ms=33.1,/guarded upload p95/);
-  verify(x=>x.pairs[2].control.rollingSuccessfulUploadP95Ms=33.1,/guarded upload p95/);
-  verify(x=>x.pairs[2].control.successfulGuardedUploads=0,/no successful/);
+  verify(x=>x.pairs[2].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=33.1,
+    /mining-bound guarded upload p95/);
+  verify(x=>x.pairs[2].control.mineFrameWindow.successfulGuardedUploadP95Ms=33.1,
+    /mining-bound guarded upload p95/);
+  verify(x=>x.pairs[2].control.mineFrameWindow.successfulGuardedUploads=0,
+    /complete fault-free mining-bound guarded GPU uploads/);
 });
 test('fatal graphics, hidden page, and lost context must not count',()=>{
   verify(x=>x.pairs[0].candidate.fatal=true,/fatal\/suspended/);
@@ -241,4 +246,48 @@ test('both post-save RAF gaps are required before numerical acceptance',()=>{
   const result=evaluateIssue291FourViewportAB(data);
   assert.equal(result.metricGatesPassed,true);
   assert.equal(result.releaseCertified,false);
+});
+
+test('bad idle GPU history cannot replace real mining-bound guarded upload p95',()=>{
+  const x=make();
+  x.pairs[0].control.rollingSuccessfulUploadP95Ms=2000;
+  x.pairs[0].candidate.rollingSuccessfulUploadP95Ms=0.5;
+  assert.equal(evaluateIssue291FourViewportAB(x).metricGatesPassed,true);
+  verify(d=>{
+    d.pairs[0].candidate.rollingSuccessfulUploadP95Ms=0.1;
+    d.pairs[0].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=35;
+  },/mining-bound guarded upload p95/);
+});
+test('one genuine original source GPU failure poisons trial even with good successful p95',()=>{
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.uploadFaults=1,
+    /complete fault-free mining-bound guarded GPU uploads/);
+  verify(x=>x.pairs[2].control.mineFrameWindow.uploadOverflow=true,
+    /complete fault-free mining-bound guarded GPU uploads/);
+});
+test('missing, invalid and malformed mining-native upload window cannot pass',()=>{
+  verify(x=>delete x.pairs[0].candidate.mineFrameWindow.successfulGuardedUploads,
+    /complete fault-free mining-bound guarded GPU uploads/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.maxUploadSamples=0,
+    /complete fault-free mining-bound guarded GPU uploads/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.successfulGuardedUploads=4097,
+    /complete fault-free mining-bound guarded GPU uploads/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.uploadFaults=NaN,
+    /complete fault-free mining-bound guarded GPU uploads/);
+  verify(x=>x.pairs[0].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=NaN,
+    /mining-bound guarded upload p95/);
+});
+test('new strict v3 source protocol rejects stale v2 mined frame snapshots',()=>{
+  verify(x=>x.pairs[1].control.protocol='291-local-4viewport-v2',/protocol/);
+});
+test('numeric summary uses trial uploads, never unrelated rolling upload counters',()=>{
+  const x=make();
+  x.pairs[1].control.rollingSuccessfulUploadP95Ms=900;
+  x.pairs[1].candidate.rollingSuccessfulUploadP95Ms=1;
+  const r=evaluateIssue291FourViewportAB(x);
+  assert.equal(r.metricGatesPassed,true);
+  assert.equal(r.releaseCertified,false);
+  assert.equal(r.comparisons[1].controlUploadP95Ms,28);
+  assert.equal(r.comparisons[1].candidateUploadP95Ms,22);
+  assert.equal(r.comparisons[1].controlTrialUploads,224);
+  assert.equal(r.comparisons[1].candidateTrialUploads,224);
 });
