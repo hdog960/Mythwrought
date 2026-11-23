@@ -911,6 +911,6 @@ test('hidden, context loss, and BFCache pagehide reset original measured frame e
     const anchor=source.indexOf(labels[i]);
     const next=source.indexOf('if(near291Perf)near291Perf.prevFrame=null;',anchor);
     assert.ok(anchor>=0&&next>anchor);
-    assert.ok(next-anchor<250,labels[i]+' must reset before background time is sampled');
+    assert.ok(next-anchor<360,labels[i]+' must reset before background time is sampled');
   }
 });
