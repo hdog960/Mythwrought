@@ -1,8 +1,7 @@
-# MYTHWROUGHT Enchanted Phase 2 source-owned, read-only original-M7
-# standing diagnostics and physically replayed legacy-ground traversal.
-# New opt-in groundMode=physical only, original mode remains unchanged.
-# Focus ONLY two tests in newly added source test file; reuse previously
-# accepted source/cave/Moonwillow/physics runs. No broad CI/Chromium.
+# Changed-only disposable original M7 player edit safety check for research
+# physical ground accessor. Reuse prior real 52/52 source, 6 west routes,
+# 4 east routes and unchanged Desert default regression exact-source green.
+# No production physics/terrain, broad CI, Chromium or other lane testing.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -34,7 +33,7 @@ jobs:
           node --check src/manual-biomes/enchanted-original-standing-diagnostic.mjs
           node --check src/manual-biomes/enchanted-original-physics-route.mjs
           node --check tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
-      - name: Only new east-side original M7 physical route and default Desert parity
+      - name: Only new player AIR and overhead solid edit rejection test
         run: |
-          node --test --test-name-pattern="real east-side|new physical source is opt-in" \
+          node --test --test-name-pattern="read-only original physical ground accessor respects" \
             tests/manual-biomes/enchanted-original-physical-ground-crossing-real-m7.test.mjs
