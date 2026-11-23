@@ -449,7 +449,7 @@ function start(nonblockStage=null){
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
     overflow:false,invalid:false,interrupted:false,
-    editPending:false,invalidReason:null
+    editPending:false,invalidReason:null,renderIdentity:null
   });
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float64Array(2048),mines:new Float64Array(128),
@@ -501,6 +501,20 @@ function start(nonblockStage=null){
     // successfully saved deep MINE before the next eligible source RAF.
     w.editPending=true;
   }
+  // A CSS viewport may remain unchanged while the original WebGL backing
+  // pixels, quality preset or DPR changes. Never compare frames or GPU work
+  // gathered across different physical render workloads.
+  function near291RenderIdentity(){
+    return [canvas.width,canvas.height,renderPreset,devicePixelRatio||1];
+  }
+  function near291CheckRenderIdentity(){
+    if(!near291Perf)return;
+    const w=near291Perf.mineWindow;
+    if((w.phase!=='active'&&w.phase!=='closing')||!w.renderIdentity)return;
+    const now=near291RenderIdentity();
+    if(now.some((value,i)=>value!==w.renderIdentity[i]))
+      near291AbortMineTrial('render-identity-changed');
+  }
   function near291Interrupt(){
     if(!near291Perf)return;
     const w=near291Perf.mineWindow;
@@ -515,6 +529,7 @@ function start(nonblockStage=null){
   function near291RecordFrame(now){
     if(!near291Perf)return;
     near291CheckViewport();
+    near291CheckRenderIdentity();
     const wBefore=near291Perf.mineWindow;
     if(wBefore.editPending)near291AbortMineTrial('unsaved-or-nondeep-edit');
     if((wBefore.phase==='active'||wBefore.phase==='closing')&&g2Active())
@@ -592,6 +607,7 @@ function start(nonblockStage=null){
     const w=near291Perf.mineWindow;
     if(w.phase==='idle'){
       w.phase='active';w.prevFrame=near291Perf.prevFrame;
+      w.renderIdentity=Object.freeze(near291RenderIdentity());
       // All FIRST-MINE uploads precede the returned applyBlockAction result
       // and the verified save. Admit only this bounded, original-upload
       // staging transaction after the source-real successful deep MINE.
@@ -677,6 +693,7 @@ function start(nonblockStage=null){
         interrupted:near291Perf.mineWindow.interrupted,
         editPending:near291Perf.mineWindow.editPending,
         invalidReason:near291Perf.mineWindow.invalidReason,
+        renderIdentity:near291Perf.mineWindow.renderIdentity,
         maxFrameSamples:near291Perf.mineWindow.frames.length
       }),
       frameGapsRecorded:near291Perf.frameCount,
@@ -694,7 +711,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
-      protocol:'291-local-4viewport-v4',
+      protocol:'291-local-4viewport-v5',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
@@ -1132,6 +1149,7 @@ function start(nonblockStage=null){
   renderSelect.value=renderPreset;
   renderSelect.addEventListener('change',()=>{
     renderPreset=normalizeRenderPreset(renderSelect.value);
+    if(near291Perf)near291CheckRenderIdentity(); // local trial only
     try{localStorage.setItem(RENDER_PREF,renderPreset);}catch(_){}
     message('3D pixel workload: '+renderSelect.selectedOptions[0].textContent);
   });
@@ -1697,6 +1715,9 @@ function start(nonblockStage=null){
       canvas.dataset.storybookQuality=renderPreset==='economy'?'base-colors':'painted-materials';
       canvas.dataset.renderScale=String(buffer.scale);
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
+      // Exact post-resize read: the pre-draw RAF timestamp may still carry
+      // the previous backing size; this enforces the new physical workload.
+      near291CheckRenderIdentity(); // inert on production Pages/PWA
       // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
       // ambient block lighting. Movement's clamped dt never drives solar time.
       const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
