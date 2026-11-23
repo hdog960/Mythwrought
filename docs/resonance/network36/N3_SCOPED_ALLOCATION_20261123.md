@@ -1,0 +1,7 @@
+# N3 component-scoped power accounting (opt-in source-only)
+
+Contract: `resonance-network36-scoped-allocation-v1`. This is an independent candidate, not a replacement or modification of historical PR #466. Input is an authoritative per-tick snapshot of distinct connected-component IDs and their generator, device, and storage members. **Connectivity is not computed here**; the caller must prove the graph, unloaded chunk boundaries, and the :24 `resonance-power-v1` output authorization before supplying the snapshot. No cross-component energy transfer. Crystal and mechanical generation both count as one Resonance unit type.
+
+Inputs are bounded to 1024 components and 4096 entries per entity kind, with safe nonnegative integer accounting and duplicate-ID rejection. Priority ascending then UTF-16 identifier determines admission. Each device receives its full demand or stops safely. Recharge and discharge obey independent capacity and per-tick rate limits. The result proposes next-tick charge only; the caller must carry it exactly once. No saved data, voxel IDs, world state, UI, renderer, damage, or production registration is changed. No physical throughput, wireless, chunk graph, or iPhone performance is claimed.
+
+Local focused Node.js tests for the authored source version: 9/9 passed before commit; committed-head CI and original-game WebGL2/offline/save acceptance remain outstanding. Run `node --test tests/resonance-network36-scoped-allocation.mjs` on this exact draft HEAD. Historical N5 accumulated candidate and PRs remain protected.
