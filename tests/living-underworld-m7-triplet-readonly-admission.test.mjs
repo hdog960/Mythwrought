@@ -92,6 +92,14 @@ const city=()=>({
   candidateThinUnderpassExpectedBridgeDistinctCells:rz===0?248:276,
   candidateThinUnderpassExpectedPadDistinctCells:135,
   candidateThinUnderpassExpectedOverlapCells:12,
+  candidateThinUnderpassSourceOverlapValuesStable:true,
+  candidateThinUnderpassSourceOverlapExpectedSharedVoxels:12,
+  candidateThinUnderpassSourceOverlapComparedSharedVoxels:12,
+  candidateThinUnderpassSourceOverlapComparisonsByRole:{
+   naturalAt:12,authoredAt:12,editedAt:12,protectedAt:12
+  },
+  candidateThinUnderpassSourceOverlapTotalComparisons:48,
+  candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly:true,
   candidateThinUnderpassExpectedCombinedDistinctCells:
    (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
@@ -149,6 +157,7 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
  assert.equal(r.cityThinUnderpassIndependentFootprintSafe,true);
+ assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
@@ -453,4 +462,45 @@ test('Phase26 independently derived bridge, landing, and overlap cells cannot be
   assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
   assert.equal(r.releaseApproved,false);
  }
+});
+
+
+test('Phase27 stable source role coordinates cannot conceal changed old geology values between bridge/pad reads',()=>{
+ const c=city();c.rows[1].candidateThinUnderpassSourceOverlapValuesStable=false;
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
+ assert.equal(r.cityThinUnderpassIndependentFootprintSafe,true);
+ assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_SOURCE_OVERLAP_VALUE_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase27 refuses absent or forged per-role overlap value comparison counts',()=>{
+ for(const mutate of [
+  row=>row.candidateThinUnderpassSourceOverlapExpectedSharedVoxels--,
+  row=>row.candidateThinUnderpassSourceOverlapComparedSharedVoxels++,
+  row=>row.candidateThinUnderpassSourceOverlapTotalComparisons--,
+  row=>row.candidateThinUnderpassSourceOverlapComparisonsByRole.naturalAt--,
+  row=>row.candidateThinUnderpassSourceOverlapComparisonsByRole.authoredAt++,
+  row=>row.candidateThinUnderpassSourceOverlapComparisonsByRole=null,
+  row=>row.candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly=false,
+  row=>{delete row.candidateThinUnderpassSourceOverlapValuesStable}
+ ]){
+  const c=city();mutate(c.rows[0]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase27 both genuine M7 city report rows must independently pass overlap role stability',()=>{
+ const r=check();
+ assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,true);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.original20SeedConstructorGateAccepted,false);
+ assert.equal(r.installedPwaVerified,false);
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
 });
