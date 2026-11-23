@@ -106,7 +106,7 @@ test('multiseed authentic M7 Desert/Mountain diagonal contact census and actual 
     // Sample across the entire geography without overtaxing any original
     // cave/landmark source planners; fixed deterministic 1-in-5 filter.
     if((Math.abs(cx*19+cz*31+seed+p.sx*7+p.sz*11)%5)!==0)continue;
-    if(report.originalPlanPairs>=MAX_PLAN_PAIRS)continue;
+    if(report.originalPlanPairs>=MAX_PLAN_PAIRS||local.planned>=90)continue;
     const a=capAt(w,sourceCaps,sx,sz),b=capAt(w,sourceCaps,tx,tz);
     local.planned++;report.originalPlanPairs++;
     if(!a||!b){local.veto++;report.protectedSourcePairs++;continue;}
@@ -150,6 +150,8 @@ test('multiseed authentic M7 Desert/Mountain diagonal contact census and actual 
  }
  assert.ok(report.climatePairs>0,'Multiple original landscapes must exhibit Desert/Mountain climate edges');
  assert.ok(report.originalPlanPairs>0,'Must inspect actual guarded original source columns');
+ assert.ok(report.perSeed.filter(row=>row.planned>0).length>=3,
+  'Source audit should cover at least three NEW seeds, not one region');
  console.log('DESERT_P3_MULTISEED_DIAGONAL '+JSON.stringify(report));
 });
 
