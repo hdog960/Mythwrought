@@ -117,6 +117,7 @@
     "nativeFullCheckoutNodeTestExecuted": false
   },
   "nextAcceptance": [
+    "Recheck current production main at next session; main advanced externally through separate Desert Phase 3 PR #463 to db4bbcc32156e5df311f733bcaa53d559c17313b. Preserve this independently merged release and continue on isolated Builder B source branch; do not assume old main HEAD is current.",
     "When exact authentic checkout available, run real native Node22 test --test tests/building-pool/roadmap-b/builder-b-essentials-wave51-focused.test.mjs plus coordinated Waves46-50 target suite; explicitly verify real ownership-1b module.",
     "Coordinate one 228-accepted-historical exact original source strict D4 sweep extended through all current original B waves, avoiding duplicate historical scans or broad CI.",
     "Real in-game Pack3 stone-supported crown roof mounts and Pack4 transparent geometry/selection/collider, player-body/camera collision around fully stone-blocking unlit towers and courtyard/walking transitions; no real physics accepted yet.",
@@ -144,6 +145,15 @@
     "noAutomationsOrOtherLanesModified": true,
     "noSourceGameRuntimeRegistration": true,
     "noSaveOrLiveWorldChanges": true,
-    "noRequiredTestsRelaxed": true
+    "noRequiredTestsRelaxed": true,
+    "productionMainSHAAtSessionStart": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+    "productionMainSHAObservedAtFinalAudit": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+    "productionMainExternalChange": {
+      "verifiedOneCommitFastForward": true,
+      "directParentSHA": "7016e14cd6289f45eaf7fc6a79a362b47996df65",
+      "newSHA": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+      "GitCommitMessageSubject": "Release: Desert V7 Phase 3 bilateral RGB and safe near-edge refresh (#463)",
+      "note": "Unrelated external Desert Phase 3 release merged into main while this Wave51 source session was in progress. This Builder B development created no commit on main, did not touch PR #463 or other developer work, and did not merge/deploy."
+    }
   }
 }
