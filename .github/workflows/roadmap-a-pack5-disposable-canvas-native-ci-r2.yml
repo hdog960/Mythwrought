@@ -1,0 +1,38 @@
+name: Roadmap A Pack5 original game canvas actual-size repair and MINE validation
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-disposable-canvas-native-ci-r2-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-disposable-canvas-native-ci-r2.yml'
+permissions:
+  contents: read
+jobs:
+  one-original-game-real-canvas:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Revised private game canvas PNG-size scope and safety
+        run: |
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-browser.mjs
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-preflight.test.mjs
+      - name: Only supported Chromium 1.58.2 and pngjs 7
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Re-test revised actual original game canvas dimensions and original MINE real path
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-browser.mjs artifacts/roadmap-a-pack5-disposable-game
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-a-pack5-disposable-original-game-r2-source-mine-pixels
+          path: artifacts/roadmap-a-pack5-disposable-game/
+          if-no-files-found: warn
+          retention-days: 14
