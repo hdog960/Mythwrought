@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createHudAdmissionSequence48} from '../src/resonance/devices48/hud-admission-sequence-v1.mjs';
+const viewport={width:667,height:375},panel={x:220,y:8,width:220,height:40};
+const input=(tick,extra={})=>({tick,revision:1,viewport,panel,reservedRects:[],...extra});
+test('initial observation changed and display only',()=>{const r=createHudAdmissionSequence48().observe(input(1));assert.equal(r.changed,true);assert.equal(r.authority,'display-only');assert.ok(Object.isFrozen(r));});
+test('unchanged frame suppresses redundant redraw',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));const r=s.observe(input(2));assert.equal(r.changed,false);assert.equal(r.reason,'unchanged');});
+test('reservation obstruction triggers update',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));const r=s.observe(input(2,{reservedRects:[panel]}));assert.equal(r.reason,'blocked');assert.equal(r.admission.admitted,false);});
+test('recovery triggers update',()=>{const s=createHudAdmissionSequence48();s.observe(input(1,{reservedRects:[panel]}));const r=s.observe(input(2));assert.equal(r.changed,true);assert.equal(r.reason,'updated');});
+test('viewport change triggers update',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));assert.equal(s.observe(input(2,{viewport:{width:844,height:390}})).changed,true);});
+test('reject duplicate tick',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));assert.throws(()=>s.observe(input(1)),/stale-tick/);});
+test('reject reverse tick',()=>{const s=createHudAdmissionSequence48();s.observe(input(4));assert.throws(()=>s.observe(input(3)),/stale-tick/);});
+test('reject stale revision',()=>{const s=createHudAdmissionSequence48();s.observe(input(1,{revision:4}));assert.throws(()=>s.observe(input(2,{revision:3})),/stale-revision/);});
+test('allow same revision with later tick',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));assert.equal(s.observe(input(2)).changed,false);});
+test('invalid observation cannot advance sequence',()=>{const s=createHudAdmissionSequence48();s.observe(input(1));assert.throws(()=>s.observe(input(2,{panel:{x:999,y:0,width:1,height:1}})),/rectangle/);assert.equal(s.observe(input(2)).changed,false);});
+test('reset starts new sequence',()=>{const s=createHudAdmissionSequence48();s.observe(input(3));s.reset();assert.equal(s.observe(input(1)).changed,true);});
+test('unsupported viewport rejects',()=>assert.throws(()=>createHudAdmissionSequence48().observe(input(1,{viewport:{width:900,height:400}})),/viewport/));
+test('reject malformed tick',()=>assert.throws(()=>createHudAdmissionSequence48().observe(input(-1)),/observation/));

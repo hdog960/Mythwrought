@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluateLiftResetReadiness as evaluate} from '../src/resonance/devices48/lift-reset-readiness-v1.mjs';
+const history=(states=[true,true,true])=>({contract:'resonance48-lift-stop-history-v1',worldId:'w',liftId:'l',fromTick:0,toTick:states.length,observations:states.map((clearCandidate,i)=>({tick:i+1,clearCandidate,stopRequired:!clearCandidate,consecutiveClear:states.slice(0,i+1).reduce((n,c)=>c?n+1:0,0)})),firstBlockedTick:states.indexOf(false)<0?null:states.indexOf(false)+1,consecutiveClear:states.reduce((n,c)=>c?n+1:0,0),stopRequired:!states.at(-1),movementAuthorized:false,passengerTransportAuthorized:false,continuousCollisionProven:false,physicsBound:false,authoritativeDelivery:false,productionBound:false});
+test('three clear samples are advisory only',()=>{const r=evaluate(history());assert.equal(r.clearStreakObserved,true);assert.equal(r.resetAuthorized,false);assert.equal(r.movementAuthorized,false);assert.ok(Object.isFrozen(r));});
+test('two samples insufficient',()=>assert.equal(evaluate(history([true,true])).clearStreakObserved,false));
+test('obstruction resets count',()=>assert.equal(evaluate(history([true,false,true])).clearStreakObserved,false));
+test('custom threshold bounded',()=>{assert.equal(evaluate(history(),{minimumClearFrames:2}).clearStreakObserved,true);assert.throws(()=>evaluate(history(),{minimumClearFrames:1}));});
+test('forged authority rejected',()=>assert.throws(()=>evaluate({...history(),authoritativeDelivery:true})));
+test('tampered summary rejected',()=>assert.throws(()=>evaluate({...history(),consecutiveClear:5})));
+test('tampered observation rejected',()=>{const h=history();h.observations[1].tick=5;assert.throws(()=>evaluate(h));});
+test('invalid identity rejected',()=>assert.throws(()=>evaluate({...history(),liftId:'!'})));
+test('invalid history bounds rejected',()=>assert.throws(()=>evaluate(history([]))));
+test('blocked latest sample remains stopped',()=>{const r=evaluate(history([true,true,false]));assert.equal(r.stopRequired,true);assert.equal(r.clearStreakObserved,false);});

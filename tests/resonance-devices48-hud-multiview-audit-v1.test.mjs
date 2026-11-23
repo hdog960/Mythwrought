@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditHudViewports48,REQUIRED_VIEWPORTS48} from '../src/resonance/devices48/hud-multiview-audit-v1.mjs';
+const fixtures=()=>REQUIRED_VIEWPORTS48.map(viewport=>({viewport,panel:{x:220,y:8,width:200,height:32},reservedRects:[]}));
+const run=(f=fixtures())=>auditHudViewports48({tick:1,revision:0,fixtures:f});
+test('three landscape fixtures accepted as source-only',()=>{const r=run();assert.equal(r.admitted,true);assert.equal(r.authority,'display-only');assert.equal(r.results.length,3);});
+test('permutation yields canonical order',()=>assert.deepEqual(run(fixtures().reverse()),run()));
+test('blocked one viewport fails aggregate',()=>{const f=fixtures();f[1].reservedRects=[{x:220,y:8,width:200,height:32}];assert.equal(run(f).admitted,false);});
+test('duplicate viewport rejected',()=>{const f=fixtures();f[1].viewport=f[0].viewport;assert.throws(()=>run(f),/duplicate/);});
+test('unsupported viewport rejected',()=>{const f=fixtures();f[1].viewport={width:900,height:400};assert.throws(()=>run(f),/unsupported/);});
+test('missing fixture rejected',()=>assert.throws(()=>run([fixtures()[0]]),/invalid-audit/));
+test('invalid tick rejected',()=>assert.throws(()=>auditHudViewports48({tick:-1,revision:0,fixtures:fixtures()}),/invalid-audit/));
+test('invalid revision rejected',()=>assert.throws(()=>auditHudViewports48({tick:1,revision:1.5,fixtures:fixtures()}),/invalid-audit/));
+test('missing panel rejected',()=>{const f=fixtures();delete f[0].panel;assert.throws(()=>run(f));});
+test('frozen output',()=>{const r=run();assert.ok(Object.isFrozen(r));assert.ok(Object.isFrozen(r.results));assert.ok(Object.isFrozen(r.results[0]));});
+test('caller input unchanged',()=>{const f=fixtures(),before=JSON.stringify(f);run(f);assert.equal(JSON.stringify(f),before);});
+test('no real-world authority granted',()=>assert.equal(run().authority,'display-only'));
