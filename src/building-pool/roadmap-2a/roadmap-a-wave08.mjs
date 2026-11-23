@@ -1278,109 +1278,109 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
     "biome": "enchanted-forest",
     "size": "small",
     "variation": 2,
-    "name": "Thistlelight Honey-Oven Arcade",
-    "w": 49,
-    "d": 46,
-    "h": 12,
-    "entry": 24,
+    "name": "Thistlelight Long-West Gallery Bakehouse",
+    "w": 43,
+    "d": 55,
+    "h": 13,
+    "entry": 21,
     "wall": "pack5:079",
     "floor": "pack2:013",
     "roof": "pack3:026",
     "rects": [
       [
-        11,
-        40,
+        10,
+        33,
         0,
-        11
+        12
       ],
       [
         0,
-        16,
-        8,
-        31
-      ],
-      [
-        35,
-        48,
-        16,
-        40
-      ],
-      [
-        8,
-        46,
-        36,
+        12,
+        10,
         45
       ],
       [
-        15,
-        36,
-        11,
+        31,
+        42,
+        17,
         39
       ],
       [
+        6,
+        38,
+        44,
+        54
+      ],
+      [
+        10,
+        33,
+        10,
+        50
+      ],
+      [
         0,
-        22,
-        29,
-        40
+        20,
+        37,
+        49
       ]
     ],
     "cuts": [
       [
-        22,
-        29,
         18,
-        26
+        25,
+        23,
+        34
       ],
       [
-        41,
-        45,
-        29,
-        34
+        35,
+        40,
+        30,
+        35
       ]
     ],
     "anchors": [
       [
-        24,
+        21,
         6
       ],
       [
-        10,
+        8,
         28
       ],
       [
-        40,
-        29
+        37,
+        24
       ],
       [
-        18,
-        42
+        16,
+        51
       ]
     ],
     "fixtures": [
       [
-        28,
+        25,
         6,
         "pack5:086",
         "ledger-service",
         "public-counter"
       ],
       [
-        12,
-        29,
+        10,
+        30,
         "pack5:091",
         "cartographers-oak-desk",
         "records-and-inventory"
       ],
       [
-        38,
-        31,
+        37,
+        27,
         "pack5:090",
         null,
         "cold-bake-oven"
       ],
       [
-        19,
-        43,
+        18,
+        52,
         "pack4:057",
         null,
         "dry-stock-and-ledger"
@@ -1389,10 +1389,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
     "roofs": [
       [
         [
-          11,
-          40,
+          10,
+          33,
           0,
-          11
+          12
         ],
         "x",
         7,
@@ -1402,9 +1402,9 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       [
         [
           0,
-          16,
-          8,
-          31
+          12,
+          10,
+          45
         ],
         "z",
         5,
@@ -1413,10 +1413,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          35,
-          48,
-          16,
-          40
+          31,
+          42,
+          17,
+          39
         ],
         "x",
         6,
@@ -1425,10 +1425,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          8,
-          46,
-          36,
-          45
+          6,
+          38,
+          44,
+          54
         ],
         "z",
         4,
