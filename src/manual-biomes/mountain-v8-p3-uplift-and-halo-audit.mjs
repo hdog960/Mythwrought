@@ -32,7 +32,11 @@ const inspectCoordinates=(a,x,z)=>a.every(c=>
  */
 export function auditMountainV8P3Uplift(proposal,{originalWorld,sourceMainHead,
   originalVoxelReaderIdentityVerified=false,onVeto}={}){
-  if(!proposal||sourceMainHead!==V8_P3_SOURCE_HEAD||
+  if(!proposal||proposal.safeToIntegrate!==false||
+     proposal.generatorIdentityRequired!=='v8-new-opt-in'||
+     proposal.sourceProvenance?.originalGroundIntact!==true||
+     proposal.sourceProvenance?.protectedEnvelopeClear!==true||
+     sourceMainHead!==V8_P3_SOURCE_HEAD||
      originalVoxelReaderIdentityVerified!==true||
      !valid(proposal.x)||!valid(proposal.z)||!valid(proposal.seed)||
      !originalWorld||originalWorld.seed!==proposal.seed||
@@ -52,7 +56,8 @@ export function auditMountainV8P3Uplift(proposal,{originalWorld,sourceMainHead,
   if(!real||!same([real.x,real.z,real.seed,real.legacyTop,real.top,real.cap,
       real.generatorIdentityRequired],
       [x,z,seed,proposal.legacyTop,proposal.top,proposal.cap,
-        'v8-new-opt-in']))
+        'v8-new-opt-in'])||
+     !same(real.sourceProvenance,proposal.sourceProvenance))
     return refuse('exact-original-legacy-proposal-mismatch',onVeto);
   const physical=planMountainV8PhysicalColumn(real,{worldMaxY:WORLD_MAX_Y,
     ids:BLOCK,readOriginalBlock:(a,b,c)=>originalWorld.get(a,b,c),
