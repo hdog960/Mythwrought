@@ -223,3 +223,93 @@ test('real opt-in player AIR edit remains authoritative after original 64-chunk 
   prototypeSaveFailClosed:true,physicalIphone:false
  }));
 });
+
+function physicallyValidWindingRoute(history,prototype,start,offset,startDetour,endDetour){
+  const nodes=[];
+  const {x,z,direction,steps}=start;
+  for(let i=0;i<=steps;i++){
+    const dz=i>=startDetour&&i<=endDetour?offset:0;
+    const n=originalGround(history,x+i*direction,z+dz);
+    if(!n||!originalGround(prototype,x+i*direction,z+dz)||
+       !originalSafeSample(history,n))return null;
+    if(nodes.length&&Math.abs(n.top-nodes.at(-1).top)>1)return null;
+    nodes.push(n);
+  }
+  const from=name(nodes[0].x,nodes[0].z,history.seed);
+  const to=name(nodes.at(-1).x,nodes.at(-1).z,history.seed);
+  if(from===to||![from,to].includes('enchanted'))return null;
+  // Keep intentional solid authored bark out of clearance acceptance.
+  // Do not misclassify a legitimate structural tree trunk as a leaf bug.
+  for(let i=1;i<nodes.length;i++){
+    const a=nodes[i-1],b=nodes[i];
+    for(let t=0;t<=1.00001;t+=.125){
+      const px=a.x+.5+(b.x-a.x)*t,pz=a.z+.5+(b.z-a.z)*t;
+      for(let xx=Math.floor(px-BODY_RADIUS+eps);
+          xx<=Math.floor(px+BODY_RADIUS-eps);xx++)
+        for(let zz=Math.floor(pz-BODY_RADIUS+eps);
+            zz<=Math.floor(pz+BODY_RADIUS-eps);zz++)
+          for(let yy=Math.min(a.feet,b.feet);
+              yy<=Math.max(a.feet,b.feet)+BODY_HEIGHT;yy++)
+            if(prototype.get(xx,yy,zz)===G.aetherBark)return null;
+    }
+  }
+  return nodes;
+}
+
+test('source-grounded winding climate crossings preserve original continuous player momentum across 14 steps',()=>{
+ const anchors=[
+  {seed:179,x:268,z:-600,direction:1,steps:14},
+  {seed:179,x:268,z:-598,direction:1,steps:14},
+  {seed:7919,x:-208,z:-600,direction:1,steps:14},
+  {seed:7919,x:-208,z:-598,direction:1,steps:14}
+ ];
+ const accepted=[],probed={candidatePlans:0,historicalTraversable:0,
+   prototypeTraversable:0,diagonalLegs:0,climateTransitions:0};
+ for(const seed of [179,7919]){
+  const profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const historical=new FourRegionWorld(seed,profile);
+  const candidate=new FourRegionWorld(seed,profile,{experimentalEnchantedTrees:true});
+  for(const anchor of anchors.filter(a=>a.seed===seed)){
+   let witness=null;
+   outer:
+   for(const offset of [1,-1,2,-2])
+    for(const [first,last] of [[4,8],[6,10],[3,5],[8,11],
+      [2,3],[10,11],[5,6],[7,8]]){
+     const nodes=physicallyValidWindingRoute(historical,candidate,
+       anchor,offset,first,last);
+     if(!nodes)continue;
+     probed.candidatePlans++;
+     const old=continuouslyWalk(historical,nodes);
+     if(!old.ok)continue;
+     probed.historicalTraversable++;
+     const now=continuouslyWalk(candidate,nodes);
+     assert.equal(now.ok,true,
+       'experimental leaves may not close an authentic winding climate route '+
+       JSON.stringify({anchor,offset,first,last,old,now}));
+     assert.equal(now.hitWall,false);
+     assert.equal(now.ceiling,false);
+     assert.equal(now.legs,anchor.steps);
+     assert.ok(Math.abs(now.feet-old.feet)<.15);
+     probed.prototypeTraversable++;
+     probed.diagonalLegs+=2;
+     probed.climateTransitions++;
+     witness={seed,anchor:[anchor.x,anchor.z],offset,
+       detour:[first,last],legs:now.legs,diagonalLegs:2,
+       from:name(nodes[0].x,nodes[0].z,seed),
+       to:name(nodes.at(-1).x,nodes.at(-1).z,seed),
+       oldTicks:old.ticks,newTicks:now.ticks};
+     break outer;
+    }
+   if(witness)accepted.push(witness);
+  }
+  assert.deepEqual(historical.save(),{schema:1,seed,edits:[]});
+  assert.throws(()=>candidate.save(),/cannot be saved as historical M7/);
+ }
+ assert.ok(accepted.length>=1,
+  'at least one actual winding 14-leg historical climate passage is required');
+ assert.ok(probed.diagonalLegs>=2);
+ console.log('# ENCHANTED M7 REAL WINDING CLIMATE PASSAGE '+JSON.stringify({
+  accepted,probed,oldOriginalStepPlayer:true,
+  noInterlegTeleport:true,notPhysicalIphone:true
+ }));
+});
