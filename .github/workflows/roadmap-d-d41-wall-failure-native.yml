@@ -1,0 +1,54 @@
+name: Builder D41 original W16-W17 finite-thickness route failure diagnosis ONLY
+on:
+  push:
+    branches:
+      - builder-d-d41-original-wall-route-failure-diagnostic-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d41-*'
+      - 'tests/building-pool/roadmap-d/d41-*'
+      - 'docs/building-pool/roadmap-d/D41_*'
+      - '.github/workflows/roadmap-d-d41-wall-failure-native.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d41-original-root-certificate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  new-original-wall-failure-tests-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify source parent and unchanged original Wave16-Wave17 Pack2 runtime and D39-D40 blobs
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '85893594c3be3c669e4fbe03bb2dd02c83f8e6cb'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/voxel-shape-fit.mjs)" = 'ec5adc274d8b45c91d3dade81c3d9c2830380849'
+          test "$(git rev-parse HEAD:src/voxel-shape-interactions.mjs)" = '01be82e6c308e47a35fa6588cc6ed1ebeafca307'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d39-actual-multicourse-wall-loop.mjs)" = '605870b7c1dcbc2f7a52213648eb444c04ce5b30'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d39-original-uncertified-wall-loop-audit.mjs)" = '5dbfbb99d82fd8b930155a9ba5672581ed433b99'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-swept-exterior-capture.mjs)" = '172284f5f5eb1727b6d510159afdc992cfd5f0da'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-original-swept-route-audit.mjs)" = 'ea8fc56603fa68db2dcb0163a5451cb41131bc9d'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly two D41 sources and two focused test modules
+        run: |
+          node --check src/building-pool/roadmap-d/d41-finite-route-failure-certificate.mjs
+          node --check src/building-pool/roadmap-d/d41-original-root-failure-audit.mjs
+          node --check tests/building-pool/roadmap-d/d41-route-failure-certificate.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d41-original-winding-failure.source.test.mjs
+      - name: Execute ONLY D41 four new pure and two genuine original W16-W17 source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d41-route-failure-certificate.pure.test.mjs \
+            tests/building-pool/roadmap-d/d41-original-winding-failure.source.test.mjs
