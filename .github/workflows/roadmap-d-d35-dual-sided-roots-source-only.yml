@@ -1,0 +1,52 @@
+name: Builder D35 source authentic split-plane dual-root and original ID62 two-face bridge ONLY
+on:
+  push:
+    branches:
+      - builder-d-d35-dual-lane-terminations-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d35-*'
+      - 'tests/building-pool/roadmap-d/d35-*'
+      - 'docs/building-pool/roadmap-d/D35_*'
+      - '.github/workflows/roadmap-d-d35-dual-sided-roots-source-only.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d35-isolated-native-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  genuine-original-wall-root-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify exact D34 parent and unchanged genuine original builder authors and Pack2 owners
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '8126a566c8fc085f0c2ddd407704ea1a10facb9e'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-pack2-owner-oblique-preview.mjs)" = '3c06f7b6d8e41b9e3bf194505c82ab9fe686ffb7'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d32-pack2-wall-seat-joint-ports.mjs)" = '27ac7102eb22c1ad4fec6ba7c8c1c97c3e5afd24'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d33-owner-cheek-pin-geometry.mjs)" = '36b116845346acac96f245b90de0337743021082'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d34-owner-lateral-pin-interface.mjs)" = '4c041ed8875ba1182c327571e0345f83538be0e7'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly two new D35 sources and two focused tests
+        run: |
+          node --check src/building-pool/roadmap-d/d35-owner-wall-termination-and-bridge.mjs
+          node --check src/building-pool/roadmap-d/d35-original-double-lane-connector-audit.mjs
+          node --check tests/building-pool/roadmap-d/d35-wall-termination-bridge.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d35-original-two-sided-roots.source.test.mjs
+      - name: Run ONLY D35 four new pure and two new authentic W16 W17 Node tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d35-wall-termination-bridge.pure.test.mjs \
+            tests/building-pool/roadmap-d/d35-original-two-sided-roots.source.test.mjs
