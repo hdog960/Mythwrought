@@ -444,7 +444,8 @@ function start(nonblockStage=null){
     viewport:'',frames:new Float64Array(2048),mines:new Float32Array(128),
     uploads:new Float32Array(2048),
     mineWitness:[],mineWitnessOverflow:false,mineWitnessInvalid:false,
-    frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,prevFrame:null
+    frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,
+    interruptionCount:0,prevFrame:null
   }:null;
   function near291Viewport(){
     return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
@@ -458,6 +459,14 @@ function start(nonblockStage=null){
     near291Perf.slowFrameCount=0;
     near291Perf.mineWitness.length=0;
     near291Perf.mineWitnessOverflow=near291Perf.mineWitnessInvalid=false;
+    near291Perf.interruptionCount=0;
+    near291Perf.prevFrame=null;
+  }
+  function near291Interrupt(){
+    if(!near291Perf)return;
+    // Do not count loading before the first eligible measured event.
+    if(near291Perf.frameCount||near291Perf.mineCount||near291Perf.uploadCount)
+      near291Perf.interruptionCount++;
     near291Perf.prevFrame=null;
   }
   function near291RecordFrame(now){
@@ -530,6 +539,10 @@ function start(nonblockStage=null){
         entry=>Object.freeze([...entry]))),
       mineWitnessOverflow:near291Perf.mineWitnessOverflow,
       mineWitnessInvalid:near291Perf.mineWitnessInvalid,
+      // A recovered WebGL context or visible page cannot erase an earlier
+      // suspended measurement interval from the same A/B run.
+      interruptionCount:near291Perf.interruptionCount,
+      continuousForegroundRun:near291Perf.interruptionCount===0,
       miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
       frameGapsRecorded:near291Perf.frameCount,
       rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
@@ -2142,7 +2155,7 @@ function start(nonblockStage=null){
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
-      if(near291Perf)near291Perf.prevFrame=null;
+      near291Interrupt();
       frameDriver.pause();
       frameHistory.frame(performance.now(),false);
       cancelAllPointers();
@@ -3328,7 +3341,7 @@ function start(nonblockStage=null){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
-    if(near291Perf)near291Perf.prevFrame=null;
+    near291Interrupt();
     near291?.contextLost(); // no invalid GL deletion
     mobRenderer=null;
     caveFarGpu?.resetForLostContext();
@@ -3371,7 +3384,7 @@ function start(nonblockStage=null){
   });
   window.addEventListener('pagehide',()=>{
     near291PageSuspended=true;
-    if(near291Perf)near291Perf.prevFrame=null;
+    near291Interrupt();
     near291LoadEpoch++; // cancel unresolved experimental module imports
     near291Pending=false;
     mobSession?.save();
