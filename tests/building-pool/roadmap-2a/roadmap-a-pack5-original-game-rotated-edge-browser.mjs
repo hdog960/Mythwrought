@@ -159,7 +159,7 @@ try{
   };
   const same=(a,b)=>a===null&&b===null||
    a!==null&&b!==null&&Math.abs(a-b)<=2e-7;
-  const tests=[],faceX=cell[0];
+  const tests=[],firstByCategory=Object.create(null),faceX=cell[0];
   // Eye is 3+ cells to the left in the genuine original game.
   // 6x authored seam coordinates on the rotated original brick face.
   const source=prod.descriptor;
@@ -192,19 +192,27 @@ try{
      bothHit++;
      if(mismatch)differentDistance++;
     }else bothMiss++;
-    if(mismatch&&tests.length<20){
-     tests.push({classification:triangle!==null&&selection===null?'triangle-only':
+    if(mismatch){
+     const witness={classification:triangle!==null&&selection===null?'triangle-only':
       triangle===null?'selection-only':'hit-distance-difference',
       yaw,pitch,eye,localTarget:[0,y+shift,z],
       projectedTriangleDistance:triangle,sourceSelectionDistance:selection,
-      originalSourceResearchOnly:true});
+      originalSourceResearchOnly:true};
+     // The first 20 diagnostic samples may all have the same category.
+     // Never silently lose the rare triangle-only warning that the actual
+     // game edge-MINE behavior is supposed to validate.
+     if(!firstByCategory[witness.classification])
+      firstByCategory[witness.classification]=witness;
+     if(tests.length<20)tests.push(witness);
     }
    }
   }
   // Pick an actual-world-pose triangle hit missed by original detailed
   // selection if possible. Fallback: a real near-seam BOTH-hit candidate.
-  const miss=tests.find(x=>x.classification==='triangle-only');
-  const edge=miss??tests.find(x=>x.classification==='hit-distance-difference');
+  const miss=firstByCategory['triangle-only'];
+  const edge=miss??firstByCategory['hit-distance-difference'];
+  if(variantTriangleOnly>0&&edge?.classification!=='triangle-only')
+   throw Error('Original source triangle-only cases were found but not selected for actual game proof');
   const target=[cell[0]+.5,cell[1]+.5,cell[2]+.5],
     v=target.map((x,i)=>x-eye[i]);
   const center={yaw:Math.atan2(v[0],v[2]),
@@ -267,11 +275,19 @@ try{
   const edgeOutcome=await snap();
   report.boundaryRealGame={
    sourcePredictedTriangleOnly:true,sourceExpectedSelectionMiss:true,
+   sourceActualTriangleDistance:study.edge.projectedTriangleDistance,
+   sourceActualSelectionDistance:study.edge.sourceSelectionDistance,
    actualGameMineRemoved:edgeOutcome.pack5Instances===0,
    retainedOriginalFixture:edgeOutcome.pack5Instances===1,
    actualGameStatus:edgeOutcome.status,
+   actualOriginalCanvasNearCrosshairStrongChangedPixels:pixels.center9x9StrongPixels,
    realOriginalMainMineControlClicked:true,
-   actualGpuEdgePixelCoverageNotYetCertified:true};
+   originalFramebufferCenterPixelNotEqualToMathAim:true};
+  assert.ok(study.edge.projectedTriangleDistance!==null&&
+   study.edge.sourceSelectionDistance===null,
+   'Selected source ray must actually be triangle-only, never an invented miss');
+  assert.ok(pixels.center9x9StrongPixels>=1,
+   'Rendered original Pack5 brick is not distinguishable within 9x9 canvas pixel centers surrounding crosshair');
   assert.equal(edgeOutcome.pack5Instances,1,
    'actual original Pack5 MINE removed a source-predicted selection-miss edge');
  }else{
@@ -318,6 +334,8 @@ try{
   sourceBothHitDistanceWarnings:study.scan.differentDistance,
   selectionOnly:study.scan.selectionOnly,
   chosenEdgeClass:study.chosenEdgeClass,
+  trueTriangleOnlyEdgeMineTested:report.boundaryRealGame.sourcePredictedTriangleOnly===true,
+  originalRealMineRetainedOnSourceTriangleOnlyEdge:report.boundaryRealGame.retainedOriginalFixture??null,
   realGpuVertices:real.sourceResidentVertices,
   realGpuBytes:real.residentBytes,
   realGpuDrawCalls:real.drawCalls,

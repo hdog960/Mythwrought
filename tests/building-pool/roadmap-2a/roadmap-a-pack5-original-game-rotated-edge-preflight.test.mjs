@@ -42,6 +42,12 @@ test('actual original camera source ray comes from game player pose instead of i
 });
 test('actual source triangle-only near-edge MINE tests fail closed and never delete through raycast helper',()=>{
  assert.ok(script.includes("study.edge?.classification==='triangle-only'"));
+ assert.ok(script.includes("const tests=[],firstByCategory=Object.create(null),faceX=cell[0]"));
+ assert.ok(script.includes("if(!firstByCategory[witness.classification])"));
+ assert.ok(script.includes("const miss=firstByCategory['triangle-only']"));
+ assert.ok(script.includes("if(variantTriangleOnly>0&&edge?.classification!=='triangle-only')"));
+ assert.ok(script.includes("assert.ok(pixels.center9x9StrongPixels>=1"));
+ assert.ok(script.includes('trueTriangleOnlyEdgeMineTested:report.boundaryRealGame.sourcePredictedTriangleOnly===true'));
  assert.ok(script.includes("await page.locator('#dig').click();await sleep(320)"));
  assert.ok(script.includes("assert.equal(edgeOutcome.pack5Instances,1"));
  assert.ok(script.includes("actualGpuEdgePixelCoverageNotYetCertified:true"));
