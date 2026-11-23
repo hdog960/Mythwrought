@@ -136,6 +136,15 @@ for(const [rx,rz] of regions){
   candidateThinUnderpassCenterLandingSolidSupport:
    underpass.centerPadSolidSupports??null,
   candidateThinUnderpassTotalSourceVisits:underpass.sourceChecks??null,
+  candidateThinUnderpassActualReaderCallsByRole:
+   underpass.underpassActualReaderCallsByRole??null,
+  candidateThinUnderpassActualReaderMethodCalls:
+   underpass.underpassActualReaderMethodCalls??null,
+  candidateThinUnderpassExpectedReaderCallsPerRole:
+   underpass.expectedUnderpassReaderCallsPerRole??null,
+  candidateThinUnderpassNoReaderCallsDuringSyntheticMotion:
+   underpass.sourceReaderCallsUnchangedDuringHypotheticalMotion===true,
+  candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
   candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
