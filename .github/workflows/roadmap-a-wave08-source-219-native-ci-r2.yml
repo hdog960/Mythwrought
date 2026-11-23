@@ -1,0 +1,36 @@
+name: Roadmap A original Wave08 twelve-source plus 219-provisional native R2
+on:
+  push:
+    branches:
+      - roadmap-a-wave08-source-219-native-ci-r2-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave08-source-219-native-ci-r2.yml'
+permissions:
+  contents: read
+jobs:
+  original-wave08-219-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Syntax only on four changed own-lane original Wave08 source and tests
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave08.mjs
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-219-provisional.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave08.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-219-provisional.test.mjs
+      - name: Only four authored Wave08 geometry/D4 + three source-only provenance tests
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-wave08.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-a5-219-provisional.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave08-219-provisional-source-only-original-json
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_219_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
