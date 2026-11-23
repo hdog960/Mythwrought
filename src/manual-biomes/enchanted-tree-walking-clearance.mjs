@@ -6,6 +6,7 @@
 // Only candidate leaves are pruned. Bark, cave AIR, terrain, original trees,
 // landmarks, saved worlds and the historical M7 generator are never edited.
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
+import {EnchantedCandidateSourceCache} from './enchanted-tree-source-cache.mjs';
 
 export const ENCHANTED_WALKING_HEADROOM_VOXELS=2;
 export const ENCHANTED_WALKING_GROUND_NEIGHBORS=Object.freeze([
@@ -23,7 +24,12 @@ export function clearEnchantedCanopyForWalking(cells,readBaseline,air=0,sharedCa
   // tiers; memoize real source reads for this ONE tree, not globally.
   // A caller may share this bounded cache among candidates in ONE chunk.
   // It is never retained by the world or shared between seeds/loads.
-  const baselineCache=sharedCache??new Map();
+  // Standalone source checks previously grew an unbounded Map even though
+  // the original chunk planner supplies the reviewed 1024-entry FIFO.
+  // Use the same bounded fallback everywhere; evicted source cells must
+  // be re-read from the authoritative caller, not assumed to be AIR.
+  // Caller-supplied Map semantics remain unchanged for existing consumers.
+  const baselineCache=sharedCache??new EnchantedCandidateSourceCache();
   const blocked=(x,y,z)=>{
     const key=x+','+y+','+z;
     if(!baselineCache.has(key))
