@@ -442,7 +442,8 @@ function start(nonblockStage=null){
     new URLSearchParams(location.search).get('measure-291')==='1';
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float32Array(2048),mines:new Float32Array(128),
-    frameCount:0,mineCount:0,prevFrame:null
+    uploads:new Float32Array(2048),
+    frameCount:0,mineCount:0,uploadCount:0,prevFrame:null
   }:null;
   function near291Viewport(){
     return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
@@ -452,7 +453,7 @@ function start(nonblockStage=null){
     const key=near291Viewport();
     if(near291Perf.viewport===key)return;
     near291Perf.viewport=key;
-    near291Perf.frameCount=near291Perf.mineCount=0;
+    near291Perf.frameCount=near291Perf.mineCount=near291Perf.uploadCount=0;
     near291Perf.prevFrame=null;
   }
   function near291RecordFrame(now){
@@ -477,12 +478,17 @@ function start(nonblockStage=null){
     near291Perf.mines[near291Perf.mineCount%near291Perf.mines.length]=duration;
     near291Perf.mineCount++;
   }
+  function near291RecordUpload(duration){
+    if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
+    near291CheckViewport();
+    near291Perf.uploads[near291Perf.uploadCount%near291Perf.uploads.length]=duration;
+    near291Perf.uploadCount++;
+  }
   function near291PerfSnapshot(){
     if(!near291Perf)return null;
     near291CheckViewport();
-    const percentile=values=>{
-      const count=Math.min(values.length,values===near291Perf.frames?
-        near291Perf.frameCount:near291Perf.mineCount);
+    const percentile=(values,seen)=>{
+      const count=Math.min(values.length,seen);
       if(!count)return null;
       const sorted=Array.from(values.slice(0,count)).sort((a,b)=>a-b);
       return Math.round(sorted[Math.ceil(count*.95)-1]*10)/10;
@@ -493,11 +499,15 @@ function start(nonblockStage=null){
       viewportPixels:[canvas.width,canvas.height],
       seed:world.seed,playerFeet:player.feet,
       trueSavedDeepMines:near291Perf.mineCount,
-      miningActionP95Ms:percentile(near291Perf.mines),
+      miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
       frameGapsRecorded:near291Perf.frameCount,
-      rollingFrameP95Ms:percentile(near291Perf.frames),
+      rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
+      guardedUploadCalls:near291Perf.uploadCount,
+      rollingGuardedUploadP95Ms:percentile(near291Perf.uploads,near291Perf.uploadCount),
       maxFrameSamples:near291Perf.frames.length,
       maxMineSamples:near291Perf.mines.length,
+      maxUploadSamples:near291Perf.uploads.length,
+      fatal:near291Fatal,graphicsLost,pageSuspended:near291PageSuspended,
       sourceFrames:frameHistory.stats(),meshCadence:meshCadence.stats(),
       residentNearChunks:chunks.size,pendingNearChunks:pending.size,
       driver:frameDriver.snapshot(),
@@ -1026,8 +1036,14 @@ function start(nonblockStage=null){
   function uploadPack2Chunk(vertices,water){
     let buffer=null,waterBuffer=null;
     try{
-      buffer=uploadChunkBuffer(gl,vertices);
-      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      const opaqueStarted=near291Perf?performance.now():null;
+      try{buffer=uploadChunkBuffer(gl,vertices);}
+      finally{if(opaqueStarted!==null)near291RecordUpload(performance.now()-opaqueStarted);}
+      if(water.length){
+        const waterStarted=near291Perf?performance.now():null;
+        try{waterBuffer=uploadChunkBuffer(gl,water);}
+        finally{if(waterStarted!==null)near291RecordUpload(performance.now()-waterStarted);}
+      }
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
       if(!near291Enabled){
@@ -2089,6 +2105,7 @@ function start(nonblockStage=null){
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){
+      if(near291Perf)near291Perf.prevFrame=null;
       frameDriver.pause();
       frameHistory.frame(performance.now(),false);
       cancelAllPointers();
@@ -3274,6 +3291,7 @@ function start(nonblockStage=null){
     e.preventDefault();
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
+    if(near291Perf)near291Perf.prevFrame=null;
     near291?.contextLost(); // no invalid GL deletion
     mobRenderer=null;
     caveFarGpu?.resetForLostContext();
@@ -3316,6 +3334,7 @@ function start(nonblockStage=null){
   });
   window.addEventListener('pagehide',()=>{
     near291PageSuspended=true;
+    if(near291Perf)near291Perf.prevFrame=null;
     near291LoadEpoch++; // cancel unresolved experimental module imports
     near291Pending=false;
     mobSession?.save();
