@@ -94,6 +94,9 @@ export function buildAlderbrookDoubleHorseshoeCoachingStables(){
   for(let y=1;y<=4;y++)if(b.clear(x,y,z))
    b.put(x,y,z,'partition','live:wood','none',{originalStableSaddleScreen:true});
  }
+ // Recut every original two-high stall gate AFTER the later timber screens;
+ // otherwise a partition at z20 can silently close the eastern stall.
+ for(const {gate} of stalls)b.opening(gate[0],gate[2]);
  for(const room of [
   ['northern-unmounted-coach-register',20,4,55,19],
   ['west-empty-stall-wing',6,14,26,57],['east-empty-horsegear-wing',46,13,67,59],
