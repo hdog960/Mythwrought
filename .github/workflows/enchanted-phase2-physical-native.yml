@@ -1,8 +1,8 @@
-# Exact original-M7 isolated enchanted Phase 2 source-only change.
-# Standalone canopy source probes now use reviewed bounded FIFO and real
-# original-world 14-leg winding biome-border walking gains new coverage.
-# Reuse unchanged 288-chunk cache, GPU and Moonwillow browser evidence.
-# Do NOT duplicate broad CI, browser screenshot or developer workflows.
+# Non-redundant original-world M7 physical climate survey only.
+# Prior exact 12/12 canopy budget and 14-leg winding routes passed on
+# source a4799ef8ddb8ce34002ba8fd533f40235188fc05, Actions #45088942632.
+# This run executes ONLY the new 8/10-leg multi-climate and seed -88 search.
+# No broad CI, unchanged tests, browsers or other developer workflows.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  canopy-bounded-source-and-winding-original-m7:
+  original-m7-short-multiclimate-traversal-survey:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -27,14 +27,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check exact source and new focused tests
+      - name: Exact source and one new changed-test syntax
         run: |
           git rev-parse HEAD
-          node --check src/manual-biomes/enchanted-tree-walking-clearance.mjs
-          node --check tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs
           node --check tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
-      - name: Real original M7 winding biome walks, native player edit, bounded canopy parity
+      - name: One new real original M7 short climate transition survey only
         run: |
-          node --test \
-            tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs \
+          node --test --test-name-pattern="bounded short original-M7 physical survey" \
             tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
