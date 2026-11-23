@@ -107,18 +107,39 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
       return fail('original-upper-route-discontinuous',
         {name,atStep:i,sourceStepsConfirmed:ownerCount,
          source:[q.x,q.floor,q.z],observations});
+    // The original upper author merges overlapping mineral-gallery floors
+    // by keeping the HIGHEST actual authored source floor in a column.
+    // Around owner step 114, nominal route.floor=-27 is NOT a floor; the
+    // actual unchanged source author has a real supported -26 floor.
+    // Accept only a literal source-owned solid floor with three original
+    // authored AIR headroom cells, matching original M7 world.get and real
+    // collision/ground admission. The actual unchanged stepPlayer alone
+    // determines whether this genuine source may be walked.
+    // Never generate a floor, bypass a steep step, or reprofile old M7.
+    const possible=[0,1,2].map(d=>
+      inspectOwnerCap(world,owner,q.x,q.floor+d,q.z));
+    const end=possible.find(v=>v.exactM7&&
+      Math.abs(v.cap.feet-predecessor.feet)<=1.01);
+    if(!end)return fail('original-upper-center-not-authored-or-adjacent',
+      {name,atStep:i,sourceStepsConfirmed:ownerCount,
+       prior:floorRecord(predecessor),target:[q.x,q.floor,q.z],
+       originalAuthorOwnedFloorCandidates:Object.freeze(possible.map(v=>
+         Object.freeze({floor:v.floor,exactM7:v.exactM7,
+           originalOwnerFloor:v.originalFloor??null}))),
+       observations:Object.freeze(observations)});
     // Every diagonal is split ONLY across an actually owner-authored
-    // integral voxel floor. Try both cardinal orderings and both REAL
-    // already authored endpoints' elevations, never insert fictitious AIR.
+    // cardinal intermediary, at an AUTHENTIC source floor between the
+    // previous and already authenticated actual target floor. The
+    // overwritten nominal route-floor value must never be used here.
     if(dx&&dz){
       let choice=null;
       for(const [x,z] of [[q.x,predecessor.z],
                           [predecessor.x,q.z]]){
-        for(const floor of [predecessor.surface,q.floor]){
+        for(const floor of [...new Set([predecessor.surface,end.cap.surface])]){
           const cap=inspectOwnerCap(world,owner,x,floor,z);
           if(cap.exactM7&&
              Math.abs(cap.cap.feet-predecessor.feet)<=1.01&&
-             Math.abs(cap.cap.feet-(q.floor+1))<=1.01){
+             Math.abs(cap.cap.feet-end.cap.feet)<=1.01){
             choice=cap;break;
           }
         }
@@ -127,7 +148,8 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
       if(!choice)return fail('original-upper-diagonal-has-no-authored-supported-corner',
         {name,atStep:i,sourceStepsConfirmed:ownerCount,
           prior:floorRecord(predecessor),
-          target:[q.x,q.floor,q.z],
+          nominalTarget:[q.x,q.floor,q.z],
+          actualSourceTarget:floorRecord(end.cap),
           observations:Object.freeze(observations)});
       path.push(Object.freeze({...choice.cap,
         owner:'original-upper-owner-supported-corner',
@@ -136,20 +158,24 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
       observations.push(Object.freeze({step:i,kind:'owner-authored-corner',
         at:floorRecord(predecessor)}));
     }
-    const end=inspectOwnerCap(world,owner,q.x,q.floor,q.z);
-    if(!end.exactM7||
-       Math.abs(end.cap.feet-predecessor.feet)>1.01||
+    if(Math.abs(end.cap.feet-predecessor.feet)>1.01||
        Math.abs(end.cap.x-predecessor.x)+
        Math.abs(end.cap.z-predecessor.z)!==1)
-      return fail('original-upper-center-not-authored-or-adjacent',
+      return fail('original-upper-actual-owner-floor-not-physically-adjacent',
         {name,atStep:i,sourceStepsConfirmed:ownerCount,
-          prior:floorRecord(predecessor),target:[q.x,q.floor,q.z],
-          inspected:Object.freeze({...end,cap:null}),
+          prior:floorRecord(predecessor),
+          nominalTarget:[q.x,q.floor,q.z],
+          actualSourceTarget:floorRecord(end.cap),
           observations:Object.freeze(observations)});
     path.push(Object.freeze({...end.cap,owner:'original-upper-owner-center',
-      upperRouteStep:i,corner:false}));
+      upperRouteStep:i,originalNominalFloor:q.floor,corner:false}));
     predecessor=path.at(-1);
     ownerCount++;
+    if(end.cap.surface!==q.floor)
+      observations.push(Object.freeze({step:i,
+        kind:'original-upper-owner-overlap-floor',
+        nominal:[q.x,q.floor,q.z],
+        physicallyAuthorOwned:floorRecord(end.cap)}));
     observations.push(Object.freeze({step:i,kind:'original-upper-route-center',
       at:floorRecord(predecessor)}));
   }
@@ -165,6 +191,8 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
     extraVerifiedPhysicalWaypoints:path.length-base.path.length,
     lastSourceUpperCenter:floorRecord(predecessor),
     authoredCornersAdded:observations.filter(a=>a.kind==='owner-authored-corner').length,
+    originalOwnedOverlapFloors:Object.freeze(observations.filter(
+      a=>a.kind==='original-upper-owner-overlap-floor')),
     observations:Object.freeze(observations),
     physics,
     physicallyTraversedUpperSteps:physics.ok?ownerCount:0,
