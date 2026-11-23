@@ -24,6 +24,7 @@ test('original depth ABI stays byte-identical while new bounds are research-only
   assert.equal(p0UpperSectionForY(20),1);
   assert.equal(p0UpperSectionForY(35.9),1);
   assert.equal(p0UpperSectionForY(36),2);
+  assert.equal(p0UpperSectionForY(147.999),8);
   assert.equal(p0UpperSectionForY(148),null);
   assert.equal(p0SectionKey(-2,3,0),'-2,3');
   assert.equal(p0SectionKey(-2,3,1),'-2,3,1');
@@ -143,4 +144,37 @@ test('resident plan preserves untouched surface and caps upper approach to 18/27
   assert.equal(planP0VerticalResidence(147,{nearUpperSite:true}).residentBufferLimit,18);
   assert.throws(()=>planP0VerticalResidence(10,{nearUpperSite:true,openShaft:true}),/overlap/);
   assert.throws(()=>planP0VerticalResidence(148,{nearUpperSite:true}));
+});
+
+test('authentic M7 original surface RGB/vertex stream remains byte-identical behind upper view',()=>{
+  for(const seed of [179,2026]){
+    const profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+    const real=new FourRegionWorld(seed,profile);
+    const site=definePrototypePyramid({seed,x:15,z:-16,baseY:20,size:31,height:26});
+    const view=createP0UpperOnlyView(real,site);
+    for(const [cx,cz] of [[0,-1],[-1,0]]){
+      // No old-world voxel changes are allowed; the accepted M7 RGB stream
+      // must remain EXACT when upper cells are projected into an isolated view.
+      const original=meshChunk(real,cx,cz),proxied=meshChunk(view,cx,cz);
+      assert.deepEqual(proxied,original,
+        'M7 RGB byte parity seed '+seed+' chunk '+cx+','+cz);
+    }
+  }
+});
+
+test('actual upper physical vertices are unchanged by reverse native chunk reads',()=>{
+  const seed=179,profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const original=new FourRegionWorld(seed,profile);
+  const site=definePrototypePyramid({seed,x:15,z:-16,baseY:20,size:31,height:26});
+  const view=createP0UpperOnlyView(original,site);
+  const coords=[[-1,-2],[0,-2],[-1,-1],[0,-1],[1,-1],[1,0]];
+  const capture=order=>new Map(order.map(([cx,cz])=>{
+    const v=meshP0UpperSection(view,cx,cz,1);
+    assert.equal(v.length%27,0);
+    assert.ok(v.byteLength<4*1024*1024);
+    return [cx+','+cz,v];
+  }));
+  const first=capture(coords),second=capture([...coords].reverse());
+  assert.ok([...first.values()].some(v=>v.length>0));
+  for(const [key,v] of first)assert.deepEqual(v,second.get(key),key);
 });

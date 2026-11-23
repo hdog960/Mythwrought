@@ -23,7 +23,7 @@ export function p0UpperSectionBounds(section){
   return Object.freeze({minY,maxY:minY+P0_UPPER_SECTION_HEIGHT-1});
 }
 export function p0UpperSectionForY(y){
-  if(!Number.isFinite(y)||y<P0_UPPER_MIN_Y||y>P0_UPPER_MAX_Y)return null;
+  if(!Number.isFinite(y)||y<P0_UPPER_MIN_Y||y>=P0_UPPER_MAX_Y+1)return null;
   return Math.floor((y-P0_UPPER_MIN_Y)/P0_UPPER_SECTION_HEIGHT)+1;
 }
 export function p0SectionsForEdit(y){
@@ -120,6 +120,11 @@ export function createP0UpperOnlyView(baseWorld,site,{veto=null}={}){
     edits:baseWorld.edits,
     base:baseWorld.base,
     generationProfile:baseWorld.generationProfile,
+    // The ORIGINAL M7 surface mesher calls sourceWorld._columnPlan to
+    // validate natural Desert/Mountain RGB seam eligibility. A proxy must
+    // retain that source query, not silently remove the accepted tint.
+    _columnPlan:typeof baseWorld._columnPlan==='function'?
+      (x,z)=>baseWorld._columnPlan(x,z):undefined,
     p0Admission:admission
   });
 }
