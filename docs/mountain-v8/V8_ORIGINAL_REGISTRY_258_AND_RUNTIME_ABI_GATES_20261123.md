@@ -36,9 +36,9 @@ Sum: 9 + 30 + 18 + 17 + 23 + 18 + 130 + 11 + 2 = **258**; five-pack's **106** en
 
 ## 3. Focused tests and limits (no invented result)
 - Original V8 source handoff still reuses exact native Actions #45092207790 **14/14** at original source commit `7b9c27098ba4be197b6c76d460a8b642153bc2eb`. No duplicate broad suite run.
-- New `tests/mountain-v8-opt-in-seed-preflight.test.mjs`: exactly **8** top-level original-world seed ownership/recovery tests, including corrupted primary with valid journal; no storage writes and never returns runtime permission.
+- New `tests/mountain-v8-opt-in-seed-preflight.test.mjs`: exactly **9** top-level original-world seed ownership/recovery tests, including corrupted primary with valid journal; no storage writes and never returns runtime permission.
 - New `tests/mountain-v8-registry-ownership-audit.test.mjs`: **3** top-level tests for 258 distinct known ID/sentinel provenance, catalog bridge completeness, immutability and no V8 allocation.
-- A single isolated workflow `.github/workflows/mountain-v8-integration-preflight-focused.yml` targets only these 11 tests and syntax checks, triggers on its own initial file creation only, and cannot rerun on future source/doc pushes. **The workflow's actual run status has NOT been independently obtained**. Its definition/commit is not a passing test result; do not count the 8+3 as green without original GitHub Actions evidence.
+- A single isolated workflow `.github/workflows/mountain-v8-integration-preflight-focused.yml` targets only the two test files (9 seed tests plus 3 registry tests) and syntax checks, triggers on its own initial file creation only, and cannot rerun on future source/doc pushes. **The workflow's actual run status has NOT been independently obtained**. Its human-readable workflow step name retains the earlier count of eight, but the Node command executes both complete files (9+3). Avoid changing that label solely to retrigger CI. Its definition/commit is not a passing test result; do not count the 9+3 as green without original GitHub Actions evidence.
 
 ## 4. Still-required approval owners and strict stop lines
 1. Creator + generator/profile owner: propose, explicitly approve and separately enable **new V8 opt-in** identity, new unused-seed route, no M2–M7 changes.
