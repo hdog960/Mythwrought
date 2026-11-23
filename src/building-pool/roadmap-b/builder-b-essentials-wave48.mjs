@@ -28,7 +28,8 @@ export function buildFrostmerefoldFourCourtWinterConservatory(){
   ['southlight-unroofed-court',28,50,39,57]
  ],
  key=(x,z)=>x+','+z,indoor=new Set(),courtyard=new Set(),exterior=new Set(),roofLevel=new Map(),
- faces={north:[0,-1],east:[1,0],south:[0,1],west:[-1,0]};
+ faces={north:[0,-1],east:[1,0],south:[0,1],west:[-1,0]},
+ plinthGround=new Set(['17,17','51,17','16,57','52,57']);
  for(const [,x0,z0,x1,z1] of wings)for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)
   indoor.add(key(x,z));
  for(const [,x0,z0,x1,z1] of courts)
@@ -43,7 +44,7 @@ export function buildFrostmerefoldFourCourtWinterConservatory(){
  const grounded=(x,z)=>indoor.has(key(x,z))||courtyard.has(key(x,z))||exterior.has(key(x,z));
  for(const k of new Set([...indoor,...courtyard,...exterior])){
   const [x,z]=k.split(',').map(Number);
-  b.put(x,0,z,'foundation',exterior.has(k)?'live:stone':'live:wood','none',
+  b.put(x,0,z,'foundation',exterior.has(k)||courtyard.has(k)||plinthGround.has(k)?'live:stone':'live:wood','none',
    {sourceRealSolidWinterFloor:true,weatherPhysicsUnverified:true});
  }
  for(const k of indoor){
