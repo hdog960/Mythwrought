@@ -42,5 +42,11 @@ jobs:
           test "$(git -C candidate rev-parse HEAD:src/storybook-materials.mjs)" = a06a1f3408d99521485a48d2d84a577a7ac588c8
           node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
           node --check candidate/tests/desert-p3-runtime-corner-gpu-source.test.mjs
-      - name: 'NEW only: actual V7 corners and exact main upload fault-injection checks'
-        run: cd candidate && node --test tests/desert-p3-runtime-corner-gpu-source.test.mjs
+      - name: 'Only repaired exact-source main GPU publication tests, reuse corner 3/3'
+        run: |
+          set -euo pipefail
+          # First real GitHub run #45088948599: corner and climate source
+          # tests PASSED 3/3. Production-impacting source below is unchanged.
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 7355afffedb485fe98d03b91a382ee3c766efa08
+          cd candidate
+          node --test --test-name-pattern='original main.mjs GPU upload' tests/desert-p3-runtime-corner-gpu-source.test.mjs
