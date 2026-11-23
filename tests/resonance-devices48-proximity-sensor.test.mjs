@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {stepProximitySensor as step} from '../src/resonance/devices48/proximity-sensor-v1.mjs';
+const input=(tick,distance,observedGrant=1)=>({worldId:'world',sensorId:'sensor',tick,distance,observedGrant,enterRadius:2,exitRadius:3,stableTicks:2});
+test('two observations required for detection',()=>{const a=step(null,input(0,1));const b=step(a,input(1,1));assert.equal(a.detected,false);assert.equal(b.detected,true);assert.equal(b.activationAuthorized,false);});
+test('hysteresis prevents boundary chatter',()=>{let s=step(null,input(0,1));s=step(s,input(1,1));s=step(s,input(2,2.5));assert.equal(s.detected,true);s=step(s,input(3,3.1));assert.equal(s.detected,true);s=step(s,input(4,3.1));assert.equal(s.detected,false);});
+test('power loss blanks output without erasing detection',()=>{let s=step(null,input(0,1));s=step(s,input(1,1));s=step(s,input(2,1,0));assert.equal(s.detected,true);assert.equal(s.output,false);assert.equal(step(s,input(3,1)).output,true);});
+test('one noisy reading does not trigger',()=>{let s=step(null,input(0,1));s=step(s,input(1,5));assert.equal(s.detected,false);assert.equal(s.streak,0);});
+test('tick gap rejected',()=>assert.throws(()=>step(step(null,input(0,1)),input(2,1))));
+test('identity swap rejected',()=>assert.throws(()=>step(step(null,input(0,1)),{...input(1,1),sensorId:'other'})));
+test('forged authority rejected',()=>assert.throws(()=>step({...step(null,input(0,1)),activationAuthorized:true},input(1,1))));
+test('invalid bounds rejected',()=>assert.throws(()=>step(null,{...input(0,1),exitRadius:1})));
+test('invalid distances rejected',()=>assert.throws(()=>step(null,input(0,Infinity))));
+test('frozen result and deterministic replay',()=>{const a=step(null,input(0,1));assert.ok(Object.isFrozen(a));assert.deepEqual(a,step(null,input(0,1)));});
