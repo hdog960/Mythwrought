@@ -1,0 +1,5 @@
+# D4 processor freshness fence v1 — source-only
+
+`previewProcessorCommitFence` cross-checks device/world/owner identity, tick, world and inventory revisions between an advisory processing plan and an independently observed fixture. It rejects protected/unowned fixtures, duplicate or invalid inputs, unavailable capacity, and missing or insufficient claimed power. All outputs set `canActuate:false`, including nominally ready previews. A boolean `authenticatedDelivery` in an untrusted caller-provided observation is **not** an actual authenticated :36 receipt. The real game must independently authenticate delivery and atomically revalidate inventory and collision/ownership before any transaction; this code performs no writes or reservations.
+
+No production actor, inventory, save, renderer, terrain, or settlement code changed. Test command: `node --test tests/resonance-devices48-processor-commit-fence-v1.test.mjs`. Local equivalent module with adjusted import path passed 18/18 focused Node tests; exact committed-head native execution is still pending. No WebGL2 captures or live integration claimed.
