@@ -1043,7 +1043,8 @@ function start(nonblockStage=null){
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
-    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
+    onOpen:()=>{near291Interrupt();cancelAllPointers();},
+    canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
@@ -2817,7 +2818,7 @@ function start(nonblockStage=null){
       updatePack2SelectionUI();
     };
   }
-  document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
+  document.getElementById('menu').onclick=()=>{near291Interrupt();gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
