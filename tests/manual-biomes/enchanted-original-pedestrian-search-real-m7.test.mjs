@@ -218,3 +218,107 @@ test('bounded terrain graph makes no false walking claims on real Enchanted clim
    sourceTerrainNeverAltered:true,physicalIphoneNotTested:true
  }));
 });
+
+test('stratified bounded REAL M7 search examines every Enchanted border category and seed -88',()=>{
+ const summaries=[],physicalProofs=[];
+ for(const seed of seeds){
+  const historical=newWorld(seed),prototype=newWorld(seed,true);
+  const all=boundaries(seed),groups=new Map();
+  for(const b of all){
+   const pair=[b.from,b.to].sort().join('/');
+   if(!groups.has(pair))groups.set(pair,[]);
+   groups.get(pair).push(b);
+  }
+  const byPair=[];
+  const seedStats={seed,borders:all.length,realGroundProbes:0,
+    originalSupportedStarts:0,graphRuns:0,graphNodes:0,
+    sourceProposals:0,historicPhysicallyCompleted:0,
+    candidatePhysicallyCompleted:0,
+    rejectedByOriginalPhysics:0,
+    excludedPhysicalBark:0};
+  for(const [pair,borders] of groups){
+   const pairStat={pair,borders:borders.length,originsSampled:0,
+     supportedStarts:0,graphRuns:0,graphRoutes:0,
+     originalWalks:0,experimentalWalks:0,
+     firstSupported:null,firstPhysical:null};
+   let finished=false;
+   // Sample up to eight geographically distinct boundaries of EACH
+   // climate pair, not only the first 36 non-Snow candidates.
+   for(const b of borders.slice(0,8)){
+    if(finished)break;
+    for(const side of [-1,1]){
+     if(finished)break;
+     const expectedStart=side===-1?b.from:b.to;
+     const target=side===-1?b.to:b.from;
+     for(const dist of [4,7,10]){
+      if(finished)break;
+      for(const dz of [0,-4,4,-8,8]){
+       if(pairStat.originsSampled>=180||pairStat.graphRuns>=10){
+        finished=true;break;
+       }
+       const ox=b.x+side*dist,oz=b.z+dz;
+       if(sourceBiome(ox,oz,seed)!==expectedStart)continue;
+       pairStat.originsSampled++;
+       seedStats.realGroundProbes++;
+       const support=originalM7PedestrianCap(historical,ox,oz);
+       if(!support)continue;
+       pairStat.supportedStarts++;
+       seedStats.originalSupportedStarts++;
+       if(!pairStat.firstSupported)pairStat.firstSupported=[ox,oz,support.feet];
+       pairStat.graphRuns++;
+       seedStats.graphRuns++;
+       const graph=searchOriginalM7PedestrianBorder(historical,{
+        seed,x:ox,z:oz,targetBiome:target,
+        radius:12,maxVisits:176,maxSteps:25,
+        maxRoutes:4,minDisplacement:6
+       });
+       assert.ok(graph.stats.visited<=176);
+       seedStats.graphNodes+=graph.stats.visited;
+       pairStat.graphRoutes+=graph.routes.length;
+       seedStats.sourceProposals+=graph.routes.length;
+       for(const nodes of graph.routes){
+        if(candidateBarkAcrossRealPlayer(prototype,nodes)){
+         seedStats.excludedPhysicalBark++;continue;
+        }
+        const old=walkGenuineOriginalPlayer(historical,nodes);
+        if(!old.ok){seedStats.rejectedByOriginalPhysics++;continue;}
+        pairStat.originalWalks++;
+        seedStats.historicPhysicallyCompleted++;
+        const now=walkGenuineOriginalPlayer(prototype,nodes);
+        assert.equal(now.ok,true,
+          'experimental candidate blocked a real old-M7 stratified climate walk '+
+          JSON.stringify({seed,pair,start:[ox,oz],old,now,nodes}));
+        assert.equal(now.legs,old.legs);
+        assert.ok(Math.abs(now.finalFeet-old.finalFeet)<=.15);
+        pairStat.experimentalWalks++;
+        seedStats.candidatePhysicallyCompleted++;
+        pairStat.firstPhysical??={start:[ox,oz],end:[nodes.at(-1).x,nodes.at(-1).z],
+          legs:old.legs,oldTicks:old.ticks,newTicks:now.ticks,
+          diagonals:old.diagonal,uphill:old.climbed,downhill:old.descended};
+        physicalProofs.push({seed,pair,...pairStat.firstPhysical});
+        finished=true;break;
+       }
+       if(finished)break;
+      }
+     }
+    }
+   }
+   byPair.push(pairStat);
+  }
+  summaries.push({...seedStats,byPair});
+  assert.deepEqual(historical.save(),{schema:1,seed,edits:[]});
+  assert.throws(()=>prototype.save(),/cannot be saved as historical M7/);
+ }
+ assert.ok(summaries.every(s=>s.borders>0));
+ assert.ok(summaries.every(s=>s.graphRuns<=s.byPair.length*10));
+ assert.ok(summaries.every(s=>s.graphNodes<=s.graphRuns*176));
+ assert.ok(summaries.some(s=>s.originalSupportedStarts>0));
+ const pairs=[...new Set(physicalProofs.map(p=>p.pair))];
+ console.log('# ENCHANTED ORIGINAL M7 STRATIFIED PHYSICAL BORDERS '+
+   JSON.stringify({summaries,physicalProofs,provenPairs:pairs,
+     seedMinus88Walks:physicalProofs.filter(p=>p.seed===-88).length,
+     everyProofUsesOriginalStepPlayer:true,
+     sourceGroundNotSynthetic:true,
+     missingPairsRemainUnknown:true,
+     pwaAndPhysicalIphoneNotMeasured:true}));
+});
