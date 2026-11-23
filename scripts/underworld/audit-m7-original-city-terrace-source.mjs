@@ -70,7 +70,7 @@ for(const [rx,rz] of regions){
  const underpassStarted=performance.now();
  const underpass=approved?auditSourceProtectedCityUnderpass(
   seed,rx,rz,{source,sourceOwnedDeepSelection:deep,
-   maxTotalSourceChecks:150000}
+   maxTotalSourceChecks:150000,auditHypotheticalMovement:true}
  ):Object.freeze({ok:false,
   reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
   sourceChecks:deep.sourceChecks??0,worldChanged:false});
@@ -86,7 +86,30 @@ for(const [rx,rz] of regions){
    radius:x.radius,ok:x.ok,reason:x.reason
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
-  candidateThinUnderpassOriginalSourceSafe:underpass.ok===true,
+  candidateThinUnderpassOriginalSourceSafe:
+   underpass.ok===true||underpass.originalSourceChecksPassed===true,
+  candidateThinUnderpassSourceAndHypotheticalPlayerPass:
+   underpass.ok===true&&underpass.hypotheticalOriginalMotionSimulated===true,
+  candidateThinUnderpassHypotheticalPlayerGateRequested:true,
+  candidateThinUnderpassHypotheticalPlayerGateRan:
+   underpass.hypotheticalOriginalMotionSimulated===true,
+  candidateThinUnderpassHypotheticalGradeEdges:
+   underpass.hypotheticalGradeElevationEdges??underpass.gradeElevationEdges??null,
+  candidateThinUnderpassHypotheticalForwardGrades:
+   underpass.hypotheticalGradeForwardChecks??null,
+  candidateThinUnderpassHypotheticalReverseGrades:
+   underpass.hypotheticalGradeReverseChecks??null,
+  candidateThinUnderpassHypotheticalContinuousWaypoints:
+   underpass.hypotheticalContinuousWalkWaypoints??null,
+  candidateThinUnderpassHypotheticalContinuousFrames:
+   underpass.hypotheticalContinuousWalkFrames??null,
+  candidateThinUnderpassHypotheticalContinuousDirections:
+   underpass.hypotheticalContinuousWalkDirections??null,
+  candidateThinUnderpassHypotheticalGradeRefusal:
+   underpass.gradeMovementReason??null,
+  candidateThinUnderpassHypotheticalContinuousRefusal:
+   underpass.continuousMovementReason??null,
+  candidateThinUnderpassPhysicsStillNotRealM7World:true,
   candidateThinUnderpassThreeWideFootgraphVerified:
    underpass.threeWideDetachedFootgraphEdgeConnectivityVerified===true,
   candidateThinUnderpassNineDestinationFootCellsReached:
@@ -130,6 +153,7 @@ for(const [rx,rz] of regions){
   candidateThinUnderpassUnverifiedPlayerElevationEdges:
    underpass.originalPlayerAabbElevationChangesStillRequireStepPlayer??null,
   candidateThinUnderpassRealStepPlayerAndWorldOverlaysNotTested:true,
+  candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly:true,
   wholeCityEllipseGalleryCutsetAudited:cutset.ok===true,
   wholeCityEllipsePlannedColumns:cutset.totalColumns??null,
   wholeCityEllipseBlockedByMainGalleries:cutset.blockedColumns??null,
