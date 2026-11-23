@@ -23,6 +23,8 @@ import {surveySnowS4LegacyGrassIslands}
   from '../src/manual-biomes/snowy-s4-legacy-grass-islands.mjs';
 import {auditSnowS4GrassSourceAttribution}
   from '../src/manual-biomes/snowy-s4-grass-source-attribution.mjs';
+import {inspectSnowS4OriginalTransitionHolds}
+  from '../src/manual-biomes/snowy-s4-transition-source-check.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
 // One focused source-backed smoke test, not a duplicate full WebGL2 run.
@@ -133,6 +135,18 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
     assert.equal(attribution.originalSourcesUnchanged,true);
     assert.ok(attribution.rows.every(row=>
       row.disposition==='source-investigation-only-no-terrain-changes'));
+    // Exact original M7 low-blend/shared-shoulder branch diagnosis, not an
+    // activation of new terrain painting. Retained grass must have a source
+    // guard veto OR satisfy the original legitimate low-blend early return.
+    const transition=inspectSnowS4OriginalTransitionHolds(world,
+      {x:13,z:508,width:6,height:6},deps);
+    assert.equal(transition.sampled,36);
+    assert.equal(transition.grassCells,attribution.grassCells);
+    assert.equal(transition.counts.protectedOriginalSource,
+      attribution.summary.guardVeto);
+    assert.equal(transition.counts.unexplainedEmptyPlan,0,
+      'A retained grass column lacks a reproducible original M7 empty-plan cause');
+    assert.equal(transition.writerEnabled,false);
     const scenery=reviewSnowS5Scenery(world,0,32,{
       planScenery:planEnvironmentalScenery,biomeAt:v6BiomeAt
     });
