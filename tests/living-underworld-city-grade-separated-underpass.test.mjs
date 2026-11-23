@@ -174,12 +174,27 @@ test('both exact seed179 candidate sites account every original callback once, w
   assert.equal(r.expectedUnderpassReaderCallsPerRole,visits);
   assert.equal(r.underpassActualReaderMethodCalls,4*visits);
   assert.equal(r.sourceReaderCallsUnchangedDuringHypotheticalMotion,true);
+  assert.equal(r.sourceReaderRoleBindingsUnchanged,true);
   assert.equal(r.underpassReaderIdentityCallerAuthenticatedOnly,true);
   assert.deepEqual(r.underpassActualReaderCallsByRole,{
    naturalAt:visits,authoredAt:visits,editedAt:visits,protectedAt:visits
   });
   assert.equal(r.actualOriginalM7PlayerMotionNotVerified,true);
  }
+});
+test('original terrain reader role replacement during bridge source checks refuses before physics',()=>{
+ const mutable=stone();
+ mutable.naturalAt=()=>{mutable.editedAt=()=>true;return 1;};
+ const r=auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:mutable,sourceOwnedDeepSelection:deep(2,0),
+  auditHypotheticalMovement:true
+ });
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'UNDERPASS_READER_ROLE_BINDING_CHANGED');
+ assert.equal(r.hypotheticalOriginalMotionSimulated,true===false);
+ assert.equal(r.sourceChecks,9198);
+ assert.equal(r.underpassActualReaderCallsByRole.editedAt,383);
+ assert.equal(r.worldChanged,false);
 });
 test('overall source budget fails BEFORE a bridge or center-pad source read',()=>{
  let oldReads=0;
