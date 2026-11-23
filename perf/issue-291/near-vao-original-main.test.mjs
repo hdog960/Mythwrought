@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'd74569f09d73289be72ccbdbaf171efbcb5a7937');
+    'f678d27316f2eba5f58f1ca77730a7a83e017eb8');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -122,13 +122,13 @@ test('local-only original test interface reports bounded experiment status',()=>
     'nearOpaque291(){return near291?.status()??null;}');
 });
 test('original source save, mine and mandatory GPU upload remain unchanged',()=>{
-  one('const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
+  one('result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
   one("const persisted=save();");
   one("const label=BLOCK_NAMES[result.block]||'block';");
   const actualMine=source.slice(source.indexOf("const near291MineStart=near291Perf&&mode==='mine'"),
     source.indexOf("  let lastStreamingCenter=",source.indexOf("const near291MineStart=near291Perf&&mode==='mine'")));
   const a=actualMine.indexOf('const persisted=save();');
-  const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart,result);');
+  const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);');
   const c=actualMine.indexOf("const label=BLOCK_NAMES[result.block]||'block';");
   assert.ok(a>=0&&b>a&&c>b);
   one('buffer=uploadChunkBuffer(gl,vertices);');
@@ -574,6 +574,7 @@ function originalInternalUploadCase({
   }:{length:9};
   const scope={
     near291Enabled:enabled,near291Fatal:false,
+    near291Perf:null,near291RecordUploadFailure:()=>{},
     gl:{deleteBuffer:buffer=>{
       events.push('delete-'+buffer.id);
       if(failNativeDeletes.includes(buffer.id))
@@ -746,9 +747,15 @@ const exactLocal291PerfSource=source.slice(local291PerfStart,local291PerfEnd);
 const createLocal291Perf=new Function('scope','with(scope){'+
   'let near291Enabled=scope.enabled,near291Fatal=false,'+
   'near291PageSuspended=false,near291=null;'+exactLocal291PerfSource+
-  '\nreturn {frame:near291RecordFrame,mine:near291RecordMine,'+
+  '\nreturn {frame:near291RecordFrame,'+
+  'mine:(duration,result,pending)=>near291RecordMine(duration,result,'+
+  '(pending===undefined?{samples:[],overflow:false,faults:0}:pending)),'+
   'interrupt:near291Interrupt,'+
-  'upload:near291RecordUpload,read:near291PerfSnapshot,'+
+  'upload:near291RecordUpload,fail:near291RecordUploadFailure,'+
+  'startFirst:()=>{near291FirstEditUploads={samples:[],overflow:false,faults:0};'+
+    'return near291FirstEditUploads;},'+
+  'finishFirst:()=>{const p=near291FirstEditUploads;near291FirstEditUploads=null;return p;},'+
+  'read:near291PerfSnapshot,'+
   'data:near291Perf};}');
 function local291PerfFixture({
   search='?measure-291=1',hostname='localhost',enabled=false
@@ -837,6 +844,7 @@ test('exact original uploadPack2Chunk measures both unmodified guarded GL upload
   Object.assign(scope,{near291Perf:perf.data,near291RecordUpload:perf.upload,
     near291Enabled:false,performance:{now:()=>{now+=2;return now;}},
     gl:{deleteBuffer:()=>{}},
+    near291RecordUploadFailure:perf.fail,
     uploadChunkBuffer:()=>({})});
   const uploaded=make(scope)(new Float32Array(9),new Float32Array(9));
   assert.equal(uploaded.count,1);
@@ -854,7 +862,7 @@ test('original real deep mine timing is captured only after success and save',()
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
-    'near291RecordMine(performance.now()-near291MineStart,result);'
+    'near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);'
   ];
   let prior=-1;
   for(const stage of stages){
@@ -887,6 +895,7 @@ test('failed original guarded water upload is NOT counted as a successful GPU sa
     near291Perf:perf.data,near291RecordUpload:perf.upload,
     near291Enabled:false,performance:{now:()=>{t+=2;return t;}},
     gl:{deleteBuffer:()=>{}},
+    near291RecordUploadFailure:perf.fail,
     uploadChunkBuffer:()=>{
       calls++;
       if(calls===2)throw failure;
@@ -941,7 +950,7 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   const snap=perf.read();
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
-  assert.equal(snap.protocol,'291-local-4viewport-v2');
+  assert.equal(snap.protocol,'291-local-4viewport-v3');
 });
 
 test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
@@ -1028,7 +1037,7 @@ test('new exact source only captures real saved original deep MINE result; no sy
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
-    'near291RecordMine(performance.now()-near291MineStart,result);'
+    'near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);'
   ];
   let last=-1;
   for(const stage of stages){
@@ -1202,7 +1211,7 @@ test('original trial frame summary is frozen, numeric, and not release certified
   perf.frame(0);perf.mine(13,{cell:[0,-19,2],previous:3,next:0});
   const snap=perf.read();
   assert.equal(Object.isFrozen(snap.mineFrameWindow),true);
-  assert.equal(snap.protocol,'291-local-4viewport-v2');
+  assert.equal(snap.protocol,'291-local-4viewport-v3');
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.browserPixelParityProven,false);
 });
@@ -1240,4 +1249,161 @@ test('post-100th saved mine interruption before second frame fails closed',()=>{
   assert.equal(win.interrupted,true);
   perf.frame(1616);
   assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+});
+
+
+test('real source upload samples before first genuine deep MINE never enter trial',()=>{
+  const {perf}=local291PerfFixture();
+  perf.upload(300);perf.upload(400); // old background streaming
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,0);
+  perf.frame(0);
+  const candidate=perf.startFirst();
+  perf.upload(9);perf.upload(15);
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,0);
+  assert.deepEqual(candidate.samples,[9,15]);
+  perf.mine(24,{cell:[0,-38,0],previous:3,next:0},perf.finishFirst());
+  const snap=perf.read();
+  assert.equal(snap.mineFrameWindow.phase,'active');
+  assert.equal(snap.mineFrameWindow.savedMines,1);
+  assert.equal(snap.mineFrameWindow.successfulGuardedUploads,2);
+  assert.equal(snap.mineFrameWindow.successfulGuardedUploadP95Ms,15);
+  assert.equal(snap.rollingSuccessfulUploadP95Ms,400);
+});
+test('failed first mining candidate drops its staged GPU samples before true saved mine',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.startFirst();perf.upload(800);perf.fail();perf.finishFirst();
+  assert.equal(perf.read().mineFrameWindow.phase,'idle');
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,0);
+  const candidate=perf.startFirst();
+  perf.upload(8);perf.upload(11);
+  perf.mine(20,{cell:[1,-38,0],previous:3,next:0},perf.finishFirst());
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.successfulGuardedUploads,2);
+  assert.equal(w.successfulGuardedUploadP95Ms,11);
+  assert.equal(w.uploadFaults,0);
+  assert.equal(candidate.overflow,false);
+});
+test('source native upload faults in active mine immediately invalidate A/B trial',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  const p=perf.startFirst();perf.upload(8);
+  perf.mine(20,{cell:[0,-30,2],previous:3,next:0},perf.finishFirst());
+  perf.upload(9);
+  perf.fail();
+  const snap=perf.read().mineFrameWindow;
+  assert.equal(snap.uploadFaults,1);
+  assert.equal(snap.successfulGuardedUploads,2);
+  assert.equal(snap.successfulGuardedUploadP95Ms,9);
+  assert.equal(snap.invalid,false); // comparator rejects via uploadFaults
+});
+test('first saved deep mine upload fault marker is retained even with good p95',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.startFirst();perf.upload(10);perf.fail();
+  perf.mine(20,{cell:[0,-30,2],previous:3,next:0},perf.finishFirst());
+  assert.equal(perf.read().mineFrameWindow.uploadFaults,1);
+});
+test('upload p95 includes real follow-up stream work until second post-save RAF',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  const pending=perf.startFirst();perf.upload(7);
+  perf.mine(11,{cell:[0,-40,0],previous:3,next:0},perf.finishFirst());
+  for(let i=1;i<100;i++){
+    perf.frame(i*16);
+    perf.upload(5);
+    perf.mine(11,{cell:[i,-40,0],previous:3,next:0});
+  }
+  const before=perf.read().mineFrameWindow;
+  assert.equal(before.phase,'closing');
+  assert.equal(before.successfulGuardedUploads,100);
+  perf.frame(1600);
+  perf.upload(31);
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,101);
+  perf.frame(1616);
+  perf.upload(110); // after bounded trial, not counted
+  const done=perf.read().mineFrameWindow;
+  assert.equal(done.phase,'complete');
+  assert.equal(done.successfulGuardedUploads,101);
+  assert.equal(done.successfulGuardedUploadP95Ms,5);
+  assert.equal(done.uploadOverflow,false);
+});
+test('first edit staged upload buffer overflow fails closed without false p95',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.startFirst();
+  for(let i=0;i<4097;i++)perf.upload(1);
+  const p=perf.finishFirst();
+  assert.equal(p.samples.length,4096);
+  assert.equal(p.overflow,true);
+  perf.mine(9,{cell:[0,-42,1],previous:3,next:0},p);
+  assert.equal(perf.read().mineFrameWindow.uploadOverflow,true);
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,4096);
+});
+test('active original-source uploader overflow marks bounded trial without wraparound',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(9,{cell:[0,-40,0],previous:3,next:0});
+  for(let i=0;i<4097;i++)perf.upload(4);
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.successfulGuardedUploads,4096);
+  assert.equal(win.uploadOverflow,true);
+  assert.equal(win.maxUploadSamples,4096);
+});
+test('authentic original source edit arms upload pending before apply and clears on throw',()=>{
+  const from=source.indexOf("const near291MineStart=near291Perf&&mode==='mine'");
+  const to=source.indexOf("  let lastStreamingCenter=",from);
+  assert.ok(from>=0&&to>from);
+  const x=source.slice(from,to);
+  const order=[
+    "near291FirstEditUploads={samples:[],overflow:false,faults:0};",
+    "result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,",
+    "near291LastFirstEditUploads=near291FirstEditUploads;",
+    "near291FirstEditUploads=null;",
+    "const persisted=save();",
+    "near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);"
+  ];
+  let last=-1;
+  for(const step of order){
+    const at=x.indexOf(step,last+1);
+    assert.ok(at>last,'original source edit/upload lifecycle stage '+step);
+    last=at;
+  }
+  assert.ok(x.includes('}finally{'));
+});
+test('source guarded original uploader failure retains error and records trial fault',()=>{
+  const {scope,perf}=local291PerfFixture();
+  const start=source.indexOf('  function uploadPack2Chunk(vertices,water){');
+  const end=source.indexOf('  let editMeshBatches=0;',start);
+  const make=new Function('scope','with(scope){'+source.slice(start,end)+
+    '\nreturn uploadPack2Chunk;}');
+  perf.mine(10,{cell:[1,-35,2],previous:3,next:0}); // trial active
+  const failure=Error('291_ORIGINAL_NATIVE_UPLOAD_FAILURE');
+  let calls=0;
+  Object.assign(scope,{
+    near291Perf:perf.data,near291RecordUpload:perf.upload,
+    near291RecordUploadFailure:perf.fail,near291Enabled:false,
+    performance:{now:()=>10*++calls},
+    gl:{deleteBuffer:()=>{}},
+    uploadChunkBuffer:()=>{throw failure;}
+  });
+  assert.throws(()=>make(scope)(new Float32Array(9),new Float32Array(9)),
+    e=>e===failure);
+  assert.equal(perf.read().mineFrameWindow.uploadFaults,1);
+  assert.equal(perf.read().mineFrameWindow.successfulGuardedUploads,0);
+});
+test('original trial GPU samples reset with CSS viewport/seed and cannot affect world',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(11,{cell:[1,-34,0],previous:3,next:0});
+  perf.upload(22);
+  scope.canvas.clientHeight=430;
+  let snap=perf.read().mineFrameWindow;
+  assert.equal(snap.phase,'idle');
+  assert.equal(snap.successfulGuardedUploads,0);
+  assert.equal(snap.uploadFaults,0);
+  perf.mine(11,{cell:[2,-34,0],previous:3,next:0});
+  perf.upload(5);scope.world.seed=123;
+  snap=perf.read().mineFrameWindow;
+  assert.equal(snap.successfulGuardedUploads,0);
+  assert.equal(snap.uploadOverflow,false);
+  assert.ok(!exactLocal291PerfSource.includes('world.set('));
 });
