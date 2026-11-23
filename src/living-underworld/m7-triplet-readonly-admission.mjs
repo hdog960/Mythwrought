@@ -70,6 +70,40 @@ export function classifyExactHeadOriginalM7Triplet({
   yes(r.joinedFourHubCandidateTopologyApproved)&&
   yes(r.joinedFourHubSourceOwnershipApproved));
  if(!citySourceSafe)reasons.push('RARE_CITY_FOUR_HUB_SOURCE_VETO');
+ // Phase 23 adds an INDEPENDENT research gate for the thin underpass.
+ // The historical four-hub source candidate can remain source-correct
+ // even when this optional route fails its PLAYER-size future walking
+ // fixture. The pinned exact-HEAD runner must require BOTH evidence
+ // tracks, while this result NEVER claims actual original-M7 walking.
+ const cityThinUnderpassHypotheticalMovementSafe=citySourceSafe&&
+  c.rows.every(r=>{
+   const bridge=r.candidateThinUnderpassSourceVisits,
+    pad=r.candidateThinUnderpassCenterLandingSourceVisits,
+    previous=r.candidateThinUnderpassFourHubSourceVisitsCountedOnce,
+    total=r.candidateThinUnderpassTotalSourceVisits;
+   const visits=[bridge,pad,previous,total];
+   const sourceVisitSumValid=visits.every(Number.isSafeInteger)&&
+    bridge>0&&pad===135&&previous>0&&
+    total===previous+bridge+pad&&total<=150000;
+   return sourceVisitSumValid&&
+    yes(r.candidateThinUnderpassHypotheticalPlayerGateRequested)&&
+    yes(r.candidateThinUnderpassOriginalSourceSafe)&&
+    yes(r.candidateThinUnderpassSourceAndHypotheticalPlayerPass)&&
+    yes(r.candidateThinUnderpassHypotheticalPlayerGateRan)&&
+    r.candidateThinUnderpassHypotheticalGradeEdges===7&&
+    r.candidateThinUnderpassHypotheticalForwardGrades===7&&
+    r.candidateThinUnderpassHypotheticalReverseGrades===7&&
+    r.candidateThinUnderpassHypotheticalContinuousDirections===2&&
+    Number.isSafeInteger(r.candidateThinUnderpassHypotheticalContinuousWaypoints)&&
+    r.candidateThinUnderpassHypotheticalContinuousWaypoints>=2&&
+    Number.isSafeInteger(r.candidateThinUnderpassHypotheticalContinuousFrames)&&
+    r.candidateThinUnderpassHypotheticalContinuousFrames>0&&
+    yes(r.candidateThinUnderpassPhysicsStillNotRealM7World)&&
+    yes(r.candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly)&&
+    yes(r.candidateThinUnderpassAlternativeNotReplacementForFullCityFloor);
+  });
+ if(!cityThinUnderpassHypotheticalMovementSafe)
+  reasons.push('RARE_CITY_UNDERPASS_SOURCE_OR_HYPOTHETICAL_PLAYER_HOLD');
  const chunkRiskSafe=chunkCohort&&
   yes(k.aggregateSourceRisk?.ok)&&
   yes(k.aggregateSourceRisk?.completeCoreHaloEvidence)&&
@@ -93,6 +127,8 @@ export function classifyExactHeadOriginalM7Triplet({
   nativeTripletReportsPresent,
   fullGallerySourceCensusVerified:fullyDiagnosed,
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
+  cityThinUnderpassHypotheticalMovementSafe,
+  cityThinUnderpassRealM7WalkingUnverified:true,
   chunkRiskSafe,
   proposalEvidenceAllPassed:nativeTripletReportsPresent&&
    arithmetic.ok&&fullyDiagnosed&&gallerySourceSafe&&citySourceSafe&&chunkRiskSafe,
