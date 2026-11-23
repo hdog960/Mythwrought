@@ -1,0 +1,34 @@
+# Focused only original -30 chamber interior physically visited
+# and source AIR edit veto. No duplicate 112-step native suite.
+name: Enchanted P2 Original First Chamber Interior Native
+on:
+  push:
+    branches:
+      - research/enchanted-p2-deep-band-chamber-upper-20261123
+    paths:
+      - .github/workflows/enchanted-p2-chamber-interior-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-first-chamber-physical-out-and-back:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original game and new researched source syntax
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/deep-cave-network.mjs)" = "3c0d2e2ced0ed23a9991da521639e0a4068fb846"
+          test "$(git hash-object src/manual-biomes/enchanted-original-cave-descent-evidence.mjs)" = "7fe76ca6ede339e6f36c595bbd7018c6d2f5892a"
+          node --check src/manual-biomes/enchanted-original-first-chamber-roundtrip.mjs
+          node --check tests/manual-biomes/enchanted-original-first-chamber-roundtrip-real-m7.test.mjs
+      - name: New original author-owned cave room and real player reverse route only
+        run: node --test tests/manual-biomes/enchanted-original-first-chamber-roundtrip-real-m7.test.mjs
