@@ -1,0 +1,40 @@
+name: Desert P3 real cave player fake-surface schema-1 restore
+on:
+  push:
+    branches:
+      - research/desert-p3-authentic-protected-climates-20261122
+    paths:
+      - .github/workflows/desert-p3-original-cave-save-veto.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-original-cave-save-veto
+  cancel-in-progress: false
+jobs:
+  native-real-original-v7-cave:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enforce exact source and no gameplay modifications
+        run: |
+          set -euo pipefail
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          BASE=9e457b1f4018e9d1113ed550725b816d5f9cc842
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(tests/desert-p3-original-protected-climates.test.mjs|tests/desert-p3-unrelated-original-mesh-parity.test.mjs|tests/desert-p3-original-cave-edit-restore.test.mjs|.github/workflows/desert-p3-protected-climates-original.yml|.github/workflows/desert-p3-original-no-touch-mesh.yml|.github/workflows/desert-p3-original-cave-save-veto.yml|docs/desert/PHASE3_ORIGINAL_CAVE_CLIMATE_PROTECTION_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
+          test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/tests/desert-p3-original-cave-edit-restore.test.mjs
+      - name: Only novel genuine original cave authored fake-cap save and full Float32 undo
+        run: cd candidate && node --test tests/desert-p3-original-cave-edit-restore.test.mjs
