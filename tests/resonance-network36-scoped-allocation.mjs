@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateScopedResonance} from '../src/resonance/network36/network-allocation.mjs';
+const d=(id,network,demand,priority=1)=>({id,network,demand,priority});
+const g=(id,network,available)=>({id,network,available});
+test('isolated networks cannot borrow generation',()=>{const r=allocateScopedResonance({networks:['b','a'],generation:[g('ga','a',10)],devices:[d('db','b',1),d('da','a',5)]});assert.deepEqual(r.networks.map(x=>x.network),['a','b']);assert.deepEqual(r.networks[1].stopped,['db']);assert.equal(r.totals.unused,5);});
+test('network splits never borrow charge',()=>{const r=allocateScopedResonance({networks:['a','b'],generation:[],devices:[d('x','b',2)],stores:[{id:'s',network:'a',capacity:10,charge:10,inputRate:2,outputRate:3}]});assert.deepEqual(r.networks[1].stopped,['x']);assert.equal(r.networks[0].stores[0].charge,10);});
+test('priority and accounting within each network',()=>{const r=allocateScopedResonance({networks:['a'],generation:[g('g','a',3)],devices:[d('factory','a',3,10),d('safety','a',2,0)]});assert.deepEqual(r.networks[0].enabled,['safety']);assert.equal(r.totals.spent,2);});
+test('duplicate cross-network identities rejected',()=>assert.throws(()=>allocateScopedResonance({networks:['a','b'],generation:[g('x','a',1)],devices:[d('x','b',1)]})));
+test('unknown network and invalid numeric input rejected',()=>{assert.throws(()=>allocateScopedResonance({networks:['a'],generation:[g('x','b',1)]}));assert.throws(()=>allocateScopedResonance({networks:['a'],generation:[g('x','a',-1)]}));});
+test('input objects remain unchanged',()=>{const s={id:'s',network:'a',capacity:10,charge:2,inputRate:2,outputRate:2};allocateScopedResonance({networks:['a'],generation:[g('g','a',5)],stores:[s]});assert.equal(s.charge,2);});
+test('overflow fails closed',()=>assert.throws(()=>allocateScopedResonance({networks:['a'],generation:[g('x','a',Number.MAX_SAFE_INTEGER),g('y','a',1)]})));
