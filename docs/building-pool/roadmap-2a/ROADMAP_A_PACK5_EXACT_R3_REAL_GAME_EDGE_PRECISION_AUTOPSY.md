@@ -46,3 +46,27 @@ Run **only** one exact native Node 22.16.0 original checkout on a dedicated CI-o
 Production main stays exact \`7016e14cd6289f45eaf7fc6a79a362b47996df65\`; protected OPEN DRAFT PR406 code HEAD \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Only own-lane new research source, tests and document; no shared workflow edits (CI-only child owns a unique workflow), other builders, five hourly automations, schema1 saves, installed PWA, locked v0.11 or original world mutation, no merge/deployment/cancellation.
 
 Roadmap A remains **207/420 SOURCE ONLY with 213 unwritten**; historical 128 commerce/345 industrial/315 government unchanged, original 79 A5 candidates and final art/structural choices still reserved. Next engineering step depends on exact native classification: investigate the source-authenticated cause, prepare *isolated* alternative non-padding ray ownership with full terrain occlusion/6-block reach/CPU boundedness, then if warranted one further disposable **original game** real on/off-pixel/MINE RED/GREEN test. iPhone Safari installed PWA and actual mixed Pack1–5 structural loading remain separate acceptance gates.
+
+## Exact authentic native R1 autopsy result — 2026-11-22 local / 2026-11-23 UTC
+
+The first new exact native original-repository [Actions #45097712195](https://github.com/hdog960/Mythwrought/actions/runs/45097712195) ran the actual authored original Pack5 code under Node 22.16.0. **Seven of eight targeted new tests passed; one negative-input unit test failed ONLY because its error-regex expected \`/precision/\` whereas the producer intentionally emits \`Roadmap A original exact R3 shape/mesh edge diagnosis: ...\`.** The real source geometry and witness validations, source original vs quantized boxes, barycentric, original strict triangle and seven micro-shift grid all PASSED, and the actual native diagnostic printed the exact numerical finding before test failure:
+
+\`\`\`json
+{
+ "classification":"relaxed-barycentric-original-source-only-hit",
+ "relaxedOriginalSourceTriangleDistance":2.915244810989979,
+ "exactTriangleDistance":null,
+ "float32BoxDistance":null,
+ "originalSelectionBoxDistance":null,
+ "relaxedTriangleMinimumBarycentric":-3.367090616210211e-9,
+ "originalSourcePoint":[3,14.972998,0.026999999999999802],
+ "originalBoxUnionSeparation":2.220446049250313e-16,
+ "float32BoxUnionSeparation":7.003547741746274e-10
+}
+\`\`\`
+
+**Substantial root-cause correction to the preceding R3 interpretation:** The original research \`sourceRayTriangleDistance\` allows up to **1e-7** negative barycentric margin. The R3 recovered exact ray has **-3.367090616210211e-9** minimum barycentric coordinate; it is **strictly outside the original Float32 triangle** while the original permissive source helper calls it a triangle hit. Original detailed selection AABB **misses** and Float32-quantized original AABB **also misses**. Repeating the exact eye-ray aim at seven original face-Y offsets from -1e-5 to +1e-5 gave source-helper hits over six positions but **zero strict triangle hits at all seven**. The "2 triangle-only source" R3 count is thus not, by itself, evidence of real original GPU pixel coverage at either exact ray. The native result reconciles the real original player MINE miss with strict geometry, without falsely declaring the game’s selection hitboxes defective or modifying production.
+
+The 37 actual changed nearby pixels in the earlier real game screenshot cannot isolate exact mathematical center-raster coverage. **Withdraw the stronger previous claim that this exact R3 ray demonstrated a confirmed original renderer-versus-selection gameplay defect.** R3 remains a genuine real-game check of a near-edge scene and MINE behavior; its source helper's non-strict hit interpretation was misleading. Other 146 R3 differing-distance warnings, independent earlier 12/14/88 source-only counts, and real iPhone pixel/target behavior are separate open questions. No automatic hitbox padding, disabled occlusion or production triangle picker is justified by this witness.
+
+The isolated native test correction changes only its NEGATIVE-INPUT expected error-text regex and adds a new **ninth fail-closed real-witness regression test** which now asserts the observed strict triangle null, original authored AABB null, Float32-quantized AABB null, and **negative but admitted barycentric margin**. This is not a weakened game acceptance; it preserves a sharper, more cautious physical proof. Re-run only these nine new native original-source tests on a separate CI-only child; do not repeat any prior broad CI or Chromium runs.

@@ -71,12 +71,28 @@ test('source-strict triangle and original tolerant barycentric hit are distingui
   float32BoxUnionSeparation:evidence.originalContactVsFloat32BoxUnion.distance
  }));
 });
+test('exact original R3 rare edge is a relaxed-barycentric false-positive rather than a strict rendered triangle hit',()=>{
+ assert.equal(evidence.diagnosedSourceRayClassification,
+  'relaxed-barycentric-original-source-only-hit');
+ assert.equal(evidence.originalDetailedRayDistance,null);
+ assert.equal(evidence.independentOriginalAuthoredBoxRay.distance,null);
+ assert.equal(evidence.float32QuantizedAuthoredBoxRay.distance,null);
+ assert.equal(evidence.strictlyInsideAuthoredFloat32SourceTriangle,null);
+ assert.ok(evidence.originalSourceTriangleWithBarycentricTolerance?.distance>0);
+ assert.ok(evidence.relaxedOriginalTriangleHitBarycentricMargin<0);
+ assert.ok(evidence.relaxedOriginalTriangleHitBarycentricMargin>=-1e-7);
+ assert.ok(Math.abs(evidence.relaxedOriginalTriangleHitBarycentricMargin-
+  (-3.367090616210211e-9))<2e-12);
+ assert.ok(evidence.originalContactVsAuthoredSelectionBoxUnion.distance<1e-9);
+ assert.ok(evidence.originalContactVsFloat32BoxUnion.distance<1e-8);
+ assert.equal(evidence.exactOriginalEdgeShiftGrid[3].strictTriangleOnly,false);
+});
 test('original independent source slab ray is strict and non-padding; ray math rejects bogus inputs',()=>{
  assert.equal(pureOriginalRayBoxDistance([-.5,.5,.5],[1,0,0],[0,0,0,1,1,1]),.5);
  assert.equal(pureOriginalRayBoxDistance([-.5,2,.5],[1,0,0],[0,0,0,1,1,1]),null);
  assert.equal(pureOriginalRayBoxDistance([0,.5,.5],[1,0,0],[0,0,0,1,1,1]),0);
- assert.throws(()=>pureOriginalRayBoxDistance([NaN,0,0],[1,0,0],[0,0,0,1,1,1]),/precision/);
- assert.throws(()=>pureOriginalRayBoxDistance([0,0,0],[0,0,0],[0,0,0,1,1,1]),/precision/);
+ assert.throws(()=>pureOriginalRayBoxDistance([NaN,0,0],[1,0,0],[0,0,0,1,1,1]),/edge diagnosis/);
+ assert.throws(()=>pureOriginalRayBoxDistance([0,0,0],[0,0,0],[0,0,0,1,1,1]),/edge diagnosis/);
 });
 test('native original exact plane triangle barycentrics detect strict interior, outside and degenerate directions',()=>{
  const a=[0,0,0],b=[1,0,0],c=[0,1,0];
