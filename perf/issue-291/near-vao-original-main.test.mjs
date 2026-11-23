@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'e58a35f997a97622be3130d057feed9aa376bf55');
+    '562c01cfdda29cb42b617d73df22d7bb8311c706');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -128,7 +128,7 @@ test('original source save, mine and mandatory GPU upload remain unchanged',()=>
   const actualMine=source.slice(source.indexOf("const near291MineStart=near291Perf&&mode==='mine'"),
     source.indexOf("  let lastStreamingCenter=",source.indexOf("const near291MineStart=near291Perf&&mode==='mine'")));
   const a=actualMine.indexOf('const persisted=save();');
-  const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart);');
+  const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart,result);');
   const c=actualMine.indexOf("const label=BLOCK_NAMES[result.block]||'block';");
   assert.ok(a>=0&&b>a&&c>b);
   one('buffer=uploadChunkBuffer(gl,vertices);');
@@ -764,7 +764,7 @@ function local291PerfFixture({
     document:{hidden:false},help:{hidden:true},
     exploration:{isOpen:()=>false},graphicsLost:false,
     canvas:{clientWidth:956,clientHeight:440,width:956,height:440},
-    world:{seed:179},player:{feet:-30},
+    world:{seed:179},player:{feet:-30},BLOCK:{AIR:0},
     frameHistory:{stats:()=>({frames:4,p95Ms:18})},
     meshCadence:{stats:()=>({meshes:2})},
     chunks:new Map(),pending:new Map(),
@@ -853,7 +853,7 @@ test('original real deep mine timing is captured only after success and save',()
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
-    'near291RecordMine(performance.now()-near291MineStart);'
+    'near291RecordMine(performance.now()-near291MineStart,result);'
   ];
   let prior=-1;
   for(const stage of stages){
@@ -959,4 +959,84 @@ test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite'
   assert.equal(slow.read().rollingSlowFrames,1);
   for(let i=1;i<=2048;i++)slow.frame(33.4000001+i*16);
   assert.equal(slow.read().rollingSlowFrames,0);
+});
+
+
+test('exact original saved deep MINE returns read-only ordered cell and previous material',()=>{
+  const {perf}=local291PerfFixture();
+  const first={cell:[12,-48,-7],previous:3,next:0};
+  const second={cell:[12,-49,-7],previous:8,next:0};
+  perf.mine(17.5,first);
+  perf.mine(24.3,second);
+  const snapshot=perf.read();
+  assert.equal(snapshot.trueSavedDeepMines,2);
+  assert.deepEqual(snapshot.mineWitness,[
+    [12,-48,-7,3,0],[12,-49,-7,8,0]]);
+  assert.equal(snapshot.mineWitnessInvalid,false);
+  assert.equal(snapshot.mineWitnessOverflow,false);
+  assert.equal(Object.isFrozen(snapshot.mineWitness),true);
+  assert.equal(Object.isFrozen(snapshot.mineWitness[0]),true);
+});
+test('mutating the original result or returned witness cannot change captured mining identity',()=>{
+  const {perf}=local291PerfFixture();
+  const result={cell:[4,-20,11],previous:3,next:0};
+  perf.mine(22,result);
+  result.cell[0]=400;
+  const read=perf.read();
+  assert.deepEqual(read.mineWitness,[[4,-20,11,3,0]]);
+  assert.throws(()=>{read.mineWitness[0][0]=500;},TypeError);
+  assert.deepEqual(perf.read().mineWitness,[[4,-20,11,3,0]]);
+});
+test('invalid or incomplete original source mine result poisons A/B witness only, not p95',()=>{
+  const {perf}=local291PerfFixture();
+  perf.mine(13,{cell:[3,-15,4],previous:2,next:0});
+  perf.mine(17,{cell:[3,-12,4],previous:2,next:7});
+  perf.mine(20,{cell:[1,-3,4],previous:2,next:0});
+  assert.equal(perf.read().trueSavedDeepMines,3);
+  assert.equal(perf.read().mineWitness.length,1);
+  assert.equal(perf.read().mineWitnessInvalid,true);
+  assert.equal(perf.read().mineWitnessOverflow,false);
+  assert.equal(perf.read().miningActionP95Ms,20);
+});
+test('more than 128 genuine saved original mines is transparently marked overflowing',()=>{
+  const {perf}=local291PerfFixture();
+  for(let i=0;i<129;i++)perf.mine(i,{cell:[i,-30,0],previous:3,next:0});
+  const summary=perf.read();
+  assert.equal(summary.trueSavedDeepMines,129);
+  assert.equal(summary.mineWitness.length,128);
+  assert.equal(summary.mineWitnessOverflow,true);
+  assert.equal(summary.mineWitnessInvalid,false);
+});
+test('changing CSS viewport or original world seed also resets mine witness evidence',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.mine(5,{cell:[7,-18,9],previous:3,next:0});
+  scope.canvas.clientHeight=430;
+  assert.equal(perf.read().mineWitness.length,0);
+  assert.equal(perf.read().trueSavedDeepMines,0);
+  perf.mine(7,{cell:[8,-18,9],previous:3,next:0});
+  scope.world.seed=180;
+  assert.equal(perf.read().mineWitness.length,0);
+  assert.equal(perf.read().trueSavedDeepMines,0);
+});
+test('new exact source only captures real saved original deep MINE result; no synthetic writes',()=>{
+  const start=source.indexOf('const near291MineStart=near291Perf&&mode');
+  const end=source.indexOf('  let lastStreamingCenter=',start);
+  assert.ok(start>=0&&end>start);
+  const real=source.slice(start,end);
+  const stages=[
+    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
+    'if(!result.ok){message(result.reason);return;}',
+    'const persisted=save();',
+    "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
+    'near291RecordMine(performance.now()-near291MineStart,result);'
+  ];
+  let last=-1;
+  for(const stage of stages){
+    const pos=real.indexOf(stage,last+1);
+    assert.ok(pos>last,'original saved edit witness order: '+stage);
+    last=pos;
+  }
+  assert.ok(!real.includes('world.set('));
+  assert.ok(!exactLocal291PerfSource.includes('world.set('));
+  assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
 });
