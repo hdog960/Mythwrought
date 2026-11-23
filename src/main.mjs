@@ -443,6 +443,7 @@ function start(nonblockStage=null){
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float64Array(2048),mines:new Float32Array(128),
     uploads:new Float32Array(2048),
+    mineWitness:[],mineWitnessOverflow:false,mineWitnessInvalid:false,
     frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,prevFrame:null
   }:null;
   function near291Viewport(){
@@ -455,6 +456,8 @@ function start(nonblockStage=null){
     near291Perf.viewport=key;
     near291Perf.frameCount=near291Perf.mineCount=near291Perf.uploadCount=0;
     near291Perf.slowFrameCount=0;
+    near291Perf.mineWitness.length=0;
+    near291Perf.mineWitnessOverflow=near291Perf.mineWitnessInvalid=false;
     near291Perf.prevFrame=null;
   }
   function near291RecordFrame(now){
@@ -479,11 +482,27 @@ function start(nonblockStage=null){
     }
     near291Perf.prevFrame=now;
   }
-  function near291RecordMine(duration){
+  function near291RecordMine(duration,result){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
     near291CheckViewport();
     near291Perf.mines[near291Perf.mineCount%near291Perf.mines.length]=duration;
     near291Perf.mineCount++;
+    // Preserve the ordered source-authentic edit identity, not just the count.
+    // These are already successful, saved deep MINE actions; this read-only
+    // witness does NOT mutate voxel cells, schema-1 data, saves or GL state.
+    if(near291Perf.mineWitness.length>=near291Perf.mines.length){
+      near291Perf.mineWitnessOverflow=true;return;
+    }
+    const cell=result?.cell;
+    if(!Array.isArray(cell)||cell.length!==3||
+       !cell.every(Number.isSafeInteger)||cell[1]>=-5||
+       !Number.isSafeInteger(result.previous)||result.previous===BLOCK.AIR||
+       result.next!==BLOCK.AIR){
+      near291Perf.mineWitnessInvalid=true;return;
+    }
+    near291Perf.mineWitness.push(Object.freeze([
+      cell[0],cell[1],cell[2],result.previous,result.next
+    ]));
   }
   function near291RecordUpload(duration){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
@@ -506,6 +525,11 @@ function start(nonblockStage=null){
       viewportPixels:[canvas.width,canvas.height],
       seed:world.seed,playerFeet:player.feet,
       trueSavedDeepMines:near291Perf.mineCount,
+      // Only retained source-original evidence: >128 saves requires restart.
+      mineWitness:Object.freeze(near291Perf.mineWitness.map(
+        entry=>Object.freeze([...entry]))),
+      mineWitnessOverflow:near291Perf.mineWitnessOverflow,
+      mineWitnessInvalid:near291Perf.mineWitnessInvalid,
       miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
       frameGapsRecorded:near291Perf.frameCount,
       rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
@@ -1394,7 +1418,7 @@ function start(nonblockStage=null){
     // Sample ONLY a real successful source MINE into deep Y, after actual
     // schema-1 save succeeds; no synthetic placements, mob hits or retries.
     if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)
-      near291RecordMine(performance.now()-near291MineStart);
+      near291RecordMine(performance.now()-near291MineStart,result);
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
