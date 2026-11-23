@@ -21,13 +21,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 2
-      - name: Authenticate literal D41 parent and immutable source owner blobs
+          fetch-depth: 4
+      - name: Authenticate exact D42 correction ancestry, D41 parent and immutable owner blobs
         env:
           EXPECTED_HEAD: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git rev-parse HEAD^)" = '07fc2ba2871b46789becc2691ce9fd80284447a5'
+          test "$(git rev-parse HEAD^)" = '06b174a77edd6f987d19a83d0c667e715511fbc0'
+          test "$(git rev-parse HEAD^^)" = '43f1d8321c0929033aff3951aec9d434e85692a1'
+          test "$(git rev-parse HEAD^^^)" = '07fc2ba2871b46789becc2691ce9fd80284447a5'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
           test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
