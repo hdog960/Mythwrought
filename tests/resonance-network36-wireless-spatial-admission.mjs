@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {deriveSpatialWirelessAdmission as run} from '../src/resonance/network36/wireless-spatial-admission.mjs';
+import {deriveWirelessLinks as baseline} from '../src/resonance/network36/wireless-links.mjs';
+const p=(id,x,y=0,z=0)=>({id,x,y,z,loaded:true});
+const t=(id,x,radius=3)=>({...p(id,x),radius});
+const compare=a=>{const b=baseline(a);const r=run(a);assert.deepEqual(r.endpoints,b.endpoints);assert.deepEqual(r.networks,b.networks);};
+test('bounded spatial admission matches original for wired and wireless',()=>compare({channels:[p('a',0)],transmitters:[t('t',1)],endpoints:[p('wired',-1),p('near',4),p('far',6)]}));
+test('separate networks stay ambiguous',()=>compare({channels:[p('a',0),p('b',10)],transmitters:[t('t',1,6),t('u',9,6)],endpoints:[p('middle',5)]}));
+test('unattached transmitters cannot power devices',()=>compare({channels:[p('a',0)],transmitters:[t('t',8)],endpoints:[p('near',9)]}));
+test('permutation preserves deterministic results',()=>{const a={channels:[p('a',0),p('b',10)],transmitters:[t('t',1),t('u',9)],endpoints:[p('x',2),p('y',8)]};const b={channels:[...a.channels].reverse(),transmitters:[...a.transmitters].reverse(),endpoints:[...a.endpoints].reverse()};assert.deepEqual(run(a),run(b));});
+test('distant buckets cost no comparisons',()=>{const r=run({channels:[p('a',0)],transmitters:[t('t',1)],endpoints:[p('far',10000)]});assert.equal(r.comparisons,0);});
+test('comparison budget fails closed',()=>assert.throws(()=>run({channels:[p('a',0)],transmitters:[t('t',1)],endpoints:[p('x',2),p('y',3)],maxComparisons:1}),/budget/));
+test('duplicate cross-category identities rejected',()=>assert.throws(()=>run({channels:[p('a',0)],transmitters:[t('a',1)]}),/identity/));
+test('unloaded or invalid descriptor rejected',()=>{assert.throws(()=>run({channels:[p('a',0)],endpoints:[{...p('x',1),loaded:false}]}));assert.throws(()=>run({channels:[p('a',0.5)]}));});
+test('input remains unchanged',()=>{const a={channels:[p('a',0)],transmitters:[t('t',1)],endpoints:[p('x',2)]};const copy=structuredClone(a);run(a);assert.deepEqual(a,copy);});
