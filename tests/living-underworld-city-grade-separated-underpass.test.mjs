@@ -166,6 +166,21 @@ test('full (2,1) source candidate counts 12711+276+135 and no original edits',()
  assert.equal(r.originalWorldUnchanged,true);
  assert.equal(r.actualPlayerWalkingUnverified,true);
 });
+test('both exact seed179 candidate sites account every original callback once, without extra movement reads',()=>{
+ for(const [rx,rz,bridgeCalls,padCalls] of [[2,0,248,135],[2,1,276,135]]){
+  const r=joinedSourceAndMovement(rx,rz);
+  assert.equal(r.ok,true);
+  const visits=bridgeCalls+padCalls;
+  assert.equal(r.expectedUnderpassReaderCallsPerRole,visits);
+  assert.equal(r.underpassActualReaderMethodCalls,4*visits);
+  assert.equal(r.sourceReaderCallsUnchangedDuringHypotheticalMotion,true);
+  assert.equal(r.underpassReaderIdentityCallerAuthenticatedOnly,true);
+  assert.deepEqual(r.underpassActualReaderCallsByRole,{
+   naturalAt:visits,authoredAt:visits,editedAt:visits,protectedAt:visits
+  });
+  assert.equal(r.actualOriginalM7PlayerMotionNotVerified,true);
+ }
+});
 test('overall source budget fails BEFORE a bridge or center-pad source read',()=>{
  let oldReads=0;
  const r=auditSourceProtectedCityUnderpass(seed,2,0,{
