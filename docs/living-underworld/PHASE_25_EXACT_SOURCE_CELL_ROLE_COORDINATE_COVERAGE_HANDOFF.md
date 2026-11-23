@@ -1,0 +1,51 @@
+# MYTHWROUGHT Living Underworld — Phase 25 exact voxel-coordinate role coverage and native helper evidence
+
+## Verified ancestry and protected boundaries
+
+Isolated new child branch: **dev/living-underworld-phase25-coordinate-coverage-20261123**. Created ONLY from verified Phase24 HEAD **00d3c590f106340a70fa98b1cefffddb354f985d**. Read the previous handoff first: **docs/living-underworld/PHASE_24_ORIGINAL_ROLE_CALLBACK_PARITY_AND_NATIVE_HOLD.md**.
+
+At start of work GitHub connector verified:
+- production main **7016e14cd6289f45eaf7fc6a79a362b47996df65**
+- Cave Phase20 **13d4f2da6833dc237005dbe8719b5edc23580304**
+- Cave Phase21 **3f5190d36f65b69ee085fa7339e5043642c7fe82**
+- Cave Phase22 **2ee6e13789115a686b482b07f2f126de3eb8189a**
+- Cave Phase23 **561dc28498c439f6a15b9d7830f660f95cd65fcf**
+- Cave Phase24 **00d3c590f106340a70fa98b1cefffddb354f985d**
+- OPEN DRAFT PR #367 **f7de8cfe6c4e055e94bf1ce2398ad7aa97e588e0**, unmerged.
+
+No authorized merge or deploy. No protected main/parent branch/PR, other developer branch, hourly automation, shared GitHub workflow, save, PWA, world generator, src/physics.mjs, src/voxel.mjs, settlement, ore or cave terrain was altered. No GitHub Actions dispatched or cancelled. Work lives entirely in the isolated child branch.
+
+## Substantive source changes
+
+**Problem fixed:** Phase24 required identical totals of per-role source reader calls for a bridge + full pad, but a malformed auditor could still call naturalAt for voxel A and authoredAt for different voxel B while reporting the SAME overall counts. An actual safe original source witness must show the SAME coordinate set for ALL FOUR roles. The bridge footprint and landing can overlap spatially, so treating all source visits as globally unique would incorrectly reject a legitimate overlap.
+
+1. New standalone **src/living-underworld/source-role-coordinate-census.mjs** exports **createUnderpassReaderCellCensus**. It uses bounded exact coordinate Sets for naturalAt/authoredAt/editedAt/protectedAt, separately for **bridge** and **pad** stages. It requires a one-way bridge-to-pad stage transition, safe integer coordinates, at most 20,000 distinct cells per stage, and single-use immutable readout. For EACH stage it independently requires every source role's coordinate Set and call count to equal the entire expected stage footprint, with zero duplicate reads. It computes bridge-pad overlapping voxel coordinates and combined unique-cell count without rereading original terrain. Malformed role, transition, budget, coordinate, missing read, duplicate read, or mismatched role-coordinate set is refused. This only audits **caller-supplied** reader calls; it does NOT authenticate the M7 world identity or certify walking.
+2. Updated **src/living-underworld/city-gallery-grade-separated-underpass.mjs** to feed the existing ORIGINAL strict source auditors into the new coordinate census, switching from bridge to pad only after successful original bridge source admission. After the full 135-cell deep landing and existing Phase24 real role-call parity pass, the new exact coordinate coverage MUST pass before optional source-safe hypothetical Phase21/22 movement. Any mismatch hard-refuses **UNDERPASS_SOURCE_ROLE_CELL_COVERAGE_REFUSED**, with first mismatch metadata. Existing original source safety, ore, authored AIR, natural AIR, edits, landmarks, old-world callback-binding identity, 150,000 visit limit, and no extra original reads during hypothetical movement remain independently mandatory. The original full city floor remains REJECTED.
+3. Existing **scripts/underworld/audit-m7-original-city-terrace-source.mjs** adds explicit exact role coordinate coverage, bridge and pad distinct-cell counts, overlap and net distinct count, per-stage role counts and duplicate counts to the SAME existing two original-M7 site report rows (seed179 2,0 and 2,1), without introducing a new original-world script or repeated original reader pass.
+4. Updated **src/living-underworld/m7-triplet-readonly-admission.mjs** with an independent **cityThinUnderpassExactCoordinateCoverageSafe** condition. The true-original-M7-report read-only classifier now requires BOTH site rows to show four role counts equal exact independent stage footprint, zero duplicates, exact set identity, full 135 pad cells, and internally consistent overlap arithmetic. It emits explicit **RARE_CITY_UNDERPASS_SOURCE_COORDINATE_HOLD** and also blocks Phase23 **cityThinUnderpassHypotheticalMovementSafe** when this new source safety gate fails. Older **proposalEvidenceAllPassed** remains a separate historical source-only research classification, never a release approval.
+5. **tests/living-underworld-city-grade-separated-underpass.test.mjs** extends the existing two-site cached synthetic-stone native witness to assert coordinate coverage and exact per-stage call/duplicate counts, correct overlap arithmetic, and zero false original-M7 walking claims. No new costly detached planner runs.
+6. **tests/living-underworld-m7-triplet-readonly-admission.test.mjs** extends source/physics classifier to **28** targeted scenarios, adding refusals for equal counts but different source-coordinate footprint, corrupted overlap/distinct arithmetic, missing stage roles, duplicate queries, and forged coverage flags.
+7. Existing **scripts/underworld/audit-m7-exact-head-triplet.mjs** now includes **20** focused original native Node test files (added only the new coordinate-census file), retains EXACTLY the SAME THREE old-M7 source research scripts, and still fails when original/source/movement/coordinate gates are refused. Do NOT launch redundant full CI.
+
+## Focused evidence — clearly differentiated
+
+**REAL native Node focused helper tests, NOT full original-world checkout:**
+- Locally created exact helper module + 8-case targeted Node 22 test file (TAP). Command run: node --test tests/living-underworld-source-role-coordinate-census.test.mjs from a temporary minimal test tree. **8/8 PASS**, zero failures. Cases: four-role identical stage cells, stage overlap, duplicate roles, equal count/different coordinates, missing naturalAt, wrong stage transitions, malformed/budget refusal, sealed immutable readout.
+- Verified exact GitHub object hashes independently against the LOCALLY TESTED FILES: source blob **aedfe5ce861ac8e9b9699784701cee427b4b08bf** and test blob **dfd84e15ed0e6eb24801fbbb0b829e19df2d1df6**. This proves the committed NEW helper and committed NEW focused test are exact same bytes as those executed by native Node. This does NOT run original M7 or all original modules.
+
+**Controlled exact GitHub source-body V8, synthetic world/route, NOT native full M7:**
+- Current Phase25 original **m7-triplet-evidence-consistency**, new **m7-triplet-readonly-admission**, updated test bodies: **28/28 PASS**, zero failures. Actual ESM imports were replaced in the V8 harness, not a true original repository Node import.
+- Integrated original code-body run loads the exact source of unchanged src/physics.mjs stepPlayer (Git blob **199cab89fc1e6ab67d12a56c62795ef0ac4b50d7**), unchanged original src/voxel.mjs collides (Git blob **543677a61aff7f54c0111f2485be79fbbbd560c6**), original stair-grade, actual original strict geology role survey, original player-body AABB, Phase21 step fixture, Phase22 continuous fixture, NEW Phase25 exact coordinate census, and updated Phase25 source audit. Non-fullcube overlay dependencies are stubbed ONLY in the detached V8 harness.
+- On an **ARTIFICIAL** source-safe 7-grade route with 81 waypoints and synthetic all-stone old-source callbacks, the **full original-source-body pipeline** PASS: seven forward / seven reverse original-controller grade checks; both uninterrupted travel directions, **2,398 physics frames**. Original role reader visits **987 per role (3,948 actual direct callback invocations)**, bridge **852 distinct** cells and full-depth pad **135 distinct** cells; **24** coordinates overlap across stages, so **963 distinct original-world query coordinates** total. Counts/bindings did not change during synthetic movement. Original source visit accounting **9,802 = 8,815 previous four-hub + 852 bridge + 135 pad**. These values are for this ARTIFICIAL route ONLY, NOT either original seed179 site.
+- Opt-out source-only behavior still passed, one-visit-short budget refused BEFORE original source callbacks, a player edit on the landing refused before movement. This does not construct or modify original world terrain.
+- Two real seed179 detached planner witness tests (2,0) and (2,1), their true original FourRegionWorld+VoxelWorld reads, 7 elevation changes per site, and the three-report native M7 triplet have **NOT** been executed with complete native original checkout.
+
+## Mandatory next phase
+
+1. Verify this child branch's exact 40-hex SHA and all protected refs, read this handoff FIRST.
+2. Obtain a COMPLETE, CLEAN, exact-HEAD authentic GitHub original source checkout. Local GitHub DNS cannot resolve github.com; Remote Desktop Commander connected MSI is OFFLINE. Do not invent a native M7 run or treat the isolated native helper test as native M7.
+3. Run ONE pinned read-only native gate at the new exact child SHA:
+   node scripts/underworld/audit-m7-exact-head-triplet.mjs <exact-40hex-phase25-child-head>
+   It must verify exact clean Git HEAD, **20 focused native Node files**, and EXACTLY **THREE** original M7 read-only research scripts, including genuine original-source seed179 (2,0) and (2,1) with 7/7 bidirectional grade steps, continuous walking, exact coordinate role coverage and complete original source/ore/AIR/edit/landmark checks. Every refusal remains a HOLD. Do not rerun unchanged broad CI.
+4. Continue independent gates for entire 80 original gallery as-built/provenance census, original M7 constructor failures 8675309/13579, live movement with actual other block-shape overlays, real generated-voxel placement, deep chunk core+halo faces, iPhone WebGL2/GPU/performance and installed Home Screen PWA/save compatibility. No full city floor, settlement, worldwide AIR density or release acceptance implied.
+5. Never modify protected main, earlier Cave branch HEADs, PR367, other developer branches or hourly automation work, merges, deploys, GitHub workflow checks or CI cancellations without user authorization.
