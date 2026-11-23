@@ -57,8 +57,10 @@ test('actual original V7 cave entrance source overrides remain authoritative and
   const sample={seed,entrances:sites.map(s=>({name:s.name,mouth:s.mouth})),cells:0,
    caveOverrides:0,zeroPlan:0,actualCaveBlocks:0};
   for(const {mouth} of sites){
-   assert.ok(Array.isArray(mouth)&&mouth.length===3);
-   const [mx,my,mz]=mouth;
+   // Exact original entrance-preflight source exports a frozen mouth RECORD
+   // {x,y,z,approachSteps}, not an [x,y,z] array.
+   assert.ok(mouth&&typeof mouth==='object'&&!Array.isArray(mouth));
+   const {x:mx,y:my,z:mz}=mouth;
    assert.ok([mx,my,mz].every(Number.isInteger));
    // The original mouths/steps are seeded by cave original source rather
    // than chosen by this Desert test. Bound search around every actual mouth.
