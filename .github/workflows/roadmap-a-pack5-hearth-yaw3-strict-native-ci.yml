@@ -1,0 +1,24 @@
+name: Roadmap A original Pack5 hearth yaw3 true world Float32 strict ray native
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-hearth-yaw3-strict-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-hearth-yaw3-strict-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-source-read-only-one-rotated-hearth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only two original-lane new source/test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-hearth-yaw3-strict-world-ray-audit.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-hearth-yaw3-strict-world-ray-audit.test.mjs
+      - name: Only eleven new original hearth yaw3 mesh/box/player source ray cases
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-hearth-yaw3-strict-world-ray-audit.test.mjs
