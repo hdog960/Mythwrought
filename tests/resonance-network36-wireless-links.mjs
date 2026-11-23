@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {deriveWirelessLinks} from '../src/resonance/network36/wireless-links.mjs';
+const ch=(id,x)=>({id,x,y:0,z:0,loaded:true});
+const ep=(id,x)=>({id,x,y:0,z:0,loaded:true});
+const tx=(id,x,radius=3)=>({...ep(id,x),radius});
+const run=(channels,transmitters,endpoints)=>deriveWirelessLinks({channels,transmitters,endpoints});
+test('wireless auto links in radius',()=>assert.equal(run([ch('a',0)],[tx('t',1)],[ep('e',4)]).endpoints[0].network,'channel:a'));
+test('range is finite',()=>assert.equal(run([ch('a',0)],[tx('t',1)],[ep('e',5)]).endpoints[0].status,'disconnected'));
+test('unpowered transmitters cannot relay',()=>assert.equal(run([ch('a',0)],[tx('t',8)],[ep('e',9)]).endpoints[0].status,'disconnected'));
+test('separate networks do not silently merge',()=>assert.equal(run([ch('a',0),ch('b',10)],[tx('t',1,6),tx('u',9,6)],[ep('e',5)]).endpoints[0].status,'ambiguous'));
+test('wired endpoint takes same-network priority',()=>assert.equal(run([ch('a',0)],[tx('t',1)],[ep('e',-1)]).endpoints[0].medium,'channel'));
+test('reject unloaded descriptors',()=>assert.throws(()=>run([ch('a',0)],[{...tx('t',1),loaded:false}],[ep('e',2)])));
+test('reject duplicate identities',()=>assert.throws(()=>run([ch('a',0)],[tx('a',1)],[ep('e',2)])));
+test('input ordering does not change result',()=>{const a=run([ch('a',0),ch('b',10)],[tx('t',1),tx('u',9)],[ep('x',2),ep('y',8)]);const b=run([ch('b',10),ch('a',0)],[tx('u',9),tx('t',1)],[ep('y',8),ep('x',2)]);assert.deepEqual(a,b)});
