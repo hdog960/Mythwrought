@@ -17,7 +17,9 @@ import {planFullOriginalM7CaveAnchorWalk,
   from './enchanted-original-full-anchor-continuity.mjs';
 
 export const ORIGINAL_UPPER_M7_BOUNDS=Object.freeze({
-  ownerSteps:24,waypoints:144
+  // Research-only original :24 owner walk toward both historical
+  // 120-step routes; no source geometry, runtime or generator edits.
+  ownerSteps:120,waypoints:384
 });
 // The author owns immutable deterministic per-seed source maps. Keep a
 // bounded two-site research memo to avoid redundantly rebuilding all five
