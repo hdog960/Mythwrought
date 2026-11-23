@@ -58,11 +58,6 @@ export function buildVesperfrostFourCourtDryBathhouse(){
   const p=first.get(name);
   if(!p)throw Error('Vesperfrost roof wing is occluded '+name);
   b.support(p[0],p[1],p[2]-1,'live:stone','vesperfrost-source-bearing-post-'+name);
-  // b.support records the real support plan but may leave unfilled tiers.
-  // Close actual y1..roof-1 stone load path, without replacing occupied cells.
-  for(let y=1;y<p[2];y++)if(b.clear(p[0],y,p[1]))
-   b.put(p[0],y,p[1],'support','live:stone','none',
-    {physicallyContinuousVesperfrostPost:name,sourceOnlyLoadCertification:false});
  }
  const basins=[
  ['west-inner-dry-plunge',16,25],['east-inner-dry-plunge',54,25],
@@ -144,10 +139,12 @@ export function buildVesperfrostFourCourtDryBathhouse(){
   if(!founded(x,z))throw Error('Vesperfrost portal has no stone foundation '+key(x,z));
   b.opening(x,z);b.portal(from,to,x,z);
  }
+ // Preserve original continuous stone bearing columns from decorative glazing.
+ const bearingPostXZ=new Set([...first.values()].map(([x,z])=>key(x,z)));
  let glass=0,bays=0;
  for(const cell of indoor){
   const [x,z]=cell.split(',').map(Number);
-  if((x*19+z*11)%13!==0||[1,2,3,4,5,6,7,8].some(y=>b.clear(x,y,z)))continue;
+  if(bearingPostXZ.has(cell)||(x*19+z*11)%13!==0||[1,2,3,4,5,6,7,8].some(y=>b.clear(x,y,z)))continue;
   const out=Object.entries(facing).find(([,v])=>!founded(x+v[0],z+v[1]));
   if(!out)continue;
   for(let y=2;y<=6;y++){
