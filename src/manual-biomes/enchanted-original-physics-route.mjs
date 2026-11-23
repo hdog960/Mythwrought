@@ -11,6 +11,7 @@ import {GROUND_PROBE,stepPlayer,STEP_HEIGHT} from '../physics.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {originalM7PedestrianCap} from './enchanted-original-pedestrian-search.mjs';
+import {originalM7PhysicalGroundCap} from './enchanted-original-standing-diagnostic.mjs';
 
 export const ENCHANTED_PHYSICS_ROUTE_LIMITS=Object.freeze({
   radius:16,visits:192,depth:24,routes:3,
@@ -53,18 +54,22 @@ function trace(node){
   }
   return {path:path.reverse(),ticksPerLeg:ticksPerLeg.reverse()};
 }
-export function originalM7PhysicsRouteReplay(world,path,{edgeTicks=48}={}){
+export function originalM7PhysicsRouteReplay(world,path,{edgeTicks=48,
+  groundMode='overlay'}={}){
   if(!Array.isArray(path)||path.length<1||
      !Number.isInteger(edgeTicks)||edgeTicks<1||
-     edgeTicks>ENCHANTED_PHYSICS_ROUTE_LIMITS.edgeTicks)
+     edgeTicks>ENCHANTED_PHYSICS_ROUTE_LIMITS.edgeTicks||
+     !['overlay','physical'].includes(groundMode))
     throw Error('Invalid original M7 physics route replay');
+  const capOf=groundMode==='overlay'?
+    originalM7PedestrianCap:originalM7PhysicalGroundCap;
   const first=path[0];
-  const cap=originalM7PedestrianCap(world,first.x,first.z);
+  const cap=capOf(world,first.x,first.z);
   if(!cap||Math.abs(cap.feet-first.feet)>.00001)
     return {ok:false,reason:'source-spawn-not-supported',legs:0,ticks:0};
   let p=playerAt(cap),ticks=0,steps=0;
   for(let i=1;i<path.length;i++){
-    const next=path[i],verified=originalM7PedestrianCap(world,next.x,next.z);
+    const next=path[i],verified=capOf(world,next.x,next.z);
     if(!verified||Math.abs(next.feet-verified.feet)>.00001)
       return {ok:false,reason:'original-ground-changed',legs:i-1,ticks};
     if(Math.max(Math.abs(verified.x-path[i-1].x),
@@ -85,7 +90,8 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
   maxRoutes=ENCHANTED_PHYSICS_ROUTE_LIMITS.routes,
   maxEdgeAttempts=ENCHANTED_PHYSICS_ROUTE_LIMITS.edgeAttempts,
   maxPhysicsTicks=ENCHANTED_PHYSICS_ROUTE_LIMITS.physicsTicks,
-  minDisplacement=4,maxArrivalsPerCell=1,corridor=null
+  minDisplacement=4,maxArrivalsPerCell=1,corridor=null,
+  groundMode='overlay'
 }={}){
   const lim=ENCHANTED_PHYSICS_ROUTE_LIMITS;
   if(world?.profile?.generator!==M7_ENVIRONMENT_GENERATOR||
@@ -101,6 +107,7 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
      !Number.isInteger(minDisplacement)||minDisplacement<1||minDisplacement>radius*2||
      !Number.isInteger(maxArrivalsPerCell)||maxArrivalsPerCell<1||
      maxArrivalsPerCell>2||
+     !['overlay','physical'].includes(groundMode)||
      (corridor!==null&&(
        typeof corridor!=='object'||Array.isArray(corridor)||
        !['west','east','north','south'].includes(corridor.direction)||
@@ -125,7 +132,10 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
     rejectedGround:0,rejectedHeight:0,rejectedCorners:0,
     rejectedPhysics:0,rejectedOverBudget:0,
     accepted:0,queuedPeak:0,truncated:false};
-  const start=originalM7PedestrianCap(world,x,z);
+  const capOf=groundMode==='overlay'?
+    originalM7PedestrianCap:originalM7PhysicalGroundCap;
+  if(groundMode==='physical')stats.groundMode='physical';
+  const start=capOf(world,x,z);
   if(!start)return {routes:[],stats:{...stats,startSupported:false}};
   const root={ground:start,player:playerAt(start),parent:null,
     depth:0,edgeTicks:null};
@@ -144,7 +154,7 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
   const supported=(a,b)=>{
     const id=key(a,b);
     if(sampled.has(id))return sampled.get(id);
-    const cap=originalM7PedestrianCap(world,a,b);
+    const cap=capOf(world,a,b);
     sampled.set(id,cap);
     return cap;
   };
@@ -162,7 +172,8 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
       const route=trace(item);
       // Each edge was previously admitted with original stepPlayer;
       // replay from the original initial state also certifies the full route.
-      const replay=originalM7PhysicsRouteReplay(world,route.path);
+      const replay=originalM7PhysicsRouteReplay(world,route.path,
+        {groundMode});
       if(!replay.ok)throw Error('Internal original-M7 physical route replay drift');
       routes.push({...route,physics:replay});
       stats.accepted++;
