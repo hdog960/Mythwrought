@@ -112,3 +112,34 @@ test('source changes after first candidate classification are detected by readba
     return original(x,y,z);
   }}),/baseline or legacy source changed/);
 });
+
+test('full 128-column envelope stays bounded and reports open clipped component',()=>{
+  const grass=new Set();
+  for(let x=0;x<16;x++)for(let z=0;z<8;z++)grass.add(x+','+z);
+  const v=make(grass);
+  const original=v.world._environmentBaseline;
+  let samples=0;
+  v.world._environmentBaseline=(...args)=>{samples++;return original(...args);};
+  const r=audit(v.world,{x:0,z:0,width:16,height:8},v.deps);
+  assert.equal(r.sampled,128);
+  assert.equal(r.grassCells,128);
+  assert.equal(r.components,1);
+  assert.equal(r.summary.noGuardVeto,128);
+  assert.ok(samples<=128*20*2,`bounded baseline work, found ${samples}`);
+  assert.equal(r.rows.length,128);
+});
+
+test('zero grass in a bounded authored-snow area is valid read-only evidence',()=>{
+  const v=make(new Set());
+  const r=audit(v.world,rect,v.deps);
+  assert.equal(r.grassCells,0);
+  assert.equal(r.rows.length,0);
+  assert.equal(r.summary.guardVeto,0);
+  assert.equal(r.originalSourcesUnchanged,true);
+});
+
+test('invalid original material ID is rejected rather than attributed',()=>{
+  const v=make();
+  v.baseline.set(key(15,8,2),999999);
+  assert.throws(()=>audit(v.world,rect,v.deps),/Invalid original M7 baseline/);
+});
