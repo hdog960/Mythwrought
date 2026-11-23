@@ -1516,3 +1516,45 @@ test('opening settings before start or after completed mine trial cannot invalid
   assert.equal(summary.interruptionCount,0);
   assert.equal(summary.trueSavedDeepMines,100);
 });
+
+
+test('EXECUTE exact original settings button callback: latch before next RAF',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[7,-38,2],previous:3,next:0});
+  const menu={onclick:null},events=[];
+  const line=source.split('\n').find(
+    v=>v.includes("document.getElementById('menu').onclick=()=>{near291Interrupt();"));
+  assert.ok(line);
+  new Function('ctx','with(ctx){'+line+'\n}')({
+    document:{getElementById:id=>{assert.equal(id,'menu');return menu;}},
+    near291Interrupt:perf.interrupt,
+    gameplayRecorder:{interrupt:value=>events.push('recorder:'+value)},
+    cancelAllPointers:()=>events.push('cancel'),
+    help:scope.help
+  });
+  assert.equal(typeof menu.onclick,'function');
+  menu.onclick();
+  assert.deepEqual(events,['recorder:Settings opened','cancel']);
+  assert.equal(scope.help.hidden,false);
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+  assert.equal(perf.read().interruptionCount,1);
+});
+test('EXECUTE exact original exploration map onOpen callback without next RAF',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(8,{cell:[8,-35,2],previous:3,next:0});
+  const expression="onOpen:()=>{near291Interrupt();cancelAllPointers();}";
+  one(expression);
+  let canceled=0;
+  const cb=new Function('ctx','with(ctx){return ({'+expression+'}).onOpen;}')({
+    near291Interrupt:perf.interrupt,
+    cancelAllPointers:()=>{canceled++;}
+  });
+  cb();
+  assert.equal(canceled,1);
+  const snapshot=perf.read();
+  assert.equal(snapshot.mineFrameWindow.phase,'interrupted');
+  assert.equal(snapshot.continuousForegroundRun,false);
+  assert.equal(snapshot.interruptionCount,1);
+});
