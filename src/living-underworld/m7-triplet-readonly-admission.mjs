@@ -94,7 +94,21 @@ export function classifyExactHeadOriginalM7Triplet({
  // even when this optional route fails its PLAYER-size future walking
  // fixture. The pinned exact-HEAD runner must require BOTH evidence
  // tracks, while this result NEVER claims actual original-M7 walking.
- const cityThinUnderpassExactCoordinateCoverageSafe=citySourceSafe&&
+ // Phase28: the exact original-M7 source functions used for the prior
+ // four-hub/deep-city survey MUST be the same four functions used by the
+ // additional thin bridge/pad survey. This only proves in-process caller
+ // continuity, not actual FourRegionWorld identity or gameplay readiness.
+ const cityThinUnderpassDeepReaderCohortSafe=citySourceSafe&&c.rows.every(r=>
+  yes(r.candidateThinUnderpassPriorDeepSourceReaderCohortRequested)&&
+  yes(r.candidateThinUnderpassPriorDeepSourceReaderCohortVerified)&&
+  r.candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles===4&&
+  yes(r.candidateThinUnderpassPriorDeepReaderCohortInProcessOnly)&&
+  yes(r.candidateThinUnderpassPriorDeepReaderCohortAuthenticM7Unverified)&&
+  r.candidateThinUnderpassPriorDeepSourceReaderCohortRefusal===null);
+ if(!cityThinUnderpassDeepReaderCohortSafe)
+  reasons.push('RARE_CITY_UNDERPASS_DEEP_SOURCE_READER_COHORT_HOLD');
+ const cityThinUnderpassExactCoordinateCoverageSafe=
+  citySourceSafe&&cityThinUnderpassDeepReaderCohortSafe&&
   c.rows.every(r=>verifiedSourceCoordinates(r,
    r.candidateThinUnderpassSourceVisits,
    r.candidateThinUnderpassCenterLandingSourceVisits));
@@ -200,6 +214,7 @@ export function classifyExactHeadOriginalM7Triplet({
   fullGallerySourceCensusVerified:fullyDiagnosed,
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   cityThinUnderpassHypotheticalMovementSafe,
+  cityThinUnderpassDeepReaderCohortSafe,
   cityThinUnderpassExactCoordinateCoverageSafe,
   cityThinUnderpassIndependentFootprintSafe,
   cityThinUnderpassOverlapSourceValuesSafe,
