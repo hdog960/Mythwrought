@@ -475,7 +475,10 @@ function start(nonblockStage=null){
     near291Perf.slowFrameCount=0;
     near291Perf.mineWitness.length=0;
     near291Perf.mineWitnessOverflow=near291Perf.mineWitnessInvalid=false;
-    near291Perf.interruptionCount=0;
+    // A CSS/seed identity change resets samples, but must NEVER erase a
+    // prior real mine trial's interruption history. Without this latch a
+    // mid-trial resize could appear as a clean new 100-mine comparison.
+    near291Perf.interruptionCount+=near291Perf.mineWindow.savedMines>0?1:0;
     near291Perf.mineWindow=near291NewMineWindow();
     near291Perf.prevFrame=null;
   }
