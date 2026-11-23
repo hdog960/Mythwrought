@@ -23,6 +23,8 @@ import {isCandidateGeologyMaterial}
  from './protected-entrance-envelope.mjs';
 import {auditThinUnderpassPedestrianConnectivity}
  from './city-underpass-pedestrian-footgraph.mjs';
+import {auditCandidateUnderpassPlayerAabb}
+ from './city-underpass-player-aabb-fixture.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -170,6 +172,7 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
  const refusals={grade:0,bounds:0,oldRoutes:0,
   detachedAir:0,strictCombined:0,footgraph:0};
  let considered=0,safeCount=0,best=null;
+ const geometricallyApproved=[];
  for(const offset of offsets){
   if(considered>=maxCandidates)break;
   considered++;
@@ -216,6 +219,7 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
   const candidate=Object.freeze({proposal,footgraph,
    pivot:pivot?Object.freeze({...pivot}):null,
    grade,footprint,connectedRouteCount:coupled.routeCount});
+  geometricallyApproved.push(candidate);
   if(!best||candidate.grade.supportCells<best.grade.supportCells||
     candidate.grade.supportCells===best.grade.supportCells&&
      candidate.grade.clearanceCells<best.grade.clearanceCells||
@@ -236,6 +240,32 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
     rejectionCounts:Object.freeze(refusals),
     originalM7SourceNotQueried:true
    });
+ // A geometry pass is not sufficient to call a passage player-sized.
+ // Independently re-run the EXACT original collides() .28x1.78 AABB on
+ // sealed, hypothetical future candidate voxels; unverified outside
+ // voxels are solid. Only grade-safe and collision-safe candidates survive.
+ geometricallyApproved.sort((a,b)=>
+  a.grade.supportCells-b.grade.supportCells||
+  a.grade.clearanceCells-b.grade.clearanceCells||
+  a.proposal.segments.length-b.proposal.segments.length);
+ let bodyProbes=0,bodyRefusals=0,accepted=null;
+ for(const candidate of geometricallyApproved){
+  bodyProbes++;
+  const body=auditCandidateUnderpassPlayerAabb({
+   accessProposal:admitted.selectedRoutes[3],
+   underpassProposal:candidate.proposal,
+   centerSidePad:to,floorY
+  });
+  if(!body.ok){bodyRefusals++;continue}
+  accepted={...candidate,body};
+  break;
+ }
+ if(!accepted)return failure(seed,rx,rz,
+  'NO_ORIGINAL_PLAYER_AABB_CLEAR_UNDERPASS_TO_NEAREST_PAD',{
+   geometrySafeCandidates:safeCount,originalAabbProbed:bodyProbes,
+   originalAabbRefused:bodyRefusals,
+   originalM7SourceNotQueried:true});
+ best=accepted;
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
   kind:'three-wide-thin-deck-underpass-below-historical-galleries',
   floorY,from,to,
@@ -262,6 +292,18 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
   physicalFootgraphReachableNodes:best.footgraph.reachableNodes,
   physicalFootgraphMinAccessToPadSteps:
    best.footgraph.accessToPadMinSteps,
+  originalPlayerAabbRadius:best.body.radius,
+  originalPlayerAabbHeight:best.body.height,
+  originalPlayerAabbFixtureBodySamples:
+   best.body.sampledBodyPositions,
+  originalPlayerAabbFixtureGroundProbes:best.body.groundProbes,
+  originalPlayerAabbFixtureFlatSweeps:best.body.sweptFlatEdges,
+  originalPlayerAabbFixtureSkippedElevationEdges:
+   best.body.skippedElevationEdges,
+  originalPlayerAabbCandidateProbes:bodyProbes,
+  originalPlayerAabbCandidateRefusals:bodyRefusals,
+  originalPlayerColliderAgainstConservativelySealedFixturePassed:true,
+  originalPlayerStepPlayerMovementNotYetSimulated:true,
   threeWideFootgraphEdgeConnectivityVerified:true,
   fullNineCellDestinationPadFootgraphConnected:true,
   originalVoxelSourceVisitsRequired:
@@ -396,6 +438,16 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   detachedFootgraphReachableFootNodes:planned.physicalFootgraphReachableNodes,
   detachedFootgraphAccessToPadMinSteps:
    planned.physicalFootgraphMinAccessToPadSteps,
+  originalPlayerAabbCollisionRadius:planned.originalPlayerAabbRadius,
+  originalPlayerAabbCollisionHeight:planned.originalPlayerAabbHeight,
+  originalPlayerAabbSealedFixturePassed:
+   planned.originalPlayerColliderAgainstConservativelySealedFixturePassed,
+  originalPlayerAabbFixtureBodySamples:
+   planned.originalPlayerAabbFixtureBodySamples,
+  originalPlayerAabbFixtureFlatSweeps:
+   planned.originalPlayerAabbFixtureFlatSweeps,
+  originalPlayerAabbElevationChangesStillRequireStepPlayer:
+   planned.originalPlayerAabbFixtureSkippedElevationEdges,
   exactOriginalCityCenterThreeWideLandingUnverified:true,
   gradeSupportCells:planned.threeWideSupportCells,
   gradeClearanceCells:planned.threeHighClearanceCells,
