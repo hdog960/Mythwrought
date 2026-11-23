@@ -4,7 +4,7 @@
 // This does NOT authenticate FourRegionWorld or certify actual player walking.
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
 const INT=Number.isSafeInteger;
-const key=(x,y,z)=>x+','+y+','+z';
+const key=(x,y,z)=>x+','+y+','+z;
 const readonlyCounts=c=>Object.freeze({...c});
 export function createCitySourceCrossAuditLedger(source,{
  maxCoordinatesPerRole=160000,maxTotalCalls=1200000
