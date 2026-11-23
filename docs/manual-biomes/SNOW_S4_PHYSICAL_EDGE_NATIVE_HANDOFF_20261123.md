@@ -36,3 +36,28 @@ Any returned reference material ID 272 is an investigative suggestion, **not** a
 2. Reconcile real source counts of zero or more conservatively proposed physical edge sites; a zero count is a valid safe outcome, not a prompt to weaken protections.
 3. Plan a genuinely versioned **new-world only** snow terrain/vegetation change after original cave, save, player movement, WebGL2 and iPhone Home Screen visual/performance acceptance. Do not turn this read-only diagnostic into the live M7 generator.
 4. Preserve original S1 ice checkerboard fixes, S2 cap source evidence, S3 prototypes, the two S4 diagnostic layers and S5 non-block reuse; never touch the other developer branches.
+
+
+## Verified complete original-repository native acceptance (2026-11-23 UTC)
+
+**New GitHub Actions #45170543633** at exact source/test HEAD `0e309a0371dcb4894af4c7c51469fe155313c225`: `COMPLETED SUCCESS`. All four test stages actually executed against the exact full original repository checkout:
+
+- S4 preview focused fixture: **12/12**.
+- Previously static-import-blocked original S3 two-seed provenance: **1/1**.
+- Previously static-import-blocked original S3/S5/S4 physics/scene gate: **1/1**. Seed179: 10 walking proposals audited; 1 source-admitted and 1 player-body-approved tree, 1,171 collision probes, 870 preserved directed portal pairs, **45 genuine original stepPlayer steps**. Seed2026: 6 walking proposals, no eligible source-admitted trees, zero steps; this is an honest empty admission, not an error.
+- New original S4 physical-edge 2-seed gate: **1/1**, preserving saves/caves. Its original two 6x6 rectangles happened to contain zero retained grass, so the pass did NOT establish real grass classification.
+
+**New separate minimum-scope GitHub Actions #45170899399** at exact source/test HEAD `30ded9ac8e628924b13716f5a43f46e17a7a0fdd`: `COMPLETED SUCCESS`, **1/1** genuine original M7 retained-grass witness test. No other previously successful tests were redundantly rerun. The coordinates were recovered from earlier protected-head S0 original seed179/2026 run #44980094211, not fabricated:
+
+| Seed | Original grass witness | Original source diagnosis | Retained grass in 5x5 sample | Physical candidate disposition |
+| --- | --- | --- | ---: | --- |
+| 179 | (-104, oldTop=9, 360) | original elevated physical source | 5 | 0 proposals, all 5 rejected |
+| 179 | (-88, oldTop=7, 536) | invalid original subsurface (cave/source protection) | 10 | 0 proposals, all 10 rejected |
+| 2026 | (-104, oldTop=9, 360) | original elevated physical source | 5 | 0 proposals, all 5 rejected |
+| 2026 | (-88, oldTop=7, 536) | invalid original subsurface (cave/source protection) | 10 | 0 proposals, all 10 rejected |
+
+This authentic **30 retained-grass column observations** total across two original source seeds and two real sites. Every one is protected, and zero writes or edits were made. A future visual fix cannot indiscriminately paint these green islands without crossing historically protected source. Do not weaken the constraints to manufacture a positive candidate quota.
+
+The four native tests in #45170543633 and one native test in #45170899399 are authenticated exact test-source results. The new handoff update is documentation-only; no original test/implementation files changed after their successful runs. Reuse the existing exact code-blob evidence; **no repeat broad CI**.
+
+**Remaining gates:** no live M7 physical snow conversion, no new-profile source acceptance, no complete snow art parity, no target iPhone WebGL2 frame-time or installed Home Screen PWA acceptance. S3 physical trees remain detached, not game-integrated. Production main and protected OPEN DRAFT PR #358 must remain frozen until separately approved.
