@@ -80,5 +80,5 @@ test('D42 original Y7 weather wood, creator nonapproval, and original source WAL
   /original|source|wood|roof|D25|D26|D27|D28|D29|D41/i);
  assert.throws(()=>auditD42OriginalW16W17BarrierAndAlternateRearFaces({...b,navigation:b.navigation.slice(1)},p,s,d25),
   /original|source|WALK|navigation|D25|D26|D27|D28|D29|D41/i);
- assert.throws(()=>auditD42OriginalW16W17BarrierAndAlternateRearFaces(b,p,s,d25,{maxWitnessSamples:30}),/budget/);
+ assert.throws(()=>auditD42OriginalW16W17BarrierAndAlternateRearFaces(b,p,s,d25,{maxWitnessSamples:30}),/samples/);
 });
