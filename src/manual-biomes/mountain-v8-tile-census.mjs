@@ -10,6 +10,8 @@ import {planMountainV8PlantCells} from './mountain-v8-vegetation-cells.mjs';
 import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
 import {certifyMountainV8Seam} from './mountain-v8-seam-certificate.mjs';
 import {createMountainV8SurveyCache} from './mountain-v8-survey-cache.mjs';
+import {auditMountainV8PhysicalDescriptors,MOUNTAIN_V8_DESCRIPTOR_MATERIALS}
+  from './mountain-v8-physical-descriptor-budget.mjs';
 
 const valid=n=>Number.isSafeInteger(n);
 const key=(x,z)=>x+','+z;
@@ -46,8 +48,31 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     rootSourceVetoReasons:emptySourceVetoCounts(),
     seamSourceVetoReasons:emptySourceVetoCounts(),
     nonMeadow:0,occupied:0,rock:0,snow:0,meadow:0,
-    cliff:0,seen:0
+    cliff:0,seen:0,
+    physicalDescriptorSites:0,sourceCertifiedDescriptorFaces:0,
+    fullCubeProxyFaces:0,fullCubeProxyBytes:0,
+    fullCubeNaiveBytes:0,fullCubeInternalPairs:0,
+    physicalMaterialCells:Object.fromEntries(
+      MOUNTAIN_V8_DESCRIPTOR_MATERIALS.map(k=>[k,0])),
+    physicalMaterialCubeFaces:Object.fromEntries(
+      MOUNTAIN_V8_DESCRIPTOR_MATERIALS.map(k=>[k,0]))
   };
+  // Physical cell face proxies are descriptive and NEVER dispatched to WebGL.
+  // A future approved V8 non-cube vegetation mesh needs its own GPU gate.
+  function auditAccepted(proposal,terrain,seam,plant=null){
+    const descriptor=auditMountainV8PhysicalDescriptors(proposal,terrain,seam,{plant});
+    if(!descriptor)throw Error('Unverified physical V8 material/face descriptor');
+    stats.physicalDescriptorSites++;
+    stats.sourceCertifiedDescriptorFaces+=descriptor.sourceCertifiedSeamFaces;
+    stats.fullCubeProxyFaces+=descriptor.exposedCubeProxyFaces;
+    stats.fullCubeProxyBytes+=descriptor.exposedCubeProxyBytes;
+    stats.fullCubeNaiveBytes+=descriptor.naiveCubeProxyBytes;
+    stats.fullCubeInternalPairs+=descriptor.culledInternalPairs;
+    for(const name of MOUNTAIN_V8_DESCRIPTOR_MATERIALS){
+      stats.physicalMaterialCells[name]+=descriptor.materialCells[name];
+      stats.physicalMaterialCubeFaces[name]+=descriptor.materialCubeProxyFaces[name];
+    }
+  }
   // Capture exact source explanations at the same time as the original
   // cached reads. No second biome/cave/landmark or world sampling pass.
   const originalVetoes=new Map();
@@ -138,7 +163,11 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
     if(chosen.cap==='snow')stats.snow++;
     else if(chosen.cap==='alpine-grass')stats.meadow++;
     else stats.rock++;
-    if(!chosen.vegetation){stats.nonMeadow++;continue;}
+    if(!chosen.vegetation){
+      stats.nonMeadow++;
+      auditAccepted(chosen,terrain,seam);
+      continue;
+    }
     // Vegetation must also clear terrain *after* the V8 uplift, not merely
     // original AIR. Read at most five horizontal footprint coordinates,
     // memoized across every occupied cell of this sparse plant.
@@ -159,8 +188,13 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
       mountainAt:(x,z)=>{const b=v6BiomeAt(x,z,seed);
         return b?.name==='mountain'&&b.weight>=.82;}
     });
-    if(!physical){stats.occupied++;continue;}
+    if(!physical){
+      stats.occupied++;
+      auditAccepted(chosen,terrain,seam);
+      continue;
+    }
     stats.plants++;stats.plantCells+=physical.estimatedCells;
+    auditAccepted(chosen,terrain,seam,physical);
     if(stats.plantCells>64*18)throw Error('Unbounded vegetation cells');
     sites.push(Object.freeze({tileX:tx,tileZ:tz,x:chosen.x,z:chosen.z,
       top:chosen.top,cap:chosen.cap,kind:physical.kind,
@@ -176,6 +210,18 @@ export function censusMountainV8Tiles({seed,tileX,tileZ,width=4,height=4,
   Object.freeze(stats.seamVetoReasons);
   Object.freeze(stats.rootSourceVetoReasons);
   Object.freeze(stats.seamSourceVetoReasons);
+  if(stats.physicalDescriptorSites!==stats.eligible||
+     stats.sourceCertifiedDescriptorFaces!==stats.seamExposedFaces||
+     total(stats.physicalMaterialCells)!==stats.terrainCells+stats.plantCells||
+     total(stats.physicalMaterialCubeFaces)!==stats.fullCubeProxyFaces||
+     stats.fullCubeProxyBytes!==stats.fullCubeProxyFaces*216||
+     stats.fullCubeNaiveBytes<stats.fullCubeProxyBytes||
+     stats.fullCubeNaiveBytes-stats.fullCubeProxyBytes!==
+       stats.fullCubeInternalPairs*2*216||
+     stats.fullCubeNaiveBytes>(stats.terrainCells+stats.plantCells)*1296)
+    throw Error('Original V8 physical material/proxy-face totals failed to reconcile');
+  Object.freeze(stats.physicalMaterialCells);
+  Object.freeze(stats.physicalMaterialCubeFaces);
   const readCosts=cache.stats();
   if(!readCosts.complete)throw Error('Mountain V8 source census budget exhausted');
   stats.sourceBudgetExhausted=readCosts.exhausted;
