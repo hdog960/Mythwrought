@@ -125,9 +125,12 @@ test('original source save, mine and mandatory GPU upload remain unchanged',()=>
   one('const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
   one("const persisted=save();");
   one("const label=BLOCK_NAMES[result.block]||'block';");
-  inOrder('const persisted=save();',
-    'near291RecordMine(performance.now()-near291MineStart);',
-    "const label=BLOCK_NAMES[result.block]||'block';");
+  const actualMine=source.slice(source.indexOf("const near291MineStart=near291Perf&&mode==='mine'"),
+    source.indexOf("  let lastStreamingCenter=",source.indexOf("const near291MineStart=near291Perf&&mode==='mine'")));
+  const a=actualMine.indexOf('const persisted=save();');
+  const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart);');
+  const c=actualMine.indexOf("const label=BLOCK_NAMES[result.block]||'block';");
+  assert.ok(a>=0&&b>a&&c>b);
   one('buffer=uploadChunkBuffer(gl,vertices);');
 });
 
@@ -838,12 +841,24 @@ test('exact original uploadPack2Chunk measures both unmodified guarded GL upload
   assert.equal(perf.read().rollingGuardedUploadP95Ms,2);
 });
 test('original real deep mine timing is captured only after success and save',()=>{
-  inOrder("const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;",
+  const start=source.indexOf("const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;");
+  const end=source.indexOf('  let lastStreamingCenter=',start);
+  assert.ok(start>=0&&end>start);
+  const actualMine=source.slice(start,end);
+  const stages=[
+    "const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;",
     'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
-    'near291RecordMine(performance.now()-near291MineStart);');
+    'near291RecordMine(performance.now()-near291MineStart);'
+  ];
+  let prior=-1;
+  for(const stage of stages){
+    const next=actualMine.indexOf(stage,prior+1);
+    assert.ok(next>prior,'source-original deep mine order changed: '+stage);
+    prior=next;
+  }
   assert.ok(source.includes('near291RecordFrame(now); // inert unless local ?measure-291=1'));
 });
 test('read-only local acceptance interface cannot claim real WebGL or iPhone certification',()=>{
