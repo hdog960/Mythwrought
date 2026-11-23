@@ -1586,8 +1586,8 @@ export const ROADMAP_A_WAVE09_SPECS=Object.freeze([
         "records-station"
       ],
       [
-        40,
-        28,
+        44,
+        24,
         "pack5:090",
         null,
         "nonlit-oven-station"
