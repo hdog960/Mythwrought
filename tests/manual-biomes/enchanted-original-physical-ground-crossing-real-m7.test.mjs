@@ -209,3 +209,32 @@ test('new physical source is opt-in and old Enchanted Desert stepPlayer search i
      visited:defaultResult.stats.visited,physicsTicks:defaultResult.stats.physicsTicks,
      exactOverlayDefaultParity:true}));
 });
+
+test('read-only original physical ground accessor respects original M7 mined support and placed obstruction edits',()=>{
+ const at=[-273,-588],worldGround=old(),worldRoof=old();
+ const a=originalM7PhysicalGroundCap(worldGround,...at);
+ const b=originalM7PhysicalGroundCap(worldRoof,...at);
+ assert.ok(a&&b);
+ assert.equal(a.feet,b.feet);
+ // Separate disposable original M7 instances: no real save or production
+ // world is changed by this native test.
+ assert.equal(worldGround.set(at[0],a.surface,at[1],0),true,
+   'original M7 setter must author a real AIR edit to legacy grass');
+ assert.equal(worldGround.get(at[0],a.surface,at[1]),0);
+ assert.equal(originalM7PhysicalGroundCap(worldGround,...at),null,
+   'an AIR edit to genuine original support must veto fallback standing');
+ assert.equal(worldRoof.set(at[0],b.feet,at[1],3),true,
+   'original M7 setter must author a real solid headroom edit');
+ assert.equal(originalM7PhysicalGroundCap(worldRoof,...at),null,
+   'a real original-world headroom obstruction must veto fallback standing');
+ assert.ok(worldGround.edits.size>=1);
+ assert.ok(worldRoof.edits.size>=1);
+ const unmodified=old();
+ assert.ok(originalM7PhysicalGroundCap(unmodified,...at));
+ assert.deepEqual(unmodified.save(),{schema:1,seed,edits:[]});
+ console.log('# ENCHANTED REAL M7 GROUND CAP PLAYER EDIT VETO '+JSON.stringify({
+  source:at,baselineFeet:a.feet,groundAirEditRejected:true,
+  overheadSolidEditRejected:true,originalUnmodified:true,
+  syntheticCaveNotClaimed:true
+ }));
+});
