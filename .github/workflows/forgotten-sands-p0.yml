@@ -1,0 +1,38 @@
+name: Forgotten Sands Phase 0 focused original-source probe
+on:
+  push:
+    branches: [research/forgotten-sands-p0-multichunk-height-20261123]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-*'
+      - 'tests/forgotten-sands-*'
+      - 'docs/forgotten-sands/**'
+      - '.github/workflows/forgotten-sands-p0.yml'
+permissions:
+  contents: read
+concurrency:
+  group: forgotten-sands-p0-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-native-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pin and print isolated source commit
+        run: |
+          git rev-parse HEAD
+          node --version
+      - name: Check research module and test syntax
+        run: |
+          node --check src/manual-biomes/forgotten-sands-monument-prototype.mjs
+          node --check src/manual-biomes/forgotten-sands-upper-probe.mjs
+          node --check tests/forgotten-sands-monument-prototype.test.mjs
+          node --check tests/forgotten-sands-upper-probe.test.mjs
+      - name: Run ONLY original-source Forgotten Sands focused native tests
+        run: |
+          node --test tests/forgotten-sands-monument-prototype.test.mjs tests/forgotten-sands-upper-probe.test.mjs
