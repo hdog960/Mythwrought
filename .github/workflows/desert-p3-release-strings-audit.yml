@@ -1,0 +1,21 @@
+name: Desert P3 audit stale exact-release strings (helper only)
+on:
+  push:
+    branches:
+      - research/desert-p3-release-cache-preflight-20261123
+    paths:
+      - .github/workflows/desert-p3-release-strings-audit.yml
+permissions:
+  contents: read
+jobs:
+  frozen-release-expectations:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Find every old release assertion before single atomic main PR change
+        run: |
+          set -euo pipefail
+          echo BEGIN_DESERT_RELEASE_STRINGS
+          git grep -n -E '20261121-unified-environment-rc7|20261121-v36' -- ':!nonblock-stage-assets.json' ':!docs/**' || true
+          echo END_DESERT_RELEASE_STRINGS
