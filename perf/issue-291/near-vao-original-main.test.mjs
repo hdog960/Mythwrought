@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '392a5e52fdfb8a7b66482562c51e63a249975d2a');
+    'ecf4aa61668d56b7f8afb5d1081ac9622412f079');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -751,6 +751,7 @@ const createLocal291Perf=new Function('scope','with(scope){'+
   'mine:(duration,result,pending)=>near291RecordMine(duration,result,'+
   '(pending===undefined?{samples:[],overflow:false,faults:0}:pending)),'+
   'interrupt:near291Interrupt,noteEdit:near291NoteEdit,'+
+  'auditRender:near291CheckRenderIdentity,'+
   'abortMine:near291AbortMineTrial,'+
   'upload:near291RecordUpload,fail:near291RecordUploadFailure,'+
   'startFirst:()=>{near291FirstEditUploads={samples:[],overflow:false,faults:0};'+
@@ -772,6 +773,7 @@ function local291PerfFixture({
     enabled,URLSearchParams:URLParams,location:{hostname,search},
     document:{hidden:false},help:{hidden:true},
     exploration:{isOpen:()=>false},graphicsLost:false,g2Active:()=>false,
+    renderPreset:'balanced',devicePixelRatio:2,
     canvas:{clientWidth:956,clientHeight:440,width:956,height:440},
     world:{seed:179},player:{feet:-30},BLOCK:{AIR:0},
     frameHistory:{stats:()=>({frames:4,p95Ms:18})},
@@ -951,7 +953,7 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   const snap=perf.read();
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
-  assert.equal(snap.protocol,'291-local-4viewport-v4');
+  assert.equal(snap.protocol,'291-local-4viewport-v5');
 });
 
 test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
@@ -1212,7 +1214,7 @@ test('original trial frame summary is frozen, numeric, and not release certified
   perf.frame(0);perf.mine(13,{cell:[0,-19,2],previous:3,next:0});
   const snap=perf.read();
   assert.equal(Object.isFrozen(snap.mineFrameWindow),true);
-  assert.equal(snap.protocol,'291-local-4viewport-v4');
+  assert.equal(snap.protocol,'291-local-4viewport-v5');
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.browserPixelParityProven,false);
 });
@@ -1553,4 +1555,95 @@ test('invalidated source A/B is reset by viewport change without changing schema
   assert.equal(fresh.mineFrameWindow.editPending,false);
   assert.equal(fresh.trueSavedDeepMines,0);
   assert.equal(fresh.releaseCertified,false);
+});
+
+test('original source captures physical backing pixels, quality preset and DPR at first saved mine',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(12,{cell:[1,-22,3],previous:3,next:0});
+  const w=perf.read().mineFrameWindow;
+  assert.deepEqual(w.renderIdentity,[956,440,'balanced',2]);
+  assert.equal(Object.isFrozen(w.renderIdentity),true);
+  assert.equal(w.invalidReason,null);
+  assert.equal(w.savedMines,1);
+});
+test('actual backing WebGL pixels may change while CSS viewport remains constant: fail closed',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-22,3],previous:3,next:0});
+  scope.canvas.width=1000;
+  perf.auditRender(); // original post-gl.viewport read-only hook
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'interrupted');
+  assert.equal(win.invalidReason,'render-identity-changed');
+  assert.equal(win.interrupted,true);
+  assert.equal(win.invalid,true);
+  assert.equal(win.savedMines,1);
+});
+test('DPR drift invalidates even when pixels have not yet been resized',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-22,3],previous:3,next:0});
+  scope.devicePixelRatio=3;
+  perf.frame(16); // original pre-draw RAF check catches DPR before canvas resize
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.invalidReason,'render-identity-changed');
+  assert.equal(win.phase,'interrupted');
+});
+test('quality preset drift invalidates original GPU workload before next frame',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(12,{cell:[1,-22,3],previous:3,next:0});
+  scope.renderPreset='economy';
+  perf.auditRender();
+  assert.equal(perf.read().mineFrameWindow.invalidReason,'render-identity-changed');
+  assert.equal(perf.read().continuousForegroundRun,false);
+});
+test('one backing-size change during the two post-mine RAF gaps poisons comparison',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(9,{cell:[0,-24,2],previous:3,next:0});
+  for(let i=1;i<100;i++){perf.frame(i*16);
+    perf.mine(9,{cell:[i,-24,2],previous:3,next:0});
+  }
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  perf.frame(1600);
+  assert.equal(perf.read().mineFrameWindow.closingFramesRemaining,1);
+  scope.canvas.height=500;
+  perf.auditRender();
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.phase,'interrupted');
+  assert.equal(w.invalidReason,'render-identity-changed');
+  perf.frame(1616);
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
+});
+test('original render identity resets only with CSS viewport/seed session and never touches saves',()=>{
+  const {scope,perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(9,{cell:[0,-24,2],previous:3,next:0});
+  scope.canvas.clientWidth=932;
+  scope.canvas.width=932;
+  const reset=perf.read();
+  assert.equal(reset.mineFrameWindow.phase,'idle');
+  assert.equal(reset.mineFrameWindow.renderIdentity,null);
+  assert.equal(reset.trueSavedDeepMines,0);
+  perf.mine(11,{cell:[1,-24,2],previous:3,next:0});
+  assert.deepEqual(perf.read().mineFrameWindow.renderIdentity,[932,440,'balanced',2]);
+  assert.ok(!exactLocal291PerfSource.includes('localStorage.'));
+  assert.ok(!exactLocal291PerfSource.includes('world.set('));
+});
+test('original draw catches post-gl.viewport size changes and quality selector checks in source',()=>{
+  const draw=source.indexOf('  function draw(now){');
+  const measure=source.indexOf('      const buffer=bufferDimensions(',draw);
+  const resize=source.indexOf('if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}',measure);
+  const audit=source.indexOf('near291CheckRenderIdentity(); // inert on production Pages/PWA',resize);
+  assert.ok(draw>=0&&measure>draw&&resize>measure&&audit>resize&&audit-resize<520);
+  const selector=source.indexOf("renderSelect.addEventListener('change',()=>{");
+  const preset=source.indexOf('renderPreset=normalizeRenderPreset(renderSelect.value);',selector);
+  const validation=source.indexOf('if(near291Perf)near291CheckRenderIdentity(); // local trial only',preset);
+  assert.ok(selector>=0&&preset>selector&&validation>preset&&validation-preset<180);
+});
+test('source original exact render identity never certifies production release',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(6,{cell:[1,-25,3],previous:3,next:0});
+  const snap=perf.read();
+  assert.equal(snap.protocol,'291-local-4viewport-v5');
+  assert.equal(snap.releaseCertified,false);
+  assert.equal(snap.nativeGpuRollbackProven,false);
+  assert.equal(snap.browserPixelParityProven,false);
 });
