@@ -4,6 +4,7 @@
 import {chunkCoord,CHUNK_SIZE} from '../voxel.mjs';
 import {editAffectedChunks} from '../chunks.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
+import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 
 export const DESERT_SEAM_VISUAL_RADIUS=3;
@@ -13,6 +14,18 @@ export function desertSeamEditAffectedChunks(world,x,z,y){
   const sourceWorld=world?.base?.generationProfile?world.base:world;
   if(sourceWorld?.generationProfile?.generator!==M7_ENVIRONMENT_GENERATOR||
      typeof sourceWorld._columnPlan!=='function')return original;
+  // The M7 environmental visual cap is restricted to the original surface
+  // vertical envelope. Deep mining must never generate an expensive
+  // original _columnPlan merely to rediscover unchanged legacy neighbors.
+  if(y<LEGACY_WORLD_MIN_Y||y>WORLD_MAX_Y)return original;
+  // The 3-block RGB source center cannot reach ANY other horizontal chunk
+  // if it is at least three full cells inside both axes. Do the exact,
+  // sign-correct CHUNK_SIZE calculation before original source planning.
+  // Local 0/15 geometry edits are untouched because they are outside here.
+  const cx=chunkCoord(x),cz=chunkCoord(z);
+  const localX=x-cx*CHUNK_SIZE,localZ=z-cz*CHUNK_SIZE;
+  if(localX>=3&&localX<=CHUNK_SIZE-4&&
+     localZ>=3&&localZ<=CHUNK_SIZE-4)return original;
   const naturalPlan=sourceWorld._columnPlan(x,z);
   if(!naturalPlan.size)return original;
   let naturalY=-Infinity;
