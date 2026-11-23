@@ -10,16 +10,30 @@ const shoulderSamples=[[14,0],[-14,0],[0,14],[0,-14]];
 
 function sharedShoulder(biome,x,z,seed){
   if(biome.weight>.50)return null;
+  let touchesPlains=false,hasOtherSpecial=false;
   for(const [dx,dz] of shoulderSamples){
     const neighbor=v6BiomeAt(x+dx,z+dz,seed);
-    if(!neighbor||neighbor.name===biome.name)continue;
-    // Both sides of a special-biome seam share an actual continuous material.
+    // Real V6 Plains is null, not a named biome. Preserve its dry Desert
+    // fringe and the original non-Desert neighbor policy.
+    if(!neighbor){touchesPlains=true;continue;}
+    if(neighbor.name===biome.name)continue;
+    // At an authentic three-way Desert/Snow(or Enchanted)/Mountain junction,
+    // the old early return chose hardpan before it reached a later Mountain.
+    // Check all four ORIGINAL offsets on Desert only: mountain scree wins
+    // regardless of offset order, without touching other biome generation.
+    if(biome.name==='desert'){
+      if(neighbor.name==='mountain')return G.scree;
+      hasOtherSpecial=true;
+      continue;
+    }
+    // Preserve original ordering and material behavior outside the Desert.
     const pair=[biome.name,neighbor.name];
     if(pair.includes('mountain'))return G.scree;
     if(pair.includes('snow')&&pair.includes('enchanted'))return G.woodlandMoss;
     return 258;
   }
-  return null;
+  if(biome.name==='desert'&&hasOtherSpecial)return 258;
+  return biome.name==='desert'&&touchesPlains?'desert-plains':null;
 }
 
 function desertOutcrop(x,z,phase){
@@ -80,14 +94,38 @@ export function planEnvironmentalColumn(x,z,seed,readBaseline,biome=v6BiomeAt(x,
   const writes=new Map(),shoulder=sharedShoulder(biome,x,z,seed);
   // The shoulder replaces the grass in a broad contiguous band. The
   // natural wood and cave checks above remain authoritative.
-  if(blend<.065&&shoulder===null)return writes;
+  // A Desert-classified column must never retain legacy green grass merely
+  // because it is at the outermost, low-weight edge of the biome. Keep the
+  // original terrain height and protected-geometry vetoes; use dry materials
+  // at that height, while other biomes preserve their existing feathering.
+  if(blend<.065&&shoulder===null&&biome.name!=='desert')return writes;
   const {cap,subsoil,rock}=groundAt(biome.name,x,z,seed,top,outcrop);
+  // Keep the true red/pale dune caps at the Desert/Plains seam. Only the
+  // conspicuous WHITE salt-crust cap is replaced by earthy hardpan; an
+  // unconditional sand strip would lose the original red mesa variation.
+  const surfaceCap=shoulder==='desert-plains'?(cap===259?258:cap):(shoulder??cap);
   for(let y=old-1;y<=top;y++)
-    writes.set(y,y===top?(shoulder??cap):y>=top-2?subsoil:rock);
+    writes.set(y,y===top?surfaceCap:y>=top-2?subsoil:rock);
   return writes;
 }
 
+// A tree is forbidden if ANY of its naturally authored footprint occupies
+// Desert, including a canopy reaching across from Plains. This is a V7-only
+// generation policy: previously saved/older-profile worlds are untouched.
+export function naturalTreeTouchesDesert(seed,cells,origin=null){
+  if(origin&&v6BiomeAt(origin[0],origin[2],seed)?.name==='desert')return true;
+  const checked=new Set();
+  for(const [x,,z] of cells){
+    const column=x+','+z;
+    if(checked.has(column))continue;
+    checked.add(column);
+    if(v6BiomeAt(x,z,seed)?.name==='desert')return true;
+  }
+  return false;
+}
+
 export function keepLegacyGroveTree(seed,plan){
+  if(naturalTreeTouchesDesert(seed,plan.cells,plan.origin))return false;
   const [x,,z]=plan.origin;
   const climate=v6BiomeAt(x,z,seed);
   return !climate||climate.weight<.56;
@@ -151,6 +189,9 @@ export function environmentalTreesForChunk(cx,cz,seed,readColumn,readCell){
       const grounded=root===column.get(floor)&&readCell(x,floor-1,z)!==BLOCK.AIR;
       if(!grounded||floor>WORLD_MAX_Y-5)continue;
       const tree=treeVoxels(biome.name,x,floor,z,roll);
+      // Reject the whole candidate in every chunk, not just Desert-side leaves.
+      // Cross-chunk sites use the same world coordinates and decision.
+      if(naturalTreeTouchesDesert(seed,tree,[x,floor,z]))continue;
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readCell(a,b,c)!==BLOCK.AIR))continue;
       for(const [a,b,c,id] of tree)
         if(a>=minX&&a<=maxX&&c>=minZ&&c<=maxZ)cells.set(a+','+b+','+c,id);
