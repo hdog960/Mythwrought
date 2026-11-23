@@ -1,0 +1,5 @@
+# D5 landscape Resonance HUD preview v1
+
+Source-only, opt-in and read-only. Consumes the existing D5 transition-pulse source (and indirectly status sequence), not a genuine :36 delivery receipt. Emits immutable display descriptors with IN/OUT/BANK/NEED counts, a POWER OK/LOW state and rune-blue/amber-gold palette. Supported CSS viewport fixtures are exactly 667×375, 844×390 and 932×430. The top-centered bounded 40px panel intentionally avoids both lower thumb rails. No renderer integration, screen captures, production actors, inventory, saves, or power authority. The fixed geometry is a proposal, not evidence of real UI collision safety. Validate against actual iPhone rails and WebGL2 before integration.
+
+Run focused tests: `node --test tests/resonance-devices48-status-hud-v1.test.mjs`. No release or merge authorization.

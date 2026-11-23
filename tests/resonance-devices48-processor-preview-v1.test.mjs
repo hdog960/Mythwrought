@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewProcessing,PROCESSOR_CONTRACT} from '../src/resonance/devices48/processor-preview-v1.mjs';
+const base=()=>({worldId:'w1',fixtureId:'f1',ownerId:'o1',optIn:true,tick:1,capacity:12,availableEnergy:9,recipe:{inputKind:'ore',outputKind:'ingot',inputUnits:2,outputUnits:1,energyPerBatch:3},inputs:[{id:'b',worldId:'w1',fixtureId:'f1',ownerId:'o1',optIn:true,source:'fixture-drop',kind:'ore',units:3},{id:'a',worldId:'w1',fixtureId:'f1',ownerId:'o1',optIn:true,source:'fixture-drop',kind:'ore',units:3}]});
+test('deterministic bounded preview without actuation',()=>{const r=previewProcessing(base());assert.equal(r.contract,PROCESSOR_CONTRACT);assert.equal(r.canActuate,false);assert.equal(r.consumed,6);assert.equal(r.proposedEnergy,9);assert.deepEqual(r.consumption.map(x=>x.id),['a','b']);assert.equal(r.outputs[0].units,3)});
+test('power shortage fails closed',()=>{const r=previewProcessing({...base(),availableEnergy:0});assert.equal(r.accepted,false);assert.equal(r.canActuate,false)});
+test('cross world rejected',()=>{const b=base();b.inputs[0].worldId='other';assert.equal(previewProcessing(b).reason,'unsafe-input')});
+test('protected input rejected',()=>{const b=base();b.inputs[0].protected=true;assert.equal(previewProcessing(b).reason,'unsafe-input')});
+test('owner mismatch rejected',()=>{const b=base();b.inputs[0].ownerId='other';assert.equal(previewProcessing(b).reason,'unsafe-input')});
+test('duplicate ids rejected',()=>{const b=base();b.inputs[1].id='b';assert.equal(previewProcessing(b).reason,'unsafe-input')});
+test('non-fixture source rejected',()=>{const b=base();b.inputs[0].source='player-build';assert.equal(previewProcessing(b).reason,'unsafe-input')});
+test('opt in required',()=>assert.equal(previewProcessing({...base(),optIn:false}).reason,'unauthorized-fixture'));
+test('capacity caps output',()=>{const r=previewProcessing({...base(),capacity:1});assert.equal(r.outputs[0].units,1)});
+test('invalid recipe rejected',()=>{const b=base();b.recipe.energyPerBatch=0;assert.equal(previewProcessing(b).reason,'invalid-recipe')});
+test('reject negative energy',()=>assert.equal(previewProcessing({...base(),availableEnergy:-1}).reason,'invalid-budget'));
+test('no mutation of source inputs',()=>{const b=base();const before=JSON.stringify(b);previewProcessing(b);assert.equal(JSON.stringify(b),before)});

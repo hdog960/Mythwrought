@@ -1,0 +1,3 @@
+# :48 D1 lamp grant continuity v1
+
+Pure source-only 1–8 lamp observation helper. Compares consecutive simulation ticks, deterministic sorted identities, bounded demand/grants, off/deficit/observed-sufficient transitions. Rejects duplicate IDs, roster changes, cross-world data, invalid grants and skipped ticks. No observation is authenticated :36 delivery. Outputs explicitly deny activation, production binding and delivery authority. No new block IDs, renderer, physics, saves, settlements or player voxel modifications. SHA-pinned :36 contract and game-owner integration remain outstanding. No WebGL2 or device captures claimed.

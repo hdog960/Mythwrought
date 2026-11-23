@@ -1,0 +1,5 @@
+# D6 bounded HUD admission stream v1 — source only
+
+`startHudAdmissionStream48({world,layout,capacity?})` creates a display-only immutable checkpoint; `appendHudAdmissionFrame48(previous,{tick,revision,reports})` validates the three existing original viewport admission reports through the existing :48 evidence bridge. It returns a new immutable checkpoint and one of `initial-safe`, `initial-blocked`, `unchanged`, `blocked`, or `recovered`. The rolling window defaults to 16 and is bounded to 1–32 frames. `everBlocked` is sticky even after the window rolls. Malformed reports, stale ticks/revisions and mismatched authority fail closed without changing prior state.
+
+This does not authenticate who supplied the observations; checkpoints are caller-supplied and can be fabricated. No production HUD placement, live collision, actual :36 allocation, rendered WebGL2 or iPhone capture is proven. Do not use `safe` or transitions to authorize gameplay. Native focused command: `node --test tests/resonance-devices48-hud-admission-stream.test.mjs`. Existing renderer, saves, production, settlements, :24/:36 and protected PRs remain out of scope.
