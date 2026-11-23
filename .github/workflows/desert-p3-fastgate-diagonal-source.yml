@@ -1,0 +1,47 @@
+name: Desert P3 V7 inner-depth source plan avoidance and diagonal proof
+on:
+  push:
+    branches:
+      - research/desert-p3-deep-inner-refresh-fence-20261122
+    paths:
+      - .github/workflows/desert-p3-fastgate-diagonal-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-fastgate-diagonal-source
+  cancel-in-progress: false
+jobs:
+  exact-original-v7:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 683dc837f708ce9d3286c277cde4cf252890a65d
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact research baseline, protected-source blobs and own file fence
+        run: |
+          set -euo pipefail
+          BASE=683dc837f708ce9d3286c277cde4cf252890a65d
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/desert-seam-invalidation.mjs|tests/desert-p3-fastgate-diagonal-census.test.mjs|.github/workflows/desert-p3-fastgate-diagonal-source.yml|docs/desert/PHASE3_DEEP_INNER_FASTGATE_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/gpu-recovery.mjs)" = 422ef73e383bda78ff94607abb858e3c8a57c2d1
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
+          node --check candidate/tests/desert-p3-fastgate-diagonal-census.test.mjs
+      - name: Authentic bounded original M7 fast gate, diagonal edit and GPU bytes only
+        run: cd candidate && node --test tests/desert-p3-fastgate-diagonal-census.test.mjs
