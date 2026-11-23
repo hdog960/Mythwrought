@@ -43,5 +43,12 @@ jobs:
           test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
           test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
           node --check candidate/tests/desert-p3-original-oasis-source-gate.test.mjs
-      - name: Only new genuine M7 source oasis plans, water RGB veto, Pack2 fluid/save source checks
-        run: cd candidate && node --test tests/desert-p3-original-oasis-source-gate.test.mjs
+      - name: Only corrected original oasis source WATER save/restore test, reuse 4-seed census
+        run: |
+          set -euo pipefail
+          # Earlier #45169842285 authenticated 4/4 original real source
+          # oases and 196 water cells; only its test-only fake undo via
+          # base.set(ID76) was invalid. Do not repeat that source census.
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          cd candidate
+          node --test --test-name-pattern='actual oasis-water protected source' tests/desert-p3-original-oasis-source-gate.test.mjs
