@@ -1,0 +1,56 @@
+name: Builder D37 original wall tensile anchor source-only narrow native
+on:
+  push:
+    branches:
+      - builder-d-d37-root-tension-fastener-gate-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d37-*'
+      - 'tests/building-pool/roadmap-d/d37-*'
+      - 'docs/building-pool/roadmap-d/D37_*'
+      - '.github/workflows/roadmap-d-d37-original-tensile-roots.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d37-source-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  real-source-wall-pullout-and-original-body-fit-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify D36 parent exact HEAD and unchanged source owner, W16/W17 and original opt-in fit
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'bccfca1fe34fd83f00e921e99c585362ffbcea38'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/voxel-shape-fit.mjs)" = 'ec5adc274d8b45c91d3dade81c3d9c2830380849'
+          test "$(git rev-parse HEAD:src/voxel-shape-interactions.mjs)" = '01be82e6c308e47a35fa6588cc6ed1ebeafca307'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-original-wall-socket-audit.mjs)" = 'aa9c648a7cf0406e5805ad2113b65f6868362b2e'
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 6
+          if git diff-tree --no-commit-id --name-only -r HEAD | grep -vE '(^src/building-pool/roadmap-d/d37-|^tests/building-pool/roadmap-d/d37-|^docs/building-pool/roadmap-d/D37_|^\.github/workflows/roadmap-d-d37-original-tensile-roots.yml$)'; then
+            echo 'REFUSED: D37 changed a prior owner or protected file' >&2; exit 1
+          fi
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly two new D37 source and two new D37 test files
+        run: |
+          node --check src/building-pool/roadmap-d/d37-wall-pullout-fastener-contract.mjs
+          node --check src/building-pool/roadmap-d/d37-original-wall-tension-proof-audit.mjs
+          node --check tests/building-pool/roadmap-d/d37-wall-pullout-contract.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d37-original-wall-tension.source.test.mjs
+      - name: Run ONLY four new D37 pure and two new genuine original W16/W17 source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d37-wall-pullout-contract.pure.test.mjs \
+            tests/building-pool/roadmap-d/d37-original-wall-tension.source.test.mjs
