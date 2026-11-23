@@ -21,6 +21,8 @@ import {auditProtectedSubsurfaceStairs}
  from './protected-subsurface-stairs.mjs';
 import {isCandidateGeologyMaterial}
  from './protected-entrance-envelope.mjs';
+import {auditThinUnderpassPedestrianConnectivity}
+ from './city-underpass-pedestrian-footgraph.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -166,7 +168,7 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
  for(let ox=-16;ox<=16;ox+=2)for(let oz=-16;oz<=16;oz+=2)
   offsets.push(Object.freeze({ox,oz}));
  const refusals={grade:0,bounds:0,oldRoutes:0,
-  detachedAir:0,strictCombined:0};
+  detachedAir:0,strictCombined:0,footgraph:0};
  let considered=0,safeCount=0,best=null;
  for(const offset of offsets){
   if(considered>=maxCandidates)break;
@@ -200,8 +202,18 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
    ...admitted.selectedRoutes,proposal
   ],{maxCells:50000});
   if(!coupled.ok){refusals.strictCombined++;continue}
+  // A non-overlapping voxel mask and safe stair grade alone cannot
+  // establish a walkable junction, especially around diagonal pivots.
+  // Independently require each of THREE lateral walking cells per
+  // original access+thin bridge section to edge-connect to the entire
+  // 3x3 full-depth destination pad, without diagonal corner shortcuts.
+  const footgraph=auditThinUnderpassPedestrianConnectivity({
+   accessProposal:admitted.selectedRoutes[3],
+   underpassProposal:proposal,centerSidePad:to,floorY
+  });
+  if(!footgraph.ok){refusals.footgraph++;continue}
   safeCount++;
-  const candidate=Object.freeze({proposal,
+  const candidate=Object.freeze({proposal,footgraph,
    pivot:pivot?Object.freeze({...pivot}):null,
    grade,footprint,connectedRouteCount:coupled.routeCount});
   if(!best||candidate.grade.supportCells<best.grade.supportCells||
@@ -244,6 +256,14 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
   rejectionCounts:Object.freeze(refusals),
   threeWideSupportCells:best.grade.supportCells,
   threeHighClearanceCells:best.grade.clearanceCells,
+  physicalFootgraphSupportCells:best.footgraph.supportCells,
+  physicalFootgraphClearanceCells:best.footgraph.clearanceCells,
+  physicalFootgraphSections:best.footgraph.fullWidthSections,
+  physicalFootgraphReachableNodes:best.footgraph.reachableNodes,
+  physicalFootgraphMinAccessToPadSteps:
+   best.footgraph.accessToPadMinSteps,
+  threeWideFootgraphEdgeConnectivityVerified:true,
+  fullNineCellDestinationPadFootgraphConnected:true,
   originalVoxelSourceVisitsRequired:
    best.grade.supportCells+best.grade.clearanceCells,
   originalStrictStairGradeSafe:best.grade.ok,
@@ -370,6 +390,8 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   centerPadNaturalAirClearance:padHeadroomAir,
   centerPadProspectiveExcavation:padExcavation,
   centerPadThreeWideFullDepthGeometryAndSourceChecked:true,
+  threeWideDetachedFootgraphEdgeConnectivityVerified:true,
+  fullNineCellDestinationPadFootgraphConnected:true,
   exactOriginalCityCenterThreeWideLandingUnverified:true,
   gradeSupportCells:planned.threeWideSupportCells,
   gradeClearanceCells:planned.threeHighClearanceCells,
