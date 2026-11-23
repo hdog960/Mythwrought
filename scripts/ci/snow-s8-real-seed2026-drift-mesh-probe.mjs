@@ -7,7 +7,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
-import {composeSnowS8NaturalDriftMaterial} from '../src/manual-biomes/snowy-s8-natural-drift-material-research.mjs';
+import {composeSnowS8NaturalDriftMaterial} from '../../src/manual-biomes/snowy-s8-natural-drift-material-research.mjs';
 const RELEASE='db4bbcc32156e5df311f733bcaa53d559c17313b';
 const M7='mythwrought-five-surface-regions-v7';
 const artifacts='artifacts/snow-s8-seed2026-real-mesh-shader';
