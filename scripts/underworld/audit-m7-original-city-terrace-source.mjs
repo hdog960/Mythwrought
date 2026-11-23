@@ -70,7 +70,8 @@ for(const [rx,rz] of regions){
  const underpassStarted=performance.now();
  const underpass=approved?auditSourceProtectedCityUnderpass(
   seed,rx,rz,{source,sourceOwnedDeepSelection:deep,
-   maxTotalSourceChecks:150000,auditHypotheticalMovement:true}
+   maxTotalSourceChecks:150000,auditHypotheticalMovement:true,
+   requireSourceReaderContinuity:true}
  ):Object.freeze({ok:false,
   reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
   sourceChecks:deep.sourceChecks??0,worldChanged:false});
@@ -186,6 +187,18 @@ for(const [rx,rz] of regions){
   candidateThinUnderpassSourceOverlapTotalComparisons:
    underpass.underpassSourceOverlapTotalComparisons??null,
   candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly:true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortRequested:
+   underpass.sourceReaderCohortProvenanceRequested===true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortVerified:
+   underpass.sourceReaderCohortProvenanceVerified===true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles:
+   underpass.sourceReaderCohortExactMatchingRoles??null,
+  candidateThinUnderpassPriorDeepReaderCohortInProcessOnly:
+   underpass.sourceReaderCohortInProcessIdentityOnly===true,
+  candidateThinUnderpassPriorDeepReaderCohortAuthenticM7Unverified:
+   underpass.sourceReaderCohortAuthenticM7WorldNotVerified===true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortRefusal:
+   underpass.readerCohortReason??null,
   candidateThinUnderpassSourceOverlapRefusal:
    underpass.overlapValueReason??null,
   candidateThinUnderpassSourceOverlapFirstMismatch:
