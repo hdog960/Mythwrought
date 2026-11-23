@@ -7,7 +7,7 @@ const viewports=[[956,440],[932,430],[844,390],[916,412]];
 function sample(viewport,mode='original-control'){
   const isVao=mode==='experimental-vao';
   return {
-    protocol:'291-local-4viewport-v3',mode,viewportCss:[...viewport],
+    protocol:'291-local-4viewport-v4',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
     trueSavedDeepMines:100,
     // Hypothetical test-only fixture. Real measurements must come from the
@@ -317,4 +317,15 @@ test('full precision legal boundary upload value of exactly 33ms is admissible',
   const r=evaluateIssue291FourViewportAB(x);
   assert.equal(r.metricGatesPassed,true);
   assert.equal(r.releaseCertified,false);
+});
+
+test('v3 snapshots cannot pass the stronger Safari v4 backing-resolution protocol',()=>{
+  verify(x=>x.pairs[0].control.protocol='291-local-4viewport-v3',/protocol/);
+  verify(x=>x.pairs[0].candidate.protocol='291-local-4viewport-v3',/protocol/);
+});
+test('a physical backing resolution mismatch fails despite matching CSS width',()=>{
+  verify(x=>{
+    x.pairs[2].candidate.viewportCss=[...x.pairs[2].control.viewportCss];
+    x.pairs[2].candidate.viewportPixels=[1696,780];
+  },/physical rendering viewport differs/);
 });
