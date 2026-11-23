@@ -96,6 +96,9 @@ function instantiate(game){
  const {world,pack3Runtime,manualLayer,selection}=game;
  const gl=driver(),chunks=new Map();
  const context={
+  // Keep original game's Float32Array memory realm so the existing uploader
+  // validator is not bypassed or made weaker by vm cross-realm allocations.
+  Float32Array,
   gl,uploadChunkBuffer,world,depthMeshKey,verticalEditSections,
   desertSeamEditAffectedChunks,meshChunk,meshDepthSection:()=>{throw Error('unexpected deep edit');},
   combinePack3ChunkMesh,meshManual14Chunk,pack2WaterSectionVertices,
