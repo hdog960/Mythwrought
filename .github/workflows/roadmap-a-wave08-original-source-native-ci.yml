@@ -1,0 +1,24 @@
+name: Roadmap A Wave08 original authored twelve source plans first native gate
+on:
+  push:
+    branches:
+      - roadmap-a-wave08-original-source-native-ci-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave08-original-source-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  wave08-original-geometry-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new isolated original Wave08 source and test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave08.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave08.test.mjs
+      - name: Only four new original Wave08 twelve building physical source and D4 tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-wave08.test.mjs
