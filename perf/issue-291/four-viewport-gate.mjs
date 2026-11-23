@@ -131,6 +131,18 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
         validCount(candidate.mineFrameWindow?.slowFrames) &&
         candidate.mineFrameWindow.slowFrames > control.mineFrameWindow.slowFrames)
       fail('VAO slow-frame regression during matched 100 deep mines');
+    // Differing trial frame counts can hide a worse proportion of late
+    // frames despite equal/fewer absolute late frames. Cross-multiply
+    // bounded integer samples without rounding; preserve the count veto.
+    const controlWindow=control.mineFrameWindow, candidateWindow=candidate.mineFrameWindow;
+    if (validCount(controlWindow?.slowFrames) &&
+        validCount(candidateWindow?.slowFrames) &&
+        validCount(controlWindow?.frameGapsRecorded) &&
+        validCount(candidateWindow?.frameGapsRecorded) &&
+        controlWindow.frameGapsRecorded>0 && candidateWindow.frameGapsRecorded>0 &&
+        candidateWindow.slowFrames * controlWindow.frameGapsRecorded >
+          controlWindow.slowFrames * candidateWindow.frameGapsRecorded)
+      fail('VAO slow-frame rate regression during matched 100 deep mines');
     const actionGain = validPositive(control.miningActionP95Ms) && validPositive(candidate.miningActionP95Ms)
       ? 1 - candidate.miningActionP95Ms/control.miningActionP95Ms : null;
     const frameGain = validPositive(control.mineFrameWindow?.frameP95Ms) &&
@@ -156,7 +168,13 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       controlTrialElapsedMs:control.mineFrameWindow?.elapsedMs??null,
       candidateTrialElapsedMs:candidate.mineFrameWindow?.elapsedMs??null,
       controlSlowFrames:control.mineFrameWindow?.slowFrames??null,
-      candidateSlowFrames:candidate.mineFrameWindow?.slowFrames??null}));
+      candidateSlowFrames:candidate.mineFrameWindow?.slowFrames??null,
+      controlSlowFrameRate:validCount(controlWindow?.slowFrames)&&
+        validCount(controlWindow?.frameGapsRecorded)&&controlWindow.frameGapsRecorded>0?
+        controlWindow.slowFrames/controlWindow.frameGapsRecorded:null,
+      candidateSlowFrameRate:validCount(candidateWindow?.slowFrames)&&
+        validCount(candidateWindow?.frameGapsRecorded)&&candidateWindow.frameGapsRecorded>0?
+        candidateWindow.slowFrames/candidateWindow.frameGapsRecorded:null}));
   }
   return Object.freeze({metricGatesPassed:failures.length===0,releaseCertified:false,
     failures:Object.freeze(failures),comparisons:Object.freeze(comparisons),externalProofsStillRequired});
