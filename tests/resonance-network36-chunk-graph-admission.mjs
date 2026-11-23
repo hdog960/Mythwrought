@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateFromChunkSnapshot as run} from '../src/resonance/network36/chunk-graph-admission.mjs';
+const c=(key,epoch,loaded=true)=>({key,epoch,loaded});
+const p=(id,x,chunkKey='A',chunkEpoch=1)=>({id,x,y:0,z:0,loaded:true,chunkKey,chunkEpoch});
+const args=()=>({current:[c('A',1)],channels:[p('a',0)],endpoints:[p('gen',0,'A',1),p('motor',0,'A',1)].map((e,i)=>({...e,y:i===0?1:-1})),generation:[{id:'gen',available:5}],devices:[{id:'motor',demand:3,priority:2}],tick:1});
+test('authenticated loaded snapshot admits connected energy',()=>{const r=run(args());assert.equal(r.admitted,true);assert.equal(r.result.allocation.totals.spent,3)});
+test('stale channel provenance rejects entire transaction',()=>{const a=args();a.channels[0].chunkEpoch=0;assert.throws(()=>run(a),/stale/);});
+test('stale endpoint provenance rejects entire transaction',()=>{const a=args();a.endpoints[0].chunkEpoch=2;assert.throws(()=>run(a),/stale/);});
+test('unloaded chunk rejects descriptors',()=>{const a=args();a.current=[c('A',1,false)];assert.throws(()=>run(a),/unloaded/);});
+test('unknown chunk rejects descriptors',()=>{const a=args();a.endpoints[1].chunkKey='missing';assert.throws(()=>run(a),/stale/);});
+test('budget overflow produces no allocation or partial changes',()=>{const a=args();a.current=[c('A',1),c('B',1)];a.maxChanges=1;const r=run(a);assert.equal(r.admitted,false);assert.equal(r.result,null);assert.deepEqual(r.changes,[]);});
+test('snapshot epoch rollback fails closed',()=>{const a=args();a.previous=[c('A',2)];assert.throws(()=>run(a),/stale/);});
+test('no mutation of caller input',()=>{const a=args();const before=structuredClone(a);run(a);assert.deepEqual(a,before);});
