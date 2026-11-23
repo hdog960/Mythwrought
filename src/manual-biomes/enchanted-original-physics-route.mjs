@@ -85,7 +85,7 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
   maxRoutes=ENCHANTED_PHYSICS_ROUTE_LIMITS.routes,
   maxEdgeAttempts=ENCHANTED_PHYSICS_ROUTE_LIMITS.edgeAttempts,
   maxPhysicsTicks=ENCHANTED_PHYSICS_ROUTE_LIMITS.physicsTicks,
-  minDisplacement=4
+  minDisplacement=4,maxArrivalsPerCell=1
 }={}){
   const lim=ENCHANTED_PHYSICS_ROUTE_LIMITS;
   if(world?.profile?.generator!==M7_ENVIRONMENT_GENERATOR||
@@ -99,12 +99,16 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
      !Number.isInteger(maxEdgeAttempts)||maxEdgeAttempts<1||maxEdgeAttempts>lim.edgeAttempts||
      !Number.isInteger(maxPhysicsTicks)||maxPhysicsTicks<1||maxPhysicsTicks>lim.physicsTicks||
      !Number.isInteger(minDisplacement)||minDisplacement<1||minDisplacement>radius*2||
+     !Number.isInteger(maxArrivalsPerCell)||maxArrivalsPerCell<1||
+     maxArrivalsPerCell>2||
      targetBiome!==null&&(typeof targetBiome!=='string'||!targetBiome))
     throw Error('Invalid original M7 physics-admitted route query');
   const sourceBiome=climate(x,z,seed);
   const stats={seed,origin:[x,z],sourceBiome,targetBiome,
-    maxVisits,maxSteps,maxEdgeAttempts,maxPhysicsTicks,radius,
+    maxVisits,maxSteps,maxEdgeAttempts,maxPhysicsTicks,radius,maxArrivalsPerCell,
     visited:0,supported:0,edgeAttempts:0,physicsTicks:0,
+    alternateArrivals:0,duplicateArrivalRejected:0,
+    distinctCells:0,peakArrivalsAtCell:0,
     rejectedGround:0,rejectedHeight:0,rejectedCorners:0,
     rejectedPhysics:0,rejectedOverBudget:0,
     accepted:0,queuedPeak:0,truncated:false};
@@ -112,7 +116,18 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
   if(!start)return {routes:[],stats:{...stats,startSupported:false}};
   const root={ground:start,player:playerAt(start),parent:null,
     depth:0,edgeTicks:null};
-  const queue=[root],seen=new Set([key(x,z)]),sampled=new Map([[key(x,z),start]]);
+  // The original single-arrival FIFO is preserved byte-for-byte when
+  // maxArrivalsPerCell=1. Opt-in two-arrival research permits the SAME
+  // physical cell to be reached with distinct incoming directions and
+  // thus genuinely different original stepPlayer velocity/ground state.
+  // Never merge those states or reset velocity to synthesize a passage.
+  // Limit to two distinct headings per physical cell, and only admit a
+  // heading AFTER a complete original physics edge has succeeded.
+  const originKey=key(x,z);
+  const arrivals=new Map([[originKey,new Set(['origin'])]]);
+  const queue=[root],sampled=new Map([[originKey,start]]);
+  stats.distinctCells=1;
+  stats.peakArrivalsAtCell=1;
   const supported=(a,b)=>{
     const id=key(a,b);
     if(sampled.has(id))return sampled.get(id);
@@ -144,7 +159,13 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
       if(stats.edgeAttempts>=maxEdgeAttempts||
          stats.physicsTicks>=maxPhysicsTicks){stats.truncated=true;break;}
       const nx=here.x+dx,nz=here.z+dz,id=key(nx,nz);
-      if(seen.has(id)||Math.abs(nx-x)>radius||Math.abs(nz-z)>radius)continue;
+      if(id===originKey||Math.abs(nx-x)>radius||Math.abs(nz-z)>radius)continue;
+      const heading=dx+','+dz,priorArrivals=arrivals.get(id);
+      if(priorArrivals&&(priorArrivals.has(heading)||
+        priorArrivals.size>=maxArrivalsPerCell)){
+        stats.duplicateArrivalRejected++;
+        continue;
+      }
       const next=supported(nx,nz);
       if(!next){stats.rejectedGround++;continue;}
       if(Math.abs(next.feet-here.feet)>Math.min(1,STEP_HEIGHT)){
@@ -166,7 +187,12 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
       const attempt=physicsEdge(world,item.player,next,lim.edgeTicks);
       stats.physicsTicks+=attempt.ticks;
       if(!attempt.ok){stats.rejectedPhysics++;continue;}
-      seen.add(id);
+      const headings=priorArrivals??new Set();
+      headings.add(heading);
+      arrivals.set(id,headings);
+      if(!priorArrivals)stats.distinctCells++;
+      else stats.alternateArrivals++;
+      stats.peakArrivalsAtCell=Math.max(stats.peakArrivalsAtCell,headings.size);
       queue.push({ground:next,player:attempt.player,parent:item,
         depth:item.depth+1,edgeTicks:attempt.ticks});
       stats.supported++;
