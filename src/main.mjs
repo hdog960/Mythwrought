@@ -435,6 +435,77 @@ function start(nonblockStage=null){
   const chunks=new Map(),pending=new Map();
   const near291Enabled=['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('near-vao-291')==='1';
+  // Independent localhost-only measurement switch supports BOTH original
+  // control (?measure-291=1) and VAO (?measure-291=1&near-vao-291=1).
+  // No measurement allocation, frame work, GL call or save in public Pages.
+  const near291Measure=['localhost','127.0.0.1'].includes(location.hostname)&&
+    new URLSearchParams(location.search).get('measure-291')==='1';
+  const near291Perf=near291Measure?{
+    viewport:'',frames:new Float32Array(2048),mines:new Float32Array(128),
+    frameCount:0,mineCount:0,prevFrame:null
+  }:null;
+  function near291Viewport(){
+    return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
+  }
+  function near291CheckViewport(){
+    if(!near291Perf)return;
+    const key=near291Viewport();
+    if(near291Perf.viewport===key)return;
+    near291Perf.viewport=key;
+    near291Perf.frameCount=near291Perf.mineCount=0;
+    near291Perf.prevFrame=null;
+  }
+  function near291RecordFrame(now){
+    if(!near291Perf)return;
+    near291CheckViewport();
+    if(document.hidden||!help.hidden||exploration.isOpen()||graphicsLost){
+      near291Perf.prevFrame=null;return;
+    }
+    const previous=near291Perf.prevFrame;
+    if(previous!==null){
+      const gap=now-previous;
+      if(gap>0&&gap<=1000){
+        near291Perf.frames[near291Perf.frameCount%near291Perf.frames.length]=gap;
+        near291Perf.frameCount++;
+      }
+    }
+    near291Perf.prevFrame=now;
+  }
+  function near291RecordMine(duration){
+    if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
+    near291CheckViewport();
+    near291Perf.mines[near291Perf.mineCount%near291Perf.mines.length]=duration;
+    near291Perf.mineCount++;
+  }
+  function near291PerfSnapshot(){
+    if(!near291Perf)return null;
+    near291CheckViewport();
+    const percentile=values=>{
+      const count=Math.min(values.length,values===near291Perf.frames?
+        near291Perf.frameCount:near291Perf.mineCount);
+      if(!count)return null;
+      const sorted=Array.from(values.slice(0,count)).sort((a,b)=>a-b);
+      return Math.round(sorted[Math.ceil(count*.95)-1]*10)/10;
+    };
+    return Object.freeze({
+      mode:near291Enabled?'experimental-vao':'original-control',
+      viewportCss:[canvas.clientWidth,canvas.clientHeight],
+      viewportPixels:[canvas.width,canvas.height],
+      seed:world.seed,playerFeet:player.feet,
+      trueSavedDeepMines:near291Perf.mineCount,
+      miningActionP95Ms:percentile(near291Perf.mines),
+      frameGapsRecorded:near291Perf.frameCount,
+      rollingFrameP95Ms:percentile(near291Perf.frames),
+      maxFrameSamples:near291Perf.frames.length,
+      maxMineSamples:near291Perf.mines.length,
+      sourceFrames:frameHistory.stats(),meshCadence:meshCadence.stats(),
+      residentNearChunks:chunks.size,pendingNearChunks:pending.size,
+      driver:frameDriver.snapshot(),
+      nearStatus:near291?.status()??null,
+      readOnly:true,nativeGpuRollbackProven:false,
+      browserPixelParityProven:false,releaseCertified:false
+    });
+  }
   let near291=null;
   // Only the localhost VAO experiment uses this page/render-stop fence.
   let near291PageSuspended=false,near291Fatal=false,near291Pending=false;
@@ -1284,12 +1355,17 @@ function start(nonblockStage=null){
         return;
       }
     }
+    const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
     const persisted=save();
+    // Sample ONLY a real successful source MINE into deep Y, after actual
+    // schema-1 save succeeds; no synthetic placements, mob hits or retries.
+    if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)
+      near291RecordMine(performance.now()-near291MineStart);
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
@@ -1386,6 +1462,7 @@ function start(nonblockStage=null){
   function draw(now){
     // Even a queued frame may not advance gameplay after a local GPU fatal.
     if(near291Enabled&&near291Fatal)return;
+    near291RecordFrame(now); // inert unless local ?measure-291=1
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
     frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
@@ -3272,6 +3349,7 @@ function start(nonblockStage=null){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
       nearOpaque291(){return near291?.status()??null;},
+      nearPerformance291(){return near291PerfSnapshot();},
       caveMode(){return {enabled:!!caveSession,seed:world.seed,
         profile:caveSession?.profile??null,
         entranceSites:caveSession?.runtime.entrancePlan.entrances.map(e=>({
