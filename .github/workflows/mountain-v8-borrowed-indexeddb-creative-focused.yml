@@ -1,0 +1,37 @@
+name: Mountain V8 isolated borrowed IndexedDB and Creative owner audit
+# One focused original source verification at workflow creation only.
+# No broad/root CI, no PR trigger, no schedule, no runtime or releases.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-borrowed-indexeddb-creative-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-borrowed-idb-and-creative:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - name: Checkout original isolated repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Original Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Only new 11 borrowed-IDB plus 5 Creative original-source tests
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-borrowed-indexeddb-readonly.mjs
+          node --check tests/mountain-v8-borrowed-indexeddb-readonly.test.mjs
+          node --check src/manual-biomes/mountain-v8-original-creative-ownership.mjs
+          node --check tests/mountain-v8-original-creative-ownership.test.mjs
+          node --test --test-concurrency=1 \
+            tests/mountain-v8-borrowed-indexeddb-readonly.test.mjs \
+            tests/mountain-v8-original-creative-ownership.test.mjs
