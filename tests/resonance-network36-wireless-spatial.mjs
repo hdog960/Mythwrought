@@ -5,7 +5,7 @@ const ep=(id,x,y=0,z=0)=>({id,x,y,z,loaded:true});
 const tx=(id,x,radius=3,y=0,z=0)=>({...ep(id,x,y,z),radius});
 test('inclusive radius and excluded beyond radius',()=>{const r=run({transmitters:[tx('t',0)],endpoints:[ep('a',3),ep('b',4)]});assert.deepEqual(r.pairs,[{transmitterId:'t',endpointId:'a'}]);});
 test('negative-coordinate bucket boundaries',()=>assert.deepEqual(run({transmitters:[tx('t',-1)],endpoints:[ep('e',-4)]}).pairs,[{transmitterId:'t',endpointId:'e'}]));
-test('three-dimensional Euclidean distance',()=>assert.deepEqual(run({transmitters:[tx('t',0,5)],endpoints:[ep('e',3,4,0),ep('f',3,3,0)]}).pairs,[{transmitterId:'t',endpointId:'f'}]));
+test('three-dimensional Euclidean distance',()=>assert.deepEqual(run({transmitters:[tx('t',0,5)],endpoints:[ep('e',3,5,0),ep('f',3,3,0)]}).pairs,[{transmitterId:'t',endpointId:'f'}]));
 test('permutation-independent deterministic output',()=>{const a={transmitters:[tx('z',1),tx('a',0)],endpoints:[ep('y',2),ep('b',3)]};assert.deepEqual(run(a),run({transmitters:[...a.transmitters].reverse(),endpoints:[...a.endpoints].reverse()}));});
 test('reject duplicate identities across descriptor types',()=>assert.throws(()=>run({transmitters:[tx('x',0)],endpoints:[ep('x',1)]})));
 test('reject unloaded and nonintegral positions',()=>{assert.throws(()=>run({endpoints:[{...ep('x',0),loaded:false}]}));assert.throws(()=>run({endpoints:[ep('x',0.5)]}));});
