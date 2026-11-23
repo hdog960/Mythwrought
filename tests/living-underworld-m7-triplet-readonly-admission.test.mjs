@@ -58,6 +58,24 @@ const city=()=>({
   joinedFourHubCandidateTopologyApproved:true,
   joinedFourHubSourceOwnershipApproved:true,
   existingFullPadAndAccessSourceSafe:true,
+  candidateThinUnderpassOriginalSourceSafe:true,
+  candidateThinUnderpassSourceAndHypotheticalPlayerPass:true,
+  candidateThinUnderpassHypotheticalPlayerGateRequested:true,
+  candidateThinUnderpassHypotheticalPlayerGateRan:true,
+  candidateThinUnderpassHypotheticalGradeEdges:7,
+  candidateThinUnderpassHypotheticalForwardGrades:7,
+  candidateThinUnderpassHypotheticalReverseGrades:7,
+  candidateThinUnderpassHypotheticalContinuousDirections:2,
+  candidateThinUnderpassHypotheticalContinuousWaypoints:rz===0?47:63,
+  candidateThinUnderpassHypotheticalContinuousFrames:2500,
+  candidateThinUnderpassPhysicsStillNotRealM7World:true,
+  candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly:true,
+  candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
+  candidateThinUnderpassSourceVisits:rz===0?248:276,
+  candidateThinUnderpassCenterLandingSourceVisits:135,
+  candidateThinUnderpassFourHubSourceVisitsCountedOnce:rz===0?8815:12711,
+  candidateThinUnderpassTotalSourceVisits:
+   rz===0?8815+248+135:12711+276+135,
   fullJoinedCandidateOriginalM7SourceChecks:8815,
   fullNetworkCombinationsInspected:1,joinedSourceChecks:8815,
   fullPadSourceChecks:200,
@@ -97,6 +115,8 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.nativeTripletReportsPresent,true);
  assert.equal(r.reportRowArithmeticReconciled,true);
  assert.equal(r.proposalEvidenceAllPassed,true);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
  assert.equal(r.iPhoneGpuVerified,false);
@@ -239,4 +259,65 @@ test('independent actual M7 full city pad veto blocks three nominally safe deep 
  assert.equal(r.citySourceSafe,false);
  assert.equal(r.proposalEvidenceAllPassed,false);
  assert.ok(r.reasonCodes.includes('RARE_CITY_FOUR_HUB_SOURCE_VETO'));
+});
+
+
+test('Phase23 four-hub proof cannot hide a refused thin-underpass movement gate',()=>{
+ const c=city();c.rows[1].candidateThinUnderpassSourceAndHypotheticalPlayerPass=false;
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.proposalEvidenceAllPassed,true);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_SOURCE_OR_HYPOTHETICAL_PLAYER_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase23 requires exactly seven bidirectional original-controller grade edges at both historical sites',()=>{
+ for(const key of ['candidateThinUnderpassHypotheticalGradeEdges',
+  'candidateThinUnderpassHypotheticalForwardGrades',
+  'candidateThinUnderpassHypotheticalReverseGrades']){
+  const c=city();c.rows[0][key]=6;
+  assert.equal(check({city:c}).cityThinUnderpassHypotheticalMovementSafe,false,key);
+ }
+ const c=city();c.rows[1].candidateThinUnderpassHypotheticalContinuousDirections=1;
+ assert.equal(check({city:c}).cityThinUnderpassHypotheticalMovementSafe,false);
+});
+test('Phase23 missing source-first physics provenance and dishonest live-world claims refuse',()=>{
+ for(const key of [
+  'candidateThinUnderpassHypotheticalPlayerGateRequested',
+  'candidateThinUnderpassHypotheticalPlayerGateRan',
+  'candidateThinUnderpassOriginalSourceSafe',
+  'candidateThinUnderpassPhysicsStillNotRealM7World',
+  'candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly',
+  'candidateThinUnderpassAlternativeNotReplacementForFullCityFloor'
+ ]){
+  const c=city();c.rows[0][key]=false;
+  assert.equal(check({city:c}).cityThinUnderpassHypotheticalMovementSafe,false,key);
+ }
+ const c=city();delete c.rows[1].candidateThinUnderpassHypotheticalContinuousFrames;
+ assert.equal(check({city:c}).cityThinUnderpassHypotheticalMovementSafe,false);
+});
+test('Phase23 conserves exact original visits four-hub plus bridge plus 135 full landing cells',()=>{
+ for(const mutate of [
+  row=>row.candidateThinUnderpassTotalSourceVisits++,
+  row=>row.candidateThinUnderpassCenterLandingSourceVisits=134,
+  row=>row.candidateThinUnderpassFourHubSourceVisitsCountedOnce=0,
+  row=>row.candidateThinUnderpassTotalSourceVisits=150001,
+  row=>row.candidateThinUnderpassSourceVisits=0,
+  row=>row.candidateThinUnderpassSourceVisits=13.5
+ ]){
+  const c=city();mutate(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase23 future sealed player geometry remains not a real-world/PWA acceptance',()=>{
+ const r=check();
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.original20SeedConstructorGateAccepted,false);
+ assert.equal(r.iPhoneGpuVerified,false);
+ assert.equal(r.installedPwaVerified,false);
+ assert.equal(r.releaseApproved,false);
 });
