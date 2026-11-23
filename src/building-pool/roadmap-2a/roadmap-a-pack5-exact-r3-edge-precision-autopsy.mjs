@@ -357,11 +357,15 @@ export function auditOriginalR3CompletePlayerPoseSeamGrid(){
  }
  fail(levels.length===27&&lateral.length===30&&sum.sourceRays===2430,
   'original actual-game grid provenance changes');
+ console.log('ROADMAP_A_R3_FULL_GRID_RECONCILIATION '+JSON.stringify({
+  exactOriginalR3Browser:{sourceTriangleOnly:2,differentDistance:146,
+   selectionOnly:0,bothHit:2301,bothMiss:127,rays:2430},
+  reconstructed:sum,rareOriginalTriangleOnlyRays:rare
+ }));
  fail(sum.originalRelaxedTriangleOnly===2&&sum.originalBothHitDistanceWarnings===146&&
   sum.originalSelectionOnly===0&&sum.originalBothHits===2301&&
-  sum.originalBothMiss===127&&
-  rare.length===2,
-  'source grid no longer reconstructs exact authenticated R3 native/browser 2430-ray counters');
+  sum.originalBothMiss===127&&rare.length===2,
+  'source grid no longer reconstructs exact authenticated R3 native/browser 2430-ray counters: '+JSON.stringify(sum));
  return {schema:'mythwrought.roadmap-a.original-r3-all-2430-relaxed-versus-strict-player-rays.v1',
   exactAuthenticatedSourceCommitArtifact:w.artifact,exactOriginalEvidenceJsonSha256:w.evidenceJsonSha256,
   originalGameActualEye:[...w.eye],originalRotatedSourceVariant:w.variant,
