@@ -1,0 +1,19 @@
+# MYTHWROUGHT Builder D33 — exact original ID62 source-owned outboard pin-cheek veto
+
+**22 November 2026. Strictly isolated and uninstalled.** Parent D32 `16d9756f334dd7e51163bd22790f2dc4411dff23`. All historical original source authors, existing Pack2 definitions and registered collider, 285 IDs (132 provisional), exact 3,644 bidirectional D4 checks, physical player world and game save are immutable. No original source/renderer, production main, protected PR or other development lane changes.
+
+## Real geometry problem
+
+D31 authentic sixteen-building study showed 2,516 original-source-derived member envelopes and **6,002 overlapping incident owner pairs**. D32 produced geometric clearance at **256 source-bearing wall intersections** without modifying any wall, but eliminated physical bearing contact. D32 0.35-cell end clearance left **1,226 overlapping incident member pairs and 1,354 unbuilt pin gaps**. Neither gap, axial CSG clip nor an old Pack2 beam represents a rated pinned structure.
+
+D33 does NOT invent a fastener or reinterpret Pack2 ID61 as an approved diagonal. Instead it tests two **unmodified original Pack2 ID62 post geometries**, one on either outboard side of the planar joint at a bounded lateral offset. Each cheek is a rigid *translation* of all three exact ID62 original owner AABBs, retaining original palette and mesh data from `pack2PreviewMesh(62,0)`; original `pack2Shape(62,0)` remains unchanged. Original ID62 is a vertical post, NOT a pin plate, shaft bolt, axial connector or installed fractional-grid part, so this is an unregistered geometry feasibility screen only.
+
+The D33 physical test compares real source-owned ID62 geometry against D32-trimmed ID61/62 members and against every original authored W16/W17 source cell intersected by the cheeks. The renderer test translates source-authored positions and *unchanged source colors*, then independently raycasts the original owner OBB union and the original triangles. It does not claim actual world raycast, WebGL2, game player or mobile production acceptance.
+
+For each of the **1,354** theoretical nodes in 64 original long-bay candidates, D33 classifies root pins vs interior pins, records owner/member intersections, incident-member residual intersections after at-most-0.45 axial trimming, and original authored-source-cell collisions. **All 128 original rooted-wall nodes are explicitly excluded from pin acceptance**, because a source-retaining wall seat and rated positive-area bearing have not been invented. All interior candidate cheeks remain *clearance only*, even when every source/collider overlap is zero: missing contact, joint bolts, end caps, approved materials, global triangulation stiffness, rated compression/tension/buckling, roof attachment, foundation and lateral reactions cannot be inferred from disjoint shapes.
+
+The project remains at **59,412 uncertified Y7 live:wood roof cells across 34 zones**. No W16/W17 roof or Y8/Y9 top tiers, WALK source, windows, interiors, settlements, world generation or saves are modified. All original catalog ID owners and release gates preserved. Any future authorization to add a REAL joint requires an explicitly authored, owned, positive-area physical connector design plus tested source material strengths, collider/render parity, and gameplay/release acceptance. There is no numerical structural release in D33.
+
+## Narrow original-native verification
+
+Single new branch push-only CI with exact D32 parent, W16/W17 immutable Git blobs, real original Pack2 and D31/D32 source checks, Node 22, and four new pure plus two new source-authentic native tests. Existing D25–D32 historic test results are reused, not redundantly rerun. The source tests publish the full sixteen-building source counts and classifier bins, while refusing forged material, creator approval and missing WALK. No broad CI, browser, GPU or PWA tests, merge, deployment, cancellation or source author change is authorized.

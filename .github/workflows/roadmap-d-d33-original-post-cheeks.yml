@@ -1,0 +1,51 @@
+name: Builder D33 original Pack2 ID62 source-owned pin-cheek only native
+on:
+  push:
+    branches:
+      - builder-d-d33-original-id62-cheek-source-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d33-*'
+      - 'tests/building-pool/roadmap-d/d33-*'
+      - 'docs/building-pool/roadmap-d/D33_*'
+      - '.github/workflows/roadmap-d-d33-original-post-cheeks.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d33-source-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-owner-id62-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify exact isolated parent and immutable W16-W17 Pack2 source ownership
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '16d9756f334dd7e51163bd22790f2dc4411dff23'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-pack2-owner-oblique-preview.mjs)" = '3c06f7b6d8e41b9e3bf194505c82ab9fe686ffb7'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d32-pack2-wall-seat-joint-ports.mjs)" = '27ac7102eb22c1ad4fec6ba7c8c1c97c3e5afd24'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d32-original-wall-seats-pin-port-audit.mjs)" = '60fe1166dfed069b02b2e646668852fa61d072ca'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly two new original-source modules and two new tests
+        run: |
+          node --check src/building-pool/roadmap-d/d33-owner-cheek-pin-geometry.mjs
+          node --check src/building-pool/roadmap-d/d33-original-source-cheek-port-audit.mjs
+          node --check tests/building-pool/roadmap-d/d33-source-post-cheek.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d33-original-source-cheek-port.source.test.mjs
+      - name: Run ONLY NEW D33 original W16-W17 and focused owner-geometry tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d33-source-post-cheek.pure.test.mjs \
+            tests/building-pool/roadmap-d/d33-original-source-cheek-port.source.test.mjs
