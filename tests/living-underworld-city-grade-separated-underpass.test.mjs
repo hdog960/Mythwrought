@@ -191,7 +191,7 @@ test('original terrain reader role replacement during bridge source checks refus
  });
  assert.equal(r.ok,false);
  assert.equal(r.reason,'UNDERPASS_READER_ROLE_BINDING_CHANGED');
- assert.equal(r.hypotheticalOriginalMotionSimulated,true===false);
+ assert.notEqual(r.hypotheticalOriginalMotionSimulated,true);
  assert.equal(r.sourceChecks,9198);
  assert.equal(r.underpassActualReaderCallsByRole.editedAt,383);
  assert.equal(r.worldChanged,false);
