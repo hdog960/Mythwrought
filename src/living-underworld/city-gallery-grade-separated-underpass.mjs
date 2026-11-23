@@ -33,6 +33,8 @@ import {createUnderpassReaderCellCensus}
  from './source-role-coordinate-census.mjs';
 import {deriveExpectedUnderpassSourceCoordinates}
  from './source-footprint-coordinate-witness.mjs';
+import {createUnderpassSourceOverlapValueWitness}
+ from './source-role-overlap-values.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -391,6 +393,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    pad:expectedFootprint.padCoordinates
   }
  });
+ // Original source callbacks may be non-deterministic or mutate between
+ // bridge and pad despite stable FUNCTION identity. The same original M7
+ // coordinate is read in both stages; require equal primitive role values.
+ const overlapValues=createUnderpassSourceOverlapValueWitness({
+  bridgeCoordinates:expectedFootprint.bridgeCoordinates,
+  padCoordinates:expectedFootprint.padCoordinates
+ });
  let coverageStage='bridge';
  // Take one stable per-role callback snapshot before the first voxel read.
  // Dynamic replacements on the caller object cannot silently switch
@@ -409,7 +418,9 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  const read=(role,x,y,z)=>{
   coverage.record(coverageStage,role,x,y,z);
   sourceRoleCalls[role]++;
-  return originalRoleReaders[role](x,y,z);
+  const value=originalRoleReaders[role](x,y,z);
+  overlapValues.observe(coverageStage,role,x,y,z,value);
+  return value;
  };
  const observed=Object.freeze({
   naturalAt:(x,y,z)=>read('naturalAt',x,y,z),
@@ -439,6 +450,7 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  if(audited.sourceChecks!==planned.originalVoxelSourceVisitsRequired)
   throw Error('Thin underpass original-source and geometry census differ');
  coverage.enterPad();
+ overlapValues.enterPad();
  coverageStage='pad';
  // The destination is a REAL 3x3 future landing, not an isolated safe
  // point. Its complete 6-support+9-headroom footprint and one-cell
@@ -532,6 +544,24 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
    worldChanged:false
   });
+ // A correct coordinate census is insufficient if naturalAt, authoredAt,
+ // editedAt or protectedAt reports a different value on an overlap cell.
+ // This comparison reads cached callback returns only: ZERO new M7 queries.
+ const overlapValueProof=overlapValues.audit();
+ if(!overlapValueProof.ok||
+    overlapValueProof.independentSharedVoxels!==
+     expectedFootprint.expectedOverlapCells)
+  return failure(seed,rx,rz,'UNDERPASS_SOURCE_ROLE_VALUE_INCONSISTENT',{
+   sourceChecks:total+padSourceVisits,
+   overlapValueReason:overlapValueProof.reason??
+    'OVERLAP_SOURCE_GEOMETRY_CENSUS_DRIFT',
+   overlapValueFirstMismatch:overlapValueProof.firstMismatch,
+   overlapValueExpectedSharedCells:expectedFootprint.expectedOverlapCells,
+   overlapValueObservedSharedCells:overlapValueProof.independentSharedVoxels,
+   overlapValueComparisonsByRole:overlapValueProof.overlapComparisonsByRole,
+   oldWorldSourceValuesNotStable:true,
+   worldChanged:false
+  });
  const sourceCallsUnchanged=()=>ROLES.every(role=>
   sourceRoleCalls[role]===sourceCallsBeforeMotion[role]);
  const sourceCallsTotal=ROLES.reduce((sum,role)=>
@@ -615,6 +645,16 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   underpassExpectedOverlapCells:expectedFootprint.expectedOverlapCells,
   underpassExpectedCombinedDistinctCells:
    expectedFootprint.expectedCombinedUniqueCells,
+  underpassSourceOverlapValuesStable:overlapValueProof.ok,
+  underpassSourceOverlapExpectedSharedVoxels:
+   expectedFootprint.expectedOverlapCells,
+  underpassSourceOverlapComparedSharedVoxels:
+   overlapValueProof.independentSharedVoxels,
+  underpassSourceOverlapComparisonsByRole:
+   overlapValueProof.overlapComparisonsByRole,
+  underpassSourceOverlapTotalComparisons:
+   overlapValueProof.comparedSourceValues,
+  underpassSourceOverlapSourceIdentityCallerOnly:true,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
    motionWalk?.originalStepPlayerExecuted===true,
