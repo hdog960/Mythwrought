@@ -41,7 +41,8 @@ test('unused original seeds are only preliminary read-only candidates',()=>{
 });
 test('ordinary schema-1 save and edits block V8 candidate without mutation',()=>{
   const seed=179,store=storage(),world=new VoxelWorld(seed);
-  assert.equal(world.set(0,12,0,BLOCK.STONE),true);
+  assert.equal(world.set(0,-100,0,BLOCK.AIR),true);
+  assert.equal(world.edits.size,1,'original deep-stone edit persisted');
   const bytes=JSON.stringify(world.save());
   store.setItem(worldSlotKey(seed),bytes);
   const out=inspectWithoutWrites(store,seed);
