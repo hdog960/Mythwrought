@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '8057cb0cf445915c6f5d5ca21fb6f44c3f51b556');
+    'ae175cd1103f4ed22176b1abc98fc6d1310938de');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -768,6 +768,7 @@ function local291PerfFixture({
     frameHistory:{stats:()=>({frames:4,p95Ms:18})},
     meshCadence:{stats:()=>({meshes:2})},
     chunks:new Map(),pending:new Map(),
+    gpuRetry:{stats:()=>({pendingRetries:0,failures:0})},
     frameDriver:{snapshot:()=>({running:true})}
   };
   return {scope,perf:createLocal291Perf(scope)};
@@ -789,8 +790,9 @@ test('same original baseline and local VAO capture exact frame/mine/upload p95',
     assert.equal(summary.rollingFrameP95Ms,58);
     assert.equal(summary.trueSavedDeepMines,3);
     assert.equal(summary.miningActionP95Ms,40);
-    assert.equal(summary.guardedUploadCalls,3);
-    assert.equal(summary.rollingGuardedUploadP95Ms,9);
+    assert.equal(summary.successfulGuardedUploads,3);
+    assert.equal(summary.rollingSuccessfulUploadP95Ms,9);
+    assert.equal(summary.gpuUploadFaults.pendingRetries,0);
     assert.equal(summary.releaseCertified,false);
     assert.equal(summary.nativeGpuRollbackProven,false);
   }
@@ -801,7 +803,7 @@ test('viewport or seed change resets every recorded sample and comparison count'
   scope.canvas.clientWidth=932;
   assert.equal(perf.read().trueSavedDeepMines,0);
   assert.equal(perf.read().frameGapsRecorded,0);
-  assert.equal(perf.read().guardedUploadCalls,0);
+  assert.equal(perf.read().successfulGuardedUploads,0);
   perf.mine(45);scope.world.seed=180;
   assert.equal(perf.read().trueSavedDeepMines,0);
 });
@@ -819,9 +821,9 @@ test('strict bounded mine and upload rings preserve lifetime counts',()=>{
   for(let i=0;i<2120;i++)perf.upload(1);
   assert.equal(perf.read().trueSavedDeepMines,170);
   assert.equal(perf.read().maxMineSamples,128);
-  assert.equal(perf.read().guardedUploadCalls,2120);
+  assert.equal(perf.read().successfulGuardedUploads,2120);
   assert.equal(perf.read().maxUploadSamples,2048);
-  assert.equal(perf.read().rollingGuardedUploadP95Ms,1);
+  assert.equal(perf.read().rollingSuccessfulUploadP95Ms,1);
 });
 test('exact original uploadPack2Chunk measures both unmodified guarded GL uploads',()=>{
   const {scope,perf}=local291PerfFixture();
@@ -837,8 +839,8 @@ test('exact original uploadPack2Chunk measures both unmodified guarded GL upload
     uploadChunkBuffer:()=>({})});
   const uploaded=make(scope)(new Float32Array(9),new Float32Array(9));
   assert.equal(uploaded.count,1);
-  assert.equal(perf.read().guardedUploadCalls,2);
-  assert.equal(perf.read().rollingGuardedUploadP95Ms,2);
+  assert.equal(perf.read().successfulGuardedUploads,2);
+  assert.equal(perf.read().rollingSuccessfulUploadP95Ms,2);
 });
 test('original real deep mine timing is captured only after success and save',()=>{
   const start=source.indexOf("const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;");
