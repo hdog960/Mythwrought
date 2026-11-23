@@ -29,6 +29,8 @@ import {auditCandidateUnderpassStepPlayer}
  from './city-underpass-step-player-fixture.mjs';
 import {auditCandidateUnderpassContinuousStepPlayer}
  from './city-underpass-continuous-walk-fixture.mjs';
+import {createUnderpassReaderCellCensus}
+ from './source-role-coordinate-census.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -352,6 +354,11 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  // Each old-world bridge and pad callback now has an observable role count.
  // Reader identity remains caller-verified: this is not a native M7 claim.
  const sourceRoleCalls={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
+ // Exact coordinate sets are independent of the prior total call counters.
+ // The strict source auditor must inspect each of the same original cells
+ // through all four roles; bridge/pad overlap is explicitly allowed.
+ const coverage=createUnderpassReaderCellCensus({maxCellsPerStage:20000});
+ let coverageStage='bridge';
  // Take one stable per-role callback snapshot before the first voxel read.
  // Dynamic replacements on the caller object cannot silently switch
  // geology/edit/landmark authorities halfway through this source census.
@@ -367,6 +374,7 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    readerIdentityCallerAuthenticatedOnly:true
   });
  const read=(role,x,y,z)=>{
+  coverage.record(coverageStage,role,x,y,z);
   sourceRoleCalls[role]++;
   return originalRoleReaders[role](x,y,z);
  };
@@ -397,6 +405,8 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    });
  if(audited.sourceChecks!==planned.originalVoxelSourceVisitsRequired)
   throw Error('Thin underpass original-source and geometry census differ');
+ coverage.enterPad();
+ coverageStage='pad';
  // The destination is a REAL 3x3 future landing, not an isolated safe
  // point. Its complete 6-support+9-headroom footprint and one-cell
  // no-build margin were vetted against old gallery and selected stairs.
@@ -471,6 +481,18 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
    readerIdentityCallerAuthenticatedOnly:true
   });
+ const exactCoordinateCoverage=coverage.audit({
+  bridgeCells:audited.sourceChecks,padCells:padSourceVisits
+ });
+ if(!exactCoordinateCoverage.ok)
+  return failure(seed,rx,rz,'UNDERPASS_SOURCE_ROLE_CELL_COVERAGE_REFUSED',{
+   sourceChecks:total+padSourceVisits,
+   coordinateCoverageReason:exactCoordinateCoverage.reason,
+   coordinateCoverageFirstMismatch:exactCoordinateCoverage.firstMismatch,
+   originalSourceChecksPassed:false,
+   underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
+   worldChanged:false
+  });
  const sourceCallsUnchanged=()=>ROLES.every(role=>
   sourceRoleCalls[role]===sourceCallsBeforeMotion[role]);
  const sourceCallsTotal=ROLES.reduce((sum,role)=>
@@ -538,6 +560,14 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    sourceCallsUnchanged()&&readerBindingsUnchanged(),
   sourceReaderRoleBindingsUnchanged:readerBindingsUnchanged(),
   underpassReaderIdentityCallerAuthenticatedOnly:true,
+  underpassCoordinateCoveragePassed:exactCoordinateCoverage.ok,
+  underpassBridgeDistinctCells:exactCoordinateCoverage.bridgeDistinctCells,
+  underpassPadDistinctCells:exactCoordinateCoverage.padDistinctCells,
+  underpassBridgePadOverlapCells:exactCoordinateCoverage.bridgePadOverlapCells,
+  underpassCombinedDistinctCells:exactCoordinateCoverage.combinedDistinctCells,
+  underpassExactStageRoleCells:exactCoordinateCoverage.stageRoleDistinctCells,
+  underpassExactStageDuplicateCalls:exactCoordinateCoverage.stageRoleDuplicateCalls,
+  underpassSourceRoleCoordinatesIdentical:true,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
    motionWalk?.originalStepPlayerExecuted===true,
