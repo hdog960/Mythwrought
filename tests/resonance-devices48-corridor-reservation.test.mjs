@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {previewCorridorReservation} from '../src/resonance/devices48/corridor-reservation-v1.mjs';
+const box=(x,y,z,X,Y,Z)=>({min:{x,y,z},max:{x:X,y:Y,z:Z}});
+const base=()=>({productionBound:false,worldId:'w',tick:4,deviceId:'gate',start:box(0,0,0,1,2,1),end:box(3,0,0,4,2,1),occupants:[]});
+test('empty corridor is advisory only',()=>{const r=previewCorridorReservation(base());assert.equal(r.previewClear,true);assert.equal(r.mayActuate,false);assert.equal(r.authoritativeDelivery,false)});
+test('swept volume catches intermediate obstruction',()=>{const f=base();f.occupants=[{id:'player',worldId:'w',tick:4,bounds:box(2,0,0,2.5,2,1)}];assert.deepEqual(previewCorridorReservation(f).blockers,['player'])});
+test('boundary contact conservatively blocks',()=>{const f=base();f.occupants=[{id:'a',worldId:'w',tick:4,bounds:box(4,2,1,5,3,2)}];assert.equal(previewCorridorReservation(f).previewClear,false)});
+test('disjoint actor does not block preview',()=>{const f=base();f.occupants=[{id:'a',worldId:'w',tick:4,bounds:box(9,0,0,10,1,1)}];assert.equal(previewCorridorReservation(f).previewClear,true)});
+test('blocker IDs deterministic',()=>{const f=base();f.occupants=['z','a'].map(id=>({id,worldId:'w',tick:4,bounds:box(2,0,0,3,1,1)}));assert.deepEqual(previewCorridorReservation(f).blockers,['a','z'])});
+test('duplicate actor refused',()=>{const f=base();f.occupants=['a','a'].map(id=>({id,worldId:'w',tick:4,bounds:box(2,0,0,3,1,1)}));assert.throws(()=>previewCorridorReservation(f))});
+test('stale actor refused',()=>{const f=base();f.occupants=[{id:'a',worldId:'w',tick:3,bounds:box(2,0,0,3,1,1)}];assert.throws(()=>previewCorridorReservation(f))});
+test('cross-world actor refused',()=>{const f=base();f.occupants=[{id:'a',worldId:'other',tick:4,bounds:box(2,0,0,3,1,1)}];assert.throws(()=>previewCorridorReservation(f))});
+test('production binding refused',()=>assert.throws(()=>previewCorridorReservation({...base(),productionBound:true})));
+test('forged delivery refused',()=>assert.throws(()=>previewCorridorReservation({...base(),authoritativeDelivery:true})));
+test('inverted bounds refused',()=>assert.throws(()=>previewCorridorReservation({...base(),end:box(5,0,0,4,1,1)})));
+test('nonfinite coordinates refused',()=>assert.throws(()=>previewCorridorReservation({...base(),end:box(NaN,0,0,4,1,1)})));
+test('oversized actor list refused',()=>assert.throws(()=>previewCorridorReservation({...base(),occupants:Array.from({length:65},(_,i)=>({id:String(i)}))})));
