@@ -6,7 +6,6 @@ import {BLOCK,collides,terrainHeight} from '../voxel.mjs';
 import {GROUND_PROBE} from '../physics.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {originalM7PhysicalGroundCap} from './enchanted-original-standing-diagnostic.mjs';
-import {originalM7PhysicsRouteReplay} from './enchanted-original-physics-route.mjs';
 import {auditOriginalM7PhysicallyWalkedSource}
   from './enchanted-original-route-evidence.mjs';
 
