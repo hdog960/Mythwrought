@@ -486,11 +486,12 @@ function start(nonblockStage=null){
     if(!near291Perf)return;
     const w=near291Perf.mineWindow;
     if(w.phase==='active'||w.phase==='closing'){
+      // Only time BETWEEN the first true saved MINE and completion belongs
+      // to this trial. Opening menus before the trial or after the second
+      // final RAF must not retroactively poison valid 100-mine evidence.
       w.phase='interrupted';w.interrupted=true;
-    }
-    // Do not count loading before the first eligible measured event.
-    if(near291Perf.frameCount||near291Perf.mineCount||near291Perf.uploadCount)
       near291Perf.interruptionCount++;
+    }
     near291Perf.prevFrame=null;
   }
   function near291RecordFrame(now){
