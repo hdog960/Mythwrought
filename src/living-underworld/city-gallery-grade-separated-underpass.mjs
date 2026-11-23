@@ -349,9 +349,23 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     requiredAdditional,
    maxTotalSourceChecks,originalM7ReaderIdentityByCallerOnly:true
   });
+ // Each old-world bridge and pad callback now has an observable role count.
+ // Reader identity remains caller-verified: this is not a native M7 claim.
+ const sourceRoleCalls={naturalAt:0,authoredAt:0,editedAt:0,protectedAt:0};
+ const read=(role,x,y,z)=>{
+  sourceRoleCalls[role]++;
+  return source[role](x,y,z);
+ };
+ const observed=Object.freeze({
+  naturalAt:(x,y,z)=>read('naturalAt',x,y,z),
+  authoredAt:(x,y,z)=>read('authoredAt',x,y,z),
+  editedAt:(x,y,z)=>read('editedAt',x,y,z),
+  protectedAt:(x,y,z)=>read('protectedAt',x,y,z)
+ });
+ const snapshot=()=>Object.freeze({...sourceRoleCalls});
  const audited=auditProtectedSubsurfaceStairs(planned.proposal,{
-  naturalAt:source.naturalAt,authoredAt:source.authoredAt,
-  editedAt:source.editedAt,protectedAt:source.protectedAt,
+  naturalAt:observed.naturalAt,authoredAt:observed.authoredAt,
+  editedAt:observed.editedAt,protectedAt:observed.protectedAt,
   maxCells:Math.min(20000,maxTotalSourceChecks-previous),
   minY:-210,maxY:19,stopOnFirstUnsafe:true
  });
@@ -364,6 +378,7 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
      firstRefusal:audited.firstRefusal??audited.reason??null,
      firstRejectedCell:audited.examples?.[0]??null,
      sourceChecks:total,underpassSourceVisits:audited.sourceChecks??0,
+     underpassActualReaderCallsByRole:snapshot(),
      originalM7ReaderIdentityByCallerOnly:true
    });
  if(audited.sourceChecks!==planned.originalVoxelSourceVisitsRequired)
@@ -379,24 +394,24 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    const x=center.x+dx,z=center.z+dz;
    padSourceVisits++;
    const support=y<=planned.floorY;
-   const edited=source.editedAt(x,y,z);
+   const edited=observed.editedAt(x,y,z);
    if(typeof edited!=='boolean')
     throw TypeError('Nonboolean original M7 underpass landing edit source');
    let refusal=null;
    if(edited)refusal='PLAYER_EDIT';
    else{
-    const owner=source.authoredAt(x,y,z);
+    const owner=observed.authoredAt(x,y,z);
     if(owner!==undefined&&(!INT(owner)||owner<0))
      throw TypeError('Invalid original M7 underpass landing authored material');
     if(owner!==undefined&&owner!==0)refusal='AUTHORED_SOURCE';
     else if(support&&owner===0)refusal='AUTHORED_AIR_SUPPORT';
     else{
-     const protectedOriginal=source.protectedAt(x,y,z);
+     const protectedOriginal=observed.protectedAt(x,y,z);
      if(typeof protectedOriginal!=='boolean')
       throw TypeError('Nonboolean original M7 underpass landing landmark source');
      if(protectedOriginal)refusal='PROTECTED_LANDMARK';
      else{
-      const material=source.naturalAt(x,y,z);
+      const material=observed.naturalAt(x,y,z);
       if(!INT(material)||material<0)
        throw TypeError('Invalid original M7 underpass landing material');
       if(!isCandidateGeologyMaterial(material))
@@ -420,11 +435,26 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
      underpassSourceVisits:audited.sourceChecks,
      centerPadSourceVisits:padSourceVisits,
      sourceChecks:total+padSourceVisits,
+     underpassActualReaderCallsByRole:snapshot(),
      oldM7ReaderIdentityByCallerOnly:true
     });
   }
  if(padSourceVisits!==planned.centerSidePadOriginalSourceVisitsRequired)
   throw Error('Three-wide full-depth center landing pad source census drifted');
+ // Strict source-role completeness: every safe audited bridge/pad voxel
+ // must have been observed by all FOUR original reader methods.
+ const sourceCallsBeforeMotion=snapshot();
+ const expectedRoleCalls=audited.sourceChecks+padSourceVisits;
+ if(ROLES.some(role=>sourceCallsBeforeMotion[role]!==expectedRoleCalls))
+  return failure(seed,rx,rz,'UNDERPASS_ORIGINAL_READER_ROLE_PARITY_REFUSED',{
+   sourceChecks:total+padSourceVisits,expectedCallsPerRole:expectedRoleCalls,
+   underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
+   readerIdentityCallerAuthenticatedOnly:true
+  });
+ const sourceCallsUnchanged=()=>ROLES.every(role=>
+  sourceRoleCalls[role]===sourceCallsBeforeMotion[role]);
+ const sourceCallsTotal=ROLES.reduce((sum,role)=>
+  sum+sourceCallsBeforeMotion[role],0);
  // No extra original-M7 reader calls: the old four-hub selection, full
  // strict bridge source, and every full-depth landing cell have ALREADY
  // passed before invoking either prospective movement fixture. This
@@ -439,6 +469,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
    centerSidePad:planned.centerSidePad,floorY:planned.floorY
   };
   motionGrade=auditCandidateUnderpassStepPlayer(args);
+  if(!sourceCallsUnchanged())
+   return failure(seed,rx,rz,'HYPOTHETICAL_GRADE_TOUCHED_ORIGINAL_READER',{
+    originalSourceChecksPassed:true,sourceChecks,
+    underpassActualReaderCallsByRole:snapshot(),
+    sourceCallsBeforeMovement:sourceCallsBeforeMotion,
+    oldWorldPhysicalMotionUnverified:true
+   });
   if(!motionGrade.ok||
      motionGrade.elevationEdges!==planned.originalPlayerAabbFixtureSkippedElevationEdges)
    return failure(seed,rx,rz,'SOURCE_SAFE_HYPOTHETICAL_STEP_PLAYER_GRADE_REFUSED',{
@@ -452,6 +489,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     oldWorldPhysicalMotionUnverified:true
    });
   motionWalk=auditCandidateUnderpassContinuousStepPlayer(args);
+  if(!sourceCallsUnchanged())
+   return failure(seed,rx,rz,'HYPOTHETICAL_WALK_TOUCHED_ORIGINAL_READER',{
+    originalSourceChecksPassed:true,sourceChecks,
+    underpassActualReaderCallsByRole:snapshot(),
+    sourceCallsBeforeMovement:sourceCallsBeforeMotion,
+    oldWorldPhysicalMotionUnverified:true
+   });
   if(!motionWalk.ok||motionWalk.gradeElevationEdges!==motionGrade.elevationEdges)
    return failure(seed,rx,rz,'SOURCE_SAFE_HYPOTHETICAL_CONTINUOUS_PLAYER_REFUSED',{
     originalSourceChecksPassed:true,sourceChecks,
@@ -467,6 +511,11 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  }
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
   originalSourceChecksPassed:true,
+  underpassActualReaderCallsByRole:sourceCallsBeforeMotion,
+  underpassActualReaderMethodCalls:sourceCallsTotal,
+  expectedUnderpassReaderCallsPerRole:expectedRoleCalls,
+  sourceReaderCallsUnchangedDuringHypotheticalMotion:sourceCallsUnchanged(),
+  underpassReaderIdentityCallerAuthenticatedOnly:true,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
    motionWalk?.originalStepPlayerExecuted===true,
