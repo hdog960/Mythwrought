@@ -451,7 +451,7 @@ function start(nonblockStage=null){
     overflow:false,invalid:false,interrupted:false
   });
   const near291Perf=near291Measure?{
-    viewport:'',frames:new Float64Array(2048),mines:new Float32Array(128),
+    viewport:'',frames:new Float64Array(2048),mines:new Float64Array(128),
     uploads:new Float32Array(2048),
     mineWitness:[],mineWitnessOverflow:false,mineWitnessInvalid:false,
     mineWindow:near291NewMineWindow(),
@@ -600,11 +600,14 @@ function start(nonblockStage=null){
   function near291PerfSnapshot(){
     if(!near291Perf)return null;
     near291CheckViewport();
-    const percentile=(values,seen)=>{
+    const percentile=(values,seen,exact=false)=>{
       const count=Math.min(values.length,seen);
       if(!count)return null;
       const sorted=Array.from(values.slice(0,count)).sort((a,b)=>a-b);
-      return Math.round(sorted[Math.ceil(count*.95)-1]*10)/10;
+      const p95=sorted[Math.ceil(count*.95)-1];
+      // Numeric A/B release bounds must use raw native high-resolution
+      // measurements. Rounding 33.04ms to 33.0ms is a false GPU PASS.
+      return exact?p95:Math.round(p95*10)/10;
     };
     return Object.freeze({
       mode:near291Enabled?'experimental-vao':'original-control',
@@ -621,20 +624,20 @@ function start(nonblockStage=null){
       // suspended measurement interval from the same A/B run.
       interruptionCount:near291Perf.interruptionCount,
       continuousForegroundRun:near291Perf.interruptionCount===0,
-      miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
+      miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount,true),
       mineFrameWindow:Object.freeze({
         phase:near291Perf.mineWindow.phase,
         savedMines:near291Perf.mineWindow.savedMines,
         successfulGuardedUploads:near291Perf.mineWindow.uploadCount,
         successfulGuardedUploadP95Ms:percentile(near291Perf.mineWindow.uploads,
-          near291Perf.mineWindow.uploadCount),
+          near291Perf.mineWindow.uploadCount,true),
         uploadOverflow:near291Perf.mineWindow.uploadOverflow,
         uploadFaults:near291Perf.mineWindow.uploadFaults,
         maxUploadSamples:near291Perf.mineWindow.uploads.length,
         closingFramesRemaining:near291Perf.mineWindow.closingFramesRemaining,
         frameGapsRecorded:near291Perf.mineWindow.frameCount,
         frameP95Ms:percentile(near291Perf.mineWindow.frames,
-          near291Perf.mineWindow.frameCount),
+          near291Perf.mineWindow.frameCount,true),
         slowFrames:near291Perf.mineWindow.slowFrames,
         elapsedMs:Math.round(near291Perf.mineWindow.elapsedMs*10)/10,
         overflow:near291Perf.mineWindow.overflow,
