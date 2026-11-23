@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '8407fd084b52262c0cfd4bb15746d155ef584181');
+    'e58a35f997a97622be3130d057feed9aa376bf55');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -942,4 +942,21 @@ test('source-original viewport/seed transitions clear accumulated slow frame evi
   assert.equal(snap.rollingSlowFrames,0);
   assert.equal(snap.rollingFrameCount,0);
   assert.equal(snap.protocol,'291-local-4viewport-v1');
+});
+
+test('original exact 33.4ms slow-frame threshold never drifts on ring overwrite',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.frame(33.4);
+  assert.equal(perf.read().rollingSlowFrames,0,
+    'exact original threshold 33.4 must not count as a slow frame');
+  for(let i=1;i<=2048;i++)perf.frame(33.4+i*16);
+  assert.equal(perf.read().frameGapsRecorded,2049);
+  assert.equal(perf.read().rollingFrameCount,2048);
+  assert.equal(perf.read().rollingSlowFrames,0,
+    'overwritten Float64 frame values must preserve the exact slow threshold');
+  const slow=local291PerfFixture().perf;
+  slow.frame(0);slow.frame(33.4000001);
+  assert.equal(slow.read().rollingSlowFrames,1);
+  for(let i=1;i<=2048;i++)slow.frame(33.4000001+i*16);
+  assert.equal(slow.read().rollingSlowFrames,0);
 });
