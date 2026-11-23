@@ -444,6 +444,8 @@ function start(nonblockStage=null){
   // before or after the actual 100 source-saved edits from moving its p95.
   const near291NewMineWindow=()=>({
     phase:'idle',savedMines:0,frames:new Float64Array(16384),
+    uploads:new Float64Array(4096),uploadCount:0,uploadOverflow:false,
+    uploadFaults:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
     overflow:false,invalid:false,interrupted:false
@@ -456,6 +458,10 @@ function start(nonblockStage=null){
     frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,
     interruptionCount:0,prevFrame:null
   }:null;
+  // Buffer only the FIRST candidate's synchronous GPU uploads until its
+  // real deep MINE and schema-1 save have both succeeded. Idle uploads
+  // before the first source-real edit must never enter this A/B trial.
+  let near291FirstEditUploads=null,near291LastFirstEditUploads=null;
   function near291Viewport(){
     return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
   }
@@ -526,7 +532,12 @@ function start(nonblockStage=null){
         w.phase='complete';
     }
   }
-  function near291RecordMine(duration,result){
+  function near291TrialUpload(duration){
+    const w=near291Perf.mineWindow;
+    if(w.uploadCount>=w.uploads.length){w.uploadOverflow=true;return;}
+    w.uploads[w.uploadCount++]=duration;
+  }
+  function near291RecordMine(duration,result,firstEditUploads=null){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
     near291CheckViewport();
     near291Perf.mines[near291Perf.mineCount%near291Perf.mines.length]=duration;
@@ -550,9 +561,13 @@ function start(nonblockStage=null){
     const w=near291Perf.mineWindow;
     if(w.phase==='idle'){
       w.phase='active';w.prevFrame=near291Perf.prevFrame;
-      // Older unrelated pagehide episodes before first mine do not belong
-      // to this source-real mining trial; the trial's own interruption flag
-      // is latched once its first successful saved edit occurs.
+      // All FIRST-MINE uploads precede the returned applyBlockAction result
+      // and the verified save. Admit only this bounded, original-upload
+      // staging transaction after the source-real successful deep MINE.
+      if(firstEditUploads){
+        if(firstEditUploads.overflow)w.uploadOverflow=true;
+        for(const value of firstEditUploads.samples)near291TrialUpload(value);
+      }else w.invalid=true; // missing first-edit source capture
     }
     if(w.phase==='active'){
       w.savedMines++;
@@ -564,6 +579,16 @@ function start(nonblockStage=null){
     near291CheckViewport();
     near291Perf.uploads[near291Perf.uploadCount%near291Perf.uploads.length]=duration;
     near291Perf.uploadCount++;
+    // First candidate may fail/not be saved: do not let its GPU work
+    // contaminate a trial until the genuine successful MINE is known.
+    const pending=near291FirstEditUploads;
+    if(pending){
+      if(pending.samples.length>=4096)pending.overflow=true;
+      else pending.samples.push(duration);
+      return;
+    }
+    const phase=near291Perf.mineWindow.phase;
+    if(phase==='active'||phase==='closing')near291TrialUpload(duration);
   }
   function near291PerfSnapshot(){
     if(!near291Perf)return null;
@@ -593,6 +618,12 @@ function start(nonblockStage=null){
       mineFrameWindow:Object.freeze({
         phase:near291Perf.mineWindow.phase,
         savedMines:near291Perf.mineWindow.savedMines,
+        successfulGuardedUploads:near291Perf.mineWindow.uploadCount,
+        successfulGuardedUploadP95Ms:percentile(near291Perf.mineWindow.uploads,
+          near291Perf.mineWindow.uploadCount),
+        uploadOverflow:near291Perf.mineWindow.uploadOverflow,
+        uploadFaults:near291Perf.mineWindow.uploadFaults,
+        maxUploadSamples:near291Perf.mineWindow.uploads.length,
         closingFramesRemaining:near291Perf.mineWindow.closingFramesRemaining,
         frameGapsRecorded:near291Perf.mineWindow.frameCount,
         frameP95Ms:percentile(near291Perf.mineWindow.frames,
@@ -1482,8 +1513,25 @@ function start(nonblockStage=null){
       }
     }
     const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;
+    // Source uploadPack2Chunk() runs synchronously inside the real edit.
+    // The first edit is not yet proven successful until apply+save return.
+    if(near291MineStart!==null&&near291Perf.mineWindow.phase==='idle')
+      near291FirstEditUploads={samples:[],overflow:false};
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
-    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    let result;
+    try{
+      result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    }finally{
+      // The *original* exception remains unchanged. No stale first-edit
+      // upload buffer can survive an exceptional edit or contaminate stream.
+      // The local candidate stays available only in this edit's scope.
+      if(near291FirstEditUploads!==null){
+        near291LastFirstEditUploads=near291FirstEditUploads;
+        near291FirstEditUploads=null;
+      }
+    }
+    const firstEditUploads=near291LastFirstEditUploads;
+    near291LastFirstEditUploads=null;
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
@@ -1491,7 +1539,7 @@ function start(nonblockStage=null){
     // Sample ONLY a real successful source MINE into deep Y, after actual
     // schema-1 save succeeds; no synthetic placements, mob hits or retries.
     if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)
-      near291RecordMine(performance.now()-near291MineStart,result);
+      near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
