@@ -19,6 +19,8 @@ import {previewSnowS3CanonicalOwnerChunk}
   from '../src/manual-biomes/snowy-s3-owner-chunk-preview.mjs';
 import {stepPlayer} from '../src/physics.mjs';
 import {surveySnowS4ChunkSeams} from '../src/manual-biomes/snowy-s4-seam-evidence.mjs';
+import {surveySnowS4LegacyGrassIslands}
+  from '../src/manual-biomes/snowy-s4-legacy-grass-islands.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
 // One focused source-backed smoke test, not a duplicate full WebGL2 run.
@@ -107,6 +109,17 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
       {x:13,z:508,width:6,height:6},{biomeAt:v6BiomeAt,terrainHeight});
     assert.equal(seam.sampled,36);
     assert.equal(seam.state,'read-only-no-generator-activation');
+    // Source-real original grass patch census, fenced to 36 M7 columns.
+    // No removal, recolor or regeneration; respect original caves and edits.
+    const grass=surveySnowS4LegacyGrassIslands(world,
+      {x:13,z:508,width:6,height:6},{biomeAt:v6BiomeAt,terrainHeight});
+    assert.equal(grass.sampled,36);
+    assert.equal(grass.greenCells,
+      grass.components.reduce((sum,component)=>sum+component.cellCount,0));
+    assert.ok(grass.components.every(component=>
+      component.disposition==='retain-original-until-proven-safe'));
+    assert.equal(grass.originalSaveUnchanged,true);
+    assert.equal(grass.sampledCaveAndPlanWitnessUnchanged,true);
     const scenery=reviewSnowS5Scenery(world,0,32,{
       planScenery:planEnvironmentalScenery,biomeAt:v6BiomeAt
     });
