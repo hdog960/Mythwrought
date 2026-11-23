@@ -1,0 +1,36 @@
+# Changed-only true original-M7 authored cave anchor and deep24 spiral
+# continuum. The legacy 4/4, 3/3, 2/2 and newer 2/2+2/2 suites are reused,
+# not rerun. No production/world/physics modifications, browser or broad CI.
+name: Enchanted Phase 2 Original Full Cave Anchor + Deep24 Spiral Native
+on:
+  push:
+    branches:
+      - research/enchanted-p2-full-authored-anchors-20261123
+    paths:
+      - .github/workflows/enchanted-p2-full-anchor-deep24-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-authored-anchor-continuity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original game and earlier accepted research remain unchanged
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-cave-descent-evidence.mjs)" = "7fe76ca6ede339e6f36c595bbd7018c6d2f5892a"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/voxel-landmarks.mjs)" = "f4907793f1e2b8a3cb882254020b7cba720658b0"
+          node --check src/manual-biomes/enchanted-original-full-anchor-continuity.mjs
+          node --check tests/manual-biomes/enchanted-original-full-anchor-deep24-real-m7.test.mjs
+      - name: Only three new genuine original/candidate cave anchor and deep24 physics cases
+        run: |
+          node --test tests/manual-biomes/enchanted-original-full-anchor-deep24-real-m7.test.mjs
