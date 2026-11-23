@@ -87,7 +87,9 @@ test('changing storage key-count during enumeration is not certified unclaimed',
     getItem(){return null;}
   };
   assert.throws(()=>extra(race,179),/Changed original owner enumeration length/);
+  changed=false;
   const r=inspect(race,179);
+  assert.equal(r.reason,'damaged-conflicting-or-unverifiable-original');
   assert.equal(r.safeToIntegrate,false);
   assert.equal(r.runtimeActivationAuthorized,false);
 });
