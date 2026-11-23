@@ -1,0 +1,38 @@
+name: Roadmap A original Pack5 rotated brick real-game source edge acceptance
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-original-rotated-edge-chromium-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-original-rotated-edge-chromium-ci.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-one-real-original-game-rotated-brick:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new original game variant/yaw edge harness safety and syntax checks
+        run: |
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-original-game-rotated-edge-browser.mjs
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-original-game-rotated-edge-preflight.test.mjs
+      - name: Install only existing approved free browser dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: One disposable original-game rotated brick WebGL2 real pixel and player MINE edge gate
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/building-pool/roadmap-2a/roadmap-a-pack5-original-game-rotated-edge-browser.mjs artifacts/roadmap-a-pack5-actual-yaw2-edge
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-a-pack5-original-rotated-edge-source-player-pixels
+          path: artifacts/roadmap-a-pack5-actual-yaw2-edge/
+          if-no-files-found: warn
+          retention-days: 14
