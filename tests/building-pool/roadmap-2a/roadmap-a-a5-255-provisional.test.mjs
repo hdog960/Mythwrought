@@ -53,8 +53,10 @@ test('A5 Wave11 each of 12 source provenance records reflects genuinely authored
  oldIds=new Set(previous.blueprints.map(b=>b.id));
  const sourcePath=new URL('../../../src/building-pool/roadmap-2a/roadmap-a-wave11.mjs',import.meta.url),
   sourceHash=sha(readFileSync(sourcePath));
- const added=current.blueprints.filter(r=>r.sourceProvenance.cohort==='wave10');
+ const added=current.blueprints.filter(r=>r.sourceProvenance.cohort==='wave11');
  assert.equal(added.length,12);
+ assert.ok(added.every(r=>r.sourceProvenance.cohort==='wave11'));
+ assert.equal(new Set(added.map(r=>r.id)).size,12);
  for(const bp of ROADMAP_A_WAVE11_SHOPS){
   assert.equal(validateBlueprint(bp).valid,true,bp.id);
   assert.ok(!oldIds.has(bp.id),bp.id+' source-owned 243 historical collision');
