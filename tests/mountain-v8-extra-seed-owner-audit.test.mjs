@@ -78,3 +78,16 @@ test('extra source owner audit never grants new-world or gameplay integration pe
   assert.ok(Object.isFrozen(a));
   assert.throws(()=>extra(store,2**33),/Invalid original int32 seed/);
 });
+
+test('changing storage key-count during enumeration is not certified unclaimed',()=>{
+  let changed=false;
+  const race={
+    get length(){return changed?2:1;},
+    key(i){changed=true;return i===0?'unrelated-owner':'another-owner';},
+    getItem(){return null;}
+  };
+  assert.throws(()=>extra(race,179),/Changed original owner enumeration length/);
+  const r=inspect(race,179);
+  assert.equal(r.safeToIntegrate,false);
+  assert.equal(r.runtimeActivationAuthorized,false);
+});
