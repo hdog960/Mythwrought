@@ -7,7 +7,7 @@ const viewports=[[956,440],[932,430],[844,390],[916,412]];
 function sample(viewport,mode='original-control'){
   const isVao=mode==='experimental-vao';
   return {
-    protocol:'291-local-4viewport-v3',mode,viewportCss:[...viewport],
+    protocol:'291-local-4viewport-v4',mode,viewportCss:[...viewport],
     viewportPixels:[...viewport],seed:2026,playerFeet:-38,
     trueSavedDeepMines:100,
     // Hypothetical test-only fixture. Real measurements must come from the
@@ -25,7 +25,8 @@ function sample(viewport,mode='original-control'){
       slowFrames:isVao?1:2,elapsedMs:isVao?7000:9000,
       successfulGuardedUploads:224,successfulGuardedUploadP95Ms:isVao?22:28,
       maxUploadSamples:4096,uploadOverflow:false,uploadFaults:0,
-      maxFrameSamples:16384,overflow:false,invalid:false,interrupted:false},
+      maxFrameSamples:16384,overflow:false,invalid:false,interrupted:false,
+      editPending:false,invalidReason:null},
     successfulGuardedUploads:224,rollingSuccessfulUploadP95Ms:isVao?22:28,
     fatal:false,graphicsLost:false,pageSuspended:false,
     continuousForegroundRun:true,interruptionCount:0,
@@ -276,7 +277,7 @@ test('missing, invalid and malformed mining-native upload window cannot pass',()
   verify(x=>x.pairs[0].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=NaN,
     /mining-bound guarded upload p95/);
 });
-test('new strict v3 source protocol rejects stale v2 mined frame snapshots',()=>{
+test('strict v4 source protocol rejects stale v2 mined frame snapshots',()=>{
   verify(x=>x.pairs[1].control.protocol='291-local-4viewport-v2',/protocol/);
 });
 test('numeric summary uses trial uploads, never unrelated rolling upload counters',()=>{
@@ -317,4 +318,31 @@ test('full precision legal boundary upload value of exactly 33ms is admissible',
   const r=evaluateIssue291FourViewportAB(x);
   assert.equal(r.metricGatesPassed,true);
   assert.equal(r.releaseCertified,false);
+});
+
+test('strict v4 protocol rejects stale v3 source snapshots',()=>{
+  verify(x=>x.pairs[0].candidate.protocol='291-local-4viewport-v3',/protocol/);
+});
+test('an original edit that never became a saved deep MINE blocks certification',()=>{
+  verify(x=>x.pairs[0].control.mineFrameWindow.editPending=true,
+    /real mining-frame trial/);
+  verify(x=>delete x.pairs[2].candidate.mineFrameWindow.editPending,
+    /real mining-frame trial/);
+});
+test('brief settings, blur or flight interruptions cannot be hidden by good final p95',()=>{
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.invalidReason='settings-opened',
+    /real mining-frame trial/);
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.invalidReason='window-blur',
+    /real mining-frame trial/);
+  verify(x=>x.pairs[1].candidate.mineFrameWindow.invalidReason='creative-flight',
+    /real mining-frame trial/);
+});
+test('an interrupted originally recorded edit never changes the release HOLD',()=>{
+  const input=make();
+  input.pairs[2].control.mineFrameWindow.invalidReason='unsaved-or-nondeep-edit';
+  input.pairs[2].control.mineFrameWindow.editPending=false;
+  const result=evaluateIssue291FourViewportAB(input);
+  assert.equal(result.metricGatesPassed,false);
+  assert.equal(result.releaseCertified,false);
+  assert.ok(result.failures.some(x=>/real mining-frame trial/.test(x)));
 });
