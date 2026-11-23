@@ -1,0 +1,33 @@
+name: Snow S7 genuine original six-chunk seam crossing
+on:
+  push:
+    branches:
+      - research/snow-s7-original-chunk-crossing-20261123
+    paths:
+      - '.github/workflows/snow-s7-original-crossing-native.yml'
+      - 'tests/snowy-s7-original-six-chunk-border-walking.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s7-original-crossing-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  genuine-original-m7-chunk-traversal:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original source identities and new exact-head syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/physics.mjs)" = 199cab89fc1e6ab67d12a56c62795ef0ac4b50d7
+          node --check tests/snowy-s7-original-six-chunk-border-walking.test.mjs
+          node --check src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs
+      - name: Only NEW original six-chunk actual stepPlayer chunk boundary walk
+        run: node --test tests/snowy-s7-original-six-chunk-border-walking.test.mjs
