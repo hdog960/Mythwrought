@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'b4ee0cc13957da7d9fc4a3d6a6708cb7c9c48305');
+    '640eb74638d3feb2a54dff1403f302bd56302c36');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1406,4 +1406,26 @@ test('original trial GPU samples reset with CSS viewport/seed and cannot affect 
   assert.equal(snap.successfulGuardedUploads,0);
   assert.equal(snap.uploadOverflow,false);
   assert.ok(!exactLocal291PerfSource.includes('world.set('));
+});
+
+test('original source real GPU 33.04ms does NOT round into admissible 33.0ms trial upload',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  const pending=perf.startFirst();
+  perf.upload(33.04);
+  perf.mine(100.04,{cell:[0,-30,1],previous:3,next:0},perf.finishFirst());
+  perf.frame(20.04);
+  const snapshot=perf.read();
+  assert.equal(snapshot.mineFrameWindow.successfulGuardedUploadP95Ms,33.04);
+  assert.equal(snapshot.rollingSuccessfulUploadP95Ms,33.0);
+  assert.equal(snapshot.miningActionP95Ms,100.04);
+  assert.equal(snapshot.mineFrameWindow.frameP95Ms,20.04);
+  assert.equal(snapshot.releaseCertified,false);
+});
+test('source original successful deep MINE timing preserves double precision, not Float32 rounding',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);
+  perf.mine(90.00006,{cell:[1,-30,1],previous:3,next:0});
+  assert.equal(perf.read().miningActionP95Ms,90.00006);
+  assert.ok(perf.read().mineFrameWindow.phase==='active');
 });
