@@ -35,8 +35,12 @@ test('genuine four named M7 entrance preflight source floors survive real author
   assert.equal(source.sourceOwnedCaveFloorCells,7);
   assert.equal(source.authoredFloorDrop,3,
     'six actual original source steps descend exactly three block floors');
-  assert.deepEqual(source.path.map(p=>[p.x,p.surface,p.z]),
-    optional.path.map(p=>[p.x,p.surface,p.z]));
+  assert.deepEqual(
+    source.path.filter(p=>p.owner==='original-source-authored-cave-floor')
+      .map(p=>[p.x,p.surface,p.z]),
+    optional.path.filter(p=>p.owner==='original-source-authored-cave-floor')
+      .map(p=>[p.x,p.surface,p.z]),
+    'candidate may have different genuine outside trees, but never different authored cave geometry');
   for(const at of source.path.filter(p=>p.owner==='original-source-authored-cave-floor')){
     assert.ok(originalM7AuthoredCaveFloorCap(original,at.x,at.surface,at.z));
     assert.equal(original.environmentCaves.get(at.x,at.surface,at.z),at.material);
@@ -74,6 +78,9 @@ test('actual original and experimental M7 player controller attempts genuine gra
      assert.ok(historical.actualPlayerFeetDrop>=2.9,
        'player physics, not generated source, must actually descend 3 blocks');
      assert.ok(historical.physicallyIntegratedFrames>=historical.walkedLegs);
+     assert.deepEqual(oldSource.path.map(p=>[p.x,p.feet,p.z]),
+       candidateSource.path.map(p=>[p.x,p.feet,p.z]),
+       'only identical real original/candidate source walks can count as matched');
      assert.equal(historical.ticks,prototype.ticks);
      assert.ok(prototype.actualPlayerFeetDrop>=2.9);
      assert.equal(historical.deepNetworkAccepted,false);
