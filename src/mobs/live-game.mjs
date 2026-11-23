@@ -36,8 +36,12 @@ export function mobSaveKey(seed,worldKind='normal'){
   return worldKind==='cave'?'mythwrought-mobs-v1-caves-seed-'+seed:PREFIX+seed;
 }
 export function classifyLiveBiome(name,feet,cave){
-  if(cave&&feet<-3.5)return 'cave';
-  return TERRAIN_BIOMES[name]||'meadow';
+  // Never turn a missing or unrecognized source biome into a safe meadow.
+  // The canonical host view treats a null biome as hazardous/unknown and
+  // original spawnEligible rejects it. Keep the five accepted V6 mappings.
+  if(cave===true&&Number.isFinite(feet)&&feet<-3.5)return 'cave';
+  if(typeof name!=='string'||!Object.hasOwn(TERRAIN_BIOMES,name))return null;
+  return TERRAIN_BIOMES[name];
 }
 
 export function createLiveMobSession({
