@@ -505,41 +505,41 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         0,
-        25,
-        13,
-        48
+        18,
+        9,
+        41
       ],
       [
-        45,
-        66,
-        12,
-        50
-      ],
-      [
-        13,
-        60,
         48,
+        66,
+        18,
+        53
+      ],
+      [
+        15,
+        61,
+        45,
         56
       ],
       [
-        23,
-        49,
+        25,
+        48,
         14,
-        50
+        49
       ]
     ],
     "cuts": [
       [
-        30,
-        37,
-        25,
+        31,
+        38,
+        24,
         34
       ],
       [
-        5,
-        11,
-        35,
-        40
+        4,
+        9,
+        31,
+        37
       ]
     ],
     "anchors": [
@@ -606,9 +606,9 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       [
         [
           0,
-          25,
-          13,
-          48
+          18,
+          9,
+          41
         ],
         "z",
         7,
@@ -617,10 +617,10 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          45,
+          48,
           66,
-          12,
-          50
+          18,
+          53
         ],
         "x",
         5,
@@ -629,9 +629,9 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
       ],
       [
         [
-          13,
-          60,
-          48,
+          15,
+          61,
+          45,
           56
         ],
         "z",
@@ -1745,17 +1745,17 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
   },
   {
     "category": "bank",
-    "biome": "mountain",
+    "biome": "enchanted-forest",
     "size": "large",
     "variation": 2,
-    "name": "Ironridge Split-Gallery Treasury",
+    "name": "Elderbough Split-Gallery Treasury",
     "w": 73,
     "d": 60,
     "h": 16,
     "entry": 36,
-    "wall": "pack1:005",
+    "wall": "pack5:079",
     "floor": "pack2:013",
-    "roof": "pack3:025",
+    "roof": "pack3:026",
     "rects": [
       [
         22,
@@ -1808,7 +1808,7 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         7
       ],
       [
-        14,
+        18,
         34
       ],
       [
@@ -1868,7 +1868,7 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         ],
         "x",
         4,
-        "Ironridge Split-Gallery Treasury independently bounded entry-span",
+        "Elderbough Split-Gallery Treasury independently bounded entry-span",
         "tower"
       ],
       [
@@ -1880,7 +1880,7 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         ],
         "z",
         7,
-        "Ironridge Split-Gallery Treasury independently bounded west-court-gallery",
+        "Elderbough Split-Gallery Treasury independently bounded west-court-gallery",
         "terrace"
       ],
       [
@@ -1892,7 +1892,7 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         ],
         "x",
         5,
-        "Ironridge Split-Gallery Treasury independently bounded east-service-bay",
+        "Elderbough Split-Gallery Treasury independently bounded east-service-bay",
         "gable"
       ],
       [
@@ -1904,7 +1904,7 @@ export const ROADMAP_A_WAVE08_SPECS=Object.freeze([
         ],
         "z",
         6,
-        "Ironridge Split-Gallery Treasury independently bounded rear-register-roof",
+        "Elderbough Split-Gallery Treasury independently bounded rear-register-roof",
         "saw"
       ]
     ]
