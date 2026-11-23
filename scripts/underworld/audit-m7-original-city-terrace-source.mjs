@@ -175,6 +175,17 @@ for(const [rx,rz] of regions){
    underpass.underpassExpectedOverlapCells??null,
   candidateThinUnderpassExpectedCombinedDistinctCells:
    underpass.underpassExpectedCombinedDistinctCells??null,
+  candidateThinUnderpassSourceOverlapValuesStable:
+   underpass.underpassSourceOverlapValuesStable===true,
+  candidateThinUnderpassSourceOverlapExpectedSharedVoxels:
+   underpass.underpassSourceOverlapExpectedSharedVoxels??null,
+  candidateThinUnderpassSourceOverlapComparedSharedVoxels:
+   underpass.underpassSourceOverlapComparedSharedVoxels??null,
+  candidateThinUnderpassSourceOverlapComparisonsByRole:
+   underpass.underpassSourceOverlapComparisonsByRole??null,
+  candidateThinUnderpassSourceOverlapTotalComparisons:
+   underpass.underpassSourceOverlapTotalComparisons??null,
+  candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly:true,
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
   candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
