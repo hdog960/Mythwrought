@@ -1,15 +1,15 @@
 // Release-composition test: actual original M7 game meshes compared with
 // immutable accepted-gameplay source, not an independent mock renderer.
-// Requires ../accepted checkout at 2bd0395d3ef163e9fdc491ab5119b1ee80844194.
+// Requires exact adjacent ../accepted checkout at 2bd0395d3ef163e9fdc491ab5119b1ee80844194.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FourRegionWorld,fourRegionProfile,
- M7_ENVIRONMENT_GENERATOR as M7} from '../src/manual-biomes/profile-world.mjs';
-import {meshChunk,BLOCK,chunkCoord} from '../src/voxel.mjs';
-import {meshChunk as acceptedMesh} from '../../accepted/src/voxel.mjs';
-import {desertSeamEditAffectedChunks} from '../src/manual-biomes/desert-seam-invalidation.mjs';
-import {editAffectedChunks} from '../src/chunks.mjs';
-import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
+ M7_ENVIRONMENT_GENERATOR as M7} from '../../src/manual-biomes/profile-world.mjs';
+import {meshChunk,BLOCK,chunkCoord} from '../../src/voxel.mjs';
+import {meshChunk as acceptedMesh} from '../../../accepted/src/voxel.mjs';
+import {desertSeamEditAffectedChunks} from '../../src/manual-biomes/desert-seam-invalidation.mjs';
+import {editAffectedChunks} from '../../src/chunks.mjs';
+import {v6BiomeAt} from '../../src/manual-biomes/v6-balanced-biomes.mjs';
 const originals=[{seed:179,cx:-50,cz:-111,x:-786,y:4,z:-1774,original:401},
  {seed:2026,cx:-178,cz:-49,x:-2848,y:7,z:-774,original:401}];
 const excluded=[{seed:179,x:128,z:-2304,name:'snow'},
