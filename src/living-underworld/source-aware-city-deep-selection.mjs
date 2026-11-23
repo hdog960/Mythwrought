@@ -15,6 +15,8 @@ import {compileMainGalleryPedestrianClearance,
  from './combined-stair-footprints.mjs';
 import {auditSourceProtectedCityTerraceAccess}
  from './source-protected-city-terrace-access.mjs';
+import {bindCityDeepSourceReaderCohort}
+ from './source-reader-cohort-provenance.mjs';
 
 const INT=Number.isSafeInteger;
 const INDICES=Object.freeze([16,25,34]);
@@ -137,7 +139,7 @@ export function selectCityCompatibleDeepLinks(seed,rx,rz,{
    break search;
   }
   if(!joined.ok){lastRefusal=joined.reason;continue;}
-  return Object.freeze({sitePresent:true,ok:true,seed,rx,rz,
+  return bindCityDeepSourceReaderCohort(Object.freeze({sitePresent:true,ok:true,seed,rx,rz,
    chosen:Object.freeze(chosen.map(x=>Object.freeze({
     index:x.index,radius:x.radius,cornerFlat:x.cornerFlat,
     quarterTurns:x.quarterTurns,supportCells:x.supportCells
@@ -148,7 +150,7 @@ export function selectCityCompatibleDeepLinks(seed,rx,rz,{
    maxCombinations,examined:Object.freeze(examined),
    originalM7ReaderIdentityAuthenticatedByCallerOnly:true,
    originalM7VoxelMutations:false,playerWalkingUnverified:true,
-   settlementsPlaced:false,worldChanged:false});
+   settlementsPlaced:false,worldChanged:false}),source);
  }
  return Object.freeze({sitePresent:true,ok:false,seed,rx,rz,
   reason:sourceBudgetHit||sourceChecks>=maxTotalSourceChecks?
