@@ -47,3 +47,41 @@ The first genuine full-game three-stage `956x440` WebGL2 experiment `scripts/ci/
 ### Current result status
 
 Native source shader-contract PASS and original Desert/Snow/Mountain seam PASS. Original cached-S7 first mesh timing showed a performance regression and glacier material metadata mismatch, so **there is NO release-ready winter shader or cache yet**. The geometry-preserving correction must be validated by its own exact-head genuine game WebGL2 run. Do not claim iPhone/device, cross-biome *visual* smoothness, or frame-rate benefit from this record.
+
+
+### Exact corrected post-Desert seed2026 browser experiment — partial gate, NOT green
+
+The final pigment-only browser harness `scripts/ci/snow-s8-real-seed2026-drift-mesh-probe.mjs` exact Git blob `a2ab5e34fdae7ff3df6264ceab77234caea8b772` was authenticated by **Actions #45276407209**, exact source HEAD `452e290dd6d8a6398783f07e3402755a1763f1d0`. The overall job **COMPLETED FAILURE**, deliberately due to the separate natural-snowdrift visible-difference assertion. Do NOT call this run SUCCESS. The source-contract 3/3 and strict original game screenshot/mesh/edited-ice subchecks below completed before that assertion.
+
+The test started actual original full Desert Phase 3 game through Chromium WebGL2, 956×440 mobile viewport, seed2026, original snow glacier source ID276 at (-144,9,504), exact original camera (-143.5, feet17.01,492.5), **25 loaded / zero pending chunks**, original M7 profile and WebGL 2.0 renderer; all three contexts had **zero JavaScript page errors**. Only source-original local browser module routes were temporarily replaced; original repo `src/voxel.mjs` and `src/storybook-materials.mjs` and game worlds were not edited.
+
+The corrected candidate specifically distinguishes `groundColor` (used by ORIGINAL UV/material/face lighting) from the new `snowS8Pigment` used ONLY in the original face `color` expression; thus original natural and user-placed ID276 preserve the original shader-material path, and only candidate winter RGB changes. The additional `drift` stage injects exact `vMat==41` variant in memory but leaves all others unchanged.
+
+| Authentic seed2026 original mesh observations | Untouched Desert-original | S7 pigment-only cached | S7 pigment + S8 drift shader |
+|---|---:|---:|---:|
+| Real `meshChunk(-9,31)` vertices | 10,536 | **10,536** | **10,536** |
+| Same mesh bytes | 379,296 | **379,296** | **379,296** |
+| ORIGINAL position, UV and material-bit fingerprint | 2535267973 | **2535267973** | **2535267973** |
+| Actual synchronous 8-build p50 | 15.0 ms | **18.9 ms** | **32.3 ms** |
+| Actual synchronous 8-build p95 | 21.4 ms | **48.7 ms** | **50.1 ms** |
+| Edited ice original `meshChunk` vertices | 36/36 | **36/36 exact** | **36/36 exact** |
+
+The original/edited-ice parity and original physical geometry checks are **passed sub-gates**, not a successful overall workflow. Timings are Chromium/GitHub Actions synchronous mesh-build times on ONE chunk, not Safari/iPhone game FPS or statistically stable render latencies. The cached original-source path still has **materially worse worst-run mesh cost**, a mandatory release blocker. A lower climate-evaluation count did NOT guarantee better wall time.
+
+Actual screenshots at this camera are byte-hash verified:
+- Original SHA256 `2c237d87fc26deaa38b7798c04a2b5c4eeca938aa414be647dbcada3e23cadfa`
+- Cached-pigment SHA256 `42e7d53634346ab6fba42ed4538cb3a1878b7e6a3b4a7d71b63433007cd31103`
+- Experimental low-grit shader SHA256 `ecb30e585c76d74a22d66e5d616e353962eae9a81f7c3d151c2d3ace560b2828`
+- Original ZIP workflow artifact #14868721455, CRC PASS; three authentic PNG screenshots. Independent image-byte ROI check x≈18..82%, y≈33..90% gives strong `blue-red > 18` fraction **73.022% original -> 11.483% cached pigment-only**, showing a genuine, natural-glacier source-color change while ORIGINAL geometry, UV and material tags stay intact.
+- The experimental S8 low-grit shader changed only **0.0241%** of this ROI by max-RGB-channel >=3 compared with cached-pigment alone. The strict test demanded >1%, so **S8 natural texture visual acceptance FAILED**. Do not weaken this threshold or claim texture success. The scene is dominated by material-path `vMat==0` original authored glacier ID276, rather than material-path `vMat==41` natural snow, and the S8 shader changes ONLY material 41. Before another browser job, source-authenticate a visible authored original snow/rime cap using exact natural material tag, or design a separately validated natural-glacier appearance strategy with explicit player-edited ice protection. Do not accidentally retag glacier UV/material just to pass visuals.
+
+**Earlier failure provenance:** #45275371504 stopped before browser due local import path; #45275699511 ran with exact source but caught invalid natural glacier UV/material hash; #45276331214 had a double-escaped temporary injected module newline and is NOT visual acceptance; only #45276407209 proved the final exact pigment-only geometry correction, though its overall low-grit image gate failed. Keep failures visible; reuse all verified exact SHA sub-gates instead of duplicate broad CI.
+
+### Next original-source engineering actions
+
+1. ORIGINAL native material-path census, especially ID272/279 (original terrain tag41) versus natural glacier ID276 (original non-terrain tag0), both original seeds and real source locations. Source-authenticate an original snow surface and physically safe camera before rerunning costly Chromium WebGL2 shader research. Do not blindly target the glacier again.
+2. Optimize S7 `stillSafe` synchronous hot path: current per-original-visible-surface checks still require repeated `_columnPlan` and multiple original `get`/cave reads even after the climate memo. A candidate may exploit the guaranteed single-threaded, one-mesh-build read-only source lifetime but MUST continue to fail closed on edited cap/support/overhead and cave override. Use measured original-versus-candidate exact source mesh p50/p95 and geometry/UV/material parity as hard gates; improve before adoption, never accept only a decrease in V6 lookup counts.
+3. For true Snow/Desert/Mountain visual transition improvement, existing one-voxel source boundary terrain is legitimately scree ID401 and hardpan ID258 with no authored winter cap to recolor. Preserve these original protected physical voxels. Real gradual source terrain + appearance requires distinct future-world profile and its own physics/cave/biome/scene/memory acceptance; S8 caching is **not** a bridge generator.
+4. Physical **iPhone installed Home Screen shortcut** acceptance remains UNRUN. Verify correct future release version only when creator authorizes deployment; compare unchanged live current M7 with any future candidate for shaders, save/restores, cave air, three moons, chunk/buffer budget and 10s stationarity/walking/mining p50/p95. Do not claim an acceptance or schedule without actual device evidence.
+
+**Final S8 status:** material 41 source transformer is authored and isolated; real biome boundary native guard SUCCESS; stricter 2026 shader/mesh overall browser FAIL as expected because invisible drift and slow cached mesh. No live-game visual change, no main/PR358 movement, no authorized V8 generator.
