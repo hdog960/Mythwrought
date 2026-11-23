@@ -42,5 +42,5 @@ jobs:
           test "$(git -C candidate rev-parse HEAD:src/storybook-materials.mjs)" = a06a1f3408d99521485a48d2d84a577a7ac588c8
           node --check candidate/src/manual-biomes/desert-seam-invalidation.mjs
           node --check candidate/tests/desert-p3-runtime-corner-gpu-source.test.mjs
-      - name: NEW only: actual V7 corners and exact main upload fault-injection checks
+      - name: 'NEW only: actual V7 corners and exact main upload fault-injection checks'
         run: cd candidate && node --test tests/desert-p3-runtime-corner-gpu-source.test.mjs
