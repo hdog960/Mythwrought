@@ -73,7 +73,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       if (!trial || trial.phase!=='complete' || trial.savedMines!==100 ||
           trial.overflow!==false || trial.invalid!==false ||
           trial.interrupted!==false ||
-          !validCount(trial.frameGapsRecorded) || trial.frameGapsRecorded<100 ||
+          !validCount(trial.frameGapsRecorded) || trial.frameGapsRecorded<101 ||
           trial.maxFrameSamples!==16384 ||
           trial.frameGapsRecorded>trial.maxFrameSamples ||
           !validCount(trial.slowFrames) || trial.slowFrames>trial.frameGapsRecorded ||
