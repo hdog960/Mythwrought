@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    'b2ece34723fe1e0a2264e0d0968510726c75b90d');
+    'd74569f09d73289be72ccbdbaf171efbcb5a7937');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1107,10 +1107,15 @@ test('exact original collector closes AFTER 100 saved edits plus their final RAF
   assert.equal(win.frameGapsRecorded,99);
   perf.frame(1600);
   win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'closing');
+  assert.equal(win.closingFramesRemaining,1);
+  perf.frame(1616);
+  win=perf.read().mineFrameWindow;
   assert.equal(win.phase,'complete');
-  assert.equal(win.frameGapsRecorded,100);
+  assert.equal(win.closingFramesRemaining,0);
+  assert.equal(win.frameGapsRecorded,101);
   assert.equal(win.frameP95Ms,16);
-  assert.equal(win.elapsedMs,1600);
+  assert.equal(win.elapsedMs,1616);
   assert.equal(win.slowFrames,0);
   assert.equal(win.overflow,false);
   assert.equal(win.interrupted,false);
@@ -1123,9 +1128,9 @@ test('idle frames after 100th true source mine never dilute the closed trial p95
     perf.frame(i*16);
     perf.mine(10,{cell:[i,-25,2],previous:3,next:0});
   }
-  perf.frame(1600);
+  perf.frame(1600);perf.frame(1616);
   const closed=perf.read().mineFrameWindow;
-  for(let i=1;i<200;i++)perf.frame(1600+i*90);
+  for(let i=1;i<200;i++)perf.frame(1616+i*90);
   const later=perf.read();
   assert.equal(later.mineFrameWindow.frameGapsRecorded,closed.frameGapsRecorded);
   assert.equal(later.mineFrameWindow.frameP95Ms,closed.frameP95Ms);
@@ -1139,10 +1144,12 @@ test('first and last real deep mining frame stalls both remain inside the A/B tr
     perf.mine(10,{cell:[i,-20,7],previous:3,next:0});
     perf.frame(50+i*16);
   }
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  perf.frame(1650);
   const snap=perf.read().mineFrameWindow;
   assert.equal(snap.phase,'complete');
   assert.equal(snap.savedMines,100);
-  assert.equal(snap.frameGapsRecorded,100);
+  assert.equal(snap.frameGapsRecorded,101);
   assert.equal(snap.slowFrames,1);
 });
 test('source-hidden or WebGL/BFCache interruption forbids resumed mining trial',()=>{
@@ -1198,4 +1205,39 @@ test('original trial frame summary is frozen, numeric, and not release certified
   assert.equal(snap.protocol,'291-local-4viewport-v2');
   assert.equal(snap.releaseCertified,false);
   assert.equal(snap.browserPixelParityProven,false);
+});
+
+test('second post-save frame closes original A/B only after the final draw upload is observed',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(7,{cell:[0,-42,0],previous:3,next:0});
+  for(let i=1;i<100;i++){
+    perf.frame(i*16);
+    perf.mine(7,{cell:[i,-42,0],previous:3,next:0});
+  }
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  perf.frame(1600);
+  assert.equal(perf.read().mineFrameWindow.phase,'closing');
+  // The prior draw's original stream/upload delay shows as this next gap.
+  perf.frame(1690);
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'complete');
+  assert.equal(win.closingFramesRemaining,0);
+  assert.equal(win.frameGapsRecorded,101);
+  assert.equal(win.slowFrames,1);
+  assert.equal(win.overflow,false);
+});
+test('post-100th saved mine interruption before second frame fails closed',()=>{
+  const {perf}=local291PerfFixture();
+  perf.frame(0);perf.mine(9,{cell:[0,-30,0],previous:3,next:0});
+  for(let i=1;i<100;i++){
+    perf.frame(i*16);
+    perf.mine(9,{cell:[i,-30,0],previous:3,next:0});
+  }
+  perf.frame(1600);
+  perf.interrupt();
+  const win=perf.read().mineFrameWindow;
+  assert.equal(win.phase,'interrupted');
+  assert.equal(win.interrupted,true);
+  perf.frame(1616);
+  assert.equal(perf.read().mineFrameWindow.phase,'interrupted');
 });
