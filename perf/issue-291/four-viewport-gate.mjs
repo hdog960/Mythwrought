@@ -49,6 +49,9 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       if (!viewportKey(run.viewportPixels)) fail(label + ' physical buffer viewport is not landscape');
       if (run.fatal !== false || run.graphicsLost !== false || run.pageSuspended !== false)
         fail(label + ' has a fatal/suspended graphics state');
+      if (run.continuousForegroundRun !== true ||
+          !validCount(run.interruptionCount) || run.interruptionCount !== 0)
+        fail(label + ' was hidden, suspended or context-lost during the observed A/B run');
       if (!validCount(run.trueSavedDeepMines) || run.trueSavedDeepMines < ISSUE291_MIN_DEEP_MINES)
         fail(label + ' has fewer than 100 actual saved deep MINE actions');
       // Count/seed alone is not proof that the same voxels were mined.
