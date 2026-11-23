@@ -107,8 +107,44 @@ export function classifyExactHeadOriginalM7Triplet({
   r.candidateThinUnderpassPriorDeepSourceReaderCohortRefusal===null);
  if(!cityThinUnderpassDeepReaderCohortSafe)
   reasons.push('RARE_CITY_UNDERPASS_DEEP_SOURCE_READER_COHORT_HOLD');
+ // Phase29: compare already observed old-world values across the ENTIRE
+ // prior deep-city source phase and later underpass, not only bridge/pad
+ // overlap. The ledger has zero independent original-world source reads.
+ const cityThinUnderpassCrossAuditLedgerSafe=
+  cityThinUnderpassDeepReaderCohortSafe&&c.rows.every(r=>{
+   const prior=r.candidateThinUnderpassCrossAuditLedgerPriorCalls,
+    later=r.candidateThinUnderpassCrossAuditLedgerUnderpassCalls,
+    common=r.candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole,
+    bridge=r.candidateThinUnderpassSourceVisits,
+    pad=r.candidateThinUnderpassCenterLandingSourceVisits,
+    total=r.candidateThinUnderpassCrossAuditLedgerTotalCalls;
+   if(!yes(r.candidateThinUnderpassCrossAuditLedgerSafe)||
+      r.candidateThinUnderpassCrossAuditLedgerReason!==null||
+      r.candidateThinUnderpassCrossAuditLedgerFirstMismatch!==null||
+      !yes(r.candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged)||
+      !yes(r.candidateThinUnderpassCrossAuditLedgerCallerOnly)||
+      !yes(r.candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries)||
+      ![bridge,pad,total].every(Number.isSafeInteger)||
+      bridge<1||pad!==135||!prior||!later||!common)return false;
+   let sum=0,commonSum=0;
+   for(const role of ['naturalAt','authoredAt','editedAt','protectedAt']){
+    if(!Number.isSafeInteger(prior[role])||prior[role]<1||
+       !Number.isSafeInteger(later[role])||
+       later[role]!==bridge+pad||
+       !Number.isSafeInteger(common[role])||common[role]<0||
+       common[role]>Math.min(prior[role],later[role]))
+     return false;
+    sum+=prior[role]+later[role];
+    commonSum+=common[role];
+   }
+   return total===sum&&
+    r.candidateThinUnderpassCrossAuditLedgerComparedReturnCount===commonSum;
+  });
+ if(!cityThinUnderpassCrossAuditLedgerSafe)
+  reasons.push('RARE_CITY_UNDERPASS_PRIOR_TO_BRIDGE_SOURCE_VALUE_HOLD');
  const cityThinUnderpassExactCoordinateCoverageSafe=
   citySourceSafe&&cityThinUnderpassDeepReaderCohortSafe&&
+  cityThinUnderpassCrossAuditLedgerSafe&&
   c.rows.every(r=>verifiedSourceCoordinates(r,
    r.candidateThinUnderpassSourceVisits,
    r.candidateThinUnderpassCenterLandingSourceVisits));
@@ -215,6 +251,7 @@ export function classifyExactHeadOriginalM7Triplet({
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   cityThinUnderpassHypotheticalMovementSafe,
   cityThinUnderpassDeepReaderCohortSafe,
+  cityThinUnderpassCrossAuditLedgerSafe,
   cityThinUnderpassExactCoordinateCoverageSafe,
   cityThinUnderpassIndependentFootprintSafe,
   cityThinUnderpassOverlapSourceValuesSafe,
