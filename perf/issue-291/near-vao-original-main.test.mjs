@@ -272,7 +272,7 @@ test('fatal local VAO is stopped BEFORE every original edit-side effect',()=>{
   inOrder('if(near291Enabled&&near291Fatal){',
     "if(mode==='mine'&&mobRenderer&&!mobRuntimeError)",
     "if(pack5Mode&&pack5Builder){",
-    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,');
+    'result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,');
 });
 
 test('a queued frame cannot advance player time after local fatal GPU loss',()=>{
@@ -858,7 +858,7 @@ test('original real deep mine timing is captured only after success and save',()
   const actualMine=source.slice(start,end);
   const stages=[
     "const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;",
-    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
+    'result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
@@ -1033,7 +1033,7 @@ test('new exact source only captures real saved original deep MINE result; no sy
   assert.ok(start>=0&&end>start);
   const real=source.slice(start,end);
   const stages=[
-    'const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
+    'result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,',
     'if(!result.ok){message(result.reason);return;}',
     'const persisted=save();',
     "if(near291MineStart!==null&&persisted&&result.cell?.[1]<-5&&player.feet<-5)",
