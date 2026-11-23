@@ -1,0 +1,24 @@
+name: Roadmap A exact R3 real-game Pack5 authored-vs-Float32 source edge autopsy
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-exact-r3-edge-native-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-exact-r3-edge-native-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-r3-exact-source-precision-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new exact original R3 edge precision research source and test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
+      - name: Only eight new true original-source precise authored mesh/AABB tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
