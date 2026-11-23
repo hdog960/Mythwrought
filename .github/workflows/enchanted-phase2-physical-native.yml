@@ -1,7 +1,7 @@
-# Enchanted Phase 2 isolated original-M7 source-grounded path search only.
-# Changed test only: stratified real original-M7 path discovery by climate
-# and seed. Prior 2/2 new bounded path source gate #45092293445 passed.
-# Reuse prior source/physics evidence; no repeated tests, broad CI or browser.
+# Only target-directed read-only original-M7 terrain search was changed.
+# Reuse previously verified native graph 2/2 #45092293445 and stratified
+# per-biome test 1/1 #45092467293. Test seed -88 Plains border with
+# actual physics, and preserve earlier Desert route, not broad CI/Chromium.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  source-real-stratified-climate-pedestrian-survey:
+  original-m7-directed-pedestrian-search:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -26,12 +26,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact source and narrow original-M7 walking test syntax
+      - name: Exact bounded original-world helper and changed-test syntax
         run: |
           git rev-parse HEAD
           node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
           node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
-      - name: Only new original M7 per-climate physical survey
+      - name: Only new target-directed genuine M7 Plains and Desert traversals
         run: |
-          node --test --test-name-pattern="stratified bounded REAL M7" \
+          node --test --test-name-pattern="target-directed" \
             tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
