@@ -82,7 +82,10 @@ test('genuine legacy source provenance and unregistered v8 identity must agree b
     {...p,top:p.top+1},
     {...p,cap:'snow'},
     {...p,seed:2026},
-    {...p,generatorIdentityRequired:'mythwrought-environment-v7'}
+    {...p,generatorIdentityRequired:'mythwrought-environment-v7'},
+    {...p,safeToIntegrate:true},
+    {...p,sourceProvenance:{...p.sourceProvenance,originalGroundIntact:false}},
+    {...p,sourceProvenance:{...p.sourceProvenance,neighborTops:[1,1,1,1]}}
   ])assert.equal(uplift(changed,{originalWorld:original,...cfg}),null);
   assert.equal(uplift(p,{originalWorld:original,sourceMainHead:'stale',
     originalVoxelReaderIdentityVerified:true}),null);
