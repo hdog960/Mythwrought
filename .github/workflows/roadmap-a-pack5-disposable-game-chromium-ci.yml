@@ -1,0 +1,38 @@
+name: Roadmap A Pack5 authorized disposable original-game pixels and mine
+on:
+  push:
+    branches:
+      - roadmap-a-pack5-disposable-game-chromium-ci-20261122
+    paths:
+      - '.github/workflows/roadmap-a-pack5-disposable-game-chromium-ci.yml'
+permissions:
+  contents: read
+jobs:
+  only-one-original-game-private-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only new disposable game runner syntax and scoped native safety preflight
+        run: |
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-browser.mjs
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-preflight.test.mjs
+      - name: Install narrowly scoped original CI-supported free Chromium + image parser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: ONLY original game one-disposable-context real WebGL2 canvas before-after and MINE gate
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+          EGL_PLATFORM: 'x11'
+        run: node tests/building-pool/roadmap-2a/roadmap-a-pack5-original-disposable-actual-game-browser.mjs artifacts/roadmap-a-pack5-disposable-game
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roadmap-a-pack5-disposable-real-original-game-pixel-evidence
+          path: artifacts/roadmap-a-pack5-disposable-game/
+          if-no-files-found: warn
+          retention-days: 14
