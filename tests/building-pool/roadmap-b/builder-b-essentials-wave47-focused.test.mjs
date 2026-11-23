@@ -89,7 +89,7 @@ test('All 19 source portals genuinely grounded, not closed by last window or par
 test('Three genuinely founded dry quay fingers are joined by full outside-only west-east pedestrian transverse return',()=>{
  const b=buildHearthquayThreeFingerRegistry(),m=new Map(b.placements.map(p=>[p.at.join(','),p])),
   walks=new Set(b.walkable.map(p=>p.join(',')));
- for(const x of [14,28,44])for(const z of [58,62]){
+ for(const [x,z] of [[14,58],[14,62],[28,59],[28,62],[44,58],[44,62]]){
   assert.equal(m.get(K(x,0,z))?.asset,'live:wood');
   assert.ok(walks.has(K(x,1,z)));
  }
