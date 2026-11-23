@@ -1,0 +1,73 @@
+# Source-only new original M7 authored cave floor descent research.
+# Focused 3-case native Node22 job, NOT a cave release/profile change.
+# Reuse prior original 4/4 cave-mouth/tick CI #45192357135 without rerun.
+name: Enchanted Phase 2 Genuine M7 Cave Descent Native (isolated)
+on:
+  push:
+    branches:
+      - research/enchanted-p2-authored-mouth-gates-20261123
+    paths:
+      - .github/workflows/enchanted-phase2-descent-native.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  original-m7-physical-cave-descent:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify inherited source owners and new changed-file syntax
+        id: guards
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-route.mjs)" = "21f368cc0532a124e7d2ba0f3e55548386c2682f"
+          test "$(git hash-object src/manual-biomes/enchanted-original-route-evidence.mjs)" = "9511e0a3709812f24f26edeb011fb105ec44a434"
+          test "$(git hash-object src/manual-biomes/enchanted-original-authored-mouth-audit.mjs)" = "5c6f56e022e860d0b06cfc3ae0664a3b6cf3a2c6"
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-tick-trace.mjs)" = "470cb8968cd40ed336e98e67840f19198fcf8a7a"
+          node --check src/manual-biomes/enchanted-original-cave-descent-evidence.mjs
+          node --check tests/manual-biomes/enchanted-original-cave-descent-real-m7.test.mjs
+      - name: Only three new original-authored cave floor and physics research tests
+        id: native
+        run: node --test tests/manual-biomes/enchanted-original-cave-descent-real-m7.test.mjs
+      - name: Publish exact result and native run locator without moving a ref
+        if: always()
+        env:
+          AUTH_TOKEN: ${{ github.token }}
+          GUARD_OUTCOME: ${{ steps.guards.outcome }}
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          if [ "$GUARD_OUTCOME" = "success" ] && [ "$NATIVE_OUTCOME" = "success" ]; then
+            export NATIVE_STATUS=success
+            export NATIVE_DESCRIPTION="3/3 targeted original M7 authored cave descent cases passed"
+          else
+            export NATIVE_STATUS=failure
+            export NATIVE_DESCRIPTION="Original M7 cave descent source tests/guards failed"
+          fi
+          python3 - <<'PY' >/tmp/enchanted-p2-cave-descent-status.json
+          import json,os
+          print(json.dumps({
+            "state":os.environ["NATIVE_STATUS"],
+            "context":"enchanted-p2-authored-cave-descent-native",
+            "description":os.environ["NATIVE_DESCRIPTION"],
+            "target_url":os.environ["GITHUB_SERVER_URL"]+"/"+os.environ["GITHUB_REPOSITORY"]+
+              "/actions/runs/"+os.environ["GITHUB_RUN_ID"]
+          }))
+          PY
+          curl --fail-with-body --silent --show-error --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $AUTH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data-binary @/tmp/enchanted-p2-cave-descent-status.json \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" >/dev/null
