@@ -19,6 +19,10 @@ import {planFullOriginalM7CaveAnchorWalk,
 export const ORIGINAL_UPPER_M7_BOUNDS=Object.freeze({
   ownerSteps:24,waypoints:144
 });
+// The author owns immutable deterministic per-seed source maps. Keep a
+// bounded two-site research memo to avoid redundantly rebuilding all five
+// original cave source layers for each individual test/step.
+const originalOwnerCache=new Map();
 const known=Object.freeze({
   'upper24-windcut':0,'upper24-hollowbend':1
 });
@@ -45,6 +49,8 @@ function inspectOwnerCap(world,owner,x,floor,z){
   });
 }
 function sourceUpperOwner(seed,which){
+  const key=seed+','+which;
+  if(originalOwnerCache.has(key))return originalOwnerCache.get(key);
   // This duplicates NO plan geometry: call exactly the original source
   // composer inputs and the exact author exported upperCaveCells function.
   const originalSources=[
@@ -59,7 +65,11 @@ function sourceUpperOwner(seed,which){
     protectedCells,editedCells:new Set(),legacyCells:()=>null});
   if(!owner.ok)return fail('original-upper-owner-source-rejected',
     {originalOwnerReason:owner.reason,originalConflictCount:owner.conflictCount??0});
-  return Object.freeze({ok:true,site,owner});
+  const result=Object.freeze({ok:true,site,owner});
+  originalOwnerCache.set(key,result);
+  if(originalOwnerCache.size>4)
+    originalOwnerCache.delete(originalOwnerCache.keys().next().value);
+  return result;
 }
 
 // Two adjacent author route centers may differ by both x and z. An
