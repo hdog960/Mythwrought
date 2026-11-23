@@ -8,7 +8,7 @@ import {surveySnowS4LegacyGrassIslands} from './snowy-s4-legacy-grass-islands.mj
 const MAX_Y=19, AIR=0, GRASS=1, DIRT=2, STONE=3;
 const M7='mythwrought-five-surface-regions-v7';
 const SOIL=new Set([GRASS,DIRT,STONE]);
-const WOOD_LEAVES=new Set([4,5]);
+const WOOD_LEAVES=new Set([4,7]);
 const freeze=Object.freeze;
 const key=(x,y,z)=>x+','+y+','+z;
 const allowed=n=>Number.isSafeInteger(n)&&n>=0&&n<=65535;
