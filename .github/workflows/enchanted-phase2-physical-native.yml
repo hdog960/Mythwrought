@@ -1,8 +1,7 @@
-# Non-redundant original-world M7 physical climate survey only.
-# Prior exact 12/12 canopy budget and 14-leg winding routes passed on
-# source a4799ef8ddb8ce34002ba8fd533f40235188fc05, Actions #45088942632.
-# This run executes ONLY the new 8/10-leg multi-climate and seed -88 search.
-# No broad CI, unchanged tests, browsers or other developer workflows.
+# Enchanted Phase 2 isolated original-M7 source-grounded path search only.
+# One new read-only bounded AABB source-path helper and its original real
+# stepPlayer admission tests. Reuse #45088942632 and #45089099828:
+# no repeated unchanged legacy tests, browser galleries or broad CI.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -16,9 +15,9 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-short-multiclimate-traversal-survey:
+  source-real-bounded-pedestrian-paths:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,11 +26,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact source and one new changed-test syntax
+      - name: Exact source and narrow original-M7 walking test syntax
         run: |
           git rev-parse HEAD
-          node --check tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
-      - name: One new real original M7 short climate transition survey only
-        run: |
-          node --test --test-name-pattern="bounded short original-M7 physical survey" \
-            tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
+          node --check src/manual-biomes/enchanted-original-pedestrian-search.mjs
+          node --check tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
+      - name: Only changed source-real bounded climate pedestrian admission
+        run: node --test tests/manual-biomes/enchanted-original-pedestrian-search-real-m7.test.mjs
