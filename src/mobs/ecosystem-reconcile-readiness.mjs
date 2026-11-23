@@ -53,6 +53,17 @@ export function inspectOriginalReconcileReadiness({
   // Original world editRevision alone cannot detect MobEngine mutations
   // from a residency/protection callback. Re-read the source engine here.
   assertOriginalMobRosterUnchanged(rosterCertificate,engine.all());
+  // A host can return an unchanged snapshot then mutate original MobEngine
+  // immediately after materializing it. A second bounded readback catches
+  // that one-shot late mutation before returning an apparently ready state.
+  // Neither read writes to the source engine or claims private #away state.
+  assertOriginalMobRosterUnchanged(rosterCertificate,engine.all());
+  // The final MobEngine.all() call is still a host-controlled callback.
+  // An edit made DURING that roster read must not be silently accepted as
+  // the world whose residency and protection decisions were inspected.
+  // This is a read-only barrier; it never rewinds or mutates the world.
+  if(world.revision()!==revision)
+    throw new TypeError('World revision changed during reconcile inspection');
   // Residency/protection may rewrite observer without touching MobEngine or
   // world revision; reject stale reconcile decisions before global clock use.
   assertOriginalReconcileObserverUnchanged(sourceObserver,observer);
