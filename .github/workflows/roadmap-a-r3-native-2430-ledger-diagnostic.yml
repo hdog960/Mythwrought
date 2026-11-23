@@ -1,0 +1,22 @@
+name: Roadmap A original R3 exact 2430-ray ledger read-only diagnostic
+on:
+  push:
+    branches:
+      - roadmap-a-r3-native-2430-ledger-diagnostic-20261122
+    paths:
+      - '.github/workflows/roadmap-a-r3-native-2430-ledger-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  read-only-original-full-grid-reconciliation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only source/test syntax and eleven precise original R3 native cases
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs
+          node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
