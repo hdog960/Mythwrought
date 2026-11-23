@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {VIEWPORTS48,admitResonanceHud48} from '../src/resonance/devices48/viewport-admission-v1.mjs';
+import {bridgeHudAdmissionEvidence} from '../src/resonance/devices48/hud-admission-evidence-bridge-v1.mjs';
+const panel={x:220,y:8,width:220,height:40};
+const make=(block=-1)=>VIEWPORTS48.map((viewport,i)=>admitResonanceHud48({viewport,panel,reservedRects:i===block?[panel]:[],revision:4}));
+const run=reports=>bridgeHudAdmissionEvidence({world:'fixture',layout:'hud-v1',tick:9,revision:4,reports});
+test('three source admission reports produce safe immutable evidence',()=>{const x=run(make());assert.equal(x.safe,true);assert.equal(x.authority,'display-only');assert.equal(x.provenance,'caller-supplied-unverified');assert.ok(Object.isFrozen(x.evidence.frames));});
+test('one obstruction fails aggregate',()=>{const x=run(make(1));assert.equal(x.safe,false);assert.deepEqual(x.evidence.frames[0].samples[1].obstructions,['reserved:0']);});
+test('permutation yields identical canonical evidence',()=>assert.deepEqual(run(make().reverse()),run(make())));
+test('missing or duplicate viewports fail closed',()=>{assert.throws(()=>run(make().slice(0,2)));const r=make();r[2]=r[1];assert.throws(()=>run(r));});
+test('stale revision and forged authority rejected',()=>{const r=make();r[0]={...r[0],revision:3};assert.throws(()=>run(r));r[0]={...make()[0],authority:'production'};assert.throws(()=>run(r));});
+test('inconsistent admitted/blockers rejected',()=>{const r=make();r[0]={...r[0],admitted:false};assert.throws(()=>run(r));});
+test('invalid blocker order, duplicates, range rejected',()=>{for(const blockers of [[2,1],[1,1],[32],[-1]]){const r=make();r[0]={...r[0],admitted:false,blockers};assert.throws(()=>run(r));}});
+test('invalid world, layout, tick, and revision rejected',()=>{for(const change of [{world:'bad space'},{layout:''},{tick:-1},{revision:1.5}])assert.throws(()=>bridgeHudAdmissionEvidence({world:'fixture',layout:'hud-v1',tick:9,revision:4,reports:make(),...change}));});
+test('unknown report properties rejected',()=>{const r=make();r[0]={...r[0],productionBound:true};assert.throws(()=>run(r));});
+test('non-admission data cannot be promoted',()=>assert.throws(()=>run([{},...make().slice(1)])));

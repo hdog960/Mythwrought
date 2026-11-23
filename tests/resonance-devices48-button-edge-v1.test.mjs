@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { advanceButtonEdge as step, BUTTON_EDGE_CONTRACT } from '../src/resonance/devices48/button-edge-v1.mjs';
+const input = (tick, pressed, powered = true, extra = {}) => ({worldId:'fixture', deviceId:'button-1', tick, pressed, powered, ...extra});
+test('contract and immutable output', () => { const a=step(null,input(0,false)); assert.equal(a.contract,BUTTON_EDGE_CONTRACT); assert.ok(Object.isFrozen(a)); });
+test('rising edge observed only once while held', () => {const a=step(null,input(0,true)); const b=step(a,input(1,true)); assert.equal(a.observedPress,true); assert.equal(b.observedPress,false); assert.equal(b.edgeCount,1);});
+test('release and repress produce new edge', () => {const a=step(null,input(0,true)); const b=step(a,input(1,false)); const c=step(b,input(2,true)); assert.equal(b.falling,true); assert.equal(c.edgeCount,2);});
+test('power loss never authorizes activation', () => {const a=step(null,input(0,true,false)); assert.equal(a.observedPress,false); assert.equal(a.activationAuthorized,false);});
+test('power restoration while held does not invent press', () => {const a=step(null,input(0,true,false)); const b=step(a,input(1,true,true)); assert.equal(b.observedPress,false);});
+test('reject skipped or replayed ticks', () => {const a=step(null,input(0,false)); assert.throws(()=>step(a,input(2,true))); assert.throws(()=>step(a,input(0,true)));});
+test('reject cross-world or cross-device reuse', () => {const a=step(null,input(0,false)); assert.throws(()=>step(a,input(1,true,true,{worldId:'other'}))); assert.throws(()=>step(a,input(1,true,true,{deviceId:'other'})));});
+test('reject malformed input', () => {for (const x of [null,{},input(-1,true),input(0,1),input(0,true,'yes')]) assert.throws(()=>step(null,x));});
+test('reject forged previous authority', () => {const a=step(null,input(0,false)); assert.throws(()=>step({...a,activationAuthorized:true},input(1,true)));});
+test('reject malformed prior count', () => {const a=step(null,input(0,false)); assert.throws(()=>step({...a,edgeCount:999},input(1,true)));});
