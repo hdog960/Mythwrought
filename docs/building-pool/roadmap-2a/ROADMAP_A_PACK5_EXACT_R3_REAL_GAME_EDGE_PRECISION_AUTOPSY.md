@@ -94,3 +94,33 @@ The original full-grid Node CI [Actions #45098096521](https://github.com/hdog960
 The **one failed case** was the expanded full 2,430-ray ledger: some original camera \`forwardVector\` outputs are only nearly unit length, not bitwise unit length. The unchanged \`makePack5Fixture().raycast\` calculates \`length=Math.hypot(...direction)\` then \`unit=direction.map(v=>v/length)\` BEFORE original slab ray intersection. The new independent box comparator had used the raw near-unit vector; at floating-point grazing boundaries its comparisons could legitimately differ from the real original fixture. This is a **forensic test model fidelity bug**, not proof of a production hitbox bug. The isolated comparator has been corrected to copy this exact normalization, and the source drift guard explicitly checks the unchanged original normalization line. The expanded eleven tests will be executed on a separate CI-only exact child. No original raycaster, selection AABB, shader, renderer, world or A5 source has been edited; no artificial tolerance added.
 
 **Do not claim the full 2,430 strict-vs-GPU Float32 classification is validated before that new native check passes.** The prior 9/9 original exact R3 single-witness native test [#45097845630](https://github.com/hdog960/Mythwrought/actions/runs/45097845630) remains independently genuine/green. Previous real-game R3 WebGL2 [#45092582089](https://github.com/hdog960/Mythwrought/actions/runs/45092582089) stays authentic. Full original game browser/iPhone is not rerun by this source-only diagnostic.
+
+## Exact full 2430-source-ray reconciliation: two tolerance artifacts, zero strict triangle-only gaps
+
+Actions [#45098391774](https://github.com/hdog960/Mythwrought/actions/runs/45098391774) executed the expanded authentic native Node original repository source audit, and gave **10/11 new cases PASS**. The remaining test was the original Chromium vs Node hard-threshold **count equality** assertion, not a mesh/selection integrity failure. The native source produced exact hit/miss agreement with authentic original Chromium R3 Actions #45092582089:
+
+| Metric | R3 Chromium research source | Expanded exact original Node source |
+|---|---:|---:|
+| Rays | 2,430 | 2,430 |
+| Original relaxed-triangle-only hits / selection misses | 2 | 2 |
+| Original original selection-only hits | 0 | 0 |
+| Both hit | 2,301 | 2,301 |
+| Both miss | 127 | 127 |
+| Both hit but > 2e-7 distance tolerance | **146** | **147** |
+| Strict-triangle-only original research mesh | not measured | **0** |
+| Strict-triangle-only actual renderer world-space Float32 | not measured | **0** |
+| Both relaxed-only hits with NEGATIVE barycentric margin | not measured | **2** |
+| Float32-quantized original selection box hit on these 2 cases | not measured | **0** |
+
+The original R3 Chromium source 146 and newer original Node 147 **must both remain recorded**. Exactly ONE warning straddles a tight 2e-7 measured distance comparator when reconstructed across the two execution environments or their calculations. Its exact cause is NOT yet isolated, and this is not evidence of one distinct gameplay bug. Do not weaken reach/occlusion/selection or falsely report identical numbers. The Native audit acceptance has been corrected to **require** its exact measured 147, preserve the original independent browser 146 and label the gap explicitly, while fail-closing on all 2,430 original hit/miss partitions.
+
+The source-diagnostic's **two complete rare triangle-only witnesses** both have strictly negative triangle barycentric margins within the old source helper's permissive 1e-7 tolerance:
+
+1. Target local \`[0, 0.972998, 0.027]\`, yaw \`1.757786033928741\`, pitch \`0.5099378275702837\`: relaxed source hit \`2.915244810989979\`, **strict research triangle null**, **strict true-world GPU Float32 triangle null**, original authored AABB null and original float32-quantized box null; barycentric margin \`-3.367090616210211e-9\`.
+2. Target local \`[0, 0.973, 0.027]\`, yaw \`1.757786033928741\`, pitch \`0.5099384263361656\`: relaxed source hit \`2.9152457872364725\`, **strict research triangle null**, **strict true-world GPU Float32 triangle null**, original authored AABB null and Float32 box null; barycentric margin \`-2.5808197690047052e-8\`. The second actual world-GPU Float32 *relaxed* source intersection is itself NULL.
+
+Original actual-world vertex translation makes **2,988** Float32 coordinate values differ from naive JavaScript double addition over 1,908 source vertices, but does NOT create strict triangle-only selection gaps on the 2,430 original fixed player-pose samples. Original renderer-world positions produce **2,298** strict mathematical source triangle intersections in that grid, and **zero** strictly rendered-triangle-only original selection misses. Actual WebGL raster fragment coverage near the mathematical center is STILL NOT measured; neither count proves all gameplay edge cases on other variants or viewports.
+
+**Consequence:** The original R3 screenshot/MINE observation is genuine, but the two original "triangle-only" analytic classifications were **permissive triangle-helper tolerance artifacts**, not an established production picker error. A production hitbox padding or triangle-picking patch is NOT warranted from these two cases alone. Preserve the real game original selection geometry as-is pending more specific geometric proof. All original authored game source, user worlds, source A5 building variants, schema1, PWA and protected refs remain unchanged.
+
+The corrected 11th test is the same narrow source-only targeted native suite, no browser or duplicate historical broad CI. Once exact new CI completes green, report that complete result and update this checkpoint; do not report this previous 10/11 run as a PASS.

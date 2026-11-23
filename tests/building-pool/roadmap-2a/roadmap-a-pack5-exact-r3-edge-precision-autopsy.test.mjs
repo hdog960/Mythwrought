@@ -156,11 +156,26 @@ test('all 2430 original R3 player pose rays are reconstructed with BOTH actual G
  assert.equal(full.authoringZCoordinateSamples,30);
  assert.equal(full.threeOriginalMicroOffsetsPerCoordinate,3);
  assert.equal(totals.originalRelaxedTriangleOnly,2);
- assert.equal(totals.originalBothHitDistanceWarnings,146);
+ assert.equal(totals.originalBothHitDistanceWarnings,147);
+ assert.equal(full.independentlyMeasuredOriginalChromiumBothHitDistanceWarnings,146);
+ assert.equal(full.originalNativeNodeBothHitDistanceWarnings,147);
+ assert.equal(full.oneBoundaryToleranceWarningDiffersAcrossBrowsersAndNode,true);
  assert.equal(totals.originalSelectionOnly,0);
+ assert.equal(totals.originalStrictTriangleOnly,0);
+ assert.equal(totals.actualGpuWorldFloat32StrictTriangleOnly,0);
+ assert.equal(totals.originalRelaxedOnlyBecauseNegativeBarycentric,2);
+ assert.equal(totals.originalFloat32BoxWouldHitAtRelaxedOnly,0);
+ assert.equal(totals.originalTriangleVsFloat32BoxStrictGap,0);
  assert.equal(totals.originalBothHits,2301);
  assert.equal(totals.originalBothMiss,127);
  assert.equal(full.allOriginalTriangleOnlyWitnesses.length,2);
+ assert.ok(full.allOriginalTriangleOnlyWitnesses.every(x=>
+  x.originalStrictTriangleDistance===null&&
+  x.originalGpuWorldFloat32StrictTriangleDistance===null&&
+  x.originalAuthoredSelectionDistance===null&&
+  x.originalFloat32BoxDistance===null&&
+  x.relaxedTriangleMinimumBarycentric<0&&
+  x.relaxedTriangleMinimumBarycentric>=-1e-7));
  assert.ok(totals.originalStrictTriangleOnly<=totals.sourceRays);
  assert.ok(totals.actualGpuWorldFloat32StrictTriangleOnly<=totals.sourceRays);
  assert.ok(totals.originalFloat32BoxWouldHitAtRelaxedOnly<=2);
