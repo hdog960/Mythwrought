@@ -1,0 +1,24 @@
+name: Roadmap A exact R3 all 2430 strict renderer source rays final Node parity
+on:
+  push:
+    branches:
+      - roadmap-a-r3-all2430-strict-node-r3-native-20261122
+    paths:
+      - '.github/workflows/roadmap-a-r3-all2430-strict-node-r3-native.yml'
+permissions:
+  contents: read
+jobs:
+  exact-original-source-strict-gpu-world-vs-research:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Only changed isolated original strict source and test syntax
+        run: |
+          node --check src/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
+      - name: Only eleven new exact real R3 all-2430 source player-ray regressions
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-pack5-exact-r3-edge-precision-autopsy.test.mjs
