@@ -443,7 +443,7 @@ function start(nonblockStage=null){
   // An independent mine-bound frame window prevents idle/control-menu frames
   // before or after the actual 100 source-saved edits from moving its p95.
   const near291NewMineWindow=()=>({
-    phase:'idle',savedMines:0,frames:new Float64Array(8192),
+    phase:'idle',savedMines:0,frames:new Float64Array(16384),
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     overflow:false,invalid:false,interrupted:false
   });
