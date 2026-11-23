@@ -75,11 +75,16 @@ test('actual oasis-water protected source is not promoted to Desert hardpan/scre
  // The search above is deliberately real and bounded. If no oasis was
  // admitted by the ORIGINAL generator, do not invent a non-source oasis.
  if(!winner){
-  console.log('DESERT_P3_OASIS_NO_AUTHENTIC_WATER '+JSON.stringify({
-   sourceSiteProbes:report.sourceSiteProbes,
-   conclusion:'No fabricated positive oasis; full live-oasis assertions explicitly not established'}));
-  assert.ok(report.sourceSiteProbes>0);
-  return;
+  // Exact genuinely generated source from prior first native #45169842285:
+  // allows this follow-up to run alone without repeating the 4-seed census.
+  const seed=179,point=[-1546,9,2];
+  const probe=new FourRegionWorld(seed,fourRegionProfile(seed,M7));
+  const region=v6BiomeAt(point[0],point[2],seed);
+  assert.equal(region?.name,'desert');
+  const plan=probe._oasisNear(point[0],point[2],0,region);
+  assert.ok(plan?.water.some(([x,y,z])=>x===point[0]&&y===point[1]&&z===point[2]),
+    'Pinned origin MUST be rediscovered from genuine original oasis source');
+  winner={seed,point,center:plan.center,tile:region.center};
  }
  const {seed,point:[x,y,z],center,tile}=winner,profile=fourRegionProfile(seed,M7);
  const w=new FourRegionWorld(seed,profile);
@@ -121,15 +126,26 @@ test('actual oasis-water protected source is not promoted to Desert hardpan/scre
  assert.equal(reload.get(x,y,z),BLOCK.AIR);
  assert.deepEqual(pack2WaterSectionVertices(new Pack2LiveWorld(reload),cx,cz,0),
   pack2WaterSectionVertices(wrapped,cx,cz,0));
- assert.ok(w.set(x,y,z,OASIS_WATER.id));
- assert.deepEqual(w.save().edits,[]);
- assert.deepEqual(meshChunk(w,cx,cz),baseline);
- assert.deepEqual(pack2WaterSectionVertices(wrapped,cx,cz,0),fluid);
+ // ID76 is a Pack2 water sidecar, forbidden by original VoxelWorld.set.
+ // DO NOT loosen an authoritative gameplay registry to simulate undo.
+ assert.equal(w.set(x,y,z,OASIS_WATER.id),false,
+  'Original terrain setter must reject Pack2 ID76, not silently insert water');
+ assert.equal(w.get(x,y,z),BLOCK.AIR);
+ assert.equal(w.save().edits.length,1);
+ // Canonical restoration of the unedited natural M7 world is the supported
+ // baseline reset and must recreate the exact same original physical source.
+ const fresh=restoreFourRegionWorld({schema:1,seed,edits:[]},profile);
+ assert.deepEqual(fresh.save().edits,[]);
+ assert.equal(fresh.get(x,y,z),OASIS_WATER.id);
+ assert.equal(fresh.environmentWaterState(x,y,z)?.id,OASIS_WATER.id);
+ assert.deepEqual(meshChunk(fresh,cx,cz),baseline);
+ assert.deepEqual(pack2WaterSectionVertices(new Pack2LiveWorld(fresh),cx,cz,0),fluid);
  console.log('DESERT_P3_OASIS_ORIGINAL_WATER_SAVE '+JSON.stringify({
   seed,center,tile,originalWater:[x,y,z],tag:OASIS_WATER.id,
   originalChunk:[cx,cz],opaqueVertexBytes:baseline.byteLength,
   waterVertexBytes:fluid.byteLength,fluidEntries:entries.length,
-  savedEditRowsAfterEdit:save.edits.length,savedEditRowsAfterUndo:0,
+  savedEditRowsAfterEdit:save.edits.length,savedEditRowsAfterCanonicalReset:0,
+  originalTerrainSetterRejectsPack2WaterId:true,
   acceptedSourceOpaqueFloat32Parity:true,
   note:'genuine accepted environmental water and source-only disposable save test'}));
 });
