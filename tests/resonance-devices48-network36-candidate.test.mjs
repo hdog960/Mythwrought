@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mapNetwork36Candidate} from '../src/resonance/devices48/network36-candidate-v1.mjs';
+const sha='0cc51c6a89fce1a9928216caeebf2930b5e07f45';
+const batch={contract:'resonance-devices48-batch-v1',seed:7,tick:4,demand:5,entries:[{deviceId:'collector',demand:2},{deviceId:'processor',demand:3}]};
+const upstream={contract:'resonance-network36-proposal-v1',tick:4,deviceStates:{collector:'active',processor:'shortage'}};
+const options={expectedSeed:7,expectedTick:4,sourceSha:sha};
+test('candidate flags never claim delivered energy',()=>{const result=mapNetwork36Candidate(batch,upstream,options);assert.deepEqual(result.candidateGrants,[{id:'collector',granted:2},{id:'processor',granted:0}]);assert.equal(result.delivered,false);assert.equal(result.productionBound,false);});
+test('world and tick mismatch fail closed',()=>{assert.throws(()=>mapNetwork36Candidate(batch,upstream,{...options,expectedSeed:8}));assert.throws(()=>mapNetwork36Candidate(batch,{...upstream,tick:5},options));});
+test('unverified source and malformed upstream fail closed',()=>{assert.throws(()=>mapNetwork36Candidate(batch,upstream,{...options,sourceSha:'main'}));assert.throws(()=>mapNetwork36Candidate(batch,{...upstream,deviceStates:{collector:'active'}},options));assert.throws(()=>mapNetwork36Candidate(batch,{...upstream,deviceStates:{collector:'active',processor:'unknown'}},options));});
+test('duplicate identities and falsified demand rejected',()=>{assert.throws(()=>mapNetwork36Candidate({...batch,entries:[batch.entries[0],batch.entries[0]],demand:4},upstream,options));assert.throws(()=>mapNetwork36Candidate({...batch,demand:6},upstream,options));});
