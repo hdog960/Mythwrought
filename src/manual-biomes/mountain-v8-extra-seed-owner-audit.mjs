@@ -21,14 +21,17 @@ export function auditMountainV8ExtraSeedOwners(storage,seed){
     throw new TypeError('Cannot enumerate original owner keys');
   const exactBase=CAVE_MOB_PREFIX+seed;
   const seen=new Set();
+  let claimed=false;
   for(let i=0;i<storage.length;i++){
     const key=storage.key(i);
     // A broken/partial enumeration must NOT certify a free seed.
     if(typeof key!=='string'||seen.has(key))
       throw new Error('Unverifiable original owner enumeration');
     seen.add(key);
-    if(suffixes.some(s=>key===exactBase+s))
-      return result(true,'existing-cave-mob-roster-or-backup');
+    // Do not exit early after a matched key: enumerate the ENTIRE storage
+    // snapshot so a duplicated/malformed later key cannot be called safe.
+    if(suffixes.some(s=>key===exactBase+s))claimed=true;
   }
-  return result(false,'no-known-extra-local-claims');
+  return result(claimed,claimed?'existing-cave-mob-roster-or-backup':
+    'no-known-extra-local-claims');
 }
