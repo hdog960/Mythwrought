@@ -19,12 +19,14 @@ import {surveyCityGalleryFloorCutsets}
  from '../../src/living-underworld/city-gallery-floor-cutset-survey.mjs';
 import {auditSourceProtectedCityUnderpass}
  from '../../src/living-underworld/city-gallery-grade-separated-underpass.mjs';
+import {createCitySourceCrossAuditLedger}
+ from '../../src/living-underworld/source-cross-audit-ledger.mjs';
 const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
 const world=new FourRegionWorld(seed,
  fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
 const original=new VoxelWorld(seed);
-const source=Object.freeze({
+const originalSource=Object.freeze({
  naturalAt:(x,y,z)=>world.naturalAndLandmarkBlock(x,y,z),
  authoredAt:(x,y,z)=>world.environmentCaves?.get(x,y,z),
  editedAt:(x,y,z)=>world.edits.has(x+','+y+','+z),
@@ -34,6 +36,11 @@ const source=Object.freeze({
 const rows=[];
 for(const [rx,rz] of regions){
  const siteStarted=performance.now();
+ // One caller-provided original FourRegionWorld/VoxelWorld source cohort;
+ // bounded read-only ledger spans BOTH prior joined deep-city selection and
+ // later underpass without a single additional terrain query.
+ const sourceLedger=createCitySourceCrossAuditLedger(originalSource);
+ const source=sourceLedger.readers;
  if(!planUnderworldRegion(seed,rx,rz).cityCandidate)
   throw Error('Original deterministic city-site plan changed');
  // The new bounded city-aware optimizer invokes the COMPLETE original-source
@@ -68,6 +75,7 @@ for(const [rx,rz] of regions){
  // full-depth landing near the center. NEVER permit its success to waive
  // the historical full-ellipse source/geometry refusal.
  const underpassStarted=performance.now();
+ if(approved)sourceLedger.beginUnderpass();
  const underpass=approved?auditSourceProtectedCityUnderpass(
   seed,rx,rz,{source,sourceOwnedDeepSelection:deep,
    maxTotalSourceChecks:150000,auditHypotheticalMovement:true,
@@ -75,6 +83,12 @@ for(const [rx,rz] of regions){
  ):Object.freeze({ok:false,
   reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
   sourceChecks:deep.sourceChecks??0,worldChanged:false});
+ const crossAudit=approved?sourceLedger.audit():Object.freeze({
+  ok:false,reason:'FOUR_HUB_ORIGINAL_SOURCE_PROOF_REQUIRED',
+  sourceCallbackCallsByRoleBeforeUnderpass:null,
+  comparedSourceReturnsAcrossPhases:0,
+  originalCallbackBindingsUnchanged:false
+ });
  rows.push(Object.freeze({seed,rx,rz,
   regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7TerrainReadOnly:true,
@@ -199,6 +213,24 @@ for(const [rx,rz] of regions){
    underpass.sourceReaderCohortAuthenticM7WorldNotVerified===true,
   candidateThinUnderpassPriorDeepSourceReaderCohortRefusal:
    underpass.readerCohortReason??null,
+  candidateThinUnderpassCrossAuditLedgerSafe:crossAudit.ok===true,
+  candidateThinUnderpassCrossAuditLedgerReason:crossAudit.reason??null,
+  candidateThinUnderpassCrossAuditLedgerFirstMismatch:
+   crossAudit.firstMismatch??null,
+  candidateThinUnderpassCrossAuditLedgerPriorCalls:
+   crossAudit.priorCalls??null,
+  candidateThinUnderpassCrossAuditLedgerUnderpassCalls:
+   crossAudit.underpassCalls??null,
+  candidateThinUnderpassCrossAuditLedgerCrossPhaseCellsByRole:
+   crossAudit.crossPhaseComparedCellsByRole??null,
+  candidateThinUnderpassCrossAuditLedgerComparedReturnCount:
+   crossAudit.comparedSourceReturnsAcrossPhases??null,
+  candidateThinUnderpassCrossAuditLedgerTotalCalls:
+   crossAudit.totalSourceCallbackCalls??null,
+  candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged:
+   crossAudit.originalCallbackBindingsUnchanged===true,
+  candidateThinUnderpassCrossAuditLedgerCallerOnly:true,
+  candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries:true,
   candidateThinUnderpassSourceOverlapRefusal:
    underpass.overlapValueReason??null,
   candidateThinUnderpassSourceOverlapFirstMismatch:
