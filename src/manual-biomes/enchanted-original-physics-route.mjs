@@ -85,7 +85,7 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
   maxRoutes=ENCHANTED_PHYSICS_ROUTE_LIMITS.routes,
   maxEdgeAttempts=ENCHANTED_PHYSICS_ROUTE_LIMITS.edgeAttempts,
   maxPhysicsTicks=ENCHANTED_PHYSICS_ROUTE_LIMITS.physicsTicks,
-  minDisplacement=4,maxArrivalsPerCell=1
+  minDisplacement=4,maxArrivalsPerCell=1,corridor=null
 }={}){
   const lim=ENCHANTED_PHYSICS_ROUTE_LIMITS;
   if(world?.profile?.generator!==M7_ENVIRONMENT_GENERATOR||
@@ -101,12 +101,25 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
      !Number.isInteger(minDisplacement)||minDisplacement<1||minDisplacement>radius*2||
      !Number.isInteger(maxArrivalsPerCell)||maxArrivalsPerCell<1||
      maxArrivalsPerCell>2||
+     (corridor!==null&&(
+       typeof corridor!=='object'||Array.isArray(corridor)||
+       !['west','east','north','south'].includes(corridor.direction)||
+       !Number.isInteger(corridor.width)||corridor.width<1||
+       corridor.width>12||
+       !Number.isInteger(corridor.backtrack)||corridor.backtrack<0||
+       corridor.backtrack>4
+     ))||
      targetBiome!==null&&(typeof targetBiome!=='string'||!targetBiome))
     throw Error('Invalid original M7 physics-admitted route query');
   const sourceBiome=climate(x,z,seed);
   const stats={seed,origin:[x,z],sourceBiome,targetBiome,
     maxVisits,maxSteps,maxEdgeAttempts,maxPhysicsTicks,radius,maxArrivalsPerCell,
     visited:0,supported:0,edgeAttempts:0,physicsTicks:0,
+    corridor:corridor?Object.freeze({
+      direction:corridor.direction,width:corridor.width,
+      backtrack:corridor.backtrack
+    }):null,
+    rejectedCorridor:0,visitedTargetBiome:0,
     alternateArrivals:0,duplicateArrivalRejected:0,
     distinctCells:0,peakArrivalsAtCell:0,
     rejectedGround:0,rejectedHeight:0,rejectedCorners:0,
@@ -140,6 +153,7 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
     const item=queue[cursor],here=item.ground;
     stats.visited++;
     const biome=climate(here.x,here.z,seed);
+    if(biome===targetBiome)stats.visitedTargetBiome++;
     if(item.depth>0&&
        Math.hypot(here.x-x,here.z-z)>=minDisplacement&&
        biome!==sourceBiome&&
@@ -160,6 +174,21 @@ export function searchOriginalM7PhysicsAdmittedRoutes(world,{
          stats.physicsTicks>=maxPhysicsTicks){stats.truncated=true;break;}
       const nx=here.x+dx,nz=here.z+dz,id=key(nx,nz);
       if(id===originKey||Math.abs(nx-x)>radius||Math.abs(nz-z)>radius)continue;
+      if(corridor){
+        // Deterministic straight physical search WINDOW, not directional
+        // priority or a fabricated route. Never changes FIFO node ordering.
+        // All candidate edges are still admitted by original stepPlayer.
+        const fx=nx-x,fz=nz-z;
+        const forward=corridor.direction==='west'?-fx:
+          corridor.direction==='east'?fx:
+          corridor.direction==='north'?-fz:fz;
+        const lateral=corridor.direction==='west'||
+          corridor.direction==='east'?fz:fx;
+        if(forward< -corridor.backtrack||
+           Math.abs(lateral)>corridor.width){
+          stats.rejectedCorridor++;continue;
+        }
+      }
       const heading=dx+','+dz,priorArrivals=arrivals.get(id);
       if(priorArrivals&&(priorArrivals.has(heading)||
         priorArrivals.size>=maxArrivalsPerCell)){
