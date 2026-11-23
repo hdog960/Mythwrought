@@ -447,7 +447,9 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     gradeMovementReason:motionGrade.reason??'ELEVATION_CENSUS_DRIFT',
     gradeMovementFirstRefusal:motionGrade.ok?null:motionGrade,
     gradeElevationEdges:motionGrade.elevationEdges??null,
-    sourceReadsAfterMovement:0,oldWorldPhysicalMotionUnverified:true
+    extraOriginalSourceVisitsChargedForMovement:0,
+    oldWorldReaderCallsNotInstrumentedHere:true,
+    oldWorldPhysicalMotionUnverified:true
    });
   motionWalk=auditCandidateUnderpassContinuousStepPlayer(args);
   if(!motionWalk.ok||motionWalk.gradeElevationEdges!==motionGrade.elevationEdges)
@@ -458,7 +460,9 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
     continuousMovementReason:motionWalk.reason??'ELEVATION_CENSUS_DRIFT',
     continuousMovementFirstRefusal:motionWalk.ok?null:motionWalk,
     gradeElevationEdges:motionGrade.elevationEdges,
-    sourceReadsAfterMovement:0,oldWorldPhysicalMotionUnverified:true
+    extraOriginalSourceVisitsChargedForMovement:0,
+    oldWorldReaderCallsNotInstrumentedHere:true,
+    oldWorldPhysicalMotionUnverified:true
    });
  }
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
