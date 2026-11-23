@@ -1,0 +1,47 @@
+name: Desert P3 original-source M7 oasis water/landmark protection
+on:
+  push:
+    branches:
+      - research/desert-p3-oasis-provenance-gate-20261123
+    paths:
+      - .github/workflows/desert-p3-original-oasis-source.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-original-oasis-source
+  cancel-in-progress: false
+jobs:
+  native-original-oasis:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          path: accepted
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check clean original accepted lineage, owned source and no rejected shader
+        run: |
+          set -euo pipefail
+          test "$(git -C accepted rev-parse HEAD)" = 2bd0395d3ef163e9fdc491ab5119b1ee80844194
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          BASE=d0e1e42e5965a69c664fbcd9baefd595cbaea22e
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(tests/desert-p3-original-oasis-source-gate.test.mjs|.github/workflows/desert-p3-original-oasis-source.yml|docs/desert/PHASE3_ORIGINAL_OASIS_AND_IPHONE_GATE_20261123.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/gpu-recovery.mjs)" = 422ef73e383bda78ff94607abb858e3c8a57c2d1
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/profile-world.mjs)" = ffad7e10c07e9252bfaaf8381962443ce658abff
+          test "$(git -C candidate rev-parse HEAD:src/manual-biomes/desert-seam-invalidation.mjs)" = 5c40d34eadf683613f6746e456e885087d168627
+          test ! -e candidate/src/manual-biomes/desert-seam-shader.mjs
+          node --check candidate/tests/desert-p3-original-oasis-source-gate.test.mjs
+      - name: Only new genuine M7 source oasis plans, water RGB veto, Pack2 fluid/save source checks
+        run: cd candidate && node --test tests/desert-p3-original-oasis-source-gate.test.mjs
