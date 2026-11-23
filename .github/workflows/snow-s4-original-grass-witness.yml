@@ -1,0 +1,29 @@
+name: Snow S4 original retained-grass witnesses (isolated follow-up)
+on:
+  push:
+    branches:
+      - research/snow-s4-physical-edge-original-native-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s4-original-grass-witness.yml'
+      - 'tests/snowy-s4-physical-edge-original-grass-sites.test.mjs'
+permissions:
+  contents: read
+jobs:
+  exact-original-grass:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact HEAD and genuine grass witness source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check tests/snowy-s4-physical-edge-original-grass-sites.test.mjs
+          test -f src/manual-biomes/profile-world.mjs
+      - name: Genuine original seed179/2026 retained-grass source and physical-edge veto
+        run: node --test tests/snowy-s4-physical-edge-original-grass-sites.test.mjs
