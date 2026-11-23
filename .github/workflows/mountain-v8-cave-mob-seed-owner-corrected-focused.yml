@@ -1,0 +1,35 @@
+name: Mountain V8 corrected cave-mob original seed preservation
+# One focused native retest after original failure #45190608923 (5/6).
+# This tests ONLY modified original-ownership research source and seven tests.
+# No full/root suite, no PR trigger, no recurring schedule or deployment.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-cave-mob-seed-owner-corrected-focused.yml
+permissions:
+  contents: read
+jobs:
+  source-owner-preservation:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact isolated source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Node 22 original repository
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact-source identity, changed-file syntax, and 7 cases only
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-extra-seed-owner-audit.mjs
+          node --check src/manual-biomes/mountain-v8-opt-in-seed-preflight.mjs
+          node --check tests/mountain-v8-extra-seed-owner-audit.test.mjs
+          node --test --test-concurrency=1 tests/mountain-v8-extra-seed-owner-audit.test.mjs
