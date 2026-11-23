@@ -44,7 +44,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     for (const [label,run,mode] of [['control',control,'original-control'],
                                     ['candidate',candidate,'experimental-vao']]) {
       if (run.mode !== mode) fail(label + ' renderer identity is incorrect');
-      if (run.protocol !== '291-local-4viewport-v3') fail(label + ' protocol is not certified for comparison');
+      if (run.protocol !== '291-local-4viewport-v4') fail(label + ' protocol is not certified for comparison');
       if (viewportKey(run.viewportCss) !== target) fail(label + ' CSS viewport differs from expected');
       if (!viewportKey(run.viewportPixels)) fail(label + ' physical buffer viewport is not landscape');
       if (run.fatal !== false || run.graphicsLost !== false || run.pageSuspended !== false)
@@ -72,7 +72,8 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       const trial=run.mineFrameWindow;
       if (!trial || trial.phase!=='complete' || trial.savedMines!==100 ||
           trial.overflow!==false || trial.invalid!==false ||
-          trial.interrupted!==false ||
+          trial.interrupted!==false || trial.editPending!==false ||
+          trial.invalidReason!==null ||
           !validCount(trial.frameGapsRecorded) || trial.frameGapsRecorded<101 ||
           trial.maxFrameSamples!==16384 ||
           trial.frameGapsRecorded>trial.maxFrameSamples ||
