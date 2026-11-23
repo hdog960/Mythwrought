@@ -35,6 +35,9 @@ export function buildBrackenmereThreeSiloCrossyardGranary(){
  for(const [x0,x1] of [[10,19],[25,37],[44,55]])
   for(let x=x0;x<=x1;x++)for(let z=64;z<=79;z++)
    if(!indoor.has(key(x,z))&&!sky.has(key(x,z)))outer.add(key(x,z));
+ for(const [x0,x1]of [[12,18],[46,52]])
+  for(let x=x0;x<=x1;x++)for(let z=62;z<=65;z++)
+   if(!indoor.has(key(x,z))&&!sky.has(key(x,z)))outer.add(key(x,z));
  for(let x=14;x<=51;x++)for(let z=75;z<=79;z++)
   if(!indoor.has(key(x,z))&&!sky.has(key(x,z)))outer.add(key(x,z));
  const grounded=(x,z)=>indoor.has(key(x,z))||sky.has(key(x,z))||outer.has(key(x,z));
