@@ -51,6 +51,17 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
         fail(label + ' has a fatal/suspended graphics state');
       if (!validCount(run.trueSavedDeepMines) || run.trueSavedDeepMines < ISSUE291_MIN_DEEP_MINES)
         fail(label + ' has fewer than 100 actual saved deep MINE actions');
+      // Count/seed alone is not proof that the same voxels were mined.
+      // This is a fully ordered source-original trace of actual successful
+      // saved MINE results; fail closed for missing, truncated or forged rows.
+      const witness=run.mineWitness;
+      if (!Array.isArray(witness) || witness.length !== run.trueSavedDeepMines ||
+          run.mineWitnessOverflow !== false || run.mineWitnessInvalid !== false ||
+          !witness.every(row=>Array.isArray(row) && row.length===5 &&
+            row.every(Number.isSafeInteger) && row[1]<-5 &&
+            row[3]>0 && row[4]===0) ||
+          new Set(witness.map(row=>row.slice(0,3).join(','))).size !== witness.length)
+        fail(label + ' lacks a complete unique ordered source-saved deep MINE witness');
       if (!validCount(run.frameGapsRecorded) || run.frameGapsRecorded < 100 ||
           !validCount(run.rollingFrameCount) || run.rollingFrameCount !==
           Math.min(run.frameGapsRecorded,2048)) fail(label + ' lacks a consistent real foreground frame window');
@@ -80,6 +91,8 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       fail('Original physical rendering viewport differs between control and VAO');
     if (control.trueSavedDeepMines !== candidate.trueSavedDeepMines)
       fail('Control and VAO saved deep-MINE counts are unequal');
+    if (JSON.stringify(control.mineWitness) !== JSON.stringify(candidate.mineWitness))
+      fail('Control and VAO saved deep-MINE cell/previous-ID order differs');
     if (control.frameGapsRecorded !== candidate.frameGapsRecorded)
       fail('Control and VAO frame observation counts are unequal');
     if (validCount(control.rollingSlowFrames) && validCount(candidate.rollingSlowFrames) &&
@@ -94,6 +107,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     if (frameGain === null || frameGain + 1e-12 < ISSUE291_REQUIRED_IMPROVEMENT)
       fail('Foreground frame p95 has not improved by at least 10%');
     comparisons.push(Object.freeze({viewport:target,seed:control.seed,
+      witnessedMineActions:Array.isArray(control.mineWitness)?control.mineWitness.length:0,
       controlMines:control.trueSavedDeepMines,candidateMines:candidate.trueSavedDeepMines,
       actionImprovementPct:actionGain===null?null:Math.round(actionGain*10000)/100,
       frameImprovementPct:frameGain===null?null:Math.round(frameGain*10000)/100,
