@@ -85,7 +85,18 @@ export function classifyExactHeadOriginalM7Triplet({
    const sourceVisitSumValid=visits.every(Number.isSafeInteger)&&
     bridge>0&&pad===135&&previous>0&&
     total===previous+bridge+pad&&total<=150000;
-   return sourceVisitSumValid&&
+   const expectedRoleCalls=bridge+pad;
+   const roles=r.candidateThinUnderpassActualReaderCallsByRole;
+   const sourceReaderParityValid=sourceVisitSumValid&&roles!=null&&
+    typeof roles==='object'&&
+    ['naturalAt','authoredAt','editedAt','protectedAt'].every(role=>
+     Number.isSafeInteger(roles[role])&&
+     roles[role]===expectedRoleCalls)&&
+    r.candidateThinUnderpassExpectedReaderCallsPerRole===expectedRoleCalls&&
+    r.candidateThinUnderpassActualReaderMethodCalls===expectedRoleCalls*4&&
+    yes(r.candidateThinUnderpassNoReaderCallsDuringSyntheticMotion)&&
+    yes(r.candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly);
+   return sourceReaderParityValid&&
     yes(r.candidateThinUnderpassHypotheticalPlayerGateRequested)&&
     yes(r.candidateThinUnderpassOriginalSourceSafe)&&
     yes(r.candidateThinUnderpassSourceAndHypotheticalPlayerPass)&&
