@@ -1,0 +1,71 @@
+# Read-only continuation of unverified source/test checkpoint 40114038.
+# The prior changed-only long-walk source is byte-for-byte unchanged.
+# ONE targeted Node22 two-case native test; no broad suites or Chromium.
+name: Enchanted Phase 2 Long Seed88 Border Walk Evidence (isolated)
+on:
+  push:
+    branches:
+      - research/enchanted-p2-authored-mouth-gates-20261123
+    paths:
+      - .github/workflows/enchanted-phase2-long-walk-evidence-native.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  genuine-original-long-border:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate unchanged original seed-88 source owners and focused test
+        id: guards
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-route.mjs)" = "21f368cc0532a124e7d2ba0f3e55548386c2682f"
+          test "$(git hash-object src/manual-biomes/enchanted-original-route-evidence.mjs)" = "9511e0a3709812f24f26edeb011fb105ec44a434"
+          test "$(git hash-object tests/manual-biomes/enchanted-original-long-walk-source-real-m7.test.mjs)" = "8aff5b319d19b8022d21a6c240ee5b674b4a7491"
+          node --check tests/manual-biomes/enchanted-original-long-walk-source-real-m7.test.mjs
+      - name: Only previously unconfirmed genuine original M7 long border source tests
+        id: native
+        run: node --test tests/manual-biomes/enchanted-original-long-walk-source-real-m7.test.mjs
+      - name: Record native pass-fail and real Actions locator on isolated commit only
+        if: always()
+        env:
+          AUTH_TOKEN: ${{ github.token }}
+          GUARD_OUTCOME: ${{ steps.guards.outcome }}
+          NATIVE_OUTCOME: ${{ steps.native.outcome }}
+        run: |
+          if [ "$GUARD_OUTCOME" = "success" ] && [ "$NATIVE_OUTCOME" = "success" ]; then
+            export NATIVE_STATUS=success
+            export NATIVE_DESCRIPTION="2/2 original M7 extended Enchanted-Plains source tests passed"
+          else
+            export NATIVE_STATUS=failure
+            export NATIVE_DESCRIPTION="Original M7 long border walk test or source guard failed"
+          fi
+          python3 - <<'PY' >/tmp/enchanted-p2-long-walk-status.json
+          import json,os
+          print(json.dumps({
+            "state":os.environ["NATIVE_STATUS"],
+            "context":"enchanted-p2-long-border-walk-native",
+            "description":os.environ["NATIVE_DESCRIPTION"],
+            "target_url":os.environ["GITHUB_SERVER_URL"]+"/"+os.environ["GITHUB_REPOSITORY"]+
+              "/actions/runs/"+os.environ["GITHUB_RUN_ID"]
+          }))
+          PY
+          curl --fail-with-body --silent --show-error --request POST \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $AUTH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            --data-binary @/tmp/enchanted-p2-long-walk-status.json \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" >/dev/null
