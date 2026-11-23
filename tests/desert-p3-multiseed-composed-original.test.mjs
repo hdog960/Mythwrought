@@ -235,7 +235,7 @@ test('source-exact composed M7 edit staging with real Pack2 water, Pack3 origina
  assert.equal(manual.size(),0,'No artificial Manual14 assets added');
  assert.equal(PACK3_MAX_ADDED_VERTICES_PER_CHUNK,12000);
  assert.equal(MANUAL14_VERTICES_PER_CHUNK,12000);
- const selected=desertSeamEditAffectedChunks(world,...source);
+ const selected=desertSeamEditAffectedChunks(world,source[0],source[2],source[1]);
  const loaded=new Set(selected.map(({cx,cz})=>depthMeshKey(cx,cz,0)));
  const full=exactComposedBatch({world,pack3,manual,loaded,at:source});
  assert.equal(full.loadedRows.length,selected.length);
