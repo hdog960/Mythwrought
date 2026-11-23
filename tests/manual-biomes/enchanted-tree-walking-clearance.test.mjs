@@ -164,3 +164,38 @@ test('one-chunk shared support cache cuts repeated reads without changing multip
     percentSaved:+(100*(1-sharedReads/separateReads)).toFixed(1)
   }));
 });
+
+test('standalone source canopy fallback remains byte-identical to unrestricted baseline across 1600 dense leaf columns',()=>{
+  // Deliberate synthetic pressure ONLY to exercise the bounded fallback.
+  // Physical M7 source parity is tested separately against real chunk worlds.
+  const canopy=[];
+  for(let x=0;x<40;x++)for(let z=0;z<40;z++)
+    canopy.push([x,8,z,(x+z)%2?G.aetherLeaves:G.moonLeaves]);
+  const originalSource=(x,y,z)=>
+    y===6&&(x%11===0&&z%7===0)?BLOCK.STONE:BLOCK.AIR;
+  let unlimitedReads=0,boundedReads=0;
+  const unlimitedCache=new Map();
+  const expected=clearEnchantedCanopyForWalking(canopy,(x,y,z)=>{
+    unlimitedReads++;return originalSource(x,y,z);
+  },BLOCK.AIR,unlimitedCache);
+  const actual=clearEnchantedCanopyForWalking(canopy,(x,y,z)=>{
+    boundedReads++;return originalSource(x,y,z);
+  },BLOCK.AIR);
+  assert.deepEqual(actual,expected,
+    'FIFO evictions must reread genuine original-source AIR and preserve leaf decisions');
+  assert.ok(unlimitedCache.size>1024,
+    'pressure must genuinely exceed the reviewed 1024-entry fallback capacity');
+  assert.ok(boundedReads>=unlimitedReads,
+    'bounded fallback cannot infer an evicted original-source value without reading');
+  assert.ok(boundedReads<canopy.length*18,
+    'bounded fallback must still avoid the naive 18 lookups per leaf');
+  const removed=canopy.length-actual.length;
+  assert.ok(removed>0&&removed<canopy.length,
+    'exercise both real occupied and AIR branches of headroom veto');
+  console.log('# ENCHANTED STANDALONE CANOPY SOURCE CACHE BOUND '+JSON.stringify({
+    authoredLeaves:canopy.length,removed,unboundedEntries:unlimitedCache.size,
+    originalSourceReadsUnbounded:unlimitedReads,
+    originalSourceReadsBounded:boundedReads,
+    defaultCapacity:1024,exactLeafParity:true,originalWorldFpsUnmeasured:true
+  }));
+});
