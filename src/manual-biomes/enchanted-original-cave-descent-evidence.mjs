@@ -26,7 +26,12 @@ function validWorld(world){
 const playerAt=cap=>({x:cap.x+.5,z:cap.z+.5,feet:cap.feet,
   yaw:0,pitch:0,vX:0,vZ:0,vY:0,onGround:true,
   coyote:0,jumpBuffer:0});
-const near=(p,target)=>Math.hypot(p.x-(target.x+.5),p.z-(target.z+.5))<=.24;
+// Descending off a full-height source block requires the player's actual
+// collision body to clear the prior ledge. The surface BFS's .24 waypoint
+// acceptance is too early for gravity settlement; this STRICTER .12
+// arrival prevents input release while still supported by that old ledge.
+// Original AABB/collision/stepPlayer are completely unchanged.
+const near=(p,target)=>Math.hypot(p.x-(target.x+.5),p.z-(target.z+.5))<=.12;
 
 // Requires the ORIGINAL cave author explicitly provided real solid floor,
 // three AIR headroom source cells and matching physical world.get. Never
