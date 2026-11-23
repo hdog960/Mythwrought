@@ -163,6 +163,18 @@ for(const [rx,rz] of regions){
    underpass.underpassExactStageDuplicateCalls??null,
   candidateThinUnderpassRoleCoordinateIdentityPassed:
    underpass.underpassSourceRoleCoordinatesIdentical===true,
+  candidateThinUnderpassIndependentGeometryMatched:
+   underpass.underpassIndependentGeometryMatched===true,
+  candidateThinUnderpassIndependentSourceCoordinatesVerified:
+   underpass.underpassIndependentSourceReaderCoordinatesVerified===true,
+  candidateThinUnderpassExpectedBridgeDistinctCells:
+   underpass.underpassExpectedBridgeDistinctCells??null,
+  candidateThinUnderpassExpectedPadDistinctCells:
+   underpass.underpassExpectedPadDistinctCells??null,
+  candidateThinUnderpassExpectedOverlapCells:
+   underpass.underpassExpectedOverlapCells??null,
+  candidateThinUnderpassExpectedCombinedDistinctCells:
+   underpass.underpassExpectedCombinedDistinctCells??null,
   candidateThinUnderpassFourHubSourceVisitsCountedOnce:
    underpass.originalFourHubSourceChecks??deep.sourceChecks??0,
   candidateThinUnderpassAlternativeNotReplacementForFullCityFloor:true,
