@@ -87,6 +87,13 @@ const city=()=>({
   candidateThinUnderpassActualReaderIdentityCallerVerifiedOnly:true,
   candidateThinUnderpassCoordinateCoveragePassed:true,
   candidateThinUnderpassRoleCoordinateIdentityPassed:true,
+  candidateThinUnderpassIndependentGeometryMatched:true,
+  candidateThinUnderpassIndependentSourceCoordinatesVerified:true,
+  candidateThinUnderpassExpectedBridgeDistinctCells:rz===0?248:276,
+  candidateThinUnderpassExpectedPadDistinctCells:135,
+  candidateThinUnderpassExpectedOverlapCells:12,
+  candidateThinUnderpassExpectedCombinedDistinctCells:
+   (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
   candidateThinUnderpassPadDistinctCells:135,
   candidateThinUnderpassBridgePadOverlapCells:12,
@@ -141,6 +148,7 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.proposalEvidenceAllPassed,true);
  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
+ assert.equal(r.cityThinUnderpassIndependentFootprintSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
@@ -413,5 +421,36 @@ test('Phase25 skipped pad roles, duplicate bridge queries and absent stage evide
   const r=check({city:c});
   assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
   assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ }
+});
+
+
+test('Phase26 independently staged geometry holds even when all four reader sets agree on an incorrect footprint',()=>{
+ const c=city();
+ c.rows[0].candidateThinUnderpassExpectedCombinedDistinctCells++;
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
+ assert.equal(r.cityThinUnderpassIndependentFootprintSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_INDEPENDENT_FOOTPRINT_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase26 independently derived bridge, landing, and overlap cells cannot be forged separately',()=>{
+ for(const change of [
+  row=>row.candidateThinUnderpassExpectedBridgeDistinctCells++,
+  row=>row.candidateThinUnderpassExpectedPadDistinctCells--,
+  row=>row.candidateThinUnderpassExpectedOverlapCells++,
+  row=>row.candidateThinUnderpassExpectedCombinedDistinctCells--,
+  row=>row.candidateThinUnderpassIndependentGeometryMatched=false,
+  row=>row.candidateThinUnderpassIndependentSourceCoordinatesVerified=false,
+  row=>{delete row.candidateThinUnderpassIndependentGeometryMatched}
+ ]){
+  const c=city();change(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassIndependentFootprintSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
  }
 });
