@@ -1,5 +1,5 @@
 // MYTHWROUGHT Roadmap C Builder 1A #647 / Wave24: Cloverreach Twin-Bell Orchard Inn.
-// Independent original temperate LARGE inn #006. SOURCE-ONLY / UNREGISTERED.
+// Independent original temperate LARGE inn #005. SOURCE-ONLY / UNREGISTERED.
 // Three genuine absent orchard courts, 14 reachable and partitioned original rooms,
 // 21 two-high authentic portal openings, 14 supported distinct roof wings,
 // 23 true original exterior Pack4 windows, four 2-cell physical Pack5 guest beds.
