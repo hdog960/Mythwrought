@@ -16,6 +16,7 @@ import {STORYBOOK_MATERIAL_FRAGMENT_SHADER} from './storybook-materials.mjs';
 import {clampLook,forwardVector,compassDegrees,MAX_PITCH} from './camera.mjs';
 import {normalizedStick,safePointerDelta,stickLookDelta,selectedLookMode,isWorldControlTarget,touchMovementX,touchCameraX} from './input.mjs';
 import {chunkKey,editAffectedChunks} from './chunks.mjs';
+import {desertSeamEditAffectedChunks} from './manual-biomes/desert-seam-invalidation.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
 import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
@@ -976,8 +977,12 @@ function start(nonblockStage=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
+    // Original surface-mesh three-block RGB cue can cross an adjacent chunk
+    // before the edited source reaches the one-voxel physics seam. Preserve
+    // existing depth/geometry refresh for all legacy or non-surface edits.
+    const affected=desertSeamEditAffectedChunks(world,x,z,y);
     for(const section of verticalEditSections(y))
-      for(const {cx,cz} of editAffectedChunks(x,z)){
+      for(const {cx,cz} of affected){
         const key=depthMeshKey(cx,cz,section);
         if(!chunks.has(key))continue;
         const vertices=meshPlayableChunk(cx,cz,section);
