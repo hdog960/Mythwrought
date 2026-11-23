@@ -1,0 +1,30 @@
+name: Desert P3 exact PWA release assertion preflight (helper only)
+on:
+  push:
+    branches:
+      - research/desert-p3-release-cache-preflight-20261123
+    paths:
+      - .github/workflows/desert-p3-release-assertions-helper.yml
+permissions:
+  contents: read
+jobs:
+  original-pwa-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate official PWA asset hashes and test current release compatibility
+        run: |
+          set -euo pipefail
+          node --check scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+          node --check scripts/ci/manual-v6-live-webgl2.mjs
+          node --check tests/app-update-browser.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs
+          node --test tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
+          if git grep -l '20261121-unified-environment-rc7' -- scripts tests src index.html sw-m5.js; then
+            echo 'FAIL stale release assertions'
+            exit 1
+          fi
