@@ -62,6 +62,7 @@ const tests=Object.freeze([
  'tests/living-underworld-city-underpass-player-aabb-fixture.test.mjs',
  'tests/living-underworld-city-underpass-step-player-fixture.test.mjs',
  'tests/living-underworld-city-underpass-continuous-walk-fixture.test.mjs',
+ 'tests/living-underworld-source-role-coordinate-census.test.mjs',
  'tests/living-underworld-m7-triplet-readonly-admission.test.mjs'
 ]);
 const nodeTests=call(process.execPath,['--test',...tests],180000);
