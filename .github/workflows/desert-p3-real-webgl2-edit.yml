@@ -1,0 +1,63 @@
+name: Desert P3 genuine localhost WebGL2 edit refresh and rollback
+on:
+  push:
+    branches:
+      - research/desert-p3-runtime-corner-gpu-fence-20261122
+    paths:
+      - .github/workflows/desert-p3-real-webgl2-edit.yml
+permissions:
+  contents: read
+concurrency:
+  group: desert-p3-real-webgl2-edit
+  cancel-in-progress: false
+jobs:
+  original-live-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9739feabd8555c7928c62e0673e0d256e2bd1999
+          path: baseline
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: candidate
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact accepted gameplay and previously focused clean source integrity
+        run: |
+          set -euo pipefail
+          BASE=9739feabd8555c7928c62e0673e0d256e2bd1999
+          test "$(git -C baseline rev-parse HEAD)" = "$BASE"
+          test "$(git -C candidate rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C candidate merge-base "$BASE" HEAD)" = "$BASE"
+          unexpected=$(git -C candidate diff --name-only "$BASE" HEAD | grep -Ev '^(src/manual-biomes/desert-seam-invalidation.mjs|tests/desert-p3-runtime-corner-gpu-source.test.mjs|tests/desert-p3-live-gpu-edit-browser.mjs|.github/workflows/desert-p3-original-corner-gpu.yml|.github/workflows/desert-p3-real-webgl2-edit.yml|docs/desert/PHASE3_RUNTIME_CORNER_GPU_AUDIT_20261122.md)$' || true)
+          test -z "$unexpected"
+          test "$(git -C candidate rev-parse HEAD:src/main.mjs)" = 3768eb68bc2951dd7e6f41490720a9b4c6616a87
+          test "$(git -C candidate rev-parse HEAD:src/voxel.mjs)" = a475ba9c195e6dd4bc5a97284dbff5f2c37936a4
+          test "$(git -C candidate rev-parse HEAD:src/gpu-recovery.mjs)" = 422ef73e383bda78ff94607abb858e3c8a57c2d1
+          node --check candidate/tests/desert-p3-live-gpu-edit-browser.mjs
+      - name: Install pinned Chromium only for novel original-game GPU edit gate
+        run: |
+          cd candidate
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Test actual original main WebGL2 loaded edit upload failure and recovery
+        run: |
+          set -euo pipefail
+          cd candidate
+          python3 -m http.server 4173 >/tmp/desert-real-webgl2-http.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          DESERT_RUNTIME_WEBGL_OUTPUT=artifacts/desert-runtime-gpu node tests/desert-p3-live-gpu-edit-browser.mjs
+      - name: Upload genuine original-game live edit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: desert-p3-real-webgl2-edit
+          path: candidate/artifacts/desert-runtime-gpu/**
+          if-no-files-found: warn
+          retention-days: 7
