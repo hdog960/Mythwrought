@@ -53,7 +53,7 @@ const helper=`window.__mythwroughtTest=Object.freeze({
 assert.equal(main.split(hook).length-1,1,'Original local-only acceptance hook moved');
 const alteredMain=main.replace(hook,helper);
 const candidates=[{seed:179,ice:[-144,8,528]},
-  {seed:2026,ice:[-160,7,480]}];
+  {seed:2026,ice:[-144,9,504]}];
 const viewport={width:956,height:440};
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
