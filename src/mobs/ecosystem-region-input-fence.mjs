@@ -39,3 +39,28 @@ export function assertOriginalRegionalInputsUnchanged(captured,region,observer){
     throw new TypeError('Original regional source inputs changed during poll');
   return true;
 }
+
+// Keep caller-owned source identities for the delayed original MobEngine
+// admission audit. A prepared candidate is NOT an admission or an immutable
+// guarantee that the live player/region have stayed put until settlement.
+const settlementInputs=new WeakMap();
+
+export function captureOriginalRegionalSettlementInputs(captured,region,observer){
+  // A previously captured input certificate, rather than caller-supplied
+  // forged coordinates, must own the transactional witness.
+  assertOriginalRegionalInputsUnchanged(captured,region,observer);
+  const witness=Object.freeze({});
+  settlementInputs.set(witness,Object.freeze({captured,region,observer}));
+  return witness;
+}
+
+export function assertOriginalRegionalSettlementInputsUnchanged(witness){
+  const source=witness&&typeof witness==='object'?
+    settlementInputs.get(witness):null;
+  if(!source)
+    throw new TypeError('Uncertified original regional settlement inputs');
+  // Reject late observer movement or source region remapping before a
+  // regional ticket claims a natural birth or advances a source cadence.
+  return assertOriginalRegionalInputsUnchanged(
+    source.captured,source.region,source.observer);
+}

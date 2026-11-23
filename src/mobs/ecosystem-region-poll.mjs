@@ -4,7 +4,8 @@ import {MobEngine} from './engine.mjs';
 import {validPoint} from './world-query.mjs';
 import {captureOriginalWorldRevision,assertOriginalWorldRevisionUnchanged}
   from './ecosystem-world-revision-fence.mjs';
-import {captureOriginalRegionalInputs,assertOriginalRegionalInputsUnchanged}
+import {captureOriginalRegionalInputs,assertOriginalRegionalInputsUnchanged,
+  captureOriginalRegionalSettlementInputs,assertOriginalRegionalSettlementInputsUnchanged}
   from './ecosystem-region-input-fence.mjs';
 import {verifyOriginalNaturalMobAdmission}
   from './ecosystem-natural-admission.mjs';
@@ -19,6 +20,7 @@ import {createRegionalEcologySchedule,inspectRegionalEcologySchedule,
 const owner=new WeakMap();
 const sourceWorlds=new WeakMap();
 const sourceObservers=new WeakMap();
+const settlementInputs=new WeakMap();
 const fullRosters=new WeakMap();
 const settled=new WeakSet();
 
@@ -78,6 +80,11 @@ export function prepareOriginalMobPoll({
   // Use frozen observer/region snapshots throughout the original census and
   // physical proposal; reject any mutation of the caller-owned inputs.
   const inputs=captureOriginalRegionalInputs(region,observer);
+  // Keep the ACTUAL caller-owned region and 3D observer throughout the
+  // delayed settlement. A frozen planning copy alone cannot prove that
+  // the player or selected source region remained unchanged after prepare.
+  const settlementWitness=captureOriginalRegionalSettlementInputs(
+    inputs,region,observer);
   const sourceObserver=inputs.observer,sourceRegion=inputs.region;
   const entities=engine.all();
   const rosterCertificate=captureOriginalMobRoster(entities);
@@ -118,6 +125,7 @@ export function prepareOriginalMobPoll({
   owner.set(prepared,engine);
   sourceWorlds.set(prepared,world);
   sourceObservers.set(prepared,sourceObserver);
+  settlementInputs.set(prepared,settlementWitness);
   fullRosters.set(prepared,rosterCertificate);
   return prepared;
 }
@@ -130,19 +138,34 @@ export function settleOriginalMobPoll(plan,{
 }={}){
   const engine=plan&&typeof plan==='object'?owner.get(plan):null;
   const certified=plan&&typeof plan==='object'?fullRosters.get(plan):null;
-  if(!(engine instanceof MobEngine)||!certified||settled.has(plan))
+  const sourceTicket=plan&&typeof plan==='object'?
+    settlementInputs.get(plan):null;
+  if(!(engine instanceof MobEngine)||!certified||!sourceTicket||
+     settled.has(plan))
     throw new TypeError('Invalid or stale original regional mob poll');
   // Reject the attempt permanently, including failed or forged admissions:
   // no retry after a real engine or world state transition.
   settled.add(plan);
   // Numeric revision equality is NOT proof of source-world identity.
-  if(world!==sourceWorlds.get(plan)||
-     typeof world?.revision!=='function'||
-     world.revision()!==plan.worldRevision)
+  if(world!==sourceWorlds.get(plan)||typeof world?.revision!=='function')
     throw new TypeError('Invalid or stale original regional mob poll');
+  // A candidate may be prepared, then the caller can move the player or
+  // selected source region before invoking real MobEngine.spawn/settle.
+  // Reject stale source inputs even when the voxel revision and engine
+  // roster happen to remain unchanged. No mutation or rollback is attempted.
+  assertOriginalRegionalSettlementInputsUnchanged(sourceTicket);
+  if(world.revision()!==plan.worldRevision)
+    throw new TypeError('Invalid or stale original regional mob poll');
+  // The revision callback is caller-owned and can itself change observer.
+  assertOriginalRegionalSettlementInputsUnchanged(sourceTicket);
   // Only actual original-engine snapshots are authoritative. A fabricated
   // afterEntities array cannot be substituted by an external caller.
   const afterEntities=engine.all();
+  assertOriginalRegionalSettlementInputsUnchanged(sourceTicket);
+  // Bracket original-engine roster reads with authoritative world revision;
+  // a delayed callback cannot silently adopt a new physical world baseline.
+  assertOriginalWorldRevisionUnchanged(world,plan.worldRevision);
+  assertOriginalRegionalSettlementInputsUnchanged(sourceTicket);
   if(plan.kind==='cooldown'){
     if(spawnedId!==null||!sameRoster(plan.before,afterEntities))
       throw new TypeError('No engine admission allowed during cooldown');
