@@ -55,13 +55,14 @@ export function searchOriginalM7PedestrianBorder(world,{
   seed=world?.seed, x,z, targetBiome=null,
   radius=12,maxVisits=ENCHANTED_ORIGINAL_PATH_MAX_VISITS,
   maxSteps=ENCHANTED_ORIGINAL_PATH_MAX_STEPS,
-  maxRoutes=ENCHANTED_ORIGINAL_PATH_MAX_ROUTES
+  minDisplacement=5,maxRoutes=ENCHANTED_ORIGINAL_PATH_MAX_ROUTES
 }={}){
   if(!Number.isInteger(seed)||seed!==(seed|0)||
      seed!==world?.seed||!Number.isSafeInteger(x)||!Number.isSafeInteger(z)||
      !Number.isInteger(radius)||radius<1||radius>ENCHANTED_ORIGINAL_PATH_MAX_RADIUS||
      !Number.isInteger(maxVisits)||maxVisits<1||maxVisits>ENCHANTED_ORIGINAL_PATH_MAX_VISITS||
      !Number.isInteger(maxSteps)||maxSteps<1||maxSteps>ENCHANTED_ORIGINAL_PATH_MAX_STEPS||
+     !Number.isInteger(minDisplacement)||minDisplacement<1||minDisplacement>radius*2||
      !Number.isInteger(maxRoutes)||maxRoutes<1||maxRoutes>ENCHANTED_ORIGINAL_PATH_MAX_ROUTES||
      targetBiome!==null&&(typeof targetBiome!=='string'||targetBiome==='enchanted'&&
        sourceBiome(x,z,seed)==='enchanted'))
@@ -69,7 +70,7 @@ export function searchOriginalM7PedestrianBorder(world,{
   const startBiome=sourceBiome(x,z,seed);
   const start=originalM7PedestrianCap(world,x,z);
   const stats={sourceBiome:startBiome,targetBiome,seed,origin:[x,z],
-    radius,maxVisits,maxSteps,visited:0,supported:0,
+    radius,maxVisits,maxSteps,minDisplacement,visited:0,supported:0,
     rejectedGround:0,rejectedHeight:0,rejectedCorner:0,
     rejectedSweep:0,proposals:0,truncated:false};
   if(!start)return {routes:[],stats:{...stats,startSupported:false}};
@@ -88,7 +89,10 @@ export function searchOriginalM7PedestrianBorder(world,{
     const at=queue[cursor],here=nodes.get(at),d=depths.get(at);
     stats.visited++;
     const biome=sourceBiome(here.x,here.z,seed);
-    if(d>0&&biome!==startBiome&&
+    // Require a meaningful spatial crossing, not a one-voxel border
+    // change. A short target reached earlier may not be revisited by BFS.
+    if(d>0&&Math.hypot(here.x-x,here.z-z)>=minDisplacement&&
+       biome!==startBiome&&
        (startBiome==='enchanted'||biome==='enchanted')&&
        (targetBiome===null||biome===targetBiome)){
       routes.push(reconstruct(at,parents,nodes));
