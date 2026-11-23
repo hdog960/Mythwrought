@@ -53,6 +53,10 @@ test('authentic M7 three-seed 21-site live mob collision and natural birth accep
       seed,fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
     const world=new Pack2LiveWorld(base);
     const before=JSON.stringify(base.save());
+    const beforePack2=JSON.stringify(world.pack2Snapshot());
+    // Original VoxelWorld/Pack2LiveWorld has no monotonic editRevision.
+    // Do NOT fabricate a constant-0 source revision witness for this test:
+    // verify original source saves at the bounded seed boundary instead.
     const sites=sourceSites(seed);
     assert.equal(sites.length,7);
     for(const site of sites){
@@ -124,6 +128,8 @@ test('authentic M7 three-seed 21-site live mob collision and natural birth accep
     }
     assert.equal(JSON.stringify(base.save()),before,
       'No M7 world/schema-1 save mutations in native mob observations');
+    assert.equal(JSON.stringify(world.pack2Snapshot()),beforePack2,
+      'No original Pack2 overlay mutations across the 7 source sites');
   }
   assert.equal(reports.length,21);
   assert.deepEqual([...new Set(reports.map(r=>r.seed))],SEEDS);

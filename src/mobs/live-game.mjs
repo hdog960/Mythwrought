@@ -48,7 +48,8 @@ export function classifyLiveBiome(name,feet,cave){
 
 export function createLiveMobSession({
   world,seed,storage,resident,biomeAt,skyAt,caveAt,playerAt,
-  worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{}
+  worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{},
+  sourceRevision
 }={}){
   if(!world||typeof world.get!=='function'||!storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
@@ -65,8 +66,14 @@ export function createLiveMobSession({
     world.generationProfile?.generator;
   const collisionWorld=generator===M7_ENVIRONMENT_GENERATOR?
     createM7MobCollisionReader(world):world;
+  // A real original VoxelWorld/Pack2LiveWorld does NOT expose editRevision.
+  // Keep the legacy fallback for existing hosts, but a trusted embedding
+  // may supply a monotonic revision witness without monkey-patching world.set.
+  // The fallback alone is NOT proof of source edit consistency.
+  if(sourceRevision!==undefined&&typeof sourceRevision!=='function')
+    throw new TypeError('Invalid live mob source revision authority');
   const query=createMobHostView(collisionWorld,{
-    resident,revision:()=>world.editRevision||0,
+    resident,revision:sourceRevision??(()=>world.editRevision||0),
     biomeAt(point){
       const biome=classifyLiveBiome(biomeAt(point),point[1],caveAt(point)?.underground);
       return {id:biome,hazard:false,climbable:biome==='cave'||biome==='alpine'};
