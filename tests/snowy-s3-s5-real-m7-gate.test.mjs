@@ -21,6 +21,8 @@ import {stepPlayer} from '../src/physics.mjs';
 import {surveySnowS4ChunkSeams} from '../src/manual-biomes/snowy-s4-seam-evidence.mjs';
 import {surveySnowS4LegacyGrassIslands}
   from '../src/manual-biomes/snowy-s4-legacy-grass-islands.mjs';
+import {auditSnowS4GrassSourceAttribution}
+  from '../src/manual-biomes/snowy-s4-grass-source-attribution.mjs';
 import {reviewSnowS5Scenery} from '../src/manual-biomes/snowy-s5-existing-scenery-audit.mjs';
 
 // One focused source-backed smoke test, not a duplicate full WebGL2 run.
@@ -120,6 +122,17 @@ test('real M7 two-seed S3 walking and S5 scenery read-only provenance',()=>{
       component.disposition==='retain-original-until-proven-safe'));
     assert.equal(grass.originalSaveUnchanged,true);
     assert.equal(grass.sampledCaveAndPlanWitnessUnchanged,true);
+    // Replay the ORIGINAL environment-v7 source preservation guard for
+    // observed green cells; never infer any authorization to change terrain.
+    const attribution=auditSnowS4GrassSourceAttribution(world,
+      {x:13,z:508,width:6,height:6},deps);
+    assert.equal(attribution.sampled,36);
+    assert.equal(attribution.grassCells,grass.greenCells);
+    assert.equal(attribution.summary.guardVeto+
+      attribution.summary.noGuardVeto,grass.greenCells);
+    assert.equal(attribution.originalSourcesUnchanged,true);
+    assert.ok(attribution.rows.every(row=>
+      row.disposition==='source-investigation-only-no-terrain-changes'));
     const scenery=reviewSnowS5Scenery(world,0,32,{
       planScenery:planEnvironmentalScenery,biomeAt:v6BiomeAt
     });
