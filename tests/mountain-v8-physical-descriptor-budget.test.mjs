@@ -7,6 +7,8 @@ import {planMountainV8PhysicalColumn as plan}
   from '../src/manual-biomes/mountain-v8-physical-column.mjs';
 import {certifyMountainV8Seam as certify}
   from '../src/manual-biomes/mountain-v8-seam-certificate.mjs';
+import {MOUNTAIN_V8_PLANT_PATTERNS}
+  from '../src/manual-biomes/mountain-v8-vegetation-cells.mjs';
 const ids={AIR:0,GRASS:1,DIRT:2,STONE:3};
 const original=(x,y,z)=>y>5?ids.AIR:y===5?ids.GRASS:ids.DIRT;
 const physical=p=>plan(p,{worldMaxY:19,ids,readOriginalBlock:original});
@@ -102,7 +104,26 @@ test('plant contact refuses duplicate cells, forged registry, foreign seed owner
     {...flower,needsApprovedV8MaterialRegistry:false},
     {...flower,estimatedCells:19},
     {...flower,cells:[flower.cells[0],{...flower.cells[1],y:10}]},
-    {...flower,cells:[flower.cells[0],{...flower.cells[1],material:'snow'}]}
+    {...flower,cells:[flower.cells[0],{...flower.cells[1],material:'snow'}]},
+    {...flower,cells:[{...flower.cells[0],material:'heather'},flower.cells[1]]},
+    {...flower,cells:[{...flower.cells[0],x:1},flower.cells[1]]},
+    {...flower,cells:[flower.cells[1],flower.cells[0]]},
+    {...flower,cells:[flower.cells[0],{...flower.cells[1],z:1}]}
   ])assert.equal(audit(p,support,seam,{plant:malformed}),null);
   assert.equal(audit({...p,safeToIntegrate:true},support,seam),null);
+});
+
+test('canonical original flora shapes are deeply frozen and cannot be substituted',()=>{
+  assert.deepEqual(Object.keys(MOUNTAIN_V8_PLANT_PATTERNS).sort(),
+    ['alpine-flower','dwarf-conifer','low-heather'].sort());
+  assert.equal(MOUNTAIN_V8_PLANT_PATTERNS['alpine-flower'].length,2);
+  assert.equal(MOUNTAIN_V8_PLANT_PATTERNS['dwarf-conifer'].length,13);
+  assert.ok(Object.isFrozen(MOUNTAIN_V8_PLANT_PATTERNS));
+  for(const cells of Object.values(MOUNTAIN_V8_PLANT_PATTERNS)){
+    assert.ok(Object.isFrozen(cells));
+    for(const cell of cells)assert.ok(Object.isFrozen(cell));
+  }
+  assert.throws(()=>{
+    MOUNTAIN_V8_PLANT_PATTERNS['alpine-flower'][0][0]=99;
+  },TypeError);
 });
