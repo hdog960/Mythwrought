@@ -4,7 +4,7 @@
 import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 export const MOUNTAIN_V8_PLANT_CELL_LIMIT=18;
 const valid=n=>Number.isSafeInteger(n);
-const pattern=Object.freeze({
+const authoredPatterns=Object.freeze({
   'alpine-flower':Object.freeze([[0,1,0,'flower'],[0,2,0,'flower-petal']]),
   'low-heather':Object.freeze([[0,1,0,'heather'],[0,2,0,'heather-tip']]),
   'dwarf-conifer':Object.freeze([
@@ -17,6 +17,14 @@ const pattern=Object.freeze({
     [0,5,0,'conifer-needles']
   ])
 });
+// Export the exact original per-kind cells as deeply immutable data. The
+// detached V8 material/shape handoff must audit the same authored pattern
+// that the source planner actually generates, never a material-only proxy.
+export const MOUNTAIN_V8_PLANT_PATTERNS=Object.freeze(Object.fromEntries(
+  Object.entries(authoredPatterns).map(([kind,cells])=>
+    [kind,Object.freeze(cells.map(cell=>Object.freeze([...cell])))]
+  )
+));
 
 /** Pure bounded candidate, not a voxel writer.
  * The original world before uplift must be AIR in every occupied cell.
@@ -48,7 +56,7 @@ export function planMountainV8PlantCells(proposal,{
   if(!root||root.rootX!==proposal.x||root.rootZ!==proposal.z||
      owner.tileX!==tileX||owner.tileZ!==tileZ||
      owner.rootX!==root.rootX||owner.rootZ!==root.rootZ)return null;
-  const pieces=pattern[proposal.vegetation];
+  const pieces=MOUNTAIN_V8_PLANT_PATTERNS[proposal.vegetation];
   if(!pieces||pieces.length>MOUNTAIN_V8_PLANT_CELL_LIMIT)return null;
   const cells=[],seen=new Set();
   for(const [dx,dy,dz,material] of pieces){
