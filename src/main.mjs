@@ -445,6 +445,7 @@ function start(nonblockStage=null){
   const near291NewMineWindow=()=>({
     phase:'idle',savedMines:0,frames:new Float64Array(16384),
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
+    closingFramesRemaining:0,
     overflow:false,invalid:false,interrupted:false
   });
   const near291Perf=near291Measure?{
@@ -518,9 +519,11 @@ function start(nonblockStage=null){
         }
       }
       w.prevFrame=now;
-      // Keep precisely the next authentic RAF gap after the 100th original
-      // save, so the final block edit cannot vanish from frame p95.
-      if(w.phase==='closing')w.phase='complete';
+      // The first post-edit RAF includes the final synchronous source save;
+      // the SECOND includes any original stream/upload work performed while
+      // drawing the first one. Never certify p95 before both frame gaps.
+      if(w.phase==='closing'&&--w.closingFramesRemaining===0)
+        w.phase='complete';
     }
   }
   function near291RecordMine(duration,result){
@@ -553,7 +556,7 @@ function start(nonblockStage=null){
     }
     if(w.phase==='active'){
       w.savedMines++;
-      if(w.savedMines===100)w.phase='closing';
+      if(w.savedMines===100){w.phase='closing';w.closingFramesRemaining=2;}
     }
   }
   function near291RecordUpload(duration){
@@ -590,6 +593,7 @@ function start(nonblockStage=null){
       mineFrameWindow:Object.freeze({
         phase:near291Perf.mineWindow.phase,
         savedMines:near291Perf.mineWindow.savedMines,
+        closingFramesRemaining:near291Perf.mineWindow.closingFramesRemaining,
         frameGapsRecorded:near291Perf.mineWindow.frameCount,
         frameP95Ms:percentile(near291Perf.mineWindow.frames,
           near291Perf.mineWindow.frameCount),
