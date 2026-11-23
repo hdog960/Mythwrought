@@ -1,7 +1,8 @@
-# One NEW source-near original-M7 Plains boundary research test only.
-# Previous exact source corridor 8/8 passed Actions #45110157768, and
-# prior original physics arrivals 9/9 #45109852257. No duplicate suites,
-# Chromium, other developer jobs, deployment or protected branch changes.
+# Isolated Phase 2 original-M7 source classification ONLY.
+# The exact 52 rejected near-Plains original source positions are diagnosed
+# with a read-only helper, alongside certified original standing references.
+# Reuse native #45109852257 (9/9), #45110157768 (8/8), #45110354373 (1/1).
+# No production/physics/cave changes, broad CI, Chromium, other jobs.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-seed88-near-boundary:
+  original-m7-52-standing-source-causes:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -26,13 +27,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Authenticate accepted original M7 source and focused test syntax
+      - name: Verify original BFS unchanged and exact diagnostic syntax
         run: |
           git rev-parse HEAD
           test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
-          node --check tests/manual-biomes/enchanted-original-physics-corridor-real-m7.test.mjs
-          node --check src/manual-biomes/enchanted-original-physics-route.mjs
-      - name: Only new authentic seed -88 near-seam source standing and stepPlayer
+          node --check src/manual-biomes/enchanted-original-standing-diagnostic.mjs
+          node --check tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
+      - name: Classify 52 original-M7 rejection guards and native surface provenance
         run: |
-          node --test --test-name-pattern="source-near seed -88 Plains boundary surveys" \
-            tests/manual-biomes/enchanted-original-physics-corridor-real-m7.test.mjs
+          node --test tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
