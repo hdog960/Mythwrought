@@ -1,0 +1,34 @@
+name: Roadmap A Wave11 exact unchanged source and corrected 255 provenance R2
+on:
+  push:
+    branches:
+      - roadmap-a-wave11-255-provenance-native-ci-r2-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave11-255-provenance-native-ci-r2.yml'
+permissions:
+  contents: read
+jobs:
+  corrected-255-original-provenance-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify byte-identical R1 original authored source and six prior passing source checks
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-wave11.mjs)" = "e00af67cf1c079551050bd6dceff82af3efdb166"
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-255-provisional.mjs)" = "ef3854b886c5c5740c119729b4d1d4e3d8d6a4fe"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave11.test.mjs)" = "96bd49583ebddaeff615de94ec3356a132143056"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave11-protected-128-only-d4.test.mjs)" = "4fa9da4289a9a80a2036218c264cb1d3dee40b88"
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-255-provisional.test.mjs
+      - name: Only THREE corrected original Wave11 255-provenance source SHA deep equality and JSON output tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-a5-255-provisional.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave11-255-original-source-provenance-r2
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_255_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
