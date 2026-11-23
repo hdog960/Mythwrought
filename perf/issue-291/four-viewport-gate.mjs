@@ -44,7 +44,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     for (const [label,run,mode] of [['control',control,'original-control'],
                                     ['candidate',candidate,'experimental-vao']]) {
       if (run.mode !== mode) fail(label + ' renderer identity is incorrect');
-      if (run.protocol !== '291-local-4viewport-v2') fail(label + ' protocol is not certified for comparison');
+      if (run.protocol !== '291-local-4viewport-v3') fail(label + ' protocol is not certified for comparison');
       if (viewportKey(run.viewportCss) !== target) fail(label + ' CSS viewport differs from expected');
       if (!viewportKey(run.viewportPixels)) fail(label + ' physical buffer viewport is not landscape');
       if (run.fatal !== false || run.graphicsLost !== false || run.pageSuspended !== false)
@@ -79,13 +79,21 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
           !validCount(trial.slowFrames) || trial.slowFrames>trial.frameGapsRecorded ||
           !validPositive(trial.elapsedMs) || !validPositive(trial.frameP95Ms))
         fail(label + ' lacks a complete bounded uninterrupted real mining-frame trial');
-      if (!validCount(run.successfulGuardedUploads) || !run.successfulGuardedUploads)
-        fail(label + ' has no successful original guarded GPU upload');
+      // Original successful guarded native uploads are measured within the
+      // exact same 100 source-saved MINE trial, including the first edit and
+      // both final draw gaps. General rolling GPU history is NOT admissible.
+      if (!trial || !validCount(trial.successfulGuardedUploads) ||
+          trial.successfulGuardedUploads===0 ||
+          trial.maxUploadSamples!==4096 ||
+          trial.successfulGuardedUploads>trial.maxUploadSamples ||
+          trial.uploadOverflow!==false || !validCount(trial.uploadFaults) ||
+          trial.uploadFaults!==0)
+        fail(label + ' lacks complete fault-free mining-bound guarded GPU uploads');
       if (!validPositive(run.miningActionP95Ms))
         fail(label + ' lacks finite positive original saved-MINE action p95');
-      if (!validNumber(run.rollingSuccessfulUploadP95Ms) ||
-          run.rollingSuccessfulUploadP95Ms > ISSUE291_MAX_UPLOAD_P95_MS)
-        fail(label + ' guarded upload p95 exceeds 33ms or is missing');
+      if (!validNumber(trial?.successfulGuardedUploadP95Ms) ||
+          trial.successfulGuardedUploadP95Ms > ISSUE291_MAX_UPLOAD_P95_MS)
+        fail(label + ' mining-bound guarded upload p95 exceeds 33ms or is missing');
       if (run.readOnly !== true || run.releaseCertified !== false ||
           run.nativeGpuRollbackProven !== false || run.browserPixelParityProven !== false)
         fail(label + ' diagnostic evidence must not claim release or rollback certification');
@@ -125,8 +133,10 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       controlMines:control.trueSavedDeepMines,candidateMines:candidate.trueSavedDeepMines,
       actionImprovementPct:actionGain===null?null:Math.round(actionGain*10000)/100,
       frameImprovementPct:frameGain===null?null:Math.round(frameGain*10000)/100,
-      controlUploadP95Ms:control.rollingSuccessfulUploadP95Ms,
-      candidateUploadP95Ms:candidate.rollingSuccessfulUploadP95Ms,
+      controlUploadP95Ms:control.mineFrameWindow?.successfulGuardedUploadP95Ms??null,
+      candidateUploadP95Ms:candidate.mineFrameWindow?.successfulGuardedUploadP95Ms??null,
+      controlTrialUploads:control.mineFrameWindow?.successfulGuardedUploads??null,
+      candidateTrialUploads:candidate.mineFrameWindow?.successfulGuardedUploads??null,
       controlTrialFrames:control.mineFrameWindow?.frameGapsRecorded??null,
       candidateTrialFrames:candidate.mineFrameWindow?.frameGapsRecorded??null,
       controlTrialElapsedMs:control.mineFrameWindow?.elapsedMs??null,
