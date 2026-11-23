@@ -100,6 +100,12 @@ const city=()=>({
   },
   candidateThinUnderpassSourceOverlapTotalComparisons:48,
   candidateThinUnderpassSourceOverlapSourceIdentityCallerOnly:true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortRequested:true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortVerified:true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles:4,
+  candidateThinUnderpassPriorDeepReaderCohortInProcessOnly:true,
+  candidateThinUnderpassPriorDeepReaderCohortAuthenticM7Unverified:true,
+  candidateThinUnderpassPriorDeepSourceReaderCohortRefusal:null,
   candidateThinUnderpassExpectedCombinedDistinctCells:
    (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
@@ -158,6 +164,7 @@ test('fully formed exact original-HEAD evidence is only a source candidate, neve
  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,true);
  assert.equal(r.cityThinUnderpassIndependentFootprintSafe,true);
  assert.equal(r.cityThinUnderpassOverlapSourceValuesSafe,true);
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
  assert.equal(r.releaseApproved,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
@@ -502,5 +509,46 @@ test('Phase27 both genuine M7 city report rows must independently pass overlap r
  assert.equal(r.original20SeedConstructorGateAccepted,false);
  assert.equal(r.installedPwaVerified,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase28 previous four-hub original source can remain safe but missing in-process cohort must HOLD',()=>{
+ const c=city();
+ c.rows[1].candidateThinUnderpassPriorDeepSourceReaderCohortVerified=false;
+ const r=check({city:c});
+ assert.equal(r.citySourceSafe,true);
+ assert.equal(r.proposalEvidenceAllPassed,true);
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,false);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_DEEP_SOURCE_READER_COHORT_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase28 both original M7 sites require four identical deep and underpass source callback identities',()=>{
+ for(const mutate of [
+  row=>{row.candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles=3},
+  row=>{row.candidateThinUnderpassPriorDeepSourceReaderCohortRequested=false},
+  row=>{row.candidateThinUnderpassPriorDeepReaderCohortInProcessOnly=false},
+  row=>{row.candidateThinUnderpassPriorDeepReaderCohortAuthenticM7Unverified=false},
+  row=>{row.candidateThinUnderpassPriorDeepSourceReaderCohortRefusal='DEEP_SOURCE_READER_COHORT_ROLE_CHANGED'},
+  row=>{delete row.candidateThinUnderpassPriorDeepSourceReaderCohortVerified}
+ ]){
+  const c=city();mutate(c.rows[0]);
+  const result=check({city:c});
+  assert.equal(result.cityThinUnderpassDeepReaderCohortSafe,false);
+  assert.equal(result.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(result.releaseApproved,false);
+ }
+});
+test('Phase28 four-role in-process continuity never authenticates original M7 world by itself',()=>{
+ const r=check();
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.original20SeedConstructorGateAccepted,false);
+ assert.equal(r.iPhoneGpuVerified,false);
+ assert.equal(r.installedPwaVerified,false);
  assert.equal(r.releaseApproved,false);
 });
