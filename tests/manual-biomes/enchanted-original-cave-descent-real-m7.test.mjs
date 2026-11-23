@@ -75,14 +75,21 @@ test('actual original and experimental M7 player controller attempts genuine gra
    const prototype=replayOriginalM7AuthoredCaveDescent(experimental,candidateSource);
    if(historical.ok&&prototype.ok){
      assert.ok(historical.walkedPastOriginalMouth);
-     assert.ok(historical.actualPlayerFeetDrop>=2.9,
-       'player physics, not generated source, must actually descend 3 blocks');
+     const expectedOriginalDrop=oldSource.path[0].feet-
+       oldSource.path.at(-1).feet;
+     const expectedCandidateDrop=candidateSource.path[0].feet-
+       candidateSource.path.at(-1).feet;
+     assert.ok(expectedOriginalDrop>=2,
+       'the original outside start and six inward authored floors must genuinely descend');
+     assert.ok(Math.abs(historical.actualPlayerFeetDrop-expectedOriginalDrop)<.1,
+       'actual original stepPlayer, not plan metadata, must reach the real final floor');
      assert.ok(historical.physicallyIntegratedFrames>=historical.walkedLegs);
      assert.deepEqual(oldSource.path.map(p=>[p.x,p.feet,p.z]),
        candidateSource.path.map(p=>[p.x,p.feet,p.z]),
        'only identical real original/candidate source walks can count as matched');
      assert.equal(historical.ticks,prototype.ticks);
-     assert.ok(prototype.actualPlayerFeetDrop>=2.9);
+     assert.ok(Math.abs(prototype.actualPlayerFeetDrop-expectedCandidateDrop)<.1,
+       'candidate actual player descent must match its own real starting and ending feet');
      assert.equal(historical.deepNetworkAccepted,false);
      successes++;
    }
