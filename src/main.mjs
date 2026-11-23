@@ -440,10 +440,18 @@ function start(nonblockStage=null){
   // No measurement allocation, frame work, GL call or save in public Pages.
   const near291Measure=['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('measure-291')==='1';
+  // An independent mine-bound frame window prevents idle/control-menu frames
+  // before or after the actual 100 source-saved edits from moving its p95.
+  const near291NewMineWindow=()=>({
+    phase:'idle',savedMines:0,frames:new Float64Array(8192),
+    frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
+    overflow:false,invalid:false,interrupted:false
+  });
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float64Array(2048),mines:new Float32Array(128),
     uploads:new Float32Array(2048),
     mineWitness:[],mineWitnessOverflow:false,mineWitnessInvalid:false,
+    mineWindow:near291NewMineWindow(),
     frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,
     interruptionCount:0,prevFrame:null
   }:null;
@@ -460,10 +468,15 @@ function start(nonblockStage=null){
     near291Perf.mineWitness.length=0;
     near291Perf.mineWitnessOverflow=near291Perf.mineWitnessInvalid=false;
     near291Perf.interruptionCount=0;
+    near291Perf.mineWindow=near291NewMineWindow();
     near291Perf.prevFrame=null;
   }
   function near291Interrupt(){
     if(!near291Perf)return;
+    const w=near291Perf.mineWindow;
+    if(w.phase==='active'||w.phase==='closing'){
+      w.phase='interrupted';w.interrupted=true;
+    }
     // Do not count loading before the first eligible measured event.
     if(near291Perf.frameCount||near291Perf.mineCount||near291Perf.uploadCount)
       near291Perf.interruptionCount++;
@@ -490,6 +503,25 @@ function start(nonblockStage=null){
       }
     }
     near291Perf.prevFrame=now;
+    const w=near291Perf.mineWindow;
+    if(w.phase==='active'||w.phase==='closing'){
+      if(w.prevFrame!==null){
+        const gap=now-w.prevFrame;
+        // The original FrameHistory drops >1000ms gaps. A complete
+        // uninterrupted mine trial MUST NOT silently drop one instead.
+        if(!Number.isFinite(gap)||gap<=0||gap>1000)w.invalid=true;
+        else if(w.frameCount>=w.frames.length)w.overflow=true;
+        else{
+          w.frames[w.frameCount++]=gap;
+          w.elapsedMs+=gap;
+          if(gap>33.4)w.slowFrames++;
+        }
+      }
+      w.prevFrame=now;
+      // Keep precisely the next authentic RAF gap after the 100th original
+      // save, so the final block edit cannot vanish from frame p95.
+      if(w.phase==='closing')w.phase='complete';
+    }
   }
   function near291RecordMine(duration,result){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
@@ -512,6 +544,17 @@ function start(nonblockStage=null){
     near291Perf.mineWitness.push(Object.freeze([
       cell[0],cell[1],cell[2],result.previous,result.next
     ]));
+    const w=near291Perf.mineWindow;
+    if(w.phase==='idle'){
+      w.phase='active';w.prevFrame=near291Perf.prevFrame;
+      // Older unrelated pagehide episodes before first mine do not belong
+      // to this source-real mining trial; the trial's own interruption flag
+      // is latched once its first successful saved edit occurs.
+    }
+    if(w.phase==='active'){
+      w.savedMines++;
+      if(w.savedMines===100)w.phase='closing';
+    }
   }
   function near291RecordUpload(duration){
     if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
@@ -544,6 +587,19 @@ function start(nonblockStage=null){
       interruptionCount:near291Perf.interruptionCount,
       continuousForegroundRun:near291Perf.interruptionCount===0,
       miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
+      mineFrameWindow:Object.freeze({
+        phase:near291Perf.mineWindow.phase,
+        savedMines:near291Perf.mineWindow.savedMines,
+        frameGapsRecorded:near291Perf.mineWindow.frameCount,
+        frameP95Ms:percentile(near291Perf.mineWindow.frames,
+          near291Perf.mineWindow.frameCount),
+        slowFrames:near291Perf.mineWindow.slowFrames,
+        elapsedMs:Math.round(near291Perf.mineWindow.elapsedMs*10)/10,
+        overflow:near291Perf.mineWindow.overflow,
+        invalid:near291Perf.mineWindow.invalid,
+        interrupted:near291Perf.mineWindow.interrupted,
+        maxFrameSamples:near291Perf.mineWindow.frames.length
+      }),
       frameGapsRecorded:near291Perf.frameCount,
       rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
       rollingSlowFrames:near291Perf.slowFrameCount,
@@ -559,7 +615,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
-      protocol:'291-local-4viewport-v1',
+      protocol:'291-local-4viewport-v2',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
