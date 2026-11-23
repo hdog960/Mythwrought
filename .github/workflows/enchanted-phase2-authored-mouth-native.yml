@@ -1,0 +1,37 @@
+# Isolated changed-only original-world cave-mouth evidence. No cave
+# generation edits, migrations, game runtime or unrelated developer CI.
+name: Enchanted Phase 2 Authored M7 Cave Mouth Native (isolated)
+on:
+  push:
+    branches:
+      - research/enchanted-p2-authored-mouth-gates-20261123
+    paths:
+      - .github/workflows/enchanted-phase2-authored-mouth-native.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-m7-authored-mouth:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify unchanged accepted physical-source owners and new syntax
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-route.mjs)" = "21f368cc0532a124e7d2ba0f3e55548386c2682f"
+          test "$(git hash-object src/manual-biomes/enchanted-original-route-evidence.mjs)" = "9511e0a3709812f24f26edeb011fb105ec44a434"
+          node --check src/manual-biomes/enchanted-original-authored-mouth-audit.mjs
+          node --check tests/manual-biomes/enchanted-original-authored-mouth-real-m7.test.mjs
+      - name: Only two new original M7 authored mouth and real physics source cases
+        run: node --test tests/manual-biomes/enchanted-original-authored-mouth-real-m7.test.mjs
