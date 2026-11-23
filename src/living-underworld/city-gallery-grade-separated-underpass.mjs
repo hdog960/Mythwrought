@@ -35,6 +35,8 @@ import {deriveExpectedUnderpassSourceCoordinates}
  from './source-footprint-coordinate-witness.mjs';
 import {createUnderpassSourceOverlapValueWitness}
  from './source-role-overlap-values.mjs';
+import {auditCityDeepSourceReaderCohort}
+ from './source-reader-cohort-provenance.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -333,14 +335,34 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
 }
 export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  source,sourceOwnedDeepSelection,maxTotalSourceChecks=150000,
- maxCandidates=MAX_PATHS,auditHypotheticalMovement=false
+ maxCandidates=MAX_PATHS,auditHypotheticalMovement=false,
+ requireSourceReaderContinuity=false
 }={}){
  if(!source||typeof source!=='object'||
   ROLES.some(k=>typeof source[k]!=='function')||
   typeof auditHypotheticalMovement!=='boolean'||
+  typeof requireSourceReaderContinuity!=='boolean'||
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<1000||
   maxTotalSourceChecks>150000)
   throw TypeError('Invalid original M7 pedestrian underpass reader');
+ // Strict native-M7 research mode: the successful prior four-hub/deep-city
+ // selection must have been audited using THESE SAME callback functions.
+ // This does NOT authenticate those functions as FourRegionWorld readers.
+ // It is a zero-source-read, ephemeral in-process identity linkage only.
+ let priorReaderCohort=null;
+ if(requireSourceReaderContinuity){
+  priorReaderCohort=auditCityDeepSourceReaderCohort(
+   sourceOwnedDeepSelection,source,{seed,rx,rz}
+  );
+  if(!priorReaderCohort.ok)
+   return failure(seed,rx,rz,'UNDERPASS_DEEP_SOURCE_READER_COHORT_REFUSED',{
+    readerCohortReason:priorReaderCohort.reason,
+    readerCohortFirstRole:priorReaderCohort.role??null,
+    originalBridgeSourceCallsDuringCohortCheck:0,
+    actualOriginalM7ReaderIdentityStillCallerSupplied:true,
+    worldChanged:false
+   });
+ }
  const planned=planGradeSeparatedCityUnderpass(seed,rx,rz,{
   sourceOwnedDeepSelection,maxCandidates
  });
@@ -655,6 +677,13 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   underpassSourceOverlapTotalComparisons:
    overlapValueProof.comparedSourceValues,
   underpassSourceOverlapSourceIdentityCallerOnly:true,
+  sourceReaderCohortProvenanceRequested:requireSourceReaderContinuity,
+  sourceReaderCohortProvenanceVerified:
+   requireSourceReaderContinuity&&priorReaderCohort?.ok===true,
+  sourceReaderCohortExactMatchingRoles:
+   requireSourceReaderContinuity?priorReaderCohort.matchingRoles:null,
+  sourceReaderCohortInProcessIdentityOnly:true,
+  sourceReaderCohortAuthenticM7WorldNotVerified:true,
   hypotheticalMovementAuditRequested:auditHypotheticalMovement,
   hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
    motionWalk?.originalStepPlayerExecuted===true,
