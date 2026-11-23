@@ -392,6 +392,10 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   centerPadThreeWideFullDepthGeometryAndSourceChecked:true,
   threeWideDetachedFootgraphEdgeConnectivityVerified:true,
   fullNineCellDestinationPadFootgraphConnected:true,
+  detachedFootgraphFullWidthSections:planned.physicalFootgraphSections,
+  detachedFootgraphReachableFootNodes:planned.physicalFootgraphReachableNodes,
+  detachedFootgraphAccessToPadMinSteps:
+   planned.physicalFootgraphMinAccessToPadSteps,
   exactOriginalCityCenterThreeWideLandingUnverified:true,
   gradeSupportCells:planned.threeWideSupportCells,
   gradeClearanceCells:planned.threeHighClearanceCells,
