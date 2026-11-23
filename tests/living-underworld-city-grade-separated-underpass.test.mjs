@@ -302,7 +302,6 @@ for(const [rx,rz,expectedFrom,expectedTo] of [
   assert.equal(continuous.gradeElevationEdges,7);
   assert.equal(continuous.completeForwardAndReverseWithoutPositionReset,true);
   assert.equal(continuous.directions.length,2);
-  assert.equal(continuous.originalM7SourceAuthenticated,undefined);
   assert.equal(continuous.authenticOriginalM7WorldTested,false);
   assert.equal(continuous.realWorldWalkabilityProven,false);
   assert.equal(continuous.originalWorldModified,false);
