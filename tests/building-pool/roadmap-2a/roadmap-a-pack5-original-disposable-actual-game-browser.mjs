@@ -52,25 +52,30 @@ const snapshot=()=>page.evaluate(()=>{
 });
 function actualPngDiff(a,b){
  const x=PNG.sync.read(a),y=PNG.sync.read(b);
- assert.equal(x.width,844);assert.equal(x.height,390);
- assert.equal(y.width,x.width);assert.equal(y.height,x.height);
+ // Original game splits the 844×390 viewport between control grip rails
+ // and the actual WebGL canvas. The genuine game canvas is 540px wide on
+ // this viewport; compare its AUTHENTIC bitmap, never fake full-viewport PNG.
+ const width=x.width,height=x.height;
+ assert.ok(width>=320&&width<=844&&height>=200&&height<=390,
+  'actual original WebGL canvas must fit inside the 844×390 viewport');
+ assert.equal(y.width,width);assert.equal(y.height,height);
  let changed=0,strong=0,centerStrong=0,maximum=0;
  const region={left:0.1,right:0.9,top:0.1,bottom:0.9};
- for(let py=0;py<390;py++)for(let px=0;px<844;px++){
-  if(px<844*region.left||px>844*region.right||
-   py<390*region.top||py>390*region.bottom)continue;
-  const idx=(py*844+px)*4;
+ for(let py=0;py<height;py++)for(let px=0;px<width;px++){
+  if(px<width*region.left||px>width*region.right||
+   py<height*region.top||py>height*region.bottom)continue;
+  const idx=(py*width+px)*4;
   const delta=Math.abs(x.data[idx]-y.data[idx])+
    Math.abs(x.data[idx+1]-y.data[idx+1])+
    Math.abs(x.data[idx+2]-y.data[idx+2]);
   if(delta>0)changed++;
   if(delta>=48){
    strong++;
-   if(px>844*.27&&px<844*.73&&py>390*.2&&py<390*.8)centerStrong++;
+   if(px>width*.27&&px<width*.73&&py>height*.2&&py<height*.8)centerStrong++;
   }
   maximum=Math.max(maximum,delta);
  }
- return {changedPixels:changed,strongRgbDifferencePixels:strong,
+ return {actualCanvasPngDimensions:[width,height],changedPixels:changed,strongRgbDifferencePixels:strong,
   centralStrongDifferencePixels:centerStrong,maximumRgbDifference:maximum,
   region,actualScreenshotPixelComparison:true};
 }

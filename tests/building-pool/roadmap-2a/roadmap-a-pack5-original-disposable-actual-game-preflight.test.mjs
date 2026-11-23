@@ -30,6 +30,11 @@ test('real game rendered pixel witness is independently rooted in ORIGINAL actua
  assert.ok(own.includes("page.locator('#scene').screenshot"));
  assert.ok(own.includes('PNG.sync.read(a)'));
  assert.ok(own.includes('PNG.sync.read(b)'));
+ assert.ok(own.includes('const width=x.width,height=x.height;'));
+ assert.ok(own.includes('assert.equal(y.width,width);assert.equal(y.height,height)'));
+ assert.ok(own.includes('actualCanvasPngDimensions:[width,height]'));
+ assert.ok(!own.includes('assert.equal(x.width,844)'));
+ assert.ok(!own.includes('for(let py=0;py<390;py++)'));
  assert.ok(own.includes('realCanvasRgbDifference:diff'));
  assert.ok(own.includes('diff.strongRgbDifferencePixels>=100'));
  assert.ok(own.includes('diff.centralStrongDifferencePixels>=40'));
