@@ -170,10 +170,10 @@ test('Original three exterior cold-air branches connect through a true outside-o
  }
  assert.equal(b.architecturalIdentity.actuallyGroundedExteriorStoneCells,383);
 });
-test('130 original Pack4 candidate panes form 26 full five-high vertical outdoor bays with original sill/lintel, physical ABI still unresolved',()=>{
+test('120 original Pack4 candidate panes form 24 full five-high bays, preserving all twelve opaque stone bearing posts',()=>{
  const b=buildVesperfrostFourCourtDryBathhouse(),m=new Map(b.placements.map(p=>[p.at.join(','),p])),
   glass=b.placements.filter(p=>p.role==='window'),groups=new Map();
- assert.equal(glass.length,130);
+ assert.equal(glass.length,120);
  for(const p of glass){
   const [x,y,z]=p.at,[dx,dz]=faces[p.orientation];
   assert.equal(p.asset,'pack4:030');assert.equal(p.occupancy.kind,'unresolved');
@@ -185,7 +185,7 @@ test('130 original Pack4 candidate panes form 26 full five-high vertical outdoor
   const k=x+','+z;if(!groups.has(k))groups.set(k,new Set());
   groups.get(k).add(y);
  }
- assert.equal(groups.size,26);
+ assert.equal(groups.size,24);
  for(const ys of groups.values())
   assert.deepEqual([...ys].sort((a,b)=>a-b),[2,3,4,5,6]);
 });
