@@ -87,6 +87,17 @@ for(const [rx,rz] of regions){
   }))??[],
   existingFullPadAndAccessSourceSafe:fullPad.ok===true,
   candidateThinUnderpassOriginalSourceSafe:underpass.ok===true,
+  candidateThinUnderpassThreeWideFootgraphVerified:
+   underpass.threeWideDetachedFootgraphEdgeConnectivityVerified===true,
+  candidateThinUnderpassNineDestinationFootCellsReached:
+   underpass.fullNineCellDestinationPadFootgraphConnected===true,
+  candidateThinUnderpassWalkableRouteSections:
+   underpass.detachedFootgraphFullWidthSections??null,
+  candidateThinUnderpassReachableFootNodes:
+   underpass.detachedFootgraphReachableFootNodes??null,
+  candidateThinUnderpassAccessToPadMinimumEdgeSteps:
+   underpass.detachedFootgraphAccessToPadMinSteps??null,
+  candidateThinUnderpassFootgraphNotPlayerAabbProof:true,
   candidateThinUnderpassRefusal:underpass.reason??null,
   candidateThinUnderpassFirstRefusal:underpass.firstRefusal??null,
   candidateThinUnderpassFirstRejectedCell:
