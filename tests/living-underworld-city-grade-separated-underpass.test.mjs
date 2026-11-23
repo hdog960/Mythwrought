@@ -182,6 +182,20 @@ test('both exact seed179 candidate sites account every original callback once, w
   assert.equal(r.underpassSourceRoleCoordinatesIdentical,true);
   assert.equal(r.underpassIndependentGeometryMatched,true);
   assert.equal(r.underpassIndependentSourceReaderCoordinatesVerified,true);
+  assert.equal(r.underpassSourceOverlapValuesStable,true);
+  assert.equal(r.underpassSourceOverlapExpectedSharedVoxels,
+   r.underpassBridgePadOverlapCells);
+  assert.equal(r.underpassSourceOverlapComparedSharedVoxels,
+   r.underpassBridgePadOverlapCells);
+  assert.equal(r.underpassSourceOverlapTotalComparisons,
+   4*r.underpassBridgePadOverlapCells);
+  assert.deepEqual(r.underpassSourceOverlapComparisonsByRole,{
+   naturalAt:r.underpassBridgePadOverlapCells,
+   authoredAt:r.underpassBridgePadOverlapCells,
+   editedAt:r.underpassBridgePadOverlapCells,
+   protectedAt:r.underpassBridgePadOverlapCells
+  });
+  assert.equal(r.underpassSourceOverlapSourceIdentityCallerOnly,true);
   assert.equal(r.underpassExpectedBridgeDistinctCells,bridgeCalls);
   assert.equal(r.underpassExpectedPadDistinctCells,padCalls);
   assert.equal(r.underpassExpectedOverlapCells,r.underpassBridgePadOverlapCells);
@@ -213,6 +227,37 @@ test('both exact seed179 candidate sites account every original callback once, w
   });
   assert.equal(r.actualOriginalM7PlayerMotionNotVerified,true);
  }
+});
+test('seed179 original detached site (2,0) rejects two SAFE stone IDs changing on one bridge-pad overlap without a world edit',()=>{
+ const planned=plan(2,0);
+ const expected=deriveExpectedUnderpassSourceCoordinates({
+  bridgeProposal:planned.proposal,
+  centerSidePad:planned.centerSidePad,floorY:planned.floorY
+ });
+ assert.equal(expected.ok,true);
+ const bridge=new Set(expected.bridgeCoordinates);
+ const target=expected.padCoordinates.find(k=>bridge.has(k));
+ assert.ok(target,'original 2,0 underpass source must overlap its center-side pad');
+ const reads=new Map();
+ const src={...stone(),naturalAt:(x,y,z)=>{
+  const key=x+','+y+','+z;
+  if(key!==target)return 1;
+  const prior=reads.get(key)??0;reads.set(key,prior+1);
+  return prior===0?1:2; // both ORIGINAL source geology IDs are allowed
+ }};
+ const r=auditSourceProtectedCityUnderpass(seed,2,0,{
+  source:src,sourceOwnedDeepSelection:deep(2,0),
+  auditHypotheticalMovement:true
+ });
+ assert.equal(reads.get(target),2);
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'UNDERPASS_SOURCE_ROLE_VALUE_INCONSISTENT');
+ assert.equal(r.overlapValueReason,'OVERLAP_SOURCE_ROLE_VALUE_CHANGED');
+ assert.equal(r.overlapValueFirstMismatch.role,'naturalAt');
+ assert.equal(r.overlapValueFirstMismatch.coordinate,target);
+ assert.equal(r.sourceChecks,9198);
+ assert.notEqual(r.hypotheticalOriginalMotionSimulated,true);
+ assert.equal(r.worldChanged,false);
 });
 test('original terrain reader role replacement during bridge source checks refuses before physics',()=>{
  const mutable=stone();
