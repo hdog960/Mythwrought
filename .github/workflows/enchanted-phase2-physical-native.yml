@@ -1,9 +1,8 @@
-# EXACT changed-only native recovery. Source is new experimental research
-# helper, no changes to original M7 generator/physics, accepted BFS or saves.
-# Already accepted seed -88, disposable obstruction and exact four-diagonal
-# witness in prior focused runs. Changed only an arbitrary four-leg assertion:
-# three original diagonals can genuinely exceed four-block displacement.
-# All previous Moonwillow, cache, GPU and WebGL2 work remains reused.
+# MYTHWROUGHT Enchanted Phase 2 isolated original-M7 physics-state research.
+# Only one changed source: optional bounded two-incoming-heading admission,
+# default historical single arrival preserved. Two focused test files only.
+# Reuse accepted unchanged geometric BFS, tree/GPU, Moonwillow WebGL2.
+# Never merge, deploy, alter shared infrastructure, or cancel other CI.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -17,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-physics-route-orientation:
+  original-m7-bounded-arrival-physics:
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
@@ -28,13 +27,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact original source checks
+      - name: Verify exact original-M7 protected source and changed files
         run: |
           git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
           node --check src/manual-biomes/enchanted-original-physics-route.mjs
           node --check tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
-          test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
-      - name: Only corrected source-admitted original Enchanted-to-Desert physics route test
+          node --check tests/manual-biomes/enchanted-original-physics-arrival-state-real-m7.test.mjs
+      - name: Genuine original-world per-edge arrivals, prior Desert witnesses, seed -88 and cave AIR
         run: |
-          node --test --test-name-pattern="original unchanged stepPlayer physically admits" \
-            tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs
+          node --test \
+            tests/manual-biomes/enchanted-original-physics-route-real-m7.test.mjs \
+            tests/manual-biomes/enchanted-original-physics-arrival-state-real-m7.test.mjs
