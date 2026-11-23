@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {stepTimedControl, TIMED_CONTROL_CONTRACT} from '../src/resonance/devices48/timed-control-v1.mjs';
+const base = {worldId:'fixture',controlId:'button_1',targetId:'gate_1',durationTicks:3,observedGrant:1};
+const step = (previous,tick,pressed=false,observedGrant=1,other={}) => stepTimedControl(previous,{...base,tick,pressed,observedGrant,...other});
+test('version and no production authority',()=>{const s=step(null,0,true);assert.equal(s.contract,TIMED_CONTROL_CONTRACT);assert.equal(s.activationAuthorized,false);assert.equal(s.productionBound,false);assert.equal(s.authoritativeDelivery,false);assert.ok(Object.isFrozen(s));});
+test('press edge activates exactly three ticks',()=>{let s=step(null,0,true);assert.equal(s.active,true);assert.equal(s.expiryTick,3);s=step(s,1,true);assert.equal(s.edge,false);s=step(s,2,true);assert.equal(s.active,true);s=step(s,3,true);assert.equal(s.active,false);});
+test('release and repress restarts bounded window',()=>{let s=step(null,0,true);s=step(s,1,false);s=step(s,2,true);assert.equal(s.expiryTick,5);assert.equal(s.edge,true);});
+test('power loss stops safely without extending expiry',()=>{let s=step(null,0,true);s=step(s,1,true,0);assert.equal(s.requested,true);assert.equal(s.active,false);s=step(s,2,true,1);assert.equal(s.active,true);s=step(s,3,true,1);assert.equal(s.active,false);});
+test('unpowered press does not fabricate delivery',()=>{const s=step(null,0,true,0);assert.equal(s.requested,true);assert.equal(s.active,false);});
+test('invalid grant, duration, identity and tick rejected',()=>{for(const other of [{observedGrant:2},{durationTicks:601},{durationTicks:0},{targetId:'button_1'},{tick:-1},{worldId:'bad id'}])assert.throws(()=>step(null,0,true,1,other));});
+test('skipped and repeated ticks rejected',()=>{const s=step(null,5,true);assert.throws(()=>step(s,7));assert.throws(()=>step(s,5));});
+test('cross-world and roster change rejected',()=>{const s=step(null,0,true);assert.throws(()=>step(s,1,false,1,{worldId:'other'}));assert.throws(()=>step(s,1,false,1,{targetId:'other'}));});
+test('forged authority rejected',()=>{const s=step(null,0,true);assert.throws(()=>step({...s,activationAuthorized:true},1));});
+test('forged previous active and requested rejected',()=>{const s=step(null,0,true);assert.throws(()=>step({...s,active:false},1));assert.throws(()=>step({...s,requested:false},1));});
+test('replay is deterministic',()=>{const a=step(null,0,true);assert.deepEqual(a,step(null,0,true));assert.deepEqual(step(a,1,false,0),step(a,1,false,0));});

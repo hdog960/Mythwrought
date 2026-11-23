@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {VIEWPORTS48,admitResonanceHud48} from '../src/resonance/devices48/viewport-admission-v1.mjs';
+import {auditHudAdmissionHistory48} from '../src/resonance/devices48/hud-admission-history-v1.mjs';
+const panel={x:220,y:8,width:220,height:40};
+const frame=(tick,blocked=-1)=>({tick,revision:tick,reports:VIEWPORTS48.map((viewport,i)=>
+  admitResonanceHud48({viewport,panel,reservedRects:i===blocked?[panel]:[],revision:tick}))});
+const run=frames=>auditHudAdmissionHistory48({world:'fixture',layout:'hud-v1',frames});
+test('multi-frame safe history remains display only',()=>{const r=run([frame(1),frame(2)]);assert.equal(r.safe,true);assert.equal(r.frameCount,2);assert.equal(r.authority,'display-only');assert.equal(r.provenance,'caller-supplied-unverified');assert.ok(Object.isFrozen(r.evidence.frames));});
+test('one blocked viewport fails entire history',()=>{const r=run([frame(1),frame(2,1)]);assert.equal(r.safe,false);assert.equal(r.evidence.frames[1].samples[1].safe,false);});
+test('report order canonicalizes independently each frame',()=>{const f=[frame(1),frame(2)];assert.deepEqual(run(f),run(f.map(x=>({...x,reports:[...x.reports].reverse()}))));});
+test('duplicate tick rejected',()=>assert.throws(()=>run([frame(1),frame(1)])));
+test('decreasing tick rejected',()=>assert.throws(()=>run([frame(2),frame(1)])));
+test('decreasing revision rejected',()=>assert.throws(()=>run([frame(1),{...frame(2),revision:0}])));
+test('mismatched report revision rejected',()=>assert.throws(()=>run([frame(1),{...frame(2),revision:3}])));
+test('forged authority rejected',()=>{const f=frame(1);f.reports[0]={...f.reports[0],authority:'live'};assert.throws(()=>run([f]));});
+test('missing viewport rejected',()=>{const f=frame(1);f.reports.pop();assert.throws(()=>run([f]));});
+test('extra frame fields rejected',()=>assert.throws(()=>run([{...frame(1),attested:true}])));
+test('empty and oversized histories rejected',()=>{assert.throws(()=>run([]));assert.throws(()=>run(Array.from({length:33},(_,i)=>frame(i+1))));});
+test('invalid identities rejected',()=>assert.throws(()=>auditHudAdmissionHistory48({world:'bad space',layout:'hud',frames:[frame(1)]})));
+test('inputs unchanged',()=>{const f=[frame(1),frame(2)];const before=JSON.stringify(f);run(f);assert.equal(JSON.stringify(f),before);});

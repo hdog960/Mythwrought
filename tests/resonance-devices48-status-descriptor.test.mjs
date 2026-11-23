@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {describeDeficitStatus as describe} from '../src/resonance/devices48/status-descriptor-v1.mjs';
+const make=(requested=5,observed=2)=>({schema:'resonance48-deficit-window-v1',worldId:'w',simulationTick:4,authoritativeDelivery:false,movementAuthorized:false,productionBound:false,history:[{tick:4,requested,observed,deficit:requested-observed}],totals:{requested,observed,deficit:requested-observed}});
+test('partial advisory status is frozen and never energized',()=>{const s=describe(make());assert.equal(s.status,'observed-partial');assert.equal(s.energized,false);assert.ok(Object.isFrozen(s))});
+test('idle and observed satisfied are not proof of power',()=>{assert.equal(describe(make(0,0)).status,'idle');assert.equal(describe(make(5,5)).status,'observed-satisfied');assert.equal(describe(make(5,5)).authoritativeDelivery,false)});
+test('unpowered advisory status',()=>assert.equal(describe(make(5,0)).status,'observed-unpowered'));
+test('forged totals rejected',()=>assert.throws(()=>describe({...make(),totals:{requested:5,observed:2,deficit:0}})));
+test('forged production authority rejected',()=>assert.throws(()=>describe({...make(),productionBound:true})));
+test('skipped ticks rejected',()=>{const x=make();x.history=[{tick:2,requested:1,observed:0,deficit:1},...x.history];x.totals={requested:6,observed:2,deficit:4};assert.throws(()=>describe(x))});
+test('out of bound totals rejected',()=>assert.throws(()=>describe(make(64000001,0))));
+test('crossed simulation tick rejected',()=>assert.throws(()=>describe({...make(),simulationTick:5})));
