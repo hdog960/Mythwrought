@@ -153,7 +153,8 @@ for(const [rx,rz] of regions){
   candidateThinUnderpassUnverifiedPlayerElevationEdges:
    underpass.originalPlayerAabbElevationChangesStillRequireStepPlayer??null,
   candidateThinUnderpassRealStepPlayerAndWorldOverlaysNotTested:true,
-  candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly:true,
+  candidateThinUnderpassNativeStepPlayerOnSealedHypotheticalFutureOnly:
+   underpass.hypotheticalOriginalMotionSimulated===true,
   wholeCityEllipseGalleryCutsetAudited:cutset.ok===true,
   wholeCityEllipsePlannedColumns:cutset.totalColumns??null,
   wholeCityEllipseBlockedByMainGalleries:cutset.blockedColumns??null,
