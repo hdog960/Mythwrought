@@ -54,6 +54,14 @@ test('seed179 (2,0) bypass bends around the selected access route with a full-de
  assert.equal(r.physicalFootgraphSections,47);
  assert.equal(r.physicalFootgraphReachableNodes,112);
  assert.equal(r.physicalFootgraphMinAccessToPadSteps,26);
+ assert.equal(r.originalPlayerColliderAgainstConservativelySealedFixturePassed,true);
+ assert.equal(r.originalPlayerAabbRadius,.28);
+ assert.equal(r.originalPlayerAabbHeight,1.78);
+ assert.equal(r.originalPlayerAabbFixtureBodySamples,622);
+ assert.equal(r.originalPlayerAabbFixtureFlatSweeps,39);
+ assert.equal(r.originalPlayerAabbFixtureSkippedElevationEdges,7);
+ assert.equal(r.originalPlayerAabbCandidateProbes,1);
+ assert.equal(r.originalPlayerStepPlayerMovementNotYetSimulated,true);
  assert.equal(r.worldChanged,false);
 });
 test('seed179 (2,1) direct three-wide bridge stops at nearby safe center-side pad',()=>{
@@ -73,6 +81,11 @@ test('seed179 (2,1) direct three-wide bridge stops at nearby safe center-side pa
  assert.equal(r.physicalFootgraphSections,63);
  assert.equal(r.physicalFootgraphReachableNodes,187);
  assert.equal(r.physicalFootgraphMinAccessToPadSteps,100);
+ assert.equal(r.originalPlayerColliderAgainstConservativelySealedFixturePassed,true);
+ assert.equal(r.originalPlayerAabbFixtureBodySamples,846);
+ assert.equal(r.originalPlayerAabbFixtureFlatSweeps,55);
+ assert.equal(r.originalPlayerAabbFixtureSkippedElevationEdges,7);
+ assert.equal(r.originalPlayerAabbCandidateProbes,1);
 });
 test('independent full 5x5 15-high center-pad margin and thin bridge preserve all old geometry',()=>{
  for(const [rx,rz] of [[2,0],[2,1]]){
@@ -112,6 +125,11 @@ test('full (2,0) candidate source proof conserves 8815+248+135 exact visits',()=
  assert.equal(r.fullNineCellDestinationPadFootgraphConnected,true);
  assert.equal(r.detachedFootgraphFullWidthSections,47);
  assert.equal(r.detachedFootgraphReachableFootNodes,112);
+ assert.equal(r.originalPlayerAabbSealedFixturePassed,true);
+ assert.equal(r.originalPlayerAabbCollisionRadius,.28);
+ assert.equal(r.originalPlayerAabbCollisionHeight,1.78);
+ assert.equal(r.originalPlayerAabbFixtureBodySamples,622);
+ assert.equal(r.originalPlayerAabbElevationChangesStillRequireStepPlayer,7);
  assert.equal(r.releaseApproved,false);
 });
 test('full (2,1) source candidate counts 12711+276+135 and no original edits',()=>{
