@@ -77,3 +77,51 @@ test('completed census is immutable snapshot, and cannot be recomputed or mutate
  assert.throws(()=>{r.stageRoleCalls.bridge.naturalAt=999},TypeError);
  assert.throws(()=>c.audit({bridgeCells:1,padCells:1}),/Invalid completed/);
 });
+
+
+test('Phase26 independent geometric truth approves exact original four-role coordinates',()=>{
+ const manifest={bridge:['1,-10,0','2,-10,0'],pad:['2,-10,0','3,-10,0']};
+ const c=createUnderpassReaderCellCensus({expectedStageCoordinates:manifest});
+ fill(c,'bridge',[p(1,-10,0),p(2,-10,0)]);
+ c.enterPad();fill(c,'pad',[p(2,-10,0),p(3,-10,0)]);
+ const r=c.audit({bridgeCells:2,padCells:2});
+ assert.equal(r.ok,true);
+ assert.equal(r.independentGeometryFootprintProvided,true);
+ assert.equal(r.independentGeometryFootprintPassed,true);
+ assert.deepEqual(r.expectedStageDistinctCells,{bridge:2,pad:2});
+});
+test('Phase26 all four roles can agree on the SAME WRONG voxel and must still refuse',()=>{
+ const c=createUnderpassReaderCellCensus({expectedStageCoordinates:{
+  bridge:['0,-10,0'],pad:['0,-10,1']
+ }});
+ fill(c,'bridge',[p(9,-10,0)]);
+ c.enterPad();fill(c,'pad',[p(0,-10,1)]);
+ const r=c.audit({bridgeCells:1,padCells:1});
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'SOURCE_ROLE_INDEPENDENT_FOOTPRINT_MISMATCH');
+ assert.equal(r.independentGeometryFootprintPassed,false);
+ assert.equal(r.stageRoleDuplicateCalls.bridge.editedAt,0);
+});
+test('Phase26 expected stage geometry is snapshotted, not retargetable by caller',()=>{
+ const bridge=['1,-10,0'],pad=['2,-10,0'];
+ const c=createUnderpassReaderCellCensus({expectedStageCoordinates:{bridge,pad}});
+ bridge[0]='9,-10,0';pad.push('3,-10,0');
+ fill(c,'bridge',[p(1,-10,0)]);
+ c.enterPad();fill(c,'pad',[p(2,-10,0)]);
+ const r=c.audit({bridgeCells:1,padCells:1});
+ assert.equal(r.ok,true);
+ assert.equal(r.independentGeometryFootprintPassed,true);
+});
+test('Phase26 invalid and duplicated geometric witness coordinates refuse up front',()=>{
+ for(const m of [
+  {bridge:[],pad:['1,-10,0']},
+  {bridge:['1,-10,0','1,-10,0'],pad:['2,-10,0']},
+  {bridge:['1.5,-10,0'],pad:['2,-10,0']},
+  {bridge:['-0,-10,0'],pad:['2,-10,0']},
+  {bridge:['1,-10,0'],pad:['99999999999999999999,-10,0']}
+ ]){
+  assert.throws(()=>createUnderpassReaderCellCensus({
+   expectedStageCoordinates:m
+  }),/Invalid independent|Duplicate independent/);
+ }
+});
