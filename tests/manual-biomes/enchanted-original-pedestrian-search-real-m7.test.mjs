@@ -420,8 +420,11 @@ test('bounded directional search explicitly falls back to unbiased original-M7 D
    const proposal=mode==='directed'?directed:
      searchOriginalM7PedestrianBorder(old,{
        seed,x,z,targetBiome:'enchanted',
-       minDisplacement:5,radius:15,maxVisits:256,
-       maxSteps:26,maxRoutes:4
+       // Exact original-world accepted first-pass bounds from
+       // #45092293445, rather than changing BFS candidate ordering by
+       // broadening the radius or maxVisits in a regression comparison.
+       minDisplacement:5,radius:11,maxVisits:192,
+       maxSteps:24,maxRoutes:4
      });
    for(const route of proposal.routes){
     if(candidateBarkAcrossRealPlayer(prototype,route))continue;
