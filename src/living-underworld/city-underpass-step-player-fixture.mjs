@@ -11,7 +11,8 @@ const INT=Number.isSafeInteger;
 const KEY=(x,y,z)=>x+','+y+','+z;
 const MAX_CELLS=20000;
 const reject=(reason,details={})=>Object.freeze({ok:false,reason,
- ...details,originalStepPlayerUsed:true,
+ ...details,originalStepPlayerImported:true,
+ actualOriginalStepPlayerInvoked:details.actualOriginalStepPlayerInvoked===true,
  originalM7SourceAuthenticated:false,existingM7TerrainRead:false,
  genuineWorldWalkingProven:false,installedPwaAccepted:false,
  worldChanged:false,noWorldWrites:true});
@@ -122,7 +123,8 @@ export function auditCandidateUnderpassStepPlayer({
    if(event.hitWall)blockedFrames++;
    if(collides(world,p.x,p.feet,p.z))
     return reject('STEP_ORIGINAL_PLAYER_BODY_COLLIDED',{
-     edgeIndex:index,direction,frame:frames});
+     edgeIndex:index,direction,frame:frames,
+     actualOriginalStepPlayerInvoked:true});
    if(Math.hypot(targetX-p.x,targetZ-p.z)<=.12&&
       Math.abs(p.feet-b.y)<=.025&&
       p.onGround&&collides(world,p.x,p.feet-.002,p.z)){
@@ -136,7 +138,7 @@ export function auditCandidateUnderpassStepPlayer({
   moves.push(record);
   if(!arrived)return reject('STEP_ORIGINAL_MOVEMENT_DID_NOT_REACH_TARGET',{
     ...record,elevationEdges:edges.length,checkedMoves:moves.length,
-    totalFrames});
+    totalFrames,actualOriginalStepPlayerInvoked:true});
   return null;
  };
  for(const {index,a,b} of edges){
