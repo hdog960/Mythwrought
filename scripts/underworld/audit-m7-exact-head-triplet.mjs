@@ -126,6 +126,8 @@ if(nodeTests.status!==0){
   allThreeExecutedSuccessfully,executions,
   originalNativeM7Reports:reports,
   sourceOnlyCandidateAdmission:admission,
+  thinUnderpassExactSourceAndFutureMovementGatePassed:
+   admission?.cityThinUnderpassHypotheticalMovementSafe===true,
   historicalConstructorFaultsStillUnresolved:[8675309,13579],
   actualPlayerWalkingTested:false,actualIphoneGpuTested:false,
   installedPwaAcceptance:false,noReleaseApproval:true,
@@ -133,12 +135,14 @@ if(nodeTests.status!==0){
    'GIT_VISIBLE_NATIVE_CHECKOUT_CHANGED_DURING_AUDIT':
    !allThreeExecutedSuccessfully?
    'ORIGINAL_M7_SCRIPT_EXECUTION_OR_JSON_FAILURE':
-   admission?.proposalEvidenceAllPassed?
-    'SOURCE_CANDIDATE_RESEARCH_ONLY_NOT_RELEASE':
+   admission?.proposalEvidenceAllPassed&&
+   admission?.cityThinUnderpassHypotheticalMovementSafe?
+    'SOURCE_AND_FUTURE_PLAYER_RESEARCH_ONLY_NOT_RELEASE':
     'ORIGINAL_M7_SOURCE_OR_COVERAGE_GATES_HOLD'
  };
  console.log(JSON.stringify(result));
  if(!exactSourceStayedUnmodified||!allThreeExecutedSuccessfully||
-  !admission?.proposalEvidenceAllPassed)
+  !admission?.proposalEvidenceAllPassed||
+  !admission?.cityThinUnderpassHypotheticalMovementSafe)
   process.exitCode=2;
 }
