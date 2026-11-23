@@ -1,0 +1,33 @@
+name: Mountain V8 isolated flora physics ABI research gate
+# Single focused original-repository native Node22 source test.
+# This branch only, trigger on workflow's first creation. No broad CI.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-flora-prototype-original-abi-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-flora-abi:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact isolated original source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Original native Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source HEAD, two syntax checks, eight flora ABI cases
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-unapproved-flora-physics-prototype.mjs
+          node --check tests/mountain-v8-unapproved-flora-physics-prototype.test.mjs
+          node --test --test-concurrency=1 tests/mountain-v8-unapproved-flora-physics-prototype.test.mjs
