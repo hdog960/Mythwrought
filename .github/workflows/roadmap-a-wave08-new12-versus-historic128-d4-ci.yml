@@ -1,0 +1,22 @@
+name: Roadmap A original Wave08 ONLY twelve versus protected 128 source D4
+on:
+  push:
+    branches:
+      - roadmap-a-wave08-new12-versus-historic128-d4-ci-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave08-new12-versus-historic128-d4-ci.yml'
+permissions:
+  contents: read
+jobs:
+  original-128-only-new-twelve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Syntax check new historical-only comparison
+        run: node --check tests/building-pool/roadmap-2a/roadmap-a-wave08-protected-128-only-d4.test.mjs
+      - name: ONE targeted strict same-category original protected128 versus new12 D4 test
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-wave08-protected-128-only-d4.test.mjs
