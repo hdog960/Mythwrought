@@ -66,6 +66,30 @@ const separation=(point,boxes)=>{
  }
  return {distance,index};
 };
+/**
+ * Original source box exact slab *entry* tangential clearance: when a ray
+ * enters an original AABB at a tangential corner/edge, selection can report
+ * an earlier distance than a STRICT triangle whose barycentric boundary
+ * rejects that exact entry surface. No padding, no actual GPU simulation.
+ */
+function originalAuthoredSlabEntrySeam(eye,ray,box){
+ const length=norm(ray),dir=ray.map(v=>v/length);
+ let entryT=-Infinity,entryAxis=null;
+ for(let a=0;a<3;a++){
+  if(Math.abs(dir[a])<1e-12)continue;
+  const plane=dir[a]>0?box[a]:box[a+3];
+  const t=(plane-eye[a])/dir[a];
+  if(t>entryT){entryT=t;entryAxis=a;}
+ }
+ if(entryAxis===null)return {entryAxis:null,tangentialMargin:null,atSeam:false};
+ const point=add(eye,dir.map(v=>v*entryT));
+ const margin=Math.min(...[0,1,2].filter(a=>a!==entryAxis).flatMap(a=>[
+  Math.abs(point[a]-box[a]),Math.abs(point[a]-box[a+3])
+ ]));
+ return {entryAxis,tangentialMargin:margin,atSeam:margin<=.000002,
+  originalSlabEntryWorldDistance:entryT};
+}
+
 /** This source directly uses the unchanged ORIGINAL construction-layer,
  * never a substitute geometry registry, and only a freshly allocated
  * throw-away all-air world. No VoxelWorld/set/localStorage.
@@ -177,7 +201,14 @@ export function auditOriginalHearthYaw3StrictWorldRayGrid(){
   strictTriangleOnlySelectionMisses:0,sourceToleranceOnlySelectionMisses:0,
   detailedSelectionOnlyAgainstStrict:0,strictDistanceWarningsOver2e7:0,
   strictGapWithMarginAtLeast1e5:0,strictGapWithBoxSeparationOver1e5:0,
-  originalAndIndependentBoxDistanceDisagreements:0};
+  originalAndIndependentBoxDistanceDisagreements:0,
+  distanceSelectionAheadOfStrictTriangles:0,
+  distanceStrictTrianglesAheadOfSelection:0,
+  distanceSameAuthoredSourceBox:0,
+  distanceDifferentAuthoredSourceBoxes:0,
+  distanceOnAuthoredTangentialSelectionSeam:0,
+  distanceAwayFromAuthoredTangentialSelectionSeam:0,
+  largestDistanceDisagreementBlockUnits:0};
  const strictW=[],toleranceW=[],distanceW=[];
  for(const ly of y)for(const lz of z)for(const shift of offsets){
   const aim=[cfg.anchor[0],cfg.anchor[1]+ly+shift,cfg.anchor[2]+lz];
@@ -195,8 +226,24 @@ export function auditOriginalHearthYaw3StrictWorldRayGrid(){
    totals.bothStrictAndDetailedHits++;
    if(Math.abs(strict-detail)>2e-7){
     totals.strictDistanceWarningsOver2e7++;
+    const diff=strict-detail;
+    if(diff>0)totals.distanceSelectionAheadOfStrictTriangles++;
+    else totals.distanceStrictTrianglesAheadOfSelection++;
+    const selectedBox=closestOriginalBox(originalEye,ray,s.boxes);
+    must(selectedBox.index!==null,'original detailed hit has no authored selection box owner');
+    const triBox=Math.floor(triangle.strictTriangleIndex/12);
+    if(triBox===selectedBox.index)totals.distanceSameAuthoredSourceBox++;
+    else totals.distanceDifferentAuthoredSourceBoxes++;
+    const seam=originalAuthoredSlabEntrySeam(originalEye,ray,s.boxes[selectedBox.index]);
+    if(seam.atSeam)totals.distanceOnAuthoredTangentialSelectionSeam++;
+    else totals.distanceAwayFromAuthoredTangentialSelectionSeam++;
+    totals.largestDistanceDisagreementBlockUnits=Math.max(
+     totals.largestDistanceDisagreementBlockUnits,Math.abs(diff));
     if(distanceW.length<12)distanceW.push({localAim:[0,ly+shift,lz],
-     triangleDistance:strict,selectionDistance:detail,margin:triangle.strictMargin});
+     triangleDistance:strict,selectionDistance:detail,margin:triangle.strictMargin,
+     signedTriangleMinusSelectionBlockUnits:diff,sourceSelectionBoxIndex:selectedBox.index,
+     sourceStrictTriangleBoxIndex:triBox,originalAuthoredSelectionSeam:seam,
+     researchOnlyNotAPixelObservation:true});
    }
   }else if(strict===null&&detail===null)totals.bothStrictAndDetailedMisses++;
   else if(strict!==null&&detail===null){
@@ -227,6 +274,18 @@ export function auditOriginalHearthYaw3StrictWorldRayGrid(){
  must(totals.strictTriangleHits===
   totals.bothStrictAndDetailedHits+totals.strictTriangleOnlySelectionMisses,
   'strict authored original triangle hit census incomplete');
+ must(totals.distanceSelectionAheadOfStrictTriangles+
+  totals.distanceStrictTrianglesAheadOfSelection===
+  totals.strictDistanceWarningsOver2e7 &&
+  totals.distanceSameAuthoredSourceBox+
+  totals.distanceDifferentAuthoredSourceBoxes===
+  totals.strictDistanceWarningsOver2e7 &&
+  totals.distanceOnAuthoredTangentialSelectionSeam+
+  totals.distanceAwayFromAuthoredTangentialSelectionSeam===
+  totals.strictDistanceWarningsOver2e7,
+  'genuine original source both-hit distance discrepancies are incompletely classified');
+ must(totals.strictDistanceWarningsOver2e7===208,
+  'original source alternative yaw3 208 measured two-hit distance warning reference unexpectedly drifted');
  const center=from(originalEye,
   [cfg.anchor[0]+.5,cfg.anchor[1]+.5,cfg.anchor[2]+.5]);
  const away=forwardVector(0,0);

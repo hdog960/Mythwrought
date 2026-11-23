@@ -110,6 +110,52 @@ test('if strict gaps exist, each is a literal ORIGINAL Float32 triangle intersec
   actualGpuRasterExecuted:false
  }));
 });
+test('all 208 measured original strict both-hit distance warnings are attributed by proximity, physical owner box and signed distance',()=>{
+ assert.equal(out.strictTriangleOnlySelectionMisses,0);
+ assert.equal(out.detailedSelectionOnlyAgainstStrict,0);
+ assert.equal(out.strictDistanceWarningsOver2e7,208);
+ assert.equal(out.distanceSelectionAheadOfStrictTriangles+
+  out.distanceStrictTrianglesAheadOfSelection,208);
+ assert.equal(out.distanceSameAuthoredSourceBox+
+  out.distanceDifferentAuthoredSourceBoxes,208);
+ assert.equal(out.distanceOnAuthoredTangentialSelectionSeam+
+  out.distanceAwayFromAuthoredTangentialSelectionSeam,208);
+ assert.ok(out.largestDistanceDisagreementBlockUnits>=2e-7);
+ assert.equal(out.firstSourceHitDistanceWarnings.length,12);
+ assert.ok(out.firstSourceHitDistanceWarnings.every(x=>
+  Number.isFinite(x.signedTriangleMinusSelectionBlockUnits)&&
+  Math.abs(x.signedTriangleMinusSelectionBlockUnits)>2e-7&&
+  Number.isSafeInteger(x.sourceSelectionBoxIndex)&&
+  Number.isSafeInteger(x.sourceStrictTriangleBoxIndex)&&
+  x.originalAuthoredSelectionSeam!==null&&
+  Number.isFinite(x.originalAuthoredSelectionSeam.tangentialMargin)&&
+  x.originalAuthoredSelectionSeam.entryAxis!==null&&
+  x.researchOnlyNotAPixelObservation));
+ console.log('ROADMAP_A_HEARTH_YAW3_ORIGINAL_208_STRICT_DISTANCE_CLASSIFICATION '+JSON.stringify({
+  originalStrictTwoHitWarnings:out.strictDistanceWarningsOver2e7,
+  selectionAhead:out.distanceSelectionAheadOfStrictTriangles,
+  trianglesAhead:out.distanceStrictTrianglesAheadOfSelection,
+  sameSourcePhysicalBox:out.distanceSameAuthoredSourceBox,
+  differentSourcePhysicalBoxes:out.distanceDifferentAuthoredSourceBoxes,
+  selectionTangentialFaceSeam:out.distanceOnAuthoredTangentialSelectionSeam,
+  selectionAwayFromFaceSeam:out.distanceAwayFromAuthoredTangentialSelectionSeam,
+  largestSignedMagnitudeInBlocks:out.largestDistanceDisagreementBlockUnits,
+  originalGpuRasterOrPlayerTestedNow:false,
+  firstWitnesses:out.firstSourceHitDistanceWarnings.slice(0,5)
+ }));
+});
+test('strict source render/pick HIT SETS agree in every original authored yaw3 ray, and permissive rays never become fixes',()=>{
+ assert.equal(out.rays,2610);
+ assert.equal(out.strictTriangleHits,2472);
+ assert.equal(out.originalDetailedHits,2472);
+ assert.equal(out.strictTriangleOnlySelectionMisses,0);
+ assert.equal(out.detailedSelectionOnlyAgainstStrict,0);
+ assert.equal(out.originalAndIndependentBoxDistanceDisagreements,0);
+ assert.equal(out.firstStrictGaps.length,0);
+ assert.equal(out.originalOnePageGpuBytes,54432);
+ assert.equal(out.actualWorldGpuVerticesChecked,1512);
+ assert.equal(out.sourceAuthoredOriginalPartBoxes,42);
+});
 test('permissive source-only ray hits remain separate from strict real mesh hits and are not turned into false production bugs',()=>{
  assert.ok(out.sourceToleranceOnlySelectionMisses<=out.rays);
  assert.ok(out.firstToleranceOnly.every(w=>

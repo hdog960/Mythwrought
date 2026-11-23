@@ -33,3 +33,41 @@ Run one new **branch-only** exact-source GitHub Actions job with Node 22.16.0; o
 ## No approval or production transfer
 
 No new numeric block ID, A5 building design approval, physical structural load approval, merger, deployment, world save writes, shared workflows, other developers, five automations, production PWA or locked v0.11 modifications. Original scene and original iPhone Safari validation remain separate. Until independently checked, source strict gaps are hypotheses; negative findings justify leaving production selection untouched and moving to another source-original physical geometry problem rather than claiming universal correctness.
+
+## Original repository first verified native checkpoint — accepted source mesh and strict hit sets
+
+[Actual original Node 22.16.0 Actions #45109531280](https://github.com/hdog960/Mythwrought/actions/runs/45109531280) **COMPLETED SUCCESS 11/11 newly authored native cases, zero failed**, with exact new source/test syntax green. Source-only research implementation \`8c8b49381ad3ac405d51be2ce312d9ff19b6e92f\`; dedicated unique CI-only child exact HEAD \`31e1b3c00af272fc55a7ca18ab551101483b8332\`.
+
+Original native diagnostic:
+
+\`\`\`json
+{
+ "identity":{"symbol":"pack5:080","sourceVariant":"hearth-running-bond",
+             "researchYaw":3,"sourceOnlyAnchor":[3,14,0],
+             "researchEye":[0.5,13.55,0.5]},
+ "originalPartBoxes":42,
+ "originalGPUVertices":1512,
+ "gpuBytes":54432,
+ "grid":{"yLevels":29,"zLevels":30,
+         "sourceOffsets":[-0.000002,0,0.000002],"exactRayCount":2610},
+ "sourceCounts":{
+   "rays":2610,
+   "strictTriangleHits":2472,
+   "detailedSelectionHits":2472,
+   "strictTriangleOnlySelectionMisses":0,
+   "strictDistanceWarnings":208,
+   "originalStrictMarginPositive":0,
+   "originalRealSpatialGap":0,
+   "relaxedOnlySelectionMisses":0,
+   "trueOriginalRayVsIndependentBoxDisagreement":0
+ }
+}
+\`\`\`
+
+The **actual original construction-layer source meshAt**, original GPU nine-Float32 staging, independent second-world-Float32 transformation and **each of all 1,512 authored physical box-face vertex corners** passed exact comparisons. The original Pack5 selection method **hit exactly the same 2,472 out of 2,610 rays as strict original renderer-space triangles** on this other research-only hearth-running-bond/yaw3 geometry. There were **no** strict triangle-only selection misses and **no** selection-only strict misses. The only significant remaining result was **208 nearest-hit distance differences** exceeding an unusually tight 2e-7 world-unit research comparator, even though both paths HIT. The first actual warning was source strict triangle distance \`2.609049032289619\`, original detailed AABB \`2.588342313528873\` (selection reported a source hit about 0.020707 blocks earlier). This is NOT 208 demonstrated gameplay defects; internal overlapping authored box faces, exact face boundary conditions and GPU raster occlusion must be distinguished.
+
+### New exact 208-warning semantic classifier (second isolated source revision)
+
+Continue the same real-own-lane source module. Preserve the previous green source/renderer coordinate and hit-set check but classify ALL **208** both-hit warnings by: **signed selection-ahead vs strict-triangle-ahead distance**, **same versus different original authored source box ownership**, and **whether the original selected AABB entry point is <=0.000002 from its own tangential authored box edge**. Compute the original source strict triangle index and its physical source box owner using exact 12-triangle/box rendering contract; independently calculate original entry face with original ray normalization and exact slab plane, retain at most twelve witness rows but classify all 208. Refuse any non-reconciling partitions or new strict source mesh/selection hit-set drift. Add two new focused native cases (now **13**) and print all measured classification counts; **do not invent the category counts ahead of the original native CI**.
+
+These classifications can identify boundary-grazing original selection ahead of the nearest source triangle, overlapping brick art and source numerical differences. They are **still only source math on a private read-only all-air world**, not true WebGL2 raster fragments or actual player HUD selection; do not introduce arbitrary box padding, relax original reach or ray occlusion, or select production original A5 building art/yaw.
