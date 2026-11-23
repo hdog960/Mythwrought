@@ -44,7 +44,7 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
     for (const [label,run,mode] of [['control',control,'original-control'],
                                     ['candidate',candidate,'experimental-vao']]) {
       if (run.mode !== mode) fail(label + ' renderer identity is incorrect');
-      if (run.protocol !== '291-local-4viewport-v1') fail(label + ' protocol is not certified for comparison');
+      if (run.protocol !== '291-local-4viewport-v2') fail(label + ' protocol is not certified for comparison');
       if (viewportKey(run.viewportCss) !== target) fail(label + ' CSS viewport differs from expected');
       if (!viewportKey(run.viewportPixels)) fail(label + ' physical buffer viewport is not landscape');
       if (run.fatal !== false || run.graphicsLost !== false || run.pageSuspended !== false)
@@ -52,8 +52,8 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       if (run.continuousForegroundRun !== true ||
           !validCount(run.interruptionCount) || run.interruptionCount !== 0)
         fail(label + ' was hidden, suspended or context-lost during the observed A/B run');
-      if (!validCount(run.trueSavedDeepMines) || run.trueSavedDeepMines < ISSUE291_MIN_DEEP_MINES)
-        fail(label + ' has fewer than 100 actual saved deep MINE actions');
+      if (!validCount(run.trueSavedDeepMines) || run.trueSavedDeepMines !== ISSUE291_MIN_DEEP_MINES)
+        fail(label + ' must capture exactly 100 saved deep MINE actions in the comparison window');
       // Count/seed alone is not proof that the same voxels were mined.
       // This is a fully ordered source-original trace of actual successful
       // saved MINE results; fail closed for missing, truncated or forged rows.
@@ -65,15 +65,24 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
             row[3]>0 && row[4]===0) ||
           new Set(witness.map(row=>row.slice(0,3).join(','))).size !== witness.length)
         fail(label + ' lacks a complete unique ordered source-saved deep MINE witness');
-      if (!validCount(run.frameGapsRecorded) || run.frameGapsRecorded < 100 ||
-          !validCount(run.rollingFrameCount) || run.rollingFrameCount !==
-          Math.min(run.frameGapsRecorded,2048)) fail(label + ' lacks a consistent real foreground frame window');
-      if (!validCount(run.rollingSlowFrames) || run.rollingSlowFrames > run.rollingFrameCount)
-        fail(label + ' has inconsistent slow-frame evidence');
+      // The measured p95 MUST come from frames spanning the exact 100
+      // saved source-real mines, not idle screen frames before or after.
+      // Faster rendering naturally changes frame count; equality of total
+      // frame count is NOT a valid A/B constraint.
+      const trial=run.mineFrameWindow;
+      if (!trial || trial.phase!=='complete' || trial.savedMines!==100 ||
+          trial.overflow!==false || trial.invalid!==false ||
+          trial.interrupted!==false ||
+          !validCount(trial.frameGapsRecorded) || trial.frameGapsRecorded<100 ||
+          trial.maxFrameSamples!==16384 ||
+          trial.frameGapsRecorded>trial.maxFrameSamples ||
+          !validCount(trial.slowFrames) || trial.slowFrames>trial.frameGapsRecorded ||
+          !validPositive(trial.elapsedMs) || !validPositive(trial.frameP95Ms))
+        fail(label + ' lacks a complete bounded uninterrupted real mining-frame trial');
       if (!validCount(run.successfulGuardedUploads) || !run.successfulGuardedUploads)
         fail(label + ' has no successful original guarded GPU upload');
-      if (!validPositive(run.miningActionP95Ms) || !validPositive(run.rollingFrameP95Ms))
-        fail(label + ' lacks finite positive action/frame p95 values');
+      if (!validPositive(run.miningActionP95Ms))
+        fail(label + ' lacks finite positive original saved-MINE action p95');
       if (!validNumber(run.rollingSuccessfulUploadP95Ms) ||
           run.rollingSuccessfulUploadP95Ms > ISSUE291_MAX_UPLOAD_P95_MS)
         fail(label + ' guarded upload p95 exceeds 33ms or is missing');
@@ -96,15 +105,17 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       fail('Control and VAO saved deep-MINE counts are unequal');
     if (JSON.stringify(control.mineWitness) !== JSON.stringify(candidate.mineWitness))
       fail('Control and VAO saved deep-MINE cell/previous-ID order differs');
-    if (control.frameGapsRecorded !== candidate.frameGapsRecorded)
-      fail('Control and VAO frame observation counts are unequal');
-    if (validCount(control.rollingSlowFrames) && validCount(candidate.rollingSlowFrames) &&
-        candidate.rollingSlowFrames > control.rollingSlowFrames)
-      fail('VAO slow-frame regression compared with original control');
+    // Identical 100 source-real edits can take differing frame counts at
+    // different FPS; compare the same bounded *work interval* instead.
+    if (validCount(control.mineFrameWindow?.slowFrames) &&
+        validCount(candidate.mineFrameWindow?.slowFrames) &&
+        candidate.mineFrameWindow.slowFrames > control.mineFrameWindow.slowFrames)
+      fail('VAO slow-frame regression during matched 100 deep mines');
     const actionGain = validPositive(control.miningActionP95Ms) && validPositive(candidate.miningActionP95Ms)
       ? 1 - candidate.miningActionP95Ms/control.miningActionP95Ms : null;
-    const frameGain = validPositive(control.rollingFrameP95Ms) && validPositive(candidate.rollingFrameP95Ms)
-      ? 1 - candidate.rollingFrameP95Ms/control.rollingFrameP95Ms : null;
+    const frameGain = validPositive(control.mineFrameWindow?.frameP95Ms) &&
+      validPositive(candidate.mineFrameWindow?.frameP95Ms)
+      ? 1 - candidate.mineFrameWindow.frameP95Ms/control.mineFrameWindow.frameP95Ms : null;
     if (actionGain === null || actionGain + 1e-12 < ISSUE291_REQUIRED_IMPROVEMENT)
       fail('Deep MINE action p95 has not improved by at least 10%');
     if (frameGain === null || frameGain + 1e-12 < ISSUE291_REQUIRED_IMPROVEMENT)
@@ -116,7 +127,12 @@ export function evaluateIssue291FourViewportAB({expectedViewports, pairs} = {}) 
       frameImprovementPct:frameGain===null?null:Math.round(frameGain*10000)/100,
       controlUploadP95Ms:control.rollingSuccessfulUploadP95Ms,
       candidateUploadP95Ms:candidate.rollingSuccessfulUploadP95Ms,
-      controlSlowFrames:control.rollingSlowFrames,candidateSlowFrames:candidate.rollingSlowFrames}));
+      controlTrialFrames:control.mineFrameWindow?.frameGapsRecorded??null,
+      candidateTrialFrames:candidate.mineFrameWindow?.frameGapsRecorded??null,
+      controlTrialElapsedMs:control.mineFrameWindow?.elapsedMs??null,
+      candidateTrialElapsedMs:candidate.mineFrameWindow?.elapsedMs??null,
+      controlSlowFrames:control.mineFrameWindow?.slowFrames??null,
+      candidateSlowFrames:candidate.mineFrameWindow?.slowFrames??null}));
   }
   return Object.freeze({metricGatesPassed:failures.length===0,releaseCertified:false,
     failures:Object.freeze(failures),comparisons:Object.freeze(comparisons),externalProofsStillRequired});
