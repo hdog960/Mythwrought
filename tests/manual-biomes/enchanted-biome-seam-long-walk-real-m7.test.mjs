@@ -313,3 +313,76 @@ test('source-grounded winding climate crossings preserve original continuous pla
   noInterlegTeleport:true,notPhysicalIphone:true
  }));
 });
+
+test('bounded short original-M7 physical survey across different Enchanted climate pairs and seed -88',()=>{
+ const seeds=[179,7919,-88],accepted=[],probes=[];
+ const coveredPair=new Set(),perSeed=new Map();
+ for(const seed of seeds){
+  const profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+  const history=new FourRegionWorld(seed,profile);
+  const prototype=new FourRegionWorld(seed,profile,{experimentalEnchantedTrees:true});
+  const borderList=boundaries(seed);
+  const explored={seed,boundaries:borderList.length,considered:0,
+    sourceGroundCandidates:0,oldWalkPass:0,prototypePass:0,
+    climatePairs:new Set(),rejectedHistoricWalks:0};
+  outer:
+  for(const b of borderList){
+   for(const dz of [0,-4,4,-8,8,-12,12]){
+    for(const steps of [8,10]){
+     for(const direction of [1,-1]){
+      explored.considered++;
+      const x=b.x-direction*Math.floor(steps/2),z=b.z+dz;
+      const route=physicallyValidWindingRoute(history,prototype,
+        {x,z,direction,steps},0,0,0);
+      if(!route)continue;
+      explored.sourceGroundCandidates++;
+      const old=continuouslyWalk(history,route);
+      if(!old.ok){explored.rejectedHistoricWalks++;continue;}
+      explored.oldWalkPass++;
+      const modern=continuouslyWalk(prototype,route);
+      assert.equal(modern.ok,true,
+        'experimental canopy closed genuine historic biome transition '+JSON.stringify({
+          seed,b,x,z,steps,old,modern
+        }));
+      assert.equal(modern.hitWall,false);
+      assert.equal(modern.ceiling,false);
+      assert.equal(modern.legs,steps);
+      assert.ok(Math.abs(modern.feet-old.feet)<.15);
+      explored.prototypePass++;
+      const from=name(route[0].x,route[0].z,seed);
+      const to=name(route.at(-1).x,route.at(-1).z,seed);
+      const pair=[from,to].sort().join('/');
+      explored.climatePairs.add(pair);
+      if(!coveredPair.has(pair)||!(perSeed.get(seed)>0)){
+       accepted.push({seed,pair,start:[x,z],direction,steps,
+         oldTicks:old.ticks,prototypeTicks:modern.ticks,
+         crossedChunk:chunkCoord(route[0].x)!==chunkCoord(route.at(-1).x)});
+      }
+      coveredPair.add(pair);
+      perSeed.set(seed,(perSeed.get(seed)??0)+1);
+      // Do not spend unbounded CI searching after two physical witnesses per
+      // seed. All other transitions are discovery/coverage, not invented.
+      if(explored.prototypePass>=2)break outer;
+     }
+    }
+   }
+  }
+  probes.push({...explored,climatePairs:[...explored.climatePairs]});
+  assert.deepEqual(history.save(),{schema:1,seed,edits:[]});
+  assert.throws(()=>prototype.save(),/cannot be saved as historical M7/);
+ }
+ const distinct=[...coveredPair];
+ // This new survey must discover source-backed opportunities; it may not
+ // claim that old terrain has safe routes in every seed or biome. Record
+ // difficult combinations explicitly for future original-world engineering.
+ assert.ok(probes.every(p=>p.boundaries>0));
+ assert.ok(probes.some(p=>p.sourceGroundCandidates>0),
+   'bounded scan must inspect authentic supporting M7 climate terrain');
+ assert.ok(accepted.length>=1,
+   'at least one independent short historic M7 crossing must actually complete');
+ console.log('# ENCHANTED ORIGINAL M7 SHORT CLIMATE WALK SURVEY '+JSON.stringify({
+   probes,accepted,distinctPairs:distinct,seedMinus88RouteCount:perSeed.get(-88)??0,
+   realOriginalStepPlayer:true,experimentalLeavesCannotReplaceOldPaths:true,
+   noInterlegTeleport:true,iPhoneNotMeasured:true
+ }));
+});
