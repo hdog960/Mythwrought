@@ -443,7 +443,7 @@ function start(nonblockStage=null){
   const near291Perf=near291Measure?{
     viewport:'',frames:new Float32Array(2048),mines:new Float32Array(128),
     uploads:new Float32Array(2048),
-    frameCount:0,mineCount:0,uploadCount:0,prevFrame:null
+    frameCount:0,mineCount:0,uploadCount:0,slowFrameCount:0,prevFrame:null
   }:null;
   function near291Viewport(){
     return canvas.clientWidth+'x'+canvas.clientHeight+'|'+world.seed;
@@ -454,6 +454,7 @@ function start(nonblockStage=null){
     if(near291Perf.viewport===key)return;
     near291Perf.viewport=key;
     near291Perf.frameCount=near291Perf.mineCount=near291Perf.uploadCount=0;
+    near291Perf.slowFrameCount=0;
     near291Perf.prevFrame=null;
   }
   function near291RecordFrame(now){
@@ -466,7 +467,13 @@ function start(nonblockStage=null){
     if(previous!==null){
       const gap=now-previous;
       if(gap>0&&gap<=1000){
-        near291Perf.frames[near291Perf.frameCount%near291Perf.frames.length]=gap;
+        const slot=near291Perf.frameCount%near291Perf.frames.length;
+        // Maintain the exact same rolling frame window as p95. A prior
+        // slow sample ceases to count when it is overwritten after wrap.
+        if(near291Perf.frameCount>=near291Perf.frames.length&&
+           near291Perf.frames[slot]>33.4)near291Perf.slowFrameCount--;
+        near291Perf.frames[slot]=gap;
+        if(gap>33.4)near291Perf.slowFrameCount++;
         near291Perf.frameCount++;
       }
     }
@@ -502,6 +509,8 @@ function start(nonblockStage=null){
       miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
       frameGapsRecorded:near291Perf.frameCount,
       rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
+      rollingSlowFrames:near291Perf.slowFrameCount,
+      rollingFrameCount:Math.min(near291Perf.frames.length,near291Perf.frameCount),
       successfulGuardedUploads:near291Perf.uploadCount,
       rollingSuccessfulUploadP95Ms:percentile(near291Perf.uploads,near291Perf.uploadCount),
       maxFrameSamples:near291Perf.frames.length,
@@ -513,6 +522,7 @@ function start(nonblockStage=null){
       gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
+      protocol:'291-local-4viewport-v1',
       readOnly:true,nativeGpuRollbackProven:false,
       browserPixelParityProven:false,releaseCertified:false
     });
