@@ -28,22 +28,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax for changed V8-only source and evidence files
+      - name: Syntax for new V8 descriptor budget and genuine original atlas
         run: |
           node --version
           git rev-parse HEAD
-          node --check src/manual-biomes/mountain-v8-seam-certificate.mjs
-          node --check src/manual-biomes/mountain-v8-source-adapter.mjs
-          node --check src/manual-biomes/mountain-v8-original-world.mjs
+          node --check src/manual-biomes/mountain-v8-physical-descriptor-budget.mjs
           node --check src/manual-biomes/mountain-v8-tile-census.mjs
-          node --check tests/mountain-v8-seam-certificate.test.mjs
-          node --check tests/mountain-v8-source-adapter.test.mjs
-          node --check tests/mountain-v8-original-world.test.mjs
+          node --check tests/mountain-v8-physical-descriptor-budget.test.mjs
           node --check tests/mountain-v8-original-landform-atlas.test.mjs
-      - name: Exact original VoxelWorld veto provenance and 256-tile atlas only
+      - name: Only new V8 material proxy and four original 64-tile atlases
         run: |
           node --test --test-concurrency=1 \
-            tests/mountain-v8-seam-certificate.test.mjs \
-            tests/mountain-v8-source-adapter.test.mjs \
-            tests/mountain-v8-original-world.test.mjs \
+            tests/mountain-v8-physical-descriptor-budget.test.mjs \
             tests/mountain-v8-original-landform-atlas.test.mjs
