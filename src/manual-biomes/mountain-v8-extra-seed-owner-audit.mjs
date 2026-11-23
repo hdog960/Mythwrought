@@ -22,7 +22,8 @@ export function auditMountainV8ExtraSeedOwners(storage,seed){
   const exactBase=CAVE_MOB_PREFIX+seed;
   const seen=new Set();
   let claimed=false;
-  for(let i=0;i<storage.length;i++){
+  const count=storage.length;
+  for(let i=0;i<count;i++){
     const key=storage.key(i);
     // A broken/partial enumeration must NOT certify a free seed.
     if(typeof key!=='string'||seen.has(key))
@@ -32,6 +33,8 @@ export function auditMountainV8ExtraSeedOwners(storage,seed){
     // snapshot so a duplicated/malformed later key cannot be called safe.
     if(suffixes.some(s=>key===exactBase+s))claimed=true;
   }
+  if(storage.length!==count)
+    throw new Error('Changed original owner enumeration length');
   return result(claimed,claimed?'existing-cave-mob-roster-or-backup':
     'no-known-extra-local-claims');
 }
