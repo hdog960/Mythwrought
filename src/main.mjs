@@ -502,14 +502,15 @@ function start(nonblockStage=null){
       miningActionP95Ms:percentile(near291Perf.mines,near291Perf.mineCount),
       frameGapsRecorded:near291Perf.frameCount,
       rollingFrameP95Ms:percentile(near291Perf.frames,near291Perf.frameCount),
-      guardedUploadCalls:near291Perf.uploadCount,
-      rollingGuardedUploadP95Ms:percentile(near291Perf.uploads,near291Perf.uploadCount),
+      successfulGuardedUploads:near291Perf.uploadCount,
+      rollingSuccessfulUploadP95Ms:percentile(near291Perf.uploads,near291Perf.uploadCount),
       maxFrameSamples:near291Perf.frames.length,
       maxMineSamples:near291Perf.mines.length,
       maxUploadSamples:near291Perf.uploads.length,
       fatal:near291Fatal,graphicsLost,pageSuspended:near291PageSuspended,
       sourceFrames:frameHistory.stats(),meshCadence:meshCadence.stats(),
       residentNearChunks:chunks.size,pendingNearChunks:pending.size,
+      gpuUploadFaults:gpuRetry.stats(),
       driver:frameDriver.snapshot(),
       nearStatus:near291?.status()??null,
       readOnly:true,nativeGpuRollbackProven:false,
@@ -1036,13 +1037,15 @@ function start(nonblockStage=null){
   function uploadPack2Chunk(vertices,water){
     let buffer=null,waterBuffer=null;
     try{
+      // Guarded time covers successful original GPU uploads only.
+      // Keep the actual production uploader call + its original throw path.
       const opaqueStarted=near291Perf?performance.now():null;
-      try{buffer=uploadChunkBuffer(gl,vertices);}
-      finally{if(opaqueStarted!==null)near291RecordUpload(performance.now()-opaqueStarted);}
+      buffer=uploadChunkBuffer(gl,vertices);
+      if(opaqueStarted!==null)near291RecordUpload(performance.now()-opaqueStarted);
       if(water.length){
         const waterStarted=near291Perf?performance.now():null;
-        try{waterBuffer=uploadChunkBuffer(gl,water);}
-        finally{if(waterStarted!==null)near291RecordUpload(performance.now()-waterStarted);}
+        waterBuffer=uploadChunkBuffer(gl,water);
+        if(waterStarted!==null)near291RecordUpload(performance.now()-waterStarted);
       }
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
