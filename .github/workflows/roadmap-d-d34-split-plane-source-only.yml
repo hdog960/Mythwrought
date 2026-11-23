@@ -1,0 +1,50 @@
+name: Builder D34 original lateral source owner and joint-face diagnostic ONLY
+on:
+  push:
+    branches:
+      - builder-d-d34-split-plane-joint-triage-isolated-20261122
+    paths:
+      - 'src/building-pool/roadmap-d/d34-*'
+      - 'tests/building-pool/roadmap-d/d34-*'
+      - 'docs/building-pool/roadmap-d/D34_*'
+      - '.github/workflows/roadmap-d-d34-split-plane-source-only.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d34-unique-source-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-lateral-owner-new-tests-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Confirm literal D33 parent and unchanged authentic original source owners
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'c76aa6b7f3e2741272e21aadb04770c23edffe45'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-pack2-owner-oblique-preview.mjs)" = '3c06f7b6d8e41b9e3bf194505c82ab9fe686ffb7'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d32-pack2-wall-seat-joint-ports.mjs)" = '27ac7102eb22c1ad4fec6ba7c8c1c97c3e5afd24'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check D34 sources and exact focused tests only
+        run: |
+          node --check src/building-pool/roadmap-d/d34-owner-lateral-pin-interface.mjs
+          node --check src/building-pool/roadmap-d/d34-original-split-plane-roof-audit.mjs
+          node --check tests/building-pool/roadmap-d/d34-lateral-physical-interface.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d34-original-split-plane.source.test.mjs
+      - name: Run ONLY D34 four pure plus two original W16 W17 source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d34-lateral-physical-interface.pure.test.mjs \
+            tests/building-pool/roadmap-d/d34-original-split-plane.source.test.mjs
