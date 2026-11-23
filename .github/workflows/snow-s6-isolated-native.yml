@@ -1,0 +1,44 @@
+name: Snow S6 isolated original M7 opt-in design gate
+on:
+  push:
+    branches:
+      - research/snow-s6-pristine-new-world-design-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s6-isolated-native.yml'
+      - 'src/manual-biomes/snowy-s6-winter-tone-proposal.mjs'
+      - 'src/manual-biomes/snowy-s6-fresh-world-design-preview.mjs'
+      - 'tests/snowy-s6-winter-tone-proposal.test.mjs'
+      - 'tests/snowy-s6-fresh-world-guard.test.mjs'
+      - 'tests/snowy-s6-original-m7-design-gate.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s6-isolated-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  true-original-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert exact isolated checkout and new-only syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/manual-biomes/snowy-s6-winter-tone-proposal.mjs
+          node --check src/manual-biomes/snowy-s6-fresh-world-design-preview.mjs
+          node --check tests/snowy-s6-original-m7-design-gate.test.mjs
+          node --check tests/snowy-s6-winter-tone-proposal.test.mjs
+          node --check tests/snowy-s6-fresh-world-guard.test.mjs
+          test -f src/manual-biomes/profile-world.mjs
+          test -f src/manual-caves/opt-in-runtime.mjs
+      - name: Focused S6 palette and fresh-world guard tests (NO browser)
+        run: |
+          node --test tests/snowy-s6-winter-tone-proposal.test.mjs tests/snowy-s6-fresh-world-guard.test.mjs
+      - name: Genuine full-repository seed179/2026 M7 S6 detached source preview
+        run: node --test tests/snowy-s6-original-m7-design-gate.test.mjs
