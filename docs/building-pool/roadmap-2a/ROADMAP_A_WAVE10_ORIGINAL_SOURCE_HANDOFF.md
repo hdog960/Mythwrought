@@ -47,3 +47,42 @@ If ANY new native case fails, do NOT claim 243 accepted: record exact first caus
 ## Ownership protections and external production release baseline
 
 At first check this session, protected production \`main\` exact \`db4bbcc32156e5df311f733bcaa53d559c17313b\`, reflecting an earlier independent authorized Desert PR463 release; protected OPEN DRAFT PR406 code exact \`1d71f5e37891280a21c777e5189f0762014ed8a9\`. Reverify at completion. New production main changes may occur independently; do not roll back, rebase, or claim to have deployed. Previous 128 historical commerce / 103 source wave candidates, industrial 345, government 315, other builders, 5 hourly automations and shared workflow files unchanged. No player-world save schema1, installed PWA, gameplay source, manual A5 material/variant/yaw, climate/snow loads, support physics, final creator structure/visual approval, settlements or merge/deployment work permitted.
+
+## FINAL authentic original full-repository native acceptance (2026-11-23)
+
+**[Exact GitHub Actions #45224092423](https://github.com/hdog960/Mythwrought/actions/runs/45224092423) COMPLETED SUCCESS**, **all NINE focused original-repository Node22.16.0 test bodies 9/9 PASS, zero failure**, five changed-source/test file syntax checks PASS, artifact upload SUCCESS. Dedicated unique **CI-ONLY** branch \`roadmap-a-wave10-original-243-native-ci-r1-20261123\`, exact CI HEAD **\`ecb370581ddbce8eb79d18f877e59bd8b82820aa\`**. Native tests run against exactly the new ORIGINAL source commit **\`1da2ea74513e32e8fbe1f894029fc44380d398e9\`** (workflow-file-only child), no duplicate old broad suites, old source art edits, shared CI workflow modifications, actual original-game browser or device run.
+
+### Exact nine native tests and source truth
+
+1. Original A5 **243 PROVISIONAL SOURCE ONLY** extends **231** predecessor records, verifies all previous 231 source records **deep-equal**, all twelve new IDs in canonical \`plannedSlots()\`, **177 unwritten** and unchanged \`target=420\`.
+2. Every new source voxel geometry record has its exact original-source SHA256 and per-voxel canonical geometry fingerprint verified, actual cell count, roof count, genuine two front source entrances, four source rooms, six-plus source exterior glass voxels, separate physical unresolved dependencies, **all** creator/physical/Game/PWA/production acceptance flags FALSE.
+3. Detached source-only JSON SHA artifact written under CI build path only, no player-world save or original runtime write.
+4. Strict historical-128 protected original **new-Wave10-only** D4 native case.
+5. Twelve original genuine source valid \`author2ALandmark\` blueprints in previously missing canonical R2 slots (two each of general-store, pet-shop, magic-shop, potion-shop, bakery and bank); 128 historical and 103 earlier wave IDs stay claimed by existing owners only.
+6. Actual native original y1 source flooring, y2 source wall/pier/fixture occupancy, four-neighbor BFS from true two-wide three-high exterior entry to all four interior source room access points and approach cells for every grounded fixture.
+7. Four separately rooted source profile roof regions, two genuinely sky-open source courtyards, original window voxels and explicit **unresolved physical Pack requirements**.
+8. Original source foundation shapes strict eight-transform D4 comparison ONLY new twelve vs old 103 waves plus new peers.
+9. **Additional strong original bank-vault geometry regression**: each of TWO original bank source designs contains two adjacent genuine **3-high AIR holes** at original vault shell, y1 floor support both inside and outside, and 4-neighbor source BFS from main entrance traverses both openings. Native logs:
+   - \`r2:bank:mountain:medium:01\`: source vault \`[53,68,32,51,38,39]\`; **3292** source floor nodes reachable.
+   - \`r2:bank:temperate:large:01\`: source vault \`[60,75,27,50,34,35]\`; **3940** source floor nodes reachable.
+   This checks actual generated ORIGINAL source voxels/geometry and an unchanged ORIGINAL builder routine, **NOT** an installed Manual Pack door/collider, original-game MINE/placement or player traversal, and is not creator structural authorization.
+
+### New strict historical/peer originality — exact source counts, no weakened threshold
+
+- **218** original source-wave D4 evaluations (new Wave10 12 versus 103 existing Wave01–09 source plans and Wave10 peers, same-category eight-way rotation/reflection). Native maximum IoU **\`0.8262941303876976\`**, worst new \`r2:bank:temperate:large:01\` versus previous \`r2:bank:snow:large:01\`.
+- **256** new Wave10-only versus the ORIGINAL protected 128 historical commerce source D4 evaluations. Native maximum IoU **\`0.7746212121212122\`**, worst new \`r2:pet-shop:snow:small:03\` versus protected \`r2:pet-shop:enchanted-forest:medium:03\`.
+- Combined **474 targeted SAME-CATEGORY eight-way source D4 evaluations**, all strictly below the unmodified **0.85** cutoff; zero geometric source-clone violations. This is *not* a full game visual judgment or proof of physical Pack instantiation.
+
+### Exact immutable source-only artifact
+
+Successful job uploaded [**Actions artifact #14842043566**](https://github.com/hdog960/Mythwrought/actions/runs/45224092423/artifacts/14842043566) (name \`roadmap-a-wave10-243-original-source-only-native-r1\`), containing original \`A5_SETTLEMENT_HANDOFF_243_PROVISIONAL.json\`. Native original Node SHA256 of EXACT source JSON bytes **\`68c6b0333de10ffdbe47d95f078c9836f1ca606accea27c5130a9ab92901ed98\`**; native SHA256 of original \`roadmap-a-wave10.mjs\` source file **\`d4e823b9a0a6c62b210c35ad24b0ee6a1eeee42d0ca1088813e521be61718ae0\`**. GitHub tool verified artifact metadata ID, name, upload completion, size **150,826 bytes**, and nonexpiration at time of run. No independent ZIP downloaded byte authentication, PNGs or actual-game screenshot gate here; do not invent them.
+
+**Source-only provisional 243 = 128 protected historical + 103 Wave01–09 source candidates + 12 NEW Wave10 source candidates; 420 - 243 = 177 genuinely unwritten canonical source slots.** These counts are authoring metadata and strict native source physical-cell acceptance only, not 243 installed or player-accessible game structures.
+
+### Exact scoped work/CI and remaining production integration holds
+
+This session had ONE targeted original native Actions workflow, it passed first try after two source-only **preflight** redesigns: \`r2:potion-shop:snow:small:04\` and \`r2:bank:mountain:medium:01\` initially showed same-category D4 estimates **0.8530** and **0.8609**. Both were genuinely independently reauthored to different longer, more irregular source footprints **BEFORE** the actual original native run. No new code test weakened, all prior original source files remained untouched, and no duplicate CI on same source revision.
+
+Wave10 does NOT select a final Manual Pack5 art variation/yaw, physical connected voxel/microshape fixture footprint, actual weight-bearing roof spans or snowloads, physical support and player-body collision, source-specific 72 PNG/browser cube proxy visuals, original WebGL2 source rendering, real gameplay biome/ground terrain, six-block selection, iPhone Safari or installed PWA, schema1 player saves, pathfinding citizens, settlement placement, road alignment, production build integration or creator visual approval. The independent Desert Phase3 release changed main previously; this research inherited the frozen isolated Wave09 source tree without claiming new-main integration. Production \`main\` and PR406 code HEAD must be independently reverified before any integration; **no merge/rebase/deploy** is allowed here.
+
+**Follow-up:** Wave11 should check canonical source IDs in the 177 remaining, with new category-balanced original source rooms and vault checks, and use one isolated native Node proof of exact prior 243 metadata/deep equality and strict new-only historical D4, avoiding older broad CI. Alternatively physical/visual acceptance of Waves08–10 must be separately authorized, not silently promoted.
