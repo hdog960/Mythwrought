@@ -28,16 +28,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax for new V8 descriptor budget and genuine original atlas
+      - name: Syntax for isolated canonical flora and material ABI handoff
         run: |
           node --version
           git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-vegetation-cells.mjs
           node --check src/manual-biomes/mountain-v8-physical-descriptor-budget.mjs
-          node --check src/manual-biomes/mountain-v8-tile-census.mjs
+          node --check src/manual-biomes/mountain-v8-integration-handoff.mjs
+          node --check tests/mountain-v8-vegetation-cells.test.mjs
           node --check tests/mountain-v8-physical-descriptor-budget.test.mjs
-          node --check tests/mountain-v8-original-landform-atlas.test.mjs
-      - name: Only new V8 material proxy and four original 64-tile atlases
+          node --check tests/mountain-v8-integration-handoff.test.mjs
+      - name: Only changed flora geometry, physical provenance and original-world handoff
         run: |
           node --test --test-concurrency=1 \
+            tests/mountain-v8-vegetation-cells.test.mjs \
             tests/mountain-v8-physical-descriptor-budget.test.mjs \
-            tests/mountain-v8-original-landform-atlas.test.mjs
+            tests/mountain-v8-integration-handoff.test.mjs
