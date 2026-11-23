@@ -17,8 +17,11 @@ export const M7_FULL_SOURCE_WALK_BOUNDS=Object.freeze({
   // Detached research-only expansion for the *unchanged* original deep
   // spiral. 112 steps reaches the first original -30 chamber approach.
   // This does not authorize or alter any cave, save or production world.
-  authoredSteps:64,spiralSteps:112,waypoints:144,
-  ticksPerLeg:48,allTicks:6500
+  // Research-only envelope covers the *original* second (-75) rest
+  // chamber and leaves room for an authored interior visit and return.
+  // No original cave writer, physics, save or generator identity change.
+  authoredSteps:64,spiralSteps:320,waypoints:384,
+  ticksPerLeg:48,allTicks:18432
 });
 const validWorld=w=>w?.profile?.generator===M7_ENVIRONMENT_GENERATOR&&
   Number.isInteger(w.seed)&&w.seed===(w.seed|0)&&
