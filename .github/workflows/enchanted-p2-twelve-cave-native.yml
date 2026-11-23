@@ -1,0 +1,63 @@
+# Research-only unchanged physics and source, 2 new target native checks.
+# Earlier 4/4, 3/3, 2/2 successful runs are reused; no broad suites.
+name: Enchanted Phase 2 M7 Twelve-Step Original Cave Descent (isolated)
+on:
+  push:
+    branches:
+      - research/enchanted-p2-deeper-source-landmark-walk-20261123
+    paths:
+      - .github/workflows/enchanted-p2-twelve-cave-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
+jobs:
+  twelve-original-cave-steps:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate unchanged source owners and syntax
+        id: guard
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/manual-biomes/enchanted-original-cave-descent-evidence.mjs)" = "7fe76ca6ede339e6f36c595bbd7018c6d2f5892a"
+          test "$(git hash-object src/manual-biomes/enchanted-original-standing-diagnostic.mjs)" = "f9c9b7fc300cf9ea3a04d2cf54fecb3ce1ee8fb7"
+          test "$(git hash-object src/manual-biomes/enchanted-original-physics-route.mjs)" = "21f368cc0532a124e7d2ba0f3e55548386c2682f"
+          node --check tests/manual-biomes/enchanted-original-cave-twelve-step-real-m7.test.mjs
+      - name: Execute only changed original twelve-step physics and edit veto
+        id: native
+        run: node --test tests/manual-biomes/enchanted-original-cave-twelve-step-real-m7.test.mjs
+      - name: Publish exact isolated run result without changing refs
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GUARD: ${{ steps.guard.outcome }}
+          NATIVE: ${{ steps.native.outcome }}
+        run: |
+          if [ "$GUARD" = success ] && [ "$NATIVE" = success ]; then
+            export RESULT=success
+            export SUMMARY="2 original M7 twelve-step cave source/physics tests passed"
+          else
+            export RESULT=failure
+            export SUMMARY="M7 twelve-step original source/physics test or guard failed"
+          fi
+          python3 - <<'PY' > /tmp/enchanted-source-status.json
+          import json,os
+          print(json.dumps({"state":os.environ["RESULT"],
+            "context":"enchanted-p2-twelve-cave-native",
+            "description":os.environ["SUMMARY"],
+            "target_url":os.environ["GITHUB_SERVER_URL"]+"/"+os.environ["GITHUB_REPOSITORY"]+"/actions/runs/"+os.environ["GITHUB_RUN_ID"]}))
+          PY
+          curl --fail-with-body -fsS -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            --data-binary @/tmp/enchanted-source-status.json \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" >/dev/null
