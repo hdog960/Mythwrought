@@ -291,3 +291,30 @@ test('numeric summary uses trial uploads, never unrelated rolling upload counter
   assert.equal(r.comparisons[1].controlTrialUploads,224);
   assert.equal(r.comparisons[1].candidateTrialUploads,224);
 });
+
+test('full precision 33.04ms upload rejects rounded-looking 33ms native trial',()=>{
+  verify(x=>{
+    x.pairs[1].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=33.04;
+    x.pairs[1].candidate.rollingSuccessfulUploadP95Ms=1;
+  },/mining-bound guarded upload p95/);
+});
+test('99.999 percent of strict ten-percent original action gain cannot be certified',()=>{
+  verify(x=>{
+    x.pairs[0].control.miningActionP95Ms=100;
+    x.pairs[0].candidate.miningActionP95Ms=90.00005;
+  },/action p95/);
+});
+test('near-ten-percent source frame p95 change cannot round into acceptance',()=>{
+  verify(x=>{
+    x.pairs[1].control.mineFrameWindow.frameP95Ms=22;
+    x.pairs[1].candidate.mineFrameWindow.frameP95Ms=19.80005;
+  },/frame p95/);
+});
+test('full precision legal boundary upload value of exactly 33ms is admissible',()=>{
+  const x=make();
+  x.pairs[2].control.mineFrameWindow.successfulGuardedUploadP95Ms=33;
+  x.pairs[2].candidate.mineFrameWindow.successfulGuardedUploadP95Ms=33;
+  const r=evaluateIssue291FourViewportAB(x);
+  assert.equal(r.metricGatesPassed,true);
+  assert.equal(r.releaseCertified,false);
+});
