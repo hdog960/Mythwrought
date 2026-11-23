@@ -26,3 +26,20 @@ test('rejects invalid tolerances and invalid replay contracts',()=>{
   assert.throws(()=>compareStepReplays(opts(()=>({})),{positionTolerance:NaN}));
   assert.throws(()=>compareStepReplays({inputs:null}));
 });
+
+test('detects nondeterministic final velocity despite identical positions and events',()=>{
+  let calls=0;
+  const r=compareStepReplays(opts((w,p)=>{p.vX=++calls>3?2:1;return {hitWall:false};}));
+  assert.equal(r.deterministic,false);
+  assert.ok(r.violations.some(v=>v.kind==='motion-state-drift'));
+});
+test('detects nondeterministic grounded and jump-buffer state',()=>{
+  let calls=0;
+  const r=compareStepReplays(opts((w,p)=>{p.onGround=++calls>3;return {landed:false};}));
+  assert.ok(r.violations.some(v=>v.kind==='motion-state-drift'));
+});
+test('allows insignificant finite motion-state roundoff within tolerance',()=>{
+  let calls=0;
+  const r=compareStepReplays(opts((w,p)=>{p.vY=++calls>3?1+1e-9:1;return {}; }));
+  assert.equal(r.deterministic,true);
+});
