@@ -984,7 +984,7 @@ test('mutating the original result or returned witness cannot change captured mi
   result.cell[0]=400;
   const read=perf.read();
   assert.deepEqual(read.mineWitness,[[4,-20,11,3,0]]);
-  assert.throws(()=>{read.mineWitness[0][0]=500;},TypeError);
+  try{read.mineWitness[0][0]=500;}catch(error){assert.ok(error instanceof TypeError);}
   assert.deepEqual(perf.read().mineWitness,[[4,-20,11,3,0]]);
 });
 test('invalid or incomplete original source mine result poisons A/B witness only, not p95',()=>{
