@@ -25,6 +25,10 @@ import {auditThinUnderpassPedestrianConnectivity}
  from './city-underpass-pedestrian-footgraph.mjs';
 import {auditCandidateUnderpassPlayerAabb}
  from './city-underpass-player-aabb-fixture.mjs';
+import {auditCandidateUnderpassStepPlayer}
+ from './city-underpass-step-player-fixture.mjs';
+import {auditCandidateUnderpassContinuousStepPlayer}
+ from './city-underpass-continuous-walk-fixture.mjs';
 const INT=Number.isSafeInteger;
 const EQ=(a,b)=>a&&b&&['x','y','z'].every(k=>a[k]===b[k]);
 const ROLES=Object.freeze(['naturalAt','authoredAt','editedAt','protectedAt']);
@@ -33,6 +37,7 @@ const failure=(seed,rx,rz,reason,extra={})=>Object.freeze({
  ok:false,sitePresent:true,seed,rx,rz,reason,...extra,
  existingMainGalleryModified:false,existingM7Modified:false,
  cityFloorApproved:false,settlementPlaced:false,
+ hypotheticalOriginalMotionSimulated:false,
  actualPlayerWalkingVerified:false,worldChanged:false
 });
 const cityEllipse=(c,x,z)=>{
@@ -323,10 +328,11 @@ export function planGradeSeparatedCityUnderpass(seed,rx,rz,{
 }
 export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
  source,sourceOwnedDeepSelection,maxTotalSourceChecks=150000,
- maxCandidates=MAX_PATHS
+ maxCandidates=MAX_PATHS,auditHypotheticalMovement=false
 }={}){
  if(!source||typeof source!=='object'||
   ROLES.some(k=>typeof source[k]!=='function')||
+  typeof auditHypotheticalMovement!=='boolean'||
   !INT(maxTotalSourceChecks)||maxTotalSourceChecks<1000||
   maxTotalSourceChecks>150000)
   throw TypeError('Invalid original M7 pedestrian underpass reader');
@@ -420,7 +426,56 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   }
  if(padSourceVisits!==planned.centerSidePadOriginalSourceVisitsRequired)
   throw Error('Three-wide full-depth center landing pad source census drifted');
+ // No extra original-M7 reader calls: the old four-hub selection, full
+ // strict bridge source, and every full-depth landing cell have ALREADY
+ // passed before invoking either prospective movement fixture. This
+ // opt-in walks a HYPOTHETICAL STONE/AIR construction, never the actual M7
+ // collision world. An unsafe old-world cell blocks before movement.
+ let motionGrade=null,motionWalk=null;
+ const sourceChecks=total+padSourceVisits;
+ if(auditHypotheticalMovement){
+  const args={
+   accessProposal:sourceOwnedDeepSelection.joined.sourceAuditedCityAccessRouteGeometry,
+   underpassProposal:planned.proposal,
+   centerSidePad:planned.centerSidePad,floorY:planned.floorY
+  };
+  motionGrade=auditCandidateUnderpassStepPlayer(args);
+  if(!motionGrade.ok||
+     motionGrade.elevationEdges!==planned.originalPlayerAabbFixtureSkippedElevationEdges)
+   return failure(seed,rx,rz,'SOURCE_SAFE_HYPOTHETICAL_STEP_PLAYER_GRADE_REFUSED',{
+    originalSourceChecksPassed:true,sourceChecks,
+    hypotheticalOriginalMotionSimulated:motionGrade.actualOriginalStepPlayerInvoked===true,
+    gradeMovementReason:motionGrade.reason??'ELEVATION_CENSUS_DRIFT',
+    gradeMovementFirstRefusal:motionGrade.ok?null:motionGrade,
+    gradeElevationEdges:motionGrade.elevationEdges??null,
+    sourceReadsAfterMovement:0,oldWorldPhysicalMotionUnverified:true
+   });
+  motionWalk=auditCandidateUnderpassContinuousStepPlayer(args);
+  if(!motionWalk.ok||motionWalk.gradeElevationEdges!==motionGrade.elevationEdges)
+   return failure(seed,rx,rz,'SOURCE_SAFE_HYPOTHETICAL_CONTINUOUS_PLAYER_REFUSED',{
+    originalSourceChecksPassed:true,sourceChecks,
+    hypotheticalOriginalMotionSimulated:motionWalk.originalStepPlayerExecuted===true||
+      motionWalk.physicsInvoked===true,
+    continuousMovementReason:motionWalk.reason??'ELEVATION_CENSUS_DRIFT',
+    continuousMovementFirstRefusal:motionWalk.ok?null:motionWalk,
+    gradeElevationEdges:motionGrade.elevationEdges,
+    sourceReadsAfterMovement:0,oldWorldPhysicalMotionUnverified:true
+   });
+ }
  return Object.freeze({ok:true,sitePresent:true,seed,rx,rz,
+  originalSourceChecksPassed:true,
+  hypotheticalMovementAuditRequested:auditHypotheticalMovement,
+  hypotheticalOriginalMotionSimulated:auditHypotheticalMovement&&
+   motionWalk?.originalStepPlayerExecuted===true,
+  hypotheticalGradeElevationEdges:motionGrade?.elevationEdges??null,
+  hypotheticalGradeForwardChecks:motionGrade?.forwardChecks??null,
+  hypotheticalGradeReverseChecks:motionGrade?.reverseChecks??null,
+  hypotheticalContinuousWalkWaypoints:motionWalk?.routeWaypoints??null,
+  hypotheticalContinuousWalkFrames:motionWalk?.totalFrames??null,
+  hypotheticalContinuousWalkDirections:motionWalk?.directions?.length??null,
+  hypotheticalOnlyStagedAirStoneAndNoLiveOverlays:true,
+  originalM7SourceReaderAuthorityByCallerOnly:true,
+  actualOriginalM7PlayerMotionNotVerified:true,
   kind:planned.kind,pivot:planned.pivot,segments:planned.segments,
   originalCityCenter:planned.originalCityCenter,
   centerSidePad:planned.centerSidePad,
