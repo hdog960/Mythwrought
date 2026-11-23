@@ -4,6 +4,7 @@
 // No world write, registry ID, V8 activation, renderer, save or GPU call.
 // An accepted source geometry certificate is NOT gameplay authorization.
 import {chunkCoord,CHUNK_SIZE} from '../voxel.mjs';
+import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {planMountainV8PlantCells,MOUNTAIN_V8_PLANT_PATTERNS}
   from './mountain-v8-vegetation-cells.mjs';
 import {auditMountainV8ProvisionalFloraPhysics}
@@ -21,13 +22,13 @@ const reject=(reason,onVeto,at=null)=>{
 /** Caller supplies real, read-only source evidence:
  *   originalDesertTreeTouches(seed,cells,origin) must be the exact function
  *     exported by current production src/manual-biomes/environment-v7.mjs.
- *   biomeAt must come from original V6 distribution at the same seed.
+ *   V6 climate is read directly from the unchanged original source module.
  *   readOriginalBlock/protectedAt/proposedSurfaceAt are source-world readers.
  * Fail closed on missing P3 callback or conflicting original source.
  */
 export function auditMountainV8P3ConiferFootprint(proposal,{
   sourceMainHead,sourceDesertTreeBlob,
-  originalDesertTreeTouches,biomeAt,
+  originalDesertTreeTouches,
   readOriginalBlock,protectedAt,proposedSurfaceAt,
   worldMaxY=19,airId=0,onVeto
 }={}){
@@ -36,14 +37,14 @@ export function auditMountainV8P3ConiferFootprint(proposal,{
      proposal.seed!==(proposal.seed|0)||!integer(proposal.top)||
      sourceMainHead!==MOUNTAIN_V8_P3_REQUIRED_MAIN||
      sourceDesertTreeBlob!==MOUNTAIN_V8_P3_TREE_SOURCE_BLOB||
-     [originalDesertTreeTouches,biomeAt,readOriginalBlock,
+     [originalDesertTreeTouches,readOriginalBlock,
        protectedAt,proposedSurfaceAt].some(f=>typeof f!=='function')||
      (onVeto!==undefined&&typeof onVeto!=='function'))
     return reject('missing-exact-current-main-source-or-unverified-proposal',onVeto);
   const plant=planMountainV8PlantCells(proposal,{
     worldMaxY,airId,readOriginalBlock,protectedAt,
     mountainAt:(x,z)=>{
-      const region=biomeAt(x,z,proposal.seed);
+      const region=v6BiomeAt(x,z,proposal.seed);
       return region?.name==='mountain'&&region.weight>=.82;
     },proposedSurfaceAt
   });
@@ -64,7 +65,7 @@ export function auditMountainV8P3ConiferFootprint(proposal,{
     if(cell.x!==proposal.x+dx||cell.y!==proposal.top+dy||
        cell.z!==proposal.z+dz||cell.material!==material)
       return reject('original-v8-pattern-mismatch',onVeto,[cell.x,cell.y,cell.z]);
-    const region=biomeAt(cell.x,cell.z,proposal.seed);
+    const region=v6BiomeAt(cell.x,cell.z,proposal.seed);
     if(region?.name!=='mountain'||!(region.weight>=.82))
       return reject('current-main-foreign-canopy-column',onVeto,
         [cell.x,cell.y,cell.z]);
