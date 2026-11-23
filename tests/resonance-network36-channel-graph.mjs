@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {deriveChannelGraph} from '../src/resonance/network36/channel-graph.mjs';
+const c=(id,x,y=0,z=0)=>({id,x,y,z,loaded:true});
+test('joining channels forms one stable network regardless of insertion order',()=>{const a=[c('z',2),c('a',0),c('m',1)];assert.deepEqual(deriveChannelGraph({channels:a}).networks,deriveChannelGraph({channels:[...a].reverse()}).networks);assert.deepEqual(deriveChannelGraph({channels:a}).networks,[{id:'channel:a',channels:['a','m','z']}]);});
+test('removal splits and readdition joins',()=>{const a=[c('a',0),c('b',1),c('c',2)];assert.equal(deriveChannelGraph({channels:a}).networks.length,1);assert.equal(deriveChannelGraph({channels:[a[0],a[2]]}).networks.length,2);});
+test('adjacent endpoint automatically connects and disconnects',()=>{const e=c('device',2);assert.equal(deriveChannelGraph({channels:[c('wire',1)],endpoints:[e]}).endpoints[0].status,'connected');assert.equal(deriveChannelGraph({channels:[],endpoints:[e]}).endpoints[0].status,'disconnected');});
+test('endpoint never silently bridges two independent networks',()=>{const r=deriveChannelGraph({channels:[c('a',0),c('b',2)],endpoints:[c('device',1)]});assert.equal(r.networks.length,2);assert.deepEqual(r.endpoints,[{id:'device',network:null,status:'ambiguous'}]);});
+test('rejects unloaded, duplicate and overlapping channels',()=>{assert.throws(()=>deriveChannelGraph({channels:[{...c('a',0),loaded:false}]}));assert.throws(()=>deriveChannelGraph({channels:[c('a',0),c('a',1)]}));assert.throws(()=>deriveChannelGraph({channels:[c('a',0),c('b',0)]}));});
+test('rejects invalid coordinates and bounded budgets',()=>{assert.throws(()=>deriveChannelGraph({channels:[c('a',0.5)]}));assert.throws(()=>deriveChannelGraph({channels:[c('a',0),c('b',1)],maxNodes:1}));});
+test('does not mutate source descriptors',()=>{const a=Object.freeze(c('a',0));const e=Object.freeze(c('e',1));deriveChannelGraph({channels:[a],endpoints:[e]});assert.equal(a.x,0);});
