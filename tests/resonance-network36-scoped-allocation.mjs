@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateScopedResonance as run} from '../src/resonance/network36/network-scoped-allocation.mjs';
+const n=(...ids)=>ids.map(id=>({id}));
+const g=(id,networkId,output)=>({id,networkId,output});
+const d=(id,networkId,demand,priority=10)=>({id,networkId,demand,priority});
+const s=(id,networkId,charge,outputRate=4)=>({id,networkId,charge,capacity:20,inputRate:3,outputRate});
+test('separate components cannot borrow surplus',()=>{const r=run({networks:n('a','b'),generators:[g('ga','a',100)],devices:[d('db','b',1)]});assert.deepEqual(r.networks.map(x=>x.stopped),[[],['db']]);assert.equal(r.networks[0].unused,100);});
+test('generators combine only within one component',()=>{const r=run({networks:n('a'),generators:[g('g2','a',3),g('g1','a',4)],devices:[d('device','a',7)]});assert.equal(r.networks[0].spent,7);});
+test('battery output rate is never spent twice',()=>{const r=run({networks:n('a'),stores:[s('battery','a',10,4)],devices:[d('first','a',3,0),d('second','a',3,1)]});assert.deepEqual(r.networks[0].enabled,['first']);assert.equal(r.networks[0].drawn,3);});
+test('priority shedding and next-tick restoration',()=>{const base={networks:n('a'),devices:[d('factory','a',6,20),d('safety','a',3,0)]};assert.deepEqual(run({...base,generators:[g('gen','a',4)]}).networks[0].stopped,['factory']);assert.deepEqual(run({...base,generators:[g('gen','a',9)]}).networks[0].enabled,['safety','factory']);});
+test('surplus cannot charge a battery in another component',()=>{const r=run({networks:n('a','b'),generators:[g('gen','a',10)],stores:[s('battery','b',0)]});assert.equal(r.networks[1].stores[0].charge,0);});
+test('stable ordering despite shuffled input',()=>{const r=run({networks:n('b','a'),devices:[d('z','a',2,0),d('a','a',2,0)],generators:[g('gen','a',2)]});assert.deepEqual(r.networks.map(x=>x.networkId),['a','b']);assert.deepEqual(r.networks[0].enabled,['a']);});
+test('invalid network, duplicate IDs, unsafe sum, invalid charge rejected',()=>{for(const arg of [{networks:n('a'),devices:[d('x','b',1)]},{networks:n('a'),generators:[g('x','a',1)],devices:[d('x','a',1)]},{networks:n('a'),generators:[g('x','a',Number.MAX_SAFE_INTEGER),g('y','a',1)]},{networks:n('a'),stores:[s('x','a',21)]}])assert.throws(()=>run(arg));});
+test('caller inputs immutable and repeated calls stateless',()=>{const battery=s('battery','a',6),arg={networks:n('a'),stores:[battery],devices:[d('lamp','a',4)]};const before=JSON.stringify(arg),first=run(arg);assert.equal(JSON.stringify(arg),before);assert.deepEqual(run(arg),first);});
+test('empty network has zero energy',()=>{const r=run({networks:n('a')}).networks[0];assert.deepEqual([r.generation,r.spent,r.drawn,r.charged,r.unused],[0,0,0,0,0]);});
