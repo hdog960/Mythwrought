@@ -265,3 +265,79 @@ test('source-exact composed M7 edit staging with real Pack2 water, Pack3 origina
   caveat:'No manual14 placed objects, no GPU driver or physical iPhone timing'
  }));
 });
+
+
+test('composed original Manual14 scene with real pack supports, Pack2 fluid and Pack3 geometry stays budgeted',()=>{
+ const seed=179,base=new FourRegionWorld(seed,fourRegionProfile(seed,M7));
+ const world=new Pack2LiveWorld(base);
+ const pack3=createPack3RuntimeStage(world,{worldId:'desert-p3-manual14-composed-census'});
+ world.pack3Runtime=pack3;
+ const manual=createManual14Layer(world);
+ world.manual14Layer=manual;
+ const origin=[-786,4,-1774],owner=[chunkCoord(origin[0]),chunkCoord(origin[2])];
+ assert.equal(base.get(...origin),401);
+ let support=null,placed=null,water=null,pack3Placed=null,attempts=0;
+ const candidates=[[-783,-1772],[-783,-1773],[-785,-1771],[-786,-1772],[-782,-1772]];
+ for(const [x,z] of candidates){
+  const sy=15,py=16;
+  if(world.get(x,sy,z)!==BLOCK.AIR||world.get(x,py,z)!==BLOCK.AIR)continue;
+  // Source-owned physical Pack2 ID61 is backed by its exact authored
+  // collision shape. No fake support maps or player save modifications.
+  if(!world.set(x,sy,z,61))continue;
+  support=[x,sy,z];
+  for(const row of MANUAL_FIVE_PACK_CATALOG.filter(v=>v.pack===1||v.pack===4)){
+   attempts++;
+   try{
+    manual.placeMany([{at:[x,py,z],asset:row.symbol,
+      numericId:row.numericId,orientation:0,
+      ...(row.pack===1?{variant:'lower'}:{})}]);
+    placed={at:[x,py,z],asset:row.symbol,numericId:row.numericId};
+    break;
+   }catch(err){
+    assert.equal(manual.size(),0,
+      'Original manual14 failed placement cannot mutate saved scene');
+   }
+  }
+  if(placed)break;
+ }
+ assert.ok(placed,'A real Pack1/Pack4 source-backed item must certify its structural support');
+ assert.ok(support);
+ assert.equal(manual.size(),1);
+ assert.ok(world.get(...support)===61);
+ for(const [x,z] of [[-785,-1773],[-784,-1773],[-782,-1774],[-787,-1772]]){
+  const at=[x,18,z];
+  if(world.get(...at)!==BLOCK.AIR||at.join(',')===placed.at.join(','))continue;
+  try{pack3.placeMany([{at,asset:PACK3_BUILDER_SYMBOLS[0],orientation:'north'}]);
+   pack3Placed=at;break;}catch{}
+ }
+ assert.ok(pack3Placed,'Original Pack3 asset must coexist with original Manual14 placement');
+ for(const [x,z] of [[-786,-1773],[-784,-1774],[-783,-1774],[-787,-1771]]){
+  const at=[x,17,z];
+  if(world.get(...at)!==BLOCK.AIR||at.join(',')===placed.at.join(',')||
+     at.join(',')===pack3Placed.join(','))continue;
+  if(world.set(...at,76)){water=at;break;}
+ }
+ assert.ok(water,'Original Pack2 fluid sidecar must coexist with physical Pack3/Manual14');
+ const selected=desertSeamEditAffectedChunks(world,origin[0],origin[2],origin[1]);
+ const loaded=new Set(selected.map(({cx,cz})=>depthMeshKey(cx,cz,0)));
+ const result=exactComposedBatch({world,pack3,manual,loaded,at:origin});
+ assert.ok(result.loadedRows.some(r=>r.manualOpaqueBytes>0||r.manualTransparentBytes>0),
+  'At least one authored original Manual14 mesh must reach a loaded chunk');
+ assert.ok(result.loadedRows.some(r=>r.waterBytes>0));
+ assert.ok(result.loadedRows.some(r=>r.addedPack3Bytes>0));
+ assert.equal(result.loadedCount,selected.length);
+ assert.ok(result.loadedRows.every(r=>r.composedOpaqueBytes<=MAX_CHUNK_UPLOAD_BYTES
+  && r.waterBytes<=MAX_CHUNK_UPLOAD_BYTES));
+ assert.ok(result.overlappingOldAndNewBytesUpperBound<MAX_CHUNK_UPLOAD_BYTES*10);
+ assert.deepEqual(base.save().edits,[]);
+ console.log('DESERT_P3_ALL_THREE_ORIGINAL_PACKS_COMPOSED '+JSON.stringify({
+  seed,origin,pack2Support:support,pack2Water:water,pack3At:pack3Placed,
+  manual14:placed,attemptedRealManualAssets:attempts,
+  affected:result.affected,opaqueBytes:result.opaqueBytes,
+  waterBytes:result.transparentBytes,
+  composedStageBytes:result.combinedBytes,
+  temporaryTwoGenerationByteEstimate:result.overlappingOldAndNewBytesUpperBound,
+  perChunk:result.loadedRows,
+  importantLimit:'source Float32 staging, not physical GPU memory allocation or iPhone p95'
+ }));
+});
