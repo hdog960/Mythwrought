@@ -76,7 +76,7 @@ test('all four CSS and backing pixel viewports must match',()=>{
 test('only equal seed and genuine edit count runs compare',()=>{
   verify(x=>x.pairs[1].candidate.seed=4021,/seed differs/);
   verify(x=>x.pairs[2].control.seed=4021,/seed differs/);
-  verify(x=>x.pairs[2].candidate.trueSavedDeepMines=99,/fewer than 100/);
+  verify(x=>x.pairs[2].candidate.trueSavedDeepMines=99,/exactly 100 saved deep MINE actions/);
   verify(x=>x.pairs[2].candidate.trueSavedDeepMines=111,
     /exactly 100 saved deep MINE actions/);
 });
@@ -100,7 +100,7 @@ test('no slow-frame regression in 100 authentic edits, and valid frame counters'
 test('10 percent action improvement AND 10 percent frame improvement required each',()=>{
   verify(x=>x.pairs[2].candidate.miningActionP95Ms=91,/action p95/);
   verify(x=>x.pairs[2].candidate.mineFrameWindow.frameP95Ms=21,/frame p95/);
-  verify(x=>x.pairs[2].control.miningActionP95Ms=0,/finite positive action/);
+  verify(x=>x.pairs[2].control.miningActionP95Ms=0,/finite positive original saved-MINE action/);
 });
 test('guarded upload p95 bound applies to both runs at every viewport',()=>{
   verify(x=>x.pairs[2].candidate.rollingSuccessfulUploadP95Ms=33.1,/guarded upload p95/);
