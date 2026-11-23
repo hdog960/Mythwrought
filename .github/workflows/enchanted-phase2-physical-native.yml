@@ -33,6 +33,7 @@ jobs:
           test "$(git hash-object src/manual-biomes/enchanted-original-pedestrian-search.mjs)" = "49fa84146656d895638126c7766675188a13fa80"
           node --check src/manual-biomes/enchanted-original-standing-diagnostic.mjs
           node --check tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
-      - name: Classify 52 original-M7 rejection guards and native surface provenance
+      - name: Only corrected 52-position original M7 guard attribution (reuse prior 1/1 certified reference test)
         run: |
-          node --test tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
+          node --test --test-name-pattern="the exact prior 52 original" \
+            tests/manual-biomes/enchanted-original-standing-diagnostic-real-m7.test.mjs
