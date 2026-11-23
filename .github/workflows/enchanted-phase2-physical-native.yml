@@ -1,7 +1,8 @@
-# Isolated changed-test recovery: original native cache canonical-key
-# rejection and 288-chunk source parity only. On previous exact unchanged
-# source, the genuine four 14-leg climate walks plus player-edit cache
-# eviction test passed 2/2 in #45084113198. Do NOT rerun them or Chromium.
+# Exact original-M7 isolated enchanted Phase 2 source-only change.
+# Standalone canopy source probes now use reviewed bounded FIFO and real
+# original-world 14-leg winding biome-border walking gains new coverage.
+# Reuse unchanged 288-chunk cache, GPU and Moonwillow browser evidence.
+# Do NOT duplicate broad CI, browser screenshot or developer workflows.
 name: Enchanted Phase 2 Physical Root and Seam Native (isolated)
 on:
   push:
@@ -15,7 +16,7 @@ permissions:
   contents: read
 
 jobs:
-  original-m7-immutable-site-key-recovery:
+  canopy-bounded-source-and-winding-original-m7:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -26,10 +27,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact source and changed-test syntax
+      - name: Check exact source and new focused tests
         run: |
           git rev-parse HEAD
-          node --check src/manual-biomes/enchanted-tree-site-biome-cache.mjs
-          node --check tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
-      - name: Original-world canonical keys, bounded FIFO, cave veto and 288-chunk regression
-        run: node --test tests/manual-biomes/enchanted-site-biome-stream-real-m7.test.mjs
+          node --check src/manual-biomes/enchanted-tree-walking-clearance.mjs
+          node --check tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs
+          node --check tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
+      - name: Real original M7 winding biome walks, native player edit, bounded canopy parity
+        run: |
+          node --test \
+            tests/manual-biomes/enchanted-tree-walking-clearance.test.mjs \
+            tests/manual-biomes/enchanted-biome-seam-long-walk-real-m7.test.mjs
