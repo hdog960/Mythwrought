@@ -1,0 +1,25 @@
+name: Forgotten Sands P0 exact new colossal core witnesses
+on:
+  push:
+    branches: [research/forgotten-sands-p0-far-shell-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-colossal-core.mjs'
+      - 'tests/forgotten-sands-colossal-core.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-colossal-core.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --test tests/forgotten-sands-colossal-core.test.mjs
