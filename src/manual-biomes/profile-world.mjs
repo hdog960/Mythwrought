@@ -83,7 +83,8 @@ export class FourRegionWorld extends VoxelWorld{
       if(this.profile.generator===M8_MOUNTAIN_GENERATOR&&region?.name==='mountain'&&region.weight>=.82){
         const raw=(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c);
         lookup=planMountainV8RegisteredTerrain(x,z,this.seed,raw,(a,b,c)=>
-          this.environmentCaves.get(a,b,c)!==undefined||raw(a,b,c)!==baseBlock(a,b,c,this.seed));
+          this.environmentCaves.get(a,b,c)!==undefined||raw(a,b,c)!==baseBlock(a,b,c,this.seed),
+          ()=>planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region));
       }
       lookup=lookup??this._oasisNear(x,z,0,region)?.columns.get(key)??
         planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region);

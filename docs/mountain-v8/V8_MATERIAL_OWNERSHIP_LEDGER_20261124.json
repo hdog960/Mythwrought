@@ -180,5 +180,31 @@
     "all active automation material proposals",
     "shared owner allocation ledger/coordination"
   ],
-  "allocationComplete": false
+  "allocationComplete": false,
+  "latestRegistryTreeReview": {
+    "main": "bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e",
+    "scope": "nontruncated recursive Git trees, named source registry/catalog/allocation paths only",
+    "refs": {
+      "Enchanted": "86e99b4444aeba5b6adbf492e051368274b16a7f",
+      "Snow": "2394f9681286b0e9104d318d52050812f3c4e413",
+      "Desert": "2c85d67299d2c5ffa5984791037cce4f1c9350d0",
+      "Cave": "2af2c08e172d09aae8120089e8506f2269d6a8cb",
+      "Mob": "c02a4e74e8401cc4ce19346774f6d73f4fa31953",
+      "Creative": "28a73427fcc8797ed6487953a5e445373b87cdd0",
+      "Lag": "c66ee63b3113d764c1b0608af73b05793863dd8c",
+      "Builder A": "b0f8d1f8f301979f94258e664ebbe19ca1d48de6",
+      "Builder B": "0b0d7298f9c807395c5ca99d8d3be5f9e1475d0c",
+      "Builder C": "c0b06cc8b40cfbbbe055cbd68c2ca2ba9da3c76d",
+      "Builder D": "b213303f71c86c233b0c4e6c1fbd4b7cd83edb2e"
+    },
+    "commonRegistryBlobs": {
+      "src/biome130-registry.mjs": "934a0e33b90155f5b2f49b6e8c69dafc234e282f",
+      "src/builder-assets/manual-five-pack.mjs": "0d8e4c66f63e086132a2779875e2ce2df4d784cc",
+      "src/creative-integration/registry-snapshot.mjs": "f2158789846b44bf9726018dc406aece016b5726",
+      "src/creative-integration/registry-validation.mjs": "d13fbb44c6629851d0fd36a4bdd3e89a9b46a2c6",
+      "src/pack5-integration/catalog.mjs": "10303fd542a0fb48c1f80d053903cf3ae665c305"
+    },
+    "environmentGround": "main/Enchanted/Creative db77df7...; Snow/Desert/Cave/Mob/Lag 64ba16...; Builder refs lack file; current main actual IDs remain 400..410",
+    "limitation": "does not certify all numeric literals, external reservations or automation drafts; no allocation"
+  }
 }

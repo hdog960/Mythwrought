@@ -210,7 +210,9 @@ export function meshChunk(world,cx,cz){
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
-  const unifiedTerrain=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const originalDesertHalo=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const v8Mountain=profile?.generator==='mythwrought-five-surface-regions-mountain-v8';
+  const unifiedTerrain=originalDesertHalo||v8Mountain;
   // Cached ONLY for this synchronous surface-mesh rebuild. No cross-chunk
   // mutable cache or per-frame source queries. Original plans decide whether
   // a surface is real and protected rather than cave-exposed subsoil.
@@ -320,7 +322,7 @@ export function meshChunk(world,cx,cz){
             if(boundary&&neighbor!==BLOCK.AIR&&
                 ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
-            if(!checkedVisibleHardpan&&groundColor&&id===258){
+            if(!checkedVisibleHardpan&&originalDesertHalo&&groundColor&&id===258){
               checkedVisibleHardpan=true;
               const region=v6BiomeAt(x,z,world.seed);
               if(region?.name==='desert'&&region.weight<=.50&&!hasEdit(x,y,z)){
@@ -380,7 +382,7 @@ export function meshChunk(world,cx,cz){
           // Reciprocal Desert-to-Mountain RGB only: screen the original top
           // and biome AFTER a genuinely exposed face; no per-frame sampling.
           // No other scree, caves, edited blocks or buried stone can qualify.
-          if(!screeScreened&&unifiedTerrain&&id===401&&newGround){
+          if(!screeScreened&&originalDesertHalo&&id===401&&newGround){
             screeScreened=true;
             if(!hasEdit(x,y,z)){
               const region=v6BiomeAt(x,z,world.seed);
