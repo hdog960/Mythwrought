@@ -1,0 +1,32 @@
+name: Forgotten Sands P0 south mesh and detached edit parity
+on:
+  push:
+    branches: [research/forgotten-sands-p0-south-residency-20261123]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-approach-edit-audit.mjs'
+      - 'src/manual-biomes/forgotten-sands-oriented-approach.mjs'
+      - 'src/manual-biomes/forgotten-sands-approach-probe.mjs'
+      - 'src/manual-biomes/forgotten-sands-detached-research.mjs'
+      - 'tests/forgotten-sands-south-residency.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-south.yml'
+permissions:
+  contents: read
+jobs:
+  native-south:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-approach-edit-audit.mjs
+          node --check src/manual-biomes/forgotten-sands-oriented-approach.mjs
+          node --check src/manual-biomes/forgotten-sands-approach-probe.mjs
+          node --check src/manual-biomes/forgotten-sands-detached-research.mjs
+          node --test tests/forgotten-sands-south-residency.test.mjs tests/forgotten-sands-oriented-approach.test.mjs tests/forgotten-sands-fixed-large.test.mjs

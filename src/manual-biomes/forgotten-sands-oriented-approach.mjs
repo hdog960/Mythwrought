@@ -1,6 +1,7 @@
 // Isolated rotated monument entrance research; no live placement authority.
 import {BLOCK,worldKey} from '../voxel.mjs';
 import {defineP0Footprint,inspectP0GroundColumn} from './forgotten-sands-grounded-probe.mjs';
+import {auditP0ApproachEdits} from './forgotten-sands-approach-edit-audit.mjs';
 const dirs=[[0,-1],[1,0],[0,1],[-1,0]];
 export function planP0OrientedApproach(world,report,turn,{reserved}={}){
   if(!report?.accepted||world.seed!==report.site.seed||!Number.isInteger(turn)||turn<0||turn>3||
@@ -25,11 +26,10 @@ export function planP0OrientedApproach(world,report,turn,{reserved}={}){
     }
     rows.push(Object.freeze({distance:r+d,top}));prior=top;
     if(columns[1].cap!==top)continue;
-    for(const k of world.edits.keys()){
-      const [x,,z]=k.split(',').map(Number),rx=x-site.x,rz=z-site.z;
-      const distance=rx*dx+rz*dz,side=-rx*dz+rz*dx;
-      if(Math.abs(side)<=1&&distance>r&&distance<=r+d)return deny('player-edit-approach',{key:k});
-    }
+    const editColumns=[];
+    for(let n=1;n<=d;n++)for(let side=-1;side<=1;side++)editColumns.push(point(r+n,side));
+    const audit=auditP0ApproachEdits(world,editColumns);
+    if(!audit.ok)return deny('player-edit-approach',audit);
     const [x,z]=point(r+d,0);
     const proposedBlock=(x,y,z)=>{
       const apron=cells.get(worldKey(x,y,z));if(apron!==undefined)return apron;
@@ -40,7 +40,7 @@ export function planP0OrientedApproach(world,report,turn,{reserved}={}){
       return report.proposedBlock(site.x-rx*dz+rz*dx,y,site.z-rx*dx-rz*dz);
     };
     return Object.freeze({accepted:true,turn,start:Object.freeze({x:x+.5,z:z+.5,feet:top+1}),
-      rows:Object.freeze(rows),addedCells:cells.size,proposedBlock});
+      rows:Object.freeze(rows),addedCells:cells.size,editLookups:audit.lookups,proposedBlock});
   }
   return deny('no-natural-start-within-eight-rows');
 }

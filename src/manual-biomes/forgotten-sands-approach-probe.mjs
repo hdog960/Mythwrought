@@ -2,6 +2,7 @@
 // no world changes, no edits, no ownership authority. Maximum 24 columns.
 import {BLOCK,worldKey} from '../voxel.mjs';
 import {defineP0Footprint,inspectP0GroundColumn} from './forgotten-sands-grounded-probe.mjs';
+import {auditP0ApproachEdits} from './forgotten-sands-approach-edit-audit.mjs';
 export function planP0NorthApproach(world,report,{reserved}={}){
   if(!report?.accepted||world.seed!==report.site.seed||typeof reserved!=='function')
     throw Error('Expected accepted quiet survey and reservation reader');
@@ -25,13 +26,12 @@ export function planP0NorthApproach(world,report,{reserved}={}){
     // The start is original, naturally supported ground, not a fabricated
     // elevated platform. Test native walking in both directions separately.
     if(columns[1].cap===top){
-      for(const k of world.edits.keys()){
-        const [x,,ez]=k.split(',').map(Number);
-        if(Math.abs(x-site.x)<=1&&ez>=z&&ez<site.minZ)
-          return reject('player-edit-approach',{key:k});
-      }
+      const editColumns=[];
+      for(let ez=z;ez<site.minZ;ez++)for(let x=site.x-1;x<=site.x+1;x++)editColumns.push([x,ez]);
+      const audit=auditP0ApproachEdits(world,editColumns);
+      if(!audit.ok)return reject('player-edit-approach',audit);
       return Object.freeze({accepted:true,reason:'quiet research apron only',
-        rows:Object.freeze(rows),addedCells:cells.size,start:Object.freeze({x:site.x+.5,z:z+.5,feet:top+1}),
+        rows:Object.freeze(rows),addedCells:cells.size,editLookups:audit.lookups,start:Object.freeze({x:site.x+.5,z:z+.5,feet:top+1}),
         proposedBlock:(x,y,z)=>cells.get(worldKey(x,y,z))??null});
     }
   }
