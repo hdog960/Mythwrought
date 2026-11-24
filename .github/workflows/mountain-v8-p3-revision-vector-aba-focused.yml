@@ -1,0 +1,44 @@
+name: Mountain V8 exact P3 original source ABA and mock retirement revision
+# One-shot newly authored focused tests only; original immutable source
+# and isolated research checked out separately, no broad CI or deployment.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-revision-vector-aba-focused.yml
+permissions:
+  contents: read
+jobs:
+  source-versioned-fail-closed:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Read exact isolated V8 source research
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Read exact immutable current-main Desert Phase 3
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Source-authentic Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact SHAs syntax and ONLY 15 new source ABA cases
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-revision-vector-aba-preflight.mjs
+          node --check isolated/tests/mountain-v8-p3-revision-vector-aba-preflight.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-revision-vector-aba-preflight.test.mjs
