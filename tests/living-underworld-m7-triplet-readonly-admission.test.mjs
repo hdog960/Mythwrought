@@ -128,6 +128,9 @@ const city=()=>({
   candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries:true,
   candidateThinUnderpassCrossAuditPreReadHardCaps:true,
   candidateThinUnderpassCrossAuditBlockedOriginalCallbacks:0,
+  candidateThinUnderpassCrossAuditFailedOriginalCallbacks:0,
+  candidateThinUnderpassCrossAuditReentrancyGuard:true,
+  candidateThinUnderpassCrossAuditAtomicReadReservation:true,
   candidateThinUnderpassCrossAuditCallbacksWithinCaps:true,
   candidateThinUnderpassCrossAuditSourceCallbackCap:1200000,
   candidateThinUnderpassCrossAuditDistinctCellCapPerRole:160000,
@@ -693,4 +696,41 @@ test('Phase30 actual original-world unique-cell counts cannot be fabricated inde
   assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
   assert.equal(r.releaseApproved,false);
  }
+});
+
+
+test('Phase31 native original M7 source callback throwing is never a successful source witness',()=>{
+ const rows=city();
+ rows.rows[0].candidateThinUnderpassCrossAuditFailedOriginalCallbacks=1;
+ const r=check({city:rows});
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+ assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_PRIOR_TO_BRIDGE_SOURCE_VALUE_HOLD'));
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
+});
+test('Phase31 original M7 callback exception and recursive-read proofs must be explicit at both seed179 sites',()=>{
+ for(const mutate of [
+  row=>{row.candidateThinUnderpassCrossAuditReentrancyGuard=false},
+  row=>{row.candidateThinUnderpassCrossAuditAtomicReadReservation=false},
+  row=>{row.candidateThinUnderpassCrossAuditFailedOriginalCallbacks=-1},
+  row=>{row.candidateThinUnderpassCrossAuditFailedOriginalCallbacks=null},
+  row=>{row.candidateThinUnderpassCrossAuditFailedOriginalCallbacks=2},
+  row=>{delete row.candidateThinUnderpassCrossAuditAtomicReadReservation}
+ ]){
+  const c=city();mutate(c.rows[1]);
+  const r=check({city:c});
+  assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase31 both original seed179 site reports must remain research-only despite atomic cohort validation',()=>{
+ const r=check();
+ assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,true);
+ assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(r.actualPlayerWalkingVerified,false);
+ assert.equal(r.releaseApproved,false);
 });
