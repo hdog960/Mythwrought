@@ -1,19 +1,20 @@
-// MYTHWROUGHT Roadmap C Builder 1A #654 Wave31: Frostharbor Three-Pier Aurora Tavern.
-// Original independently authored snow-large tavern 003: three actual absent glacier fjords,
-// 21 connected named rooms, two-high physical portals, 56-cell open-air source court,
-// separately supported Pack3 roofing, in-shell Pack4 glazing and four Pack5 two-cell beds.
-// SOURCE ONLY: no runtime/settlement/world placement, saves/schema, shared CI or production art.
+// MYTHWROUGHT Roadmap C Builder 1A #654 Wave31: Frostharbor Three-Pier Aurora Inn.
+// Original independently authored snow-large INN 002; unique legal identity after legacy tavern 003 veto.
+// Three genuine glacier fjord cutouts, twenty-one connected original named rooms,
+// thirty-three two-high genuine physical portals, fifty-six grounded open-air court cells,
+// twenty-one separately supported Pack3 roof wings, Pack4 wall glazing, four Pack5 two-cell guest beds.
+// SOURCE ONLY: no runtime registration, generated settlements, save/schema, final art, other lanes or deployment.
 import {compileM2ArchitecturalSpec} from './m2-originals.mjs';
-export const ROADMAP_C_1A_WAVE31_TAVERN_SPECS=Object.freeze([
+export const ROADMAP_C_1A_WAVE31_INN_SPECS=Object.freeze([
   {
-    "category": "tavern",
+    "category": "inn",
     "biome": "snow",
     "size": "large",
-    "index": 3,
-    "title": "Frostharbor Three-Pier Aurora Tavern",
+    "index": 2,
+    "title": "Frostharbor Three-Pier Aurora Inn",
     "w": 95,
     "d": 84,
-    "plan": "frostharbor-three-asymmetric-fjord-voids-three-pier-aurora-court-snow-tavern-original",
+    "plan": "frostharbor-three-asymmetric-fjord-voids-three-pier-aurora-court-snow-inn-original",
     "roof": "steep",
     "skin": "live:wood",
     "roofAsset": "pack3:025",
@@ -1362,8 +1363,8 @@ export const ROADMAP_C_1A_WAVE31_TAVERN_SPECS=Object.freeze([
       40,
       50
     ],
-    "detail": "Original 21-chamber snow fjord tavern with three real full-depth carved glacier cuts, grounded fully roof-open 56-cell aurora courtyard, connected three-pier interior longhouse, separate west sleighwright and east steam-spring wings, stepped supported Pack3 snow roofs, true Pack4 wall glazing and four physically reserved Pack5 wanderer-quilt beds. SOURCE ONLY, no settlements, live world, final materials, structural/collision/weather, PWA, schema or save approval."
+    "detail": "Original 21-chamber snow fjord inn with three real full-depth carved glacier cuts, grounded fully roof-open 56-cell aurora courtyard, connected three-pier interior longhouse, separate west sleighwright and east steam-spring wings, stepped supported Pack3 snow roofs, true Pack4 wall glazing and four physically reserved Pack5 wanderer-quilt beds. SOURCE ONLY, no settlements, live world, final materials, structural/collision/weather, PWA, schema or save approval."
   }
 ]);
-export const ROADMAP_C_1A_WAVE31_TAVERN_IDS=Object.freeze(ROADMAP_C_1A_WAVE31_TAVERN_SPECS.map(s=>'r1:'+s.category+':'+s.biome+':'+s.size+':'+String(s.index).padStart(3,'0')));
-export function getRoadmapC1ATavernsWave31(){return ROADMAP_C_1A_WAVE31_TAVERN_SPECS.map(compileM2ArchitecturalSpec);}
+export const ROADMAP_C_1A_WAVE31_INN_IDS=Object.freeze(ROADMAP_C_1A_WAVE31_INN_SPECS.map(s=>'r1:'+s.category+':'+s.biome+':'+s.size+':'+String(s.index).padStart(3,'0')));
+export function getRoadmapC1AInnWave31(){return ROADMAP_C_1A_WAVE31_INN_SPECS.map(compileM2ArchitecturalSpec);}
