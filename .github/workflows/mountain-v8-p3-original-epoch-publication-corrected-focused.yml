@@ -1,0 +1,45 @@
+name: Mountain V8 original epoch shadow-publication corrected focused
+# One narrow original Node22 run correcting ONLY cross-checkout retry class
+# test-fixture identity. Initial #45323495068 failed at shared test setup;
+# no original production GPU or world source was implicated.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-original-epoch-publication-corrected-focused.yml
+permissions:
+  contents: read
+jobs:
+  source-owner-epoch-shadow-only:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact isolated source
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable production P3 original read-only
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Native Node22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify two original SHAs and only corrected 12 source epoch cases
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-source-epoch-projected-publication.mjs
+          node --check isolated/tests/mountain-v8-p3-source-epoch-projected-publication.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-source-epoch-projected-publication.test.mjs
