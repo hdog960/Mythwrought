@@ -1,0 +1,26 @@
+name: Enchanted Wilds E2B native portable seam flight
+on:
+  push:
+    branches: [research/enchanted-wilds-e2b-persistence-20261124]
+    paths: [.github/workflows/enchanted-wilds-e2b-native.yml]
+permissions:
+  contents: read
+jobs:
+  original-native-session:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate reused source and native research integration
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git rev-parse HEAD:src/floating-islands/sky-gpu-transaction.mjs)" = e76368c84ec9edcf727ed5f4c583661b394bd66c
+          test "$(git rev-parse HEAD:src/floating-islands/sky-native-g2.mjs)" = a717dc9ccfc949d86dafbd1728c252830738bfbb
+          test "$(git rev-parse HEAD:src/floating-islands/sky-creative-bridge.mjs)" = f4559bd2cf8063af7cd0e4308961102d251500a3
+          test "$(git rev-parse HEAD:src/depth.mjs)" = b54b7fd8c422699a328b60135178f97508e277c8
+          for f in src/manual-biomes/enchanted-wilds-upper-world.mjs src/manual-biomes/enchanted-wilds-e2-session.mjs src/manual-biomes/enchanted-wilds-upper-frame.mjs; do node --check "$f"; done
+          node --test tests/manual-biomes/enchanted-wilds-e2b-session.test.mjs
