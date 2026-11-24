@@ -1,0 +1,44 @@
+name: Mountain V8 exact Desert P3 original multi-layer CPU provenance
+# One original Node22 dual-checkout focused test only. The separately protected
+# current-main ref is READ-ONLY. No production V8 runtime, GPU, save or merge.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-original-multilayer-cpu-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-layered-mesh-owners:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated V8 exact source only
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable Desert Phase3 current-main source
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Original Node22 runtime
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Native source exact SHAs syntax and 11 brand-new layered-ABI cases
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-original-layered-cpu-research.mjs
+          node --check isolated/tests/mountain-v8-p3-original-layered-cpu-research.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-original-layered-cpu-research.test.mjs
