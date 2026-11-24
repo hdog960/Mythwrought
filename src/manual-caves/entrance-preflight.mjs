@@ -5,7 +5,7 @@
 import {BLOCK,worldKey,terrainHeight,baseBlock,collides} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from '../depth.mjs';
 import {DEEP_CAVE_ORIGIN,deepCaveRoute} from '../deep-cave-network.mjs';
-import {descentEntranceApproach} from '../underground-switchback-descent.mjs';
+import {descentEntranceApproach,descentRoute} from '../underground-switchback-descent.mjs';
 import {UPPER_SITES} from '../cave-approaches/upper-network.mjs';
 
 import {isCandidateGeologyMaterial} from '../living-underworld/protected-entrance-envelope.mjs';
@@ -128,6 +128,28 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
   }
  }
  if(!mouth)return reject('NO_SUPPORTED_SURFACE_MOUTH');
+ // The existing below-legacy descent stops authoring at y=-3.
+ // Connect the fallback to the actual original approach, not just its
+ // top station. Only its missing above-legacy headroom may be proposed.
+ // All existing below-legacy authored cells and floors must stay intact.
+ const approach=descentEntranceApproach();
+ const main=descentRoute().slice(1,3);
+ const join=[...approach.slice(1),...main];
+ let collarCells=0;
+ for(const p of approach.slice(1))for(const dx of [-1,0,1])
+  for(let h=1;h<=4;h++){
+   const x=p.x+dx,y=p.floor+h,z=p.z,k=key(x,y,z);
+   if(y<LEGACY_WORLD_MIN_Y)continue;
+   if(reserved.has(k))return reject('DESCENT_JOIN_OTHER_ENTRANCE');
+   for(const map of [source,...extraSources])
+    if(map.has(k)&&map.get(k)!==BLOCK.AIR)return reject('DESCENT_JOIN_AUTHORED_COLLISION');
+   if(world.edits.has(k))return reject('DESCENT_JOIN_PLAYER_EDIT');
+   const actual=world.get(x,y,z),natural=baseBlock(x,y,z,world.seed);
+   if(actual!==natural&&actual!==BLOCK.AIR)return reject('DESCENT_JOIN_LANDMARK');
+   if(actual!==BLOCK.AIR&&!isCandidateGeologyMaterial(actual))return reject('DESCENT_JOIN_UNSAFE_MATERIAL');
+   if(cells.has(k)&&cells.get(k)!==BLOCK.AIR)return reject('DESCENT_JOIN_INTERNAL_CONFLICT');
+   if(!cells.has(k)&&actual!==BLOCK.AIR){cells.set(k,BLOCK.AIR);collarCells++;}
+  }
  // Actual original controller, no teleports within a direction. The lookup
  // preserves original source priority and uses no invented support outside
  // the audited footprint. Both directions are mandatory before acceptance.
@@ -159,12 +181,17 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
   }
   return frames;
  };
+ const joined=[...join].reverse().concat(route);
  const forward=drive(route),reverse=forward===null?null:drive([...route].reverse());
+ const joinedForward=drive(joined),joinedReverse=joinedForward===null?null:drive([...joined].reverse());
+ if(joinedForward===null||joinedReverse===null)return reject('ORIGINAL_DESCENT_JOIN_CONTROLLER_HOLD');
  if(forward===null||reverse===null)return reject('ORIGINAL_CONTROLLER_ROUTE_HOLD');
  return Object.freeze({ok:true,name:site.name,sourceAnchor:Object.freeze({...site}),
   direction:Object.freeze({dx:0,dz:-1}),mouth,cells,route:Object.freeze(route),
   fallback:Object.freeze({turn,side,delay,spacing,forwardFrames:forward,reverseFrames:reverse,
-   originalControllerBothDirections:true,liveWalkingVerified:false}),
+   originalControllerBothDirections:true,liveWalkingVerified:false,
+   collarCells,joinedStations:joined.length,joinedForwardFrames:joinedForward,
+   joinedReverseFrames:joinedReverse,originalDescentJoinVerified:true}),
   physicallyProposed:true,worldModified:false,runtimeConnected:false});
 }
 
