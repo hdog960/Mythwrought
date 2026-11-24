@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '15b500a9609c1e381b357fa3f39e76c1b6aa53fc');
+    '23f88922a373ad68d5df701da1d67159ec3c0ce0');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1749,10 +1749,10 @@ test('original source times real synchronous mesh CPU before upload and preserve
   const a=body.indexOf('const near291MeshStarted=near291EditPhase?performance.now():null;');
   const b=body.indexOf('const vertices=meshPlayableChunk(cx,cz,section);');
   const c=body.indexOf('near291EditPhase.meshMs+=Math.max(0,performance.now()-near291MeshStarted);');
-  const d=body.indexOf('ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});');
+  const d=body.indexOf('const uploaded=uploadPack2Chunk(item.vertices,');
   assert.ok(a>=0&&b>a&&c>b&&d>c);
   assert.ok(body.includes('near291EditPhase.loadedSections+=batch.length;'));
-  assert.ok(body.includes('deleteChunkBuffers(old);'));
+  assert.ok(body.includes('deleteChunkBuffers(item.near291RetainWater?'));
 });
 test('original source clears edit scratch in original finally and logs only after save success',()=>{
   const begin=source.indexOf("    const near291MineStart=near291Perf&&mode==='mine'?performance.now():null;");
@@ -2127,8 +2127,8 @@ test('original source retains solid then water function and upload publication o
     'const water=meshPlayableWater(cx,cz,section);',
     'near291EditPhase.waterMs+=Math.max(0,performance.now()-waterStart);',
     'batch.push({key,cx,cz,section,vertices,water});',
-    'ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});',
-    'deleteChunkBuffers(old);'
+    'const uploaded=uploadPack2Chunk(item.vertices,',
+    'deleteChunkBuffers(item.near291RetainWater?'
   ];
   const indexes=steps.map(s=>r.indexOf(s));
   assert.ok(indexes.every(n=>n>=0));
@@ -2219,7 +2219,7 @@ test('public Pages uses the untouched source solid and water functions without p
   const {perf}=local291PerfFixture({hostname:'hdog960.github.io'});
   assert.equal(perf.read(),null);
   const a=source.indexOf('  function meshPlayableChunk(cx,cz,section){');
-  const b=source.indexOf('  function refreshEditedMeshes(',a);
+  const b=source.indexOf('  function near291SameWaterBytes(',a);
   const r=source.slice(a,b);
   assert.ok(r.includes('meshDepthSection(world,cx,cz,section)'));
   assert.ok(r.includes('pack2WaterSectionVertices(world,cx,cz,section)'));
@@ -2278,4 +2278,169 @@ test('public source mesher makes zero additional performance clock calls',()=>{
   fn(scope)(0,0,-20);
   assert.deepEqual(calls,['upload','delete']);
   assert.equal(scope.editMeshBatches,1);
+});
+
+
+function water291NativeFixture({
+  enabled=true,reuse=true,sections=[-1],
+  firstWater=[1,2,3,4,5,6,7,8,9],secondWater=firstWater,
+  failAt=0,retireFailure=false,needFar=false
+}={}){
+  const begin=source.indexOf('  function near291SameWaterBytes(');
+  const end=source.indexOf('  function refreshPhysicalChunk(',begin);
+  assert.ok(begin>0&&end>begin);
+  let edits=0,uploads=0,bufferId=0,pauses=0;
+  const events=[],retired=[],chunks=new Map();
+  for(const section of sections)chunks.set('0,0,'+section,{
+    buffer:{id:'resident-opaque-'+section},
+    waterBuffer:{id:'resident-water-'+section},waterCount:1,count:2});
+  const scope={
+    near291Enabled:enabled,near291WaterReuse:reuse,
+    near291EditPhase:null,near291Fatal:false,chunks,
+    performance:{now:()=>{throw Error('Unexpected extra profiler clock');}},
+    verticalEditSections:()=>sections,
+    editAffectedChunks:()=>[{cx:0,cz:0}],
+    depthMeshKey:(cx,cz,section)=>cx+','+cz+','+section,
+    meshPlayableChunk:(cx,cz,section)=>{
+      events.push('solid-'+section);return new Float32Array(18);
+    },
+    meshPlayableWater:(cx,cz,section)=>{
+      events.push('water-'+section);
+      return new Float32Array(edits?secondWater:firstWater);
+    },
+    uploadPack2Chunk:(opaque,water)=>{
+      events.push('upload-'+water.length);
+      if(++uploads===failAt)throw Error('291_INJECTED_STAGE_FAILURE');
+      const buffer={id:'new-opaque-'+(++bufferId)};
+      const waterBuffer=water.length?{id:'new-water-'+(++bufferId)}:null;
+      return {buffer,count:opaque.length/9,waterBuffer,
+        waterCount:water.length/9};
+    },
+    originalDeleteChunkBuffers:({buffer})=>{
+      events.push('cleanup-'+buffer.id);retired.push(buffer.id);
+    },
+    deleteChunkBuffers:old=>{
+      events.push('retire-opaque-'+old.buffer.id);retired.push(old.buffer.id);
+      if(retireFailure&&edits>0)throw Error('291_INJECTED_RETIRE_FAILURE');
+      if(old.waterBuffer){
+        events.push('retire-water-'+old.waterBuffer.id);
+        retired.push(old.waterBuffer.id);
+      }
+    },
+    editMeshBatches:0,lastEditMeshKeys:[],
+    frameDriver:{pause:()=>{pauses++;}},
+    fatal:()=>events.push('fatal'),
+    caveSession:needFar?{}:null,combinedWorld:()=>false,
+    caveFarGpu:{invalidate:()=>events.push('c6-invalidate')}
+  };
+  const fn=new Function('scope','with(scope){'+source.slice(begin,end)+
+    '\nreturn refreshEditedMeshes;}')(scope);
+  return {scope,events,retired,run(){
+    try{fn(0,0,-31);return null;}catch(e){return e.message}
+  },next(){edits++;},
+    get uploadCount(){return uploads;},
+    get pauseCount(){return pauses;}};
+}
+test('water reuse requires independent localhost near-VAO feature opt-in',()=>{
+  assert.ok(source.includes("get('reuse-water-291')==='1'"));
+  assert.ok(source.includes('const near291WaterReuse=near291Enabled&&'));
+  for(const [enabled,reuse] of [[false,false],[true,false]]){
+    const v=water291NativeFixture({enabled,reuse});
+    assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+    assert.equal(v.events.filter(e=>e==='upload-9').length,2);
+    assert.equal(v.scope.chunks.get('0,0,-1').water291Bytes,undefined);
+  }
+});
+test('identical original water mesh retains original GPU water handle after second edit',()=>{
+  const v=water291NativeFixture();assert.equal(v.run(),null);
+  const water=v.scope.chunks.get('0,0,-1').waterBuffer;
+  v.next();assert.equal(v.run(),null);
+  const last=v.scope.chunks.get('0,0,-1');
+  assert.equal(last.waterBuffer,water);
+  assert.equal(last.waterCount,1);
+  assert.equal(last.water291Bytes.byteLength,36);
+  assert.equal(v.events.filter(e=>e==='upload-9').length,1);
+  assert.equal(v.events.filter(e=>e==='upload-0').length,1);
+  assert.ok(!v.retired.includes(water.id));
+  assert.equal(v.scope.editMeshBatches,2);
+});
+test('changed original water vertices ALWAYS retire old water and allocate new',()=>{
+  const v=water291NativeFixture({secondWater:[9,8,7,6,5,4,3,2,1]});
+  assert.equal(v.run(),null);const old=v.scope.chunks.get('0,0,-1').waterBuffer;
+  v.next();assert.equal(v.run(),null);
+  assert.equal(v.events.filter(e=>e==='upload-9').length,2);
+  assert.ok(v.retired.includes(old.id));
+  assert.ok(v.scope.chunks.get('0,0,-1').waterBuffer!==old);
+});
+test('water reuse uses byte identity, refusing signed-zero changes',()=>{
+  const v=water291NativeFixture({
+    firstWater:[-0,1,2,3,4,5,6,7,8],
+    secondWater:[0,1,2,3,4,5,6,7,8]
+  });
+  assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+  assert.equal(v.events.filter(e=>e==='upload-9').length,2);
+});
+test('streamed resident water with no CPU vertex witness cannot reuse on first edit',()=>{
+  const v=water291NativeFixture();
+  assert.equal(v.scope.chunks.get('0,0,-1').water291Bytes,undefined);
+  assert.equal(v.run(),null);
+  assert.equal(v.events[2],'upload-9');
+  assert.equal(v.scope.chunks.get('0,0,-1').water291Bytes.length,9);
+});
+test('empty water section retains no stale resident buffer or CPU witness',()=>{
+  const v=water291NativeFixture({firstWater:[],secondWater:[]});
+  assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+  const c=v.scope.chunks.get('0,0,-1');
+  assert.equal(c.waterBuffer,null);assert.equal(c.waterCount,0);
+  assert.equal(c.water291Bytes,undefined);
+  assert.equal(v.events.filter(e=>e==='upload-0').length,2);
+});
+test('vertex snapshot bigger than 32KiB is never stored or reused',()=>{
+  const big=Array.from({length:8208},(_,i)=>i%9);
+  const v=water291NativeFixture({firstWater:big,secondWater:big});
+  assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+  assert.equal(v.scope.chunks.get('0,0,-1').water291Bytes,undefined);
+  assert.equal(v.events.filter(e=>e==='upload-8208').length,2);
+});
+test('stage failure after first retained section cleans only NEW opaque handle',()=>{
+  const v=water291NativeFixture({sections:[-1,-2],failAt:4});
+  assert.equal(v.run(),null);
+  const old=[...v.scope.chunks.values()].map(x=>x.waterBuffer);
+  v.next();
+  assert.equal(v.run(),'291_INJECTED_STAGE_FAILURE');
+  assert.deepEqual([...v.scope.chunks.values()].map(x=>x.waterBuffer),old);
+  assert.ok(v.events.some(e=>e.startsWith('cleanup-new-opaque-')));
+  for(const item of old)assert.ok(!v.retired.includes(item.id));
+  assert.equal(v.scope.near291Fatal,false);
+});
+test('original VAO retirement error remains fatal while reused water stays published',()=>{
+  const v=water291NativeFixture({retireFailure:true});
+  assert.equal(v.run(),null);const old=v.scope.chunks.get('0,0,-1').waterBuffer;
+  v.next();assert.equal(v.run(),'291_INJECTED_RETIRE_FAILURE');
+  assert.equal(v.scope.near291Fatal,true);
+  assert.equal(v.pauseCount,1);
+  assert.equal(v.scope.chunks.get('0,0,-1').waterBuffer,old);
+  assert.ok(v.events.includes('fatal'));
+});
+test('original chunk eviction retires retained water exactly once',()=>{
+  const v=water291NativeFixture();
+  assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+  const chunk=v.scope.chunks.get('0,0,-1');
+  const water=chunk.waterBuffer.id;
+  v.scope.deleteChunkBuffers(chunk);
+  v.scope.chunks.delete('0,0,-1');
+  assert.equal(v.retired.filter(id=>id===water).length,1);
+  assert.equal(v.scope.chunks.size,0);
+});
+test('C6 original far invalidation executes once per edit even with retained water',()=>{
+  const v=water291NativeFixture({needFar:true});
+  assert.equal(v.run(),null);v.next();assert.equal(v.run(),null);
+  assert.equal(v.events.filter(e=>e==='c6-invalidate').length,2);
+  assert.equal(v.scope.near291Fatal,false);
+});
+test('original water buffer contents are not blindly reused when count differs',()=>{
+  const v=water291NativeFixture();assert.equal(v.run(),null);
+  v.scope.chunks.get('0,0,-1').waterCount=2;
+  v.next();assert.equal(v.run(),null);
+  assert.equal(v.events.filter(e=>e==='upload-9').length,2);
 });
