@@ -27,6 +27,9 @@ export function createCitySourceCrossAuditLedger(source,{
  // Hard caps are enforced BEFORE calling any underlying M7 reader. Once a
  // read has been withheld, no later call may accidentally resume scanning.
  let preReadBlocked=false,blockedSourceCallbackAttempts=0;
+ // Source callbacks must be atomic. No nested ledger read and no source
+ // exception may be swallowed by the caller and followed by a false PASS.
+ let originalCallbackActive=false,sourceCallbackFailures=0;
  const fail=(reason,details={})=>{
   if(!refusal){refusal=reason;firstMismatch=Object.freeze(details);}
  };
@@ -49,6 +52,9 @@ export function createCitySourceCrossAuditLedger(source,{
   if(preReadBlocked)
    refuseBeforeSourceCallback(refusal??'ORIGINAL_SOURCE_LEDGER_PREVIOUS_REFUSAL',
     {role,coordinate:k});
+  if(originalCallbackActive)
+   refuseBeforeSourceCallback('ORIGINAL_SOURCE_REENTRANT_CALLBACK',
+    {role,coordinate:k,phase});
   if(source[role]!==original[role])
    refuseBeforeSourceCallback('ORIGINAL_SOURCE_CALLBACK_BINDING_CHANGED',
     {role,coordinate:k});
@@ -58,9 +64,34 @@ export function createCitySourceCrossAuditLedger(source,{
   if(!records.has(k)&&records.size>=maxCoordinatesPerRole)
    refuseBeforeSourceCallback('ORIGINAL_SOURCE_LEDGER_CELL_BUDGET',
     {role,coordinate:k});
-  const value=original[role].call(source,x,y,z);
+  // Reserve the source-call budget BEFORE running arbitrary callback code.
+  // This also ensures a throwing callback is counted as an actual invocation.
   total++;
   (phase==='prior'?prior:later)[role]++;
+  originalCallbackActive=true;
+  let value;
+  try{
+   value=original[role].call(source,x,y,z);
+  }catch(error){
+   sourceCallbackFailures++;
+   if(!preReadBlocked){
+    fail('ORIGINAL_SOURCE_CALLBACK_THROWN',{
+     role,coordinate:k,phase,
+     errorName:typeof error?.name==='string'?error.name:'UnknownError'
+    });
+    preReadBlocked=true;
+   }
+   const withheld=new Error('Original M7 source reader withheld: '+refusal);
+   withheld.code=refusal;
+   throw withheld;
+  }finally{
+   originalCallbackActive=false;
+  }
+  // A callback could catch and suppress a nested ledger refusal. It may not
+  // turn its own return value into a seemingly valid original-world read.
+  if(preReadBlocked)
+   refuseBeforeSourceCallback(refusal??'ORIGINAL_SOURCE_REENTRANT_CALLBACK',
+    {role,coordinate:k,phase});
   const valid=role==='naturalAt'?INT(value)&&value>=0:
    role==='authoredAt'?value===undefined||(INT(value)&&value>=0):
    typeof value==='boolean';
@@ -113,6 +144,9 @@ export function createCitySourceCrossAuditLedger(source,{
    totalSourceCallbackCalls:total,originalCallbackBindingsUnchanged:bindingsUnchanged(),
    preReadHardCapsEnforced:true,
    blockedSourceCallbackAttempts,
+   sourceCallbackFailures,
+   sourceReadReentrancyGuardEnforced:true,
+   sourceCallbackInvocationsReservedBeforeCall:true,
    sourceCallbacksWithinHardCaps:withinHardCaps,
    maximumSourceCallbackCalls:maxTotalCalls,
    maximumDistinctCoordinatesPerRole:maxCoordinatesPerRole,
