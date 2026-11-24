@@ -1,32 +1,44 @@
-name: Creative Phase 3 inventory acceptance
+name: Creative Phase 3 physical and Phase 4 eggs
 on:
   push:
     branches: [creative-phase3-inventory-20261124]
 permissions:
   contents: read
 jobs:
-  creative-inventory:
+  native-materials-and-cache:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Native exact source catalog and geometry
-        run: |
+      - run: |
           git rev-parse HEAD
           node --check src/main.mjs
-          node --test tests/creative-catalog.test.mjs tests/creative-thumbnails.test.mjs
-      - name: Browser inventory and original world placement
-        run: |
-          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-physical-material-census.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs
+  real-eggs:
+    needs: native-materials-and-cache
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
-          python3 -m http.server 4173 > /tmp/creative-http.log 2>&1 &
-          node tests/creative-integration/phase3-inventory-browser.mjs
+          python3 -m http.server 4174 > /tmp/creative-http.log 2>&1 &
+          EGG_SHARD=${{ matrix.shard }} node tests/creative-integration/physical-eggs-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: creative-phase3-inventory
-          path: artifacts/creative-phase3/
+          name: creative-eggs-${{ matrix.shard }}
+          path: artifacts/creative-eggs/
           if-no-files-found: warn

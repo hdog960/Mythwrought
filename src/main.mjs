@@ -591,7 +591,7 @@ function start(nonblockStage=null){
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Status=document.getElementById('g2bFlightStatus');
   const inventoryHeader=document.getElementById('creativeInventoryToggle');
-  let creativeInventory=null,creativeActivationEpoch=0;
+  let creativeInventory=null,creativeActivationEpoch=0,creativeSpawnSpecies=null;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -654,7 +654,7 @@ function start(nonblockStage=null){
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
     g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
-    creativeActivationEpoch++;
+    creativeActivationEpoch++;creativeSpawnSpecies=null;
     g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
@@ -789,7 +789,7 @@ function start(nonblockStage=null){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else {g2CreativeEnabled=false;creativeActivationEpoch++;}
+    }else {g2CreativeEnabled=false;creativeActivationEpoch++;creativeSpawnSpecies=null;}
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
@@ -1068,6 +1068,16 @@ function start(nonblockStage=null){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
     if(storageReadOnly){message('Protected world is read-only; edit refused');return;}
+    if(mode==='place'&&creativeSpawnSpecies){
+      const species=getSpecies(creativeSpawnSpecies),target=raycast(world,eye(),facing(),6);
+      if(!g2CreativeEnabled||!species||!target?.adjacent||!mobSession||!mobRenderer||mobRuntimeError){
+        message('Creature egg requires a clear, loaded physical target');return;
+      }
+      const [x,y,z]=target.adjacent;
+      const result=mobSession.spawnCreative(species.id,[x+.5,y,z+.5]);
+      if(!result.ok){message('Cannot summon '+species.displayName+': '+result.reason);return;}
+      message('Summoned '+species.displayName+' · verified creature roster saved');return;
+    }
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -2304,6 +2314,7 @@ function start(nonblockStage=null){
       message('Selected '+biome130Block(selected).name+' · '+biomeRotation.selectedOptions[0].textContent);
   });
   biomeSelect.addEventListener('change',()=>{
+    creativeSpawnSpecies=null;
     const chosen=Number(biomeSelect.value);
     if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
     selected=chosen;selectedRotation=Number(biomeRotation.value);
@@ -2362,6 +2373,7 @@ function start(nonblockStage=null){
   if(pack2Section?.parentElement)pack2Section.insertAdjacentElement('beforebegin',manual14Panel);
   else document.getElementById('advancedTools').append(manual14Panel);
   manual14Select.addEventListener('change',()=>{
+    creativeSpawnSpecies=null;
     const id=Number(manual14Select.value);
     if(!manual14Ids.has(id))return;
     selected=id;manual14Yaw=Number(manual14Rotate.value);
@@ -2382,6 +2394,7 @@ function start(nonblockStage=null){
     manual14Variant=(manual14Upper.checked&&[15,16].includes(selected))?'upper':'lower';
   });
   const pack3Palette=installPack3Palette(help,(id,yaw)=>{
+    creativeSpawnSpecies=null;
     selected=id;pack3Yaw=yaw;biomeSelect.value='';manual14Select.value='';
     pack2Selection=null;updatePack2SelectionUI();
     document.querySelectorAll('[data-block]').forEach(q=>{
@@ -2405,6 +2418,7 @@ function start(nonblockStage=null){
   // Retain the actual Pack 3 palette and handlers; relocate its existing panel.
   document.getElementById('advancedTools').append(pack3Palette.material.closest('.looksetting'));
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
+    creativeSpawnSpecies=null;
     selected=Number(b.dataset.block);
     biomeSelect.value='';manual14Select.value='';pack3Palette.clear();
     pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
@@ -3398,6 +3412,9 @@ function start(nonblockStage=null){
       };},
       mobStatus(){return mobSession?.status()??null;},
       mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
+      mobPersistedRoster(){return mobSession?.engine.checkpoint().entities.map(m=>({
+        id:m.id,species:m.species,position:[...m.position],state:m.state,important:m.important
+      }))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
@@ -3410,7 +3427,7 @@ function start(nonblockStage=null){
   // Creative Phase 3: reuse the installed physical placement owners.
   const creativeCatalog=buildCreativeCatalog();
   creativeInventory=installCreativeInventory({
-    catalog:creativeCatalog,includeCreatures:false,
+    catalog:creativeCatalog,includeCreatures:true,
     onOpen:()=>{
       if(!g2CreativeEnabled||!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
       gameplayRecorder?.interrupt('Creative inventory opened');cancelAllPointers();
@@ -3422,6 +3439,7 @@ function start(nonblockStage=null){
       canvas.focus({preventScroll:true});
     },
     onRotate:item=>{
+      if(item.kind==='spawn')return 'Creature eggs have no orientation';
       if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
       const next=field=>{
         const n=(Number(field.value)+1)%4;field.value=String(n);
@@ -3436,6 +3454,7 @@ function start(nonblockStage=null){
       return item.name+' has fixed orientation';
     },
     onVariant:item=>{
+      if(item.kind==='spawn')return 'Creature eggs have no material variant';
       if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
       if(item.owner==='pack2'){
         document.getElementById(/water/i.test(item.name)?'pack2WaterLevel':'pack2Variant').click();
@@ -3448,7 +3467,15 @@ function start(nonblockStage=null){
       return item.name+' · variants are separate catalog entries';
     },
     onSelect:async item=>{
-      if(!g2CreativeEnabled||storageReadOnly||item.kind!=='block')throw Error('Select an editable physical material');
+      if(!g2CreativeEnabled||storageReadOnly)throw Error('Creative editing unavailable');
+      if(item.kind==='spawn'){
+        if(!getSpecies(item.id)||!mobSession||typeof mobSession.spawnCreative!=='function'||
+           mobSession.status()?.readonly!==false||!mobRenderer||mobRuntimeError)
+          throw Error('Creature egg requires a writable live creature host and renderer');
+        pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;
+        creativeSpawnSpecies=item.id;return;
+      }
+      if(item.kind!=='block')throw Error('Unknown Creative item');
       if(caveSession&&!['core','biome130'].includes(item.owner))throw Error('Shaped materials require a normal world');
       if(item.owner==='pack5'){
         const requestedWorld=world,epoch=creativeActivationEpoch;
@@ -3459,7 +3486,7 @@ function start(nonblockStage=null){
         pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
         pack5Variant.value=item.variants[0];
         if(pack5Variant.value!==item.variants[0])throw Error('Pack 5 variant not installed');
-        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;return;
+        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;creativeSpawnSpecies=null;return;
       }
       let target;
       if(item.owner==='core'||item.owner==='pack2')target=document.querySelector('[data-block="'+item.id+'"]');
@@ -3470,7 +3497,7 @@ function start(nonblockStage=null){
       if(target.dataset.block)target.click();
       else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
       if(selected!==item.id)throw Error('Material selection not confirmed: '+item.key);
-      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;
+      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativeSpawnSpecies=null;
     }
   });
   inventoryHeader.addEventListener('click',()=>{
