@@ -13,6 +13,7 @@ import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
+import {mountainV8ConifersForChunk} from './mountain-v8-runtime-conifers.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
 import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
@@ -63,6 +64,7 @@ export class FourRegionWorld extends VoxelWorld{
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
+    if(this.profile.generator===M8_MOUNTAIN_GENERATOR)this._mountainV8ConiferChunks=new Map();
     if(environmentalProfile(this.profile.generator)){
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
@@ -196,6 +198,23 @@ export class FourRegionWorld extends VoxelWorld{
     }
     return cells.get(worldKey(x,y,z))??BLOCK.AIR;
   }
+  _mountainV8ConiferAt(x,y,z){
+    const cx=chunkCoord(x),cz=chunkCoord(z),key=cx+','+cz;
+    let cells=this._mountainV8ConiferChunks.get(key);
+    if(!cells){
+      const raw=(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c);
+      cells=mountainV8ConifersForChunk(cx,cz,this.seed,{
+        readOriginal:raw,
+        protectedAt:(a,b,c)=>this.environmentCaves.get(a,b,c)!==undefined||raw(a,b,c)!==baseBlock(a,b,c,this.seed),
+        readColumn:(a,c)=>this._columnPlan(a,c),
+        readGround:(a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
+        readExistingTree:(a,b,c)=>this._environmentTreeAt(a,b,c)
+      });
+      this._mountainV8ConiferChunks.set(key,cells);
+      if(this._mountainV8ConiferChunks.size>64)this._mountainV8ConiferChunks.delete(this._mountainV8ConiferChunks.keys().next().value);
+    }
+    return cells.get(worldKey(x,y,z))??BLOCK.AIR;
+  }
   naturalAndLandmarkBlock(x,y,z){
     const cave=this.environmentCaves?.get(x,y,z);
     if(cave!==undefined)return cave;
@@ -217,7 +236,14 @@ export class FourRegionWorld extends VoxelWorld{
     if(overlay===undefined&&ground===BLOCK.GRASS&&
        y===terrainHeight(x,z,this.seed)&&
        v6BiomeAt(x,z,this.seed)?.name==='desert')return 256;
-    return ground===BLOCK.AIR&&y>terrainHeight(x,z,this.seed)?this._environmentTreeAt(x,y,z):ground;
+    if(ground!==BLOCK.AIR||y<=terrainHeight(x,z,this.seed))return ground;
+    const existing=this._environmentTreeAt(x,y,z);
+    if(existing!==BLOCK.AIR)return existing;
+    if(this.profile.generator===M8_MOUNTAIN_GENERATOR){
+      const region=v6BiomeAt(x,z,this.seed);
+      if(region?.name==='mountain'&&region.weight>=.82)return this._mountainV8ConiferAt(x,y,z);
+    }
+    return BLOCK.AIR;
   }
   set(x,y,z,id,rotation=0){
     // Original setter knows the original block registry, validation,
