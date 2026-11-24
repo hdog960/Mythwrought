@@ -1,0 +1,30 @@
+name: Mountain V8 dedicated material RGB-only final gate
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-dedicated-rgb-final.yml]
+permissions:
+  contents: read
+jobs:
+  rgb:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: d5b2c9e485b28d6f7c745c03648dc23a67beae15
+          path: prior-rgb
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Current actual RGB-only feather and exact historical M7
+        env:
+          MOUNTAIN_V8_PREVIOUS_ROOT: ${{ github.workspace }}/prior-rgb
+        run: |
+          git rev-parse HEAD
+          git -C prior-rgb rev-parse HEAD
+          node --test tests/mountain-v8-developer-shoulder-rgb-native.test.mjs

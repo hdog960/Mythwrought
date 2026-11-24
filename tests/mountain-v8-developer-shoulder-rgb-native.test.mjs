@@ -1,4 +1,6 @@
-import test from 'node:test';
+import test,{after} from 'node:test';
+import {readFileSync,writeFileSync,unlinkSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -10,9 +12,20 @@ const root=process.env.MOUNTAIN_V8_PREVIOUS_ROOT;
 assert.ok(root);
 const old=await import(pathToFileURL(path.join(root,'src/manual-biomes/profile-world.mjs')).href);
 const oldVoxel=await import(pathToFileURL(path.join(root,'src/voxel.mjs')).href);
+// The immutable pre-material run already proved the original RGB-only change.
+// Compare the CURRENT real mesh with the identical source minus only the
+// RGB feather expression, not obsolete geometry/IDs from that earlier build.
+const referenceFile=fileURLToPath(new URL('../src/.mountain-v8-rgb-reference-'+process.pid+'.mjs',import.meta.url));
+const source=readFileSync(new URL('../src/voxel.mjs',import.meta.url),'utf8');
+const target='return rgb.map((v,i)=>v+(moss[i]-v)*w);';
+assert.equal(source.split(target).length,2,'one exact RGB transformation');
+writeFileSync(referenceFile,source.replace(target,'return rgb;'),{flag:'wx'});
+after(()=>unlinkSync(referenceFile));
+const unfeathered=await import(pathToFileURL(referenceFile).href);
 const seed=179;
 function worlds(generator=M8_MOUNTAIN_GENERATOR){
  return [new FourRegionWorld(seed,fourRegionProfile(seed,generator)),
+ generator===M8_MOUNTAIN_GENERATOR?new FourRegionWorld(seed,fourRegionProfile(seed,generator)):
  new old.FourRegionWorld(seed,old.fourRegionProfile(seed,generator))];
 }
 function compare(a,b){
@@ -32,17 +45,17 @@ test('actual V8 west shoulder meshes change RGB only, across negative horizontal
  const [w,p]=worlds();
  let changed=0,bytes=0,vertices=0;
  for(const [cx,cz] of [[-17,-12],[-17,-11],[-18,-11],[-17,-10],[-18,-10],[-17,-9]]){
-  const a=meshChunk(w,cx,cz),b=oldVoxel.meshChunk(p,cx,cz);
+  const a=meshChunk(w,cx,cz),b=unfeathered.meshChunk(p,cx,cz);
   changed+=compare(a,b);bytes+=a.byteLength;vertices+=a.length/9;
  }
  console.log('V8 shoulder RGB census',JSON.stringify({chunks:6,changed,bytes,vertices}));
  assert.ok(changed>0);
  assert.deepEqual(w.save(),p.save());
 });
-test('V8 interior natural conifer mesh and nonmountain Desert mesh retain exact prior bytes',()=>{
+test('V8 interior natural conifer and nonmountain Desert unaffected by current RGB feather',()=>{
  const [w,p]=worlds();
  for(const [cx,cz] of [[-30,0],[-50,-112],[0,0]]){
-  const a=meshChunk(w,cx,cz),b=oldVoxel.meshChunk(p,cx,cz);
+  const a=meshChunk(w,cx,cz),b=unfeathered.meshChunk(p,cx,cz);
   assert.equal(compare(a,b),0);
  }
 });
@@ -60,13 +73,13 @@ test('actual edited source cap retains original untinted RGB and geometry, with 
   const plan=w._columnPlan(x,z);
   if(!plan.size)continue;
   const y=Math.max(...plan.keys()),id=plan.get(y);
-  if(![1,3,400,401,402].includes(id)||w.get(x,y+1,z)!==BLOCK.AIR)continue;
+  if(![1,3,400,401,402,500,503,504,505,506].includes(id)||w.get(x,y+1,z)!==BLOCK.AIR)continue;
   site={x,y,z,id};
  }
  assert.ok(site);
- const {x,y,z,id}=site,placed=id===BLOCK.GRASS?BLOCK.STONE:BLOCK.GRASS;
+ const {x,y,z,id}=site,placed=[BLOCK.GRASS,503].includes(id)?BLOCK.STONE:BLOCK.GRASS;
  assert.equal(w.set(x,y,z,placed),true);assert.equal(p.set(x,y,z,placed),true);
- const cx=Math.floor(x/16),cz=Math.floor(z/16),a=meshChunk(w,cx,cz),b=oldVoxel.meshChunk(p,cx,cz);
+ const cx=Math.floor(x/16),cz=Math.floor(z/16),a=meshChunk(w,cx,cz),b=unfeathered.meshChunk(p,cx,cz);
  compare(a,b);
  // Legacy full-cube top emits six consecutive vertices. Require whole
  // top face coverage, not ambiguous shared corner vertices of other cells.
