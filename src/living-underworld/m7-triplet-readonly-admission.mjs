@@ -98,7 +98,23 @@ export function classifyExactHeadOriginalM7Triplet({
  // four-hub/deep-city survey MUST be the same four functions used by the
  // additional thin bridge/pad survey. This only proves in-process caller
  // continuity, not actual FourRegionWorld identity or gameplay readiness.
- const cityThinUnderpassDeepReaderCohortSafe=citySourceSafe&&c.rows.every(r=>
+ // Phase32: unlike caller-only function identity, the native read-only
+ // research script now constructs the reader cohort IN the game modules that
+ // define original FourRegionWorld, original VoxelWorld and M7 profile.
+ // No row may advance on hand-authored or swapped constructor claims.
+ const cityNativeOriginalM7ReaderProvenanceSafe=citySourceSafe&&c.rows.every(r=>
+  yes(r.originalM7NativeReaderProvenanceVerified)&&
+  yes(r.originalM7NativeReaderIssuedByGameModule)&&
+  yes(r.originalM7NativeWorldConstructorExact)&&
+  yes(r.originalM7NativeWorldSeedAndGeneratorExact)&&
+  yes(r.originalM7NativeOriginalWorldMethodsStable)&&
+  yes(r.originalM7NativeEditsUnchanged)&&
+  yes(r.originalM7NativeProvenanceZeroAdditionalTerrainReads)&&
+  yes(r.originalM7NativeSiteSafetyNotAutomaticallyProven));
+ if(!cityNativeOriginalM7ReaderProvenanceSafe)
+  reasons.push('RARE_CITY_NATIVE_ORIGINAL_M7_READER_PROVENANCE_HOLD');
+ const cityThinUnderpassDeepReaderCohortSafe=
+  citySourceSafe&&cityNativeOriginalM7ReaderProvenanceSafe&&c.rows.every(r=>
   yes(r.candidateThinUnderpassPriorDeepSourceReaderCohortRequested)&&
   yes(r.candidateThinUnderpassPriorDeepSourceReaderCohortVerified)&&
   r.candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles===4&&
@@ -263,6 +279,7 @@ export function classifyExactHeadOriginalM7Triplet({
   fullGallerySourceCensusVerified:fullyDiagnosed,
   gallerySourceSafe,asBuiltGalleriesReady,citySourceSafe,
   cityThinUnderpassHypotheticalMovementSafe,
+  cityNativeOriginalM7ReaderProvenanceSafe,
   cityThinUnderpassDeepReaderCohortSafe,
   cityThinUnderpassCrossAuditLedgerSafe,
   cityThinUnderpassExactCoordinateCoverageSafe,
