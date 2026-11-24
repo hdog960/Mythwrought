@@ -1,0 +1,226 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave63-source-handoff.v1",
+  "status": "Original source candidate; 10 focused exact staged V8 callbacks pass, native Wave63 pending.",
+  "parent": "300c7f5c0e91932c226e628010e9df8be0a1f1eb",
+  "branch": "builder-b-wave63-saffronveil-three-pavilion-20261124",
+  "source": "src/building-pool/roadmap-b/builder-b-essentials-wave63.mjs",
+  "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave63-focused.test.mjs",
+  "id": "r1:greenhouse:desert:medium:003",
+  "metrics": {
+    "placements": 4471,
+    "walkable": 1253,
+    "rooms": 6,
+    "portals": 13,
+    "roles": {
+      "foundation": 1505,
+      "wall": 1344,
+      "support": 718,
+      "roof": 694,
+      "furnishing": 146,
+      "partition": 24,
+      "window": 40
+    },
+    "d4": 120,
+    "maxIoU": 0.3729060451565914,
+    "closest": "r1:greenhouse:snow:medium:003",
+    "stoneFoundation": 1505,
+    "roofSections": [
+      252,
+      299,
+      80,
+      63
+    ],
+    "continuousStoneBearings": 16,
+    "dryTrayBodies": 86,
+    "dryTrayRims": 60,
+    "accessibleTraySides": 16,
+    "canopyWalkable": 59
+  },
+  "ownership": {
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6",
+    "priorAccepted": 228,
+    "b115": 115,
+    "d92": 92,
+    "priorGreenhouseIds": [
+      "r1:greenhouse:temperate:small:002",
+      "r1:greenhouse:snow:small:002",
+      "r1:greenhouse:enchanted-forest:small:002",
+      "r1:greenhouse:desert:small:002",
+      "r1:greenhouse:snow:small:003",
+      "r1:greenhouse:snow:medium:002",
+      "r1:greenhouse:enchanted-forest:medium:003",
+      "r1:greenhouse:temperate:large:003",
+      "r1:greenhouse:snow:large:003",
+      "r1:greenhouse:enchanted-forest:small:003",
+      "r1:greenhouse:snow:large:004",
+      "r1:greenhouse:desert:large:003",
+      "r1:greenhouse:temperate:large:004",
+      "r1:greenhouse:temperate:small:003",
+      "r1:greenhouse:snow:medium:003"
+    ],
+    "alternateRimewhorlHead": "342fba1c9ba522b5e9012aedb6829dfa41e34b0d",
+    "alternateNotCounted": true
+  },
+  "v8": {
+    "result": [
+      {
+        "name": "Frozen B115-exclusive desert medium greenhouse and no registration or simulation",
+        "pass": true
+      },
+      {
+        "name": "Unique source placements and all 1505 contiguous original stone foundations",
+        "pass": true
+      },
+      {
+        "name": "Exterior entry physically reaches every two-high source walk node and named room interior",
+        "pass": true
+      },
+      {
+        "name": "694 actual roof cells in four occupied sections, every roof backed and sixteen corner bearings solid",
+        "pass": true
+      },
+      {
+        "name": "All four dry trays physically founded, 86 body cells and 60 rims, sixteen accessible sides",
+        "pass": true
+      },
+      {
+        "name": "Three enclosed pavilion wall envelopes close to roof backing except two-high doors and framed windows",
+        "pass": true
+      },
+      {
+        "name": "Open shade canopy has 59 physically clear ground cells, all four directional entrances and independent cross-plaza path",
+        "pass": true
+      },
+      {
+        "name": "Real interior seed partition contains 24 solid timber cells and two two-high clear passages",
+        "pass": true
+      },
+      {
+        "name": "Actual outward four-high unresolved glazing with solid stone sills and headers",
+        "pass": true
+      },
+      {
+        "name": "Fifteen prior original greenhouse constructors and 120 strict unchanged D4 comparisons",
+        "pass": true
+      }
+    ],
+    "log": [
+      "SAFFRONVEIL_120_D4 {\"total\":120,\"max\":0.3729060451565914,\"closest\":\"r1:greenhouse:snow:medium:003\"}"
+    ],
+    "compilerBlobs": [
+      "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2",
+      "f1e10c5372d49f6ad9b4d138b887cfb6f2297b96",
+      "64b93c02e262b7fe4049408c2458faa985a710a3"
+    ],
+    "peerBlobs": [
+      {
+        "wave": 2,
+        "sha": "7adebc571c9a238eeab6f55adc3b24f6ac7bc998"
+      },
+      {
+        "wave": 7,
+        "sha": "2551361fda0fe94e9da1574695fc3f06a75cf969"
+      },
+      {
+        "wave": 13,
+        "sha": "4813622592632b0b6f28b4180136ea7192495db2"
+      },
+      {
+        "wave": 17,
+        "sha": "36ab1f088b8826740cb87b6d34b6740cf25a5157"
+      },
+      {
+        "wave": 19,
+        "sha": "f1456ffa011a6f758b569e11cb2b00a5b96069e1"
+      },
+      {
+        "wave": 23,
+        "sha": "f8aa2cf5426680708d2ba03c1ac345e91a7b409f"
+      },
+      {
+        "wave": 29,
+        "sha": "82631877cb8987e0442e114072b72c023ecf5209"
+      },
+      {
+        "wave": 31,
+        "sha": "b082816b369c0aadd8f950855096d1e6717b16d8"
+      },
+      {
+        "wave": 37,
+        "sha": "db614f5c6ff5f936a398948c544dc2cdda594df6"
+      },
+      {
+        "wave": 40,
+        "sha": "de3284ecd152d9dcef93436f4d0a9564a79e1ff3"
+      },
+      {
+        "wave": 48,
+        "sha": "7e1f9c55b3951015d3b83beb95377630655cf1e2"
+      },
+      {
+        "wave": 54,
+        "sha": "b52be1de8e69227ed820dc920583391cfbe69c0c"
+      },
+      {
+        "wave": 60,
+        "sha": "d0572ec616fa0ff5b92412fbb41627753fc31d74"
+      },
+      {
+        "wave": 61,
+        "sha": "2aa01c1cc8e0099c5fa0561c6e804da5d241799b"
+      },
+      {
+        "wave": 62,
+        "sha": "62d527440c4dde178715aa8252d4ff5c51fbbd93"
+      }
+    ],
+    "method": "Exact test callback bodies run with authentic original compiler and prior source constructors through isolated V8 test/assert/fs adapters, not native Wave63 ESM."
+  },
+  "nativeReuse": {
+    "head": "300c7f5c0e91932c226e628010e9df8be0a1f1eb",
+    "runId": 45428318556,
+    "jobId": 138566321674,
+    "tests": 32,
+    "passed": 32,
+    "failed": 0,
+    "artifactId": 14937351961,
+    "artifactDigest": "sha256:1b18cb9c01d3820b1bd9fcf0201f9cf79f292db6d78123e808b638d58627cfe3",
+    "digestEvidence": "GitHub artifact metadata and upload log agree; archive bytes not independently downloaded in this turn.",
+    "durationMs": 8049.412572,
+    "d4": 312,
+    "scope": [
+      60,
+      61,
+      62
+    ],
+    "noRerun": true
+  },
+  "progress": {
+    "servicesAuthoredOrStaged": 63,
+    "servicesRemaining": 52,
+    "residentialAuthoredOrStaged": 10,
+    "residentialRemaining": 169,
+    "total": 73,
+    "goal": 294,
+    "remaining": 221
+  },
+  "protected": {
+    "main": "bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e",
+    "mainAdvance": "Authorized compact menu PR487 merged separately.",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "noMerge": true,
+    "noDeploy": true,
+    "noSettlements": true,
+    "noRegistry": true,
+    "noSaveWrites": true
+  },
+  "pending": [
+    "Native Wave63 targeted cohort",
+    "Full accepted228 historical D4",
+    "Installed Pack3/4 producers",
+    "M7 player",
+    "WebGL2",
+    "iPhone Home Screen PWA",
+    "Creator visual acceptance"
+  ]
+}
