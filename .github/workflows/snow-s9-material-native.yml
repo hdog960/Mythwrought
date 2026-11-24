@@ -1,0 +1,45 @@
+name: Snow S9 original visible material census and mesh-resident tint source
+on:
+  push:
+    branches:
+      - research/snow-s9-original-material-and-mesh-resident-20261123
+    paths:
+      - '.github/workflows/snow-s9-material-native.yml'
+      - 'src/manual-biomes/snowy-s9-mesh-resident-pigment.mjs'
+      - 'tests/snowy-s9-mesh-resident-pigment.test.mjs'
+      - 'tests/snowy-s9-original-winter-material-census.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s9-exact-material-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  original-material-and-resident-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact refs and source syntax, no main modification
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s7-mesh-tint-source-cache.mjs)" = f5a538405085d994d52c1f68bafd587edf182e30
+          node --check src/manual-biomes/snowy-s9-mesh-resident-pigment.mjs
+          node --check tests/snowy-s9-mesh-resident-pigment.test.mjs
+          node --check tests/snowy-s9-original-winter-material-census.test.mjs
+      - name: New S9 strict source witness contract only
+        run: node --test tests/snowy-s9-mesh-resident-pigment.test.mjs
+      - name: Two authentic post-Desert original visible face shader material routes
+        run: |
+          node --test tests/snowy-s9-original-winter-material-census.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
