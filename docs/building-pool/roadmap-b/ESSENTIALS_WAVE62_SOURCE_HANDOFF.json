@@ -1,0 +1,208 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave62-source-handoff.v1",
+  "status": "Original source candidate only. 9/9 exact staged V8 callbacks passed; native targeted cohort gate pending.",
+  "parent": "7377d9170434f376887653f50fc4f0a365687264",
+  "branch": "builder-b-wave62-frostwillow-six-coldframes-20261124",
+  "source": "src/building-pool/roadmap-b/builder-b-essentials-wave62.mjs",
+  "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave62-focused.test.mjs",
+  "workflow": ".github/workflows/builder-b-wave60-62-native-isolated.yml",
+  "id": "r1:greenhouse:snow:medium:003",
+  "metrics": {
+    "placements": 5076,
+    "walkable": 1470,
+    "rooms": 6,
+    "portals": 12,
+    "foundation": 1755,
+    "wall": 1209,
+    "support": 893,
+    "roof": 893,
+    "partition": 52,
+    "furnishing": 242,
+    "window": 32,
+    "coldframeBases": 146,
+    "rims": 96,
+    "accessibleSides": 24,
+    "roofWingCounts": [
+      540,
+      225,
+      56,
+      72
+    ],
+    "maxIoU": 0.3279613215149073,
+    "closest": "r1:greenhouse:temperate:small:003",
+    "d4": 112
+  },
+  "ownership": {
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6",
+    "priorAccepted": 228,
+    "b115": 115,
+    "d92": 92,
+    "previousGreenhouseIds": [
+      "r1:greenhouse:temperate:small:002",
+      "r1:greenhouse:snow:small:002",
+      "r1:greenhouse:enchanted-forest:small:002",
+      "r1:greenhouse:desert:small:002",
+      "r1:greenhouse:snow:small:003",
+      "r1:greenhouse:snow:medium:002",
+      "r1:greenhouse:enchanted-forest:medium:003",
+      "r1:greenhouse:temperate:large:003",
+      "r1:greenhouse:snow:large:003",
+      "r1:greenhouse:enchanted-forest:small:003",
+      "r1:greenhouse:snow:large:004",
+      "r1:greenhouse:desert:large:003",
+      "r1:greenhouse:temperate:large:004",
+      "r1:greenhouse:temperate:small:003"
+    ],
+    "otherWave61Branch": {
+      "head": "342fba1c9ba522b5e9012aedb6829dfa41e34b0d",
+      "id": "r1:bathhouse:snow:small:004",
+      "note": "Separate candidate with conflicting Wave61 filenames. Preserved, not counted in this lineage; later owner-coordinated renumber/transplant needed."
+    }
+  },
+  "v8": {
+    "result": [
+      {
+        "name": "Frozen B115-only snow medium greenhouse and no runtime activation",
+        "pass": true
+      },
+      {
+        "name": "Exact original schema counts and entire contiguous stone foundation",
+        "pass": true
+      },
+      {
+        "name": "Actual two-high source walking connects every portal, room and foundation walk node",
+        "pass": true
+      },
+      {
+        "name": "Four actual Pack3 roof wings and continuous stone corner bearings",
+        "pass": true
+      },
+      {
+        "name": "146 physical coldframe bodies, 96 rim cells, four covered beds and two open beds with 24 accessible sides",
+        "pass": true
+      },
+      {
+        "name": "Thermal partition remains physically solid except two independent clear passage cells",
+        "pass": true
+      },
+      {
+        "name": "Actual exterior wall closure to roof backing, except explicit door and framed pane openings",
+        "pass": true
+      },
+      {
+        "name": "Complete outward four-high unresolved Pack4 window bays with original stone sills and headers",
+        "pass": true
+      },
+      {
+        "name": "Fourteen authentic prior greenhouse constructors and 112 unchanged D4 comparisons",
+        "pass": true
+      }
+    ],
+    "log": [
+      "FROSTWILLOW_112_D4 {\"total\":112,\"max\":0.3279613215149073,\"closest\":\"r1:greenhouse:temperate:small:003\"}"
+    ],
+    "compilerBlobs": [
+      "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2",
+      "f1e10c5372d49f6ad9b4d138b887cfb6f2297b96",
+      "64b93c02e262b7fe4049408c2458faa985a710a3"
+    ],
+    "peerBlobs": [
+      {
+        "wave": 2,
+        "sha": "7adebc571c9a238eeab6f55adc3b24f6ac7bc998"
+      },
+      {
+        "wave": 7,
+        "sha": "2551361fda0fe94e9da1574695fc3f06a75cf969"
+      },
+      {
+        "wave": 13,
+        "sha": "4813622592632b0b6f28b4180136ea7192495db2"
+      },
+      {
+        "wave": 17,
+        "sha": "36ab1f088b8826740cb87b6d34b6740cf25a5157"
+      },
+      {
+        "wave": 19,
+        "sha": "f1456ffa011a6f758b569e11cb2b00a5b96069e1"
+      },
+      {
+        "wave": 23,
+        "sha": "f8aa2cf5426680708d2ba03c1ac345e91a7b409f"
+      },
+      {
+        "wave": 29,
+        "sha": "82631877cb8987e0442e114072b72c023ecf5209"
+      },
+      {
+        "wave": 31,
+        "sha": "b082816b369c0aadd8f950855096d1e6717b16d8"
+      },
+      {
+        "wave": 37,
+        "sha": "db614f5c6ff5f936a398948c544dc2cdda594df6"
+      },
+      {
+        "wave": 40,
+        "sha": "de3284ecd152d9dcef93436f4d0a9564a79e1ff3"
+      },
+      {
+        "wave": 48,
+        "sha": "7e1f9c55b3951015d3b83beb95377630655cf1e2"
+      },
+      {
+        "wave": 54,
+        "sha": "b52be1de8e69227ed820dc920583391cfbe69c0c"
+      },
+      {
+        "wave": 60,
+        "sha": "d0572ec616fa0ff5b92412fbb41627753fc31d74"
+      },
+      {
+        "wave": 61,
+        "sha": "2aa01c1cc8e0099c5fa0561c6e804da5d241799b"
+      }
+    ],
+    "method": "Exact staged tests with authentic original compiler and peers in isolated V8 node:test/assert/fs adapters; not native ESM."
+  },
+  "progress": {
+    "servicesAuthoredOrStaged": 62,
+    "servicesRemaining": 53,
+    "residentialAuthoredOrStaged": 10,
+    "residentialRemaining": 169,
+    "total": 72,
+    "goal": 294,
+    "remaining": 222
+  },
+  "nativeGate": {
+    "scope": [
+      60,
+      61,
+      62
+    ],
+    "expectedTests": 32,
+    "run": "pending",
+    "noBroadSuite": true
+  },
+  "protected": {
+    "main": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "priorRefsVerified": true,
+    "noMerge": true,
+    "noDeploy": true,
+    "noSettlements": true,
+    "noRegistration": true,
+    "noSaveWrites": true
+  },
+  "pending": [
+    "Native exact cohort job outcome",
+    "Full accepted228 D4 sweep",
+    "Installed Pack3/Pack4 producers",
+    "M7 walking",
+    "Original WebGL2",
+    "iPhone Home Screen PWA",
+    "Creator visual approval"
+  ],
+  "notes": "Initial V8 test harness had missing shape helper; corrected before commit, without relaxing threshold."
+}

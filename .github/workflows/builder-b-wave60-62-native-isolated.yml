@@ -1,0 +1,46 @@
+name: Builder B Wave60-62 targeted original native source
+on:
+  push:
+    branches:
+      - 'builder-b-wave62-frostwillow-six-coldframes-20261124'
+    paths:
+      - '.github/workflows/builder-b-wave60-62-native-isolated.yml'
+permissions:
+  contents: read
+jobs:
+  targeted-original-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact checkout and original immutable parent source
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave60.mjs)" = d0572ec616fa0ff5b92412fbb41627753fc31d74
+          test "$(git hash-object tests/building-pool/roadmap-b/builder-b-essentials-wave60-focused.test.mjs)" = 23f03fbd1afcc3828007ef5f18eb2b18e21b85d7
+          test "$(git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave61.mjs)" = 2aa01c1cc8e0099c5fa0561c6e804da5d241799b
+          test "$(git hash-object tests/building-pool/roadmap-b/builder-b-essentials-wave61-focused.test.mjs)" = a02acacaff08484ac2d0b7235a34f78aa393c3b2
+          node --version
+          git rev-parse HEAD
+      - name: Execute original native Node ESM Wave60-62 only
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/builder-b-wave60-62-native
+          git rev-parse HEAD > artifacts/builder-b-wave60-62-native/source-head.txt
+          node --version > artifacts/builder-b-wave60-62-native/node-version.txt
+          node --test --test-concurrency=1 tests/building-pool/roadmap-b/builder-b-essentials-wave{60,61,62}-focused.test.mjs | tee artifacts/builder-b-wave60-62-native/node-test.log
+      - name: Upload source provenance and native test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-b-wave60-62-original-native
+          path: artifacts/builder-b-wave60-62-native/
+          if-no-files-found: warn

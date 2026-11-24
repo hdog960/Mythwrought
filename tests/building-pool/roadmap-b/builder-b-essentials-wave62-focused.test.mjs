@@ -1,0 +1,95 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {buildFrostwillowSixColdframes,FROSTWILLOW_ID} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave62.mjs';
+import {structuralFingerprint} from '../../../src/building-pool/roadmap-1b/legacy-stable-schema.mjs';
+import {buildAlderglassTrellisConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave2.mjs';
+import {buildRimeglassCrescentSunGreenhouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave7.mjs';
+import {buildGlimmerboughSplitSunOrchidHouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave13.mjs';
+import {buildAmberwellSandglassConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave17.mjs';
+import {buildAuroracrestFoldedFrostSeedhouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave19.mjs';
+import {buildCrystalfenStaggeredWinterglass} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave23.mjs';
+import {buildStarpetalDoubleGardenOrchidarium} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave29.mjs';
+import {buildWillowglassTripleAtriumConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave31.mjs';
+import {buildSilverpineFourCourtWinterglass} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave37.mjs';
+import {buildMoonfernTriskelionArboretum} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave40.mjs';
+import {buildFrostmerefoldFourCourtWinterConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave48.mjs';
+import {buildSolglassFourTerraceSunhouse} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave54.mjs';
+import {buildHazelspireFourDrySeedTerraceConservatory} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave60.mjs';
+import {buildAlderwispThreeLanternSeedCourt} from '../../../src/building-pool/roadmap-b/builder-b-essentials-wave61.mjs';
+const peers=[buildAlderglassTrellisConservatory,buildRimeglassCrescentSunGreenhouse,buildGlimmerboughSplitSunOrchidHouse,buildAmberwellSandglassConservatory,buildAuroracrestFoldedFrostSeedhouse,buildCrystalfenStaggeredWinterglass,buildStarpetalDoubleGardenOrchidarium,buildWillowglassTripleAtriumConservatory,buildSilverpineFourCourtWinterglass,buildMoonfernTriskelionArboretum,buildFrostmerefoldFourCourtWinterConservatory,buildSolglassFourTerraceSunhouse,buildHazelspireFourDrySeedTerraceConservatory,buildAlderwispThreeLanternSeedCourt];
+const freeze=JSON.parse(readFileSync(new URL('../../../docs/building-pool/roadmap-b/BUILDER_BD_EXCLUSIVE_1B_FREEZE.json',import.meta.url),'utf8'));
+const b=buildFrostwillowSixColdframes(),K=(x,y,z)=>[x,y,z].join(',');
+const m=new Map(b.placements.map(p=>[p.at.join(','),p])),walk=new Set(b.walkable.map(p=>p.join(',')));
+const dirs={north:[0,-1],east:[1,0],south:[0,1],west:[-1,0]};
+const beds=[['northwest-coldframe',8,9,11,14,true],['northeast-coldframe',16,9,19,14,true],['southwest-coldframe',8,24,11,29,true],['southeast-coldframe',16,24,19,29,true],['outdoor-seed-rack',26,35,30,39,false],['outdoor-hardening-rack',34,35,38,39,false]];
+function bfs(start){assert.ok(walk.has(start));const q=[start],seen=new Set(q);
+ for(let i=0;i<q.length;i++){const[x,,z]=q[i].split(',').map(Number);for(const[dx,dz]of Object.values(dirs)){
+ const X=x+dx,Z=z+dz,k=K(X,1,Z);
+ if(seen.has(k)||!walk.has(k)||m.has(K(X,1,Z))||m.has(K(X,2,Z))||m.get(K(X,0,Z))?.asset!=='live:stone')continue;
+ seen.add(k);q.push(k);}}return seen;}
+test('Frozen B115-only snow medium greenhouse and no runtime activation',()=>{
+ assert.equal(b.id,FROSTWILLOW_ID);assert.equal(b.id,'r1:greenhouse:snow:medium:003');
+ assert.deepEqual([freeze.priorAcceptedIds.length,freeze.builderB.ids.length,freeze.builderD.ids.length],[228,115,92]);
+ assert.ok(freeze.builderB.ids.includes(b.id));assert.ok(!freeze.builderD.ids.includes(b.id));assert.ok(!freeze.priorAcceptedIds.includes(b.id));
+ assert.equal(b.status,'candidate');assert.equal(b.worldPlacement,false);assert.equal(b.liveIntegration,false);
+ for(const key of ['workingCrops','workingIrrigation','workingHeat','productionRegistered','schema1SaveWritten'])assert.equal(b.architecturalIdentity[key],false);
+});
+test('Exact original schema counts and entire contiguous stone foundation',()=>{
+ assert.deepEqual(b.footprint,{width:43,height:23,depth:49});assert.equal(m.size,5076);assert.equal(b.placements.length,m.size);
+ assert.equal(walk.size,1470);assert.equal(b.rooms.length,6);assert.equal(b.portals.length,12);
+ let n=0;for(let x=2;x<=40;x++)for(let z=2;z<=46;z++){assert.equal(m.get(K(x,0,z))?.asset,'live:stone');n++;}assert.equal(n,1755);
+});
+test('Actual two-high source walking connects every portal, room and foundation walk node',()=>{
+ const seen=bfs(K(13,1,5));assert.equal(seen.size,walk.size);
+ for(const p of b.portals){const[x,y,z]=p.at;assert.ok(seen.has(p.at.join(',')));assert.ok(!m.has(K(x,y+1,z)));}
+ for(const room of b.rooms)assert.ok([...seen].some(k=>{const[x,,z]=k.split(',').map(Number);return x>room.min[0]&&x<room.max[0]&&z>room.min[2]&&z<room.max[2];}),room.id);
+});
+test('Four actual Pack3 roof wings and continuous stone corner bearings',()=>{
+ const n={};for(const p of b.placements.filter(p=>p.role==='roof')){const[x,y,z]=p.at;assert.equal(p.occupancy.kind,'unresolved');assert.ok(p.asset.startsWith('pack3:'));assert.equal(m.get(K(x,y-1,z))?.asset,'live:stone');n[p.frostwillowWing]=(n[p.frostwillowWing]||0)+1;}
+ assert.deepEqual(n,{'west-winterglass':540,'east-seed-drying':225,'south-work-porch':56,'north-east-lantern':72});
+ for(const[name,x,z]of [['west-winterglass',5,5],['east-seed-drying',37,30],['south-work-porch',11,41],['north-east-lantern',31,8]]){
+ const roof=b.placements.find(p=>p.frostwillowWing===name&&p.at[0]===x&&p.at[2]===z);assert.ok(roof);for(let y=0;y<roof.at[1];y++)assert.equal(m.get(K(x,y,z))?.asset,'live:stone',name+' '+y);}
+});
+test('146 physical coldframe bodies, 96 rim cells, four covered beds and two open beds with 24 accessible sides',()=>{
+ const seen=bfs(K(13,1,5));let base=0,rim=0,sides=0;
+ for(const[name,x0,z0,x1,z1,inside]of beds){
+ for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++){
+ const p=m.get(K(x,1,z));assert.equal(p?.frostwillowBed,name);assert.equal(p.asset,'live:stone');assert.equal(p.inside,inside);assert.ok(!walk.has(K(x,1,z)));base++;
+ if(x===x0||x===x1||z===z0||z===z1){assert.equal(m.get(K(x,2,z))?.frostwillowRim,name);rim++;}else assert.ok(!m.has(K(x,2,z)));
+ let roof=false;for(let y=3;y<23;y++){const p=m.get(K(x,y,z));if(p?.role==='roof')roof=true;if(!inside)assert.ok(!p);}assert.equal(roof,inside);
+ }
+ const cx=Math.floor((x0+x1)/2),cz=Math.floor((z0+z1)/2);
+ for(const[x,z]of [[x0-1,cz],[x1+1,cz],[cx,z0-1],[cx,z1+1]]){assert.ok(seen.has(K(x,1,z)),name+' '+x+','+z);sides++;}
+ }assert.deepEqual([base,rim,sides],[146,96,24]);
+});
+test('Thermal partition remains physically solid except two independent clear passage cells',()=>{
+ for(let z=16;z<=30;z++)for(let y=1;y<=4;y++){
+ if(z===20||z===26){if(y<=2)assert.ok(!m.has(K(22,y,z)));continue;}
+ assert.equal(m.get(K(22,y,z))?.asset,'live:stone');}
+ for(const z of [20,26]){assert.ok(walk.has(K(22,1,z)));assert.ok(walk.has(K(21,1,z)));assert.ok(walk.has(K(23,1,z)));}
+});
+test('Actual exterior wall closure to roof backing, except explicit door and framed pane openings',()=>{
+ const roofs=new Map(b.placements.filter(p=>p.role==='roof').map(p=>[p.at[0]+','+p.at[2],p]));
+ const doors=new Set(b.portals.map(p=>p.at[0]+','+p.at[2]));
+ let checked=0;for(const p of roofs.values()){const[x,y,z]=p.at,k=x+','+z;
+ if(!Object.values(dirs).some(([dx,dz])=>!roofs.has((x+dx)+','+(z+dz))))continue;
+ for(let Y=1;Y<y;Y++){if(doors.has(k)&&Y<=2)continue;const p=m.get(K(x,Y,z));assert.ok(p&&(p.asset==='live:stone'||p.role==='window'),k+' '+Y);checked++;}
+ }assert.ok(checked>1000);
+});
+test('Complete outward four-high unresolved Pack4 window bays with original stone sills and headers',()=>{
+ const bays=new Map();let count=0;for(const p of b.placements.filter(p=>p.role==='window')){
+ const[x,y,z]=p.at,d=dirs[p.orientation];assert.ok(d);assert.equal(p.asset,'pack4:030');assert.equal(p.occupancy.kind,'unresolved');
+ assert.equal(m.get(K(x,1,z))?.asset,'live:stone');assert.equal(m.get(K(x,6,z))?.asset,'live:stone');assert.ok(!m.has(K(x+d[0],y,z+d[1])));
+ const k=x+','+z;if(!bays.has(k))bays.set(k,[]);bays.get(k).push(y);count++;}
+ assert.equal(count,32);assert.equal(bays.size,8);for(const ys of bays.values())assert.deepEqual(ys.sort((a,b)=>a-b),[2,3,4,5]);
+});
+function shape(v,flip,t){const s=new Set();const {width:w,height:h,depth:d}=v.footprint;
+ for(const p of v.placements){const X=Math.floor(16*p.at[0]/w),Y=Math.floor(12*p.at[1]/h),Z=Math.floor(16*p.at[2]/d),A=flip?15-X:X;let x=A,z=Z;
+ if(t===1)[x,z]=[Z,15-A];if(t===2)[x,z]=[15-A,15-Z];if(t===3)[x,z]=[15-Z,A];s.add([x,Y,z,p.role].join('/'));}return s;}
+test('Fourteen authentic prior greenhouse constructors and 112 unchanged D4 comparisons',()=>{
+ const target=shape(b,false,0),fp=structuralFingerprint(b);let total=0,max=0,closest=null;
+ for(const fn of peers){const old=fn();assert.notEqual(old.id,b.id);assert.notEqual(structuralFingerprint(old),fp);
+ for(const flip of [false,true])for(let t=0;t<4;t++){const s=shape(old,flip,t);let n=0;for(const k of target)if(s.has(k))n++;const v=n/(s.size+target.size-n);assert.ok(v<0.85,old.id+' '+v);total++;if(v>max){max=v;closest=old.id;}}}
+ assert.equal(total,112);console.log('FROSTWILLOW_112_D4 '+JSON.stringify({total,max,closest}));
+});
