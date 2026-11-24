@@ -4,6 +4,12 @@
     "./src/nonblock/staged-habitats.mjs": "c0932251fb658ac8d580493c1e7b509787ec61d2eebc58327b57f4c2791e07f1",
     "./src/environment-ground.mjs": "21ff107c4bb35365b06f0407563d43d81183393c4368c13a120900cf515c402d",
     "./src/manual-biomes/environment-v7.mjs": "ee98403c24fa5b2da19acc5d75a5816ccd400bb795b1cd0c7c8679306942c543",
+    "./src/manual-biomes/enchanted-tree-candidates.mjs": "35fd0a5840da2350a7cb211e0dd3aa288d04f449a1d16ddc4e526145b91faaa9",
+    "./src/manual-biomes/enchanted-tree-footings.mjs": "681ad1cbf089adf93761bb94480a46005054e1cb1bfebc06c47ccb21b65de339",
+    "./src/manual-biomes/enchanted-tree-overlap.mjs": "d3b03802b346326a2d8870b05e05a04a788a5607da99f8e113d62593d0ebb3fa",
+    "./src/manual-biomes/enchanted-tree-site-biome-cache.mjs": "50955db518bcaea8f70609202fa35c07790ebf94a8f0e5d8ae1c55582ca6631a",
+    "./src/manual-biomes/enchanted-tree-source-cache.mjs": "4ae3db8d47b49c26bd3eaaf050f076d285fc8343532fea26645cbe461e773ac1",
+    "./src/manual-biomes/enchanted-tree-walking-clearance.mjs": "07b98cdbe9998bf6232e3a7d1653932be36af48f978de7b6004d254417bf8665",
     "./src/manual-biomes/environment-oasis.mjs": "6627e772dbded074cb85cf99c79f9f92e61c21cb50c43f392dac1526f6c3e42f",
     "./src/nonblock/candidate-effects.mjs": "2bcbdff0a68c595521d619f10f0f1671ac358e79af812af74b20df875462b424",
     "./src/nonblock/candidate-families.mjs": "b67401eeb2c45998ebc979701719313d103ea23daa939ed933972ac62b1cdc62",
@@ -304,8 +310,8 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
-    "./sw-m5.js": "aff2a96ab05feb38d5737752d6c1066d26b318af05bd4913ab43a51f7c6c2db8",
+    "./sw-m5.js": "7a0d8596f148ae3e2001e2242052cdcc483a873189ebbd046ba9924663364d98",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "99baa9909eecedf3321073e2a9ca5893570f5c5ef26bab05938f937846f72019"
+    "./sw-nonblock-stage.js": "64a4420f6c99158b26b934b5fe6f7bf96292006a0b94eda8c15ad06a87323327"
   }
 }
