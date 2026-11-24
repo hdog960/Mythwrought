@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '7eec93f20e0343dd68bf5e32a3f365e8e186b5e3');
+    '15b500a9609c1e381b357fa3f39e76c1b6aa53fc');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -752,8 +752,12 @@ const createLocal291Perf=new Function('scope','with(scope){'+
   '(pending===undefined?{samples:[],overflow:false,faults:0}:pending)),'+
   'interrupt:near291Interrupt,noteEdit:near291NoteEdit,'+
   'auditRender:near291CheckRenderIdentity,'+
-  'abortMine:near291AbortMineTrial,phase:near291RecordMinePhase,'+
-  'beginEdit:()=>{near291EditPhase={meshMs:0,loadedSections:0,gpuMs:0,gpuCalls:0};'+
+  'abortMine:near291AbortMineTrial,'+
+  'phase:(p)=>near291RecordMinePhase({solidMs:0,waterMs:0,'+
+    'solidVertices:0,waterVertices:0,...p}),' +
+  'rawPhase:near291RecordMinePhase,'+
+  'beginEdit:()=>{near291EditPhase={meshMs:0,loadedSections:0,gpuMs:0,gpuCalls:0,'+
+    'solidMs:0,waterMs:0,solidVertices:0,waterVertices:0};'+
   'return near291EditPhase;},'+
   'endEdit:()=>{const p=near291EditPhase;near291EditPhase=null;return p;},'+
   'upload:near291RecordUpload,fail:near291RecordUploadFailure,'+
@@ -2108,4 +2112,170 @@ test('source residual remains local diagnostic, never native release certificati
   assert.equal(sample.browserPixelParityProven,false);
   assert.equal(sample.mineFrameWindow.unattributedActionP95Ms,null);
   assert.equal(local291PerfFixture({hostname:'hdog960.github.io'}).perf.read(),null);
+});
+
+
+test('original source retains solid then water function and upload publication order',()=>{
+  const a=source.indexOf('  function refreshEditedMeshes(x,z,y=0){');
+  const b=source.indexOf('  function refreshPhysicalChunk(',a);
+  const r=source.slice(a,b);
+  const steps=[
+    'const solidStart=near291EditPhase?performance.now():null;',
+    'const vertices=meshPlayableChunk(cx,cz,section);',
+    'near291EditPhase.solidMs+=Math.max(0,performance.now()-solidStart);',
+    'const waterStart=near291EditPhase?performance.now():null;',
+    'const water=meshPlayableWater(cx,cz,section);',
+    'near291EditPhase.waterMs+=Math.max(0,performance.now()-waterStart);',
+    'batch.push({key,cx,cz,section,vertices,water});',
+    'ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});',
+    'deleteChunkBuffers(old);'
+  ];
+  const indexes=steps.map(s=>r.indexOf(s));
+  assert.ok(indexes.every(n=>n>=0));
+  assert.deepEqual(indexes,[...indexes].sort((x,y)=>x-y));
+});
+test('100 source-saved mines preserve independent full precision solid and water p95',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  for(let i=1;i<=100;i++){
+    perf.mine(200,{cell:[i,-31,4],previous:3,next:0});
+    perf.rawPhase({meshMs:i+10,solidMs:i/2,waterMs:i/4,saveMs:2,
+      gpuMs:3,gpuCalls:1,solidVertices:i*6,waterVertices:i*3,loadedSections:2});
+    perf.frame(i*16);
+  }
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.savedMines,100);
+  assert.equal(w.phaseMines,100);
+  assert.equal(w.meshGenerationP95Ms,105);
+  assert.equal(w.solidMeshGenerationP95Ms,47.5);
+  assert.equal(w.waterMeshGenerationP95Ms,23.75);
+  assert.equal(w.meshOtherCpuP95Ms,33.75);
+  assert.equal(w.maxSolidVerticesPerMine,600);
+  assert.equal(w.maxWaterVerticesPerMine,300);
+  assert.equal(w.invalid,false);
+});
+test('zero emitted source water vertices retain valid zero water timing',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(70,{cell:[1,-31,4],previous:3,next:0});
+  perf.rawPhase({meshMs:45,solidMs:40,waterMs:0,saveMs:4,
+    gpuMs:10,gpuCalls:1,solidVertices:720,waterVertices:0,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.waterMeshGenerationP95Ms,0);
+  assert.equal(w.maxWaterVerticesPerMine,0);
+  assert.equal(w.meshOtherCpuP95Ms,5);
+});
+test('remaining mesh CPU work is separate from whole-action unexplained work',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(90,{cell:[1,-31,4],previous:3,next:0});
+  perf.rawPhase({meshMs:60,solidMs:30,waterMs:20,saveMs:5,gpuMs:10,
+    gpuCalls:2,solidVertices:900,waterVertices:90,loadedSections:3});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.meshOtherCpuP95Ms,10);
+  assert.equal(w.unattributedActionP95Ms,15);
+  assert.equal(w.invalid,false);
+});
+test('mesh subphase time exceeding original full mesh by more than 3ms fails closed',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(80,{cell:[1,-31,4],previous:3,next:0});
+  perf.rawPhase({meshMs:20,solidMs:18,waterMs:10,saveMs:5,gpuMs:2,
+    gpuCalls:1,solidVertices:10,waterVertices:10,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,true);
+  assert.equal(w.invalidReason,'phase-time-exceeds-action');
+  assert.equal(w.phaseMines,0);
+});
+test('negative nonfinite and Uint32-overflow mesh subphase values are rejected',()=>{
+  for(const anomaly of [{solidMs:-1},{waterMs:Infinity},{solidVertices:-1},
+    {waterVertices:1.5},{waterVertices:4294967296}]){
+    const {perf}=local291PerfFixture();perf.frame(0);
+    perf.mine(100,{cell:[1,-31,4],previous:3,next:0});
+    perf.rawPhase({meshMs:40,solidMs:20,waterMs:10,saveMs:5,gpuMs:5,
+      gpuCalls:1,solidVertices:10,waterVertices:4,loadedSections:1,...anomaly});
+    assert.equal(perf.read().mineFrameWindow.invalid,true);
+    assert.equal(perf.read().mineFrameWindow.invalidReason,'phase-invalid');
+    assert.equal(perf.read().mineFrameWindow.phaseMines,0);
+  }
+});
+test('missing original solid-water source evidence cannot silently pass',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(40,{cell:[1,-31,4],previous:3,next:0});
+  perf.rawPhase({meshMs:25,saveMs:3,gpuMs:5,gpuCalls:1,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,true);
+  assert.equal(w.invalidReason,'phase-invalid');
+});
+test('viewport reset clears both mesh diagnostics and retains interruption veto',()=>{
+  const {scope,perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(90,{cell:[1,-31,4],previous:3,next:0});
+  perf.rawPhase({meshMs:45,solidMs:35,waterMs:5,saveMs:10,gpuMs:10,
+    gpuCalls:2,solidVertices:500,waterVertices:30,loadedSections:2});
+  assert.equal(perf.read().mineFrameWindow.maxSolidVerticesPerMine,500);
+  scope.canvas.clientHeight=400;const w=perf.read();
+  assert.equal(w.mineFrameWindow.solidMeshGenerationP95Ms,null);
+  assert.equal(w.mineFrameWindow.maxSolidVerticesPerMine,null);
+  assert.equal(w.interruptionCount,1);
+  assert.equal(w.continuousForegroundRun,false);
+});
+test('public Pages uses the untouched source solid and water functions without perf clocks',()=>{
+  const {perf}=local291PerfFixture({hostname:'hdog960.github.io'});
+  assert.equal(perf.read(),null);
+  const a=source.indexOf('  function meshPlayableChunk(cx,cz,section){');
+  const b=source.indexOf('  function refreshEditedMeshes(',a);
+  const r=source.slice(a,b);
+  assert.ok(r.includes('meshDepthSection(world,cx,cz,section)'));
+  assert.ok(r.includes('pack2WaterSectionVertices(world,cx,cz,section)'));
+  assert.ok(!r.includes('performance.now()'));
+  assert.ok(!r.includes('near291'));
+});
+test('controlled original source two-section mesh stages and retires all buffers once',()=>{
+  const a=source.indexOf('  function refreshEditedMeshes(x,z,y=0){');
+  const b=source.indexOf('  function refreshPhysicalChunk(',a);
+  const sourceFn=new Function('scope','with(scope){'+source.slice(a,b)+
+    '\nreturn refreshEditedMeshes;}');
+  const calls=[],chunks=new Map([
+    ['0,0,-1',{buffer:'old-1'}],['0,0,-2',{buffer:'old-2'}]]);
+  let tick=0;
+  const scope={
+    near291EditPhase:{meshMs:0,loadedSections:0,solidMs:0,waterMs:0,
+      solidVertices:0,waterVertices:0},
+    performance:{now:()=>++tick},chunks,
+    verticalEditSections:()=>[-1,-2],editAffectedChunks:()=>[{cx:0,cz:0}],
+    depthMeshKey:(cx,cz,s)=>cx+','+cz+','+s,
+    meshPlayableChunk:(cx,cz,s)=>{calls.push('solid:'+s);return new Float32Array(18);},
+    meshPlayableWater:(cx,cz,s)=>{calls.push('water:'+s);return new Float32Array(9);},
+    uploadPack2Chunk:(v,w)=>{calls.push('upload');return {buffer:'next',waterBuffer:'liquid',
+      count:v.length/9,waterCount:w.length/9};},
+    deleteChunkBuffers:old=>calls.push('retire:'+old.buffer),
+    editMeshBatches:0,lastEditMeshKeys:[],near291Enabled:false,caveSession:null,
+    combinedWorld:()=>false,caveFarGpu:{invalidate:()=>{throw Error('unexpected cave mutation')}}
+  };
+  sourceFn(scope)(0,0,-20);
+  assert.deepEqual(calls,['solid:-1','water:-1','solid:-2','water:-2',
+    'upload','upload','retire:old-1','retire:old-2']);
+  assert.equal(scope.editMeshBatches,1);
+  assert.equal(scope.near291EditPhase.solidVertices,4);
+  assert.equal(scope.near291EditPhase.waterVertices,2);
+  assert.equal(scope.near291EditPhase.loadedSections,2);
+  assert.equal(chunks.get('0,0,-1').count,2);
+  assert.equal(chunks.get('0,0,-2').waterCount,1);
+});
+test('public source mesher makes zero additional performance clock calls',()=>{
+  const a=source.indexOf('  function refreshEditedMeshes(x,z,y=0){');
+  const b=source.indexOf('  function refreshPhysicalChunk(',a);
+  const fn=new Function('scope','with(scope){'+source.slice(a,b)+
+    '\nreturn refreshEditedMeshes;}');
+  const calls=[],scope={
+    near291EditPhase:null,
+    performance:{now:()=>{throw Error('Unexpected perf clock on public original path');}},
+    chunks:new Map([['0,0,-1',{buffer:'old'}]]),
+    verticalEditSections:()=>[-1],editAffectedChunks:()=>[{cx:0,cz:0}],
+    depthMeshKey:(cx,cz,s)=>cx+','+cz+','+s,
+    meshPlayableChunk:()=>new Float32Array(18),
+    meshPlayableWater:()=>new Float32Array(0),
+    uploadPack2Chunk:()=>{calls.push('upload');return {buffer:'new',count:2,waterBuffer:null,waterCount:0};},
+    deleteChunkBuffers:()=>calls.push('delete'),editMeshBatches:0,lastEditMeshKeys:[],
+    near291Enabled:false,caveSession:null,combinedWorld:()=>false
+  };
+  fn(scope)(0,0,-20);
+  assert.deepEqual(calls,['upload','delete']);
+  assert.equal(scope.editMeshBatches,1);
 });
