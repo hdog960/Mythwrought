@@ -10,7 +10,7 @@ function verifiedV6(world){
   return Boolean(p&&typeof p==='object'&&!Array.isArray(p)&&
     Object.keys(p).sort().join(',')==='generator,kind,seed,version'&&
     p.kind==='mythwrought-generation-profile'&&p.version===1&&
-    [M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(p.generator)&&Number.isInteger(p.seed)&&
+    (p.generator===M6_BALANCED_GENERATOR||isEnvironmentGenerator(p.generator))&&Number.isInteger(p.seed)&&
     p.seed===(p.seed|0)&&Number.isInteger(world?.seed)&&
     world.seed===(world.seed|0)&&world.seed===p.seed&&
     world.base?.seed===p.seed);
