@@ -317,7 +317,21 @@ export class FourRegionWorld extends VoxelWorld{
       if(cache.get(worldKey(x,b,z))===trunk&&
          cache.get(worldKey(x,b-1,z))!==trunk){bottom=b;break;}
     }
-    if(bottom===null||y<bottom-1||y>bottom+2)return [];
+    // Flower and heather use the same real root/support transaction as pine.
+    if(bottom===null){
+      for(const kind of ['alpine-flower','low-heather']){
+        const pattern=MOUNTAIN_V8_PLANT_PATTERNS[kind],stem=M[pattern[0][3]];
+        for(const b of [y,y+1]){
+          if(cache.get(worldKey(x,b,z))!==stem)continue;
+          if(y===b-1?this.get(x,y,z)!==M['alpine-grass']:this.get(x,y,z)!==stem)continue;
+          const cells=pattern.map(([dx,dy,dz,material])=>({cell:[x+dx,b-1+dy,z+dz],id:M[material]}));
+          if(cells.some(({cell,id})=>cache.get(worldKey(...cell))!==id))continue;
+          return cells.filter(({cell,id})=>!this.edits.has(worldKey(...cell))&&this.get(...cell)===id).map(({cell})=>cell);
+        }
+      }
+      return [];
+    }
+    if(y<bottom-1||y>bottom+2)return [];
     if(y===bottom-1?this.get(x,y,z)!==M['alpine-grass']:
        this.get(x,y,z)!==trunk)return [];
     const pattern=MOUNTAIN_V8_PLANT_PATTERNS['dwarf-conifer'];

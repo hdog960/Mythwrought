@@ -1,0 +1,31 @@
+name: Mountain V8 dedicated material and alpine plant native qualification
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-dedicated-materials-native.yml]
+permissions:
+  contents: read
+jobs:
+  dedicated-materials:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 53728e221dfc5c4f099ace5b72379de0f5fb0e6c
+          path: prior-mountain
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and native material qualification
+        env:
+          MOUNTAIN_PRIOR_ROOT: ${{ github.workspace }}/prior-mountain
+        run: |
+          node --version
+          git rev-parse HEAD
+          git -C prior-mountain rev-parse HEAD
+          node --test tests/mountain-v8-dedicated-materials.test.mjs

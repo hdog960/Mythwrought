@@ -82,8 +82,10 @@ export function loadWorldSafe(storage,seed){
 export function assertMountainV8WriteIdentity(storage,world){
   const generator='mythwrought-five-surface-regions-mountain-v8';
   const actual=world?.base?.generationProfile??world?.generationProfile;
-  if(actual?.generator!==generator&&[...(world.edits?.values?.()??[])].some(isMountainV8Material))
-    throw Error('Dedicated Mountain V8 edits require V8 source identity');
+  if(actual?.generator!==generator){
+    for(const id of world.edits?.values?.()??[])if(isMountainV8Material(id))
+      throw Error('Dedicated Mountain V8 edits require V8 source identity');
+  }
   const key=worldSlotKey(world.seed)+'-four-biomes-profile-v1';
   const raws=[storage.getItem(key),storage.getItem(key+'-journal')];
   if(actual?.generator!==generator&&!raws.some(raw=>typeof raw==='string'&&raw.includes(generator)))return;

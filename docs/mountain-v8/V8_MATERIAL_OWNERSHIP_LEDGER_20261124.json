@@ -1,7 +1,7 @@
 {
   "source": "creator-authorized Mountain V8",
   "referenceMain": "db4bbcc32156e5df311f733bcaa53d559c17313b",
-  "review": "partial; no allocation authority until all active owner conflicts and claims resolved",
+  "review": "Creator prospective exclusive authorization recorded in #452 comment 7146299596; no conflicting claim found in prior visible registry audits and fresh targeted repository issue/comment searches. Private/detached unrecorded prior claims cannot be independently certified. Stop and reconcile if discovered.",
   "knownClaims": [
     {
       "owner": "legacy",
@@ -54,68 +54,68 @@
   "descriptors": [
     {
       "name": "stone",
-      "id": null,
-      "status": "unallocated"
+      "id": 500,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "dirt",
-      "id": null,
-      "status": "unallocated"
+      "id": 501,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "snow",
-      "id": null,
-      "status": "unallocated"
+      "id": 502,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "alpine-grass",
-      "id": null,
-      "status": "unallocated"
+      "id": 503,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "slate",
-      "id": null,
-      "status": "unallocated"
+      "id": 504,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "gneiss",
-      "id": null,
-      "status": "unallocated"
+      "id": 505,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "scree",
-      "id": null,
-      "status": "unallocated"
+      "id": 506,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "flower",
-      "id": null,
-      "status": "unallocated"
+      "id": 507,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "flower-petal",
-      "id": null,
-      "status": "unallocated"
+      "id": 508,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "heather",
-      "id": null,
-      "status": "unallocated"
+      "id": 509,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "heather-tip",
-      "id": null,
-      "status": "unallocated"
+      "id": 510,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "conifer-trunk",
-      "id": null,
-      "status": "unallocated"
+      "id": 511,
+      "status": "creator-reserved; candidate registered; pending qualification"
     },
     {
       "name": "conifer-needles",
-      "id": null,
-      "status": "unallocated"
+      "id": 512,
+      "status": "creator-reserved; candidate registered; pending qualification"
     }
   ],
   "inspectedCheckpoints": [
@@ -176,11 +176,12 @@
     }
   ],
   "remaining": [
-    "full branch and detached ownership reconciliation",
-    "all active automation material proposals",
-    "shared owner allocation ledger/coordination"
+    "targeted candidate runtime qualification",
+    "final production conflict check and owner reconciliation if any undisclosed claim emerges",
+    "persistence release barrier",
+    "visual and installed iPhone acceptance"
   ],
-  "allocationComplete": false,
+  "allocationComplete": true,
   "latestRegistryTreeReview": {
     "main": "bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e",
     "scope": "nontruncated recursive Git trees, named source registry/catalog/allocation paths only",
@@ -238,5 +239,16 @@
     ],
     "finding": "all five nontruncated trees preserve biome130/manual/Pack5 catalog blobs; :36 old environment-ground blob unchanged, others predate it; :24 contract source-only descriptor, no production registration. No allocation made.",
     "remaining": "explicit shared namespace agreement from creator or owners, not more historical branch audits"
+  },
+  "creatorAuthorization": {
+    "issue": 452,
+    "comment": 7146299596,
+    "range": [
+      500,
+      512
+    ],
+    "exclusive": "Mountain V8 only",
+    "conditional": "No overwrite of an existing conflicting owner",
+    "scope": "isolated candidate; no public activation"
   }
 }
