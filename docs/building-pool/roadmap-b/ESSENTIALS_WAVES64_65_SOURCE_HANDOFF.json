@@ -1,0 +1,156 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave64-65-source-handoff.v1",
+  "status": "Two original source candidates, 20 focused V8 callbacks passed before write; native exact stored-file cohort run pending.",
+  "branch": "builder-b-wave64-65-final-greenhouse-cohort-20261124",
+  "parent": "0b0d7298f9c807395c5ca99d8d3be5f9e1475d0c",
+  "reports": [
+    {
+      "wave": 64,
+      "title": "Briarbell Cloister Seed House",
+      "id": "r1:greenhouse:temperate:small:004",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave64.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave64-focused.test.mjs",
+      "metrics": {
+        "placements": 2532,
+        "walkable": 688,
+        "rooms": 6,
+        "portals": 9,
+        "roles": {
+          "foundation": 837,
+          "wall": 800,
+          "support": 372,
+          "roof": 372,
+          "furnishing": 67,
+          "window": 84
+        },
+        "roofCounts": {
+          "north-reception": 126,
+          "south-sorting": 126,
+          "west-gallery": 60,
+          "east-gallery": 60
+        },
+        "bedBody": 37,
+        "bedRim": 30,
+        "accessibleSides": 12,
+        "d4": 128,
+        "maxIoU": 0.3104602510460251,
+        "closest": "r1:greenhouse:temperate:small:003"
+      },
+      "isolatedV8": {
+        "passed": 10,
+        "failed": 0,
+        "method": "Test bodies executed against authentic original compiler and original prior constructors before tree creation. Tree creation exceeded per-call budget; identical source and test templates reconstructed for write. Native exact stored-file verification remains pending."
+      }
+    },
+    {
+      "wave": 65,
+      "title": "Dunelace Stepped Sunhouse",
+      "id": "r1:greenhouse:desert:small:003",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave65.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave65-focused.test.mjs",
+      "metrics": {
+        "placements": 3061,
+        "walkable": 861,
+        "rooms": 7,
+        "portals": 12,
+        "roles": {
+          "foundation": 1023,
+          "wall": 1004,
+          "support": 428,
+          "roof": 428,
+          "furnishing": 98,
+          "window": 80
+        },
+        "roofCounts": {
+          "tapered-north-entry": 40,
+          "upper-seed-hall": 80,
+          "wide-sun-hall": 228,
+          "southern-drying-hall": 80
+        },
+        "bedBody": 54,
+        "bedRim": 44,
+        "accessibleSides": 16,
+        "d4": 136,
+        "maxIoU": 0.27793493635077793,
+        "closest": "r1:greenhouse:desert:medium:003"
+      },
+      "isolatedV8": {
+        "passed": 10,
+        "failed": 0,
+        "method": "Test bodies executed against authentic original compiler and original prior constructors before tree creation. Tree creation exceeded per-call budget; identical source and test templates reconstructed for write. Native exact stored-file verification remains pending."
+      }
+    }
+  ],
+  "greenhouseAllocation": {
+    "completeSourceOnly": true,
+    "ids": [
+      "r1:greenhouse:temperate:small:002",
+      "r1:greenhouse:snow:small:002",
+      "r1:greenhouse:enchanted-forest:small:002",
+      "r1:greenhouse:desert:small:002",
+      "r1:greenhouse:snow:small:003",
+      "r1:greenhouse:snow:medium:002",
+      "r1:greenhouse:enchanted-forest:medium:003",
+      "r1:greenhouse:temperate:large:003",
+      "r1:greenhouse:snow:large:003",
+      "r1:greenhouse:enchanted-forest:small:003",
+      "r1:greenhouse:snow:large:004",
+      "r1:greenhouse:desert:large:003",
+      "r1:greenhouse:temperate:large:004",
+      "r1:greenhouse:temperate:small:003",
+      "r1:greenhouse:snow:medium:003",
+      "r1:greenhouse:desert:medium:003",
+      "r1:greenhouse:temperate:small:004",
+      "r1:greenhouse:desert:small:003"
+    ],
+    "count": 18,
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6"
+  },
+  "nativeReuse": {
+    "runId": 45428318556,
+    "jobId": 138566321674,
+    "head": "300c7f5c0e91932c226e628010e9df8be0a1f1eb",
+    "passed": 32,
+    "artifactId": 14937351961,
+    "rerun": false
+  },
+  "nativeNew": {
+    "workflow": ".github/workflows/builder-b-wave63-65-native-isolated.yml",
+    "scope": [
+      63,
+      64,
+      65
+    ],
+    "expectedTests": 30,
+    "runPending": true
+  },
+  "progress": {
+    "servicesAuthoredOrStaged": 65,
+    "servicesRemaining": 50,
+    "residentialAuthoredOrStaged": 10,
+    "residentialRemaining": 169,
+    "total": 75,
+    "goal": 294,
+    "remaining": 219
+  },
+  "protected": {
+    "main": "bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "alternateRimewhorlHead": "342fba1c9ba522b5e9012aedb6829dfa41e34b0d",
+    "alternateNotCounted": true,
+    "noMerge": true,
+    "noDeploy": true,
+    "noSettlement": true,
+    "noRegistry": true,
+    "noSaveWrites": true
+  },
+  "pending": [
+    "New exact-head native cohort outcome",
+    "Full accepted228 historical D4",
+    "Installed asset producers",
+    "M7 physical player",
+    "WebGL2",
+    "iPhone Home Screen PWA",
+    "Creator visual approval"
+  ]
+}

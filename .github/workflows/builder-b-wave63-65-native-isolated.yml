@@ -1,0 +1,44 @@
+name: Builder B Wave63-65 targeted original native source
+on:
+  push:
+    branches:
+      - 'builder-b-wave64-65-final-greenhouse-cohort-20261124'
+    paths:
+      - '.github/workflows/builder-b-wave63-65-native-isolated.yml'
+permissions:
+  contents: read
+jobs:
+  targeted-original-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact checkout and immutable Wave63 source
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave63.mjs)" = 1ca79e88ffbb6b4cdc3936528c8acc0153bb9aed
+          test "$(git hash-object tests/building-pool/roadmap-b/builder-b-essentials-wave63-focused.test.mjs)" = 56515d121488e5bbd1a4fad1fe367488958e8b82
+          node --version
+      - name: Execute only new native Wave63-65 tests
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/builder-b-wave63-65-native
+          git rev-parse HEAD > artifacts/builder-b-wave63-65-native/source-head.txt
+          node --version > artifacts/builder-b-wave63-65-native/node-version.txt
+          git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave{63,64,65}.mjs tests/building-pool/roadmap-b/builder-b-essentials-wave{63,64,65}-focused.test.mjs > artifacts/builder-b-wave63-65-native/source-blobs.txt
+          node --test --test-concurrency=1 tests/building-pool/roadmap-b/builder-b-essentials-wave{63,64,65}-focused.test.mjs | tee artifacts/builder-b-wave63-65-native/node-test.log
+      - name: Upload native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-b-wave63-65-original-native
+          path: artifacts/builder-b-wave63-65-native/
+          if-no-files-found: warn
