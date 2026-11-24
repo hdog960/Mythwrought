@@ -1,4 +1,4 @@
-name: Living Underworld Phase37 - corrected authored-ownership entrance fallback
+name: Living Underworld Phase37 - ore-preserving grade alternatives
 on:
   push:
     branches:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
-      - name: Corrected native entrance, actual isolated M7 controller and constructor tests
+      - name: Native ore-preserving grade alternatives and constructed M7 controller tests
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
