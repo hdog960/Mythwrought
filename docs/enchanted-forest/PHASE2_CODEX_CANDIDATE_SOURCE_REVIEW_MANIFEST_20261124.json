@@ -70,8 +70,33 @@
   "liveStreamingRun": {
     "id": 45324823484,
     "exactHead": "8a7f67294a12cd4c9188c69d9395106c8b311791",
-    "statusAtManifestCreation": "in_progress",
-    "mustCheckActualConclusionAndArtifact": true
+    "jobId": 138211787137,
+    "status": "completed",
+    "conclusion": "success",
+    "node": "22.23.5",
+    "artifact": {
+      "id": 14889052404,
+      "name": "enchanted-p2-original-live-stream-metrics",
+      "zipBytes": 3862,
+      "zipSHA256": "8eb46405331ce68ebd64edb2f297832e7108387091ade5232c0d25db52662665",
+      "manifestSHA256": "8196a90eaef65f13d74f0dc3c50e2c98362cc75f3ca281435f309863274ede3a",
+      "downloaded": true,
+      "crcVerified": true
+    },
+    "matchedWaypointsPerMode": 7,
+    "sourceWitnessesPerMode": 24,
+    "residentChunksPerStation": 25,
+    "retiredPriorChunkKeysPerMode": 70,
+    "observedPeakLogicalBufferBytes": {
+      "historical": 3558720,
+      "candidate": 4035000
+    },
+    "pageErrors": 0,
+    "gpuRetryFailures": 0,
+    "protectedSaveBytesUnchanged": true,
+    "experimentalSaveRefused": true,
+    "physicalIphone": false,
+    "installedPwa": false
   },
   "blockedOwnerIssues": [
     {
@@ -118,5 +143,7 @@
     "Owner decisions on three known cave blockers, only if required by scope.",
     "Physical installed iPhone Home Screen PWA performance, offline, thermal, memory, recovery and save testing after approved integration.",
     "Explicit merge and deployment approval."
-  ]
+  ],
+  "reviewSourceHashesVerified": 8,
+  "researchLaneDisposition": "complete; handoff ready for Codex review; not production approval"
 }
