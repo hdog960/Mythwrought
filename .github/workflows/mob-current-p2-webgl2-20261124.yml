@@ -1,0 +1,63 @@
+name: Mob current P2 deep cave and real renderer qualification
+on:
+  push:
+    branches:
+      - qualification/mob-current-p2-webgl2-20261124
+    paths:
+      - '.github/workflows/mob-current-p2-webgl2-20261124.yml'
+permissions:
+  contents: read
+jobs:
+  current-native-and-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact original current-source candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git checkout --detach 92934f645b34469d5a1c85122519b47b0c909130
+          test "$(git rev-parse HEAD^{tree})" = d4e5c4edb89091e336b9693168f0dbd22d04b6fc
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test "$(git hash-object tests/mob-ecosystem-current-enchanted-p2.test.mjs)" = 10d66d58addb0ff653e79ee67e4dc826c413255c
+          test "$(git hash-object tests/mob-ecosystem-current-deep-cave-rejections.test.mjs)" = 8769bee8e6dd06c8e42e0ddbb0953a1be14ee1a1
+          test "$(git hash-object tests/mob-ecosystem-projectile-webgl2-browser.mjs)" = e25ae2e5860d74f16a9c5594ae7a72e7f43991b2
+          node --version
+          git rev-parse HEAD HEAD^{tree}
+      - name: Actual current P2 compatibility and physical deep-cave diagnosis
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/mob-current-native
+          node --test --test-concurrency=1 tests/mob-ecosystem-current-enchanted-p2.test.mjs tests/mob-ecosystem-current-deep-cave-rejections.test.mjs | tee artifacts/mob-current-native/current-native.tap
+      - name: Install pinned browser dependencies
+        if: success() || failure()
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual original renderer WebGL2 8+4 projectile pixel and timing gate
+        if: success() || failure()
+        run: node tests/mob-ecosystem-projectile-webgl2-browser.mjs
+      - name: Print evidence
+        if: always()
+        shell: bash
+        run: |
+          if [ -f artifacts/mob-current-native/current-native.tap ]; then sha256sum artifacts/mob-current-native/current-native.tap; fi
+          if [ -f artifacts/mob-projectile-webgl2/report.json ]; then cat artifacts/mob-projectile-webgl2/report.json; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-current-p2-deep-webgl2-92934f64
+          path: |
+            artifacts/mob-current-native/
+            artifacts/mob-projectile-webgl2/
+          if-no-files-found: error
+          retention-days: 14
