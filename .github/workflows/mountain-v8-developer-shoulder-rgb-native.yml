@@ -1,0 +1,33 @@
+name: Mountain V8 actual source shoulder RGB native gate
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-shoulder-rgb-native.yml]
+permissions:
+  contents: read
+jobs:
+  shoulder-rgb:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: previous
+          ref: d5b2c9e485b28d6f7c745c03648dc23a67beae15
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and four new RGB-only regression tests
+        run: |
+          node --version
+          git -C candidate rev-parse HEAD
+          git -C previous rev-parse HEAD
+          test "$(git -C previous rev-parse HEAD)" = d5b2c9e485b28d6f7c745c03648dc23a67beae15
+          node --check candidate/src/voxel.mjs
+          export MOUNTAIN_V8_PREVIOUS_ROOT="$GITHUB_WORKSPACE/previous"
+          node --test --test-concurrency=1 candidate/tests/mountain-v8-developer-shoulder-rgb-native.test.mjs
