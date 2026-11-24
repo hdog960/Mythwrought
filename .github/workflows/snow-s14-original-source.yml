@@ -1,0 +1,37 @@
+name: Snow S14 indexed certified forest and real snow-side transects
+on:
+  push:
+    branches: [research/snow-s14-indexed-forest-and-edge-pigment-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s14-*.mjs'
+      - 'tests/snowy-s14-*.test.mjs'
+      - '.github/workflows/snow-s14-original-source.yml'
+permissions:
+  contents: read
+jobs:
+  exact-original-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate accepted original sources and exact checkout
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s13-certified-forest-overlay.mjs)" = 6079532b358e4d5a4233159194173e2fd26b3786
+          test "$(git hash-object src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs)" = 03e1241626e703d3e39619db28a31ec35c0856b9
+          node --check src/manual-biomes/snowy-s14-indexed-forest.mjs
+          node --check src/manual-biomes/snowy-s14-edge-pigment.mjs
+      - name: Native original byte parity, indexed timings, original seam transects
+        run: |
+          node --test tests/snowy-s14-original-index-and-edge.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
