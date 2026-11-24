@@ -1,0 +1,35 @@
+# MYTHWROUGHT Snow S12 — physical natural conifers and original rime camera
+## Detached source-only handoff, 2026-11-24 UTC
+
+### Exact refs and reused proofs
+- Incoming branch research/snow-s11-original-four-chunk-perf-isolated-20261123 verified identical at 067d1582d0ac42f65507f663ef139f9467df1fc2; read docs/manual-biomes/SNOW_S11_ORIGINAL_RIME_WIND_SNOW_SOURCE_HANDOFF_20261123.md first.
+- Independent production main db4bbcc32156e5df311f733bcaa53d559c17313b and protected OPEN DRAFT Snow PR358 HEAD 59e449be7e73b25f259c4c72855cfb638a056517 unchanged at start. No merges, deployment, profile registration, world/save/PWA change, automation changes or other developer branch writes.
+- Reused native S11 #45323703417 SUCCESS, S11 exact original snow272 shader #45323879961 SUCCESS, S10 four-chunk original browser benchmark #45324365774 SUCCESS; all exact source heads verified. Earlier S7/S6 native movement and original seam evidence retained, not rerun blindly.
+- Original S11 shader blob 77ef0bee44dc1863ce0b5184a37e86806c204c62 and S10 source 03e1241626e703d3e39619db28a31ec35c0856b9 unchanged.
+
+### New actual source: connected tapered winter conifers
+src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs Git blob 46045b9036569eb07c3bfa857ce76004de7a43e9. Detached alternative factory compatible with existing S3 canonical site/admission contracts; never imported into live generator. Four original style names and exact trunk heights 5,7,9,6 retained, original IDs 4/406/407, Y<=19, horizontal extent <=3, 16..119 cells. Branch levels are tapered and irregular with deterministic absolute-coordinate endpoint pruning; upper exposed branches get snow based on deterministic lee-side deposition rather than alternating whole horizontal bands. Continuous original WOOD trunk; face-connected BFS from trunk prunes any detached needles. Lowest foliage floor+3 (never below). Climate-bound wrapper refuses the entire candidate if any occupied horizontal column is not actual snow weight .65..1. Existing exact S3 original provenance, cave AIR, original/legacy voxel, edited cells, original scenery, cumulative body collision and canonical owner contracts remain unmodified. Does not replace any old tree or paint hardpan/scree.
+
+Native branch research/snow-s12-natural-conifer-original-source-20261124 tested exact HEAD 5669a2476910f3795fdd20d27f012fd797b18340. Actual Node22 GitHub Actions #45331843309 COMPLETED SUCCESS. Exact tests:
+- tests/snowy-s12-natural-conifer-prototypes.test.mjs blob 83c04d81f422de24d6eefbbab0bfbfc23cf841c6: 3/3 focused native tests; 160 coordinate/wind-varied trees, connectivity, real ID and original S3 budget, roof, material placement, climate footprint veto, shape variation.
+- tests/snowy-s12-real-original-forest.test.mjs blob b32abf7641ac2bf640a66593797c186436e4ec63: 1/1 full original pinned Desert P3 M7 test, imports actual production FourRegionWorld, VoxelWorld, terrainHeight, collides, meshChunk, stepPlayer and original nonblock scenery. Existing S6 cross-owner audit blob 96af334d6707b4b6d27bee47ae8c718474f8414f unchanged. Reviews 3x2 chunks (-2..0,32..33) both real seeds, exact reversed request equality, original source/legacy AIR and no edits/cave overrides, full save equivalence and schema-1 restore. Additional meshes emitted by genuine original meshChunk against disposable read-only overlay, not a screenshot or live implementation.
+
+| Seed | Admitted trees | Full unique tree cells | Consumer-window cells | Body probes | Preserved directed pairs | Genuine local stepPlayer frames |
+|---|---:|---:|---:|---:|---:|---:|
+|179|4|203|169|4912|3268|180|
+|2026|3|148|74|3718|2560|135|
+|total|7|351|243|8630|5828|315|
+
+Seed179 all four original style categories, seed2026 three styles (spruce, wind alpine, fir). Same tree counts/styles as historic S3 test; this result does not independently prove identical keys to that prior checkpoint. Historic S6 had 506 whole-tree cells, 135 local movement frames; S12 now 351 (-30.63%), 315 new local frames. Prior S7 long cross-chunk route result is retained as historic S3 evidence only, not automatically acceptance of changed S12 silhouettes. No source edits, no actual generator activation.
+
+Original native mesh byte counts on five occupied consumer chunks:
+- seed179 (-2,32) 102384 ->128304, 42 cells; (-1,32) 92880 ->132624, 69 cells; (0,33) 91368 ->120312, 58 cells.
+- seed2026 (-2,33) 216216 ->258336, 73 cells; (-1,33) 107568 ->108864, 1 cell.
+Actual material18 vertices near staged needles were observed; diagnostic neighborhood hits are NOT unique triangle ownership. The upper bound for added cube mesh bytes is enforced; no GPU timing or in-game visual silhouette acceptance yet. Existing material18 shader also affects original leaves and can impart green texture; do not globally recolor tag18 to fix original protected foliage.
+
+### Exact rime279 original WebGL2 gate
+Isolated child branch research/snow-s12-rime279-camera-isolated-20261124 exact tested source HEAD e92d0ab89f7a9e97995b8b16ef0f13ff662e8e0c. Browser harness scripts/ci/snow-s12-original-rime279-real-webgl2.mjs blob 3d9371e0b782f7ea2c362302072d1f565745fa0d. Dedicated workflow blob 652d977ca8ccfba4778a3ee1684388c85b07df4b. One targeted browser job #45331949825, launched after native source acceptance, checks real original seed2026 ID279 at (-135,9,318), physically safe original teleport/aim, loaded source chunks, 956x440 actual WebGL2, S10 both stages and S11 material41 shader only in candidate, exact source HTTP SHA, same original geometry/UV/material fingerprint and player-edited 276 vertices, strict >1% central-view RGB change>=3. Browser actual conclusion MUST be checked; initial status IN PROGRESS. The rime-targeted scene contains other terrain too, so ROI changes cannot be attributed exclusively to rime. No iPhone shader or GPU cost acceptance.
+
+### Boundary and remaining physical integration gates
+Original immediate snow-to-desert/mountain seams are real protected original ID258/401, with no eligible winter cap (native #45275821157); do not blanket paint them or alter their world geometry. New S12 canopy climate-footprint veto prevents its additional physical foliage from crossing into non-snow/weak snow, but does NOT fix historical old grass/trees or gradual transition visuals. A separate original source transition census/optional future-profile design can tune NEW source generation only when approved; preserve current M7 cap/ground/edits. No existing physical terrain rewritten.
+Next: actual original renderer before/after S12 physical tree overlay screenshot with source-safe certified cells, genuine new S12 long cross-chunk native movement and renderer mesh cost, authentic rime run and day/night visual evidence. No proof that S12 resolves all squat/striped historical foliage. V8 research marker stays UNREGISTERED. Actual installed iPhone Home Screen PWA, source reload/offline/cache, original saves, rapid digging GPU/frame p95, real shader fill cost and full official release tests remain UNRUN. No merge/deploy without creator authorization.
