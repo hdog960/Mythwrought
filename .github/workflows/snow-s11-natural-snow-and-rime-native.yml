@@ -1,0 +1,45 @@
+name: Snow S11 original snow41 wind contour and original rime279 native proof
+on:
+  push:
+    branches:
+      - research/snow-s11-natural-snow41-rime-original-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s11-natural-snow-and-rime-native.yml'
+      - 'src/manual-biomes/snowy-s11-original-snow41-wind-contours.mjs'
+      - 'tests/snowy-s11-original-snow41-source.test.mjs'
+      - 'tests/snowy-s11-real-original-rime279-survey.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s11-original-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  source-verified-shader-and-original-rime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact isolated HEAD, read-only Desert main, source-only syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs)" = 03e1241626e703d3e39619db28a31ec35c0856b9
+          node --check src/manual-biomes/snowy-s11-original-snow41-wind-contours.mjs
+          node --check tests/snowy-s11-original-snow41-source.test.mjs
+          node --check tests/snowy-s11-real-original-rime279-survey.test.mjs
+      - name: Original shader only, exact one-branch material 41 and none other
+        run: node --test tests/snowy-s11-original-snow41-source.test.mjs
+      - name: Authentic two-seed actual original emitted rime279 top-face census
+        run: |
+          node --test tests/snowy-s11-real-original-rime279-survey.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
