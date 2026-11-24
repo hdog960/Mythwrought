@@ -1,0 +1,44 @@
+name: Mountain V8 final scoped visual and portable profile qualification
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-final-visual.yml]
+permissions:
+  contents: read
+jobs:
+  final-visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 9fe5acdb6f38c3cc9727d07df28949f38fc6158d
+          path: prior-shoulder
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted changed import and shoulder expectation gates
+        env:
+          MOUNTAIN_V8_PREVIOUS_ROOT: ${{ github.workspace }}/prior-shoulder
+        run: |
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --test tests/mountain-v8-portable-profile.test.mjs tests/mountain-v8-developer-shoulder-native.test.mjs tests/mountain-v8-compact-menu.test.mjs tests/mountain-v8-developer-admission.test.mjs
+          node --input-type=module -e "import fs from 'node:fs';import {createHash} from 'node:crypto';const m=JSON.parse(fs.readFileSync('nonblock-stage-assets.json'));for(const [p,h] of Object.entries(m.assets)){if(createHash('sha256').update(fs.readFileSync(p==='./'?'index.html':p)).digest('hex')!==h)throw Error(p)}console.log('Exact manifest',Object.keys(m.assets).length)"
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual scoped fully streamed visuals, overlays, import and resume
+        run: node scripts/ci/mountain-v8-final-visual.mjs
+      - name: Retain original game captures and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-final-visual
+          path: artifacts/mountain-v8-final-visual/
+          if-no-files-found: warn
