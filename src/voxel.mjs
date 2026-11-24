@@ -3,7 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
-import {environmentGround,M7_ENVIRONMENT_GENERATOR} from './environment-ground.mjs';
+import {environmentGround,isEnvironmentGenerator} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {canWarmSourceScree,canUseDesertHardpanCue,nearestDesertHardpanSquared,warmScreeVertexColor} from './manual-biomes/desert-bilateral-rgb.mjs';
@@ -210,7 +210,7 @@ export function meshChunk(world,cx,cz){
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
-  const originalDesertHalo=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const originalDesertHalo=isEnvironmentGenerator(profile?.generator);
   const v8Mountain=profile?.generator==='mythwrought-five-surface-regions-mountain-v8';
   const unifiedTerrain=originalDesertHalo||v8Mountain;
   // Cached ONLY for this synchronous surface-mesh rebuild. No cross-chunk
