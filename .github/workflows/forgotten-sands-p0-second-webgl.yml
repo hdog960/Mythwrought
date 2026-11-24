@@ -1,0 +1,43 @@
+name: Forgotten Sands P0 second site native and WebGL2
+on:
+  push:
+    branches: [research/forgotten-sands-p0-negative-webgl-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-second-site.mjs'
+      - 'tests/forgotten-sands-second-site.test.mjs'
+      - 'tests/forgotten-sands-webgl/**'
+      - '.github/workflows/forgotten-sands-p0-second-webgl.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --test tests/forgotten-sands-second-site.test.mjs
+  webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 &
+          node tests/forgotten-sands-webgl/run.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p0-negative-site-webgl
+          path: p0-webgl-evidence/
