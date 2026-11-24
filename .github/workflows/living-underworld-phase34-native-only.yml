@@ -1,4 +1,4 @@
-name: Living Underworld Phase34 — strict underpass source-role error regression
+name: Living Underworld Phase34 — corrected exact-head native original M7
 on:
   push:
     branches:
@@ -6,43 +6,72 @@ on:
     paths:
       - .github/workflows/living-underworld-phase34-native-only.yml
 
-# One additional focused diagnostic after first exact-head 278/280 native HOLD.
-# This is branch-isolated and does NOT repeat all 25 files or 3 M7 scripts.
+# Isolated targeted validation of corrected source. Shared CI untouched.
+# No pull request/main triggers, deployment, cancellation or world writes.
 permissions:
   contents: read
 
 jobs:
-  isolate-failed-native-source-tests:
+  exact-original-m7-native:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 35
     steps:
-      - name: Exact isolated checkout
+      - name: Checkout exact isolated commit without persisted write credentials
         uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - name: Exact native Node v22.16.0
+          fetch-depth: 1
+      - name: Native Node22.16.0
         uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
-      - name: Capture full TAP for ONLY the formerly failing underpass test file
+      - name: Verify source integrity
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check scripts/underworld/audit-m7-exact-head-triplet.mjs
+          node --check src/living-underworld/city-gallery-grade-separated-underpass.mjs
+      - name: Execute pinned 25-suite and exactly three true original M7 read-only scripts
         shell: bash
         run: |
           set +e
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 3
-          test -z "$(git status --porcelain --untracked-files=all)" || exit 3
-          node --test tests/living-underworld-city-grade-separated-underpass.test.mjs \
-            > "$RUNNER_TEMP/m7-focused-diagnostic.tap" 2>&1
-          code=$?
-          echo "EXACT_HEAD=$GITHUB_SHA, native status=$code"
-          grep -A 26 -B 4 '^not ok' "$RUNNER_TEMP/m7-focused-diagnostic.tap" || true
-          tail -n 20 "$RUNNER_TEMP/m7-focused-diagnostic.tap"
-          exit "$code"
-      - name: Save complete targeted native TAP even on HOLD
+          node scripts/underworld/audit-m7-exact-head-triplet.mjs "$GITHUB_SHA" > "$RUNNER_TEMP/m7-corrected-native-triplet.json" 2> "$RUNNER_TEMP/m7-corrected-native-triplet.stderr"
+          exit_code=$?
+          echo "PINNED_ORIGINAL_M7_EXIT=$exit_code SHA=$GITHUB_SHA"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const f=process.env.RUNNER_TEMP+"/m7-corrected-native-triplet.json";
+            const body=fs.existsSync(f)?fs.readFileSync(f,"utf8").trim():"";
+            try{
+              const r=JSON.parse(body.split(/\r?\n/).at(-1));
+              console.log(JSON.stringify({
+                expectedHead:r.expectedHead,actualHead:r.actualHead,
+                fullCheckoutExactAndClean:r.nativeFullCheckoutExactAndClean,
+                focusedNativeTestsPassed:r.focusedNativeNodeTestsPassed,
+                originalM7ScriptsAttempted:r.trueOriginalM7ScriptsAttempted,
+                originalM7ScriptsAllSucceeded:r.allThreeExecutedSuccessfully,
+                sourceOnlyCandidateGate:r.sourceOnlyCandidateAdmission?.cityThinUnderpassHypotheticalMovementSafe,
+                reason:r.reason,executions:r.executions,
+                nativeTestTail:r.testSummaryStdoutTail?.slice(-1500),
+                nativeErrors:r.testErrorTail?.slice(-600)
+              }));
+            }catch(error){
+              console.log("NATIVE_JSON_PARSE_HOLD: "+String(error));
+              console.log(body.slice(-3000));
+            }
+          '
+          echo "Original native stderr:"
+          tail -c 2200 "$RUNNER_TEMP/m7-corrected-native-triplet.stderr" || true
+          exit "$exit_code"
+      - name: Preserve entire original native research result whether PASS or HOLD
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: living-underworld-phase34-targeted-diagnostics
-          path: ${{ runner.temp }}/m7-focused-diagnostic.tap
+          name: living-underworld-phase34-corrected-original-m7
+          path: |
+            ${{ runner.temp }}/m7-corrected-native-triplet.json
+            ${{ runner.temp }}/m7-corrected-native-triplet.stderr
           retention-days: 7
           if-no-files-found: warn
