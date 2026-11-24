@@ -28,7 +28,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,M8_MOUNTAIN_GENERATOR} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -107,7 +107,7 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
 function start(nonblockStage=null){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
-  const combinedWorld=()=>world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const combinedWorld=()=>[M7_ENVIRONMENT_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(world.base?.generationProfile?.generator);
   const hasLiveScenery=()=>Boolean(nonblockStage||combinedWorld());
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
@@ -307,7 +307,7 @@ function start(nonblockStage=null){
     }).catch(error=>({supported:false,reason:String(error)}));
   }
   if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
         world.base.generationProfile.generator)))
     void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
@@ -2845,7 +2845,7 @@ function start(nonblockStage=null){
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
           world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
@@ -2920,6 +2920,32 @@ function start(nonblockStage=null){
         String(error.message||error);
     }
   };
+  // LOCAL CANDIDATE ONLY: real explicit selection for isolated browser QA.
+  // Never expose this action on public Pages until old tabs and all writers
+  // have a coordinated admission protocol and the creator authorizes release.
+  if(['localhost','127.0.0.1'].includes(location.hostname)&&seedRow){
+    const v8Button=document.createElement('button');
+    v8Button.id='createMountainV8Candidate';v8Button.type='button';
+    v8Button.textContent='CREATE NEW MOUNTAIN V8 (LOCAL CANDIDATE)';
+    seedRow.insertAdjacentElement('afterend',v8Button);
+    v8Button.onclick=async()=>{
+      if(v8Button.disabled)return;
+      v8Button.disabled=true;
+      try{
+        const next=worldSeedFromText(seedInput.value),former=world;
+        if(next===former.seed)throw Error('Choose a different unused seed');
+        if(!window.confirm('Create isolated Mountain V8 candidate for unused seed '+next+'?'))return;
+        if(!storageReadOnly&&!save())throw Error('Current world must be saved first');
+        const {createMountainV8CandidateWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+        const candidate=await createMountainV8CandidateWorld(String(next),{confirmed:true});
+        if(world!==former||changed)throw Error('Current world changed while admission ran; candidate saved separately, not selected');
+        const stored=saveM2World(localStorage,candidate.world);
+        if(!stored.ok)throw Error('V8 save verification failed: '+stored.reason);
+        enterPreparedM2World(candidate.world,'Mountain V8 local candidate '+next+' created.');
+      }catch(error){seedMessage.textContent='V8 candidate not selected: '+String(error.message||error);}
+      finally{v8Button.disabled=false;}
+    };
+  }
   document.getElementById('switchWorld').onclick=()=>{
     try{
       const next=worldSeedFromText(seedInput.value);

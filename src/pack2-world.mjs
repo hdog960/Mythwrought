@@ -5,7 +5,7 @@
 import {VoxelWorld,BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY} from './depth.mjs';
 import {worldSlotKey} from './seeds.mjs';
-import {saveFingerprint} from './persistence.mjs';
+import {saveFingerprint,assertMountainV8WriteIdentity} from './persistence.mjs';
 import {isPack2LiveId,pack2NormalizeState} from './pack2-integration.mjs';
 
 export const PACK2_SIDECAR_SUFFIX='-pack2-live-v1';
@@ -182,6 +182,7 @@ export function loadPack2LiveWorld(storage,base){
 export function savePack2LiveWorld(storage,world){
   try{
     if(!(world instanceof Pack2LiveWorld))throw Error('Expected live Pack 2 overlay world');
+    assertMountainV8WriteIdentity(storage,world);
     const key=pack2StorageKey(world.seed);
     const raw=JSON.stringify(world.pack2Snapshot());
     // No eager changes to preexisting worlds without Pack 2 objects.
