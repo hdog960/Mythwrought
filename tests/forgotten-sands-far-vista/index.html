@@ -1,0 +1,56 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Forgotten Sands isolated far-shell comparison</title></head><body style="margin:0"><canvas width="956" height="440" style="width:100vw;height:100vh"></canvas><script type="module">
+import {P0_ORIGINAL_SHADERS as original} from '../../src/manual-biomes/forgotten-sands-original-shaders.mjs';
+import {buildGpuPipeline} from '../../src/gpu-pipeline.mjs';
+import {uploadChunkBuffer} from '../../src/gpu-recovery.mjs';
+const gl=document.querySelector('canvas').getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true}),canvas=document.querySelector('canvas');
+const check=(x,m)=>{if(!x)throw Error(m);};
+const req=(w,m)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>{clean();reject(Error('worker timeout'));},60000);const clean=()=>{clearTimeout(timer);w.removeEventListener('message',msg);w.removeEventListener('error',err);};const msg=e=>{clean();e.data.type==='fault'?reject(Error(e.data.error)):resolve(e.data);};const err=e=>{clean();reject(Error(e.message));};w.addEventListener('message',msg);w.addEventListener('error',err);w.postMessage(m);});
+async function run(){
+  check(gl,'WebGL2 required');const q=new URLSearchParams(location.search),index=Number(q.get('group')??1),distance=Number(q.get('distance')??48);
+  const worker=new Worker('./far-worker.mjs',{type:'module'}),buffers=[];let far=null,basePipe,farPipe,p;
+  try{
+    p=await req(worker,{type:'prepare',index});
+    basePipe=buildGpuPipeline(gl,original);
+    // Independent landmark-only pipeline. Original near shader unchanged.
+    const fs=original.terrainFragment.replace('mix(29.0,9.0,uCaveHaze)','mix(45.0,9.0,uCaveHaze)').replace('mix(68.0,27.0,uCaveHaze)','mix(155.0,27.0,uCaveHaze)');
+    const vs=original.terrainVertex.replace('1.0015*z','1.0008*z');
+    check(fs!==original.terrainFragment&&vs!==original.terrainVertex,'far shader patch mismatch');
+    farPipe=buildGpuPipeline(gl,{...original,terrainVertex:vs,terrainFragment:fs});
+    const upload=async v=>{await new Promise(requestAnimationFrame);const b=uploadChunkBuffer(gl,v);gl.bindBuffer(gl.ARRAY_BUFFER,b);check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===v.byteLength,'upload byte mismatch');return {b,count:v.length/9,bytes:v.byteLength};};
+    for(let i=0;i<p.near.length;i++){const r=await req(worker,{type:'near',i});buffers.push(await upload(r.vertices));}
+    const r=await req(worker,{type:'far'});check(r.plan.allowed,'no far slot');far=await upload(r.vertices);
+    const nearBytes=buffers.reduce((n,b)=>n+b.bytes,0);
+    check(buffers.length+1===r.plan.buffers&&nearBytes+far.bytes===r.plan.vertexBytes,'resident accounting');
+    // Original projection depth must remain identical between near and far
+    // passes for correct occlusion. At this view distance (<100), the original
+    // clip plane suffices, so use original VS for actual candidate draw.
+    gl.deleteProgram(farPipe.terrainProgram);gl.deleteProgram(farPipe.skyProgram);gl.deleteBuffer(farPipe.outlineBuffer);
+    farPipe=buildGpuPipeline(gl,{...original,terrainFragment:fs});
+    const pitch=.11;
+    function bind(pipe){
+      gl.useProgram(pipe.terrainProgram);const u=pipe.uniforms;
+      gl.uniform3fv(u.uEye,p.eye);gl.uniform3fv(u.uForward,[Math.cos(pitch),Math.sin(pitch),0]);gl.uniform3fv(u.uRight,[0,0,1]);gl.uniform3fv(u.uUp,[-Math.sin(pitch),Math.cos(pitch),0]);
+      gl.uniform1f(u.uAspect,canvas.width/canvas.height);gl.uniform1f(u.uTan,Math.tan(72*Math.PI/360));gl.uniform3fv(u.uFog,[.69,.62,.49]);gl.uniform3fv(u.uSkyLight,[1,.95,.85]);gl.uniform1f(u.uCaveHaze,0);gl.uniform1f(u.uArtQuality,1);
+    }
+    function draw(pipe,b){gl.bindBuffer(gl.ARRAY_BUFFER,b.b);for(const [loc,size,offset] of [[pipe.atPos,3,0],[pipe.atColor,3,12],[pipe.atUv,2,24],[pipe.atMat,1,32]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,size,gl.FLOAT,false,36,offset);}gl.drawArrays(gl.TRIANGLES,0,b.count);}
+    function render(mode){
+      gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.69,.62,.49,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);bind(basePipe);for(const b of buffers)draw(basePipe,b);
+      if(mode!=='near'){const pipe=mode==='candidate'?farPipe:basePipe;bind(pipe);draw(pipe,far);}
+      gl.finish();check(gl.getError()===gl.NO_ERROR,'draw error');const px=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,px);return px;
+    }
+    const a=render('near'),b=render('baseline'),baseline=canvas.toDataURL('image/png'),c=render('candidate');
+    let changed=0,visible=0;const bands=[0,0,0];for(let i=0;i<c.length;i+=4){
+      const delta=Math.abs(c[i]-b[i])+Math.abs(c[i+1]-b[i+1])+Math.abs(c[i+2]-b[i+2]);
+      if(delta>12){changed++;bands[Math.min(2,Math.floor((i/4%canvas.width)*3/canvas.width))]++;}
+      if(Math.abs(c[i]-a[i])+Math.abs(c[i+1]-a[i+1])+Math.abs(c[i+2]-a[i+2])>15)visible++;
+    }
+    check(changed>100&&visible>100,'far visibility absent');
+    const candidate=canvas.toDataURL('image/png');const repeat=render('near');check(repeat.every((v,i)=>v===a[i]),'near-only pixels changed');
+    window.p0Images={baseline,candidate};return {index,seed:p.seed,distance,nearBuffers:buffers.length,farBuffers:1,nearBytes,farBytes:far.bytes,plan:r.plan,faces:r.faces,rectangles:r.rectangles,nearOmitted:r.nearOmitted,changed,visible,bands,nearOnlyPixelParity:true,viewport:[canvas.width,canvas.height],retired:buffers.length+1};
+  }finally{
+    for(const b of buffers)gl.deleteBuffer(b.b);if(far)gl.deleteBuffer(far.b);
+    for(const pipe of [basePipe,farPipe])if(pipe){gl.deleteBuffer(pipe.outlineBuffer);gl.deleteProgram(pipe.terrainProgram);gl.deleteProgram(pipe.skyProgram);}worker.terminate();
+  }
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script></body></html>
