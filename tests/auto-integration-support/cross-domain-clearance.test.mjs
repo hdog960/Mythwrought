@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {inspectCrossDomainClearance as inspect} from '../../src/auto-integration-support/cross-domain-clearance.mjs';
+const c=(x,y,z)=>({x,y,z});
+const base=()=>({solidCells:[c(0,-1,0),c(1,0,0)],voidCells:[c(0,0,0),c(0,0,1)],surfaceAnchors:[c(2,0,0)],objects:[{id:'object:fern',domain:'cave',anchor:c(0,0,0),footprint:[c(0,0,0)],attachment:'ground'}]});
+test('real support and cave void fixture passes without mutation',()=>{const v=base();const before=JSON.stringify(v);assert.equal(inspect(v).status,'FIXTURE_COMPATIBLE_ONLY');assert.equal(JSON.stringify(v),before)});
+test('contradictory cave solid occupancy rejects',()=>{const v=base();v.solidCells.push(c(0,0,0));assert.equal(inspect(v).reason,'contradictory-world-occupancy')});
+test('restored player edit reservation blocks candidate',()=>{const v=base();v.protectedCells=[c(0,0,0)];assert.equal(inspect(v).reason,'occupied-or-protected')});
+test('cave footprint cannot extend into unproven void',()=>{const v=base();v.objects[0].footprint.push(c(0,0,2));assert.equal(inspect(v).reason,'unproven-cave-clearance')});
+test('objects cannot overlap each other',()=>{const v=base();v.objects.push({...v.objects[0],id:'object:moss'});assert.equal(inspect(v).reason,'object-overlap')});
+test('surface ground fixture requires physical support',()=>{const v=base();v.objects=[{id:'object:flower',domain:'surface',anchor:c(2,0,0),footprint:[c(0,0,0)],attachment:'ground'}];assert.equal(inspect(v).reason,'missing-attachment-support')});
+test('surface void collision is rejected',()=>{const v=base();v.surfaceAnchors=[c(0,0,0)];v.objects=[{id:'object:flower',domain:'surface',anchor:c(0,0,0),footprint:[c(0,0,0)],attachment:'free'}];assert.equal(inspect(v).reason,'surface-void-conflict')});
+test('safe integer overflow rejected',()=>{const v=base();v.objects[0].anchor=c(Number.MAX_SAFE_INTEGER,0,0);v.voidCells.push(v.objects[0].anchor);v.objects[0].footprint=[c(1,0,0)];assert.equal(inspect(v).reason,'coordinate-overflow')});
