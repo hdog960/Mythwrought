@@ -235,6 +235,12 @@ for(const [rx,rz] of regions){
    crossAudit.preReadHardCapsEnforced===true,
   candidateThinUnderpassCrossAuditBlockedOriginalCallbacks:
    crossAudit.blockedSourceCallbackAttempts??null,
+  candidateThinUnderpassCrossAuditFailedOriginalCallbacks:
+   crossAudit.sourceCallbackFailures??null,
+  candidateThinUnderpassCrossAuditReentrancyGuard:
+   crossAudit.sourceReadReentrancyGuardEnforced===true,
+  candidateThinUnderpassCrossAuditAtomicReadReservation:
+   crossAudit.sourceCallbackInvocationsReservedBeforeCall===true,
   candidateThinUnderpassCrossAuditCallbacksWithinCaps:
    crossAudit.sourceCallbacksWithinHardCaps===true,
   candidateThinUnderpassCrossAuditSourceCallbackCap:
