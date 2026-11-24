@@ -1,0 +1,44 @@
+name: Snow S17 actual generated forest and physical edge WebGL2
+on:
+  push:
+    branches: [research/snow-s17-actual-generator-webgl2-20261124]
+    paths:
+      - 'scripts/ci/snow-s17-actual-generator-webgl2.mjs'
+      - '.github/workflows/snow-s17-actual-generator-webgl2.yml'
+permissions:
+  contents: read
+jobs:
+  actual-generated-world:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate already accepted exact generated source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/manual-biomes/snowy-s17-fresh-source.mjs)" = c04300cc3ad920f3900d76f35cf267393b0ce6a7
+          test "$(git hash-object src/manual-biomes/snowy-s17-experimental-world.mjs)" = 58771444c08e769c2ae76713420b472c22e96ba1
+          test "$(git hash-object src/manual-biomes/environment-v7.mjs)" = 7a6969a50e00bb490c4b06a13bb236a82fc3789a
+          test "$(git hash-object src/voxel.mjs)" = 376350d5efdec64b84a271e123943ca530b6ba6b
+          node --check scripts/ci/snow-s17-actual-generator-webgl2.mjs
+      - name: Install targeted pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual current source forest and physical edge comparisons
+        run: |
+          python3 -m http.server 4173 >/tmp/snow-s17-actual.log 2>&1 &
+          node scripts/ci/snow-s17-actual-generator-webgl2.mjs
+      - name: Preserve genuine screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s17-actual-generator-${{ github.sha }}
+          path: artifacts/snow-s17-actual/
+          if-no-files-found: ignore
+          retention-days: 7
