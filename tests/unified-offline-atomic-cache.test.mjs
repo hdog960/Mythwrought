@@ -120,7 +120,7 @@ test('missing new Enchanted tree dependency cannot activate or replace prior she
 
 test('missing Snow planner dependency fails closed and retains previous-good shell',async()=>{
  const candidate=stage({missing:'/src/manual-biomes/snowy-s17-fresh-source.mjs'});
- await assert.rejects(candidate.install(),/Cannot verify\\/cache original source/);
+ await assert.rejects(candidate.install(),new RegExp('Cannot verify/cache original source'));
  assert.equal(candidate.skipped,0);
  assert.equal(candidate.all.has(CACHE),false);
  assert.equal(candidate.all.get(PREVIOUS).size,1);
