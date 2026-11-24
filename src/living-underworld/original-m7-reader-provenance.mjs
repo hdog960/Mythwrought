@@ -23,8 +23,12 @@ const seedValid=seed=>Number.isSafeInteger(seed)&&seed===(seed|0);
 export function createOriginalM7ReadOnlySource(seed=179){
  if(!seedValid(seed))
   throw TypeError('Invalid original M7 source seed');
- const profile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
- const world=new FourRegionWorld(seed,profile);
+ // FourRegionWorld validates by CONSTRUCTING a NEW frozen profile object.
+ // Capture the canonical profile from the real instance; its identity is
+ // not supposed to equal the originally passed requested-profile object.
+ const requestedProfile=fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR);
+ const world=new FourRegionWorld(seed,requestedProfile);
+ const profile=world.profile;
  const original=new VoxelWorld(seed);
  const cave=world.environmentCaves;
  if(Object.getPrototypeOf(world)!==FourRegionWorld.prototype||
@@ -33,6 +37,7 @@ export function createOriginalM7ReadOnlySource(seed=179){
     original.constructor!==VoxelWorld||
     world.seed!==seed||original.seed!==seed||
     world.profile!==profile||profile.seed!==seed||
+    profile.kind!=='mythwrought-generation-profile'||profile.version!==1||
     profile.generator!==M7_ENVIRONMENT_GENERATOR||
     !Object.isFrozen(profile)||!(world.edits instanceof Map)||
     !(original.edits instanceof Map)||
@@ -82,6 +87,7 @@ export function inspectOriginalM7ReadOnlySource(source,{seed}={}){
     world.seed!==expected||original.seed!==expected||
     world.profile!==profile||
     profile.seed!==expected||
+    profile.kind!=='mythwrought-generation-profile'||profile.version!==1||
     profile.generator!==M7_ENVIRONMENT_GENERATOR||
     !Object.isFrozen(profile)||
     world.environmentCaves!==cave||
