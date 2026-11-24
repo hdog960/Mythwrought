@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '23f88922a373ad68d5df701da1d67159ec3c0ce0');
+    '2e5b84eac8ac445a23bc23920da67378f5599f76');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -2445,4 +2445,123 @@ test('original water buffer contents are not blindly reused when count differs',
   v.scope.chunks.get('0,0,-1').waterCount=2;
   v.next();assert.equal(v.run(),null);
   assert.equal(v.events.filter(e=>e==='upload-9').length,2);
+});
+
+function stream291WitnessFixture({enabled=true,reuse=true,fail=false,
+  water=new Float32Array(9).fill(1),badCount=false}={}){
+  const a=source.indexOf('  function near291SameWaterBytes(');
+  const b=source.indexOf('  function refreshPhysicalChunk(',a);
+  const c=source.indexOf('  function stream(){');
+  const d=source.indexOf('  function respawnPrototype(',c);
+  assert.ok(a>=0&&b>a&&c>b&&d>c);
+  let n=0,clock=0;
+  const uploads=[],deleted=[],chunks=new Map();
+  const key='0,0,-1',pending=new Map([[key,[0,0,-1]]]);
+  const scope={
+    world:{},near291Enabled:enabled,near291WaterReuse:reuse,
+    near291EditPhase:null,near291Fatal:false,chunks,pending,
+    wanted:new Set([key]),lastStreamingCenter:'0,0|-1',
+    player:{x:0,z:0,feet:-20},name:(x,z)=>x+','+z,
+    chunkCoord:()=>0,surfaceOpeningNearby:()=>false,
+    sectionWindow:()=>[-1],sectionForY:()=>-1,WORLD_MIN_Y:-210,
+    performance:{now:()=>++clock},
+    gpuRetry:{ready:()=>true,success:()=>{},fail:()=>({attempt:2}),
+      keepOnly:()=>{}},
+    meshCadence:{ready:()=>true,finished:()=>{},resetCooldown:()=>{}},
+    frame:1,verticalEditSections:()=>[-1],
+    editAffectedChunks:()=>[{cx:0,cz:0}],
+    depthMeshKey:(x,z,s)=>x+','+z+','+s,
+    meshPlayableChunk:()=>new Float32Array(9),
+    meshPlayableWater:()=>water,
+    uploadPack2Chunk:(v,w)=>{
+      uploads.push(w.length);
+      if(fail)throw Error('injected original streaming upload fault');
+      return {buffer:{id:++n},count:1,
+        waterBuffer:w.length?{id:++n}:null,
+        waterCount:w.length/9+(badCount?1:0)};
+    },
+    deleteChunkBuffers:o=>{if(o)deleted.push(o.buffer,o.waterBuffer);},
+    editMeshBatches:0,lastEditMeshKeys:[],
+    caveSession:null,combinedWorld:()=>false,message:()=>{}
+  };
+  const api=new Function('scope','with(scope){'+source.slice(a,b)+
+    source.slice(c,d)+'\nreturn {stream,refreshEditedMeshes,near291WaterSnapshot};}')(scope);
+  return {api,scope,key,uploads,deleted,water,mine:()=>api.refreshEditedMeshes(0,0,-20)};
+}
+test('original successful streaming enables first exact-match mining water retention',()=>{
+  const v=stream291WitnessFixture();v.api.stream();
+  const before=v.scope.chunks.get(v.key);
+  assert.ok(before.water291Bytes instanceof Float32Array);
+  v.mine();const after=v.scope.chunks.get(v.key);
+  assert.deepEqual(v.uploads,[9,0]);
+  assert.equal(after.waterBuffer,before.waterBuffer);
+  assert.equal(after.water291Bytes,before.water291Bytes);
+  assert.ok(!v.deleted.includes(before.waterBuffer));
+});
+test('stream witness is independent of mutable original mesher array',()=>{
+  const v=stream291WitnessFixture();v.api.stream();
+  const old=v.scope.chunks.get(v.key);
+  v.water[0]=2;
+  assert.equal(old.water291Bytes[0],1);
+  v.mine();
+  assert.deepEqual(v.uploads,[9,9]);
+  assert.ok(v.deleted.includes(old.waterBuffer));
+  assert.equal(v.scope.chunks.get(v.key).water291Bytes[0],2);
+});
+test('streamed water witness does not retain large backing storage from a small view',()=>{
+  const backing=new Float32Array(100000);
+  const view=backing.subarray(9,18);view.fill(3);
+  const v=stream291WitnessFixture({water:view});v.api.stream();
+  const witness=v.scope.chunks.get(v.key).water291Bytes;
+  assert.equal(witness.byteOffset,0);
+  assert.equal(witness.buffer.byteLength,36);
+  assert.ok(witness.buffer!==backing.buffer);
+  assert.deepEqual([...witness],[...view]);
+});
+test('snapshot copies original raw float bytes including signed zero and NaN payload',()=>{
+  const v=stream291WitnessFixture();
+  const w=new Float32Array(9);
+  const bits=new Uint32Array(w.buffer);
+  bits[0]=0x80000000;bits[1]=0x7fc01234;
+  const copy=v.api.near291WaterSnapshot(w);
+  assert.deepEqual([...new Uint32Array(copy.buffer)],[...bits]);
+  assert.ok(copy.buffer!==w.buffer);
+});
+test('original control and plain VAO streaming never seed an experimental witness',()=>{
+  for(const opt of [{enabled:false},{reuse:false}]){
+    const v=stream291WitnessFixture(opt);v.api.stream();
+    assert.equal(v.scope.chunks.get(v.key).water291Bytes,undefined);
+    v.mine();assert.deepEqual(v.uploads,[9,9]);
+  }
+});
+test('failed original streaming upload never publishes a witness or resident chunk',()=>{
+  const v=stream291WitnessFixture({fail:true});v.api.stream();
+  assert.equal(v.scope.chunks.size,0);
+  assert.equal(v.scope.pending.has(v.key),true);
+  assert.deepEqual(v.uploads,[9]);
+});
+test('oversized and dry original streamed water have no retained witness',()=>{
+  for(const water of [new Float32Array(8208),new Float32Array(0)]){
+    const v=stream291WitnessFixture({water});v.api.stream();
+    assert.equal(v.scope.chunks.get(v.key).water291Bytes,undefined);
+    v.mine();assert.deepEqual(v.uploads,[water.length,water.length]);
+  }
+});
+test('original streaming count mismatch cannot seed a water witness',()=>{
+  const v=stream291WitnessFixture({badCount:true});v.api.stream();
+  assert.equal(v.scope.chunks.get(v.key).water291Bytes,undefined);
+  v.mine();assert.deepEqual(v.uploads,[9,9]);
+});
+test('streamed resident eviction releases the witness with the chunk and next upload reseeds it',()=>{
+  const v=stream291WitnessFixture();v.api.stream();
+  const old=v.scope.chunks.get(v.key);
+  v.scope.wanted.clear();v.scope.frame=45;
+  v.api.stream();
+  assert.equal(v.scope.chunks.size,0);
+  assert.ok(v.deleted.includes(old.waterBuffer));
+  v.scope.wanted.add(v.key);v.scope.pending.set(v.key,[0,0,-1]);
+  v.api.stream();const fresh=v.scope.chunks.get(v.key);
+  assert.ok(fresh.waterBuffer!==old.waterBuffer);
+  assert.ok(fresh.water291Bytes!==old.water291Bytes);
+  v.mine();assert.deepEqual(v.uploads,[9,9,0]);
 });
