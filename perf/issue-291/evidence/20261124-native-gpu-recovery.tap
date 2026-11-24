@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: only packed finite-sized mesh buffers are uploaded to WebGL
+ok 1 - only packed finite-sized mesh buffers are uploaded to WebGL
+  ---
+  duration_ms: 1.074476
+  type: 'test'
+  ...
+# Subtest: exponential bounded GPU retry avoids every-frame infinite OOM reupload
+ok 2 - exponential bounded GPU retry avoids every-frame infinite OOM reupload
+  ---
+  duration_ms: 1.040546
+  type: 'test'
+  ...
+# Subtest: world seed/chunk changes remove stale GPU error states safely
+ok 3 - world seed/chunk changes remove stale GPU error states safely
+  ---
+  duration_ms: 0.385139
+  type: 'test'
+  ...
+# Subtest: invalid retry budgets and timestamps hard fail
+ok 4 - invalid retry budgets and timestamps hard fail
+  ---
+  duration_ms: 0.161989
+  type: 'test'
+  ...
+# Subtest: the exact production upload rejects silent OUT_OF_MEMORY and frees staged buffer
+ok 5 - the exact production upload rejects silent OUT_OF_MEMORY and frees staged buffer
+  ---
+  duration_ms: 0.560688
+  type: 'test'
+  ...
+# Subtest: the same production upload returns validated buffer on success and cleans thrown errors
+ok 6 - the same production upload returns validated buffer on success and cleans thrown errors
+  ---
+  duration_ms: 1.154194
+  type: 'test'
+  ...
+# Subtest: uncleared pre-existing GPU errors fail closed without submitting a chunk
+ok 7 - uncleared pre-existing GPU errors fail closed without submitting a chunk
+  ---
+  duration_ms: 0.269518
+  type: 'test'
+  ...
+# Subtest: bounded stale GPU errors drain before a healthy upload
+ok 8 - bounded stale GPU errors drain before a healthy upload
+  ---
+  duration_ms: 0.241196
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 76.610114
