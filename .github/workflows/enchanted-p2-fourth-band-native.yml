@@ -1,0 +1,29 @@
+name: Enchanted P2 Original Fourth Band and Chamber
+on:
+  push:
+    branches:
+      - research/enchanted-p2-fourth-band-alternate-loops-20261123
+    paths:
+      - .github/workflows/enchanted-p2-fourth-band-native.yml
+permissions:
+  contents: read
+jobs:
+  original-fourth-band:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard original owner source and physics
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/deep-cave-network.mjs)" = "3c0d2e2ced0ed23a9991da521639e0a4068fb846"
+          test "$(git hash-object src/manual-biomes/enchanted-original-cave-descent-evidence.mjs)" = "7fe76ca6ede339e6f36c595bbd7018c6d2f5892a"
+          node --version
+          node --test tests/manual-biomes/enchanted-original-fourth-band-real-m7.test.mjs
