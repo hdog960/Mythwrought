@@ -4,7 +4,7 @@ import { getSpecies, speciesRegistry } from './species.mjs';
 import { validPoint } from './world-query.mjs';
 import { supportedPosition } from './movement.mjs';
 import { distanceTo } from './behavior.mjs';
-import { caveSpawnColumn } from './cave-spawn-column.mjs';
+import { caveSpawnColumn, caveSupportedFallback } from './cave-spawn-column.mjs';
 
 const MAX_REGIONS = 64;
 const INTERVAL = .5;
@@ -167,7 +167,8 @@ export class PopulationManager {
         [random & 15,(random >>> 4) & 15];
       const x = cx * CHUNK_SIZE + column[0] + .5;
       const z = cz * CHUNK_SIZE + column[1] + .5;
-      const point = supportedPosition(this.#world, x, z, feet + 1, feet - 1.5, species.body);
+      const point = supportedPosition(this.#world, x, z, feet + 1, feet - 1.5, species.body) ??
+        (section < 0 ? caveSupportedFallback(this.#world,x,z,feet,species.body,section,sectionForY) : null);
       if (!point || sectionForY(Math.floor(point[1])) !== section ||
           !spawnEligible(this.#world, species, point, observer) ||
           entities.some(mob => distanceTo(mob.position, point) < 1.2)) continue;

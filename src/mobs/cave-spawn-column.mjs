@@ -11,3 +11,21 @@ export function caveSpawnColumn(seed,cx,cz,section,serial){
   const index=((n&255)+(((n>>>8)&255)|1)*offset)&255;
   return [index&15,index>>>4];
 }
+
+// The original descending support search assumes the top of its window
+// is already clear. Narrow stepped caves may have a ceiling there and a
+// valid floor elsewhere. Keep the original result when available; otherwise
+// inspect at most nine whole-block feet heights in the same loaded section.
+// No terrain writes, retries across columns, or relaxation of body support.
+const CAVE_FLOOR_OFFSETS=Object.freeze([0,-1,1,-2,2,-3,3,-4,4]);
+export function caveSupportedFallback(world,x,z,feet,body,section,sectionForY){
+  if(!Number.isFinite(feet)||section>=0)return null;
+  const center=Math.floor(feet);
+  for(const offset of CAVE_FLOOR_OFFSETS){
+    const y=center+offset;
+    if(sectionForY(y)!==section)continue;
+    const point=[x,y,z];
+    if(world.grounded(point,body))return point;
+  }
+  return null;
+}
