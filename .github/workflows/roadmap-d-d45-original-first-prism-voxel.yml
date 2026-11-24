@@ -1,0 +1,51 @@
+name: Builder D45 exact original source physical first voxel and fraction-only egress
+on:
+  push:
+    branches:
+      - builder-d-d45-original-first-voxel-egress-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d45-*'
+      - 'tests/building-pool/roadmap-d/d45-*'
+      - 'docs/building-pool/roadmap-d/D45_*'
+      - '.github/workflows/roadmap-d-d45-original-first-prism-voxel.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d45-native-original-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  exact-native-original-w16-w17-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Pin D44 exact parent and original immutable owner/source blobs
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '1496c5b36fd7832c080ee8338cd941dce9cbdf1e'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-swept-exterior-capture.mjs)" = '172284f5f5eb1727b6d510159afdc992cfd5f0da'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d43-source-backed-outboard-support.mjs)" = "$(git rev-parse HEAD^:src/building-pool/roadmap-d/d43-source-backed-outboard-support.mjs)"
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d44-source-full-volume-tie-router.mjs)" = "$(git rev-parse HEAD^:src/building-pool/roadmap-d/d44-source-full-volume-tie-router.mjs)"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check two NEW source and two NEW test files only
+        run: |
+          node --check src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs
+          node --check src/building-pool/roadmap-d/d45-original-first-voxel-egress-audit.mjs
+          node --check tests/building-pool/roadmap-d/d45-source-blocker-egress.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d45-original-source-blockers.source.test.mjs
+      - name: ONLY 4 new focused source-geometry and 2 authentic original W16-W17 tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d45-source-blocker-egress.pure.test.mjs \
+            tests/building-pool/roadmap-d/d45-original-source-blockers.source.test.mjs
