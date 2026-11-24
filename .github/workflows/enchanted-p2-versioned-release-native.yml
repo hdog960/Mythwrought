@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 4
+          fetch-depth: 8
       - uses: actions/checkout@v4
         with:
           ref: db4bbcc32156e5df311f733bcaa53d559c17313b
@@ -39,7 +39,7 @@ jobs:
           ENCHANTED_PREVIOUS_ROOT: ${{ github.workspace }}/.baseline-main
         run: |
           node scripts/ci/build-stage-cache-manifest.mjs --check
-          # Reuse 15 accepted cases from #45403908662 and corrected 1/1 from #45404104591. Browser harness-only delta.
+          # Reuse all native passes and #45426946498 upgrade/new-world evidence. Only offline harness cache policy changed.
           git diff --exit-code 0368f22d38132044ca77eebcdd2e61c593e373a1 -- src index.html sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json
       - name: Install targeted real Chromium
         run: |
