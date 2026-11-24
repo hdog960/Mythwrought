@@ -1,0 +1,37 @@
+name: Mountain V8 actual local selection and offline WebGL2
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-offline-webgl2.yml]
+permissions:
+  contents: read
+jobs:
+  offline-v8:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and three new native checks
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --test tests/mountain-v8-developer-write-identity.test.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual game local selection, WebGL2, service worker and offline save
+        run: node scripts/ci/mountain-v8-developer-offline-webgl2.mjs
+      - name: Retain authentic browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-offline-webgl2
+          path: artifacts/mountain-v8-offline/
+          if-no-files-found: warn
