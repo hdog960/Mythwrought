@@ -474,7 +474,8 @@ export function raycast(world,eye,direction,maxDistance=7){
     return {hit:overlay.cell,adjacent:overlay.normal.some(Boolean)?
       overlay.cell.map((v,i)=>v+overlay.normal[i]):null,distance:overlay.distance};
   };
-  if(world?.biomeCellCount>0||world?.pack2Cells?.size>0){
+  if(world?.biomeCellCount>0||world?.pack2Cells?.size>0||
+     world?.hasNaturalNonCubeShapes===true||world?.base?.hasNaturalNonCubeShapes===true){
     // Mixed physical catalogs: one box-accurate collision ray for all legacy,
     // manual solids and registered biome130 shapes. Static clear-rill water
     // has a sloped surface and is ray-tested separately by exact triangles.

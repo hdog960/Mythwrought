@@ -277,6 +277,7 @@ export class FourRegionWorld extends VoxelWorld{
     }
     return true;
   }
+  get hasNaturalNonCubeShapes(){return this.profile.generator===M8_MOUNTAIN_GENERATOR;}
   get cachedBiomeColumns(){return this._biomeColumns.size;}
   get generationProfile(){return this.profile;}
 }
