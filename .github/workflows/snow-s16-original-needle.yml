@@ -1,0 +1,57 @@
+name: Snow S16 original same-forest needle rendering and paired outlier cost
+on:
+  push:
+    branches: [research/snow-s16-original-needle-render-and-integration-20261124]
+    paths:
+      - 'scripts/ci/snow-s16-*.mjs'
+      - '.github/workflows/snow-s16-original-needle.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-forest-visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Reuse original accepted S13 exact artifact
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 45403736766
+          name: snow-s13-original-forest-860f85504f057685f787c3c08c53d1c4b85e006b
+          path: accepted-s13
+      - name: Verify original and accepted source refs
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s15-certified-needle-material.mjs)" = b78640e9cdaf52d37dd6bbe56fb06a55646e6530
+          test "$(git hash-object src/manual-biomes/snowy-s14-indexed-forest.mjs)" = 0b496c05ea9f07dfdd489109dc0488ad558495a1
+          echo 'a75bc1ddc4e40e0bfb2c878c2ccaeb0659c5d9bd39f0ea709feb40a4832a79ac  accepted-s13/forest-179.json' | sha256sum -c -
+          node --check scripts/ci/snow-s16-original-needle-webgl2.mjs
+      - name: Pinned browser installation
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Same physical forest actual WebGL2 material comparison and paired CPU measurements
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s16-original.log 2>&1 &
+          node scripts/ci/snow-s16-original-needle-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Preserve screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s16-original-needle-${{ github.sha }}
+          path: artifacts/snow-s16/
+          if-no-files-found: ignore
+          retention-days: 7
