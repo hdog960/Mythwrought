@@ -78,8 +78,8 @@ test('#654 native original compiler and entire immutable 286-history quota, fing
  assert.deepEqual(ROADMAP_C_1A_WAVE31_INN_IDS,['r1:inn:snow:large:002']);
  assert.equal(b.id,'r1:inn:snow:large:002');
  assert.equal(validateBlueprint(b),true);assert.equal(validatePool(all).authored,287);
- assert.equal(new Set(all.map(x=>x.id)).size,286);
- assert.equal(new Set(all.map(structuralFingerprint)).size,286);
+ assert.equal(new Set(all.map(x=>x.id)).size,287);
+ assert.equal(new Set(all.map(structuralFingerprint)).size,287);
  assert.deepEqual(findMirroredOrRotatedDuplicates(all),[]);
  assert.deepEqual([b.footprint.width,b.footprint.height,b.footprint.depth],[95,12,84]);
  assert.equal(b.worldPlacement,false);assert.equal(b.liveIntegration,false);
@@ -114,7 +114,7 @@ test('#654 physically absent glacier volume, roof-open aurora court, twenty real
  assert.deepEqual(cuts,[[0,0,25,19],[72,0,94,29],[0,63,22,83]]);
  assert.equal(b.architecturalIdentity.exteriorVoidFootprintCells,1693);
  let missing=0;
- for(let x=0;x<84;x++)for(let z=0;z<70;z++){
+ for(let x=0;x<b.footprint.width;x++)for(let z=0;z<b.footprint.depth;z++){
   if(absent(x,z)){missing++;for(let y=0;y<12;y++)assert.ok(!vox.has(key([x,y,z])),'false missing glacier column '+key([x,y,z]));}
   else assert.equal(vox.get(key([x,0,z]))?.role,'foundation');
  }
@@ -147,7 +147,7 @@ test('#654 twenty-four original exterior Pack4 glazed apertures and true produce
   assert.ok(Number.isInteger(dx)&&Number.isInteger(dz));assert.equal(y,2);assert.equal(p.asset,'pack4:030');
   const ox=x+dx,oz=z+dz,ix=x-dx,iz=z-dz;
   assert.ok(walks.has(key([ix,1,iz])),'window interior is not walkable '+key(p.at));
-  assert.ok(absent(ox,oz)||ox===0||ox===83||oz===0||oz===69,'window faces internal wall '+key(p.at));
+  assert.ok(absent(ox,oz)||ox===0||ox===b.footprint.width-1||oz===0||oz===b.footprint.depth-1,'window faces internal wall '+key(p.at));
   assert.ok(!vox.has(key([ox,2,oz]))&&!vox.has(key([ox,3,oz])),'fake outside view '+key(p.at));
   if(absent(ox,oz))notchViews++;
  }

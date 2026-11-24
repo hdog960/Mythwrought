@@ -1360,7 +1360,7 @@ export const ROADMAP_C_1A_WAVE31_INN_SPECS=Object.freeze([
       }
     ],
     "posts": [
-      40,
+      42,
       50
     ],
     "detail": "Original 21-chamber snow fjord inn with three real full-depth carved glacier cuts, grounded fully roof-open 56-cell aurora courtyard, connected three-pier interior longhouse, separate west sleighwright and east steam-spring wings, stepped supported Pack3 snow roofs, true Pack4 wall glazing and four physically reserved Pack5 wanderer-quilt beds. SOURCE ONLY, no settlements, live world, final materials, structural/collision/weather, PWA, schema or save approval."
