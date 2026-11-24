@@ -16,13 +16,15 @@ if(!Number.isInteger(shard)||shard<0||shard>3)throw Error('EGG_SHARD must be 0..
 const catalog=buildCreativeCatalog();
 assert.equal(catalog.blocks.length,241);
 assert.equal(catalog.creatures.length,40);
-const eggs=catalog.creatures.slice(shard*10,shard*10+10);
-assert.equal(eggs.length,10);
+const offset=Number(process.env.EGG_OFFSET??0);
+assert.ok(Number.isInteger(offset)&&offset>=0&&offset<10,'EGG_OFFSET must be 0..9');
+const eggs=catalog.creatures.slice(shard*10+offset,shard*10+10);
+assert.equal(eggs.length,10-offset);
 const OUT='artifacts/creative-eggs/shard-'+shard;
 await mkdir(OUT,{recursive:true});
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const report={kind:'real-original-game-creative-egg-placement-and-reload',shard,
-  head:process.env.GITHUB_SHA||null,sourceCatalog:catalog.revision,
+  head:process.env.GITHUB_SHA||null,offset,expectedSpecies:eggs.map(e=>e.id),sourceCatalog:catalog.revision,
   worldGenerator:ENCHANTED_P2_GENERATOR,realWebGL2:true,oldWorldOpened:false,
   realUIEggClick:true,realUIPlaceClick:true,noInjectedMobs:true,
   physicalIphone:false,species:[],errors:[],complete:false};
@@ -53,8 +55,9 @@ try{
       'Registry-backed egg must have a real implementation');
     const ctx=await browser.newContext({viewport:{width:932,height:430},
       deviceScaleFactor:1,isMobile:true,hasTouch:true,serviceWorkers:'block'});
-    const page=await ctx.newPage(),errors=[],missing=[];
-    page.on('dialog',d=>d.accept());
+    const page=await ctx.newPage(),errors=[],missing=[],dialogs=[];
+    let stage='initial-world';
+    page.on('dialog',async d=>{dialogs.push({type:d.type(),message:d.message()});await d.accept();});
     page.on('pageerror',e=>errors.push(String(e.message)));
     page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
     try{
@@ -63,8 +66,17 @@ try{
       await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,null,{timeout:60000});
       await page.locator('#menu').click();
       assert.equal(await page.locator('#advancedMenu').evaluate(e=>e.open),false);
+      stage='new-world';
       await page.locator('#newWorld').click();
-      await page.waitForFunction(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator?.includes('enchanted'),null,{timeout:60000});
+      await page.waitForFunction(generator=>{
+        const t=window.__mythwroughtTest;
+        const status=document.querySelector('#seedMessage')?.textContent??'';
+        return t?.fourBiomeProfile()?.generator===generator||status.includes('New world refused');
+      },ENCHANTED_P2_GENERATOR,{timeout:60000});
+      const created=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),status:document.querySelector('#seedMessage')?.textContent,seed:window.__mythwroughtTest?.snapshot()?.seed}));
+      assert.equal(created.profile?.generator,ENCHANTED_P2_GENERATOR,'NEW WORLD failed: '+JSON.stringify({created,dialogs}));
+      console.log('REAL_CREATIVE_WORLD_READY',JSON.stringify({id:egg.id,created,dialogs}));
+      stage='physical-setup';
       await page.locator('#closeHelp').click();
       await page.waitForFunction(()=>
         Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,
@@ -107,6 +119,7 @@ try{
         document.querySelector('.mw-inventory-grid [data-key="spawn:'+id+'"]')
           ?.getAttribute('aria-selected')==='true',egg.id,{timeout:15000});
       await page.locator('.mw-inventory-close').click();
+      stage='actual-place';
       await page.locator('#place').click(); // THE ACTUAL USER ACTION
       await page.waitForFunction(id=>{
         const t=window.__mythwroughtTest,s=t?.mobStatus();
@@ -126,6 +139,7 @@ try{
         +document.querySelector('#scene')?.dataset.mobDrawCalls>0,
         null,{timeout:30000});
       const live=await screenshot(page,egg.id,'live');
+      stage='cold-reload';
       await page.reload({waitUntil:'networkidle',timeout:45000});
       await page.waitForFunction(id=>{
         const t=window.__mythwroughtTest,s=t?.mobStatus();
@@ -183,14 +197,20 @@ try{
           images:[live.sha256,reloaded.sha256]}));
       await saveProof();
     }catch(err){
-      report.errors.push({id:egg.id,error:String(err?.stack||err)});
-      await saveProof();throw err;
+      const diagnostics=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),seed:window.__mythwroughtTest?.snapshot()?.seed,status:document.querySelector('#seedMessage')?.textContent,saveHealth:document.querySelector('#saveHealth')?.textContent,loadedChunks:document.querySelector('#scene')?.dataset.loadedChunks,targetPlace:document.querySelector('#scene')?.dataset.targetPlace,mobs:window.__mythwroughtTest?.mobStatus()})).catch(e=>({diagnosticError:String(e)}));
+      const failure={id:egg.id,stage,error:String(err?.stack||err),diagnostics,dialogs,pageErrors:errors,missing};
+      report.errors.push(failure);
+      console.error('REAL_CREATIVE_EGG_FAILURE',JSON.stringify(failure));
+      await saveProof();
+      // Continue independent fresh contexts to collect every outstanding result.
+      // Any failure still fails the whole shard below.
     }finally{await ctx.close();}
   }
-  assert.equal(report.species.length,10);
-  assert.equal(new Set(report.species.map(x=>x.id)).size,10);
+  assert.equal(report.errors.length,0,'One or more required species failed');
+  assert.equal(report.species.length,eggs.length);
+  assert.deepEqual(report.species.map(x=>x.id),eggs.map(x=>x.id));
   assert.equal(new Set(report.species.flatMap(x=>
-    [x.live.sha256,x.reloaded.sha256])).size,20);
+    [x.live.sha256,x.reloaded.sha256])).size,2*eggs.length);
   report.complete=true;await saveProof();
 }catch(err){
   report.errors.push({fatal:String(err?.stack||err)});
