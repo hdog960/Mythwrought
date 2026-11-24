@@ -1,0 +1,44 @@
+name: Mountain V8 original synthetic GPU two-pass failure research
+# One-shot narrow original-source native 13-case test only.
+# Separate immutable read-only production checkout; no real WebGL or deploy.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-original-mock-gpu-transaction-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-two-pass-mock-rollback:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Read original isolated Mountain V8 source
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Read pinned production Desert Phase3 source ONLY
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Original Node22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact dual SHAs, syntax, and 13 NEW original source mock-GPU tests
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-mock-gpu-transaction-research.mjs
+          node --check isolated/tests/mountain-v8-p3-mock-gpu-transaction-research.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-mock-gpu-transaction-research.test.mjs
