@@ -14,12 +14,22 @@ export function createM7MobCollisionReader(world){
   // A deliberately small immutable *reader interface*. Never expose the
   // original world's set(), save(), base or edits mutation capabilities.
   // The original mob world-query reads only these source-backed operations.
-  const pack3=world.pack3Runtime;
-  const shapeOverlay=pack3?.size&&pack3?.playerFits?
-    Object.freeze({
-      size:()=>pack3.size(),
-      playerFits:bounds=>pack3.playerFits(bounds)
-    }):undefined;
+  // Resolve the current owner layer at read time. Capturing the initial
+  // layer loses late attachment/replacement; omitting target loses shaped
+  // occluders even though their collision is still solid.
+  const pack3View=Object.freeze({
+    size:()=>world.pack3Runtime?.size?.()??1,
+    playerFits:bounds=>world.pack3Runtime?.playerFits?.(bounds)??{fits:false},
+    target:(...args)=>typeof world.pack3Runtime?.target==='function'?
+      world.pack3Runtime.target(...args):true
+  });
+  const manual14View=Object.freeze({
+    size:()=>world.manual14Layer?.size?.()??1,
+    target:(...args)=>typeof world.manual14Layer?.target==='function'?
+      world.manual14Layer.target(...args):true
+  });
+  const manual14Collision=bounds=>world.manual14Collision(bounds);
+  const pack5Collision=bounds=>world.pack5Collision(bounds);
   return Object.freeze({
     get(x,y,z){
       const id=world.get(x,y,z);
@@ -29,10 +39,11 @@ export function createM7MobCollisionReader(world){
       (...args)=>world.getPack2State(...args):undefined,
     rotationAt:typeof world.rotationAt==='function'?
       (...args)=>world.rotationAt(...args):undefined,
-    pack3Runtime:shapeOverlay,
-    manual14Collision:typeof world.manual14Collision==='function'?
-      bounds=>world.manual14Collision(bounds):undefined,
-    pack5Collision:typeof world.pack5Collision==='function'?
-      bounds=>world.pack5Collision(bounds):undefined
+    get pack3Runtime(){return world.pack3Runtime?pack3View:undefined;},
+    get manual14Layer(){return world.manual14Layer?manual14View:undefined;},
+    get manual14Collision(){return typeof world.manual14Collision==='function'?
+      manual14Collision:undefined;},
+    get pack5Collision(){return typeof world.pack5Collision==='function'?
+      pack5Collision:undefined;}
   });
 }
