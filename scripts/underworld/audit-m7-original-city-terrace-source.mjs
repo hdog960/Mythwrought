@@ -108,6 +108,10 @@ for(const [rx,rz] of regions){
   originalM7NativeOriginalWorldMethodsStable:
    nativeSourceProof.originalWorldMethodsStable===true&&
    nativeSourceProof.originalCaveReaderBindingStable===true,
+  originalM7NativeInheritedVoxelMethodsStable:
+   nativeSourceProof.originalInheritedVoxelBaselineMethodsStable===true,
+  originalM7NativeSuperclassExact:
+   nativeSourceProof.originalFourRegionSuperclassExact===true,
   originalM7NativeEditsUnchanged:
    nativeSourceProof.originalWorldEditMapInstancesStable===true&&
    nativeSourceProof.originalWorldEditMapsEmpty===true,
