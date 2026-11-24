@@ -1,0 +1,44 @@
+name: Mountain V8 final continuous crown and candidate14 offline closure
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-final-crown.yml]
+permissions:
+  contents: read
+jobs:
+  crown:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Targeted changed foliage geometry, dedicated material and production parity
+        env:
+          MOUNTAIN_PRIOR_ROOT: ${{ github.workspace }}/prior-production
+        run: |
+          git rev-parse HEAD
+          node --check src/voxel.mjs
+          node --check src/depth-mesh.mjs
+          node --test tests/mountain-v8-final-crown.test.mjs tests/mountain-v8-dedicated-materials.test.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual fully streamed revised crown and cold offline reopen
+        run: node scripts/ci/mountain-v8-final-crown.mjs
+      - name: Retain original game captures and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-final-crown
+          path: artifacts/mountain-v8-final-crown/
+          if-no-files-found: warn
