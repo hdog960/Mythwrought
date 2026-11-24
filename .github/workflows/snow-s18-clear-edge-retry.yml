@@ -1,0 +1,43 @@
+name: Snow S18 corrected actual taper viewpoint only
+on:
+  push:
+    branches: [research/snow-s18-clear-edge-camera-retry-20261124]
+    paths:
+      - 'scripts/ci/snow-s18-clear-edge-retry-webgl2.mjs'
+      - '.github/workflows/snow-s18-clear-edge-retry.yml'
+permissions:
+  contents: read
+jobs:
+  clear-edge-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate S18 already accepted source (no duplicate native)
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object src/voxel.mjs)" = 11872f442aaf427cd1bd76f50b7c6ad73920efd2
+          test "$(git hash-object src/storybook-materials.mjs)" = 41048c86150bb428b3cdb27df18f57cb30699c19
+          test "$(git hash-object src/manual-biomes/snowy-s17-fresh-source.mjs)" = c04300cc3ad920f3900d76f35cf267393b0ce6a7
+          node --check scripts/ci/snow-s18-clear-edge-retry-webgl2.mjs
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine corrected original and candidate edge comparison
+        run: |
+          python3 -m http.server 4173 >/tmp/snow-s18-retry.log 2>&1 &
+          node scripts/ci/snow-s18-clear-edge-retry-webgl2.mjs
+      - name: Preserve real visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s18-clear-edge-retry-${{ github.sha }}
+          path: artifacts/snow-s18-edge-retry/
+          if-no-files-found: ignore
+          retention-days: 7
