@@ -1,0 +1,104 @@
+name: Living Underworld Phase35 — compact upper-hub real M7 source gate
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase35-compact-upper-hub-research-20261124
+    paths:
+      - .github/workflows/living-underworld-phase35-compact-native.yml
+# Isolated cave research ONLY. No shared CI, merge, deployment, workflow
+# cancellation, saving world, or full 25-file native repetition.
+permissions:
+  contents: read
+
+jobs:
+  verify-reduced-true-original-M7-core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Checkout exact isolated source without write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Native Node22.16.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact clean source and native test syntax
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check src/living-underworld/compact-upper-hub-research.mjs
+          node --check tests/living-underworld-compact-upper-hub-research.test.mjs
+          node --check scripts/underworld/audit-m7-five-biome-hub-chunk-risk.mjs
+      - name: Focused 8-test native geometry, safety, and connectivity suite
+        shell: bash
+        run: |
+          node --test tests/living-underworld-compact-upper-hub-research.test.mjs \
+            > "$RUNNER_TEMP/m7-compact-native-tests.tap" 2>&1
+          tail -n 28 "$RUNNER_TEMP/m7-compact-native-tests.tap"
+      - name: True M7 five-biome read-only source-protected compact mask
+        shell: bash
+        run: |
+          set +e
+          node scripts/underworld/audit-m7-five-biome-hub-chunk-risk.mjs \
+            > "$RUNNER_TEMP/m7-compact-original-chunk.json" \
+            2> "$RUNNER_TEMP/m7-compact-original-chunk.stderr"
+          status=$?
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const dir=process.env.RUNNER_TEMP;
+            const report=JSON.parse(fs.readFileSync(dir+"/m7-compact-original-chunk.json","utf8").trim().split(/\r?\n/).at(-1));
+            const a=report.aggregateSourceRisk;
+            const summary={
+              schema:report.schema,seed:report.seed,
+              originalBaselineOwned:report.originalBaselineOwnedInteriorGeometryProposals,
+              compactOwned:report.compactOwnedInteriorGeometryProposals,
+              trueApprovedOwned:a.approvedCarves,
+              realRemoved:report.actuallyRemovedOwnedInteriorGeometryProposals,
+              fiveBiomes:report.rows.map(r=>({
+                biome:r.biome,oldOwned:r.originalUncompactedOwnedInteriorProposals,
+                newOwned:r.ownedInteriorApprovedCarves,
+                unsafe:r.sourceRejectedCarveCells,
+                faceGrowth:r.approvedOnlyAddedFaces,
+                coreParity:r.sourceCoreCutParity
+              })),
+              originalSourceRisk:a.ok,sourceRiskReason:a.reason,
+              fiveBiomeSourceQueries:a.sourceQueries,
+              faceGrowth:a.faceGrowth,sourceUnsafe:a.unsafeCarves,
+              completeCoreHaloEvidence:a.completeCoreHaloEvidence,
+              disjointOwnedChunks:a.ownedChunkInteriorsDisjoint,
+              aggregateBudgetStill10000:report.strictAggregateOwnedInteriorCarveLimitStill10000,
+              unchangedOriginalWorld:report.noWorldEdits
+            };
+            console.log(JSON.stringify(summary,null,2));
+            if(!a.ok||!a.completeCoreHaloEvidence||
+              !a.ownedChunkInteriorsDisjoint||
+              a.approvedCarves>10000||a.sourceQueries!==29160||
+              a.unsafeCarves!==0||a.faceGrowth>3500||
+              report.originalBaselineOwnedInteriorGeometryProposals!==14168||
+              report.compactOwnedInteriorGeometryProposals!==9617||
+              report.actuallyRemovedOwnedInteriorGeometryProposals!==4551||
+              report.strictAggregateOwnedInteriorCarveLimitStill10000!==true||
+              report.noWorldEdits!==true||
+              report.rows.some(r=>!r.ok||r.sourceRejectedCarveCells!==0||
+                r.sourceCoreCutParity!==true))process.exitCode=3;
+          '
+          integrity=$?
+          echo "Native script status=$status, aggregate gate status=$integrity"
+          tail -c 2000 "$RUNNER_TEMP/m7-compact-original-chunk.stderr" || true
+          if [ "$status" -ne 0 ]; then exit "$status"; fi
+          if [ "$integrity" -ne 0 ]; then exit "$integrity"; fi
+      - name: Preserve genuine source risk and native test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-underworld-phase35-compact-original-m7
+          path: |
+            ${{ runner.temp }}/m7-compact-native-tests.tap
+            ${{ runner.temp }}/m7-compact-original-chunk.json
+            ${{ runner.temp }}/m7-compact-original-chunk.stderr
+          if-no-files-found: warn
+          retention-days: 7
