@@ -1,0 +1,35 @@
+name: Snow S12 detached original conifer physical shapes
+on:
+  push:
+    branches: [research/snow-s12-natural-conifer-original-source-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs'
+      - 'tests/snowy-s12-*.test.mjs'
+      - '.github/workflows/snow-s12-natural-conifer-native.yml'
+permissions:
+  contents: read
+jobs:
+  native-original-conifers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original immutable refs and focused shape contracts
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s6-cross-owner-forest-audit.mjs)" = 96af334d6707b4b6d27bee47ae8c718474f8414f
+          node --test tests/snowy-s12-natural-conifer-prototypes.test.mjs
+      - name: Two authentic original M7 six-chunk physical forests and original mesher
+        run: |
+          node --test tests/snowy-s12-real-original-forest.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
