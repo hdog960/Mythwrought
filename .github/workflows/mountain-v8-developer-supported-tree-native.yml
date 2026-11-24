@@ -1,0 +1,26 @@
+name: Mountain V8 actual supported tree action and rollback
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-supported-tree-native.yml]
+permissions:
+  contents: read
+jobs:
+  supported-tree:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and six new real world interaction tests
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --check src/blocks.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --test --test-concurrency=1 tests/mountain-v8-developer-supported-tree-native.test.mjs
