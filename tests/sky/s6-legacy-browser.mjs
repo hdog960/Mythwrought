@@ -89,6 +89,9 @@ try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
       await waitStage(page);
       await page.locator('#menu').click();
+      // SAVE is a retained Advanced action in the released compact menu.
+      await page.locator('#advancedMenu > summary').click();
+      assert.equal(await page.locator('#advancedMenu').evaluate(el=>el.open),true);
       await page.locator('#save').click();
       await page.locator('#closeHelp').click();
       const saved=await nonClock(page);
