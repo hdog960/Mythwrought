@@ -94,7 +94,7 @@
     "./src/sky-moons.mjs": "f1b9e15d60ab624f3194d5eb1221e133c924bca8d737a8e15006e7babd775bb8",
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
-    "./src/sky-v6-adapter.mjs": "865daa5ee5a593ab8de9268bfec6fa44813ada79b74d479d163425cdf6c223d5",
+    "./src/sky-v6-adapter.mjs": "b0a44a8c103a11af026578e47484ecaf3fa19110638dd903b3d4398f853c25dd",
     "./": "2a960a653fd6e33a8f4167c1f7050497c7b6b6fb39e767521133fc646377fc45",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
     "./index.html": "2a960a653fd6e33a8f4167c1f7050497c7b6b6fb39e767521133fc646377fc45",
