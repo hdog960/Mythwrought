@@ -6,9 +6,9 @@ import {VoxelWorld,BLOCK} from '../../src/voxel.mjs';
 import {sectionBounds} from '../../src/depth.mjs';
 import {meshDepthSection} from '../../src/depth-mesh.mjs';
 import {meshDepthSection291} from '../../src/depth-mesh-291.mjs';
-import {ENVIRONMENT_GROUND} from '../../src/environment-ground.mjs';
-import {BIOME130_REGISTERED_IDS} from '../../src/biome130-registry.mjs';
-import {pack2NormalizeState} from '../../src/pack2-integration.mjs';
+import {ENVIRONMENT_GROUND,environmentGround} from '../../src/environment-ground.mjs';
+import {BIOME130_REGISTERED_IDS,isBiome130BlockId} from '../../src/biome130-registry.mjs';
+import {pack2NormalizeState,isPack2LiveId} from '../../src/pack2-integration.mjs';
 
 function parity(a,b,cx,cz,section){
   const expected=meshDepthSection(a,cx,cz,section);
@@ -126,4 +126,41 @@ test('cache miss exception propagates at identical axial source read without ret
   }
   assert.deepEqual(traces[1],traces[0]);
   assert.deepEqual(traces[1].at(-1),target);
+});
+
+
+test('actual rock registry contract disjoint from Pack2 biome and environment IDs',()=>{
+  for(const id of [BLOCK.STONE,BLOCK.DEEPSTONE]){
+    assert.equal(isPack2LiveId(id),false);
+    assert.equal(isBiome130BlockId(id),false);
+    assert.equal(environmentGround(id),undefined);
+  }
+});
+test('hot rock path preserves source reads for solid and mined stone/deepstone',()=>{
+  for(const id of [BLOCK.STONE,BLOCK.DEEPSTONE]){
+    for(const s of [-1,-13]){
+      const {minY,maxY}=sectionBounds(s),cx=-1,cz=1;
+      for(const cavity of [false,true]){
+        const traces=[[],[]];
+        const fixture=trace=>({get(x,y,z){
+          trace.push([x,y,z]);
+          return cavity&&((x+y+z)%7===0||y===minY||y===maxY)?BLOCK.AIR:id;
+        }});
+        parity(fixture(traces[0]),fixture(traces[1]),cx,cz,s);
+        assert.deepEqual(traces[1],traces[0]);
+      }
+    }
+  }
+});
+test('rock next to actual water and environment ground preserves material faces and reads',()=>{
+  const ids=[BLOCK.STONE,BLOCK.DEEPSTONE,BLOCK.AIR,76,ENVIRONMENT_GROUND.slate];
+  for(const [cx,cz,s] of [[0,0,-1],[-2,3,-13]]){
+    const traces=[[],[]];
+    const fixture=trace=>({get(x,y,z){
+      trace.push([x,y,z]);
+      return ids[Math.abs(x*19+y*17+z*23)%ids.length];
+    }});
+    parity(fixture(traces[0]),fixture(traces[1]),cx,cz,s);
+    assert.deepEqual(traces[1],traces[0]);
+  }
 });
