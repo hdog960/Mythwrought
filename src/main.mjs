@@ -973,6 +973,34 @@ function start(nonblockStage=null){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
+  // Synchronous real renderer owner: retain all old loaded entries until
+  // the complete upload batch is ready. No awaits, save writes or callbacks
+  // between final validation and map publication. Context loss invalidates
+  // the batch rather than publishing dead handles.
+  function publishEditedChunkBatch(batch){
+    if(gl.isContextLost())throw Error('Graphics context lost before edit mesh staging');
+    const owner=world;
+    const originals=batch.map(item=>chunks.get(item.key));
+    if(originals.some(item=>!item))throw Error('Edited chunk no longer resident');
+    const ready=[];
+    try{
+      for(const item of batch){
+        if(gl.isContextLost())throw Error('Graphics context lost during edit mesh staging');
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+      }
+      if(gl.isContextLost()||world!==owner||
+         batch.some((item,i)=>chunks.get(item.key)!==originals[i]))
+        throw Error('Edited mesh owner changed before publication');
+    }catch(error){
+      if(!gl.isContextLost())for(const item of ready)deleteChunkBuffers(item);
+      throw error;
+    }
+    for(const item of ready)chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+      buffer:item.buffer,count:item.count,waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+    // All replacements are visible before any old handle is retired.
+    if(!gl.isContextLost())for(const old of originals)deleteChunkBuffers(old);
+    return ready;
+  }
   function refreshEditedMeshes(x,z,y=0,affectedCells=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
@@ -991,22 +1019,7 @@ function start(nonblockStage=null){
         const water=meshPlayableWater(cx,cz,section);
         batch.push({key,cx,cz,section,vertices,water});
       }
-    const ready=[];
-    try{
-      for(const item of batch){
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
-      }
-    }catch(err){
-      for(const item of ready)deleteChunkBuffers(item);
-      throw err;
-    }
-    for(const item of ready){
-      const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
-    }
+    const ready=publishEditedChunkBatch(batch);
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
     if(caveSession||combinedWorld())caveFarGpu.invalidate();
@@ -1019,10 +1032,7 @@ function start(nonblockStage=null){
     if(!chunks.has(key))return;
     const vertices=meshPlayableChunk(cx,cz,section);
     const water=meshPlayableWater(cx,cz,section);
-    const buffers=uploadPack2Chunk(vertices,water);
-    const old=chunks.get(key);
-    chunks.set(key,{x:cx,z:cz,section,...buffers});
-    deleteChunkBuffers(old);
+    publishEditedChunkBatch([{key,cx,cz,section,vertices,water}]);
     editMeshBatches++;
     lastEditMeshKeys=[key];
   }
@@ -1040,24 +1050,10 @@ function start(nonblockStage=null){
       const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
       if(chunks.has(key))unique.set(key,{key,cx,cz,section});
     }
-    const ready=[];
-    try{
-      for(const item of unique.values()){
-        const vertices=meshPlayableChunk(item.cx,item.cz,item.section);
-        const water=meshPlayableWater(item.cx,item.cz,item.section);
-        ready.push({...item,...uploadPack2Chunk(vertices,water)});
-      }
-    }catch(error){
-      for(const item of ready)deleteChunkBuffers(item);
-      throw error;
-    }
-    for(const item of ready){
-      const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
-    }
+    const batch=[...unique.values()].map(item=>({...item,
+      vertices:meshPlayableChunk(item.cx,item.cz,item.section),
+      water:meshPlayableWater(item.cx,item.cz,item.section)}));
+    const ready=publishEditedChunkBatch(batch);
     if(ready.length){
       editMeshBatches++;
       lastEditMeshKeys=ready.map(x=>x.key);
