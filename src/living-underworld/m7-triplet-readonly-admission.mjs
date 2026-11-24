@@ -126,6 +126,9 @@ export function classifyExactHeadOriginalM7Triplet({
       !yes(r.candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries)||
       !yes(r.candidateThinUnderpassCrossAuditPreReadHardCaps)||
       !yes(r.candidateThinUnderpassCrossAuditCallbacksWithinCaps)||
+      !yes(r.candidateThinUnderpassCrossAuditReentrancyGuard)||
+      !yes(r.candidateThinUnderpassCrossAuditAtomicReadReservation)||
+      r.candidateThinUnderpassCrossAuditFailedOriginalCallbacks!==0||
       r.candidateThinUnderpassCrossAuditBlockedOriginalCallbacks!==0||
       r.candidateThinUnderpassCrossAuditSourceCallbackCap!==1200000||
       r.candidateThinUnderpassCrossAuditDistinctCellCapPerRole!==160000||
