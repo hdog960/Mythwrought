@@ -158,6 +158,10 @@ test('Wave13 two original bank vaults have genuine physically OPEN 2x3 internal 
   assert.equal(b,a+1,'two adjacent original internal vault entrances '+bp.id);
   const voxel=new Map(bp.voxels.map(v=>[v.x+','+v.y+','+v.z,v]));
   const {seen,floor,occupied}=floorReach(bp);
+  // Stronger original-source regression: the entire authored vault footprint,
+  // not just the two door columns, must stand on genuine y=1 source floor.
+  for(let x=x0;x<=x1;x++)for(let z=z0;z<=z1;z++)
+   assert.ok(floor.has(key(x,z)),bp.id+' unsupported vault shell/interior floor '+key(x,z));
   for(const z of [a,b]){
    assert.ok(floor.has(key(x0-1,z))&&floor.has(key(x0,z))&&floor.has(key(x0+1,z)),
     'missing source-supported outside/threshold/inside vault floor '+bp.id);
