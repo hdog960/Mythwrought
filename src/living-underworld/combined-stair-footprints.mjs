@@ -393,3 +393,6 @@ export function compileSelectedStairPedestrianClearance(proposals,{
   actualPlayerWalkingNotVerified:true,
   worldChanged:false});
 }
+
+// Isolated construction uses the exact audited footprint, not a new raster.
+export {footprint as compileGalleryConstructionFootprint};
