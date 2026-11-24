@@ -1,0 +1,44 @@
+name: Mountain V8 isolated P3 source mesh staging atomic rollback preview
+# One original native source-only focused 12-case gate. No production changes,
+# live WebGL, world writes, branch merges, recurring jobs or broad CI.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-atomic-mesh-preview-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-p3-cpu-stage-rollback:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact isolated V8 research
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Checkout immutable original Desert P3 production read only
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Original Node22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify exact sources, changed syntax and 12 focused original cases
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-mesh-batch-rollback-research.mjs
+          node --check isolated/tests/mountain-v8-p3-mesh-batch-rollback-research.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-mesh-batch-rollback-research.test.mjs
