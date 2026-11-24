@@ -1,0 +1,97 @@
+name: Enchanted release 486 paired blocker diagnostics
+on:
+  push:
+    branches: [research/enchanted-release-486-paired-diagnostics-20261124]
+    paths: [.github/workflows/enchanted-release-486-paired-diagnostics.yml]
+permissions:
+  contents: read
+jobs:
+  paired-original-blockers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production
+      - uses: actions/checkout@v4
+        with:
+          ref: c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10
+          path: candidate
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate both original checkouts and install one browser
+        run: |
+          test "$(git -C production rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git -C candidate rev-parse HEAD)" = c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10
+          cmp production/tests/sky/s1-clock-browser.mjs candidate/tests/sky/s1-clock-browser.mjs
+          cmp production/tests/nonblock-parity-browser.mjs candidate/tests/nonblock-parity-browser.mjs
+          cmp production/src/preflight.mjs candidate/src/preflight.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Instrument temporary test copies only, preserving original assertions
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for root in map(Path, ['production','candidate']):
+              p=root/'tests/sky/s1-clock-browser.mjs'
+              s=p.read_text()
+              def rep(s,a,b):
+                  assert s.count(a)==1,a
+                  return s.replace(a,b)
+              s=rep(s,'const sizes=[[667,375],[844,390],[932,430]];','const sizes=[[932,430]];')
+              s=rep(s,'    const state=()=>page.evaluate(()=>{','''    const trace=async(label)=>{const details=await page.evaluate(()=>{
+                const c=document.querySelector('#scene'),a=window.__mythwroughtTest;
+                return {seed:c.dataset.skyClockSeed,center:c.dataset.chunkCenter,loaded:+c.dataset.loadedChunks,pending:+c.dataset.pendingChunks,
+                  rendered:+c.dataset.renderedFrames,helpHidden:document.querySelector('#help').hidden,
+                  focused:document.activeElement?.id,player:a?.player?.(),profile:a?.fourBiomeProfile?.(),snapshot:a?.snapshot?.(),faults:a?.gpuUploadFaults?.()};
+              });console.log('SKY TRACE '+label+' '+JSON.stringify(details));};
+              const state=()=>page.evaluate(()=>{''')
+              s=rep(s,'        const other=await state();','        await trace("other-before-night");\n        const other=await state();')
+              s=rep(s,'        const back=await state();','        await trace("return-before-close");\n        const back=await state();')
+              s=rep(s,'       const beforeAudit=await storageExceptClock();','       const beforeAudit=await storageExceptClock();') if '       const beforeAudit=await storageExceptClock();' in s else s
+              s=rep(s,'      const beforeAudit=await storageExceptClock();','      await trace("before-audit");\n      const beforeAudit=await storageExceptClock();')
+              s=rep(s,'      const end=await state();','''      const end=await state();
+              await trace("original-final-sample");
+              if(end.chunks!==25){await page.waitForTimeout(4000);await trace("after-four-more-seconds");await page.waitForTimeout(8000);await trace("after-twelve-more-seconds");}''')
+              (p.parent/'s1-release-diagnostic.mjs').write_text(s)
+              p=root/'tests/nonblock-parity-browser.mjs'
+              s=p.read_text()
+              s=rep(s,"    assert.ok(stats.frames>=12,'Expected a warm frame sample for '+habitat);",'''    const gaps=timestamps.slice(1).map((t,i)=>t-timestamps[i]);
+              const details=await page.evaluate(()=>({hidden:document.hidden,visibility:document.visibilityState,
+                focus:document.hasFocus(),dataset:{...document.querySelector('#scene').dataset},snapshot:window.__mythwroughtTest.snapshot()}));
+              console.log('PARITY FRAME TRACE '+JSON.stringify({habitat,timestamps,gaps,stats,details}));
+              assert.ok(stats.frames>=12,'Expected a warm frame sample for '+habitat);''')
+              (p.parent/'nonblock-release-diagnostic.mjs').write_text(s)
+          PY
+      - name: Paired actual original-game sky and desert observations (sequential)
+        run: |
+          mkdir -p evidence
+          for version in production candidate; do
+            (
+              cd "$version"
+              python3 -m http.server 4173 >"/tmp/enchanted-486-$version-server.log" 2>&1 &
+              server=$!
+              trap 'kill "$server" 2>/dev/null || true' EXIT
+              sleep 1
+              export GITHUB_SHA="$(git rev-parse HEAD)"
+              set +e
+              node tests/sky/s1-release-diagnostic.mjs > "../evidence/$version-sky.log" 2>&1
+              sky=$?
+              NONBLOCK_PARITY_HABITATS=meadow,desert node tests/nonblock-release-diagnostic.mjs > "../evidence/$version-parity.log" 2>&1
+              parity=$?
+              printf '%s sky=%s parity=%s\n' "$version" "$sky" "$parity" | tee "../evidence/$version-status.txt"
+              cat "../evidence/$version-sky.log" "../evidence/$version-parity.log"
+              # These are diagnostic results, never substitutes for acceptance.
+              exit 0
+            )
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: enchanted-486-paired-blocker-diagnostics
+          path: evidence/
+          if-no-files-found: error
+          retention-days: 14
