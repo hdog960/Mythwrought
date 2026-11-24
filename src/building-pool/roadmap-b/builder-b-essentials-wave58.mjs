@@ -21,8 +21,8 @@ export function buildRimeboundTwinArcCorralStable(){
   ['northwest-iced-arch',5,7,18,30,14,'pack3:026'],
   ['northeast-rimewatch-room',46,7,58,30,16,'pack3:025'],
   ['southern-pine-archway',27,53,37,62,19,'pack3:023'],
-  ['west-fir-side-vault',5,31,12,50,15,'pack3:026'],
-  ['east-fir-side-vault',51,31,58,50,17,'pack3:025']
+  ['west-fir-side-vault',5,31,12,62,15,'pack3:026'],
+  ['east-fir-side-vault',51,31,58,62,17,'pack3:025']
  ],courts=[
   ['northern-open-sky-oculus',27,24,36,34],
   ['west-open-snow-yard',14,38,21,45],
