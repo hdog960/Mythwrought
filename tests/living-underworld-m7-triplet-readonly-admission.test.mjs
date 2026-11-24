@@ -126,6 +126,11 @@ const city=()=>({
   candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged:true,
   candidateThinUnderpassCrossAuditLedgerCallerOnly:true,
   candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries:true,
+  candidateThinUnderpassCrossAuditPreReadHardCaps:true,
+  candidateThinUnderpassCrossAuditBlockedOriginalCallbacks:0,
+  candidateThinUnderpassCrossAuditCallbacksWithinCaps:true,
+  candidateThinUnderpassCrossAuditSourceCallbackCap:1200000,
+  candidateThinUnderpassCrossAuditDistinctCellCapPerRole:160000,
   candidateThinUnderpassExpectedCombinedDistinctCells:
    (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
@@ -622,5 +627,40 @@ test('Phase29 zero actual prior-to-underpass repeated coordinates are allowed wh
  const r=check({city:c});
  assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,true);
  assert.equal(r.cityThinUnderpassRealM7WalkingUnverified,true);
+ assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase30 original M7 native source readers must enforce both hard caps before any callback is invoked',()=>{
+ const base=check();
+ assert.equal(base.cityThinUnderpassCrossAuditLedgerSafe,true);
+ for(const mutate of [
+  row=>{row.candidateThinUnderpassCrossAuditPreReadHardCaps=false},
+  row=>{row.candidateThinUnderpassCrossAuditCallbacksWithinCaps=false},
+  row=>{row.candidateThinUnderpassCrossAuditBlockedOriginalCallbacks=1},
+  row=>{row.candidateThinUnderpassCrossAuditBlockedOriginalCallbacks=-1},
+  row=>{row.candidateThinUnderpassCrossAuditSourceCallbackCap=1200001},
+  row=>{row.candidateThinUnderpassCrossAuditSourceCallbackCap=1199999},
+  row=>{row.candidateThinUnderpassCrossAuditDistinctCellCapPerRole=160001},
+  row=>{row.candidateThinUnderpassCrossAuditDistinctCellCapPerRole=159999},
+  row=>{delete row.candidateThinUnderpassCrossAuditBlockedOriginalCallbacks},
+  row=>{delete row.candidateThinUnderpassCrossAuditCallbacksWithinCaps}
+ ]){
+  const reports=city();mutate(reports.rows[0]);
+  const r=check({city:reports});
+  assert.equal(r.cityThinUnderpassDeepReaderCohortSafe,true);
+  assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.ok(r.reasonCodes.includes('RARE_CITY_UNDERPASS_PRIOR_TO_BRIDGE_SOURCE_VALUE_HOLD'));
+  assert.equal(r.releaseApproved,false);
+ }
+});
+test('Phase30 source budget policy must be independently enforced at BOTH original seed179 sites',()=>{
+ const reports=city();
+ reports.rows[1].candidateThinUnderpassCrossAuditPreReadHardCaps=false;
+ const r=check({city:reports});
+ assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+ assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
+ assert.equal(r.actualPlayerWalkingVerified,false);
  assert.equal(r.releaseApproved,false);
 });
