@@ -1,0 +1,63 @@
+name: Builder D51 isolated original articulated rotated-cap endface source ONLY
+on:
+  push:
+    branches:
+      - builder-d-d51-original-articulated-endface-isolated-20261124
+    paths:
+      - 'src/building-pool/roadmap-d/d51-*'
+      - 'tests/building-pool/roadmap-d/d51-*'
+      - 'docs/building-pool/roadmap-d/D51_*'
+      - '.github/workflows/roadmap-d-d51-original-articulated-endface.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d51-new-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-d51-real-source-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Authenticate exact D50 parent protected original owner and only six added files
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'b213303f71c86c233b0c4e6c1fbd4b7cd83edb2e'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d47-original-congruent-socket-saddle.mjs)" = 'a45e05cd56d3040cfd5211469caabed267075afd'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs)" = '354933307cc9a333587b54af42ddfc3cc4e8a8f8'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d50-lateral-three-stage-connector.mjs)" = '7890b431bff290cd56a92585dd95cdff900bbca8'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d50-original-lateral-bypass-audit.mjs)" = 'ffb22b7575876dd6f8a77b8e25064cbbd0969796'
+          git diff --name-only HEAD^ HEAD > /tmp/d51-actual
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d51-original-articulated-endface.yml' \
+            'docs/building-pool/roadmap-d/D51_TRUE_DOGLEG_ENDCAP_AND_ROTATED_CAP_HULL_GATE.md' \
+            'src/building-pool/roadmap-d/d51-articulated-true-endface-link.mjs' \
+            'src/building-pool/roadmap-d/d51-original-rotated-endface-audit.mjs' \
+            'tests/building-pool/roadmap-d/d51-articulated-endface.pure.test.mjs' \
+            'tests/building-pool/roadmap-d/d51-original-rotated-endface.source.test.mjs' > /tmp/d51-expected
+          diff -u /tmp/d51-expected /tmp/d51-actual
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax-check only four new D51 modules
+        run: |
+          node --check src/building-pool/roadmap-d/d51-articulated-true-endface-link.mjs
+          node --check src/building-pool/roadmap-d/d51-original-rotated-endface-audit.mjs
+          node --check tests/building-pool/roadmap-d/d51-articulated-endface.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d51-original-rotated-endface.source.test.mjs
+      - name: Run only D51 four new pure and two real W16-W17 tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d51-articulated-endface.pure.test.mjs \
+            tests/building-pool/roadmap-d/d51-original-rotated-endface.source.test.mjs
