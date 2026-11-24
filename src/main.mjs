@@ -573,7 +573,7 @@ function start(nonblockStage=null){
   function resetPack5ForWorld(){
     pack5ToggleEpoch++;
     if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
-    pack5Builder=null;pack5Mode=false;
+    pack5Builder=null;pack5Mode=false;creativePack5Owned=false;
     const toggle=document.getElementById('pack5Enabled');
     if(toggle)toggle.checked=false;
     queueMicrotask(()=>{void restoreSavedPack5Scene();});
@@ -592,6 +592,7 @@ function start(nonblockStage=null){
   const g2Status=document.getElementById('g2bFlightStatus');
   const inventoryHeader=document.getElementById('creativeInventoryToggle');
   let creativeInventory=null,creativeActivationEpoch=0,creativeSpawnSpecies=null;
+  let creativePack5Owned=false;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -789,7 +790,10 @@ function start(nonblockStage=null){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else {g2CreativeEnabled=false;creativeActivationEpoch++;creativeSpawnSpecies=null;}
+    }else {
+      g2CreativeEnabled=false;creativeActivationEpoch++;creativeSpawnSpecies=null;
+      if(creativePack5Owned){pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;}
+    }
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
@@ -2175,6 +2179,7 @@ function start(nonblockStage=null){
   }
   pack5Enabled.addEventListener('change',async()=>{
     const activation=++pack5ToggleEpoch;
+    creativePack5Owned=false;
     if(caveSession){
       pack5Enabled.checked=false;pack5Mode=false;
       pack5Status.textContent='Cave World keeps a separate voxel-only profile; shaped furnishings are available in ordinary worlds.';
@@ -2188,7 +2193,8 @@ function start(nonblockStage=null){
     try{
       const loaded=await ensurePack5Loaded();
       if(!loaded||!pack5Enabled.checked||activation!==pack5ToggleEpoch)return;
-      pack5Mode=true;
+      pack5Mode=true;creativeSpawnSpecies=null;
+      creativeInventory?.syncSelection();
       pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
         pack5Builder.layer.count()+' pieces in verified separate seed sidecar.';
     }catch(error){
@@ -2313,10 +2319,14 @@ function start(nonblockStage=null){
     if(BIOME130_REGISTERED_IDS.includes(selected))
       message('Selected '+biome130Block(selected).name+' · '+biomeRotation.selectedOptions[0].textContent);
   });
-  biomeSelect.addEventListener('change',()=>{
+  function clearCreativePlacementOverride(){
     creativeSpawnSpecies=null;
+    if(g2CreativeEnabled){pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;}
+  }
+  biomeSelect.addEventListener('change',()=>{
     const chosen=Number(biomeSelect.value);
     if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
+    clearCreativePlacementOverride();
     selected=chosen;selectedRotation=Number(biomeRotation.value);
     manual14Select.value='';pack3Palette.clear();pack2Selection=null;world.nextPack2State=null;
     document.getElementById('pack2StateText').textContent='Select a Pack 2 block to adjust its state.';
@@ -2373,9 +2383,9 @@ function start(nonblockStage=null){
   if(pack2Section?.parentElement)pack2Section.insertAdjacentElement('beforebegin',manual14Panel);
   else document.getElementById('advancedTools').append(manual14Panel);
   manual14Select.addEventListener('change',()=>{
-    creativeSpawnSpecies=null;
     const id=Number(manual14Select.value);
     if(!manual14Ids.has(id))return;
+    clearCreativePlacementOverride();
     selected=id;manual14Yaw=Number(manual14Rotate.value);
     manual14Variant=manual14Upper.checked?'upper':'lower';
     if(manual14Variant==='upper'&&id!==15&&id!==16){
@@ -2394,7 +2404,7 @@ function start(nonblockStage=null){
     manual14Variant=(manual14Upper.checked&&[15,16].includes(selected))?'upper':'lower';
   });
   const pack3Palette=installPack3Palette(help,(id,yaw)=>{
-    creativeSpawnSpecies=null;
+    clearCreativePlacementOverride();
     selected=id;pack3Yaw=yaw;biomeSelect.value='';manual14Select.value='';
     pack2Selection=null;updatePack2SelectionUI();
     document.querySelectorAll('[data-block]').forEach(q=>{
@@ -2418,7 +2428,7 @@ function start(nonblockStage=null){
   // Retain the actual Pack 3 palette and handlers; relocate its existing panel.
   document.getElementById('advancedTools').append(pack3Palette.material.closest('.looksetting'));
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
-    creativeSpawnSpecies=null;
+    clearCreativePlacementOverride();
     selected=Number(b.dataset.block);
     biomeSelect.value='';manual14Select.value='';pack3Palette.clear();
     pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
@@ -2445,6 +2455,7 @@ function start(nonblockStage=null){
   };
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();document.getElementById('advancedMenu').open=false;help.hidden=true;
+    if(g2CreativeEnabled)creativeInventory?.syncSelection();
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
   };
@@ -3428,6 +3439,11 @@ function start(nonblockStage=null){
   const creativeCatalog=buildCreativeCatalog();
   creativeInventory=installCreativeInventory({
     catalog:creativeCatalog,includeCreatures:true,
+    getActiveKey:()=>{
+      if(creativeSpawnSpecies)return 'spawn:'+creativeSpawnSpecies;
+      if(pack5Mode&&pack5Builder)return creativeCatalog.blocks.find(item=>item.owner==='pack5'&&item.symbol===pack5Family.value)?.key??null;
+      return 'block:'+selected;
+    },
     onOpen:()=>{
       if(!g2CreativeEnabled||!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
       gameplayRecorder?.interrupt('Creative inventory opened');cancelAllPointers();
@@ -3472,7 +3488,7 @@ function start(nonblockStage=null){
         if(!getSpecies(item.id)||!mobSession||typeof mobSession.spawnCreative!=='function'||
            mobSession.status()?.readonly!==false||!mobRenderer||mobRuntimeError)
           throw Error('Creature egg requires a writable live creature host and renderer');
-        pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;
+        pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;
         creativeSpawnSpecies=item.id;return;
       }
       if(item.kind!=='block')throw Error('Unknown Creative item');
@@ -3486,7 +3502,7 @@ function start(nonblockStage=null){
         pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
         pack5Variant.value=item.variants[0];
         if(pack5Variant.value!==item.variants[0])throw Error('Pack 5 variant not installed');
-        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;creativeSpawnSpecies=null;return;
+        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;creativePack5Owned=true;creativeSpawnSpecies=null;return;
       }
       let target;
       if(item.owner==='core'||item.owner==='pack2')target=document.querySelector('[data-block="'+item.id+'"]');
@@ -3497,7 +3513,7 @@ function start(nonblockStage=null){
       if(target.dataset.block)target.click();
       else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
       if(selected!==item.id)throw Error('Material selection not confirmed: '+item.key);
-      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativeSpawnSpecies=null;
+      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;creativeSpawnSpecies=null;
     }
   });
   inventoryHeader.addEventListener('click',()=>{

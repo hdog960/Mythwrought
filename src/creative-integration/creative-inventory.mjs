@@ -9,8 +9,8 @@ const el=(tag,className,text)=>{
   if(text!==undefined)n.textContent=text;
   return n;
 };
-export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRotate,onVariant,includeCreatures=true}={}){
-  if(!catalog?.records||[onSelect,onOpen,onClose,onRotate,onVariant].some(fn=>typeof fn!=='function'))
+export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRotate,onVariant,getActiveKey,includeCreatures=true}={}){
+  if(!catalog?.records||[onSelect,onOpen,onClose,onRotate,onVariant,getActiveKey].some(fn=>typeof fn!=='function'))
     throw TypeError('Creative inventory requires live item authority and context handlers');
   const overlay=el('div','mw-inventory');
   overlay.id='creativeInventory';overlay.hidden=true;
@@ -60,6 +60,8 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRota
       for(let i=0;i<slots.length;i++){
         const b=el('button','mw-inventory-slot'+(activeSlot===i?' active':''),slots[i]?.glyph??'＋');
         b.type='button';b.title=slots[i]?.name??'Empty slot';
+        b.dataset.key=slots[i]?.key??'';
+        b.setAttribute('aria-current',String(activeSlot===i));
         b.setAttribute('aria-label','Hotbar slot '+(i+1)+': '+(slots[i]?.name??'Empty'));
         const index=el('small','',String(i+1));b.append(index);
         b.addEventListener('click',()=>{
@@ -80,9 +82,24 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRota
       host.append(rotateButton);
     }
   }
+  function syncSelection(){
+    if(pending)return;
+    const key=getActiveKey();
+    const live=catalog.records.find(item=>item.key===key)??null;
+    if(selected===live&&slots[activeSlot]===live)return;
+    selected=live;
+    const known=live?slots.indexOf(live):-1;
+    if(known>=0)activeSlot=known;
+    else slots[activeSlot]=live;
+    preview.textContent=live?live.name+' · Active placement item':'Select an item';
+    renderSlots();
+    for(const button of grid.querySelectorAll('button[data-key]'))
+      button.setAttribute('aria-selected',String(button.dataset.key===live?.key));
+  }
   async function contextAction(handler){
     if(pending)return; // Never rotate a different item during async activation.
-    const item=selected??slots[activeSlot];
+    syncSelection();
+    const item=selected;
     if(!item)return;
     const epoch=selectionEpoch;
     try{
@@ -104,6 +121,7 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRota
       // A world switch/Creative OFF may invalidate this request while the
       // original Pack 5 provider is awaiting its real physical sidecar.
       if(epoch!==selectionEpoch)return;
+      if(getActiveKey()!==item.key)throw Error('Live placement owner did not accept '+item.key);
       selected=item;activeSlot=requestedSlot;
       if(assign)slots[requestedSlot]=item;
       preview.textContent=item.name+' · '+(item.kind==='spawn'?
@@ -184,7 +202,7 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRota
   function openInventory(){
     if(visible)return;
     if(onOpen()===false)return;
-    overlay.hidden=false;visible=true;refresh();
+    syncSelection();overlay.hidden=false;visible=true;refresh();
   }
   close.addEventListener('click',closeInventory);
   overlay.addEventListener('pointerdown',event=>{
@@ -199,8 +217,9 @@ export function installCreativeInventory({catalog,onSelect,onOpen,onClose,onRota
     setEnabled(value){
       quickbar.hidden=!value;
       if(!value){resetSession();closeInventory();}
+      else syncSelection();
     },
-    resetSession,
+    resetSession,syncSelection,
     catalog,selected:()=>selected,slot:()=>slots[activeSlot],
     setCategory:key=>{if(!categoryButtons.has(key))return false;category=key;refresh();return true;}
   });
