@@ -1,0 +1,41 @@
+name: Snow S17 actual fresh source native acceptance
+on:
+  push:
+    branches: [research/snow-s17-fresh-source-current-release-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s17-*.mjs'
+      - 'src/manual-biomes/environment-v7.mjs'
+      - 'src/voxel.mjs'
+      - 'tests/snowy-s17-*.test.mjs'
+      - '.github/workflows/snow-s17-fresh-source.yml'
+permissions:
+  contents: read
+jobs:
+  actual-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: current-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact current release and inherited accepted helpers
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C current-readonly rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          test "$(git hash-object src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs)" = 46045b9036569eb07c3bfa857ce76004de7a43e9
+          test "$(git hash-object src/manual-biomes/snowy-s14-edge-pigment.mjs)" = 02fa2493b0ebaa0e6665a83653f3a9e861d306cd
+          node --check src/voxel.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check src/manual-biomes/snowy-s17-fresh-source.mjs
+          node --check src/manual-biomes/snowy-s17-experimental-world.mjs
+      - name: Actual generated world, new physical changes and unchanged historical profiles
+        run: |
+          node --test tests/snowy-s17-actual-fresh-source.test.mjs
+          test -z "$(git -C current-readonly status --porcelain)"
