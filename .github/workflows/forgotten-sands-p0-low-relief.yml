@@ -1,0 +1,26 @@
+name: Forgotten Sands P0 additional low relief native
+on:
+  push:
+    branches: [research/forgotten-sands-p0-south-residency-20261123]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-low-relief-windows.mjs'
+      - 'tests/forgotten-sands-low-relief-windows.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-low-relief.yml'
+permissions:
+  contents: read
+jobs:
+  native-extra-low-relief:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-low-relief-windows.mjs
+          node --test tests/forgotten-sands-low-relief-windows.test.mjs
