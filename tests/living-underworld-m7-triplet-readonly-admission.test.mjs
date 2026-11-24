@@ -58,6 +58,8 @@ const city=()=>({
   originalM7NativeWorldConstructorExact:true,
   originalM7NativeWorldSeedAndGeneratorExact:true,
   originalM7NativeOriginalWorldMethodsStable:true,
+  originalM7NativeInheritedVoxelMethodsStable:true,
+  originalM7NativeSuperclassExact:true,
   originalM7NativeEditsUnchanged:true,
   originalM7NativeProvenanceZeroAdditionalTerrainReads:true,
   originalM7NativeSiteSafetyNotAutomaticallyProven:true,
@@ -785,5 +787,37 @@ test('Phase32 fabricated prior reader functions cannot upgrade caller-only evide
  assert.equal(result.cityNativeOriginalM7ReaderProvenanceSafe,false);
  assert.equal(result.cityThinUnderpassDeepReaderCohortSafe,false);
  assert.equal(result.actualPlayerWalkingVerified,false);
+ assert.equal(result.releaseApproved,false);
+});
+
+
+test('Phase33 each original-M7 city row requires unchanged inherited voxel terrain methods',()=>{
+ for(const mutate of [
+  row=>{row.originalM7NativeInheritedVoxelMethodsStable=false},
+  row=>{row.originalM7NativeSuperclassExact=false},
+  row=>{delete row.originalM7NativeInheritedVoxelMethodsStable},
+  row=>{delete row.originalM7NativeSuperclassExact}
+ ]){
+  for(const rowIndex of [0,1]){
+   const reports=city();mutate(reports.rows[rowIndex]);
+   const result=check({city:reports});
+   assert.equal(result.citySourceSafe,true);
+   assert.equal(result.cityNativeOriginalM7ReaderProvenanceSafe,false);
+   assert.equal(result.cityThinUnderpassHypotheticalMovementSafe,false);
+   assert.ok(result.reasonCodes.includes('RARE_CITY_NATIVE_ORIGINAL_M7_READER_PROVENANCE_HOLD'));
+   assert.equal(result.actualPlayerWalkingVerified,false);
+   assert.equal(result.releaseApproved,false);
+  }
+ }
+});
+test('Phase33 native original superclass proof is independent of outer four-function cohort evidence',()=>{
+ const reports=city();
+ reports.rows[0].originalM7NativeInheritedVoxelMethodsStable=false;
+ reports.rows[0].candidateThinUnderpassPriorDeepSourceReaderCohortVerified=true;
+ reports.rows[0].candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles=4;
+ const result=check({city:reports});
+ assert.equal(result.cityNativeOriginalM7ReaderProvenanceSafe,false);
+ assert.equal(result.cityThinUnderpassDeepReaderCohortSafe,false);
+ assert.equal(result.cityThinUnderpassCrossAuditLedgerSafe,false);
  assert.equal(result.releaseApproved,false);
 });
