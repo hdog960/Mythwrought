@@ -1,0 +1,23 @@
+name: Mountain V8 actual natural noncube pine integration
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-conifer-native.yml]
+permissions:
+  contents: read
+jobs:
+  real-conifer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact native V8 natural conifer and source registry tests
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --test --test-concurrency=1 tests/mountain-v8-developer-conifer-native.test.mjs

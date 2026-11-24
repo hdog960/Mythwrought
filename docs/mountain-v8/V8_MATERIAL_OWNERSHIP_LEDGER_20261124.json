@@ -1,0 +1,184 @@
+{
+  "source": "creator-authorized Mountain V8",
+  "referenceMain": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+  "review": "partial; no allocation authority until all active owner conflicts and claims resolved",
+  "knownClaims": [
+    {
+      "owner": "legacy",
+      "range": [
+        0,
+        8
+      ]
+    },
+    {
+      "owner": "manual creator-owned reservation (includes existing Pack1–4)",
+      "range": [
+        9,
+        208
+      ]
+    },
+    {
+      "owner": "Pack5 combined builder bridge",
+      "range": [
+        209,
+        226
+      ]
+    },
+    {
+      "owner": "sentinel",
+      "ids": [
+        255,
+        65535
+      ]
+    },
+    {
+      "owner": "biome130",
+      "range": [
+        256,
+        385
+      ]
+    },
+    {
+      "owner": "environment V7",
+      "range": [
+        400,
+        410
+      ]
+    }
+  ],
+  "existingPineReuse": {
+    "trunk": 370,
+    "needles": 379,
+    "ownership": "unchanged biome130"
+  },
+  "descriptors": [
+    {
+      "name": "stone",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "dirt",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "snow",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "alpine-grass",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "slate",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "gneiss",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "scree",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "flower",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "flower-petal",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "heather",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "heather-tip",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "conifer-trunk",
+      "id": null,
+      "status": "unallocated"
+    },
+    {
+      "name": "conifer-needles",
+      "id": null,
+      "status": "unallocated"
+    }
+  ],
+  "inspectedCheckpoints": [
+    {
+      "owner": "Enchanted",
+      "ref": "09c13cd4dbb70a947f0d8bcbc2dd7e637c24d0ee",
+      "finding": "environment-ground retains 400–410"
+    },
+    {
+      "owner": "Snow",
+      "ref": "37973c8f4824036ddf18e2ead6e3476f17791a71",
+      "finding": "inspected shader tag 41 (not block ID)"
+    },
+    {
+      "owner": "Desert",
+      "ref": "5ebe28f616f3a2a293c5abc5e8bc11580c2b3442",
+      "finding": "compare selected file paths, no registry path identified"
+    },
+    {
+      "owner": "Cave",
+      "ref": "846643d680e90574583a7b220970528714630de1",
+      "finding": "inspected material veto test; synthetic 800+ values NOT allocation"
+    },
+    {
+      "owner": "Mob",
+      "ref": "0417caf7583a761d643e2124365f35b1ebe13695",
+      "finding": "selected compare paths only"
+    },
+    {
+      "owner": "Creative",
+      "ref": "09bb45445ee60d611d0d67993d634862b29afa72",
+      "finding": "catalog reads installed owner IDs"
+    },
+    {
+      "owner": "Lag",
+      "ref": "cb524bcc755f6a5900e87c1d720a441789432d76",
+      "finding": "selected compare paths only"
+    },
+    {
+      "owner": "Builder A",
+      "ref": "a4f2f86713afd99d96650b09260fb6e74dfd7462",
+      "finding": "compare truncated at 300 files"
+    },
+    {
+      "owner": "Builder B",
+      "ref": "52f61915fe578ab4b541fa91912436192a9c3629",
+      "finding": "compare truncated at 300 files"
+    },
+    {
+      "owner": "Builder C",
+      "ref": "aa6ade8b12ac3b25a09f169061ce935736d4f0b0",
+      "finding": "compare truncated at 300 files"
+    },
+    {
+      "owner": "Builder D",
+      "ref": "18b849df629f0015cd4c5f0561efb40ca7713ac6",
+      "finding": "compare truncated at 300 files"
+    }
+  ],
+  "remaining": [
+    "full branch and detached ownership reconciliation",
+    "all active automation material proposals",
+    "shared owner allocation ledger/coordination"
+  ],
+  "allocationComplete": false
+}
