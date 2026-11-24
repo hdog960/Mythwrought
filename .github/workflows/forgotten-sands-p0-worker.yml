@@ -1,0 +1,26 @@
+name: Forgotten Sands P0 original worker transfer
+on:
+  push:
+    branches: [research/forgotten-sands-p0-joint-group-cap-search-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-worker-*.mjs'
+      - 'tests/forgotten-sands-worker-queue.test.mjs'
+      - 'tests/forgotten-sands-workers/**'
+      - '.github/workflows/forgotten-sands-p0-worker.yml'
+permissions:
+  contents: read
+jobs:
+  native-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --test tests/forgotten-sands-worker-queue.test.mjs
