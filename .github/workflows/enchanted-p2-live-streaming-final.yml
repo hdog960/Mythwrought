@@ -1,0 +1,48 @@
+name: Enchanted P2 Final Original WebGL2 Mixed-Biome Streaming
+on:
+  push:
+    branches:
+      - research/enchanted-p2-live-streaming-final-20261124
+    paths:
+      - .github/workflows/enchanted-p2-live-streaming-final.yml
+permissions:
+  contents: read
+jobs:
+  original-engine-mixed-biome-stream:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard exact unchanged game and source
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/main.mjs)" = "9a33a51e602236b66ed0a3146895e760d478d803"
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/voxel.mjs)" = "543677a61aff7f54c0111f2485be79fbbbd560c6"
+          test "$(git hash-object src/manual-biomes/profile-world.mjs)" = "151f09cf564b329f1630a8a33e498193e957a0eb"
+          test "$(git hash-object src/manual-biomes/environment-v7.mjs)" = "8da11cb0c04f16fdbe09413cf8448f4b6d27be5c"
+          test "$(git hash-object src/manual-biomes/enchanted-tree-candidates.mjs)" = "69aec88ab0bb50ab4d292707baec214bd46112fb"
+          test "$(git hash-object src/nonblock/staged-habitats.mjs)" = "b9badfcc9c6d243721429a9893b33fdb06e5076b"
+          test "$(git hash-object src/nonblock/candidate-scene.mjs)" = "567c2055330b82d67cb37fab9c0101c7da33fc82"
+          test "$(git hash-object src/gpu-recovery.mjs)" = "422ef73e383bda78ff94607abb858e3c8a57c2d1"
+          node --check scripts/ci/enchanted-phase2-live-streaming-final.mjs
+      - name: Install targeted Chromium dependencies
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Single matched mixed-biome live streaming program
+        run: node scripts/ci/enchanted-phase2-live-streaming-final.mjs
+      - name: Retain exact live metrics and any failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enchanted-p2-original-live-stream-metrics
+          path: artifacts/enchanted-forest/phase2-live-stream/
+          if-no-files-found: warn
+          retention-days: 14
