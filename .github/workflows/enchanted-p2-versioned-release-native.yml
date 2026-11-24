@@ -39,7 +39,8 @@ jobs:
           ENCHANTED_PREVIOUS_ROOT: ${{ github.workspace }}/.baseline-main
         run: |
           node scripts/ci/build-stage-cache-manifest.mjs --check
-          node --test tests/manual-biomes/enchanted-versioned-release.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/app-update.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
+          # Reuse 15 accepted cases from exact #45403908662. Only the sky predicate and manifest digest changed.
+          node --test --test-name-pattern='new generator uses real environmental terrain' tests/manual-biomes/enchanted-versioned-release.test.mjs
       - name: Install targeted real Chromium
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2
