@@ -174,15 +174,15 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
   },
   {
     "category": "general-store",
-    "biome": "snow",
+    "biome": "mountain",
     "size": "large",
-    "variation": 1,
-    "name": "Frostwake Long-Pier Merchant Hall",
+    "variation": 3,
+    "name": "Frostcrag Long-Pier Merchant Hall",
     "w": 94,
     "d": 68,
     "h": 15,
     "entry": 46,
-    "wall": "pack1:004",
+    "wall": "pack1:005",
     "floor": "pack2:013",
     "roof": "pack3:025",
     "rects": [
@@ -301,7 +301,7 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
         ],
         "x",
         8,
-        "Frostwake Long-Pier Merchant Hall original entrance-canopy",
+        "Frostcrag Long-Pier Merchant Hall original entrance-canopy",
         "terrace"
       ],
       [
@@ -313,7 +313,7 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
         ],
         "z",
         5,
-        "Frostwake Long-Pier Merchant Hall original western-covered-trade",
+        "Frostcrag Long-Pier Merchant Hall original western-covered-trade",
         "tower"
       ],
       [
@@ -325,7 +325,7 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
         ],
         "x",
         7,
-        "Frostwake Long-Pier Merchant Hall original east-rear-connection",
+        "Frostcrag Long-Pier Merchant Hall original east-rear-connection",
         "gable"
       ],
       [
@@ -337,7 +337,7 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
         ],
         "z",
         6,
-        "Frostwake Long-Pier Merchant Hall original far-rear-store",
+        "Frostcrag Long-Pier Merchant Hall original far-rear-store",
         "saw"
       ]
     ]

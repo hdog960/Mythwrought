@@ -70,6 +70,12 @@ test('Wave13 12 original new source-only blueprints use canonical 267-yet-unwrit
  const registry=new Map(plannedSlots().map(s=>[s.id,s]));
  const oldIds=new Set(prior.blueprints.map(x=>x.id));
  assert.equal(new Set(now.map(b=>b.id)).size,12);
+ // Explicit regression for the R2 protected historical ID collision.
+ assert.ok(oldIds.has('r2:general-store:snow:large:01'));
+ assert.ok(missing.has('r2:general-store:mountain:large:03'));
+ assert.ok(!now.some(b=>b.id==='r2:general-store:snow:large:01'));
+ assert.equal(now.find(b=>b.id==='r2:general-store:mountain:large:03')?.title,'Frostcrag Long-Pier Merchant Hall');
+ assert.deepEqual(prior.remainingCanonicalIDs.filter(id=>id.startsWith('r2:bank:')&&!now.some(b=>b.id===id)),['r2:bank:mountain:small:02']);
  for(const bp of now){
   assert.ok(missing.has(bp.id),'canonical prior 267 already claimed '+bp.id);
   assert.ok(!oldIds.has(bp.id),'previous source changed '+bp.id);
