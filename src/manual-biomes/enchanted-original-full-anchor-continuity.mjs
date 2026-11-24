@@ -22,8 +22,9 @@ export const M7_FULL_SOURCE_WALK_BOUNDS=Object.freeze({
   // No original cave writer, physics, save or generator identity change.
   // Detached research-only bound through third (-130) rest chamber.
   // Original cave geometry, player physics, saves and production unchanged.
-  authoredSteps:64,spiralSteps:548,waypoints:624,
-  ticksPerLeg:48,allTicks:30000
+  // Final original spiral endpoint; detached research only.
+  authoredSteps:64,spiralSteps:824,waypoints:920,
+  ticksPerLeg:48,allTicks:44160
 });
 const validWorld=w=>w?.profile?.generator===M7_ENVIRONMENT_GENERATOR&&
   Number.isInteger(w.seed)&&w.seed===(w.seed|0)&&
