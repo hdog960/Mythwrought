@@ -12,7 +12,7 @@ function attachVerifiedEntrances(base){
   // The historical surface landscape is read only. Actual cave base already
   // owns every candidate below the protected -3 floor; source conflicts fail.
   const plan=planNewCaveEntrances({world:new VoxelWorld(base.seed),
-    sourceCells:base.caveCellMap,approved:true});
+    sourceCells:base.caveCellMap,additionalSourceMaps:[base.caveConnectorCells,base.caveEastCells],approved:true});
   if(!plan.ok)throw Error('New cave surface entrances not safe: '+JSON.stringify(plan.failures));
   for(const [key,id] of plan.cells){
     if(base.caveCellMap.has(key)&&base.caveCellMap.get(key)!==id)
