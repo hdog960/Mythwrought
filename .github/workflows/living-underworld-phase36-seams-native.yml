@@ -1,0 +1,51 @@
+name: Living Underworld Phase36 - native compact portal seams
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase36-compact-seam-clearance-20261124
+    paths:
+      - .github/workflows/living-underworld-phase36-seams-native.yml
+permissions:
+  contents: read
+jobs:
+  native-seams:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact clean checkout and focused native tests
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --test tests/living-underworld-compact-portal-seam-clearance.test.mjs > "$RUNNER_TEMP/seam-tests.tap" 2>&1 || { cat "$RUNNER_TEMP/seam-tests.tap"; exit 1; }
+          tail -n 12 "$RUNNER_TEMP/seam-tests.tap"
+      - name: Original M7 source and controller seam audit
+        run: |
+          set +e
+          node scripts/underworld/audit-m7-compact-portal-seams.mjs > "$RUNNER_TEMP/seam-report.json" 2> "$RUNNER_TEMP/seam-stderr.txt"
+          code=$?
+          cat "$RUNNER_TEMP/seam-stderr.txt"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const j=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/seam-report.json","utf8"));
+            console.log(JSON.stringify({ok:j.ok,aggregate:j.aggregate,constructorProbes:j.constructorProbes,rows:j.rows.map(r=>({seed:r.seed,rx:r.rx,rz:r.rz,direction:r.direction,ok:r.ok,reason:r.reason,uniqueNaturalCells:r.uniqueNaturalCells,sharedHaloCells:r.sharedHaloCells,supportedRoutes:r.supportedRoutes,attempted:r.attempted,forward:r.forward,reverse:r.reverse,route:r.route,aggregate:r.aggregate,reader:r.nativeOriginalReaderProvenance}))},null,2));
+          '
+          parse=$?
+          test -z "$(git status --porcelain --untracked-files=all)" || exit 4
+          if [ "$code" -ne 0 ]; then exit "$code"; fi
+          exit "$parse"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase36-native-original-m7-seam-evidence
+          path: |
+            ${{ runner.temp }}/seam-tests.tap
+            ${{ runner.temp }}/seam-report.json
+            ${{ runner.temp }}/seam-stderr.txt
+          retention-days: 7
