@@ -1,0 +1,29 @@
+name: Forgotten Sands P0 relief search full mesh and detached snapshot
+on:
+  push:
+    branches: [research/forgotten-sands-p0-relief-full-mesh-20261123]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-relief-search.mjs'
+      - 'src/manual-biomes/forgotten-sands-detached-research.mjs'
+      - 'tests/forgotten-sands-relief-full-mesh.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-relief.yml'
+permissions:
+  contents: read
+jobs:
+  native-relief-mesh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-relief-search.mjs
+          node --check src/manual-biomes/forgotten-sands-detached-research.mjs
+          node --check tests/forgotten-sands-relief-full-mesh.test.mjs
+          node --test tests/forgotten-sands-relief-full-mesh.test.mjs
