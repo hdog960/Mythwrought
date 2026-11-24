@@ -31,7 +31,18 @@ export function createOriginalM7ReadOnlySource(seed=179){
  const profile=world.profile;
  const original=new VoxelWorld(seed);
  const cave=world.environmentCaves;
- if(Object.getPrototypeOf(world)!==FourRegionWorld.prototype||
+ // Original FourRegionWorld.naturalAndLandmarkBlock calls "super", so a
+ // changed VoxelWorld prototype can change observed M7 geology without
+ // changing either world instance's own naturalAndLandmarkBlock identity.
+ // Prove the original inherited baseline/legacy dispatch still belongs to
+ // this engine, not merely to a copied outer reader callback.
+ const baseNatural=VoxelWorld.prototype.naturalAndLandmarkBlock;
+ const legacyNatural=VoxelWorld.prototype.legacyBlockAt;
+ const caveGet=cave?.get;
+ if(typeof baseNatural!=='function'||typeof legacyNatural!=='function'||
+    typeof caveGet!=='function'||
+    Object.getPrototypeOf(FourRegionWorld.prototype)!==VoxelWorld.prototype||
+    Object.getPrototypeOf(world)!==FourRegionWorld.prototype||
     Object.getPrototypeOf(original)!==VoxelWorld.prototype||
     world.constructor!==FourRegionWorld||
     original.constructor!==VoxelWorld||
@@ -51,7 +62,7 @@ export function createOriginalM7ReadOnlySource(seed=179){
 
  const worldNatural=world.naturalAndLandmarkBlock;
  const oldNatural=original.naturalAndLandmarkBlock;
- const caveGet=cave.get,edits=world.edits,originalEdits=original.edits;
+ const edits=world.edits,originalEdits=original.edits;
  const source=Object.freeze({
   naturalAt:(x,y,z)=>worldNatural.call(world,x,y,z),
   authoredAt:(x,y,z)=>caveGet.call(cave,x,y,z),
@@ -61,7 +72,7 @@ export function createOriginalM7ReadOnlySource(seed=179){
  });
  issued.set(source,Object.freeze({
   seed,world,original,profile,cave,edits,originalEdits,
-  worldNatural,oldNatural,caveGet,
+  worldNatural,oldNatural,caveGet,baseNatural,legacyNatural,
   readers:Object.freeze(Object.fromEntries(ROLES.map(role=>
    [role,source[role]])))
  }));
@@ -80,6 +91,10 @@ export function inspectOriginalM7ReadOnlySource(source,{seed}={}){
     source[role]!==record.readers[role]))
   return refusal('ORIGINAL_M7_SOURCE_READER_FUNCTION_CHANGED');
  const {world,original,profile,cave,edits,originalEdits}=record;
+ if(Object.getPrototypeOf(FourRegionWorld.prototype)!==VoxelWorld.prototype||
+    VoxelWorld.prototype.naturalAndLandmarkBlock!==record.baseNatural||
+    VoxelWorld.prototype.legacyBlockAt!==record.legacyNatural)
+  return refusal('ORIGINAL_M7_INHERITED_SOURCE_METHOD_CHANGED');
  if(Object.getPrototypeOf(world)!==FourRegionWorld.prototype||
     Object.getPrototypeOf(original)!==VoxelWorld.prototype||
     world.constructor!==FourRegionWorld||
@@ -107,6 +122,8 @@ export function inspectOriginalM7ReadOnlySource(source,{seed}={}){
   originalM7ProfileGeneratorExact:true,
   originalM7SeedExact:true,
   originalWorldMethodsStable:true,
+  originalInheritedVoxelBaselineMethodsStable:true,
+  originalFourRegionSuperclassExact:true,
   originalCaveReaderBindingStable:true,
   originalWorldEditMapInstancesStable:true,
   originalWorldEditMapsEmpty:true,
