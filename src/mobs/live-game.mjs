@@ -7,6 +7,7 @@ import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {MobEngine,DEFAULT_ACTIVE_MOBS} from './engine.mjs';
 import {BehaviorController} from './behavior.mjs';
 import {MobCombat} from './combat.mjs';
+import {LIVE_PROJECTILE_LIMIT} from './live-projectile-budget.mjs';
 import {CompanionManager} from './companion.mjs';
 import {AnimalInteractions} from './animal-interactions.mjs';
 import {PopulationManager} from './ecology.mjs';
@@ -113,7 +114,7 @@ export function createLiveMobSession({
   const raw=storage.getItem(key);
   if(raw!==null){
     try{
-      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query));
+      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT}));
       lastStored=raw;
     }catch(error){
       readOnly=true;
@@ -123,7 +124,7 @@ export function createLiveMobSession({
   if(!engine){
     engine=new MobEngine(query,seed,{maxEntities:32,maxActive:LIVE_MOB_ACTIVE_LIMIT});
     behavior=new BehaviorController(engine,query);
-    combat=new MobCombat(engine,query,behavior);
+    combat=new MobCombat(engine,query,behavior,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT});
     companions=new CompanionManager(engine,query,combat);
     animals=new AnimalInteractions(engine,query);
   }
@@ -177,7 +178,7 @@ export function createLiveMobSession({
     // Real hostile ranged attacks must not strike an invisible projectile.
     // Use the four original authored preview projectile meshes with real
     // position/velocity from MobCombat, not synthetic screen-space sprites.
-    const projectiles=combat.projectiles.slice(0,8).map(shot=>({
+    const projectiles=combat.projectiles.map(shot=>({
       ...shot,species:{id:shot.visual},state:'active',juvenile:false,
       yaw:Math.atan2(shot.velocity[0],shot.velocity[2]),visual:'projectile'
     }));
