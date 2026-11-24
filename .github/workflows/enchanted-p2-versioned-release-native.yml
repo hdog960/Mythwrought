@@ -1,0 +1,58 @@
+name: Enchanted P2 Versioned Release Native and Offline Delta
+on:
+  push:
+    branches:
+      - research/enchanted-p2-versioned-release-20261124
+    paths:
+      - .github/workflows/enchanted-p2-versioned-release-native.yml
+permissions:
+  contents: read
+jobs:
+  versioned-release-delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: .baseline-main
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard immutable source and audit all remaining environment identity references
+        env:
+          ENCHANTED_PREVIOUS_ROOT: ${{ github.workspace }}/.baseline-main
+        run: |
+          git rev-parse HEAD
+          test "$(git -C .baseline-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          for f in src/physics.mjs src/deep-cave-network.mjs src/cave-approaches/upper-network.mjs src/manual-biomes/profile-storage.mjs; do cmp "$f" ".baseline-main/$f"; done
+          git grep -n -E 'M7_ENVIRONMENT_GENERATOR|mythwrought-five-surface-regions-v7' -- src
+          node --version
+          for f in src/main.mjs src/voxel.mjs src/environment-ground.mjs src/manual-biomes/profile-world.mjs src/manual-biomes/m2-runtime-bridge.mjs src/nonblock/staged-habitats.mjs src/sky-v6-adapter.mjs scripts/ci/enchanted-versioned-release-browser.mjs; do node --check "$f"; done
+      - name: Only new profile and changed release/cache tests
+        env:
+          ENCHANTED_PREVIOUS_ROOT: ${{ github.workspace }}/.baseline-main
+        run: |
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/manual-biomes/enchanted-versioned-release.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/app-update.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
+      - name: Install targeted real Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: One real versioned generator and offline shell upgrade acceptance
+        env:
+          ENCHANTED_PREVIOUS_ROOT: ${{ github.workspace }}/.baseline-main
+        run: node scripts/ci/enchanted-versioned-release-browser.mjs
+      - name: Preserve exact browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: enchanted-p2-versioned-release-browser
+          path: artifacts/enchanted-versioned-release/
+          if-no-files-found: warn
+          retention-days: 14
