@@ -118,8 +118,14 @@ try{
         await page.locator('#seedInput').fill('Moonlit Vale');
         await page.locator('#switchWorld').click();
         await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.skyClockSeed!=='179');
-        await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.loadedChunks===25,
-          null,{timeout:45000});
+        // A world switch clears the live chunk map before the previous frame's dataset is republished.
+        // Require both the actual new-world mesh state and its rendered counters, not stale DOM readiness.
+        await page.waitForFunction(()=>{
+          const d=document.querySelector('#scene')?.dataset;
+          const live=window.__mythwroughtTest?.snapshot();
+          return !!live&&String(live.seed)===d?.skyClockSeed&&live.chunks.length===25&&
+            live.pending.length===0&&+d.loadedChunks===25&&+d.pendingChunks===0;
+        },null,{timeout:45000});
         const other=await state();
         assert.ok(other.phase>=720000&&other.phase<750000,'New world did not receive its own noon');
         await page.locator('#skySetNight').click();
@@ -128,8 +134,14 @@ try{
         await page.locator('#seedInput').fill('179');
         await page.locator('#switchWorld').click();
         await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.skyClockSeed==='179');
-        await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.loadedChunks===25,
-          null,{timeout:45000});
+        // A world switch clears the live chunk map before the previous frame's dataset is republished.
+        // Require both the actual new-world mesh state and its rendered counters, not stale DOM readiness.
+        await page.waitForFunction(()=>{
+          const d=document.querySelector('#scene')?.dataset;
+          const live=window.__mythwroughtTest?.snapshot();
+          return !!live&&String(live.seed)===d?.skyClockSeed&&live.chunks.length===25&&
+            live.pending.length===0&&+d.loadedChunks===25&&+d.pendingChunks===0;
+        },null,{timeout:45000});
         const back=await state();
         assert.ok(back.phase>=720000&&back.phase<750000,
           'World 179 clock was replaced by Moonlit Vale time');
