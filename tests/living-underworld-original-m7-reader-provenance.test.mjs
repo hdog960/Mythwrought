@@ -1,5 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {VoxelWorld} from '../src/voxel.mjs';
+import {FourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 import {createOriginalM7ReadOnlySource as create,
  inspectOriginalM7ReadOnlySource as inspect}
  from '../src/living-underworld/original-m7-reader-provenance.mjs';
@@ -67,4 +69,53 @@ test('independent original M7 reader cohorts are distinct frozen instances with 
  assert.notStrictEqual(another.naturalAt,source.naturalAt);
  assert.equal(inspect(another,{seed:179}).ok,true);
  assert.equal(inspect(source,{seed:179}).ok,true);
+});
+
+
+test('Phase33 original FourRegionWorld inherits the exact VoxelWorld baseline',()=>{
+ assert.strictEqual(Object.getPrototypeOf(FourRegionWorld.prototype),
+  VoxelWorld.prototype);
+ const witness=inspect(source,{seed:179});
+ assert.equal(witness.ok,true);
+ assert.equal(witness.originalInheritedVoxelBaselineMethodsStable,true);
+ assert.equal(witness.originalFourRegionSuperclassExact,true);
+});
+test('Phase33 changed inherited naturalAndLandmarkBlock refuses even when four outer readers remain unchanged',()=>{
+ const previous=VoxelWorld.prototype.naturalAndLandmarkBlock;
+ try{
+  VoxelWorld.prototype.naturalAndLandmarkBlock=function(){return 1};
+  const proof=inspect(source,{seed:179});
+  assert.equal(proof.ok,false);
+  assert.equal(proof.reason,'ORIGINAL_M7_INHERITED_SOURCE_METHOD_CHANGED');
+  assert.equal(proof.originalWorldSourceQueriesDuringAttestation,0);
+ }finally{
+  VoxelWorld.prototype.naturalAndLandmarkBlock=previous;
+ }
+ assert.equal(inspect(source,{seed:179}).ok,true);
+});
+test('Phase33 changed inherited legacyBlockAt refuses without reading any original-world voxel',()=>{
+ const previous=VoxelWorld.prototype.legacyBlockAt;
+ try{
+  VoxelWorld.prototype.legacyBlockAt=function(){return 1};
+  const proof=inspect(source,{seed:179});
+  assert.equal(proof.ok,false);
+  assert.equal(proof.reason,'ORIGINAL_M7_INHERITED_SOURCE_METHOD_CHANGED');
+  assert.equal(proof.originalWorldSourceQueriesDuringAttestation,0);
+ }finally{
+  VoxelWorld.prototype.legacyBlockAt=previous;
+ }
+ assert.equal(inspect(source,{seed:179}).ok,true);
+});
+test('Phase33 original seed179 city site anchors have repeatable source values without edits',()=>{
+ // Genuine research anchors. This proves only repeatable readback at TWO
+ // coordinates, NOT the whole grade route, gallery, overlay or true walking.
+ for(const [x,y,z] of [[625,-132,133],[649,-182,396]]){
+  for(const role of ['naturalAt','authoredAt','editedAt','protectedAt']){
+   const first=source[role](x,y,z);
+   assert.equal(Object.is(source[role](x,y,z),first),true,
+    role+' changed at original seed179 research anchor');
+  }
+ }
+ assert.equal(inspect(source,{seed:179}).ok,true);
+ assert.equal(inspect(source,{seed:179}).actualOriginalWorldSiteSafetyVerified,false);
 });
