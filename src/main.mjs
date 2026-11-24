@@ -440,6 +440,10 @@ function start(nonblockStage=null){
   // No measurement allocation, frame work, GL call or save in public Pages.
   const near291Measure=['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('measure-291')==='1';
+  // An independent extra opt-in preserves prior VAO-only experiment results:
+  // localhost ?near-vao-291=1&reuse-water-291=1, never public Pages/PWA.
+  const near291WaterReuse=near291Enabled&&
+    new URLSearchParams(location.search).get('reuse-water-291')==='1';
   // An independent mine-bound frame window prevents idle/control-menu frames
   // before or after the actual 100 source-saved edits from moving its p95.
   const near291NewMineWindow=()=>({
@@ -1417,6 +1421,19 @@ function start(nonblockStage=null){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
+  // Experimental 291 only: the ORIGINAL water mesher always runs. Reuse the
+  // published native water buffer only for exactly matching vertex bytes;
+  // never a hash, stale water state, alternate mesher, or C6-owner change.
+  function near291SameWaterBytes(previous,next){
+    if(!(previous instanceof Float32Array)||
+       !(next instanceof Float32Array)||!previous.byteLength||
+       previous.byteLength!==next.byteLength||previous.byteLength>32768)
+      return false;
+    const a=new Uint8Array(previous.buffer,previous.byteOffset,previous.byteLength);
+    const b=new Uint8Array(next.buffer,next.byteOffset,next.byteLength);
+    for(let i=0;i<a.length;i++)if(a[i]!==b[i])return false;
+    return true;
+  }
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
@@ -1449,7 +1466,23 @@ function start(nonblockStage=null){
     const ready=[];
     try{
       for(const item of batch){
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+        // The exact original-source failure fixtures may omit this optional
+        // flag; in that case preserve the unchanged original GPU path.
+        const reuseEnabled=near291Enabled&&
+          typeof near291WaterReuse!=='undefined'&&near291WaterReuse;
+        const prior=reuseEnabled?chunks.get(item.key):null;
+        const retainWater=reuseEnabled&&!!prior?.waterBuffer&&
+          prior.waterCount===item.water.length/9&&
+          near291SameWaterBytes(prior.water291Bytes,item.water);
+        // Opaque geometry is ALWAYS uploaded as before. A proven identical
+        // live water buffer is never included in staged ready[] cleanup.
+        const uploaded=uploadPack2Chunk(item.vertices,
+          retainWater?new Float32Array(0):item.water);
+        ready.push({...item,...uploaded,near291RetainWater:retainWater,
+          near291PriorWater:retainWater?prior.waterBuffer:null,
+          near291PriorWaterCount:retainWater?prior.waterCount:0,
+          near291WaterBytes:reuseEnabled&&item.water.byteLength>0&&
+            item.water.byteLength<=32768?item.water:null});
       }
     }catch(err){
       if(!near291Enabled){
@@ -1491,10 +1524,22 @@ function start(nonblockStage=null){
       for(const item of ready){
         const old=chunks.get(item.key);
         if(near291Enabled)near291PublicationStarted=true;
-        chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+        const replacement={x:item.cx,z:item.cz,section:item.section,
           buffer:item.buffer,count:item.count,
-          waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-        deleteChunkBuffers(old);
+          waterBuffer:item.near291RetainWater?
+            item.near291PriorWater:item.waterBuffer,
+          waterCount:item.near291RetainWater?
+            item.near291PriorWaterCount:item.waterCount};
+        // At most 32 KiB of original CPU water vertex evidence per resident
+        // chunk. Chunk eviction/context reset releases it with the Map item.
+        if(near291Enabled&&item.near291WaterBytes)
+          replacement.water291Bytes=item.near291WaterBytes;
+        chunks.set(item.key,replacement);
+        // Original opaque VAO handle is retired as before. Transfer ownership
+        // of a proven-identical published water buffer to replacement; never
+        // delete its live original native GL handle during publication.
+        deleteChunkBuffers(item.near291RetainWater?
+          {buffer:old.buffer,waterBuffer:null}:old);
       }
       editMeshBatches++;
       lastEditMeshKeys=ready.map(item=>item.key);
