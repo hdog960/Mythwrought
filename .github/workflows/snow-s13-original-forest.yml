@@ -1,0 +1,51 @@
+name: Snow S13 certified original forest long walks and rendered comparison
+on:
+  push:
+    branches: [research/snow-s13-certified-forest-long-walk-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s13-certified-forest-overlay.mjs'
+      - 'tests/snowy-s13-original-long-walk.test.mjs'
+      - 'scripts/ci/snow-s13-original-forest-webgl2.mjs'
+      - '.github/workflows/snow-s13-original-forest.yml'
+permissions:
+  contents: read
+jobs:
+  source-native-and-original-render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source refs and accepted S12 factory
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs)" = 46045b9036569eb07c3bfa857ce76004de7a43e9
+          node --check scripts/ci/snow-s13-original-forest-webgl2.mjs
+      - name: Full original owner union, eight fixed border routes, paired native mesh times
+        run: SNOW_S13_EXPORT=1 node --test tests/snowy-s13-original-long-walk.test.mjs
+      - name: Install targeted pinned Chromium only after native gate
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Genuine before and after original game forest, exact local source certificate
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s13-original.log 2>&1 &
+          node scripts/ci/snow-s13-original-forest-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Preserve real measurements and source-certified PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s13-original-forest-${{ github.sha }}
+          path: artifacts/snow-s13/
+          if-no-files-found: ignore
+          retention-days: 7
