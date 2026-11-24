@@ -26,3 +26,27 @@ New isolated browser branch research/snow-s10-original-rgb-webgl2-perf-isolated-
 ### Release-blocking gates
 
 The S8 shader change for natural snow material41 has NOT been proven visibly better on the newly authenticated snow272 camera. Any future snow texture work must target original shader material path correctly and remain detached pending approval. Natural Snow/Desert/Mountain one-voxel geology seams have no eligible winter cap; preserve original hardpan ID258 and scree ID401 rather than repainting. Require verified original source p50/p95 and genuine GPU iPhone Home Screen PWA stationary, long walking and rapid mining acceptance; current real iPhone installation, cache refresh/offline reopening, three moon night, physics, save restore, cave AIR and historical grove preservation are UNRUN for this candidate. No merges or deployments without explicit creator authorization.
+
+
+### COMPLETED exact S10 real-game 16-sample benchmark, research SUCCESS
+
+**GitHub Actions #45303337276, at exact source implementation HEAD 93fcc81f2068822e65d5816c00e3749293515483 — COMPLETED SUCCESS.** The full genuine pinned post-Desert M7 game loaded original source from an independent exact production checkout, Node22 and Chromium WebGL2, 956x440 CSS, original glacier ID276 at (-144,9,504), original identical collision-safe camera (-143.5,feet17.01,z492.5), 25 resident / 0 pending real chunks, GL canvas buffer 612x379, and ZERO page JavaScript errors in both contexts. The original main and voxel module bytes were verified against source SHA256; test-only route substitution was present only in the candidate disposable browser, not production or saved worlds.
+
+**Original and candidate mesh geometry matched exactly:** 10,536 Float32 vertices, 379,296 mesh buffer bytes, bit-equivalent original non-RGB position/UV/material fingerprint **2535267973**, and **36/36 exact original user-placed glacier ice test vertices** after making the same disposable edit. Original schema and original source environment untouched.
+
+| Same real original seed2026 chunk (-9,31), 16 synchronous meshChunk builds | Original post-Desert M7 | S10 mesh-owned reusable RGB |
+|---|---:|---:|
+| p50 (median, reported test definition) | 19.3 ms | **21.0 ms** |
+| p95 (reported test definition) | 52.3 ms | **41.4 ms** |
+| 3D vertices | 10,536 | 10,536 |
+| Mesh bytes | 379,296 | 379,296 |
+| Geometry/UV/material fingerprint | 2535267973 | 2535267973 |
+| Player-edited 276 ice | 36 exact verts | **36 identical verts** |
+
+This one original Chromium run satisfies the PREDECLARED S10 research non-regression margin of p50<=1.15x original AND p95<=1.15x original. Median is **8.81% higher**, p95 is **20.84% lower**, not evidence of faster throughput on iPhone. Earlier S7 and S9 browser samples genuinely failed their own required p95 performance gates, and remain rejected. 16 samples have noticeable cold-start/jitter; do not generalize or recharacterize this as universal FPS improvement or actual iPhone acceptance.
+
+Original glacier 956x440 screenshot SHA256 **85d2f677ec29d5d00c30aa691b8968138f4cf4218ada6fc62ffe6e5fed98a7e1**. Candidate screenshot SHA256 **798761ea3ad8a195e51eb787349bcf0ec3e513a9e0994850e9c4d7b8ed68c5ba**. Original strong-blue pixel fraction **73.0223%**, S10 **11.4835%** using identical ROI x≈18..82%, y≈33..90% and strong-blue condition B-R>18. This is a visible genuine real-game source-color improvement; repetitive original physical terrain and nonvaried trees remain. Actual source-original material41 snow camera and screenshots already accepted from #45302372048; this S10 performance job intentionally reuses that evidence instead of duplicating the snow camera test.
+
+GitHub Actions artifact **#14880011104**, name snow-s10-exact-mesh-16-samples-93fcc81f2068822e65d5816c00e3749293515483. The exact downloaded ZIP was CRC-checked (PASS), SHA256 **2845b36cdb34f7952731f9a57924b9616cd078bd4255a75e7ca9fa5f27ce5307**, both original game PNG files independently SHA256-confirmed, and manifest.json checked to contain **one real seed2026 report with measuredMeshNoRegression=true** and identical geometry fingerprint. These are original Chromium game images, not generated art.
+
+**Final S10 status:** one bounded original-game **research** mesh performance check GREEN plus original 8/8 native source tests, but NO PRODUCTION RELEASE AUTHORITY. Further authentic multi-seed/chunk/edge and stationary/walking/mining cost sampling, source-owned snow272 material41 texture variants, full mandatory release CI, and REAL installed iPhone Home Screen Safari/WebGL2/PWA acceptance are still UNRUN. Keep original M7 saves/cave geology and older worlds untouched and the V8 marker UNREGISTERED; never merge or deploy without creator authorization.
