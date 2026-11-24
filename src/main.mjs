@@ -444,6 +444,9 @@ function start(nonblockStage=null){
   // localhost ?near-vao-291=1&reuse-water-291=1, never public Pages/PWA.
   const near291WaterReuse=near291Enabled&&
     new URLSearchParams(location.search).get('reuse-water-291')==='1';
+  const near291FastDepth=near291Enabled&&
+    new URLSearchParams(location.search).get('fast-depth-291')==='1';
+  let near291DepthMesher=null;
   // An independent mine-bound frame window prevents idle/control-menu frames
   // before or after the actual 100 source-saved edits from moving its p95.
   const near291NewMineWindow=()=>({
@@ -1413,7 +1416,9 @@ function start(nonblockStage=null){
     return combined;
   }
   function meshPlayableChunk(cx,cz,section){
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+    const original=section===0?meshChunk(world,cx,cz):
+      near291DepthMesher?near291DepthMesher(world,cx,cz,section):
+      meshDepthSection(world,cx,cz,section);
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
     return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
   }
@@ -2293,11 +2298,18 @@ function start(nonblockStage=null){
     const epoch=++near291LoadEpoch;
     near291Pending=true;
     import('../perf/issue-291/opaque-near-lifecycle.mjs')
-      .then(({createOpaqueNearLifecycle})=>{
+      .then(async ({createOpaqueNearLifecycle})=>{
+        // No candidate import on public Pages or ordinary near-VAO trials.
+        // Await its module before the existing certified-ready frame gate.
+        const depthCandidate=near291FastDepth?
+          (await import('./depth-mesh-291.mjs')).meshDepthSection291:null;
         if(epoch!==near291LoadEpoch||near291PageSuspended||near291Fatal)return;
         // Backgrounding/context loss is expected on iPhone, not a fatal GPU
         // failure. Leave the old import unarmed and retry on visible/restore.
         if(graphicsLost||document.hidden)return;
+        if(near291FastDepth&&typeof depthCandidate!=='function')
+          throw Error('Local depth candidate unavailable');
+        near291DepthMesher=depthCandidate;
         near291=createOpaqueNearLifecycle({gl,
           attributes:{atPos,atColor,atUv,atMat},pipelineProgram:program,
           originalDeleteChunkBuffers,stopRenderLoop:reason=>{
