@@ -1,0 +1,28 @@
+name: Enchanted P2 Original D48 Full Component Frontier
+on:
+  push:
+    branches:
+      - research/enchanted-p2-alcoves-seed-ledger-20261123
+    paths:
+      - .github/workflows/enchanted-p2-d48-component-native.yml
+permissions:
+  contents: read
+jobs:
+  original-d48-frontier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original source guards and new component diagnostic only
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/cave-approaches/upper-network.mjs)" = "a48bd919685b326f062ffa1c5856fa27c2619be8"
+          node --check src/manual-biomes/enchanted-original-d48-component-audit.mjs
+          node --test tests/manual-biomes/enchanted-original-d48-component-real-m7.test.mjs
