@@ -206,5 +206,37 @@
     },
     "environmentGround": "main/Enchanted/Creative db77df7...; Snow/Desert/Cave/Mob/Lag 64ba16...; Builder refs lack file; current main actual IDs remain 400..410",
     "limitation": "does not certify all numeric literals, external reservations or automation drafts; no allocation"
+  },
+  "automationDraftRegistryReview": {
+    "scope": "visible named source registries and :24 documented contract; no private/detached reservation guarantee",
+    "refs": [
+      {
+        "lane": "24",
+        "pr": 290,
+        "sha": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+      },
+      {
+        "lane": "36",
+        "pr": 481,
+        "sha": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+      },
+      {
+        "lane": "48",
+        "pr": 476,
+        "sha": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+      },
+      {
+        "lane": "00",
+        "pr": 288,
+        "sha": "6bda12dde3204f1a43de0623a9347f2f16461008"
+      },
+      {
+        "lane": "12",
+        "pr": 289,
+        "sha": "b298acfd3d06e2778b5bcf3264c8af18d681cdf2"
+      }
+    ],
+    "finding": "all five nontruncated trees preserve biome130/manual/Pack5 catalog blobs; :36 old environment-ground blob unchanged, others predate it; :24 contract source-only descriptor, no production registration. No allocation made.",
+    "remaining": "explicit shared namespace agreement from creator or owners, not more historical branch audits"
   }
 }

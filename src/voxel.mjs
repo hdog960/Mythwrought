@@ -235,6 +235,34 @@ export function meshChunk(world,cx,cz){
     sourceCaps.set(key,cap);
     return cap;
   }
+  // V8-only natural shoulder RGB feathering. Only the source-owned exposed
+  // cap qualifies; no neighbor edit can affect this field, so ordinary
+  // geometry dirty chunks suffice and the M7 Desert radius-three halo stays
+  // independent. All inputs use integer world vertices, not chunk indices.
+  const mountainVertexWeights=new Map();
+  function mountainShoulderWeight(x,z){
+    const key=x+','+z;
+    if(!mountainVertexWeights.has(key)){
+      const region=v6BiomeAt(x,z,world.seed);
+      const t=region?.name==='mountain'?Math.max(0,Math.min(1,(.96-region.weight)/.61)):0;
+      mountainVertexWeights.set(key,.58*t*t*(3-2*t));
+    }
+    return mountainVertexWeights.get(key);
+  }
+  function mountainShoulderCap(x,y,z,id){
+    if(!v8Mountain||![BLOCK.GRASS,BLOCK.STONE,400,401,402].includes(id)||hasEdit(x,y,z))return false;
+    const region=v6BiomeAt(x,z,world.seed);
+    if(region?.name!=='mountain'||region.weight>=.96)return false;
+    const cap=originalSurface(x,z);
+    return cap?.top===y&&cap.id===id;
+  }
+  function mountainShoulderRgb(rgb,x,z){
+    const w=mountainShoulderWeight(x,z);
+    if(w===0)return rgb;
+    // Muted grass/stone transition palette, not a new material or texture.
+    const moss=[.40,.47,.36];
+    return rgb.map((v,i)=>v+(moss[i]-v)*w);
+  }
     const groundTints=new Map();
   function groundTint(x,z){
     const key=x+','+z;
@@ -372,7 +400,7 @@ export function meshChunk(world,cx,cz){
         // samples and tint calculation until the FIRST exposed face; otherwise
         // a solid chunk pays for shading thousands of invisible blocks.
         // Keep world-space inputs and face order identical for save/seed parity.
-        let variance,screenedScreeCap=false,screeScreened=false;
+        let variance,screenedScreeCap=false,screeScreened=false,mountainCap;
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
@@ -393,6 +421,8 @@ export function meshChunk(world,cx,cz){
               }
             }
           }
+          if(face.d[1]===1&&mountainCap===undefined)mountainCap=mountainShoulderCap(x,y,z,id);
+          const blendMountainTop=face.d[1]===1&&mountainCap===true;
           const r=clamp(color[0]*variance*face.lit,0,1);
           const g=clamp(color[1]*variance*face.lit,0,1);
           const b=clamp(color[2]*variance*face.lit,0,1);
@@ -433,10 +463,17 @@ export function meshChunk(world,cx,cz){
                   rgb=warmScreeVertexColor(color,d2);
                 }
               }
+              if(blendMountainTop)rgb=mountainShoulderRgb(rgb,x+p[0],z+p[2]);
               appendVertex(x+p[0],y+p[1],z+p[2],rgb[0]*shade,rgb[1]*shade,rgb[2]*shade,
                 u,v,terrain?terrainArtMaterial(id):id===408?4:18);
-            }else
-              appendVertex(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
+            }else{
+              const rgb=blendMountainTop?mountainShoulderRgb(color,x+p[0],z+p[2]):null;
+              appendVertex(x+p[0],y+p[1],z+p[2],
+                rgb?clamp(rgb[0]*variance*face.lit,0,1):r,
+                rgb?clamp(rgb[1]*variance*face.lit,0,1):g,
+                rgb?clamp(rgb[2]*variance*face.lit,0,1):b,
+                uv[0],uv[1],id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id);
+            }
           }
         }
       }
