@@ -1,0 +1,29 @@
+name: Enchanted P2 Original Upper Alternate Arms
+on:
+  push:
+    branches:
+      - research/enchanted-p2-fourth-band-alternate-loops-20261123
+    paths:
+      - .github/workflows/enchanted-p2-alternate-arms-native.yml
+permissions:
+  contents: read
+jobs:
+  actual-original-upper-arms:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard immutable source and test only new arm routes
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/cave-approaches/upper-network.mjs)" = "a48bd919685b326f062ffa1c5856fa27c2619be8"
+          test "$(git hash-object src/manual-biomes/enchanted-original-upper-owner-walk-audit.mjs)" = "8c2ec9e02c12c80d207f6b77c215677efa45a799"
+          node --version
+          node --test tests/manual-biomes/enchanted-original-upper-alternate-arm-real-m7.test.mjs
