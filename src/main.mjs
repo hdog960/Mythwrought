@@ -664,7 +664,15 @@ function start(nonblockStage=null){
     w.loadedSections[i]=phase.loadedSections;
   }
   function near291RecordUpload(duration){
-    if(!near291Perf||!Number.isFinite(duration)||duration<0)return;
+    if(!near291Perf)return;
+    // This ORIGINAL native upload already succeeded. Invalid timing evidence
+    // must never disappear from a 33ms guarded-GPU p95 acceptance trial.
+    // Poison only localhost opt-in diagnostic state; never touch GL or saves.
+    if(!Number.isFinite(duration)||duration<0){
+      if(near291EditPhase)near291EditPhase.gpuMs=NaN;
+      near291RecordUploadFailure();
+      return;
+    }
     // Count native uploads only inside an existing original edit; unchanged
     // stream uploads continue into the separate per-trial GPU history.
     if(near291EditPhase){
