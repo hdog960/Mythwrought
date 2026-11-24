@@ -1,0 +1,26 @@
+name: Enchanted Wilds E2 upper physical original native
+on:
+  push:
+    branches: [research/enchanted-wilds-e2-upper-world-20261124]
+    paths: [.github/workflows/enchanted-wilds-e2-upper-native.yml]
+permissions:
+  contents: read
+jobs:
+  original-physical-upper:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact reused Island source provenance and original native upper physical tests
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git rev-parse HEAD:src/floating-islands/sky-runtime-adapter.mjs)" = bfb423288c7005a87521d4e54a1dd222de150603
+          test "$(git rev-parse HEAD:src/floating-islands/sky-original-core.mjs)" = e595d4235c6c26c3b6a93378f051c96b9af78fe8
+          test "$(git rev-parse HEAD:src/floating-islands/sky-source-mesh.mjs)" = ff790eab56d006d879da3a06c5fb4f85d43b74de
+          test "$(git rev-parse HEAD:src/depth.mjs)" = b54b7fd8c422699a328b60135178f97508e277c8
+          node --check src/manual-biomes/enchanted-wilds-upper-world.mjs
+          node --test tests/manual-biomes/enchanted-wilds-e2-upper.test.mjs
