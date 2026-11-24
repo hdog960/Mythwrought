@@ -1,3 +1,5 @@
+import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
+import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
@@ -556,6 +558,7 @@ function start(nonblockStage=null){
   resetManual14ForWorld();
   // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
   let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
+  let pack5ToggleEpoch=0;
   // The future settlement-builder source imports exactly this contract.
   // All five owner-specific save sidecars remain authoritative and isolated.
   const fivePackBuilder=createManualFivePackLiveBuilder({
@@ -568,6 +571,7 @@ function start(nonblockStage=null){
       pack5Gpu.refresh(eye());}
   });
   function resetPack5ForWorld(){
+    pack5ToggleEpoch++;
     if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
     pack5Builder=null;pack5Mode=false;
     const toggle=document.getElementById('pack5Enabled');
@@ -586,6 +590,8 @@ function start(nonblockStage=null){
   }
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Status=document.getElementById('g2bFlightStatus');
+  const inventoryHeader=document.getElementById('creativeInventoryToggle');
+  let creativeInventory=null,creativeActivationEpoch=0;
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -624,6 +630,8 @@ function start(nonblockStage=null){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
     g2Toggle.checked=g2CreativeEnabled;
+    inventoryHeader.hidden=!g2CreativeEnabled;
+    creativeInventory?.setEnabled(g2CreativeEnabled);
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -646,6 +654,7 @@ function start(nonblockStage=null){
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
     g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
+    creativeActivationEpoch++;
     g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
@@ -780,7 +789,7 @@ function start(nonblockStage=null){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else g2CreativeEnabled=false;
+    }else {g2CreativeEnabled=false;creativeActivationEpoch++;}
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
@@ -1058,6 +1067,7 @@ function start(nonblockStage=null){
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(storageReadOnly){message('Protected world is read-only; edit refused');return;}
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -2154,6 +2164,7 @@ function start(nonblockStage=null){
     }
   }
   pack5Enabled.addEventListener('change',async()=>{
+    const activation=++pack5ToggleEpoch;
     if(caveSession){
       pack5Enabled.checked=false;pack5Mode=false;
       pack5Status.textContent='Cave World keeps a separate voxel-only profile; shaped furnishings are available in ordinary worlds.';
@@ -2166,11 +2177,12 @@ function start(nonblockStage=null){
     }
     try{
       const loaded=await ensurePack5Loaded();
-      if(!loaded||!pack5Enabled.checked)return;
+      if(!loaded||!pack5Enabled.checked||activation!==pack5ToggleEpoch)return;
       pack5Mode=true;
       pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
         pack5Builder.layer.count()+' pieces in verified separate seed sidecar.';
     }catch(error){
+      if(activation!==pack5ToggleEpoch)return;
       pack5Mode=false;pack5Enabled.checked=false;
       pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+
         String(error.message||error);
@@ -3395,6 +3407,77 @@ function start(nonblockStage=null){
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
+  // Creative Phase 3: reuse the installed physical placement owners.
+  const creativeCatalog=buildCreativeCatalog();
+  creativeInventory=installCreativeInventory({
+    catalog:creativeCatalog,includeCreatures:false,
+    onOpen:()=>{
+      if(!g2CreativeEnabled||!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
+      gameplayRecorder?.interrupt('Creative inventory opened');cancelAllPointers();
+      help.hidden=false;help.classList.add('mw-inventory-paused');return true;
+    },
+    onClose:()=>{
+      creativeActivationEpoch++;
+      help.classList.remove('mw-inventory-paused');help.hidden=true;
+      canvas.focus({preventScroll:true});
+    },
+    onRotate:item=>{
+      if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
+      const next=field=>{
+        const n=(Number(field.value)+1)%4;field.value=String(n);
+        field.dispatchEvent(new Event('change',{bubbles:true}));
+        return item.name+' · rotated '+n*90+'°';
+      };
+      if(item.owner==='biome130')return next(biomeRotation);
+      if(item.owner==='pack1'||item.owner==='pack4')return next(manual14Rotate);
+      if(item.owner==='pack3')return pack3Palette.yaw.disabled?'Fixed orientation':next(pack3Palette.yaw);
+      if(item.owner==='pack2'){document.getElementById('pack2Rotate').click();return pack2StateText.textContent;}
+      if(item.owner==='pack5')return next(document.getElementById('pack5Rotation'));
+      return item.name+' has fixed orientation';
+    },
+    onVariant:item=>{
+      if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
+      if(item.owner==='pack2'){
+        document.getElementById(/water/i.test(item.name)?'pack2WaterLevel':'pack2Variant').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5'&&item.variants?.length){
+        pack5Variant.value=item.variants[(item.variants.indexOf(pack5Variant.value)+1)%item.variants.length];
+        return item.name+' · '+pack5Variant.value;
+      }
+      return item.name+' · variants are separate catalog entries';
+    },
+    onSelect:async item=>{
+      if(!g2CreativeEnabled||storageReadOnly||item.kind!=='block')throw Error('Select an editable physical material');
+      if(caveSession&&!['core','biome130'].includes(item.owner))throw Error('Shaped materials require a normal world');
+      if(item.owner==='pack5'){
+        const requestedWorld=world,epoch=creativeActivationEpoch;
+        if(!await ensurePack5Loaded()||world!==requestedWorld||epoch!==creativeActivationEpoch||
+           !g2CreativeEnabled||storageReadOnly||caveSession)throw Error('Pack 5 selection canceled');
+        pack5Family.value=item.symbol;
+        if(pack5Family.value!==item.symbol)throw Error('Pack 5 family not installed');
+        pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
+        pack5Variant.value=item.variants[0];
+        if(pack5Variant.value!==item.variants[0])throw Error('Pack 5 variant not installed');
+        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;return;
+      }
+      let target;
+      if(item.owner==='core'||item.owner==='pack2')target=document.querySelector('[data-block="'+item.id+'"]');
+      else if(item.owner==='biome130')target=biomeSelect;
+      else if(item.owner==='pack1'||item.owner==='pack4')target=manual14Select;
+      else if(item.owner==='pack3')target=pack3Palette.material;
+      if(!target)throw Error('Placement owner not mounted: '+item.key);
+      if(target.dataset.block)target.click();
+      else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
+      if(selected!==item.id)throw Error('Material selection not confirmed: '+item.key);
+      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;
+    }
+  });
+  inventoryHeader.addEventListener('click',()=>{
+    if(g2CreativeEnabled)creativeInventory.open();
+  });
+  g2Sync();
+
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
