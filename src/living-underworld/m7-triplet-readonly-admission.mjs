@@ -124,6 +124,11 @@ export function classifyExactHeadOriginalM7Triplet({
       !yes(r.candidateThinUnderpassCrossAuditLedgerReaderBindingsUnchanged)||
       !yes(r.candidateThinUnderpassCrossAuditLedgerCallerOnly)||
       !yes(r.candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries)||
+      !yes(r.candidateThinUnderpassCrossAuditPreReadHardCaps)||
+      !yes(r.candidateThinUnderpassCrossAuditCallbacksWithinCaps)||
+      r.candidateThinUnderpassCrossAuditBlockedOriginalCallbacks!==0||
+      r.candidateThinUnderpassCrossAuditSourceCallbackCap!==1200000||
+      r.candidateThinUnderpassCrossAuditDistinctCellCapPerRole!==160000||
       ![bridge,pad,total].every(Number.isSafeInteger)||
       bridge<1||pad!==135||!prior||!later||!common)return false;
    let sum=0,commonSum=0;
