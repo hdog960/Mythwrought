@@ -46,7 +46,7 @@ try{
    if(!await page.evaluate(()=>Boolean(
        document.getElementById('scene').getContext('webgl2'))))
      throw Error('Real WebGL2 unavailable in physical walking test');
-   await page.locator('#menu').click();
+   await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
    await page.locator('#seedInput').fill('179');
    if(await page.locator('#createFourBiomeWorld').count()!==1)
      throw Error('Accepted normal v4 new-world button unexpectedly removed');

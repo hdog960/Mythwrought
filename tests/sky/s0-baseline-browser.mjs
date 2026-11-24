@@ -64,7 +64,7 @@ try {
       }
       // The built-in diagnostic is the primary measured frame-time source.
       const keysBefore=await page.evaluate(()=>Object.fromEntries(Object.entries(localStorage)));
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#runAudit').click();
       await page.waitForFunction(()=>document.querySelector('#auditReport')?.value.includes('Foreground play frames:'),
         null,{timeout:10000});

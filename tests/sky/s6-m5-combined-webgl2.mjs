@@ -184,7 +184,7 @@ try{
       if(!await page.evaluate(()=>Boolean(
         document.getElementById('scene').getContext('webgl2'))))
         throw Error('Genuine WebGL2 context unavailable');
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#seedInput').fill(String(seed));
       await page.locator('#createExperimentalV5World').click();
       await page.locator('#closeHelp').click();
@@ -233,7 +233,7 @@ try{
           +c.dataset.skyS6BiomeStrength>.6&&+c.dataset.loadedChunks===25;
       },route.name,{timeout:60000});
       async function skyTime(phase){
-        await page.locator('#menu').click();
+        await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
         await page.locator(phase==='day'?'#skySetDay':'#skySetNight').click();
         await page.locator('#closeHelp').click();
         await page.waitForFunction(({expected,night})=>{
@@ -278,7 +278,7 @@ try{
       if(!seen.raw||seen.size<=mapBefore.size||
          !JSON.parse(seen.raw).cells.includes(cell))
         throw Error('No authentic location-specific physical map discovery');
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#save').click();
       const saved=await page.evaluate(k=>({
         raw:localStorage.getItem(k),

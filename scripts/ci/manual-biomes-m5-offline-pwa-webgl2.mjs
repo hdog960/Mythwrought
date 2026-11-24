@@ -56,7 +56,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261124-enchanted-p2-v1',
+  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261124-compact-menu-v1',
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -140,7 +140,7 @@ try{
     !navigator.serviceWorker.controller&&
     performance.getEntriesByType('resource')
       .every(e=>!e.name.endsWith('/sw-m5.js'))));
-  await page.locator('#menu').click();
+  await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
   await page.locator('#seedInput').fill(String(seed));
   await page.locator('#createExperimentalV5World').click();
   await page.locator('#closeHelp').click();
@@ -180,7 +180,7 @@ try{
     {timeout:180000});
   const online=await page.evaluate(async()=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261124-enchanted-p2-v1');
+    const name=keys.find(x=>x==='mythwrought-m5-shell-20261124-compact-menu-v1');
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
@@ -251,7 +251,7 @@ try{
   await page.locator('#miniMapButton').click();
   await screenshot(page,'offline-discovered-map');
   await page.locator('#closeExploration').click();
-  await page.locator('#menu').click();
+  await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
   await page.locator('#save').click();
   const saved=await page.evaluate(({worldKey,profileKey,journalKey})=>({
     world:localStorage.getItem(worldKey),profile:localStorage.getItem(profileKey),

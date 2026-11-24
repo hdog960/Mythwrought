@@ -189,7 +189,7 @@ try{
       if(!await page.evaluate(()=>Boolean(
         document.getElementById('scene').getContext('webgl2'))))
         throw Error('Genuine WebGL2 context unavailable');
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#seedInput').fill(String(seed));
       await page.locator('#createExperimentalV5World').click();
       await page.locator('#closeHelp').click();
@@ -242,7 +242,7 @@ try{
       if(!seen.raw||seen.size<=mapBefore.size||
          !JSON.parse(seen.raw).cells.includes(cell))
         throw Error('No authentic location-specific physical map discovery');
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#save').click();
       const saved=await page.evaluate(k=>({
         raw:localStorage.getItem(k),

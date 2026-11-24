@@ -112,7 +112,7 @@ try{
     if(!await page.evaluate(()=>
       Boolean(document.getElementById('scene').getContext('webgl2'))))
       throw Error('V6 actual Chromium WebGL2 missing at '+width+'x'+height);
-    await page.locator('#menu').click();
+    await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#seedInput').fill(String(seed));
     if(await page.locator('#createBalancedV6World').count()!==1)
       throw Error('V6 real-game UI action missing');
@@ -183,9 +183,9 @@ try{
         urls.some(url=>url.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs'))&&
         urls.some(url=>url.endsWith('/src/app-update.mjs'))&&
         urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
-    },'mythwrought-m5-shell-20261124-enchanted-p2-v1',{timeout:180000});
+    },'mythwrought-m5-shell-20261124-compact-menu-v1',{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261124-enchanted-p2-v1';
+      const name='mythwrought-m5-shell-20261124-compact-menu-v1';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
