@@ -50,9 +50,10 @@ const server=createServer(async(req,res)=>{
   const file=absolute===base?path.join(base,'index.html'):absolute;
   const bytes=await readFile(file);
   res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream',
-   // The harness deliberately publishes a new revision seconds after the old one.
-   // Revalidate the worker script online instead of caching it for 300 seconds.
-   'Cache-Control':'no-store',
+   // Old worker must revalidate for the immediate simulated publication.
+   // The final installed worker is stable during the bounded offline trial,
+   // matching the prior M5 offline harness's 300-second script lifetime.
+   'Cache-Control':rel==='/sw-m5.js'&&epoch==='candidate'?'public, max-age=300':'no-store',
    'X-MW-Source':base===root?'candidate':'historical'});
   res.end(bytes);
  }catch(e){res.writeHead(404);res.end(String(e));}
@@ -157,6 +158,7 @@ try{
  const off=await live();
  assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),cell),BLOCK.AIR);
  assert.deepEqual(await readSlot(prefix),saved);assert.deepEqual(await readSlot(oldPrefix),protectedBytes);
+ report.offlineObservation={offline:off,editedTreeStillAir:true,versionedBytesUnchanged:true,historicalBytesUnchanged:true,originRequestsAfterCutoff:requests-cutoff};
  assert.equal(requests,cutoff,'Unexpected origin requests after offline cutoff');
  assert.deepEqual(report.errors,[]);assert.deepEqual(report.workerErrors,[]);
  check('cold-offline-versioned-reopen',{offline:off,editedTreeStillAir:true,versionedBytesUnchanged:true,historicalBytesUnchanged:true,originRequestsAfterCutoff:requests-cutoff});
