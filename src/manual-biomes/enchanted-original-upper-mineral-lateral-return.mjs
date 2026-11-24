@@ -13,17 +13,21 @@ import {
 import {replayFullOriginalM7CaveAnchorWalk}
  from './enchanted-original-full-anchor-continuity.mjs';
 export const ORIGINAL_UPPER_LATERAL_LIMIT=Object.freeze({
- mainJunctionStep:110,sideStepsMax:34,mainFinishStep:120,
+ mainJunctionStep:110,sideStepsMax:34,vaultStepsMax:6,
+ mainFinishStep:120,
  branches:Object.freeze(['upper24-windcut','upper24-hollowbend'])
 });
 const reject=(reason,detail={})=>Object.freeze({ok:false,reason,...detail});
 const three=p=>[p.x,p.surface,p.z];
-export function planOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34}={}){
+export function planOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34,vaultSteps=0}={}){
  if(world?.profile?.generator!==M7_ENVIRONMENT_GENERATOR||
    !Number.isInteger(world.seed)||world.seed!==(world.seed|0)||
    !ORIGINAL_UPPER_LATERAL_LIMIT.branches.includes(name)||
    !Number.isInteger(sideSteps)||sideSteps<1||
-   sideSteps>ORIGINAL_UPPER_LATERAL_LIMIT.sideStepsMax)
+   sideSteps>ORIGINAL_UPPER_LATERAL_LIMIT.sideStepsMax||
+   !Number.isInteger(vaultSteps)||vaultSteps<0||
+   vaultSteps>ORIGINAL_UPPER_LATERAL_LIMIT.vaultStepsMax||
+   vaultSteps>0&&sideSteps!==34)
    throw Error('Invalid original M7 authored side-gallery route request');
  const q=auditOriginalM7UpperAnchorWalk(world,name,{
     ownerSteps:ORIGINAL_UPPER_LATERAL_LIMIT.mainFinishStep,
@@ -57,10 +61,29 @@ export function planOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34}={
     {name,atLateralStep:i,actualFeet:source.feet,mainFeet:center.feet});
   away.push(Object.freeze({...source,originalUpperLateralStep:i}));
  }
+ // The *actual original* vaulted room occupies the elliptical authored
+ // floor around the end of the 34-cell lateral branch. Only accept a
+ // cardinal, literal original source-owned interior spoke at x+N and
+ // verify its three headroom AIR cells + body support with the existing
+ // canonical original reader; never assume a visualized alcove is walkable.
+ const lip=away.at(-1),vault=[];
+ for(let i=1;i<=vaultSteps;i++){
+  const x=lip.x+i,z=lip.z;
+  const source=originalM7UpperOwnedPhysicalFloor(world,name,x,originalFloor,z);
+  if(!source)return reject('original-mineral-vault-interior-floor-unavailable',
+   {name,vaultStep:i,source:[x,originalFloor,z],
+    genuinelyAuthoredInteriorCells:vault.length});
+  if(Math.abs(source.feet-lip.feet)>1.01)
+   return reject('original-mineral-vault-physical-elevation-unsafe',
+    {name,vaultStep:i,source:[x,originalFloor,z]});
+  vault.push(Object.freeze({...source,originalUpperVaultStep:i}));
+ }
+ const vaultReturn=vault.length?[...vault.slice(0,-1)].reverse().concat(
+  [Object.freeze({...lip,originalVaultRoomReturn:true})]):[];
  const back=[...away.slice(0,-1)].reverse();
  const full=[
    ...main.path.slice(0,index+1),
-   ...away,...back,
+   ...away,...vault,...vaultReturn,...back,
    Object.freeze({...center,originalLateralReturnToMain:true}),
    ...main.path.slice(index+1)
  ];
@@ -74,16 +97,20 @@ export function planOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34}={
   realJunction:Object.freeze(three(center)),
   authenticSideEnd:Object.freeze(three(away.at(-1))),
   originalAuthenticatedSideFloors:Object.freeze(away),
+  authenticVaultInteriorEnd:vault.length?Object.freeze(three(vault.at(-1))):null,
+  originalAuthenticatedVaultInteriorFloors:Object.freeze(vault),
+  vaultSteps,
   physicallyWalked:false,sourceOnly:true,
   originalMain120Cells:main.path.length,
   completeContinuousSourcePlan:Object.freeze({...main,
     path:Object.freeze(full),originalSideBranchOutAndBack:2*sideSteps,
+    originalVaultRoomOutAndBack:2*vaultSteps,
     sourceOwnedUpperRouteSteps:120,
     fullDeepNetworkAccepted:false}),
   sideVaultInteriorFullyProven:false});
 }
-export function surveyOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34}={}){
- const plan=planOriginalM7UpperMineralSideReturn(world,name,{sideSteps});
+export function surveyOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34,vaultSteps=0}={}){
+ const plan=planOriginalM7UpperMineralSideReturn(world,name,{sideSteps,vaultSteps});
  if(!plan.ok)return plan;
  const real=replayFullOriginalM7CaveAnchorWalk(world,plan.completeContinuousSourcePlan);
  if(!real.ok)return reject('original-lateral-player-physics-failed',{
@@ -92,13 +119,18 @@ export function surveyOriginalM7UpperMineralSideReturn(world,name,{sideSteps=34}
   firstBlockedIndex:real.failedAt??null,
   actualPlayer:real.actualPlayer??null});
  const end=plan.authenticSideEnd;
+ if(vaultSteps&&(!plan.authenticVaultInteriorEnd||
+    !real.legs.some(l=>l.target.join(',')===
+      plan.authenticVaultInteriorEnd.join(','))))
+   throw Error('Original player never physically reached authored mineral vault interior');
  if(!real.legs.some(l=>l.target.join(',')===end.join(','))||
     !real.legs.some(l=>l.target.join(',')===plan.realJunction.join(',')))
    throw Error('Actual original player failed to visit and return from lateral branch');
- return Object.freeze({ok:true,name,sideSteps,
+ return Object.freeze({ok:true,name,sideSteps,vaultSteps,
   sourcePlan:plan,realPlayer:real,
   physicallyVisitedOriginalVaultBranch:true,
   physicallyReturnedToOriginalUpperMain:true,
   physicallyFinishedOriginalUpperMain120:true,
+  physicallyVisitedRealVaultInterior:vaultSteps>0,
   wholeUpperNetworkAccepted:false,sideVaultInteriorFullyProven:false});
 }
