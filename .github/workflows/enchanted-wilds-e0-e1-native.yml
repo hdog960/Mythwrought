@@ -1,0 +1,35 @@
+name: Enchanted Wilds E0 E1 original source native
+on:
+  push:
+    branches: [research/enchanted-wilds-e0-e1-identity-20261124]
+    paths: [.github/workflows/enchanted-wilds-e0-e1-native.yml]
+permissions:
+  contents: read
+jobs:
+  source-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: original
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate protected source and execute actual E1 native tests
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git -C ../original rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          for f in src/depth.mjs src/voxel.mjs src/physics.mjs src/main.mjs src/environment-ground.mjs src/manual-biomes/m2-runtime-bridge.mjs src/pack2-world.mjs src/manual-biomes/environment-oasis.mjs; do
+            cmp "$f" "../original/$f"
+          done
+          node --check src/manual-biomes/enchanted-wilds-identity.mjs
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          WILDS_ORIGINAL_ROOT="$PWD/../original" node --test tests/manual-biomes/enchanted-wilds-e1.test.mjs
