@@ -24,6 +24,13 @@ const COLORS={
   4:[.60,.39,.23],5:[.36,.79,.92],6:[.70,.58,.33],
   7:[.27,.57,.31],8:[.32,.39,.48]
 };
+// Registry functions are pure lookups over the original immutable ID tables.
+// Certify the hot legacy rock IDs against all three authoritative registries
+// once. If a registry ever claims either ID, preserve the generic path.
+const plainRock=id=>!isPack2LiveId(id)&&!isBiome130BlockId(id)&&!environmentGround(id);
+const plainStone=plainRock(BLOCK.STONE),plainDeepstone=plainRock(BLOCK.DEEPSTONE);
+const isPlainRock=id=>(id===BLOCK.STONE&&plainStone)||
+  (id===BLOCK.DEEPSTONE&&plainDeepstone);
 export function meshDepthSection291(world,cx,cz,section){
   if(!world||typeof world.get!=='function'||![cx,cz,section].every(Number.isInteger)||section>=0)
     throw Error('Invalid deep mesh request');
@@ -69,7 +76,8 @@ export function meshDepthSection291(world,cx,cz,section){
         const center=((x-minX)*side+(z-minZ))*depth+(y-minY);
         const id=fastHalo?blockAtIndex(center,x,y,z):blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
-        if(isPack2LiveId(id)){
+        const rock=isPlainRock(id);
+        if(!rock&&isPack2LiveId(id)){
           if(id!==76){
             const state=world.getPack2State?.(x,y,z);
             if(!state)throw Error('Deep Pack 2 mesh missing physical state');
@@ -78,7 +86,7 @@ export function meshDepthSection291(world,cx,cz,section){
           }
           continue;
         }
-        if(isBiome130BlockId(id)){
+        if(!rock&&isBiome130BlockId(id)){
           const rotation=world.rotationAt?.(x,y,z)??0,key=id*4+rotation;
           let mesh=shapeCache.get(key);
           if(!mesh){
@@ -111,7 +119,7 @@ export function meshDepthSection291(world,cx,cz,section){
           }
           continue;
         }
-        const naturalGround=environmentGround(id);
+        const naturalGround=rock?undefined:environmentGround(id);
         const color=naturalGround?.color??COLORS[id]??COLORS[3];
         // All authoritative color tables are frozen RGB triples. Preserve
         // original arithmetic order, lazy shade (no work for hidden cells),
@@ -122,7 +130,8 @@ export function meshDepthSection291(world,cx,cz,section){
           const face=FACES[f],nx=x+face.d[0],ny=y+face.d[1],nz=z+face.d[2];
           const neighbor=fastHalo?blockAtIndex(center+faceOffsets[f],nx,ny,nz):
             blockAt(nx,ny,nz);
-          if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
+          if(neighbor!==BLOCK.AIR&&
+             (isPlainRock(neighbor)||!isPack2LiveId(neighbor)))continue;
           if(shade===undefined)shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
           const r=Math.min(1,color[0]*shade*face.lit),
             g=Math.min(1,color[1]*shade*face.lit),
