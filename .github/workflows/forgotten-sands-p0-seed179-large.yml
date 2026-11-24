@@ -1,0 +1,26 @@
+name: Forgotten Sands P0 first seed179 large native geometry
+on:
+  push:
+    branches: [research/forgotten-sands-p0-mixed-mesh-vistas-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-seed179-large.mjs'
+      - 'tests/forgotten-sands-seed179-large.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-seed179-large.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-seed179-large.mjs
+          node --test tests/forgotten-sands-seed179-large.test.mjs
