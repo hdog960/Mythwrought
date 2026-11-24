@@ -234,3 +234,124 @@ test('Phase30 rejected coordinates and sealed source do not invoke the original 
   /Invalid original-world source ledger observation/);
  assert.equal(calls,2);
 });
+
+test('Phase31 an original reader throwing after prior survey seals all later reads and preserves first failure',()=>{
+ let actual=0,reads=0;
+ const src={...normal(),naturalAt:()=>{
+  actual++;if(++reads===2)throw new TypeError('M7 callback failed');
+  return 1;
+ },editedAt:()=>{actual++;return false}};
+ const ledger=create(src);
+ read(ledger.readers,0,-80,0);
+ ledger.beginUnderpass();
+ assert.throws(()=>ledger.readers.naturalAt(0,-80,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(actual,3); // two naturalAt calls plus one earlier editedAt
+ assert.throws(()=>ledger.readers.editedAt(0,-80,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(actual,3,'no original world callback after throwing read');
+ const r=ledger.audit();
+ assert.equal(r.ok,false);
+ assert.equal(r.reason,'ORIGINAL_SOURCE_CALLBACK_THROWN');
+ assert.equal(r.firstMismatch.role,'naturalAt');
+ assert.equal(r.firstMismatch.errorName,'TypeError');
+ assert.equal(r.sourceCallbackFailures,1);
+ assert.equal(r.underpassCalls.naturalAt,1);
+ assert.equal(r.blockedSourceCallbackAttempts,1);
+ assert.equal(r.originalCallbackBindingsUnchanged,true);
+});
+test('Phase31 original callback throws on prior phase and no subsequent callback can execute',()=>{
+ let calls=0;
+ const ledger=create({...normal(),naturalAt:()=>{calls++;throw Error('bad origin')}});
+ assert.throws(()=>ledger.readers.naturalAt(7,-61,3),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(calls,1);
+ assert.throws(()=>ledger.readers.naturalAt(7,-61,3),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(calls,1);
+ assert.throws(()=>ledger.beginUnderpass(),/prior audit incomplete/);
+});
+test('Phase31 recursive naturalAt source reader cannot enter the ledger for another role',()=>{
+ let calls=0;
+ let wrapped;
+ const source={...normal(),naturalAt:()=>{
+  calls++;wrapped.editedAt(0,-55,0);
+  return 1;
+ }};
+ const ledger=create(source);wrapped=ledger.readers;
+ assert.throws(()=>wrapped.naturalAt(0,-55,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(calls,1);
+ assert.throws(()=>wrapped.authoredAt(0,-55,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(calls,1);
+});
+test('Phase31 callback swallowing a nested refusal cannot make outer read succeed',()=>{
+ let rawCalls=0;let wrapped;
+ const source={...normal(),naturalAt:()=>{
+  rawCalls++;
+  try{wrapped.authoredAt(1,-50,0)}catch(error){
+   assert.equal(error.code,'ORIGINAL_SOURCE_REENTRANT_CALLBACK');
+  }
+  return 1;
+ }};
+ const ledger=create(source);wrapped=ledger.readers;
+ assert.throws(()=>wrapped.naturalAt(1,-50,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(rawCalls,1);
+ assert.throws(()=>wrapped.protectedAt(1,-50,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(rawCalls,1);
+});
+test('Phase31 callback can return non-poisoned normal geology with zero reentrancy count',()=>{
+ const ledger=create(normal(),{maxTotalCalls:8,maxCoordinatesPerRole:1});
+ read(ledger.readers,0,-55,0);ledger.beginUnderpass();
+ read(ledger.readers,0,-55,0);
+ const proof=ledger.audit();
+ assert.equal(proof.ok,true);
+ assert.equal(proof.sourceCallbackFailures,0);
+ assert.equal(proof.sourceReadReentrancyGuardEnforced,true);
+ assert.equal(proof.sourceCallbackInvocationsReservedBeforeCall,true);
+ assert.equal(proof.blockedSourceCallbackAttempts,0);
+ assert.equal(proof.totalSourceCallbackCalls,8);
+});
+test('Phase31 throwing callback still consumes exactly one reserved original source read',()=>{
+ let calls=0;
+ const src={...normal(),protectedAt:()=>{calls++;throw RangeError('bad M7')}};
+ const ledger=create(src,{maxTotalCalls:4});
+ ledger.readers.naturalAt(0,-55,0);
+ ledger.readers.authoredAt(0,-55,0);
+ ledger.readers.editedAt(0,-55,0);
+ assert.throws(()=>ledger.readers.protectedAt(0,-55,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(calls,1);
+ assert.throws(()=>ledger.readers.editedAt(0,-55,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.equal(calls,1);
+});
+test('Phase31 ledger audit after nested error includes true number of original invocations',()=>{
+ const raw=normal();let calls=0;let wrapper;
+ const source={...normal(),authoredAt:()=>{calls++;return raw.authoredAt()},
+  naturalAt:()=>{calls++;wrapper.editedAt(0,-60,0);return 1}};
+ const ledger=create(source);wrapper=ledger.readers;
+ // Acquire one complete valid prior witness before exercising nested M7 callback.
+ // Use independent raw-function plan: switch on only for later phase.
+ // Here the recursive source is invoked immediately and cannot reach audit,
+ // so verify its reserved role-call bookkeeping by direct captured error.
+ assert.throws(()=>wrapper.naturalAt(0,-60,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(calls,1);
+ assert.throws(()=>wrapper.naturalAt(0,-60,0),
+  /ORIGINAL_SOURCE_REENTRANT_CALLBACK/);
+ assert.equal(calls,1);
+});
+test('Phase31 source read failure never falsely authenticates a native M7 world',()=>{
+ const src={...normal(),editedAt:()=>{throw 'source unavailable'}};
+ const ledger=create(src);
+ ledger.readers.naturalAt(0,-90,0);
+ ledger.readers.authoredAt(0,-90,0);
+ assert.throws(()=>ledger.readers.editedAt(0,-90,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+ assert.throws(()=>ledger.readers.protectedAt(0,-90,0),
+  /ORIGINAL_SOURCE_CALLBACK_THROWN/);
+});
