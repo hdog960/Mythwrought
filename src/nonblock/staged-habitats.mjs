@@ -1,6 +1,6 @@
 import {BLOCK,terrainHeight,worldKey} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
-import {M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from '../manual-biomes/profile-world.mjs';
+import {M6_BALANCED_GENERATOR,isEnvironmentGenerator} from '../manual-biomes/profile-world.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {M3_DESERT_IDS} from '../manual-biomes/desert-m3.mjs';
 import {M4_PHYSICAL_MATERIALS} from '../manual-biomes/three-regions-m4.mjs';
@@ -47,7 +47,7 @@ function coordinates(value,size){
 
 function surfaceHabitat(world,x,z){
   const {seed,generationProfile:profile}=world;
-  const evolved=profile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const evolved=isEnvironmentGenerator(profile?.generator);
   const sample=evolved||profile?.generator===M6_BALANCED_GENERATOR?v6BiomeAt:surfaceBiomeAt;
   const region=profile?sample(x,z,seed):null;
   return region?.weight>=.35?region.name:'meadow';
@@ -57,7 +57,7 @@ function surfaceAnchor(world,habitat,column){
   if(!coordinates(column,2))throw new TypeError('Invalid scenery surface column');
   const [x,z]=column;
   if(surfaceHabitat(world,x,z)!==habitat)return null;
-  const evolved=world.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const evolved=isEnvironmentGenerator(world.generationProfile?.generator);
   const floor=terrainHeight(x,z,world.seed)-2;
   for(let y=WORLD_MAX_Y;y>=floor;y--){
     const block=evolved?world.naturalAndLandmarkBlock(x,y,z):world.get(x,y,z);
@@ -165,7 +165,7 @@ function findLandmarkProp(baseline,district,x,z,hash){
         if(court&&Math.abs(x-court.origin[0])<=2)continue;
       }
       const candidate={...placement,anchor:[x,y,z],orientation};
-      if(createCandidateScene(baseline.seed,M7_ENVIRONMENT_GENERATOR,[candidate],dep).visible().length)
+      if(createCandidateScene(baseline.seed,baseline.generationProfile.generator,[candidate],dep).visible().length)
         return candidate;
     }
   }
@@ -215,7 +215,7 @@ function environmentalCaveSite(world,baseline,x,z,section,hash,options){
 }
 
 export function planEnvironmentalScenery(world,cx,cz,options={}){
-  if(world.generationProfile?.generator!==M7_ENVIRONMENT_GENERATOR)return [];
+  if(!isEnvironmentGenerator(world.generationProfile?.generator))return [];
   const requests=[];
   const cave=[];
   const props=[];
@@ -240,7 +240,7 @@ export function planEnvironmentalScenery(world,cx,cz,options={}){
       if(prop){
         const editedAt=(x,y,z)=>world.edits.has(worldKey(x,y,z))||options.occupied?.(x,y,z);
         const dep={storage:emptyStorage,blockAt:(...p)=>world.get(...p)!==BLOCK.AIR,editedAt,voxelPick:emptyPick};
-        if(createCandidateScene(world.seed,M7_ENVIRONMENT_GENERATOR,[prop],dep).visible().length)props.push(prop);
+        if(createCandidateScene(world.seed,world.generationProfile.generator,[prop],dep).visible().length)props.push(prop);
         continue;
       }
     }
