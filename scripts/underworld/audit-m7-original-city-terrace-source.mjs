@@ -231,6 +231,16 @@ for(const [rx,rz] of regions){
    crossAudit.originalCallbackBindingsUnchanged===true,
   candidateThinUnderpassCrossAuditLedgerCallerOnly:true,
   candidateThinUnderpassCrossAuditLedgerNoExtraSourceQueries:true,
+  candidateThinUnderpassCrossAuditPreReadHardCaps:
+   crossAudit.preReadHardCapsEnforced===true,
+  candidateThinUnderpassCrossAuditBlockedOriginalCallbacks:
+   crossAudit.blockedSourceCallbackAttempts??null,
+  candidateThinUnderpassCrossAuditCallbacksWithinCaps:
+   crossAudit.sourceCallbacksWithinHardCaps===true,
+  candidateThinUnderpassCrossAuditSourceCallbackCap:
+   crossAudit.maximumSourceCallbackCalls??null,
+  candidateThinUnderpassCrossAuditDistinctCellCapPerRole:
+   crossAudit.maximumDistinctCoordinatesPerRole??null,
   candidateThinUnderpassSourceOverlapRefusal:
    underpass.overlapValueReason??null,
   candidateThinUnderpassSourceOverlapFirstMismatch:
