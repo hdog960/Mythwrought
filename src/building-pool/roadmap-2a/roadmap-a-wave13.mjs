@@ -175,116 +175,116 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
   {
     "category": "general-store",
     "biome": "snow",
-    "size": "large",
-    "variation": 1,
-    "name": "Frostwake Long-Pier Merchant Hall",
-    "w": 94,
+    "size": "medium",
+    "variation": 3,
+    "name": "Frostwake Bridged-Pier Merchant Hall",
+    "w": 74,
     "d": 68,
     "h": 15,
-    "entry": 46,
+    "entry": 36,
     "wall": "pack1:004",
     "floor": "pack2:013",
     "roof": "pack3:025",
     "rects": [
       [
-        28,
-        65,
+        20,
+        52,
         0,
-        20
+        16
       ],
       [
         0,
-        32,
-        16,
-        50
-      ],
-      [
-        64,
-        93,
+        26,
         13,
-        48
+        53
       ],
       [
-        10,
-        83,
-        55,
+        49,
+        73,
+        20,
+        47
+      ],
+      [
+        9,
+        61,
+        56,
         67
       ],
       [
-        32,
-        66,
-        17,
-        59
+        25,
+        51,
+        14,
+        60
       ],
       [
-        2,
-        19,
-        44,
-        61
+        0,
+        15,
+        47,
+        63
       ],
       [
-        77,
-        93,
-        42,
-        62
+        61,
+        73,
+        43,
+        60
       ]
     ],
     "cuts": [
       [
+        31,
         40,
-        54,
-        28,
-        43
+        29,
+        41
       ],
       [
-        74,
-        84,
-        32,
+        57,
+        64,
+        33,
         42
       ]
     ],
     "anchors": [
       [
-        46,
-        8
+        36,
+        7
       ],
       [
-        14,
+        12,
         33
       ],
       [
-        80,
+        64,
         26
       ],
       [
-        23,
+        22,
         62
       ]
     ],
     "fixtures": [
       [
-        50,
-        8,
+        40,
+        7,
         "pack5:086",
         "ledger-service",
         "public-service-ledge"
       ],
       [
-        16,
+        14,
         35,
         "pack5:091",
         "cartographers-oak-desk",
         "source-records-desk"
       ],
       [
-        81,
+        65,
         28,
         "pack5:087",
         null,
         "dry-trading-display"
       ],
       [
-        24,
+        23,
         63,
         "pack4:057",
         null,
@@ -294,50 +294,50 @@ export const ROADMAP_A_WAVE13_SPECS=Object.freeze([
     "roofs": [
       [
         [
-          28,
-          65,
+          20,
+          52,
           0,
-          20
+          16
         ],
         "x",
         8,
-        "Frostwake Long-Pier Merchant Hall original entrance-canopy",
+        "Frostwake Bridged-Pier Merchant Hall original winter-front-gable",
         "terrace"
       ],
       [
         [
           0,
-          32,
-          16,
-          50
+          26,
+          13,
+          53
         ],
         "z",
         5,
-        "Frostwake Long-Pier Merchant Hall original western-covered-trade",
+        "Frostwake Bridged-Pier Merchant Hall original bridged-west-trade",
         "tower"
       ],
       [
         [
-          64,
-          93,
-          13,
-          48
+          49,
+          73,
+          20,
+          47
         ],
         "x",
         7,
-        "Frostwake Long-Pier Merchant Hall original east-rear-connection",
+        "Frostwake Bridged-Pier Merchant Hall original east-pier-canopy",
         "gable"
       ],
       [
         [
-          10,
-          83,
-          55,
+          9,
+          61,
+          56,
           67
         ],
         "z",
         6,
-        "Frostwake Long-Pier Merchant Hall original far-rear-store",
+        "Frostwake Bridged-Pier Merchant Hall original rear-inventory-arcade",
         "saw"
       ]
     ]
