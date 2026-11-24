@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '90217a8133e0533af0e5facef8ebf62c9e91691a');
+    '3ef6c70de403e8e480dfa14351a1ca9b0f0f8304');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1924,4 +1924,106 @@ test('per-mine GPU diagnostic never certifies native GPU rollback or physical re
   assert.equal(s.nativeGpuRollbackProven,false);
   assert.equal(s.browserPixelParityProven,false);
   assert.equal(s.mineFrameWindow.perMineNativeUploadSumP95Ms,null);
+});
+
+
+test('nonfinite or negative successful native upload timing is a trial fault',()=>{
+  for(const bad of [NaN,Infinity,-Infinity,-1,undefined,null]){
+    const {perf}=local291PerfFixture();perf.frame(0);
+    perf.mine(20,{cell:[1,-31,2],previous:3,next:0});
+    perf.upload(bad);
+    const w=perf.read().mineFrameWindow;
+    assert.equal(w.uploadFaults,1);
+    assert.equal(w.successfulGuardedUploads,0);
+    assert.equal(w.successfulGuardedUploadP95Ms,null);
+  }
+});
+test('source authentic first-mine capture cannot launder invalid native timings',()=>{
+  for(const bad of [NaN,Infinity,-1]){
+    const {perf}=local291PerfFixture();perf.frame(0);
+    const edit=perf.beginEdit(),pending=perf.startFirst();
+    perf.upload(bad);perf.upload(12);
+    const capture=perf.finishFirst();perf.endEdit();
+    assert.equal(pending,capture);
+    assert.equal(capture.faults,1);
+    assert.equal(capture.samples.length,1);
+    perf.mine(40,{cell:[1,-31,2],previous:3,next:0},capture);
+    perf.phase({meshMs:2,saveMs:3,gpuMs:edit.gpuMs,
+      gpuCalls:edit.gpuCalls,loadedSections:1});
+    const w=perf.read().mineFrameWindow;
+    assert.equal(w.savedMines,1);
+    assert.equal(w.uploadFaults,1);
+    assert.equal(w.successfulGuardedUploads,1);
+    assert.equal(w.invalid,true);
+    assert.equal(w.invalidReason,'phase-invalid');
+  }
+});
+test('original real opaque/water uploader preserves GL success despite invalid timer',()=>{
+  const {scope,perf}=local291PerfFixture();
+  const a=source.indexOf('  function uploadPack2Chunk(vertices,water){');
+  const b=source.indexOf('  let editMeshBatches=0;',a);
+  assert.ok(a>=0&&b>a);
+  const realUploader=new Function('scope','with(scope){'+source.slice(a,b)+
+    '\nreturn uploadPack2Chunk;}');
+  const edit=perf.beginEdit(),captureStart=perf.startFirst();let calls=0;
+  Object.assign(scope,{near291Perf:perf.data,near291Enabled:false,
+    near291RecordUpload:perf.upload,near291RecordUploadFailure:perf.fail,
+    performance:{now:()=>NaN},
+    gl:{deleteBuffer:()=>{throw Error('Native upload succeeded; never delete');}},
+    uploadChunkBuffer:()=>{calls++;return {};}});
+  const returned=realUploader(scope)(new Float32Array(9),new Float32Array(9));
+  const captured=perf.finishFirst();perf.endEdit();
+  assert.equal(returned.count,1);
+  assert.equal(calls,2);
+  assert.equal(captured,captureStart);
+  assert.equal(captured.faults,2);
+  assert.equal(captured.samples.length,0);
+  assert.ok(Number.isNaN(edit.gpuMs));
+  perf.frame(0);
+  perf.mine(40,{cell:[1,-31,2],previous:3,next:0},captured);
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.uploadFaults,2);
+  assert.equal(w.successfulGuardedUploads,0);
+});
+test('later invalid timer latches GPU upload fault after a valid mine',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(22,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:2,saveMs:2,gpuMs:3,gpuCalls:1,loadedSections:1});
+  perf.upload(4);perf.upload(Infinity);
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.uploadFaults,1);
+  assert.equal(w.successfulGuardedUploads,1);
+  assert.equal(w.successfulGuardedUploadP95Ms,4);
+});
+test('invalid original streaming GPU timer inside mine window fails closed',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(22,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:2,saveMs:2,gpuMs:3,gpuCalls:1,loadedSections:1});
+  perf.upload(NaN);
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.uploadFaults,1);
+  assert.equal(w.perMineNativeUploadSumP95Ms,3);
+});
+test('idle invalid timing before first original source MINE does not invent trial failure',()=>{
+  const {perf}=local291PerfFixture();
+  perf.upload(NaN);
+  perf.frame(0);
+  perf.mine(22,{cell:[1,-31,2],previous:3,next:0});
+  perf.phase({meshMs:2,saveMs:2,gpuMs:3,gpuCalls:1,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.uploadFaults,0);
+  assert.equal(w.savedMines,1);
+  assert.equal(w.invalid,false);
+});
+test('public original Pages/PWA never enters local measurement failure guard',()=>{
+  const {scope,perf}=local291PerfFixture({hostname:'hdog960.github.io'});
+  assert.equal(perf.data,null);
+  const a=source.indexOf('  function near291RecordUpload(duration){');
+  const b=source.indexOf('  function near291RecordUploadFailure(){',a);
+  const body=source.slice(a,b);
+  assert.ok(body.includes('if(!near291Perf)return;'));
+  assert.ok(body.includes('near291RecordUploadFailure();'));
+  assert.ok(!body.includes('gl.'));
+  assert.ok(!body.includes('localStorage.'));
+  assert.equal(scope.location.hostname,'hdog960.github.io');
 });
