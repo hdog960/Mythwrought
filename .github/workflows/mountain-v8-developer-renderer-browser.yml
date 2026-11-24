@@ -1,0 +1,37 @@
+name: Mountain V8 real supported-tree renderer and WebGL context recovery
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-renderer-browser.yml]
+permissions:
+  contents: read
+jobs:
+  renderer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact candidate source
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --check scripts/ci/mountain-v8-developer-renderer-browser.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual game natural tree, staged failure and context restoration
+        run: node scripts/ci/mountain-v8-developer-renderer-browser.mjs
+      - name: Retain actual game screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-renderer
+          path: artifacts/mountain-v8-renderer/
+          if-no-files-found: warn
