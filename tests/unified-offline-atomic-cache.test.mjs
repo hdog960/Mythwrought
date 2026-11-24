@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261123-desert-p3-v1';
+const RELEASE='20261124-enchanted-p2-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261120-five-systems-rc11';
+const PREVIOUS='mythwrought-m5-shell-20261123-desert-p3-v1';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
@@ -108,4 +108,12 @@ test('missing source aborts atomic install without replacing previous-good app',
     'Incomplete new candidate cache must be discarded');
   assert.equal(candidate.all.get(PREVIOUS).size,1,
     'Known good installed shell remains byte-identical');
+});
+
+test('missing new Enchanted tree dependency cannot activate or replace prior shell',async()=>{
+  const candidate=stage({missing:'/src/manual-biomes/enchanted-tree-site-biome-cache.mjs'});
+  await assert.rejects(candidate.install(),/Cannot verify\/cache original source/);
+  assert.equal(candidate.skipped,0);
+  assert.equal(candidate.all.has(CACHE),false);
+  assert.equal(candidate.all.get(PREVIOUS).size,1);
 });
