@@ -96,7 +96,12 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
    if(world.edits.has(k))return 'PLAYER_EDIT_PROTECTION';
    const natural=baseBlock(x,y,z,world.seed),actual=world.get(x,y,z);
    if(actual!==natural&&actual!==id)return 'PROTECTED_EXISTING_LANDMARK';
-   if(actual!==id&&!isCandidateGeologyMaterial(actual))return 'UNSAFE_ORIGINAL_MATERIAL';
+   // A below-legacy cell already owned by the PRIMARY authored cave
+   // and equal to its existing value is not a new terrain replacement.
+   // Preserve the explicit source value; never authorize a new ore cut.
+   const alreadyAuthored=y<LEGACY_WORLD_MIN_Y&&source.has(k)&&source.get(k)===id;
+   if(actual!==id&&!isCandidateGeologyMaterial(actual)&&!alreadyAuthored)
+    return 'UNSAFE_ORIGINAL_MATERIAL:'+k+':'+actual;
    if(cells.has(k)&&cells.get(k)!==id)return 'INTERNAL_PORTAL_CONFLICT';
    cells.set(k,id);
   }
@@ -131,8 +136,10 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
  const projected={get(x,y,z){
   const k=key(x,y,z);
   if(cells.has(k))return cells.get(k);
-  for(const map of extraSources)if(map.has(k))return map.get(k);
-  return source.get(k)??world.get(x,y,z);
+  // Same precedence as sourceCaveCell: primary/connector below legacy,
+  // east gallery above. Extra maps are connector then east gallery.
+  if(y<LEGACY_WORLD_MIN_Y)return source.get(k)??extraSources[0]?.get(k)??world.get(x,y,z);
+  return extraSources[1]?.get(k)??world.get(x,y,z);
  }};
  const drive=points=>{
   const a=points[0],p={x:a.x+.5,z:a.z+.5,feet:a.feet,yaw:0,pitch:0,
