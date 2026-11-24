@@ -1,0 +1,222 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave58-authentic-original-source-handoff.v1",
+  "status": "ISOLATED ORIGINAL SOURCE CANDIDATE ONLY. 14 exact staged focused test callback bodies PASS 14/14 with genuine immutable original schema/M2 sourcePlan and seven original earlier stables in isolated JavaScript V8. 56 strict source D4 same-category comparisons PASS, max IoU 0.473970473970474, unchanged reject >=0.85. Genuine complete repository native Node22, original canonical accepted228 historic D4, original installed Pack3/4 physical producer, M7 physical game player, browser WebGL2, installed iPhone PWA UNRUN.",
+  "branch": "builder-b-wave58-rimebound-twin-arc-corral-isolated-20261123",
+  "directProtectedParentWave57HEAD": "1e93a1b82cf1848f74d3b7ab14184fc279d33b1d",
+  "source": {
+    "name": "Rimebound Twin-Arc Snow Corrals",
+    "wave": 58,
+    "officialFrozenB115ExclusiveID": "r1:stable:snow:small:005",
+    "path": "src/building-pool/roadmap-b/builder-b-essentials-wave58.mjs",
+    "exactOriginalGitBlob": "2d1ef1efc7c0c675eec1d4d10feecc2b9a2f9533",
+    "actualOriginalFootprint": [
+      64,
+      35,
+      84
+    ],
+    "actualUniqueOriginalVoxelCells": 11145,
+    "originallyConnectedY1WalkableSourceCells": 4093,
+    "trulyGroundedSourceStoneYardCells": 4424,
+    "actualNamedOriginalRooms": 21,
+    "sourceStoneFoundedBodyAndHeadClearPortals": 31,
+    "directlyStoneBackedOriginalUnresolvedPack3CandidateRoofCells": 2674,
+    "exactDistinctRealOccupiedRoofWings": 11,
+    "originalFullHeightStoneBearingRoofColumns": 11,
+    "sourceRoofCellsByPhysicallyOccupiedWing": {
+      "northern-rime-entry": 312,
+      "west-tack-and-fir-gallery": 585,
+      "east-snowshoe-ledger": 577,
+      "central-braided-windbreak": 410,
+      "west-feeding-refuge": 215,
+      "east-dry-hoof-hall": 223,
+      "northwest-iced-arch": 84,
+      "northeast-rimewatch-room": 78,
+      "southern-pine-archway": 67,
+      "west-fir-side-vault": 68,
+      "east-fir-side-vault": 55
+    },
+    "originalStoneFoundedFullHeightSkyOpenCourts": [
+      110,
+      64,
+      64,
+      72
+    ],
+    "totalActuallySkyOpenWalkableSourceCourtCells": 310,
+    "originalTwoAsymmetricStoneFoundedDryCorrals": [
+      {
+        "name": "west-elongated-snow-corral",
+        "footprint": [
+          11,
+          13
+        ],
+        "boundsXZ": [
+          8,
+          65,
+          18,
+          77
+        ]
+      },
+      {
+        "name": "east-broad-rime-corral",
+        "footprint": [
+          13,
+          15
+        ],
+        "boundsXZ": [
+          43,
+          63,
+          55,
+          77
+        ]
+      }
+    ],
+    "totalActuallyStoneFoundedCorralFootprintCells": 338,
+    "realTwoTierOpaqueTimberCorralRailSourceCells": 176,
+    "actualPhysicallyClearTwoHighGateSourceCells": 8,
+    "genuinelyContinuousOriginalCardinalBidirectionalGatePasses": 4,
+    "twoTrulyRaisedStoneDryFeederSize": [
+      5,
+      5
+    ],
+    "originalStoneSolidY1FeederBaseSourceCells": 50,
+    "actuallyRaisedStoneFeederUpperRimSourceCells": 32,
+    "actualAirAboveFeederInnerSourceCells": 18,
+    "actualOriginalFullySolidThreeTierSnowwindBaffleCells": 54,
+    "actualSeparateRaisedStoneDryTackCells": 9,
+    "physicallyConnectedOutsideOnlyThreeArmCardinalBFSCells": 168,
+    "genuinelyAuthoredUnresolvedPack4SourceCandidateGlazingCells": 45,
+    "realCompleteFiveHighOriginalStoneFramedOutwardGlassBays": 9,
+    "workingHorseBehavior": false,
+    "workingFeeding": false,
+    "actualSnowWeather": false,
+    "realInstalledPack3Pack4MeshYawCollisionSelectionAccepted": false,
+    "actualM7PlayerCameraBodyPhysicalRun": false,
+    "productionRegistered": false,
+    "worldPlacement": false,
+    "generatedSettlementPlaced": false,
+    "originalSchema1SaveWritten": false,
+    "originalWebGL2FramesActuallyRendered": 0,
+    "realInstalledIphoneHomeScreenPwaAccepted": false,
+    "creatorArtworkApproval": false
+  },
+  "tests": {
+    "stagedNativeNodeFocusedTestPath": "tests/building-pool/roadmap-b/builder-b-essentials-wave58-focused.test.mjs",
+    "stagedFocusedTestGitBlob": "3e749ca05d5ea65ea3b890c91882d2b381c57152",
+    "focusedOriginalSourceTestBodiesExecutedInIsolatedV8": 14,
+    "passedOriginalSourceV8": 14,
+    "failedOriginalSourceV8": 0,
+    "authenticSourceExecution": "Retrieved immutable GitHub original legacy-stable-schema SCHEMA/validateBlueprint/structuralFingerprint, original schema blueprintId/validateAllocation and unchanged authentic M2 sourcePlan, official B115/D92/priorAccepted228 frozen ledger, new Wave58 source and seven actual earlier stable source constructors. Compiled and evaluated all exact staged 14 native-eligible node:test callback bodies in isolated JS V8 using equivalent Node assert/test adapter, not full original Node22 ES module execution.",
+    "realOriginalSourceCompiler": "PASS 11145 unique real placements, 4093 connected original walks, 21 rooms and 31 portals",
+    "frozenOriginalB115Exclusivity": "PASS chosen slot B115 present, D92 absent, accepted228 absent",
+    "originalAll57PreviousWaveHeaderIDScan": "PASS 57 earlier authored Wave1–57 original source file headers (first 18 lines) searched for r1:stable:snow:small:005; no previous occurrence. Seven previous same-category original constructors fetched and compared fully. Full repo all-lines identity scan UNRUN.",
+    "originalStoneFoundationPhysicalContinuity": "PASS all 4424 y0 floor cells",
+    "sourceRoofMountingGeometry": "PASS all 2674 original candidate Pack3 cells direct source-solid backed; no installed Pack3 claim",
+    "trueElevenNonGhostRoofWingOccupancy": "PASS all 11 wings >=30 final original candidate roof cells including west side 68 and east side 55",
+    "actualGroundToRoofContinuity": "PASS all 11 true continuous original stone posts after all doors/glass",
+    "trueOriginalFullHeightSkyOpenCourts": "PASS 310 y1 walkable and y1..34 source-clear founded cells",
+    "originalTwoAsymmetricDryCorrals": "PASS every one of 338 originally stone-founded footprint cells",
+    "realOpaqueWoodAndClearOriginalGates": "PASS 176 two-high rail cells and eight two-high body/head-clear openings",
+    "genuinePhysicalCardinalWalking": "PASS four ordered north-to-south and south-to-north entirely original y1/y2 clear routes, two corrals",
+    "actuallySolidStoneDryRaisedFeeders": "PASS 50 original solid y1 feet; 32 stone rim y2; 18 true upper air cells",
+    "fullyRealSolidThreeTierBaffles": "PASS 54 original cells with no phantom walk",
+    "sourcePhysicallySolidDryTack": "PASS nine raised solid stone cells on authored stone y0",
+    "originalPortalPhysicalClearance": "PASS 31 original y0 stone-grounded, y1 walkable and y2 open",
+    "originalOutsideOnlyCrosswalk": "PASS 168 cardinally reached source y1 outside-only cells, west to east",
+    "actualOutwardFramedPack4Candidates": "PASS 45 original unresolved panes in nine complete y2..6 exterior-air-facing stone y1/y7 framed bays",
+    "originalTrueStablePeerWaves": [
+      4,
+      12,
+      20,
+      25,
+      33,
+      44,
+      52
+    ],
+    "originalActualStablePeerIDs": [
+      "r1:stable:temperate:small:002",
+      "r1:stable:desert:small:002",
+      "r1:stable:temperate:medium:001",
+      "r1:stable:snow:small:003",
+      "r1:stable:desert:medium:003",
+      "r1:stable:temperate:large:005",
+      "r1:stable:desert:large:005"
+    ],
+    "realStrictD4MirrorRotateComparisons": 56,
+    "unchangedSourceNearDuplicateRejectionThreshold": 0.85,
+    "highestActualEarlierSourceIoU": 0.473970473970474,
+    "closestAuthenticEarlierStable": "r1:stable:desert:large:005",
+    "fullCanonicalOriginalAccepted228HistoricalD4Executed": false,
+    "originalNativeNode22FullESModulesExecuted": false,
+    "originalPack3Pack4InstalledPhysicalProducerExecuted": false,
+    "originalWebGL2RenderedFrames": 0,
+    "installedIphoneHomeScreenPwaActuallyRun": false
+  },
+  "sourceAuthoringCorrections": [
+    "First purely transient prototype rejected BEFORE branch creation: authentic sourcePlan.finish refused disconnected voxel circulation. It was not committed and no validators were weakened.",
+    "Corrected authored original to one complete source-stone-founded shared courtyard plus physically separate timber guarded corrals, and actual cardinally traversable north/south gates.",
+    "First committed version had no framed Pack4 candidate windows because original external facing was tested using a source floor-footing predicate instead of actual adjacent source air. Original source-air-facing actual validation fixed on same isolated branch.",
+    "Focused pretest caught west and east overlapping side roofs with only twelve and nine surviving candidate cells. Extended both wing footprints only into otherwise uncovered yard before the northern real corral boundaries. Strong explicit >=30 genuine cells/wings preserved and satisfied.",
+    "Original source had 14-stage all-green focused tests after final correction and unchanged original M2 sourcePlan. No original existing source, schema, tests or other developers changed."
+  ],
+  "exactCommits": {
+    "isolatedSourceInitial": "a1101354848885aca669c159a3bcc33153ad98c5",
+    "fixedRealExteriorGlass": "0ee0e1d503ea3241be367c409988ac282ab202ec",
+    "expandedTwoActuallyOccupiedRoofWings": "7e3deddb1e22e1aecd4e40eae6b35b492b47c898",
+    "exactStaged14CaseFocusedNativeEligibleTest": "1bddfdc8d41cd12f6b683174ea55eac43b4dbc19"
+  },
+  "nativeAvailability": {
+    "originalNodeInstalled": "22.16.0",
+    "actualFullOriginalRepoLocalCheckoutAvailable": false,
+    "exactDirectGitCloneBlocker": "fatal: unable to access 'https://github.com/hdog960/Mythwrought.git/': Could not resolve host: github.com",
+    "exactOriginalNativeNode22FocusedRuns": 0
+  },
+  "remainingEssentialQualityGates": [
+    "Authenticate exact final isolated HEAD/source/test/handoff blobs and protected main/PR407/Wave57. If genuine complete original repo checkout becomes available, use native Node22 ESM: node --test tests/building-pool/roadmap-b/builder-b-essentials-wave58-focused.test.mjs; batch/coordinate native focused Waves46–57 tests rather than redundant CI.",
+    "Run one coordinated genuine original full 228 accepted historical strict D4 novelty scan for new staged original Builder B cohort; the seven same-category source peers alone do not establish complete accepted228 uniqueness.",
+    "Real original installed Pack3 roof selection/collision, yaw, support and true Pack4 transparency/collider; real M7 player-body two-high walking through corral gates and continuous outside source paths in game, PWA mobile performance.",
+    "Do not imply decorative dry stone feeders implement horses, hay/food, weather, economies or settlement citizen services. All remain unimplemented.",
+    "Never merge, deploy, register runtime, generate settlements, migrate schema1 saves, or modify other developer/automation lanes without explicit separate creator authorization."
+  ],
+  "ciEfficiency": {
+    "githubActionsRunsLaunched": 0,
+    "githubActionsRunsCancelled": 0,
+    "repeatedFull228HistoricalScans": 0,
+    "realChromiumRuns": 0,
+    "actualOriginalFullRepoNativeNodeRuns": 0,
+    "originalRequiredSafetyChecksRelaxed": false,
+    "otherDevelopersModified": false,
+    "automationsModified": false
+  },
+  "progress": {
+    "stagedB115BuilderBServiceOriginals": 58,
+    "remainingB115ServiceOriginals": 57,
+    "residentialOriginalsAuthoredOrStaged": 10,
+    "residentialOriginalsRemaining": 169,
+    "combinedOriginalsAuthoredOrStaged": 68,
+    "combinedOriginalGoal": 294,
+    "totalOriginalsRemaining": 226
+  },
+  "protectedRefs": {
+    "productionMainExactLastVerified": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+    "externalDesertPhase3PR463Preserved": true,
+    "originalOpenDraftPR407ExactHead": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "priorWave46": "29cafd2ecf4ef7c0caabcfbabe5b9fde26a4c634",
+    "priorWave47": "09a422f0476fa0ec61743fd7a0dc0ad7a2c0cf17",
+    "priorWave48": "2f1f6a7e73248be2b6a3b2124cbda3f0c1d21a11",
+    "priorWave49": "e1d6f3bf14bafc7cf90ab767320d63f63bd4fe06",
+    "priorWave50": "83c64d5373202873661cc323f21d0ca908b7f53c",
+    "priorWave51": "21539c68e4802c8c143bca462c08ca109a4c3b79",
+    "priorWave52": "cb5d203dacf0fb1d8afb10f97028221d78890443",
+    "priorWave53": "aac000f6bc15876720515f1cfdae904485a78a08",
+    "priorWave54": "c381b28930cc80791c88d13619bf143f66079ef3",
+    "priorWave55": "ef4789c261a8251138ef15779e2e7f8e016b7621",
+    "priorWave56": "e58319d687e283255edc0ca1e99ac86fea2d7bbe",
+    "priorWave57": "1e93a1b82cf1848f74d3b7ab14184fc279d33b1d",
+    "noMerges": true,
+    "noDeployments": true,
+    "noGameplayRegistration": true,
+    "noSettlementOrVillageCode": true,
+    "noSaveWrites": true,
+    "allOtherDevelopersAndAutomationsUntouched": true
+  }
+}
