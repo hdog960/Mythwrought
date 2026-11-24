@@ -1,0 +1,62 @@
+name: Enchanted release 486 focused acceptance correction
+on:
+  push:
+    branches: [research/enchanted-release-486-paired-diagnostics-20261124]
+    paths: [.github/workflows/enchanted-release-486-focused-acceptance.yml]
+permissions:
+  contents: read
+jobs:
+  original-sky-and-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prove only test synchronization and diagnostic workflow changes
+        run: |
+          set -euo pipefail
+          base=c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10
+          test "$(git merge-base "$base" HEAD)" = "$base"
+          git diff --name-only "$base" HEAD
+          test "$(git rev-parse HEAD:tests/sky/s1-clock-browser.mjs)" = 9ad66b3e5d83f37e276c13904f3047f6cec9ed80
+          test "$(git rev-parse HEAD:tests/nonblock-parity-browser.mjs)" = 5e56b27504cddc1d168379a5aff2bf14e22b21c5
+          git diff --exit-code "$base" HEAD -- src/ index.html sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          original=subprocess.check_output(['git','show','c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10:tests/sky/s1-clock-browser.mjs']).decode()
+          corrected=Path('tests/sky/s1-clock-browser.mjs').read_text()
+          assert [x.strip() for x in original.splitlines() if 'assert.' in x]==[x.strip() for x in corrected.splitlines() if 'assert.' in x]
+          assert original.count('timeout:45000')==corrected.count('timeout:45000')
+          print('All original assertions and readiness timeouts preserved')
+          PY
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Original complete three-size sky S0 through S6 gate
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 >/tmp/enchanted-focused-sky.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          for script in s0-baseline s1-clock s2-atmosphere s3-moons s4-stars s5-events s6-legacy; do
+            node "tests/sky/$script-browser.mjs"
+          done
+      - name: Original complete seven-habitat nonblock parity without instrumentation
+        if: always()
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 >/tmp/enchanted-focused-parity.log 2>&1 &
+          trap 'kill $! 2>/dev/null || true' EXIT
+          node tests/nonblock-parity-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: enchanted-486-focused-acceptance
+          path: |
+            artifacts/sky-*/
+            artifacts/nonblock-parity/
+          if-no-files-found: error
+          retention-days: 14
