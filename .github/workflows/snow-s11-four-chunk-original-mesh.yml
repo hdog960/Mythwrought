@@ -1,0 +1,53 @@
+name: Snow S11 exact four adjacent original M7 chunk mesh budget
+on:
+  push:
+    branches:
+      - research/snow-s11-original-four-chunk-perf-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s11-four-chunk-original-mesh.yml'
+      - 'scripts/ci/snow-s11-original-four-chunk-mesh-webgl2.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s11-four-real-chunks-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  pinned-post-desert-four-real-meshes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify original refs and unchanged independently tested S10 source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs)" = 03e1241626e703d3e39619db28a31ec35c0856b9
+          node --check scripts/ci/snow-s11-original-four-chunk-mesh-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Install only pinned Chromium WebGL2 and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Four real adjacent original seed2026 chunks, sixteen exact mesh builds each
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s11-real-multichunk.log 2>&1 &
+          node scripts/ci/snow-s11-original-four-chunk-mesh-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Preserve exact source-timing evidence even on budget failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s11-four-original-source-chunks-${{ github.sha }}
+          path: artifacts/snow-s11-multichunk-original-mesh/
+          if-no-files-found: ignore
+          retention-days: 7
