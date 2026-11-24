@@ -1,0 +1,39 @@
+name: Roadmap A Wave15 original nonbank source twelve
+on:
+  push:
+    branches:
+      - roadmap-a-wave15-original-303-native-ci-r1-20261124
+    paths:
+      - '.github/workflows/roadmap-a-wave15-original-303-native-ci-r1.yml'
+permissions:
+  contents: read
+jobs:
+  exact-authentic-source-wave15-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact source and native test Git blobs
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-wave15.mjs)" = "60f48100d818dce992b3e3e37c3e7a0288afe404"
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave15.mjs
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave15.test.mjs)" = "bbea730ff411d159154d062f25c016a2f426a5d1"
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave15.test.mjs
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-303-provisional.mjs)" = "3e3d538aaf0ac3aaa94cd9ccbd673d2ca4d071b4"
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-303-provisional.mjs
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-a5-303-provisional.test.mjs)" = "be0290b9814a332451115ff728e5e9c507b89a16"
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-303-provisional.test.mjs
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave15-protected-128-only-d4.test.mjs)" = "cd541dad276f1fa7e488a84c859376ba2cec32fd"
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave15-protected-128-only-d4.test.mjs
+      - name: Nine focused original native tests
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-wave15.test.mjs tests/building-pool/roadmap-2a/roadmap-a-a5-303-provisional.test.mjs tests/building-pool/roadmap-2a/roadmap-a-wave15-protected-128-only-d4.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave15-303-original-source-provenance-r1
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_303_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
