@@ -2,12 +2,25 @@
 // road/settlement generation or external ownership authority.
 import {FourRegionWorld,M7_ENVIRONMENT_GENERATOR,restoreFourRegionWorld} from './profile-world.mjs';
 import {defineP0ModularSpan} from './forgotten-sands-modular-span.mjs';
-import {beginP0GroundSurvey,p0FootprintContains} from './forgotten-sands-grounded-probe.mjs';
+import {beginP0GroundSurvey,p0FootprintContains,defineP0Footprint,createP0FootprintIndex} from './forgotten-sands-grounded-probe.mjs';
 import {planP0OrientedApproach} from './forgotten-sands-oriented-approach.mjs';
 import {beginP0NaturalConnection,walkP0NaturalConnection} from './forgotten-sands-natural-connection.mjs';
 import {BLOCK,worldKey} from '../voxel.mjs';
 const dirs=[[0,-1],[1,0],[0,1],[-1,0]];
 const finish=job=>{let r;do{r=job.step();}while(r.accepted===null);return r;};
+// Mixed-size input is a bounded, aligned, disjoint exact-span layout,
+// independently re-surveyed below. Never trust previous report metadata.
+function jointSpec(input){
+  if(!input.modules)return defineP0ModularSpan(input);
+  if(!Array.isArray(input.modules)||input.modules.length!==3||!['x','z'].includes(input.axis))throw Error('Invalid mixed group');
+  const modules=input.modules.map(defineP0Footprint),axis=input.axis;
+  if(modules.some(m=>m.seed!==input.seed||![15,23,31].includes(m.size)))throw Error('Invalid mixed group source');
+  const cross=axis==='x'?'z':'x',lo=axis==='x'?'minX':'minZ',hi=axis==='x'?'maxX':'maxZ';
+  if(modules.some(m=>m[cross]!==modules[0][cross])||modules[2][hi]-modules[0][lo]+1!==111||
+    modules[1][lo]-modules[0][hi]-1<9||modules[2][lo]-modules[1][hi]-1<9)throw Error('Invalid mixed group span');
+  createP0FootprintIndex(modules,{clearance:8});
+  return Object.freeze({seed:input.seed,axis,span:111,modules:Object.freeze(modules)});
+}
 const append=(a,b)=>{for(const n of b){const p=a.at(-1);if(p&&p.x===n.x&&p.z===n.z&&p.feet===n.feet)continue;a.push(n);}};
 export function researchP0JointGroup(source,input,{reserved,ownerRevision}={}){
   if(!(source instanceof FourRegionWorld)||source.generationProfile.generator!==M7_ENVIRONMENT_GENERATOR||
@@ -15,7 +28,7 @@ export function researchP0JointGroup(source,input,{reserved,ownerRevision}={}){
   const epoch=ownerRevision();
   if(typeof epoch!=='string'||!epoch.length)throw Error('Invalid research owner revision');
   const save=JSON.stringify(source.save()),profile=source.generationProfile;
-  const base=restoreFourRegionWorld(JSON.parse(save),profile),spec=defineP0ModularSpan(input);
+  const base=restoreFourRegionWorld(JSON.parse(save),profile),spec=jointSpec(input);
   const stale=()=>ownerRevision()!==epoch||source.generationProfile!==profile||JSON.stringify(source.save())!==save;
   // A missing, throwing or nonboolean owner answer never means free space.
   const veto=(x,z)=>{if(ownerRevision()!==epoch)return true;return reserved(x,z)!==false;};

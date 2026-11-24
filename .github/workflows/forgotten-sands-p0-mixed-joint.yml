@@ -1,0 +1,27 @@
+name: Forgotten Sands P0 mixed joint native walking
+on:
+  push:
+    branches: [research/forgotten-sands-p0-browser-worker-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-joint-group.mjs'
+      - 'tests/forgotten-sands-mixed-joint.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-mixed-joint.yml'
+permissions:
+  contents: read
+jobs:
+  native-mixed-joint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-joint-group.mjs
+          node --test tests/forgotten-sands-mixed-joint.test.mjs
+          node --test --test-name-pattern='actual original jointly|strict research reservation' tests/forgotten-sands-joint-group.test.mjs
