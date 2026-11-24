@@ -1,0 +1,28 @@
+name: Forgotten Sands P0 joint group and original cap-ranked survey
+on:
+  push:
+    branches: [research/forgotten-sands-p0-joint-group-cap-search-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-joint-group.mjs'
+      - 'src/manual-biomes/forgotten-sands-actual-cap-search.mjs'
+      - 'tests/forgotten-sands-joint-group.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-joint.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-joint-group.mjs
+          node --check src/manual-biomes/forgotten-sands-actual-cap-search.mjs
+          node --test tests/forgotten-sands-joint-group.test.mjs
