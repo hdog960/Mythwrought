@@ -1,0 +1,44 @@
+name: Mountain V8 exact P3 owner source snapshot and synthetic GPU lifetime
+# One-shot only, 14 newly authored source tests, no redundant broad CI.
+# Both immutable original GitHub revisions checked out read-only.
+on:
+  push:
+    branches:
+      - mountain-v8-integration-preflight-isolated-20261122
+    paths:
+      - .github/workflows/mountain-v8-p3-mock-retirement-owner-evidence-focused.yml
+permissions:
+  contents: read
+jobs:
+  original-owner-source-and-mock-retirement:
+    if: github.ref == 'refs/heads/mountain-v8-integration-preflight-isolated-20261122'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Isolated source research exact checkout
+        uses: actions/checkout@v4
+        with:
+          path: isolated
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Exact immutable Desert P3 original source read-only checkout
+        uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Original native Node22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Print source identities, syntax and only new 14 owner tests
+        run: |
+          node --version
+          git -C isolated rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          node --check isolated/src/manual-biomes/mountain-v8-p3-mock-retirement-owner-evidence.mjs
+          node --check isolated/tests/mountain-v8-p3-mock-retirement-owner-evidence.test.mjs
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 isolated/tests/mountain-v8-p3-mock-retirement-owner-evidence.test.mjs
