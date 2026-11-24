@@ -90,7 +90,7 @@ try{
  });
  check('offline-real-source-reopen',state.offline&&state.controller&&state.sourceCached,state);
  await capture('offline');
- await page.locator('#menu').click();await page.locator('#save').click();await page.locator('#closeHelp').click();
+ await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#save').click();await page.locator('#closeHelp').click();
  const final=await page.evaluate(seed=>{
   const key='mythwrought-v002-world-'+seed,p=key+'-four-biomes-profile-v1';
   return {world:localStorage.getItem(key),profile:localStorage.getItem(p),journal:localStorage.getItem(p+'-journal'),selected:localStorage.getItem('mythwrought-v002-selected-seed'),legacy:localStorage.getItem('mythwrought-v002-world-7')};

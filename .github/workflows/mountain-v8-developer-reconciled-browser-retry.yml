@@ -1,0 +1,36 @@
+name: Mountain V8 reconciled compact menu offline browser correction
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-reconciled-browser-retry.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact browser source
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check scripts/ci/mountain-v8-reconciled-browser.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual compact-menu local V8 and offline save
+        run: node scripts/ci/mountain-v8-reconciled-browser.mjs
+      - name: Retain genuine screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-reconciled-retry
+          path: artifacts/mountain-v8-reconciled/
+          if-no-files-found: warn
