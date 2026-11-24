@@ -3,12 +3,18 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261123-desert-p3-v1';
-const ASSET_RELEASE='20261123-desert-p3-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261124-enchanted-p2-v1';
+const ASSET_RELEASE='20261124-enchanted-p2-v1';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
   "./src/manual-biomes/environment-v7.mjs",
+  "./src/manual-biomes/enchanted-tree-candidates.mjs",
+  "./src/manual-biomes/enchanted-tree-footings.mjs",
+  "./src/manual-biomes/enchanted-tree-overlap.mjs",
+  "./src/manual-biomes/enchanted-tree-site-biome-cache.mjs",
+  "./src/manual-biomes/enchanted-tree-source-cache.mjs",
+  "./src/manual-biomes/enchanted-tree-walking-clearance.mjs",
   "./src/manual-biomes/environment-oasis.mjs",
   "./src/nonblock/candidate-effects.mjs",
   "./src/nonblock/candidate-families.mjs",

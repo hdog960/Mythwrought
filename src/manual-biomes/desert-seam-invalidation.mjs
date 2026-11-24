@@ -3,7 +3,7 @@
 // No changes to world generation, saves, physics, shader or voxel identities.
 import {chunkCoord,CHUNK_SIZE} from '../voxel.mjs';
 import {editAffectedChunks} from '../chunks.mjs';
-import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
+import {isEnvironmentGenerator} from '../environment-ground.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 
@@ -12,7 +12,7 @@ export function desertSeamEditAffectedChunks(world,x,z,y){
   const original=editAffectedChunks(x,z);
   if(!Number.isInteger(y))throw Error('Desert visual edit Y must be integer');
   const sourceWorld=world?.base?.generationProfile?world.base:world;
-  if(sourceWorld?.generationProfile?.generator!==M7_ENVIRONMENT_GENERATOR||
+  if(!isEnvironmentGenerator(sourceWorld?.generationProfile?.generator)||
      typeof sourceWorld._columnPlan!=='function')return original;
   // The M7 environmental visual cap is restricted to the original surface
   // vertical envelope. Deep mining must never generate an expensive
