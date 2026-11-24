@@ -1,0 +1,62 @@
+name: Builder D46 authentic D36 convex socket to D45 fractional outboard continuity ONLY
+on:
+  push:
+    branches:
+      - builder-d-d46-original-socket-outboard-continuity-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d46-*'
+      - 'tests/building-pool/roadmap-d/d46-*'
+      - 'docs/building-pool/roadmap-d/D46_*'
+      - '.github/workflows/roadmap-d-d46-original-socket-outboard.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d46-original-source-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-original-d46-native-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify D45 parent and unmodified exact original W16 W17 and Pack2 owner sources
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'cc46d3cb7456295df69f71ffcb479aaef72da41b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-swept-exterior-capture.mjs)" = '172284f5f5eb1727b6d510159afdc992cfd5f0da'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d43-source-backed-outboard-support.mjs)" = '21564dac1446dee84d71aa210c80930e19fc652a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-original-first-voxel-egress-audit.mjs)" = '407434d341a9c0d52bd2be9ea2b8e6b1e31febd2'
+          git diff --name-only HEAD^ HEAD > /tmp/d46-actual.txt
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d46-original-socket-outboard.yml' \
+            'docs/building-pool/roadmap-d/D46_GENUINE_SOCKET_DOGLEG_FOOTPRINT_CONTINUITY_AND_CONTACT_GATE.md' \
+            'src/building-pool/roadmap-d/d46-original-socket-exterior-continuity-audit.mjs' \
+            'src/building-pool/roadmap-d/d46-socket-to-fractional-tie-contract.mjs' \
+            'tests/building-pool/roadmap-d/d46-original-socket-outboard.source.test.mjs' \
+            'tests/building-pool/roadmap-d/d46-socket-outboard-continuity.pure.test.mjs' > /tmp/d46-expected.txt
+          diff -u /tmp/d46-expected.txt /tmp/d46-actual.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check ONLY four newly added D46 source/test modules
+        run: |
+          node --check src/building-pool/roadmap-d/d46-socket-to-fractional-tie-contract.mjs
+          node --check src/building-pool/roadmap-d/d46-original-socket-exterior-continuity-audit.mjs
+          node --check tests/building-pool/roadmap-d/d46-socket-outboard-continuity.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d46-original-socket-outboard.source.test.mjs
+      - name: Run only new 4 D46 pure and 2 original W16-W17 native source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d46-socket-outboard-continuity.pure.test.mjs \
+            tests/building-pool/roadmap-d/d46-original-socket-outboard.source.test.mjs
