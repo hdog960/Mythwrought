@@ -457,9 +457,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           2
         ],
         "max": [
-          47,
+          48,
           4,
-          13
+          14
         ]
       },
       {
@@ -470,9 +470,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           15
         ],
         "max": [
-          47,
+          48,
           4,
-          27
+          28
         ]
       },
       {
@@ -483,9 +483,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           29
         ],
         "max": [
-          47,
+          48,
           4,
-          40
+          41
         ]
       },
       {
@@ -496,9 +496,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           42
         ],
         "max": [
-          47,
+          48,
           4,
-          53
+          54
         ]
       },
       {
@@ -509,9 +509,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           55
         ],
         "max": [
-          47,
+          48,
           4,
-          67
+          68
         ]
       },
       {
@@ -522,9 +522,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           2
         ],
         "max": [
-          34,
+          35,
           4,
-          13
+          14
         ]
       },
       {
@@ -535,9 +535,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           15
         ],
         "max": [
-          34,
+          35,
           4,
-          25
+          26
         ]
       },
       {
@@ -548,9 +548,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           27
         ],
         "max": [
-          34,
+          35,
           4,
-          37
+          38
         ]
       },
       {
@@ -561,9 +561,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           39
         ],
         "max": [
-          34,
+          35,
           4,
-          51
+          52
         ]
       },
       {
@@ -574,9 +574,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           53
         ],
         "max": [
-          34,
+          35,
           4,
-          67
+          68
         ]
       },
       {
@@ -587,9 +587,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           27
         ],
         "max": [
-          19,
+          20,
           4,
-          41
+          42
         ]
       },
       {
@@ -600,9 +600,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           43
         ],
         "max": [
-          19,
+          20,
           4,
-          67
+          68
         ]
       },
       {
@@ -613,9 +613,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           2
         ],
         "max": [
-          62,
+          63,
           4,
-          12
+          13
         ]
       },
       {
@@ -626,9 +626,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           14
         ],
         "max": [
-          63,
+          64,
           4,
-          28
+          29
         ]
       },
       {
@@ -639,9 +639,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           30
         ],
         "max": [
-          63,
+          64,
           4,
-          42
+          43
         ]
       },
       {
@@ -652,9 +652,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           44
         ],
         "max": [
-          63,
+          64,
           4,
-          54
+          55
         ]
       },
       {
@@ -665,9 +665,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           56
         ],
         "max": [
-          63,
+          64,
           4,
-          67
+          68
         ]
       },
       {
@@ -678,9 +678,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           15
         ],
         "max": [
-          81,
+          82,
           4,
-          28
+          29
         ]
       },
       {
@@ -691,9 +691,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           30
         ],
         "max": [
-          81,
+          82,
           4,
-          42
+          43
         ]
       },
       {
@@ -704,9 +704,9 @@ export const ROADMAP_C_1A_WAVE30_TAVERN_SPECS=Object.freeze([
           44
         ],
         "max": [
-          81,
+          82,
           4,
-          53
+          54
         ]
       }
     ],
