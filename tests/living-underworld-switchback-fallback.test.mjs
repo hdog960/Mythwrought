@@ -74,6 +74,6 @@ test('protected anchor player edit is never bypassed by alternate routes',()=>{
  assert.equal(plan.ok,false);
  const failed=plan.failures.find(x=>x.name==='switchback36');
  assert.ok(failed);
- assert.equal(failed.alternateAttempts.length,48);
+ assert.equal(failed.alternateAttempts.length,224);
  assert.ok(failed.alternateAttempts.every(x=>x==='PLAYER_EDIT_PROTECTION'));
 });
