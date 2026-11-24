@@ -65,6 +65,8 @@ export function planP0FarSlot(near,{feet,shaft=false,nearBytes=0,farBytes=0}={})
   if(!Array.isArray(near)||near.length>34||!Number.isFinite(feet)||![nearBytes,farBytes].every(n=>Number.isSafeInteger(n)&&n>=0))throw Error('Invalid far slot');
   // Never steal required original near slots. No far representation underground,
   // in shaft mode, or when original upper residency already fills its budget.
-  const allowed=feet>=0&&!shaft&&near.length<27&&farBytes>0&&farBytes<=P0_FAR_MAX_BYTES&&nearBytes+farBytes<=2610144;
+  const keys=new Set(near.map(k=>k.key));
+  const surfaceUpperPair=near.length===18&&keys.size===18&&near.filter(k=>k.s===0).length===9&&near.filter(k=>k.s===1).length===9;
+  const allowed=feet>=0&&feet<20&&!shaft&&surfaceUpperPair&&farBytes>0&&farBytes<=P0_FAR_MAX_BYTES&&nearBytes+farBytes<=2610144;
   return Object.freeze({allowed,buffers:near.length+(allowed?1:0),vertexBytes:nearBytes+(allowed?farBytes:0)});
 }

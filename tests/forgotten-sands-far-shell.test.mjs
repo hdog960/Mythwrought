@@ -23,6 +23,9 @@ test('all four far shells are exact physical exterior faces, exclude resident ow
     assert.equal(plan.allowed,true);assert.ok(plan.buffers<=27);
     assert.equal(planP0FarSlot(p0BenchmarkWindow(0,0,36),{feet:36,farBytes:1}).allowed,false);
     assert.equal(planP0FarSlot(near,{feet:-1,farBytes:1}).allowed,false);
+    assert.equal(planP0FarSlot(p0BenchmarkWindow(0,0,14,{nearUpperSite:false}),{feet:14,farBytes:1}).allowed,false);
+    assert.equal(planP0FarSlot(near,{feet:20,farBytes:1}).allowed,false);
+    assert.equal(planP0FarSlot(near,{feet:14,nearBytes:2600000,farBytes:20000}).allowed,false);
     assert.equal(planP0FarSlot(near,{feet:14,shaft:true,farBytes:1}).allowed,false);
     assert.equal(JSON.stringify(world.save()),before);
     console.log('P0 FAR SHELL',JSON.stringify({index:i,faces,nearOmitted:shell.nearOmitted,rectangles:shell.rectangles.length,farBytes:shell.vertices.byteLength,nearBytes,plan,inspected:shell.inspected}));
