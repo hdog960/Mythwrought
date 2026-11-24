@@ -68,7 +68,7 @@ ok 11 - context loss makes NO invalid VAO deletion call and refuses draws
 # Subtest: restoration requires original program rebuild and new attributes
 ok 12 - restoration requires original program rebuild and new attributes
   ---
-  duration_ms: 0.207395
+  duration_ms: 0.207396
   type: 'test'
   ...
 # Subtest: valid restored pipeline starts a new VAO cache generation
