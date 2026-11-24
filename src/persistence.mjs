@@ -162,5 +162,8 @@ export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=fal
 }
 export function importWorldData(text){
   if(typeof text!=='string'||text.length>MAX_IMPORT_BYTES)throw Error('Import too large or unreadable');
+  const payload=JSON.parse(text);
+  if(payload?.edits?.some(row=>Array.isArray(row)&&isMountainV8Material(row[3])))
+    throw Error('Dedicated Mountain V8 materials require verified profile export');
   return parseWorldData(text);
 }

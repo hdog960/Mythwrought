@@ -32,17 +32,17 @@ test('V8 inherits actual current forest trees without aliasing the historical pr
  const aa=a._environmentTreeChunks.get('-3,-33'),bb=b._environmentTreeChunks.get('-3,-33');
  assert.ok(aa?.size>0&&bb?.size>0);
  assert.deepEqual([...aa],[...bb]);
- assert.equal(a.get(-470,13,5),370);
+ assert.equal(a.get(-470,13,5),511);
  assert.equal(a.mountainV8SupportedTreeCells(-470,13,5).length,13);
  assert.equal(a.save().edits.length,0);
  assert.ok(!desertSeamEditAffectedChunks(a,-786,-1774,4).some(c=>c.cx===-50&&c.cz===-112));
  console.log('V8 inherited forest cell count',aa.size);
 });
-test('candidate nonblock manifest verifies every actual asset and includes seven new Mountain modules',()=>{
+test('candidate nonblock manifest verifies every actual asset and includes nine Mountain modules',()=>{
  const m=JSON.parse(readFileSync(new URL('../nonblock-stage-assets.json',import.meta.url)));
  const read=p=>readFileSync(new URL('../'+(p==='./'?'index.html':p.slice(2)),import.meta.url));
- assert.equal(m.version,'20261124-v39-mountain09');
+ assert.equal(m.version,'20261124-v39-mountain12');
  for(const [p,h] of Object.entries(m.assets))assert.equal(hash(read(p)),h,p);
- assert.equal(Object.keys(m.assets).filter(p=>p.includes('/mountain-v8-')).length,7);
+ assert.equal(Object.keys(m.assets).filter(p=>p.includes('/mountain-v8-')).length,9);
  console.log('V8 verified staged manifest entries',Object.keys(m.assets).length);
 });

@@ -6,7 +6,7 @@ import {Pack2LiveWorld} from '../src/pack2-world.mjs';
 import {biome130Block,BIOME130_REGISTERED_IDS} from '../src/biome130-registry.mjs';
 import {ENVIRONMENT_GROUND} from '../src/environment-ground.mjs';
 import {MANUAL_FIVE_PACK_NUMERIC_IDS} from '../src/builder-assets/manual-five-pack.mjs';
-import {MOUNTAIN_V8_EXISTING_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
+import {MOUNTAIN_V8_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 import {mountainV8TileRoot} from '../src/manual-biomes/mountain-v8-source-adapter.mjs';
 const seed=179,profile=fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR),w=new FourRegionWorld(seed,profile);
@@ -32,22 +32,22 @@ function find(){
  throw Error('No genuine natural conifer in bounded real mountain search');
 }
 test('existing pine physical material ownership and broad manual reservation remain separate',()=>{
- assert.deepEqual(pine,{trunk:370,needles:379});
- assert.equal(biome130Block(pine.trunk).name,'Pine logs');
- assert.equal(biome130Block(pine.trunk).solid,true);
- assert.equal(biome130Block(pine.needles).solid,false);
+ assert.deepEqual(pine,{trunk:511,needles:512});
+ assert.equal(biome130Block(370).name,'Pine logs');
+ assert.equal(biome130Block(370).solid,true);
+ assert.equal(biome130Block(379).solid,false);
  const ids=[...Object.values(BLOCK),...MANUAL_FIVE_PACK_NUMERIC_IDS,...BIOME130_REGISTERED_IDS,...Object.values(ENVIRONMENT_GROUND),255,65535];
  assert.equal(ids.length,258);assert.equal(new Set(ids).size,258);
  assert.ok(MANUAL_FIVE_PACK_NUMERIC_IDS.every(id=>id>=9&&id<=226));
 });
 test('real natural conifer uses full authored pattern within negative owner chunk with no saved edits',()=>{
  const {cx,cz,x,y,z,cells}=find();
- assert.equal(cells.size%13,0);
+ assert.equal([...cells.values()].filter(id=>id===pine.trunk||id===pine.needles).length%13,0);
  const own=[...cells].filter(([k])=>{const [a,b,c]=k.split(',').map(Number);return Math.abs(a-x)<=1&&Math.abs(c-z)<=1&&b>=y&&b<=y+4;});
  assert.equal(own.length,13);
  assert.equal(own.filter(([,id])=>id===pine.trunk).length,3);
  assert.equal(own.filter(([,id])=>id===pine.needles).length,10);
- assert.equal(w.get(x,y-1,z),BLOCK.GRASS);
+ assert.equal(w.get(x,y-1,z),503);
  for(const [k,id] of own){
   const [a,b,c]=k.split(',').map(Number);
   assert.equal(Math.floor(a/16),cx);assert.equal(Math.floor(c/16),cz);

@@ -6,9 +6,9 @@ import {fileURLToPath} from 'node:url';
 import {createMountainV8CandidateWorld} from '../src/manual-biomes/mountain-v8-new-world-admission.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url));
 const read=p=>readFileSync(path.join(root,p),'utf8');
-test('candidate worker cache and release markers close all seven Mountain source dependencies',()=>{
+test('candidate worker cache and release markers close all nine Mountain source dependencies',()=>{
  const worker=read('sw-m5.js'),index=read('index.html'),update=read('src/app-update.mjs');
- const release='20261124-mountain-v8-candidate-03';
+ const release='20261124-mountain-v8-candidate-12';
  assert.ok(worker.includes("const ASSET_RELEASE='"+release+"'"));
  assert.ok(worker.includes("CACHE_PREFIX+'"+release+"'"));
  assert.ok(index.includes('data-mw-release="'+release+'"'));
@@ -17,7 +17,7 @@ test('candidate worker cache and release markers close all seven Mountain source
  assert.ok(update.includes("GAME_RELEASE='"+release+"'"));
  const assets=new Set([...worker.matchAll(/"\.\/([^"]+)"/g)].map(m=>m[1]));
  const paths=[...assets].filter(p=>p.startsWith('src/manual-biomes/mountain-v8-'));
- assert.equal(paths.length,7);
+ assert.equal(paths.length,9);
  for(const p of paths){
   assert.ok(existsSync(path.join(root,p)),p);
   const body=read(p);

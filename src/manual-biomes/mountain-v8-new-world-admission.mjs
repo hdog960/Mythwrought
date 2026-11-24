@@ -145,3 +145,16 @@ export async function createMountainV8CandidateWorld(seedText,{
       cooperatingLockOnly:true,publicActivationAuthorized:false});
   });
 }
+
+// Separate namespace for the real local candidate UI. Check old saves and optional
+// databases before claiming, but subsequent old writers cannot reach these keys.
+export async function createMountainV8IsolatedWorld(seedText,{confirmed=false,storage=globalThis.localStorage,factory=globalThis.indexedDB,locks=globalThis.navigator?.locks}={}){
+ if(confirmed!==true)throw Error('Explicit NEW Mountain V8 confirmation required');
+ const seed=worldSeedFromText(seedText);checkSeed(seed);
+ assertLocalUnused(storage,seed);
+ const old=await inspectMountainV8OptionalSeed(seed,factory);
+ if(old.claimed)throw Error('Existing ordinary Vault/Mirror snapshot claims this seed');
+ assertLocalUnused(storage,seed);
+ const {mountainV8Storage,mountainV8DatabaseFactory}=await import('./mountain-v8-isolated-storage.mjs');
+ return createMountainV8CandidateWorld(String(seed),{confirmed:true,storage:mountainV8Storage(storage),factory:mountainV8DatabaseFactory(factory),locks});
+}

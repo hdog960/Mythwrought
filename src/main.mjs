@@ -43,7 +43,8 @@ import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
-import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
+import {mountainV8Storage,mountainV8DatabaseFactory,V8_ACTIVE_KEY,setMountainV8Active} from './manual-biomes/mountain-v8-isolated-storage.mjs';
+import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy,writeMirror} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
 import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
@@ -105,6 +106,13 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
 }else start();
 
 function start(nonblockStage=null){
+  const rawStorage=window.localStorage;
+  const localCandidate=['localhost','127.0.0.1'].includes(location.hostname);
+  const isolatedMountain=localCandidate&&rawStorage.getItem(V8_ACTIVE_KEY)==='1';
+  // Bind once for the lifetime of this game session; no closure can retain an
+  // ordinary storage writer after entering the isolated candidate.
+  const localStorage=isolatedMountain?mountainV8Storage(rawStorage):rawStorage;
+  const databaseFactory=isolatedMountain?mountainV8DatabaseFactory(globalThis.indexedDB):globalThis.indexedDB;
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
   const combinedWorld=()=>isEnvironmentGenerator(world.base?.generationProfile?.generator);
@@ -122,6 +130,7 @@ function start(nonblockStage=null){
         'Recovered a verified four-biome profile; export a backup';
       return result.world;
     }
+    if(isolatedMountain)throw Error('No isolated Mountain V8 world for this seed');
     const result=loadWorldSafe(localStorage,seed);
     if(!nonblockStage&&isUnclaimedWorldSeed(localStorage,seed,result)){
       const choice=planM2WorldChoice(String(seed),M2_WORLD_MODE.CREATE_ENVIRONMENT_V7,{confirmed:true});
@@ -795,7 +804,7 @@ function start(nonblockStage=null){
   const frameHistory=new FrameHistory(360);
   const meshCadence=new MeshFrameCadence({budgetMs:12,maxCooldown:2});
   const gpuRetry=new GpuUploadRetry({baseDelayMs:250,maxDelayMs:8000});
-  const mirrorQueue=new MirrorWriteQueue();
+  const mirrorQueue=new MirrorWriteQueue(raw=>writeMirror(raw,databaseFactory));
   const mirrorStatus=document.getElementById('mirrorStatus');
   const mirrorSlot=document.getElementById('mirrorSlot');
   const mirrorDownload=document.getElementById('mirrorDownload');
@@ -2526,7 +2535,7 @@ function start(nonblockStage=null){
   }
   async function refreshVault(prefer=''){
     clearVaultLink();
-    const records=await listVaultBackups();
+    const records=await listVaultBackups(databaseFactory);
     const selected=prefer||vaultSelect.value;
     vaultSelect.replaceChildren();
     const prompt=document.createElement('option');
@@ -2550,7 +2559,7 @@ function start(nonblockStage=null){
     const capturedSeed=world.seed;
     const raw=world.base instanceof FourRegionWorld?exportM2World(world):JSON.stringify(world.pack2Cells.size?
       pack2ExportBundle(world):world.save());
-    const snapshot=await createVaultBackup(raw);
+    const snapshot=await createVaultBackup(raw,databaseFactory);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
@@ -2560,7 +2569,7 @@ function start(nonblockStage=null){
   });
   document.getElementById('vaultPrepare').onclick=()=>useVault(async()=>{
     clearVaultLink();
-    const snapshot=await inspectVaultBackup(chosenVaultId());
+    const snapshot=await inspectVaultBackup(chosenVaultId(),databaseFactory);
     // A second user tap on the actual link preserves Safari's download gesture.
     vaultObjectUrl=URL.createObjectURL(new Blob([snapshot.raw],{type:'application/json'}));
     vaultLink.href=vaultObjectUrl;
@@ -2571,7 +2580,7 @@ function start(nonblockStage=null){
   document.getElementById('vaultRestore').onclick=()=>useVault(async()=>{
     clearVaultLink();
     const activeSeed=world.seed;
-    const snapshot=await inspectVaultBackup(chosenVaultId());
+    const snapshot=await inspectVaultBackup(chosenVaultId(),databaseFactory);
     const candidate=prepareSnapshotRestore(snapshot.raw,snapshot.seed);
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
@@ -2612,14 +2621,14 @@ function start(nonblockStage=null){
   document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
     clearVaultLink();
     const id=chosenVaultId();
-    const all=await listVaultBackups();
+    const all=await listVaultBackups(databaseFactory);
     const entry=all.find(item=>item.id===id);
     if(!entry)throw Error('Selected backup no longer exists');
     if(!window.confirm('Permanently DELETE only this device backup from seed '+(entry.seed??'?')+
       '? This cannot be undone. Your live world and other snapshots will not be touched.')){
       vaultStatus.textContent='Deletion cancelled. No backup changed.';return;
     }
-    await deleteVaultBackup(id);
+    await deleteVaultBackup(id,databaseFactory);
     const remaining=await refreshVault();
     vaultStatus.textContent='Selected snapshot deleted and verified; '+remaining.length+' backups remain. Live world unchanged.';
   });
@@ -2680,7 +2689,7 @@ function start(nonblockStage=null){
   });
   document.getElementById('mirrorCheck').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
-    const state=await inspectMirror(world.seed);
+    const state=await inspectMirror(world.seed,databaseFactory);
     if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+world.seed+'. Save and SYNC to make one.';return;}
     const summarize=(label,slot)=>label+': '+(slot===null?'absent':
       slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
@@ -2692,7 +2701,7 @@ function start(nonblockStage=null){
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
     const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
-    const snap=await getMirrorCopy(selectedSeed,selectedVersion);
+    const snap=await getMirrorCopy(selectedSeed,selectedVersion,databaseFactory);
     if(world.seed!==selectedSeed)throw Error('Active world changed during export; select this seed again');
     mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
     mirrorDownload.href=mirrorDownloadUrl;
@@ -2704,7 +2713,7 @@ function start(nonblockStage=null){
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
     await settleMirrorWrites(); // Never let an older queued write race a restore.
     const seed=world.seed,which=mirrorSlot.value;
-    const snap=await getMirrorCopy(seed,which);
+    const snap=await getMirrorCopy(seed,which,databaseFactory);
     const candidate=prepareSnapshotRestore(snap.raw,seed);
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
@@ -2930,7 +2939,14 @@ function start(nonblockStage=null){
   // LOCAL CANDIDATE ONLY: real explicit selection for isolated browser QA.
   // Never expose this action on public Pages until old tabs and all writers
   // have a coordinated admission protocol and the creator authorizes release.
-  if(['localhost','127.0.0.1'].includes(location.hostname)&&seedRow){
+  if(localCandidate&&seedRow){
+    if(isolatedMountain){
+      const exit=document.createElement('button');exit.id='exitMountainV8Candidate';exit.type='button';
+      exit.textContent='RETURN TO ORDINARY WORLD';seedRow.append(exit);
+      exit.onclick=()=>{try{if(!storageReadOnly&&!save())throw Error('Save Mountain V8 first');
+        setMountainV8Active(rawStorage,false);location.reload();
+      }catch(error){seedMessage.textContent=String(error.message||error);}};
+    }
     const v8Button=document.createElement('button');
     v8Button.id='createMountainV8Candidate';v8Button.type='button';
     v8Button.textContent='CREATE NEW MOUNTAIN V8 (LOCAL CANDIDATE)';
@@ -2943,15 +2959,23 @@ function start(nonblockStage=null){
         if(next===former.seed)throw Error('Choose a different unused seed');
         if(!window.confirm('Create isolated Mountain V8 candidate for unused seed '+next+'?'))return;
         if(!storageReadOnly&&!save())throw Error('Current world must be saved first');
-        const {createMountainV8CandidateWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
-        const candidate=await createMountainV8CandidateWorld(String(next),{confirmed:true});
+        const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+        const candidate=await createMountainV8IsolatedWorld(String(next),{confirmed:true,storage:rawStorage});
         if(world!==former||changed)throw Error('Current world changed while admission ran; candidate saved separately, not selected');
-        const stored=saveM2World(localStorage,candidate.world);
+        const scoped=mountainV8Storage(rawStorage);
+        const stored=saveM2World(scoped,candidate.world);
         if(!stored.ok)throw Error('V8 save verification failed: '+stored.reason);
-        enterPreparedM2World(candidate.world,'Mountain V8 local candidate '+next+' created.');
+        setMountainV8Active(rawStorage,true);location.reload();
       }catch(error){seedMessage.textContent='V8 candidate not selected: '+String(error.message||error);}
       finally{v8Button.disabled=false;}
     };
+  }
+  if(isolatedMountain){
+    for(const button of [createFourBiomeButton,createV5MountainWorldButton,createBalancedV6Button,createEnchantedButton,
+      document.getElementById('newWorld'),document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')]){
+      button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();
+        seedMessage.textContent='Return to the ordinary world before using this generator.';},true);
+    }
   }
   function createLatestMenuWorld(next){
     if(next===world.seed)throw Error('Choose a different unused seed for a new world');
@@ -3058,6 +3082,8 @@ function start(nonblockStage=null){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
+      if(isolatedMountain&&incoming?.profile?.generator!==M8_MOUNTAIN_GENERATOR)
+        throw Error('Return to the ordinary world to import a non-Mountain profile');
       if(incoming?.kind==='mythwrought-four-biomes-export'){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.

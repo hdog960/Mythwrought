@@ -5,7 +5,7 @@ import {BLOCK,worldKey,meshChunk,raycast} from '../src/voxel.mjs';
 import {applyBlockAction} from '../src/blocks.mjs';
 import {FourRegionWorld,fourRegionProfile,M8_MOUNTAIN_GENERATOR,M7_ENVIRONMENT_GENERATOR,restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 import {Pack2LiveWorld} from '../src/pack2-world.mjs';
-import {MOUNTAIN_V8_EXISTING_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
+import {MOUNTAIN_V8_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
 import {MOUNTAIN_V8_PLANT_PATTERNS} from '../src/manual-biomes/mountain-v8-vegetation-cells.mjs';
 import {desertSeamEditAffectedChunks} from '../src/manual-biomes/desert-seam-invalidation.mjs';
 import {verticalEditSections,depthMeshKey} from '../src/depth.mjs';
@@ -15,7 +15,7 @@ const keys=c=>c.map(v=>v.join(',')).sort();
 function fixture(){
  const base=new FourRegionWorld(seed,profile),world=new Pack2LiveWorld(base);
  for(const {cell,id} of natural)assert.equal(world.get(...cell),id,cell.join(','));
- assert.equal(world.get(x,y-1,z),BLOCK.GRASS);
+ assert.equal(world.get(x,y-1,z),503);
  return {base,world};
 }
 function mine(world,rebuild,at=y){
@@ -62,12 +62,12 @@ test('ground support removal uses one real action with fourteen affected cells',
 test('real supported-tree failure restores original source and existing edit/rotation bytes',()=>{
  const {base,world}=fixture();
  const preserved=natural.find(e=>e.id===pine.needles).cell;
- assert.equal(world.set(...preserved,pine.trunk,2),true);
+ assert.equal(world.set(...preserved,370,2),true);
  const before=JSON.stringify(world.save()),count=base.biomeCellCount;
  let calls=0;
  const r=mine(world,(a,c,b,cells)=>{
   calls++;assert.equal(cells.length,12);
-  assert.equal(world.get(...preserved),pine.trunk);
+  assert.equal(world.get(...preserved),370);
   throw Error('synthetic rebuild failure in actual block action');
  });
  assert.equal(r.ok,false);assert.match(r.error,/synthetic rebuild failure/);

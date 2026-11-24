@@ -33,9 +33,9 @@ const rows=[
   [.32,0,.32,.68,1,.68],[0,.18,.42,1,.30,.58],
   [.42,.18,0,.58,.30,1]],['#674a32','#795b3d','#59412d'],0],
  ['conifer-needles','Alpine dwarf pine needles',false,[
-  [.18,0,.18,.82,.28,.82],[0,.16,.26,1,.48,.74],
-  [.26,.16,0,.74,.48,1],[.26,.42,.26,.74,.70,.74],
-  [.37,.65,.37,.63,1,.63]],['#345d3d','#426f45','#294e36'],0]
+  [.16,0,.16,.84,.48,.84],[0,.10,.20,1,.58,.80],
+  [.20,.10,0,.80,.58,1],[.22,.38,.22,.78,.82,.78],
+  [.29,.70,.29,.71,1,.71]],['#345d3d','#426f45','#294e36'],0]
 ];
 // The runtime module must not import catalogs that themselves import voxel.
 // Qualification supplies the original owner registries to this explicit check.

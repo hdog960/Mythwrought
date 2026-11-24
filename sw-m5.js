@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261124-mountain-v8-candidate-11';
-const ASSET_RELEASE='20261124-mountain-v8-candidate-11';
+const CACHE_NAME=CACHE_PREFIX+'20261124-mountain-v8-candidate-12';
+const ASSET_RELEASE='20261124-mountain-v8-candidate-12';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
@@ -265,6 +265,7 @@ const SOURCE_ASSETS=[
   "./src/manual-biomes/profile-world.mjs",
   "./src/manual-biomes/mountain-v8-candidate.mjs",
   "./src/manual-biomes/mountain-v8-materials.mjs",
+  "./src/manual-biomes/mountain-v8-isolated-storage.mjs",
   "./src/manual-biomes/mountain-v8-source-adapter.mjs",
   "./src/manual-biomes/mountain-v8-physical-column.mjs",
   "./src/manual-biomes/mountain-v8-runtime-terrain.mjs",
