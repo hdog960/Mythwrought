@@ -108,6 +108,8 @@ export function classifyExactHeadOriginalM7Triplet({
   yes(r.originalM7NativeWorldConstructorExact)&&
   yes(r.originalM7NativeWorldSeedAndGeneratorExact)&&
   yes(r.originalM7NativeOriginalWorldMethodsStable)&&
+  yes(r.originalM7NativeInheritedVoxelMethodsStable)&&
+  yes(r.originalM7NativeSuperclassExact)&&
   yes(r.originalM7NativeEditsUnchanged)&&
   yes(r.originalM7NativeProvenanceZeroAdditionalTerrainReads)&&
   yes(r.originalM7NativeSiteSafetyNotAutomaticallyProven));
