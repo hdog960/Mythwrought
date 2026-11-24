@@ -1,0 +1,45 @@
+name: Snow S10 zero-per-cap-allocation original M7 winter RGB source gate
+on:
+  push:
+    branches:
+      - research/snow-s10-original-rgb-scratch-source-20261123
+    paths:
+      - '.github/workflows/snow-s10-source-native.yml'
+      - 'src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs'
+      - 'tests/snowy-s10-single-mesh-scratch-pigment.test.mjs'
+      - 'tests/snowy-s10-original-m7-scratch-parity.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s10-rgb-scratch-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  exact-original-M7-scratch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Strict original source and authored syntaxes
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s9-mesh-resident-pigment.mjs)" = 2a93d327e6613083633f19d8f32799e9347b4f9b
+          node --check src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs
+          node --check tests/snowy-s10-single-mesh-scratch-pigment.test.mjs
+          node --check tests/snowy-s10-original-m7-scratch-parity.test.mjs
+      - name: New focused zero-allocation original cap admission tests
+        run: node --test tests/snowy-s10-single-mesh-scratch-pigment.test.mjs
+      - name: Actual two-seed 32x32 M7 source color and schema 1 parity
+        run: |
+          node --test tests/snowy-s10-original-m7-scratch-parity.test.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
