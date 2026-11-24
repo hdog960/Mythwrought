@@ -1,0 +1,35 @@
+name: Mountain V8 dedicated materials actual WebGL2 landscapes and changed shared renderer
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-dedicated-materials-browser.yml]
+permissions:
+  contents: read
+jobs:
+  dedicated-materials-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and script syntax
+        run: |
+          git rev-parse HEAD
+          node --check scripts/ci/mountain-v8-dedicated-materials-browser.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual natural materials, full streamed scenery and changed shared renderer
+        run: node scripts/ci/mountain-v8-dedicated-materials-browser.mjs
+      - name: Retain original game captures and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-dedicated-materials
+          path: artifacts/mountain-v8-dedicated-materials/
+          if-no-files-found: warn
