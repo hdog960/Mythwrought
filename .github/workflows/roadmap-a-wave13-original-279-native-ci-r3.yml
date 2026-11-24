@@ -1,0 +1,41 @@
+name: Roadmap A Wave13 corrected historical unused ID and source 279 native R3
+on:
+  push:
+    branches:
+      - roadmap-a-wave13-original-279-native-ci-r3-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave13-original-279-native-ci-r3.yml'
+permissions:
+  contents: read
+jobs:
+  original-wave13-279-native-final:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact original research source, strengthened vault floor and protected metadata blobs
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-wave13.mjs)" = "76f7eca52dae9de1e235f69262babf781f00cfd5"
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.mjs)" = "932cc760507cee5fedc04c3c7f22f0846f32d91f"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs)" = "2f12a6e952693075665def0e2692e9b3198ed475"
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave13.mjs
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave13-protected-128-only-d4.test.mjs
+      - name: Nine genuine original new-only source bank vault old267 provenance and historic128 D4 tests
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-wave13-protected-128-only-d4.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave13-279-original-source-provenance-r3
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_279_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
