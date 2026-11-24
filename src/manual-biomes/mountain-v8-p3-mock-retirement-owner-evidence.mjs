@@ -69,7 +69,7 @@ export function inspectMountainV8RepeatedOriginalSnapshot(readers,{
  */
 export function inspectMountainV8MockRetirementEligibility(
   shadow,mockStage,loadedOriginal,{
-    expectedSourceEpoch,readCurrentSourceEpoch,
+    originalLoadedAtStage,expectedSourceEpoch,readCurrentSourceEpoch,
     readContextGeneration,expectedContextGeneration,
     isContextLost=()=>false,isSyntheticHandleLive,
     beforeRetirementInspection=()=>{}
@@ -89,6 +89,7 @@ export function inspectMountainV8MockRetirementEligibility(
      !Array.isArray(mockStage.stages)||
      mockStage.stagedChunkCount!==mockStage.stages.length||
      !(loadedOriginal instanceof Map)||
+     !(originalLoadedAtStage instanceof Map)||
      typeof readCurrentSourceEpoch!=='function'||
      typeof readContextGeneration!=='function'||
      typeof isContextLost!=='function'||
@@ -98,7 +99,7 @@ export function inspectMountainV8MockRetirementEligibility(
      !expectedSourceEpoch||
      expectedSourceEpoch.contextGeneration!==expectedContextGeneration)
     return reject('shadow-source-or-retirement-owner-unverifiable');
-  const originals=new Map(loadedOriginal);
+  const originals=new Map(originalLoadedAtStage);
   const unchangedLoaded=()=>originals.size===loadedOriginal.size&&
     [...originals].every(([k,v])=>loadedOriginal.has(k)&&
       loadedOriginal.get(k)===v);
