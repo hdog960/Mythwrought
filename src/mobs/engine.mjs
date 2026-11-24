@@ -116,15 +116,33 @@ export class MobEngine {
     return true;
   }
 
+  // Wake/recovery reads must finish before the engine publishes an awake
+  // slot. An owner callback can change the source or reenter the engine.
+  #canWake(mob, groundedRequired) {
+    if (this.#disposed || this.#awake >= this.#maxActive) return false;
+    const priorState = mob.state;
+    const point = [...mob.position];
+    const hasRevision = typeof this.#world.revision === 'function';
+    const version = hasRevision ? this.#world.revision() : null;
+    const clear = groundedRequired ?
+      this.#world.grounded(point, mob.species.body) :
+      this.#world.volume(point, mob.species.body) === 'clear';
+    if (!clear) return false;
+    if (typeof this.#world.residentAt === 'function' &&
+        this.#world.residentAt(point) !== true) return false;
+    if (hasRevision && !Object.is(this.#world.revision(), version)) return false;
+    return !this.#disposed && this.#entities.get(mob.id) === mob &&
+      mob.state === priorState && this.#awake < this.#maxActive &&
+      validPoint(point) && point.every((value, axis) => Object.is(value, mob.position[axis]));
+  }
+
   transition(id, state) {
     const mob = this.#entities.get(id);
     if (!mob || !transitions[mob.state].includes(state) ||
         (state === 'removed' && mob.important)) return false;
     const wasAwake = awake.has(mob.state);
     const willBeAwake = awake.has(state);
-    if (willBeAwake && !wasAwake &&
-        (this.#awake >= this.#maxActive ||
-          this.#world.volume(mob.position, mob.species.body) !== 'clear')) return false;
+    if (willBeAwake && !wasAwake && !this.#canWake(mob, false)) return false;
     this.#awake += Number(willBeAwake) - Number(wasAwake);
     if (!willBeAwake) mob.velocity.fill(0);
     if (state === 'removed') this.#entities.delete(id);
@@ -145,7 +163,7 @@ export class MobEngine {
   recover(id, fraction = .5) {
     const mob = this.#entities.get(id);
     if (mob?.state !== 'downed' || !Number.isFinite(fraction) || fraction <= 0 || fraction > 1 ||
-        this.#awake >= this.#maxActive || !this.#world.grounded(mob.position, mob.species.body))
+        !this.#canWake(mob, true))
       return false;
     mob.health = mob.species.combat.health * fraction;
     mob.state = 'idle';
