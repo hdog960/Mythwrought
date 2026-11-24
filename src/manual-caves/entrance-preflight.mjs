@@ -79,7 +79,7 @@ function surveyDirection(world,source,site,dx,dz,reserved){
 // North is the continuation away from the authored descent. A level 3x3
 // landing permits a turn; straight sections retain 3-wide, 4-high clearance.
 // This search runs ONLY if all four historical straight attempts refused.
-function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,side,delay){
+function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,side,delay,spacing){
  const cells=new Map(),route=[];
  const reject=reason=>({ok:false,reason});
  const put=(x,z,floor)=>{
@@ -96,11 +96,9 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
    if(world.edits.has(k))return 'PLAYER_EDIT_PROTECTION';
    const natural=baseBlock(x,y,z,world.seed),actual=world.get(x,y,z);
    if(actual!==natural&&actual!==id)return 'PROTECTED_EXISTING_LANDMARK';
-   // A below-legacy cell already owned by the PRIMARY authored cave
-   // and equal to its existing value is not a new terrain replacement.
-   // Preserve the explicit source value; never authorize a new ore cut.
-   const alreadyAuthored=y<LEGACY_WORLD_MIN_Y&&source.has(k)&&source.get(k)===id;
-   if(actual!==id&&!isCandidateGeologyMaterial(actual)&&!alreadyAuthored)
+   // Even below the legacy floor, preserve unsafe raw source material.
+   // The diagnosed ore obstruction is above that floor; never waive it.
+   if(actual!==id&&!isCandidateGeologyMaterial(actual))
     return 'UNSAFE_ORIGINAL_MATERIAL:'+k+':'+actual;
    if(cells.has(k)&&cells.get(k)!==id)return 'INTERNAL_PORTAL_CONFLICT';
    cells.set(k,id);
@@ -109,13 +107,13 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
  };
  // Corner and its immediate neighbors share a floor. delay varies initial
  // northward grade timing deterministically, not the protected source anchor.
- const floorAt=i=>site.floor+Math.floor(Math.max(0,i-delay)/2);
+ const floorAt=i=>site.floor+Math.floor(Math.max(0,i-delay)/spacing);
  const landing=floorAt(turn-2);
  let mouth=null;
  for(let i=0;i<=64;i++){
   const x=site.x+side*Math.max(0,i-turn),z=site.z-Math.min(i,turn);
   const floor=i<turn-2?floorAt(i):i<=turn+2?landing:
-   landing+Math.floor((i-turn-2)/2);
+   landing+Math.floor((i-turn-2)/spacing);
   if(floor+4>WORLD_MAX_Y)return reject('HEIGHT_LIMIT');
   const cols=[];
   if(i===turn){
@@ -165,7 +163,7 @@ function surveySwitchbackFallback(world,source,site,reserved,extraSources,turn,s
  if(forward===null||reverse===null)return reject('ORIGINAL_CONTROLLER_ROUTE_HOLD');
  return Object.freeze({ok:true,name:site.name,sourceAnchor:Object.freeze({...site}),
   direction:Object.freeze({dx:0,dz:-1}),mouth,cells,route:Object.freeze(route),
-  fallback:Object.freeze({turn,side,delay,forwardFrames:forward,reverseFrames:reverse,
+  fallback:Object.freeze({turn,side,delay,spacing,forwardFrames:forward,reverseFrames:reverse,
    originalControllerBothDirections:true,liveWalkingVerified:false}),
   physicallyProposed:true,worldModified:false,runtimeConnected:false});
 }
@@ -186,13 +184,13 @@ export function planNewCaveEntrances({world,sourceCells,approved=false,additiona
       attempts.push(plan.reason);
     }
     if(!accepted&&site.name==='switchback36'){
-      // At most 48 alternatives, fixed order. Preserve legacy straight
+      // At most 224 alternatives, fixed order. Preserve legacy straight
       // paths for every seed that previously had a valid entrance.
       const alternateAttempts=[];
-      search: for(const turn of [4,6,8,10,12,14])
+      search: for(const spacing of [2,1,3,4])for(const turn of [4,6,8,10,12,14,3])
         for(const delay of [0,2,4,6])for(const side of [-1,1]){
           const plan=surveySwitchbackFallback(world,sourceCells,site,reserved,
-            additionalSourceMaps,turn,side,delay);
+            additionalSourceMaps,turn,side,delay,spacing);
           if(plan.ok){accepted=plan;break search;}
           alternateAttempts.push(plan.reason);
         }
