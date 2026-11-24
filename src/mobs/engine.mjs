@@ -59,15 +59,28 @@ export class MobEngine {
     if (this.#disposed || this.#entities.size >= this.#maxEntities ||
         this.#next >= Number.MAX_SAFE_INTEGER-1 || !validPoint(point)) return null;
     const species = getSpecies(speciesId);
-    if (!species || species.implementation !== 'preview' ||
-        this.#world.volume(point, species.body) !== 'clear') return null;
+    if (!species || species.implementation !== 'preview') return null;
+    // Admission is read-only until every physical-world supplier completes.
+    // Do not reserve an identity, awake slot or event for a stale sample.
+    const originalPoint = [...point];
+    const hasRevision = typeof this.#world.revision === 'function';
+    const version = hasRevision ? this.#world.revision() : null;
+    if (this.#world.volume(point, species.body) !== 'clear') return null;
+    const grounded = this.#world.grounded(point, species.body);
+    if (typeof this.#world.residentAt === 'function' &&
+        this.#world.residentAt(point) !== true) return null;
+    if (hasRevision && !Object.is(this.#world.revision(), version)) return null;
+    if (!validPoint(point) ||
+        originalPoint.some((value, axis) => !Object.is(value, point[axis])) ||
+        this.#disposed || this.#entities.size >= this.#maxEntities ||
+        this.#next >= Number.MAX_SAFE_INTEGER-1) return null;
     const count = ++this.#next;
     const id = 'mob-' + (this.#seed >>> 0).toString(36) + '-' + count.toString(36);
     const state = dormant || this.#awake >= this.#maxActive ? 'dormant' : 'idle';
     const entity = {
       id, species, origin: Object.freeze([...point]), position: [...point], juvenile: juvenile === true,
       velocity: [0, 0, 0], yaw: 0, health: species.combat.health, state,
-      grounded: this.#world.grounded(point, species.body), homeChunk, important: false, motionMode: 'walk',
+      grounded, homeChunk, important: false, motionMode: 'walk',
       randomState: (this.#seed ^ Math.imul(count, 0x9e3779b9)) >>> 0
     };
     if (awake.has(state)) this.#awake++;
