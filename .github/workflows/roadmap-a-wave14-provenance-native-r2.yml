@@ -1,0 +1,36 @@
+name: Roadmap A Wave14 provenance-only recovery
+on:
+  push:
+    branches:
+      - roadmap-a-wave14-provenance-native-r2-20261124
+    paths:
+      - '.github/workflows/roadmap-a-wave14-provenance-native-r2.yml'
+permissions:
+  contents: read
+jobs:
+  exact-authentic-wave14-provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify unchanged original source and six already accepted geometry checks plus corrected manifest
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-wave14.mjs)" = "b78ad9a9adf8fb36cad828de08d898eded6af709"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave14.test.mjs)" = "715867d8d1777375d76fba36f822105facd71c71"
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-291-provisional.mjs)" = "26d80ee2f38364cfed47c35ef11da2da227a81ae"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-a5-291-provisional.test.mjs)" = "decf87ef8bb84b9fdc06c6a6f5fa584ed2ca0223"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave14-protected-128-only-d4.test.mjs)" = "61814da35becc4a0297a4e675311fa19cce067e0"
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-291-provisional.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-291-provisional.test.mjs
+      - name: Three previously blocked original provenance test bodies only
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-a5-291-provisional.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave14-291-original-source-provenance-r2
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_291_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
