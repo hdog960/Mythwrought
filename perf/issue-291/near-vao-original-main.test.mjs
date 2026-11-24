@@ -328,7 +328,8 @@ function originalNearPublishCase({
   const chunks=new Map(loaded?[['0,0,0',old]]:[]);
   const calls=[],reason='291_ORIGINAL_PUBLISH_FAULT';
   const scope={
-    near291Enabled:enabled,near291Fatal:false,chunks,
+    near291Enabled:enabled,near291WaterReuse:false,
+    near291EditPhase:null,near291Fatal:false,chunks,
     verticalEditSections:()=>[0],editAffectedChunks:()=>[{cx:0,cz:0}],
     depthMeshKey:()=> '0,0,0',
     meshPlayableChunk:()=>new Float32Array(9),
@@ -414,7 +415,8 @@ function originalMultiStagedCleanupCase({
   const events=[],initialError=new Error('291_ORIGINAL_THIRD_GPU_UPLOAD_FAILURE');
   let uploadN=0,bridgeN=0;
   const scope={
-    chunks,near291Enabled:enabled,near291Fatal:false,
+    chunks,near291Enabled:enabled,near291WaterReuse:false,
+    near291EditPhase:null,near291Fatal:false,
     verticalEditSections:()=>sections,
     editAffectedChunks:()=>[0,1,2].map(cx=>({cx,cz:0})),
     depthMeshKey:(cx,cz,section)=>cx+','+cz+','+section,
