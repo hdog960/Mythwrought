@@ -32,15 +32,29 @@ function validRegion(region) {
 export function spawnEligible(world, species, point, observer) {
   if (!validPoint(point) || !validPoint(observer) || species?.implementation !== 'preview' ||
       !species.lifecycle.replenishes) return false;
+  // Original source coordinates and the authoritative world version must
+  // remain the same across habitat and physically supported spawn reads.
+  // Admission never writes the world, engine or private ecology clock.
+  const originalPoint = Object.freeze([...point]);
+  const originalObserver = Object.freeze([...observer]);
+  const hasRevision = typeof world.revision === 'function';
+  const version = hasRevision ? world.revision() : null;
   const range = distanceTo(point, observer);
   if (range < MIN_SPAWN_DISTANCE || range > MAX_SPAWN_DISTANCE) return false;
   const { biome, light, hazard } = world.environment(point);
   const { biomes, depth, light: bounds } = species.habitat;
-  return !hazard && biomes.includes(biome) && Number.isFinite(light) &&
+  const eligible = !hazard && biomes.includes(biome) && Number.isFinite(light) &&
     light >= bounds[0] && light <= bounds[1] && point[1] >= depth[0] &&
     point[1] <= depth[1] && (world.grounded(point, species.body) ||
       (species.movement.capabilities.includes('swim') && world.volume(point,species.body) === 'clear' &&
         world.medium?.([point[0],point[1] + Math.min(.18,species.body.height*.3),point[2]]) === 'water'));
+  if (!eligible || originalPoint.some((value,i)=>!Object.is(value,point[i])) ||
+      originalObserver.some((value,i)=>!Object.is(value,observer[i]))) return false;
+  if (typeof world.residentAt === 'function' && world.residentAt(originalPoint)!==true)
+    return false;
+  if (hasRevision && !Object.is(world.revision(),version)) return false;
+  return !originalPoint.some((value,i)=>!Object.is(value,point[i])) &&
+    !originalObserver.some((value,i)=>!Object.is(value,observer[i]));
 }
 
 export class PopulationManager {
