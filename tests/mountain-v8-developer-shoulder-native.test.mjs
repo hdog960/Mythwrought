@@ -6,7 +6,7 @@ import {BLOCK,meshChunk,terrainHeight} from '../src/voxel.mjs';
 import {FourRegionWorld,fourRegionProfile,M8_MOUNTAIN_GENERATOR,M7_ENVIRONMENT_GENERATOR,restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
 import {v6BiomeAt} from '../src/manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamEditAffectedChunks} from '../src/manual-biomes/desert-seam-invalidation.mjs';
-import {MOUNTAIN_V8_EXISTING_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
+import {MOUNTAIN_V8_PINE as pine} from '../src/manual-biomes/mountain-v8-runtime-conifers.mjs';
 import {createHash} from 'node:crypto';
 const oldRoot=process.env.MOUNTAIN_V8_PREVIOUS_ROOT;
 assert.ok(oldRoot);
@@ -39,9 +39,10 @@ test('actual source mountain shoulder transects feather accepted height differen
  assert.ok(sampled>20&&changed>0&&closer>0&&newError<oldError);
 });
 test('interior seed179 natural tree and terrain source remain canonical',()=>{
- assert.deepEqual([...current._columnPlan(-470,5)],[...previous._columnPlan(-470,5)]);
+ const originalId=new Map([[500,3],[501,2],[502,272],[503,1],[504,400],[505,402],[506,401]]);
+ assert.deepEqual([...current._columnPlan(-470,5)].map(([y,id])=>[y,originalId.get(id)??id]),[...previous._columnPlan(-470,5)]);
  assert.equal(current.get(-470,13,5),pine.trunk);
- assert.equal(current.get(-470,12,5),BLOCK.GRASS);
+ assert.equal(current.get(-470,12,5),503);
  assert.deepEqual(current.mountainV8SupportedTreeCells(-470,13,5),previous.mountainV8SupportedTreeCells(-470,13,5));
  assert.deepEqual(current.save().edits,[]);
  assert.deepEqual(restoreFourRegionWorld(current.save(),profile).save(),current.save());

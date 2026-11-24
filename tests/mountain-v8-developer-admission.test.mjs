@@ -8,7 +8,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const read=p=>readFileSync(path.join(root,p),'utf8');
 test('candidate worker cache and release markers close all nine Mountain source dependencies',()=>{
  const worker=read('sw-m5.js'),index=read('index.html'),update=read('src/app-update.mjs');
- const release='20261124-mountain-v8-candidate-12';
+ const release='20261124-mountain-v8-candidate-13';
  assert.ok(worker.includes("const ASSET_RELEASE='"+release+"'"));
  assert.ok(worker.includes("CACHE_PREFIX+'"+release+"'"));
  assert.ok(index.includes('data-mw-release="'+release+'"'));

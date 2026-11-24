@@ -124,7 +124,10 @@ function start(nonblockStage=null){
     // Profiled worlds must never be restored using the old bare VoxelWorld
     // baseline, which can silently discard legacy-equivalent player edits.
     // The old loader below remains EXACT for every ordinary legacy seed.
-    if(readFourRegionProfile(localStorage,seed)){
+    const storedProfile=readFourRegionProfile(localStorage,seed)?.profile;
+    if(storedProfile){
+      if((storedProfile.generator===M8_MOUNTAIN_GENERATOR)!==isolatedMountain)
+        throw Error('Mountain V8 profile requires its isolated storage session');
       const result=openM2World(localStorage,planM2WorldChoice(String(seed)));
       if(result.recovered)recoveryNote=result.warning||
         'Recovered a verified four-biome profile; export a backup';
@@ -2947,6 +2950,20 @@ function start(nonblockStage=null){
         setMountainV8Active(rawStorage,false);location.reload();
       }catch(error){seedMessage.textContent=String(error.message||error);}};
     }
+    if(!isolatedMountain){
+      const resume=document.createElement('button');resume.id='resumeMountainV8Candidate';resume.type='button';
+      resume.textContent='RESUME MOUNTAIN V8';
+      const scoped=mountainV8Storage(rawStorage);
+      resume.hidden=scoped.getItem(SELECTED_SEED_KEY)===null;
+      seedRow.append(resume);
+      resume.onclick=()=>{try{
+        const seed=worldSeedFromText(scoped.getItem(SELECTED_SEED_KEY));
+        if(readFourRegionProfile(scoped,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+          throw Error('No verified isolated Mountain save');
+        if(!storageReadOnly&&!save())throw Error('Save ordinary world first');
+        setMountainV8Active(rawStorage,true);location.reload();
+      }catch(error){seedMessage.textContent=String(error.message||error);}};
+    }
     const v8Button=document.createElement('button');
     v8Button.id='createMountainV8Candidate';v8Button.type='button';
     v8Button.textContent='CREATE NEW MOUNTAIN V8 (LOCAL CANDIDATE)';
@@ -3088,12 +3105,23 @@ function start(nonblockStage=null){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.
         const examined=inspectM2WorldExport(rawImport);
+        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR&&!localCandidate)
+          throw Error('Mountain V8 import is not publicly enabled');
         if(storageReadOnly)throw Error('Read-only save protection is active');
         if(examined.seed===world.seed)
           throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
         if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
           return;
         if(!save())throw Error('Save your current world before importing');
+        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR){
+          if(!localCandidate)throw Error('Mountain V8 import is not publicly enabled');
+          const {importMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+          const former=world;
+          const imported=await importMountainV8IsolatedWorld(rawImport,{confirmed:true,storage:rawStorage});
+          if(world!==former||changed)throw Error('Current world changed; imported Mountain save retained separately');
+          if(imported.base.generationProfile.generator!==M8_MOUNTAIN_GENERATOR)throw Error('Mountain import profile mismatch');
+          setMountainV8Active(rawStorage,true);location.reload();return;
+        }
         // Preserve EXACT imported generator identity, even for older v2/v3.
         const intent=planM2WorldChoice(String(examined.seed),
           M2_WORLD_MODE.IMPORT_PROFILE,{confirmed:true,

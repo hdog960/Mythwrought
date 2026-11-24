@@ -8,7 +8,7 @@ import {VAULT_DB,VAULT_STORE} from '../vault.mjs';
 import {MIRROR_DB,MIRROR_STORE} from '../mirror.mjs';
 import {M8_MOUNTAIN_GENERATOR,FourRegionWorld,fourRegionProfile} from './profile-world.mjs';
 import {BIOME_PROFILE_SUFFIX,isUnclaimedWorldSeed,readFourRegionProfile} from './profile-storage.mjs';
-import {openM2World,planM2WorldChoice} from './m2-runtime-bridge.mjs';
+import {openM2World,planM2WorldChoice,saveM2World,inspectM2WorldExport,exportM2World} from './m2-runtime-bridge.mjs';
 export const V8_ADMISSION_LOCK='mythwrought-v8-new-world-admission-v1';
 const checkSeed=seed=>{if(!Number.isSafeInteger(seed)||seed!==(seed|0)||seed===DEFAULT_WORLD_SEED)
   throw Error('V8 requires a non-default signed 32-bit unused seed');};
@@ -157,4 +157,40 @@ export async function createMountainV8IsolatedWorld(seedText,{confirmed=false,st
  assertLocalUnused(storage,seed);
  const {mountainV8Storage,mountainV8DatabaseFactory}=await import('./mountain-v8-isolated-storage.mjs');
  return createMountainV8CandidateWorld(String(seed),{confirmed:true,storage:mountainV8Storage(storage),factory:mountainV8DatabaseFactory(factory),locks});
+}
+
+// Verified portable profile import into the separate Mountain namespace.
+// Existing ordinary and Mountain seeds, Vault/Mirror claims and all original
+// bytes are preserved. Partial storage failure retains evidence; no deletion.
+export async function importMountainV8IsolatedWorld(rawImport,{
+ confirmed=false,storage=globalThis.localStorage,factory=globalThis.indexedDB,locks=globalThis.navigator?.locks
+}={}){
+ if(confirmed!==true)throw Error('Explicit Mountain V8 import confirmation required');
+ const inspected=inspectM2WorldExport(rawImport);
+ if(inspected.world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)
+  throw Error('Only a verified Mountain V8 profile can enter the Mountain namespace');
+ const seed=inspected.seed;checkSeed(seed);
+ if(typeof locks?.request!=='function')throw Error('Web Locks unavailable; V8 import refused');
+ const {mountainV8Storage,mountainV8DatabaseFactory}=await import('./mountain-v8-isolated-storage.mjs');
+ const scope=mountainV8Storage(storage),db=mountainV8DatabaseFactory(factory);
+ return locks.request(V8_ADMISSION_LOCK,{mode:'exclusive'},async lock=>{
+  if(!lock||lock.name!==V8_ADMISSION_LOCK||lock.mode!=='exclusive')throw Error('V8 admission lock unavailable');
+  assertLocalUnused(storage,seed);assertLocalUnused(scope,seed);
+  for(const candidate of [factory,db])if((await inspectMountainV8OptionalSeed(seed,candidate)).claimed)
+   throw Error('Existing Vault/Mirror snapshot claims import seed');
+  assertLocalUnused(storage,seed);assertLocalUnused(scope,seed);
+  const raw=JSON.stringify(inspected.world.base.generationProfile),record=JSON.stringify({version:1,checksum:saveFingerprint(raw),raw});
+  const key=worldSlotKey(seed)+BIOME_PROFILE_SUFFIX;
+  scope.setItem(key+'-journal',record);
+  if(scope.getItem(key+'-journal')!==record||scope.getItem(key)!==null)throw Error('Mountain import profile journal conflict');
+  scope.setItem(key,record);
+  if(scope.getItem(key)!==record||readFourRegionProfile(scope,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+   throw Error('Mountain import profile readback failed');
+  const saved=saveM2World(scope,inspected.world);
+  if(!saved.ok)throw Error('Mountain import not verified; reservation retained: '+saved.reason);
+  const reopened=openM2World(scope,planM2WorldChoice(String(seed)));
+  if(exportM2World(reopened.world)!==exportM2World(inspected.world))
+   throw Error('Mountain import exact profile/edits/Pack2 readback mismatch');
+  return reopened;
+ });
 }
