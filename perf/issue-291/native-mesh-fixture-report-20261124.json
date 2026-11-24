@@ -1,0 +1,108 @@
+{
+  "node": "v22.16.0",
+  "fixtureScope": "exact source ESM via vm, four controlled collaborator modules, real depth/environment; not VoxelWorld or game",
+  "parity": {
+    "cases": 18,
+    "bytes": 14506416,
+    "reads": 93386
+  },
+  "rows": [
+    {
+      "kind": "solid",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 0.419,
+        "p95": 0.6534
+      },
+      "parent": {
+        "median": 0.2693,
+        "p95": 0.3564
+      },
+      "candidate": {
+        "median": 0.2579,
+        "p95": 0.3308
+      }
+    },
+    {
+      "kind": "tunnel",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 0.4555,
+        "p95": 0.7087
+      },
+      "parent": {
+        "median": 0.2933,
+        "p95": 0.3852
+      },
+      "candidate": {
+        "median": 0.2773,
+        "p95": 0.3557
+      }
+    },
+    {
+      "kind": "cavern",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 0.5461,
+        "p95": 0.8329
+      },
+      "parent": {
+        "median": 0.3713,
+        "p95": 0.5037
+      },
+      "candidate": {
+        "median": 0.3486,
+        "p95": 0.4786
+      }
+    },
+    {
+      "kind": "checker",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 3.3214,
+        "p95": 4.5158
+      },
+      "parent": {
+        "median": 2.2585,
+        "p95": 3.863
+      },
+      "candidate": {
+        "median": 2.0343,
+        "p95": 3.9016
+      }
+    },
+    {
+      "kind": "mixed",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 1.7016,
+        "p95": 2.1524
+      },
+      "parent": {
+        "median": 1.3125,
+        "p95": 1.6318
+      },
+      "candidate": {
+        "median": 1.1869,
+        "p95": 1.474
+      }
+    },
+    {
+      "kind": "shapes",
+      "samplesPerVariant": 180,
+      "original": {
+        "median": 2.0507,
+        "p95": 2.6269
+      },
+      "parent": {
+        "median": 1.5092,
+        "p95": 2.104
+      },
+      "candidate": {
+        "median": 1.433,
+        "p95": 1.9578
+      }
+    }
+  ],
+  "sink": 979183080
+}
