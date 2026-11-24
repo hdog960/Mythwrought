@@ -4,7 +4,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
-import {environmentGround,isEnvironmentGenerator} from './environment-ground.mjs';
+import {environmentGround,isEnvironmentGenerator,SNOW_P1_GENERATOR,SNOW_WIND_RENDER_TAG} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {canWarmSourceScree,canUseDesertHardpanCue,nearestDesertHardpanSquared,warmScreeVertexColor} from './manual-biomes/desert-bilateral-rgb.mjs';
@@ -217,7 +217,7 @@ export function meshChunk(world,cx,cz){
   // a surface is real and protected rather than cave-exposed subsoil.
   const sourceWorld=world.base?.generationProfile?world.base:world;
   // Unsavable research-only Snow world. Existing generation profiles never opt in.
-  const snowS17=sourceWorld.experimentalSnowS17===true;
+  const snowS17=sourceWorld.generationProfile?.generator===SNOW_P1_GENERATOR||sourceWorld.experimentalSnowS17===true;
   const snowS17Pigment=snowS17?createSnowS14EdgePigment(world.seed,v6BiomeAt):null;
   const sourceCaps=new Map(),seamVertexDistances=new Map(),screeWarmDistances=new Map();
   const hasEdit=(x,y,z)=>world.edits?.has(worldKey(x,y,z))||
@@ -371,7 +371,7 @@ export function meshChunk(world,cx,cz){
               }
               appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
-                groundColor?(snowS17Rgb&&terrainArtMaterial(id)===41?44:terrainArtMaterial(id)):0);
+                groundColor?(snowS17Rgb&&terrainArtMaterial(id)===41?SNOW_WIND_RENDER_TAG:terrainArtMaterial(id)):0);
             }
           }
           continue;
