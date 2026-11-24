@@ -131,6 +131,14 @@ const city=()=>({
   candidateThinUnderpassCrossAuditCallbacksWithinCaps:true,
   candidateThinUnderpassCrossAuditSourceCallbackCap:1200000,
   candidateThinUnderpassCrossAuditDistinctCellCapPerRole:160000,
+  candidateThinUnderpassCrossAuditPriorUniqueCellsByRole:{
+   naturalAt:rz===0?8000:12000,authoredAt:rz===0?8000:12000,
+   editedAt:rz===0?8000:12000,protectedAt:rz===0?8000:12000
+  },
+  candidateThinUnderpassCrossAuditTotalUniqueCellsByRole:{
+   naturalAt:rz===0?8300:12400,authoredAt:rz===0?8300:12400,
+   editedAt:rz===0?8300:12400,protectedAt:rz===0?8300:12400
+  },
   candidateThinUnderpassExpectedCombinedDistinctCells:
    (rz===0?248:276)+135-12,
   candidateThinUnderpassBridgeDistinctCells:rz===0?248:276,
@@ -663,4 +671,26 @@ test('Phase30 source budget policy must be independently enforced at BOTH origin
  assert.equal(r.cityThinUnderpassExactCoordinateCoverageSafe,false);
  assert.equal(r.actualPlayerWalkingVerified,false);
  assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase30 actual original-world unique-cell counts cannot be fabricated independently of source hard caps',()=>{
+ for(const mutate of [
+  row=>row.candidateThinUnderpassCrossAuditPriorUniqueCellsByRole.naturalAt=0,
+  row=>row.candidateThinUnderpassCrossAuditPriorUniqueCellsByRole.authoredAt=-1,
+  row=>row.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole.editedAt=160001,
+  row=>row.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole.protectedAt=0,
+  row=>row.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole.naturalAt=
+    row.candidateThinUnderpassCrossAuditPriorUniqueCellsByRole.naturalAt-1,
+  row=>row.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole.naturalAt=
+    row.candidateThinUnderpassCrossAuditLedgerPriorCalls.naturalAt+
+    row.candidateThinUnderpassCrossAuditLedgerUnderpassCalls.naturalAt+1,
+  row=>{delete row.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole}
+ ]){
+  const reports=city();mutate(reports.rows[1]);
+  const r=check({city:reports});
+  assert.equal(r.cityThinUnderpassCrossAuditLedgerSafe,false);
+  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,false);
+  assert.equal(r.releaseApproved,false);
+ }
 });
