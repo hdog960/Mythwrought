@@ -14,7 +14,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
     "title": "Cragsong Switchback Observatory Inn",
     "w": 82,
     "d": 76,
-    "plan": "cragsong-asymmetric-switchback-north-ridge-terraces-central-open-skywell-three-real-cliff-cutouts-twenty-room-four-gallery-inn-original",
+    "plan": "cragsong-broad-northwest-foundry-terrace-wide-shallow-southwest-cliff-shelf-asymmetric-observatory-inn-original",
     "roof": "sawtooth",
     "skin": "pack1:006",
     "roofAsset": "pack3:025",
@@ -23,7 +23,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         0,
         0,
         22,
-        17
+        8
       ],
       [
         64,
@@ -33,8 +33,8 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
       ],
       [
         0,
-        59,
-        19,
+        66,
+        30,
         75
       ]
     ],
@@ -53,9 +53,9 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
       ],
       [
         22,
-        18,
+        9,
         22,
-        58
+        65
       ],
       [
         64,
@@ -335,7 +335,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "at": [
           31,
           1,
-          65
+          60
         ],
         "from": "lower-valley-feast-hall",
         "to": "west-innkeeper-lodgings"
@@ -555,7 +555,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "max": [
           31,
           4,
-          74
+          65
         ]
       },
       {
@@ -628,7 +628,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "min": [
           2,
           1,
-          18
+          10
         ],
         "max": [
           22,
@@ -659,7 +659,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "max": [
           22,
           4,
-          59
+          65
         ]
       },
       {
@@ -735,17 +735,17 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
       ],
       [
         23,
-        11,
+        7,
         "west"
       ],
       [
         8,
-        18,
+        9,
         "north"
       ],
       [
         18,
-        18,
+        9,
         "north"
       ],
       [
@@ -769,18 +769,18 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "west"
       ],
       [
-        20,
+        1,
         63,
         "west"
       ],
       [
-        20,
+        31,
         69,
         "west"
       ],
       [
-        27,
-        74,
+        25,
+        65,
         "south"
       ],
       [
@@ -945,7 +945,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
           23,
           51,
           30,
-          73
+          64
         ],
         "style": "long-gable",
         "raise": 2
@@ -1009,7 +1009,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
         "name": "hammer-foundry-overhang",
         "rect": [
           2,
-          18,
+          10,
           21,
           31
         ],
@@ -1033,7 +1033,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
           2,
           46,
           21,
-          58
+          64
         ],
         "style": "edge-rise",
         "raise": 2
@@ -1172,14 +1172,14 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
       },
       {
         "x": 26,
-        "z": 65,
+        "z": 57,
         "room": "west-innkeeper-lodgings",
         "asset": "pack5:082",
         "variant": "wanderer-quilt"
       },
       {
         "x": 28,
-        "z": 71,
+        "z": 62,
         "room": "west-innkeeper-lodgings",
         "asset": "pack4:057"
       },
@@ -1322,7 +1322,7 @@ export const ROADMAP_C_1A_WAVE32_INN_SPECS=Object.freeze([
       39,
       47
     ],
-    "detail": "Original twenty-room mountain inn standing over three physically missing all-height ridge cuts: switchback cliff lodgings, independent stone and timber service galleries, a grounded 48-column open-sky mountain observatory, twenty real individually supported Pack3 roof wings, 28 outward Pack4 glazing cuts, and four reserved two-cell Pack5 beds. Pure source candidate; no runtime, settling, saves, weather/load/doors ABI or final art acceptance."
+    "detail": "Original mountain inn with deep northwest hammer-gallery terrace and broad shallow southwest cliff shelf, an independent northeast high-pass recess, 20 connected rooms, grounded roof-open 48-cell observatory, 20 supported mountain roof wings, 28 outward Pack4 glazing cuts, and four reserved two-cell Pack5 beds. Pure source candidate; no runtime, settlement, save, load, door ABI or final art approval."
   }
 ]);
 export const ROADMAP_C_1A_WAVE32_INN_IDS=Object.freeze(ROADMAP_C_1A_WAVE32_INN_SPECS.map(s=>'r1:'+s.category+':'+s.biome+':'+s.size+':'+String(s.index).padStart(3,'0')));
