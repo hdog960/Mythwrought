@@ -86,8 +86,11 @@ export function createCitySourceCrossAuditLedger(source,{
  function beginUnderpass(){
   if(closed||phase!=='prior'||!ROLES.every(role=>prior[role]>0))
    throw Error('Original source ledger prior audit incomplete');
-  if(!bindingsUnchanged())
+  if(!bindingsUnchanged()){
    fail('ORIGINAL_SOURCE_CALLBACK_BINDING_CHANGED',{phase:'prior'});
+   // No later original-world source callback may run after this refusal.
+   preReadBlocked=true;
+  }
   phase='underpass';
  }
  function audit(){
