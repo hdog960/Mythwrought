@@ -13,6 +13,7 @@ import {planMountainV8ResearchMeshBatch}
   from '../src/manual-biomes/mountain-v8-p3-mesh-batch-rollback-research.mjs';
 import {stageMountainV8MockGpuTransaction}
   from '../src/manual-biomes/mountain-v8-p3-mock-gpu-transaction-research.mjs';
+import {GpuUploadRetry} from '../src/gpu-recovery.mjs';
 import {readMountainV8DetachedOriginalEpoch as ledger,
   previewMountainV8DetachedPublication as preview}
   from '../src/manual-biomes/mountain-v8-p3-source-epoch-projected-publication.mjs';
@@ -26,7 +27,7 @@ const [{VoxelWorld,BLOCK,terrainHeight,meshChunk,worldKey},
   {combinePack3ChunkMesh},
   {createPack3RuntimeStage},{PACK3_BUILDER_SYMBOLS},
   {meshManual14Chunk},{MANUAL_FIVE_PACK_CATALOG},
-  {GpuUploadRetry}
+  {GpuUploadRetry:currentMainGpuUploadRetry}
 ]=await Promise.all([
   fromMain('src/voxel.mjs'),fromMain('src/depth.mjs'),
   fromMain('src/manual-biomes/v6-balanced-biomes.mjs'),
@@ -39,6 +40,7 @@ const [{VoxelWorld,BLOCK,terrainHeight,meshChunk,worldKey},
   fromMain('src/builder-assets/manual-five-pack.mjs'),
   fromMain('src/gpu-recovery.mjs')
 ]);
+assert.equal(GpuUploadRetry.toString(),currentMainGpuUploadRetry.toString());
 const seed=179,MAIN='db4bbcc32156e5df311f733bcaa53d559c17313b';
 const union=(a,b)=>{
   if(!b.length)return a;
@@ -116,7 +118,7 @@ function fixture(){
     originalOwnershipToken:'native-owner-fixture',
     readOwnershipToken:()=> 'native-owner-fixture',now:5000
   });
-  assert.equal(mock.status,'synthetic-gpu-preview-only');
+  assert.equal(mock.status,'synthetic-gpu-preview-only',mock.reason);
   const check=(more={})=>preview(mock,originalChunks,{
     expectedEpoch:baseline,readCurrentEpoch:epoch,
     contextGeneration:9,readContextGeneration:()=>contextGeneration,
