@@ -1,0 +1,61 @@
+name: Builder D50 isolated ORIGINAL 3-stage lateral bypass and dogleg entry ONLY
+on:
+  push:
+    branches:
+      - builder-d-d50-original-lateral-bypass-isolated-20261124
+    paths:
+      - 'src/building-pool/roadmap-d/d50-*'
+      - 'tests/building-pool/roadmap-d/d50-*'
+      - 'docs/building-pool/roadmap-d/D50_*'
+      - '.github/workflows/roadmap-d-d50-original-lateral-bypass.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d50-original-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-d50-native-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Prove exact D49 parent and original W16 W17 Pack2 geometry not edited
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = 'ad8a8bc4452801e18c5af5d8a2da4677c08030e8'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d47-original-congruent-socket-saddle.mjs)" = 'a45e05cd56d3040cfd5211469caabed267075afd'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs)" = '354933307cc9a333587b54af42ddfc3cc4e8a8f8'
+          git diff --name-only HEAD^ HEAD > /tmp/d50-actual.txt
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d50-original-lateral-bypass.yml' \
+            'docs/building-pool/roadmap-d/D50_AUTHENTIC_THREE_STAGE_LATERAL_BYPASS_AND_DOGLEG_ENTRY_GATE.md' \
+            'src/building-pool/roadmap-d/d50-lateral-three-stage-connector.mjs' \
+            'src/building-pool/roadmap-d/d50-original-lateral-bypass-audit.mjs' \
+            'tests/building-pool/roadmap-d/d50-original-three-stage.source.test.mjs' \
+            'tests/building-pool/roadmap-d/d50-three-stage-lateral.pure.test.mjs' > /tmp/d50-expected.txt
+          diff -u /tmp/d50-expected.txt /tmp/d50-actual.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check ONLY four new D50 source/test modules
+        run: |
+          node --check src/building-pool/roadmap-d/d50-lateral-three-stage-connector.mjs
+          node --check src/building-pool/roadmap-d/d50-original-lateral-bypass-audit.mjs
+          node --check tests/building-pool/roadmap-d/d50-three-stage-lateral.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d50-original-three-stage.source.test.mjs
+      - name: Run ONLY D50 four pure plus two real original source Node cases
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d50-three-stage-lateral.pure.test.mjs \
+            tests/building-pool/roadmap-d/d50-original-three-stage.source.test.mjs
