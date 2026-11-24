@@ -315,6 +315,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .compact-menu-status p{font-size:11px!important;line-height:1.25;margin:0;overflow-wrap:anywhere}
 .compact-menu summary{cursor:pointer;list-style:revert}
 .compact-menu summary span{float:right;font-size:11px;font-weight:500;color:#d7e0cd}
+#advancedMenu:not([open]) > #advancedTools{display:none}
 #advancedTools{padding-top:8px}
 #advancedTools .looksetting{margin-block:8px}
 #advancedTools button,#advancedTools select,#advancedTools input{touch-action:manipulation}

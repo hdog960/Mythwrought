@@ -313,7 +313,7 @@
     "./src/voxel.mjs": "2b9f541f6e95991b3da0ed5a55bf3f30ea6415efe804374870827734c6ccd7ec",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
-    "./styles.css": "897a880c62ca129f2aafa6b13d17d8bedd1dcbc9dfaaa82bc54475e5613f972d",
+    "./styles.css": "4cd95bc7e13f7ee6b5d9674a1fe3520eef211d59b59ee6d40b2924bd594f3406",
     "./sw-m5.js": "8384bc592859814fbb79d33724d5995467bc6035754c2313c6506d39e7214b68",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
     "./sw-nonblock-stage.js": "c611ef4475852a987036981c59dd3ef59a0efea04772a50463c735b8628ba13a"

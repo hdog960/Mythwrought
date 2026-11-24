@@ -110,7 +110,7 @@ try{
     await page.locator('#menu').click();
     const compact=await page.evaluate(()=>{
       const host=document.querySelector('.compact-menu'), advanced=document.querySelector('#advancedMenu');
-      const selectors=['#closeHelp','#skySetDay','#skySetNight','#newWorld','#seedInput','#switchWorld','#advancedMenu > summary'];
+      const selectors=['#closeHelp','#skySetDay','#skySetNight','#newWorld','#newSnowWorld','#seedInput','#switchWorld','#advancedMenu > summary'];
       const outer=host.getBoundingClientRect();
       return {width:innerWidth,height:innerHeight,scroll:host.scrollHeight,client:host.clientHeight,open:advanced.open,
         inside:selectors.every(id=>{
