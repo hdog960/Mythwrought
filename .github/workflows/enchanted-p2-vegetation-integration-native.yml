@@ -1,0 +1,33 @@
+name: Enchanted P2 Native Vegetation Integration Gate
+on:
+  push:
+    branches:
+      - research/enchanted-p2-vegetation-integration-gate-20261124
+    paths:
+      - .github/workflows/enchanted-p2-vegetation-integration-native.yml
+permissions:
+  contents: read
+jobs:
+  native-vegetation-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Guard exact original physical world, tree and scenery source
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/voxel.mjs)" = "543677a61aff7f54c0111f2485be79fbbbd560c6"
+          test "$(git hash-object src/manual-biomes/profile-world.mjs)" = "151f09cf564b329f1630a8a33e498193e957a0eb"
+          test "$(git hash-object src/manual-biomes/enchanted-tree-candidates.mjs)" = "69aec88ab0bb50ab4d292707baec214bd46112fb"
+          test "$(git hash-object src/nonblock/staged-habitats.mjs)" = "b9badfcc9c6d243721429a9893b33fdb06e5076b"
+          test "$(git hash-object src/nonblock/candidate-scene.mjs)" = "567c2055330b82d67cb37fab9c0101c7da33fc82"
+          test "$(git hash-object src/gpu-recovery.mjs)" = "422ef73e383bda78ff94607abb858e3c8a57c2d1"
+          node --version
+          node --check src/manual-biomes/enchanted-native-vegetation-integration.mjs
+          node --test tests/manual-biomes/enchanted-native-vegetation-integration-real-m7.test.mjs
