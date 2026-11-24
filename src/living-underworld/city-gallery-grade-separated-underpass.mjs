@@ -441,6 +441,23 @@ export function auditSourceProtectedCityUnderpass(seed,rx,rz,{
   coverage.record(coverageStage,role,x,y,z);
   sourceRoleCalls[role]++;
   const value=originalRoleReaders[role](x,y,z);
+  // Preserve original stair/landing source-role error diagnostics before
+  // Phase27's strict overlap observer (which also rejects invalid values).
+  // This performs ZERO additional source reads and widens no permitted type.
+  if(role==='editedAt'&&typeof value!=='boolean')
+   throw TypeError(coverageStage==='pad'?
+    'Nonboolean original M7 underpass landing edit source':
+    'Nonboolean original M7 stair edit source');
+  if(role==='protectedAt'&&typeof value!=='boolean')
+   throw TypeError(coverageStage==='pad'?
+    'Nonboolean original M7 underpass landing landmark source':
+    'Nonboolean original M7 stair landmark source');
+  if(coverageStage==='pad'&&role==='naturalAt'&&
+     (!INT(value)||value<0))
+   throw TypeError('Invalid original M7 underpass landing material');
+  if(coverageStage==='pad'&&role==='authoredAt'&&
+     value!==undefined&&(!INT(value)||value<0))
+   throw TypeError('Invalid original M7 underpass landing authored material');
   overlapValues.observe(coverageStage,role,x,y,z,value);
   return value;
  };
