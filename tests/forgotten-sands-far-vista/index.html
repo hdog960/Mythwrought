@@ -9,13 +9,12 @@ async function run(){
   check(gl,'WebGL2 required');const q=new URLSearchParams(location.search),index=Number(q.get('group')??1),distance=Number(q.get('distance')??48);
   const worker=new Worker('./far-worker.mjs',{type:'module'}),buffers=[];let far=null,basePipe,farPipe,p;
   try{
-    p=await req(worker,{type:'prepare',index});
+    p=await req(worker,{type:'prepare',index,distance});
     basePipe=buildGpuPipeline(gl,original);
     // Independent landmark-only pipeline. Original near shader unchanged.
     const fs=original.terrainFragment.replace('mix(29.0,9.0,uCaveHaze)','mix(45.0,9.0,uCaveHaze)').replace('mix(68.0,27.0,uCaveHaze)','mix(155.0,27.0,uCaveHaze)');
-    const vs=original.terrainVertex.replace('1.0015*z','1.0008*z');
-    check(fs!==original.terrainFragment&&vs!==original.terrainVertex,'far shader patch mismatch');
-    farPipe=buildGpuPipeline(gl,{...original,terrainVertex:vs,terrainFragment:fs});
+    check(fs!==original.terrainFragment,'far shader patch mismatch');
+    farPipe=buildGpuPipeline(gl,{...original,terrainFragment:fs});
     const upload=async v=>{await new Promise(requestAnimationFrame);const b=uploadChunkBuffer(gl,v);gl.bindBuffer(gl.ARRAY_BUFFER,b);check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===v.byteLength,'upload byte mismatch');return {b,count:v.length/9,bytes:v.byteLength};};
     for(let i=0;i<p.near.length;i++){const r=await req(worker,{type:'near',i});buffers.push(await upload(r.vertices));}
     const r=await req(worker,{type:'far'});check(r.plan.allowed,'no far slot');far=await upload(r.vertices);
@@ -24,8 +23,6 @@ async function run(){
     // Original projection depth must remain identical between near and far
     // passes for correct occlusion. At this view distance (<100), the original
     // clip plane suffices, so use original VS for actual candidate draw.
-    gl.deleteProgram(farPipe.terrainProgram);gl.deleteProgram(farPipe.skyProgram);gl.deleteBuffer(farPipe.outlineBuffer);
-    farPipe=buildGpuPipeline(gl,{...original,terrainFragment:fs});
     const pitch=.11;
     function bind(pipe){
       gl.useProgram(pipe.terrainProgram);const u=pipe.uniforms;
