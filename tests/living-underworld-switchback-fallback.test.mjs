@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,worldKey,BLOCK,collides} from '../src/voxel.mjs';
+import {stepPlayer} from '../src/physics.mjs';
 import {CaveVoxelWorld} from '../src/manual-caves/cave-voxel-world.mjs';
 import {planNewCaveEntrances,originalCaveEntranceSites} from '../src/manual-caves/entrance-preflight.mjs';
 import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
@@ -31,8 +32,29 @@ for(const seed of [8675309,13579]){
    assert.equal(collides(m7,p.x+.5,p.feet,p.z+.5),false);
    for(let h=1;h<=4;h++)assert.equal(m7.get(p.x,p.floor+h,p.z),BLOCK.AIR);
   }
+  // The constructed isolated M7 object itself, not just the projected plan.
+  // No writes, no live device or historical save is involved.
+  const drive=points=>{
+   const a=points[0],p={x:a.x+.5,z:a.z+.5,feet:a.feet,yaw:0,pitch:0,
+    vX:0,vZ:0,vY:0,onGround:true,coyote:.09,jumpBuffer:0};
+   let frames=0;
+   for(const b of points.slice(1)){
+    let reached=false;
+    for(let n=0;n<120;n++){
+     const dx=b.x+.5-p.x,dz=b.z+.5-p.z,d=Math.hypot(dx,dz);
+     if(d>.085)p.yaw=Math.atan2(dx,dz);
+     stepPlayer(m7,p,{forward:d>.085?1:0,strafe:0,jump:false},1/60);frames++;
+     assert.equal(collides(m7,p.x,p.feet,p.z),false);
+     if(Math.hypot(b.x+.5-p.x,b.z+.5-p.z)<=.12&&Math.abs(p.feet-b.feet)<=.025&&
+        p.onGround&&collides(m7,p.x,p.feet-.002,p.z)){reached=true;break;}
+    }
+    assert.ok(reached,'Actual isolated M7 controller did not reach '+JSON.stringify(b));
+   }
+   return frames;
+  };
+  const constructedForward=drive(entry.route),constructedReverse=drive([...entry.route].reverse());
   assert.equal(m7.edits.size,0);
-  console.log(JSON.stringify({seed,entry:entry.fallback,mouth:entry.mouth,routeLength:entry.route.length,cells:entry.cells.size,constructorPass:true}));
+  console.log(JSON.stringify({seed,entry:entry.fallback,mouth:entry.mouth,routeLength:entry.route.length,cells:entry.cells.size,constructorPass:true,constructedForward,constructedReverse}));
  });
 }
 test('previous successful straight entrances remain on historical path',()=>{
