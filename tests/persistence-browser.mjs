@@ -49,6 +49,7 @@ try{
   assert.equal(await get(primary),'{damaged-primary-v009','Damaged save silently overwritten on startup');
   assert.match(await page.locator('#status').textContent(),/Recovered from verified edit journal/);
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#save').click();
   assert.match(await page.locator('#status').textContent(),/verified and saved/);
   assert.equal(await get(damaged),'{damaged-primary-v009','Damaged bytes not preserved during user save repair');
@@ -98,6 +99,7 @@ try{
   await scene();
   assert.match(await page.locator('#status').textContent(),/SAVE PROTECTION/);
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#save').click();
   assert.match(await page.locator('#status').textContent(),/SAVE PROTECTION ACTIVE/);
   assert.equal(await get('mythwrought-v002-world-987'),'corrupted-987-world','Damaged seed was overwritten');

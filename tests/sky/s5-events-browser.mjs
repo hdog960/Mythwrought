@@ -178,7 +178,7 @@ async function activate(page,phase,age,expected,alignment=false){
   return status;
 }
 async function selectDay(page){
-  await page.locator('#menu').click();
+  await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
   await page.locator('#skySetDay').click();
   await page.locator('#closeHelp').click();
   await page.waitForFunction(()=>{
@@ -198,7 +198,7 @@ try{
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
       await settle(page);
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#save').click();
       await page.locator('#closeHelp').click();
       const saved=await nonSky(page),key='mythwrought-v002-world-179';

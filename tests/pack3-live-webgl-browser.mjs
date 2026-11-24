@@ -34,6 +34,7 @@ try {
       const legacyBefore=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179'));
       const verticesBefore=await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedMeshVertices));
       await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
       await page.locator('#pack3Material').selectOption('116');
       await page.locator('#pack3Rotation').selectOption('1');
       await page.locator('#closeHelp').click();

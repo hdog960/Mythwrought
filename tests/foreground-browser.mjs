@@ -97,6 +97,7 @@ try{
  await mkdir('artifacts',{recursive:true});
  await page.screenshot({path:'artifacts/mythwrought-v010-foreground-resume-landscape.png'});
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#runAudit').click();
  await page.waitForFunction(()=>document.querySelector('#auditReport').value.includes('mesh uploads'),null,{timeout:10000});
  const report=await page.locator('#auditReport').inputValue();

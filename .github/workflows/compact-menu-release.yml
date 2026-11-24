@@ -1,0 +1,36 @@
+name: Compact player menu release acceptance
+on:
+  push:
+    branches: [release/compact-player-menu-20261124]
+permissions:
+  contents: read
+jobs:
+  compact-menu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Menu native and release cache checks
+        run: |
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --check sw-m5.js
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/compact-menu.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs
+      - name: Install pinned real browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Exact previous installed shell to compact menu
+        run: node tests/compact-menu-upgrade-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: compact-menu-same-install
+          path: artifacts/compact-menu/
+          if-no-files-found: warn

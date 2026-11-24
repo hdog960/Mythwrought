@@ -66,7 +66,7 @@ try{
       assert.ok(initial.gripGaps.every(n=>n>=-2),'Thumb rail covers original viewport');
       assert.equal(initial.skyDrawn,'true');
       assert.equal(initial.glError,initial.glNoError);
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       assert.equal(await page.locator('#help').isVisible(),true);
       assert.equal(await page.locator('#skySetDay').count(),1);
       assert.equal(await page.locator('#skySetNight').count(),1);
@@ -92,7 +92,7 @@ try{
       assert.equal(await page.evaluate(()=>document.activeElement.id),'scene');
       await shot('night-world');
       // DAY: no extra frame-loop registration and no pause. Existing shader unchanged.
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#skySetDay').click();
       const day=await state();
       assert.ok(day.phase>=720000&&day.phase<740000,'SET DAY did not jump to noon');
@@ -114,7 +114,7 @@ try{
       // Cross-world isolation: only in the largest viewport to keep evidence focused.
       let seedIsolation=null;
       if(width===932){
-        await page.locator('#menu').click();
+        await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
         await page.locator('#seedInput').fill('Moonlit Vale');
         await page.locator('#switchWorld').click();
         await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.skyClockSeed!=='179');
@@ -141,7 +141,7 @@ try{
       // These are software Chromium/SwiftShader observations, not iPhone results.
       await page.waitForTimeout(4000);
       const beforeAudit=await storageExceptClock();
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#runAudit').click();
       await page.waitForFunction(()=>document.querySelector('#auditReport')?.value.includes('Foreground play frames:'),
         null,{timeout:10000});

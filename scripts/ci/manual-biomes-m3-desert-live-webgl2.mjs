@@ -78,7 +78,7 @@ try{
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});
     if(!await page.evaluate(()=>Boolean(document.getElementById('scene').getContext('webgl2'))))
       throw Error('No genuine WebGL2 at '+width+'x'+height);
-    await page.locator('#menu').click();
+    await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#seedInput').fill(String(seed));
     await page.locator('#createFourBiomeWorld').click();
     if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
@@ -142,7 +142,7 @@ try{
       {x:edit.x,y:edit.y,z:edit.z});
     if(!removed)throw Error('M3 real game mine/edit did not change a dune cap');
     await capture(under,'cutaway');
-    await page.locator('#menu').click();
+    await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#save').click();
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:30000});

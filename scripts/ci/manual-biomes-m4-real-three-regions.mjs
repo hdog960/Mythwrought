@@ -83,7 +83,7 @@ try{
     const gl=await page.evaluate(()=>
       Boolean(document.getElementById('scene').getContext('webgl2')));
     if(!gl)throw Error('Actual M4 game WebGL2 unavailable');
-    await page.locator('#menu').click();
+    await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#seedInput').fill('179');
     await page.locator('#createFourBiomeWorld').click();
     if(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator)!==
@@ -162,7 +162,7 @@ try{
       if(!edited)throw Error('M4 actual game cannot mine '+point.name);
       await capture(point,'cutaway');
     }
-    await page.locator('#menu').click();
+    await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#save').click();
     await page.reload({waitUntil:'load'});
     await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:25000});

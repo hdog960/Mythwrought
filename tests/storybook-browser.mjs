@@ -53,6 +53,7 @@ try{
  assert.ok(bright.colors>=10,'Rendered material/sky scene visually uniform '+bright.colors);
 
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#renderPreset').selectOption('economy');
  await page.locator('#closeHelp').click();
  await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.storybookQuality==='base-colors');
@@ -69,6 +70,7 @@ try{
  assert.equal(economy.schema1,before.schema1,'Visual preset changed canonical saved data');
 
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#renderPreset').selectOption('balanced');
  await page.locator('#closeHelp').click();
  await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.storybookQuality==='painted-materials');

@@ -66,6 +66,7 @@ try{
   assert.ok(Math.hypot(atRest.x-stopped.x,atRest.z-stopped.z)<.035,'Released input still drifted');
   // Camera, block editing and backup regression remain functional.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#save').click();
   assert.ok(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-world-179')));
   await page.locator('#closeHelp').click();

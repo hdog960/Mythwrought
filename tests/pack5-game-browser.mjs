@@ -36,6 +36,7 @@ try{
     await page.waitForFunction(()=>Number(document.getElementById('scene')?.dataset.renderedFrames)>2,
       {timeout:30000});
     await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
     await page.evaluate(()=>{
       const checkbox=document.getElementById('pack5Enabled');
       checkbox.checked=true;checkbox.dispatchEvent(new Event('change',{bubbles:true}));
@@ -126,6 +127,7 @@ try{
   assert.equal(layout.leftClear,true,'Left touch grip overlaps world');
   assert.equal(layout.rightClear,true,'Right touch grip overlaps world');
   await mobile.locator('#menu').tap();
+  await mobile.locator('#advancedMenu > summary').tap();
   await mobile.locator('#pack5Enabled').check();
   await mobile.waitForFunction(()=>
     document.getElementById('pack5Status').textContent.includes('Pack 5 ON'));

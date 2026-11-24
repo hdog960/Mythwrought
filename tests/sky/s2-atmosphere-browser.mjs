@@ -71,7 +71,7 @@ const settle=page=>page.waitForFunction(()=>{
   return c?.dataset.skyDrawn==='true'&&+c.dataset.loadedChunks===25&&
     c.dataset.skyFog&&c.dataset.skyAmbient&&document.querySelector('#notice').hidden;
 },null,{timeout:60000});
-async function open(page){await page.locator('#menu').click();assert.ok(await page.locator('#help').isVisible());}
+async function open(page){await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();assert.ok(await page.locator('#help').isVisible());}
 async function close(page){await page.locator('#closeHelp').click();assert.ok(!(await page.locator('#help').isVisible()));}
 async function select(page,which){
   await page.locator(which==='day'?'#skySetDay':'#skySetNight').click();

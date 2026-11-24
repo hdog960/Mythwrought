@@ -1,5 +1,5 @@
 {
-  "version": "20261124-v38",
+  "version": "20261124-v39",
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "c0932251fb658ac8d580493c1e7b509787ec61d2eebc58327b57f4c2791e07f1",
     "./src/environment-ground.mjs": "21ff107c4bb35365b06f0407563d43d81183393c4368c13a120900cf515c402d",
@@ -95,9 +95,9 @@
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
     "./src/sky-v6-adapter.mjs": "b0a44a8c103a11af026578e47484ecaf3fa19110638dd903b3d4398f853c25dd",
-    "./": "2a960a653fd6e33a8f4167c1f7050497c7b6b6fb39e767521133fc646377fc45",
+    "./": "934906d2b42268805322f8d6b5ef0696ebe7387d5aadcc27429f0476e4b2e28a",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
-    "./index.html": "2a960a653fd6e33a8f4167c1f7050497c7b6b6fb39e767521133fc646377fc45",
+    "./index.html": "934906d2b42268805322f8d6b5ef0696ebe7387d5aadcc27429f0476e4b2e28a",
     "./manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
     "./src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "bc9f916c76bd32789ed2b482cf887528f4e519e20e8062592d2d4d0368d0359e",
     "./src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a0be2ccba487cd44db302d95773bbae2dd296efcab51e53b85b0a19837b6a0d5",
@@ -243,9 +243,9 @@
     "./src/interactions/shape-edit-transaction.mjs": "6e2605bbaa9894e3a130baff1622f7ee92b46a2e0a1eef47329b8892b859d6b1",
     "./src/layout.mjs": "237a5529c726300291cde7fbed0b7ecc98ae545748aff23e31528aecbc1beea0",
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
-    "./src/app-update.mjs": "4b07e0c9fc4be9221f9c8084ab59b07e8a8ce680191cc58c5884b5ccf96e4b44",
+    "./src/app-update.mjs": "22abfa83a7307bf53f362bc4e875f9f5987ef7b48478e5fe7b32515a3d3c0626",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "7ec28237592cc2585d63c422e9d0f911051072e320b7e1a6c80f23293a1b5ce6",
+    "./src/main.mjs": "07b133338b9401edc925de695dbaf0f5eefd7d48f7c845bc5508ee223f2e18ba",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/desert-bilateral-rgb.mjs": "7819c6a5ada37da04267dd774e994649c874d891268fd80b71ecd4c7515b6b5e",
     "./src/manual-biomes/desert-seam-vertex-tint.mjs": "4eff1be29be0a18f87050f496d50fb07892b52bf4d69133160ba2a62e9e7ab0f",
@@ -309,9 +309,9 @@
     "./src/voxel.mjs": "5eb1159b3a75ab71912c58de9963b9d5cfbcfb6a0037fed24180ffaf97ad5982",
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
-    "./styles.css": "718c946759e7ea30206bcf94b825a540a5a8ada2b8325ce7aee98bb776814dfb",
-    "./sw-m5.js": "7a0d8596f148ae3e2001e2242052cdcc483a873189ebbd046ba9924663364d98",
+    "./styles.css": "d5c769f0f14dede0ed45a90fe7fdf9e61f9fd24ac529f65d39eee3eda1bf3c4e",
+    "./sw-m5.js": "afd860ae13d4c2e18a3d4656f304e78c0d462d5beee2857dc1b2091096cb73b9",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "64a4420f6c99158b26b934b5fe6f7bf96292006a0b94eda8c15ad06a87323327"
+    "./sw-nonblock-stage.js": "49ddb7fd4bd95d9ee654df306584f1357375be1963a237b2159e0d84af5188cf"
   }
 }

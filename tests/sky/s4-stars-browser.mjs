@@ -92,7 +92,7 @@ async function settle(page){
   },null,{timeout:60000});
 }
 async function choose(page,which){
-  await page.locator('#menu').click();
+  await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
   assert.ok(await page.locator('#help').isVisible());
   await page.locator(which==='night'?'#skySetNight':'#skySetDay').click();
   await page.locator('#closeHelp').click();
@@ -136,7 +136,7 @@ try{
     try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
       await settle(page);
-      await page.locator('#menu').click();
+      await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
       await page.locator('#save').click();
       await page.locator('#closeHelp').click();
       const original=await nonSky(page),key='mythwrought-v002-world-179';

@@ -60,6 +60,7 @@ try{
 
   // Continuous stick mode must also reverse horizontal without affecting vertical.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#lookMode').selectOption('stick');
   await page.locator('#closeHelp').click();
   await page.evaluate(()=>window.__mythwroughtTest.setOrientation(0,0));

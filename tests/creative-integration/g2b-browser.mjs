@@ -98,13 +98,12 @@ try{
    assert.equal(beforeCreative.creativeEnabled,false,'Creative must begin disabled');
    assert.equal(beforeCreative.active,false,'Double-tap cannot fly in Explore mode');
    await page.waitForTimeout(900);
-   await page.locator('#menu').click();
+   // Creator-approved top HUD toggle is usable directly, without scrolling settings.
    assert.equal(await page.locator('#g2bFlightEnable').isChecked(),false);
    await page.locator('#g2bFlightEnable').check();
    let enabled=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
    assert.equal(enabled.creativeEnabled,true,'Creative toggle did not enable mode');
    assert.equal(enabled.active,false,'Enabling Creative must NOT automatically enter flight');
-   await page.locator('#closeHelp').click();
    await tapJumpTouch();
    assert.equal((await page.evaluate(()=>window.__mythwroughtTest.flightInfo())).active,false,
      'One JUMP touch must not enable flight');
@@ -137,12 +136,8 @@ try{
    assert.equal(info.bodyClear,true);
    assert.equal(info.resident,true);
    assert.ok(info.maxY>=60,'Sky flight ceiling must permit useful ascent above the surface');
-   for(const profile of ['precision','normal','fast','travel']){
-    await page.locator('#g2bFlightProfile').selectOption(profile);
-    info=await page.evaluate(()=>window.__mythwroughtTest.flightInfo());
-    assert.equal(info.profile,profile,'G2B profile not applied');
-   }
-   await page.locator('#g2bFlightProfile').selectOption('normal');
+   assert.equal(await page.locator('#g2bFlightProfile').count(),0,'Speed selector must not exist');
+   assert.equal(info.profile,'travel','Creator-approved fixed flight speed 15');
    await page.locator('#closeHelp').click();
    await page.waitForTimeout(250); // paused controls may resume only after the next safe GPU frame.
    assert.equal(await page.locator('#dig').textContent(),'DOWN');

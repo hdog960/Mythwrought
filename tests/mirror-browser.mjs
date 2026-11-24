@@ -40,6 +40,7 @@ try{
  const wood=await saved(primary);
  assert.equal((await inspect(179)).exists,false,'Mirroring ran without consent');
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  assert.equal(await page.locator('#mirrorEnabled').isChecked(),false);
  await page.locator('#renderPreset').selectOption('battery');
  await page.waitForFunction(()=>document.querySelector('#scene').dataset.renderPreset==='battery');
@@ -60,6 +61,7 @@ try{
  const crystal=await saved(primary);
  assert.notEqual(crystal,wood);
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await waitMirror('Verified device mirror for seed 179');
  await page.locator('#mirrorCheck').click();
  await waitMirror('previous: verified');
@@ -104,6 +106,7 @@ try{
  // bytes across a seed switch. Previously the test could snapshot an older
  // mirror while the restored seed's 400ms follow-up was still pending.
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#mirrorSync').click();
  await waitMirror('Verified mirror synced for seed 179');
  const old179=(await inspect(179)).current.raw;
@@ -115,6 +118,7 @@ try{
  await page.locator('#closeHelp').click();
  await fixture(15,18,-1,4);
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await waitMirror('Verified device mirror for seed 987');
  assert.equal((await inspect(179)).current.raw,old179,'Another seed overwrote first seed mirror');
  assert.equal((await inspect(987)).current.valid,true);
@@ -140,6 +144,7 @@ try{
  await fixture(15,18,-1,5);
  const healthyCanonical=await saved('mythwrought-v002-world-987');
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await waitMirror('MIRROR NOT VERIFIED');
  assert.equal((await inspect(987)).current.valid,false,'Corrupt mirror silently overwritten');
  assert.equal(await saved('mythwrought-v002-world-987'),healthyCanonical);
@@ -161,6 +166,7 @@ try{
  await page.waitForTimeout(600);
  assert.equal((await inspect(4321)).exists,false,'Mirror continued after opt-out');
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#renderPreset').selectOption('economy');
  await page.waitForFunction(()=>document.querySelector('#scene').dataset.renderPreset==='economy');
  const economy=await dims();
@@ -178,6 +184,7 @@ try{
  await scene();
  assert.match(await page.locator('#status').textContent(),/SAVE PROTECTION/);
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  // Intentionally click rather than Playwright.check(): the correct UX
  // *rejects* the requested checked state for a protected damaged world.
  await page.locator('#mirrorEnabled').click();

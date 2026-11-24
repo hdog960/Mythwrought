@@ -43,6 +43,7 @@ try{
   const edits=await page.evaluate(()=>JSON.parse(localStorage.getItem('mythwrought-v002-world-179')||'{}').edits);
   assert.ok(Array.isArray(edits)&&edits.length>0,'Mining did not persist a real block edit');
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   assert.ok(await page.locator('#help').isVisible(),'Help should open');
   const helpTouchAction=await page.locator('.helpbody').evaluate(el=>getComputedStyle(el).touchAction);
   assert.equal(helpTouchAction,'pan-y','Settings modal must permit vertical finger scrolling on iPhone');
@@ -67,9 +68,11 @@ try{
   await page.waitForFunction(()=>document.querySelector('#scene')?.width>0);
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),savedSeed);
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   assert.equal(await page.locator('#lookValue').textContent(),'150%','Camera preference failed to survive reload');
   await page.locator('#closeHelp').click();
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#seedInput').fill('179');
   await page.locator('#switchWorld').click();
   assert.equal(await page.locator('#seed').textContent(),'WORLD 179');
