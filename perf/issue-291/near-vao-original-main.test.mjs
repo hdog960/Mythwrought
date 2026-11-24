@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '3ef6c70de403e8e480dfa14351a1ca9b0f0f8304');
+    '7eec93f20e0343dd68bf5e32a3f365e8e186b5e3');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -1767,7 +1767,7 @@ test('mesh and schema-save phase histograms are genuine bounded 100-source-mine 
   const {perf}=local291PerfFixture();
   perf.frame(0);
   for(let i=1;i<=100;i++){
-    perf.mine(10,{cell:[i,-31,2],previous:3,next:0});
+    perf.mine(200,{cell:[i,-31,2],previous:3,next:0});
     perf.phase({meshMs:i,saveMs:i/10,gpuMs:1,gpuCalls:1,loadedSections:i%4});
     perf.frame(i*16);
   }
@@ -1785,7 +1785,7 @@ test('unsaved or unrelated phase outside a source-MINE trial is never admitted',
   assert.equal(perf.read().mineFrameWindow.phaseMines,0);
   assert.equal(perf.read().mineFrameWindow.meshGenerationP95Ms,null);
   perf.frame(0);
-  perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.mine(25,{cell:[1,-31,2],previous:3,next:0});
   perf.phase({meshMs:9,saveMs:2,gpuMs:1,gpuCalls:1,loadedSections:1});
   assert.equal(perf.read().mineFrameWindow.phaseMines,1);
 });
@@ -1795,7 +1795,7 @@ test('missing negative or infinite source phase marks the trial invalid, never f
     {meshMs:1,saveMs:NaN,gpuMs:1,gpuCalls:1,loadedSections:1},
     {meshMs:1,saveMs:2,gpuMs:1,gpuCalls:1,loadedSections:-1}]){
     const {perf}=local291PerfFixture();
-    perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+    perf.frame(0);perf.mine(25,{cell:[1,-31,2],previous:3,next:0});
     perf.phase(invalid);
     const w=perf.read().mineFrameWindow;
     assert.equal(w.invalid,true);
@@ -1805,7 +1805,7 @@ test('missing negative or infinite source phase marks the trial invalid, never f
 });
 test('duplicated per-mine phase can never overwrite the first saved original sample',()=>{
   const {perf}=local291PerfFixture();
-  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.frame(0);perf.mine(25,{cell:[1,-31,2],previous:3,next:0});
   perf.phase({meshMs:11,saveMs:4,gpuMs:1,gpuCalls:1,loadedSections:2});
   perf.phase({meshMs:3,saveMs:1,gpuMs:1,gpuCalls:1,loadedSections:1});
   const w=perf.read().mineFrameWindow;
@@ -1816,7 +1816,7 @@ test('duplicated per-mine phase can never overwrite the first saved original sam
 });
 test('CSS or seed session reset clears phase histories but preserves interruption veto',()=>{
   const {scope,perf}=local291PerfFixture();
-  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.frame(0);perf.mine(25,{cell:[1,-31,2],previous:3,next:0});
   perf.phase({meshMs:11,saveMs:4,gpuMs:1,gpuCalls:1,loadedSections:2});
   scope.canvas.clientWidth=932;
   const reset=perf.read();
@@ -1827,7 +1827,7 @@ test('CSS or seed session reset clears phase histories but preserves interruptio
 });
 test('phase measurements cannot certify original GPU rollback, pixel parity or PWA release',()=>{
   const {perf}=local291PerfFixture();
-  perf.frame(0);perf.mine(12,{cell:[1,-31,2],previous:3,next:0});
+  perf.frame(0);perf.mine(25,{cell:[1,-31,2],previous:3,next:0});
   perf.phase({meshMs:11,saveMs:4,gpuMs:1,gpuCalls:1,loadedSections:2});
   const snap=perf.read();
   assert.equal(snap.releaseCertified,false);
@@ -1882,7 +1882,7 @@ test('unrelated stream GPU work does not raise original per-mine upload sum',()=
 test('100 accepted mine phases use full-precision nearest-rank summed native GPU p95',()=>{
   const {perf}=local291PerfFixture();perf.frame(0);
   for(let i=1;i<=100;i++){
-    perf.mine(80,{cell:[i,-31,3],previous:3,next:0});
+    perf.mine(200,{cell:[i,-31,3],previous:3,next:0});
     perf.phase({meshMs:15,saveMs:4,gpuMs:i,gpuCalls:i%4,loadedSections:1});
     perf.frame(i*16);
   }
@@ -2026,4 +2026,86 @@ test('public original Pages/PWA never enters local measurement failure guard',()
   assert.ok(!body.includes('gl.'));
   assert.ok(!body.includes('localStorage.'));
   assert.equal(scope.location.hostname,'hdog960.github.io');
+});
+
+
+test('unattributed action p95 uses original exact source MINE action timing',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  for(let i=1;i<=100;i++){
+    perf.mine(200,{cell:[i,-31,5],previous:3,next:0});
+    perf.phase({meshMs:i,saveMs:i/10,gpuMs:1,gpuCalls:1,loadedSections:1});
+    perf.frame(i*16);
+  }
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.savedMines,100);
+  assert.equal(w.phaseMines,100);
+  assert.ok(Math.abs(w.unattributedActionP95Ms-192.4)<1e-9);
+  assert.equal(w.invalid,false);
+});
+test('unattributed source time captures sync work beyond mesh upload and save',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(100,{cell:[1,-31,4],previous:3,next:0});
+  perf.phase({meshMs:45,saveMs:10,gpuMs:25,gpuCalls:2,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.unattributedActionP95Ms,20);
+  assert.equal(w.meshGenerationP95Ms,45);
+  assert.equal(w.schemaSaveP95Ms,10);
+  assert.equal(w.perMineNativeUploadSumP95Ms,25);
+});
+test('untrustworthy phase overhang cannot produce a falsely positive residual',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(20,{cell:[1,-31,4],previous:3,next:0});
+  perf.phase({meshMs:21,saveMs:9,gpuMs:7,gpuCalls:2,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,true);
+  assert.equal(w.invalidReason,'phase-time-exceeds-action');
+  assert.equal(w.phaseMines,0);
+  assert.equal(w.unattributedActionP95Ms,null);
+});
+test('small mobile original performance-now quantization overhang rounds remainder to zero',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(30,{cell:[1,-31,4],previous:3,next:0});
+  perf.phase({meshMs:15,saveMs:12,gpuMs:5,gpuCalls:1,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,false);
+  assert.equal(w.unattributedActionP95Ms,0);
+});
+test('no independent injected action duration can replace real source MINE timing',()=>{
+  const {perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(15,{cell:[1,-31,4],previous:3,next:0});
+  perf.data.mineWindow.sourceActionMs=null;
+  perf.phase({meshMs:5,saveMs:3,gpuMs:2,gpuCalls:1,loadedSections:1});
+  const w=perf.read().mineFrameWindow;
+  assert.equal(w.invalid,true);
+  assert.equal(w.invalidReason,'phase-time-exceeds-action');
+});
+test('original action clock is read once and then reused for the source residual',()=>{
+  const begin=source.indexOf('  function near291RecordMine(duration,result,firstEditUploads=null){');
+  const end=source.indexOf('  function near291RecordUpload(duration){',begin);
+  const body=source.slice(begin,end);
+  assert.ok(body.includes('w.sourceActionMs=duration;'));
+  assert.ok(body.includes('w.unattributedActionMs[i]=Math.max(0,w.sourceActionMs-accountedMs);'));
+  assert.ok(body.includes('w.sourceActionMs=null;'));
+  assert.ok(!body.includes('performance.now()'));
+  assert.ok(source.includes('near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);'));
+});
+test('viewport reset clears residual without clearing prior interruption evidence',()=>{
+  const {scope,perf}=local291PerfFixture();perf.frame(0);
+  perf.mine(50,{cell:[1,-31,4],previous:3,next:0});
+  perf.phase({meshMs:20,saveMs:10,gpuMs:10,gpuCalls:1,loadedSections:1});
+  assert.equal(perf.read().mineFrameWindow.unattributedActionP95Ms,10);
+  scope.canvas.clientWidth=932;
+  const result=perf.read();
+  assert.equal(result.mineFrameWindow.unattributedActionP95Ms,null);
+  assert.equal(result.interruptionCount,1);
+  assert.equal(result.continuousForegroundRun,false);
+});
+test('source residual remains local diagnostic, never native release certification',()=>{
+  const {perf}=local291PerfFixture();
+  const sample=perf.read();
+  assert.equal(sample.releaseCertified,false);
+  assert.equal(sample.nativeGpuRollbackProven,false);
+  assert.equal(sample.browserPixelParityProven,false);
+  assert.equal(sample.mineFrameWindow.unattributedActionP95Ms,null);
+  assert.equal(local291PerfFixture({hostname:'hdog960.github.io'}).perf.read(),null);
 });
