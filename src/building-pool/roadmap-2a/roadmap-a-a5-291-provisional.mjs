@@ -7,10 +7,10 @@ import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {plannedSlots} from './catalog.mjs';
 import {buildRoadmapA279ProvisionalSettlementManifest} from './roadmap-a-a5-279-provisional.mjs';
-import {ROADMAP_A_WAVE13_SHOPS} from './roadmap-a-wave14.mjs';
+import {ROADMAP_A_WAVE14_SHOPS} from './roadmap-a-wave14.mjs';
 const sha=data=>createHash('sha256').update(data).digest('hex');
 const newCohorts=Object.freeze([
- {key:'wave14',filename:'roadmap-a-wave14.mjs',items:ROADMAP_A_WAVE13_SHOPS,evidenceExpected:72}
+ {key:'wave14',filename:'roadmap-a-wave14.mjs',items:ROADMAP_A_WAVE14_SHOPS,evidenceExpected:72}
 ]);
 function newRecord(b,cohort,fileSHA256){
  const cells=b.voxels,points=cells.map(v=>[v.x,v.y,v.z,v.kind,v.material,v.physicalVariant??null])
