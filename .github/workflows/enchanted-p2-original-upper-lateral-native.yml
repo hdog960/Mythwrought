@@ -1,0 +1,35 @@
+# Only NEW original M7 upper-gallery lateral mineral branch physics.
+# Reuse old native 120-step main route without reexecuting as standalone.
+name: Enchanted P2 Original Upper Mineral Lateral Return Native
+on:
+  push:
+    branches:
+      - research/enchanted-p2-third-band-upper-lateral-20261123
+    paths:
+      - .github/workflows/enchanted-p2-original-upper-lateral-native.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-upper-lateral-source-and-physics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm unchanged cave author and true physics, only new syntax
+        run: |
+          git rev-parse HEAD
+          test "$(git hash-object src/physics.mjs)" = "199cab89fc1e6ab67d12a56c62795ef0ac4b50d7"
+          test "$(git hash-object src/cave-approaches/upper-network.mjs)" = "a48bd919685b326f062ffa1c5856fa27c2619be8"
+          test "$(git hash-object src/manual-biomes/enchanted-original-cave-descent-evidence.mjs)" = "7fe76ca6ede339e6f36c595bbd7018c6d2f5892a"
+          node --check src/manual-biomes/enchanted-original-upper-owner-walk-audit.mjs
+          node --check src/manual-biomes/enchanted-original-upper-mineral-lateral-return.mjs
+          node --check tests/manual-biomes/enchanted-original-upper-lateral-return-real-m7.test.mjs
+      - name: Only two real original lateral vault corridor return and mined floor cases
+        run: node --test tests/manual-biomes/enchanted-original-upper-lateral-return-real-m7.test.mjs
