@@ -1,0 +1,42 @@
+# MYTHWROUGHT Living Underworld Phase34 — FIRST true original-M7 native triplet and preserved research HOLD
+
+## Exact tested source and protected ancestry
+
+- Isolated Phase34 branch: dev/living-underworld-phase34-native-triplet-ci-20261123, originally created from exact Phase33 HEAD 9781585c168c6510631f2ea4157ea1a85198c37d.
+- FIRST read Phase33 docs/living-underworld/PHASE_33_ORIGINAL_INHERITED_VOXEL_READER_INTEGRITY_HANDOFF.md.
+- Protected production main db4bbcc32156e5df311f733bcaa53d559c17313b (external Desert PR463), Phase20–33 preserved at the previously documented immutable SHAs; OPEN DRAFT PR367 exact head f7de8cfe6c4e055e94bf1ce2398ad7aa97e588e0 unmerged.
+- Exact FULL original-source native acceptance run: Git commit 88e99ae89f4c5a178d2e38b468230e27a469dd2b, GitHub Actions #45332166138, job 138235649534, Node22.16.0, clean checkout and untouched repository verified before AND after native research.
+- This handoff itself is a documentation-only descendant of the tested exact commit. DO NOT relabel the docs-only descendant as an independently rerun native source commit.
+- Full original ZIP artifact https://github.com/hdog960/Mythwrought/actions/runs/45332166138/artifacts/14891813477 ; authenticated GitHub ZIP SHA256 7a71d2196f13a46bf5cbda0b305fb026b2dae05f193b09ff72efbbc52c1adad1 ; ZIP CRC passed; exact JSON named m7-corrected-native-triplet.json.
+
+## Substantive original-source correction
+
+Phase33's pinned runner had never run in a full real original world. New branch-only, read-only GitHub workflow uncovered precisely TWO failing native tests in src/living-underworld/city-gallery-grade-separated-underpass.mjs: the Phase27 strict source overlap witness was throwing generic Invalid original source overlap role value before the previous original stair/landing source-role validators could report their exact error messages. Both errors were strict REJECTIONS, not false approvals.
+
+Changed ONLY the isolated Cave Dev source method (git blob a6fb544563e8144de47b51c83fa78e2fa999421b): after an existing original source-role callback returns, before overlap observation, it hard-refuses malformed editedAt/protectedAt with the existing specific stair or landing nonboolean errors; also checks invalid naturalAt/authoredAt landing source values with the prior specific landing material errors. All original strict source-role, geometry, value-consistency and safety gates remain; ZERO additional original-world source reads; NO original physics/voxel code changes.
+
+CI efficiency: One branch-isolated initial native run, one 4-file diagnostic (source defects isolated, full TAP saved), one corrected 20-case original underpass native test, then ONE corrected full exact-HEAD native runner. No redundant full run against unchanged code, no modification to shared .github/workflows/ci.yml or other developers' workflows, no CI cancellation, merges or deploys.
+
+## Authentic native run results (do NOT confuse source-only with gameplay acceptance)
+
+GitHub #45332166138 at exact SHA 88e99ae89f4c5a178d2e38b468230e27a469dd2b: 25 focused native Node files, **280/280 assertions PASS**, zero failed, no skips; ALL THREE genuine original M7 read-only source scripts executed and returned native exit 0/JSON parsed: gallery 2150.071ms, city 3073.776ms, chunk 631.337ms. Original M7 triplet admission correctly returned reason ORIGINAL_M7_SOURCE_OR_COVERAGE_GATES_HOLD, not release approval.
+
+Original real seed179 **city site (2,0)**: original FourRegionWorld/VoxelWorld module-issued factory, exact inherited VoxelWorld source method/seed/M7 profile/empty edit maps, four-hub/terrace/detour source, prior-to-underpass source ledger, atomic source cap, all four source roles, independent geometry and overlap-source values PASSED. Thin underpass actual old-source 248 bridge + 135 landing=383 visits per role; 24 bridge/pad shared cells, 96 repeated original role-value pairs; 4*383=1532 direct source callback calls; prior/underpass ledger 156672 original role invocations; original 7/7 forward and 7/7 reverse stepPlayer grade fixtures, 2 continuous hypothetical traversals, 1817 frames, 46 waypoints PASS on a **sealed hypothetical future bridge**, NOT an as-built M7 player walk.
+
+Original real seed179 **city site (2,1)**: same native genuine source audits PASSED. Thin underpass 276 bridge + 135 landing=411 visits per role; 20 bridge/pad overlap cells, 80 repeated role-value pairs; 1644 direct source role reads; prior/underpass ledger 306828 original role invocations; 7/7 forward + 7/7 reverse original stepPlayer grade fixtures and 2 complete hypothetical traversals, 2422 frames, 62 waypoints PASS, but NOT built or actually walked on a live device.
+
+Native original-world historical whole-city full pad at BOTH city sites: existingFullPadAndAccessSourceSafe=false, exact old source refusal CITY_LINK_BLOCKS_MAIN_GALLERY. Whole-city ellipse and direct legacy pad stay REJECTED, not replaced or approved merely because thin alternative passes. Strict classifier citySourceSafe therefore remains FALSE as designed; all dependent thin source proof flags are FALSE through this global policy prerequisite even though actual original site-row thin candidate safety fields are TRUE. Do not treat all cascaded flags as ten separate source defects or remove the full city veto.
+
+Native five-biome gallery research: 5/5 regions original source safe, 80/80 galleries fully source checked, 123840 original voxels and 495360 original role method calls, zero source veto or unsafe material ID overflow. As-built galleries 0/5 regions, headroom blocked in old unconstructed substrate; no actual gallery floors or live walking. asBuiltGalleriesReady=false as intended.
+
+Native five-biome original chunk risk: five owned independent chunks with real source, 29160 halo source queries, zero unsafe carves, 5260 approved halo-only proposals, 1843 projected new faces (within 3500 limit); **14168 real owned-interior proposed carves** exceed the unchanged strict maxTotalApprovedCarves=10000 by **4168**. Aggregate HOLD is AGGREGATE_APPROVED_CARVE_BUDGET. Source/cell/face evidence itself PASSED. DO NOT raise, bypass, split-to-disguise or reinterpret this original aggregate cap without justified redesign and user authorization.
+
+Triplet report accounting reconciled for gallery, city and chunk. Exact clean checkout remained clean. All original world callbacks and edits untouched. No GPU/installed iPhone PWA, live Pack2/130/Pack3/Pack5/nonblock collider or actual player walk verified. Original M7 constructor faults seeds 8675309 and 13579 NOT retested. No new settlement, save, source-game placement or release approved.
+
+## Next substantive source engineering (not another evidence wrapper)
+
+1. FIRST verify final Phase34 docs-only HEAD, immutable tested source commit 88e99ae89f4c5a178d2e38b468230e27a469dd2b, main, protected Cave Phase20-33 refs and OPEN DRAFT PR367; read THIS handoff.
+2. Treat genuine original two-site thin source + hypothetical controller results as passed research, but do not weaken full-city historical source veto or claim live walking. Independently investigate a valid, source-safe alternative to unsafe city full pad if a global city floor is required, or explicitly keep it permanently blocked.
+3. Highest actionable native budget blocker: redesign actual planned five-biome **owned INTERIOR** carve mask to fit <=10000 while maintaining required geometry, all source veto checks and <=3500 face growth. Do NOT increase budget or fake split into independent batches whose cumulative total is still 14168. Reuse genuine native artifact (do not repeat 280 tests needlessly); run focused original-world source tests of a genuinely changed proposal only.
+4. Other mandatory release gates: actually built 80 galleries and thin bridge, true M7 collision including full overlays, complete authentic 20-seed/constructor faults, GPU chunk/buffer and physical installed iPhone PWA performance, saves/profile and live player walking. No settlement work.
+5. Keep all original cave lanes isolated, do not edit main/other developer branches, protected refs/PR367, Desert, five automations, shared CI, gameplay physics/voxel, merges/deployments or CI cancellation. Source-only tests never license release.
