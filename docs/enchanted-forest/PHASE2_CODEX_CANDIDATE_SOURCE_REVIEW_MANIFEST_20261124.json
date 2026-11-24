@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "kind": "mythwrought-enchanted-phase2-codex-source-review",
+  "sourceRef": "8a7f67294a12cd4c9188c69d9395106c8b311791",
+  "comparisonBase": "db8cad02387050579c75cbdcdea3e94a9f6d6bee",
+  "scope": "review only; not merge authorization, not source migration",
+  "candidateFiles": [
+    {
+      "path": "src/manual-biomes/enchanted-tree-candidates.mjs",
+      "gitBlob": "69aec88ab0bb50ab4d292707baec214bd46112fb",
+      "change": "modified"
+    },
+    {
+      "path": "src/manual-biomes/enchanted-tree-footings.mjs",
+      "gitBlob": "3d278a44070719ac9154d128f271ffa9939baaa5",
+      "change": "added"
+    },
+    {
+      "path": "src/manual-biomes/enchanted-tree-overlap.mjs",
+      "gitBlob": "6677365a7f18c6f7c4de78f5925d07dc68f56aa5",
+      "change": "added"
+    },
+    {
+      "path": "src/manual-biomes/enchanted-tree-site-biome-cache.mjs",
+      "gitBlob": "4604341021411dc77929cfbd785ad08644578a25",
+      "change": "added"
+    },
+    {
+      "path": "src/manual-biomes/enchanted-tree-source-cache.mjs",
+      "gitBlob": "40470e2e7d1d99d33b6e6557f36b9299a67375a0",
+      "change": "added"
+    },
+    {
+      "path": "src/manual-biomes/enchanted-tree-walking-clearance.mjs",
+      "gitBlob": "209be50e304aab604f20919586e933a3c3c0b8b0",
+      "change": "added"
+    },
+    {
+      "path": "src/manual-biomes/environment-v7.mjs",
+      "gitBlob": "8da11cb0c04f16fdbe09413cf8448f4b6d27be5c",
+      "change": "modified"
+    },
+    {
+      "path": "src/manual-biomes/profile-world.mjs",
+      "gitBlob": "151f09cf564b329f1630a8a33e498193e957a0eb",
+      "change": "modified"
+    }
+  ],
+  "policy": {
+    "reviewAgainstCurrentMain": true,
+    "doNotWholesaleMerge": true,
+    "neverEnableExperimentalUnderHistoricalM7": true,
+    "excludeResearchHelpersFromGameplay": true,
+    "excludeHistoricalWorkflowsFromProduction": true,
+    "doNotTouchOtherOwners": true,
+    "creatorApprovalRequiredForVersioning": true,
+    "productionApproval": false
+  },
+  "reusedEvidence": [
+    45048958889,
+    45057456018,
+    45073175109,
+    45078536456,
+    45302687834,
+    45302760208,
+    45323704117,
+    45323813858,
+    45324304872
+  ],
+  "liveStreamingRun": {
+    "id": 45324823484,
+    "exactHead": "8a7f67294a12cd4c9188c69d9395106c8b311791",
+    "statusAtManifestCreation": "in_progress",
+    "mustCheckActualConclusionAndArtifact": true
+  },
+  "blockedOwnerIssues": [
+    {
+      "site": "Windcut d48",
+      "center": [
+        112,
+        -16,
+        -82
+      ],
+      "reachable": 113,
+      "unsupportedBoundary": 334,
+      "exits": 0
+    },
+    {
+      "site": "Hollowbend d48",
+      "center": [
+        -64,
+        -16,
+        78
+      ],
+      "reachable": 113,
+      "unsupportedBoundary": 334,
+      "exits": 0
+    },
+    {
+      "site": "Switchback36",
+      "position": [
+        192,
+        -5,
+        189
+      ],
+      "floorId": 8,
+      "missingAuthoredAirY": [
+        -3,
+        -2
+      ],
+      "continuation": 0
+    }
+  ],
+  "releaseGates": [
+    "Review Phase0 parent and candidate eight-file delta against current production; preserve other lane changes.",
+    "Explicit creator decision on distinct generator version and compatibility; no historical M7 save migration without approval.",
+    "Creator art signoff on Y19-bounded tree silhouettes; no ceiling expansion.",
+    "Owner decisions on three known cave blockers, only if required by scope.",
+    "Physical installed iPhone Home Screen PWA performance, offline, thermal, memory, recovery and save testing after approved integration.",
+    "Explicit merge and deployment approval."
+  ]
+}
