@@ -84,10 +84,20 @@ test('single authoritative original deleteChunkBuffers hook covers every existin
   assert.ok((source.match(/\bdeleteChunkBuffers\(/g)||[]).length>=14);
 });
 test('candidate initialized only after original frame driver exists',()=>{
-  inOrder('const frameDriver=new ForegroundFrameDriver(',
-    'function armNear291(){','near291=createOpaqueNearLifecycle({gl,',
+  const driver=source.indexOf('const frameDriver=new ForegroundFrameDriver(');
+  const start=source.indexOf('function armNear291(){');
+  const end=source.indexOf('\n  armNear291();',start);
+  assert.ok(driver>=0&&start>driver&&end>start);
+  const arm=source.slice(start,end);
+  let previous=-1;
+  for(const anchor of ['near291=createOpaqueNearLifecycle({gl,',
     'originalDeleteChunkBuffers,stopRenderLoop:reason=>{',
-    'frameDriver.pause();');
+    'near291Fatal=true;','frameDriver.pause();',
+    "fatal('Local VAO 291 experiment stopped: '+reason);",'return true;']){
+    const position=arm.indexOf(anchor,previous+1);
+    assert.ok(position>previous,'missing or unordered arm anchor: '+anchor);
+    previous=position;
+  }
 });
 test('native graphics context lost is forwarded without deletion',()=>{
   inOrder("canvas.addEventListener('webglcontextlost',",
@@ -123,10 +133,12 @@ test('local-only original test interface reports bounded experiment status',()=>
 });
 test('original source save, mine and mandatory GPU upload remain unchanged',()=>{
   one('result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});');
-  one("const persisted=save();");
   one("const label=BLOCK_NAMES[result.block]||'block';");
   const actualMine=source.slice(source.indexOf("const near291MineStart=near291Perf&&mode==='mine'"),
     source.indexOf("  let lastStreamingCenter=",source.indexOf("const near291MineStart=near291Perf&&mode==='mine'")));
+  // The independent gate-toggle save is valid; the actual voxel edit
+  // transaction must contain exactly one authoritative save of its own.
+  assert.equal(actualMine.split('const persisted=save();').length-1,1);
   const a=actualMine.indexOf('const persisted=save();');
   const b=actualMine.indexOf('near291RecordMine(performance.now()-near291MineStart,result,firstEditUploads);');
   const c=actualMine.indexOf("const label=BLOCK_NAMES[result.block]||'block';");
@@ -282,10 +294,15 @@ test('a queued frame cannot advance player time after local fatal GPU loss',()=>
   const entry=source.slice(start,end);
   assert.ok(entry.includes('if(near291Enabled&&near291Fatal)return;'));
   const originalFence=entry.slice(entry.indexOf('if(near291Enabled&&near291Fatal)return;')).trim();
-  const fn=new Function('near291Enabled','near291Fatal',originalFence+"\nreturn 'continue';");
-  assert.equal(fn(true,true),undefined);
-  assert.equal(fn(true,false),'continue');
-  assert.equal(fn(false,true),'continue');
+  const fn=new Function('near291Enabled','near291Fatal','near291RecordFrame','now',
+    originalFence+"\nreturn 'continue';");
+  let frames=0;
+  const record=now=>{assert.equal(now,123);frames++;};
+  assert.equal(fn(true,true,record,123),undefined);
+  assert.equal(frames,0,'fatal queued frame must not even enter recorder');
+  assert.equal(fn(true,false,record,123),'continue');
+  assert.equal(fn(false,true,record,123),'continue');
+  assert.equal(frames,2,'ordinary and disabled paths continue exactly once');
 });
 
 test('fatal stream retirement aborts IN-FLIGHT frame before original mobs/C6/water',()=>{
@@ -1087,20 +1104,28 @@ test('source context restoration cannot remove an existing hidden-page interrupt
   assert.equal(perf.read().trueSavedDeepMines,2);
   assert.equal(perf.read().continuousForegroundRun,false);
 });
-test('source viewport/seed resets discard old interrupted A/B session, not saved world',()=>{
+test('source viewport/seed resets discard samples but retain interruption latch',()=>{
   const {scope,perf}=local291PerfFixture();
   perf.mine(6,{cell:[2,-23,8],previous:3,next:0});
   perf.interrupt();
   assert.equal(perf.read().interruptionCount,1);
   scope.canvas.clientWidth=932;
   const reset=perf.read();
-  assert.equal(reset.interruptionCount,0);
-  assert.equal(reset.continuousForegroundRun,true);
+  assert.equal(reset.interruptionCount,2);
+  assert.equal(reset.continuousForegroundRun,false);
   assert.equal(reset.mineWitness.length,0);
   assert.equal(reset.trueSavedDeepMines,0);
   perf.mine(10,{cell:[3,-23,8],previous:3,next:0});
   scope.world.seed=181;
-  assert.equal(perf.read().mineWitness.length,0);
+  const changedSeed=perf.read();
+  assert.equal(changedSeed.mineWitness.length,0);
+  assert.equal(changedSeed.trueSavedDeepMines,0);
+  assert.equal(changedSeed.interruptionCount,3);
+  assert.equal(changedSeed.continuousForegroundRun,false);
+  assert.equal(perf.read().interruptionCount,3,'snapshot alone cannot clear latch');
+  const fresh=local291PerfFixture().perf.read();
+  assert.equal(fresh.interruptionCount,0);
+  assert.equal(fresh.continuousForegroundRun,true);
 });
 
 test('original saved-mine window is idle before source-original deep block actions',()=>{

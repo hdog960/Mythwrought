@@ -72,7 +72,26 @@ test('G2B pure two-thumb dispatch is released separately and does not steal',()=
 });
 test('G2B source clears flight input on blur, visibility, map, context loss',()=>{
  assert.ok(src.includes('g2Pause(\'Touch interrupted; hover safely\')'));
- assert.ok(src.includes("window.addEventListener('blur',cancelAllPointers)"));
+ // #291 wraps the original blur callback to invalidate interrupted
+ // measurements. Accept the direct original binding or exercise the
+ // exact wrapped callback, including cleanup when diagnostics are disabled.
+ const direct="window.addEventListener('blur',cancelAllPointers)";
+ if(!src.includes(direct)){
+   const start=src.indexOf("window.addEventListener('blur',()=>{");
+   const end=src.indexOf("\n  });",start);
+   assert.ok(start>=0&&end>start);
+   const listener=src.slice(start,end+6);
+   for(const enabled of [false,true]){
+     let cleared=0,aborted=0;
+     const window={addEventListener(type,fn){
+       assert.equal(type,'blur');fn();
+     }};
+     new Function('window','near291Perf','near291AbortMineTrial','cancelAllPointers',listener)(
+       window,enabled?{}:null,reason=>{assert.equal(reason,'window-blur');aborted++;},()=>cleared++);
+     assert.equal(cleared,1,'blur must unconditionally clear flight input');
+     assert.equal(aborted,enabled?1:0,'only an active measurement is invalidated');
+   }
+ }
  assert.ok(src.includes("onOpen:()=>cancelAllPointers()"));
  assert.ok(src.includes("canvas.addEventListener('webglcontextlost'"));
  assert.ok(src.includes('frameDriver.pause();cancelAllPointers()'));
