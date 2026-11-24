@@ -1,0 +1,63 @@
+name: Enchanted release 486 original artifact reconciliation
+on:
+  push:
+    branches: [research/enchanted-release-486-paired-diagnostics-20261124]
+    paths: [.github/workflows/enchanted-release-486-artifact-reconciliation.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-evidence-verifier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate and recover already generated exact-source evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = c662f3f95ef77222c1b8dbeb5a9d82742c9b0f10
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/hdog960/Mythwrought/actions/artifacts/14941961261/zip -o /tmp/original.zip
+          curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H "Accept: application/vnd.github+json" https://api.github.com/repos/hdog960/Mythwrought/actions/artifacts/14943228288/zip -o /tmp/focused.zip
+          printf '%s  %s\n' 24fe6cbf1e55ffec05fea1c5e1db97a90324783f3e7a48e4e90eddcea7bce3c8 /tmp/original.zip 80582f7e23307bad0e34cec6b15b98a218e09aa94a04493337d4f291943d8cec /tmp/focused.zip | sha256sum -c -
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import zipfile, shutil
+          root=Path('artifacts')
+          root.mkdir(exist_ok=True)
+          for label in ('original','focused'):
+              with zipfile.ZipFile('/tmp/'+label+'.zip') as z:
+                  assert z.testzip() is None
+                  names=[n for n in z.namelist() if not n.endswith('/')]
+                  if label=='focused':
+                      shutil.rmtree(root/'nonblock-parity',ignore_errors=True)
+                  count=0
+                  for n in names:
+                      parts=PurePosixPath(n).parts
+                      assert not n.startswith('/') and '..' not in parts
+                      if parts[0]=='artifacts':parts=parts[1:]
+                      if not parts:continue
+                      if label=='focused' and parts[0]!='nonblock-parity':continue
+                      if label=='original' and parts[0]=='nonblock-parity':continue
+                      dest=root.joinpath(*parts)
+                      dest.parent.mkdir(parents=True,exist_ok=True)
+                      dest.write_bytes(z.read(n))
+                      count+=1
+                  print(label,'authenticated files',count)
+          assert (root/'nonblock-parity/manifest.json').is_file()
+          PY
+      - name: Run original untouched source and PNG roster verifier
+        run: node scripts/ci/verify-nonblock-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: enchanted-486-reconciled-original-verifier
+          path: artifacts/nonblock-evidence-summary.json
+          if-no-files-found: error
+          retention-days: 14
