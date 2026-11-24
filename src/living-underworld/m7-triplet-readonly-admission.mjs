@@ -133,7 +133,12 @@ export function classifyExactHeadOriginalM7Triplet({
       bridge<1||pad!==135||!prior||!later||!common)return false;
    let sum=0,commonSum=0;
    for(const role of ['naturalAt','authoredAt','editedAt','protectedAt']){
-    if(!Number.isSafeInteger(prior[role])||prior[role]<1||
+    const prevDistinct=r.candidateThinUnderpassCrossAuditPriorUniqueCellsByRole?.[role];
+    const totalDistinct=r.candidateThinUnderpassCrossAuditTotalUniqueCellsByRole?.[role];
+    if(!Number.isSafeInteger(prevDistinct)||prevDistinct<1||
+       !Number.isSafeInteger(totalDistinct)||totalDistinct<prevDistinct||
+       totalDistinct>160000||totalDistinct>prior[role]+later[role]||
+       !Number.isSafeInteger(prior[role])||prior[role]<1||
        !Number.isSafeInteger(later[role])||
        later[role]!==bridge+pad||
        !Number.isSafeInteger(common[role])||common[role]<0||
