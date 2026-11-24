@@ -33,7 +33,7 @@ const inOrder=(...pieces)=>{let p=-1;for(const piece of pieces){
 
 test('exact isolated original-main integration blob, no unrelated modifications',()=>{
   assert.equal(gitBlob(read('src/main.mjs')),
-    '2e5b84eac8ac445a23bc23920da67378f5599f76');
+    '5fd31a02ff92e73e717bd97f865168cad6541fd1');
 });
 test('the authentic modified complete src/main.mjs passes native Node module syntax',()=>{
   execFileSync(process.execPath,['--check',here('src/main.mjs').pathname],{stdio:'pipe'});
@@ -2226,7 +2226,8 @@ test('public Pages uses the untouched source solid and water functions without p
   assert.ok(r.includes('meshDepthSection(world,cx,cz,section)'));
   assert.ok(r.includes('pack2WaterSectionVertices(world,cx,cz,section)'));
   assert.ok(!r.includes('performance.now()'));
-  assert.ok(!r.includes('near291'));
+  assert.ok(r.includes('near291DepthMesher?near291DepthMesher(world,cx,cz,section):'));
+  assert.ok(r.includes('section===0?meshChunk(world,cx,cz):'));
 });
 test('controlled original source two-section mesh stages and retires all buffers once',()=>{
   const a=source.indexOf('  function refreshEditedMeshes(x,z,y=0){');
@@ -2564,4 +2565,40 @@ test('streamed resident eviction releases the witness with the chunk and next up
   assert.ok(fresh.waterBuffer!==old.waterBuffer);
   assert.ok(fresh.water291Bytes!==old.water291Bytes);
   v.mine();assert.deepEqual(v.uploads,[9,9,0]);
+});
+
+test('fast depth is independently opt-in and loaded before original VAO readiness',()=>{
+  assert.ok(source.includes('const near291FastDepth=near291Enabled&&'));
+  assert.ok(source.includes("get('fast-depth-291')==='1'"));
+  assert.ok(source.includes('let near291DepthMesher=null;'));
+  const a=source.indexOf('  function armNear291(){');
+  const b=source.indexOf('  armNear291();',a);
+  const arm=source.slice(a,b);
+  const order=[
+    "import('../perf/issue-291/opaque-near-lifecycle.mjs')",
+    "await import('./depth-mesh-291.mjs')",
+    'if(epoch!==near291LoadEpoch||near291PageSuspended||near291Fatal)return;',
+    'if(graphicsLost||document.hidden)return;',
+    'near291DepthMesher=depthCandidate;',
+    'near291=createOpaqueNearLifecycle({gl,',
+    'frameDriver.resume();'
+  ].map(x=>arm.indexOf(x));
+  assert.ok(order.every(x=>x>=0));
+  assert.deepEqual(order,[...order].sort((a,b)=>a-b));
+});
+test('original surface and control meshing remain unchanged while candidate handles deep sections',()=>{
+  const a=source.indexOf('  function meshPlayableChunk(cx,cz,section){');
+  const b=source.indexOf('  function meshPlayableWater(',a);
+  const calls=[];
+  const scope={world:{},meshChunk:()=>{calls.push('surface');return 'surface';},
+    meshDepthSection:()=>{calls.push('original');return 'original';},
+    near291DepthMesher:null,pack3:{runtime:{}},
+    combinePack3ChunkMesh:v=>v,combineVertices:v=>v,
+    manual14AtChunk:()=>({opaque:[]})};
+  const f=new Function('scope','with(scope){'+source.slice(a,b)+'\nreturn meshPlayableChunk;}')(scope);
+  assert.equal(f(0,0,-1),'original');
+  scope.near291DepthMesher=()=>{calls.push('candidate');return 'candidate';};
+  assert.equal(f(0,0,0),'surface');
+  assert.equal(f(-1,2,-1),'candidate');
+  assert.deepEqual(calls,['original','surface','candidate']);
 });
