@@ -1,0 +1,50 @@
+name: Builder D44 original finite prism outboard tie source ONLY
+on:
+  push:
+    branches:
+      - builder-d-d44-original-three-course-outboard-tie-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d44-*'
+      - 'tests/building-pool/roadmap-d/d44-*'
+      - 'docs/building-pool/roadmap-d/D44_*'
+      - '.github/workflows/roadmap-d-d44-original-three-course-tie.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d44-only-new-original-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  six-new-d44-original-tests-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Verify immutable exact D43 parent and original source provenance
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '39338a4ffd817e3c648f56a3b381a62430ccb4c1'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d40-swept-exterior-capture.mjs)" = '172284f5f5eb1727b6d510159afdc992cfd5f0da'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d42-root-barrier-witness.mjs)" = 'df1e722f366bbc9b1fa5d24aa42901c5f15c2f84'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check ONLY two new D44 source and two new test modules
+        run: |
+          node --check src/building-pool/roadmap-d/d44-source-full-volume-tie-router.mjs
+          node --check src/building-pool/roadmap-d/d44-original-outboard-tie-audit.mjs
+          node --check tests/building-pool/roadmap-d/d44-original-tie-router.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d44-original-outboard-three-course.source.test.mjs
+      - name: Run ONLY D44 four pure and two original source W16/W17 tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d44-original-tie-router.pure.test.mjs \
+            tests/building-pool/roadmap-d/d44-original-outboard-three-course.source.test.mjs
