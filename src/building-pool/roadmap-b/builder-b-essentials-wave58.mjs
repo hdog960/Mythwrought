@@ -181,7 +181,7 @@ export function buildRimeboundTwinArcCorralStable(){
   const [x,z]=cell.split(',').map(Number);
   if(roofSupports.has(cell)||(x*17+z*13)%7!==0||
      [1,2,3,4,5,6,7].some(y=>b.clear(x,y,z)))continue;
-  const face=Object.entries(border).find(([,d])=>!founded(x+d[0],z+d[1]));
+  const face=Object.entries(border).find(([,d])=>!halls.has(K(x+d[0],z+d[1]))&&[2,3,4,5,6].every(y=>b.clear(x+d[0],y,z+d[1])));
   if(!face)continue;
   for(let y=2;y<=6;y++){b.cut(x,y,z);b.put(x,y,z,'window','pack4:030',face[0],
     {rimeboundRealFramedCandidatePack4Window:true,installedPack4SelectionUnverified:true});panes++;}
