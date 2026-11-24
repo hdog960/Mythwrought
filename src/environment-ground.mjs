@@ -1,6 +1,9 @@
 // Full solid terrain for the explicit environmental world profile.
 // The 130 authored Builder families retain their existing IDs and shapes.
 export const M7_ENVIRONMENT_GENERATOR='mythwrought-five-surface-regions-v7';
+// Explicitly versioned forest baseline; never a historical M7 alias.
+export const ENCHANTED_P2_GENERATOR='mythwrought-five-surface-regions-v7-enchanted-p2';
+export const isEnvironmentGenerator=generator=>generator===M7_ENVIRONMENT_GENERATOR||generator===ENCHANTED_P2_GENERATOR;
 export const ENVIRONMENT_GROUND=Object.freeze({
   slate:400,scree:401,gneiss:402,woodlandLoam:403,woodlandPeat:404,woodlandMoss:405,
   coldNeedles:406,snowyNeedles:407,aetherBark:408,aetherLeaves:409,moonLeaves:410
