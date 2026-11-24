@@ -973,18 +973,20 @@ function start(nonblockStage=null){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
-  function refreshEditedMeshes(x,z,y=0){
+  function refreshEditedMeshes(x,z,y=0,affectedCells=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
     // Original surface-mesh three-block RGB cue can cross an adjacent chunk
     // before the edited source reaches the one-voxel physics seam. Preserve
     // existing depth/geometry refresh for all legacy or non-surface edits.
-    const affected=desertSeamEditAffectedChunks(world,x,z,y);
-    for(const section of verticalEditSections(y))
-      for(const {cx,cz} of affected){
+    const seen=new Set();
+    for(const [px,py,pz] of affectedCells??[[x,y,z]])
+      for(const section of verticalEditSections(py))
+      for(const {cx,cz} of desertSeamEditAffectedChunks(world,px,pz,py)){
         const key=depthMeshKey(cx,cz,section);
-        if(!chunks.has(key))continue;
+        if(seen.has(key)||!chunks.has(key))continue;
+        seen.add(key);
         const vertices=meshPlayableChunk(cx,cz,section);
         const water=meshPlayableWater(cx,cz,section);
         batch.push({key,cx,cz,section,vertices,water});

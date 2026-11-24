@@ -13,7 +13,9 @@ import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
-import {mountainV8ConifersForChunk} from './mountain-v8-runtime-conifers.mjs';
+import {mountainV8ConifersForChunk,MOUNTAIN_V8_EXISTING_PINE} from './mountain-v8-runtime-conifers.mjs';
+import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
+import {MOUNTAIN_V8_PLANT_PATTERNS} from './mountain-v8-vegetation-cells.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
 import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
@@ -276,6 +278,35 @@ export class FourRegionWorld extends VoxelWorld{
       }
     }
     return true;
+  }
+  // Gameplay-only support query. Keep set()/restore() single-cell so saved
+  // schema-1 AIR rows remain canonical and do not trigger a second tree fall.
+  mountainV8SupportedTreeCells(x,y,z){
+    if(this.profile.generator!==M8_MOUNTAIN_GENERATOR||
+       ![x,y,z].every(Number.isSafeInteger))return [];
+    const root=mountainV8TileRoot(Math.floor(x/8),Math.floor(z/8),this.seed);
+    if(!root||root.rootX!==x||root.rootZ!==z)return [];
+    if(this.edits.has(worldKey(x,y,z)))return [];
+    this._mountainV8ConiferAt(x,y,z);
+    const cache=this._mountainV8ConiferChunks.get(chunkCoord(x)+','+chunkCoord(z));
+    const {trunk,needles}=MOUNTAIN_V8_EXISTING_PINE;
+    if(!cache)return [];
+    let bottom=null;
+    for(let b=y-2;b<=y+1;b++){
+      if(cache.get(worldKey(x,b,z))===trunk&&
+         cache.get(worldKey(x,b-1,z))!==trunk){bottom=b;break;}
+    }
+    if(bottom===null||y<bottom-1||y>bottom+2)return [];
+    if(y===bottom-1?this.get(x,y,z)!==BLOCK.GRASS:
+       this.get(x,y,z)!==trunk)return [];
+    const pattern=MOUNTAIN_V8_PLANT_PATTERNS['dwarf-conifer'];
+    const cells=pattern.map(([dx,dy,dz,material])=>({
+      cell:[x+dx,bottom-1+dy,z+dz],
+      id:material==='conifer-trunk'?trunk:needles
+    }));
+    if(cells.some(({cell,id})=>cache.get(worldKey(...cell))!==id))return [];
+    return cells.filter(({cell,id})=>!this.edits.has(worldKey(...cell))&&
+      this.get(...cell)===id).map(({cell})=>cell);
   }
   get hasNaturalNonCubeShapes(){return this.profile.generator===M8_MOUNTAIN_GENERATOR;}
   get cachedBiomeColumns(){return this._biomeColumns.size;}

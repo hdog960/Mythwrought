@@ -82,6 +82,35 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
         next=mode==='mine'?BLOCK.AIR:selected;
   if(previous===next&&(!isBiome130BlockId(next)||previousRotation===rotation))
     return {ok:false,reason:'Block is already in that state'};
+  // The V8 natural support action is one transaction, not repeated single
+  // rebuilds. Only original unedited natural cells may fall. Never remove
+  // Pack2/3/manual or player-authored replacements in the footprint.
+  const base=world.base??world;
+  const supported=mode==='mine'&&!previousPack2?
+    base.mountainV8SupportedTreeCells?.(...cell)??[]:[];
+  if(supported.length){
+    const same=(a,b)=>a.every((v,i)=>v===b[i]);
+    const cells=[cell,...supported.filter(c=>!same(c,cell)&&
+      !world.getPack2State?.(...c)&&!world.pack3Runtime?.get?.(c)&&
+      !world.manual14Layer?.get?.(c)&&!world.pack5Layer?.cell?.(c)&&
+      world.get(...c)===base.get(...c))];
+    const before=cells.map(c=>({cell:c,id:world.get(...c),rotation:world.rotationAt?.(...c)??0}));
+    const written=[];
+    try{
+      for(const entry of before){
+        if(!world.set(...entry.cell,BLOCK.AIR))throw Error('V8 supported cell removal refused');
+        written.push(entry);
+      }
+      if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1],cells);
+    }catch(error){
+      for(const entry of written.reverse()){
+        if(!world.set(...entry.cell,entry.id,entry.rotation))
+          throw Error('V8 supported tree rollback failed');
+      }
+      return {ok:false,reason:'Supported tree update failed; original cells restored',error:String(error)};
+    }
+    return {ok:true,mode,cell,previous,next,block:previous,affectedCells:cells};
+  }
   if(!world.set(...cell,next,mode==='place'&&isBiome130BlockId(next)?rotation:0))
     return {ok:false,reason:'Invalid block ID, rotation or editable height'};
   try{
