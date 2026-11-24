@@ -1,4 +1,4 @@
-name: Living Underworld Phase34 — source-only native failure isolation
+name: Living Underworld Phase34 — strict underpass source-role error regression
 on:
   push:
     branches:
@@ -25,17 +25,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
-      - name: Capture full TAP for only four recent original-source research suites
+      - name: Capture full TAP for ONLY the formerly failing underpass test file
         shell: bash
         run: |
           set +e
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA" || exit 3
           test -z "$(git status --porcelain --untracked-files=all)" || exit 3
-          node --test \
-            tests/living-underworld-original-m7-reader-provenance.test.mjs \
-            tests/living-underworld-source-cross-audit-ledger.test.mjs \
-            tests/living-underworld-m7-triplet-readonly-admission.test.mjs \
-            tests/living-underworld-city-grade-separated-underpass.test.mjs \
+          node --test tests/living-underworld-city-grade-separated-underpass.test.mjs \
             > "$RUNNER_TEMP/m7-focused-diagnostic.tap" 2>&1
           code=$?
           echo "EXACT_HEAD=$GITHUB_SHA, native status=$code"
