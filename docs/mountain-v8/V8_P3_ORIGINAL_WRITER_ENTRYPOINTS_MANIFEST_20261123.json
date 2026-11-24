@@ -1,0 +1,439 @@
+{
+  "format": "mountain-v8-original-writer-entrypoints-research-v1",
+  "sourceHead": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+  "coverage": "bounded exact-source inventory; not exhaustive JS call graph; no instrumentation",
+  "files": [
+    {
+      "path": "src/voxel.mjs",
+      "owner": "world",
+      "gitBlob": "a475ba9c195e6dd4bc5a97284dbff5f2c37936a4",
+      "lineCount": 602,
+      "ranges": [
+        {
+          "start": 154,
+          "end": 169,
+          "purpose": "voxel edit/rotation/count",
+          "first": "  set(x,y,z,id,rotation=0){",
+          "last": "  }"
+        },
+        {
+          "start": 182,
+          "end": 200,
+          "purpose": "restore unpublished world",
+          "first": "  static restore(payload){",
+          "last": "  }"
+        }
+      ]
+    },
+    {
+      "path": "src/manual-biomes/profile-world.mjs",
+      "owner": "world",
+      "gitBlob": "ffad7e10c07e9252bfaaf8381962443ce658abff",
+      "lineCount": 290,
+      "ranges": [
+        {
+          "start": 215,
+          "end": 246,
+          "purpose": "profile setter and recursive support edits",
+          "first": "  set(x,y,z,id,rotation=0){",
+          "last": "  }"
+        },
+        {
+          "start": 255,
+          "end": 290,
+          "purpose": "profile restore and rotations",
+          "first": "export function restoreFourRegionWorld(payload,profile){",
+          "last": ""
+        }
+      ]
+    },
+    {
+      "path": "src/pack2-world.mjs",
+      "owner": "pack2",
+      "gitBlob": "e8326c3ddb264a1e44985cd6d265ff0970b86467",
+      "lineCount": 226,
+      "ranges": [
+        {
+          "start": 28,
+          "end": 46,
+          "purpose": "constructor cell/index hydration",
+          "first": "  constructor(base,records=[]){",
+          "last": "  }"
+        },
+        {
+          "start": 49,
+          "end": 62,
+          "purpose": "water index changes",
+          "first": "  _updateWaterBucket(key,previous,next){",
+          "last": "  }"
+        },
+        {
+          "start": 79,
+          "end": 130,
+          "purpose": "overlay/base/state writes",
+          "first": "  set(x,y,z,id,rotation=0){",
+          "last": "  }"
+        },
+        {
+          "start": 182,
+          "end": 216,
+          "purpose": "persistent journal writes",
+          "first": "export function savePack2LiveWorld(storage,world){",
+          "last": "}"
+        }
+      ]
+    },
+    {
+      "path": "src/blocks.mjs",
+      "owner": "world",
+      "gitBlob": "4643a272516cfe174c86d54d3e9d70731a69cf09",
+      "lineCount": 100,
+      "ranges": [
+        {
+          "start": 67,
+          "end": 99,
+          "purpose": "block action rebuild and rollback",
+          "first": "export function applyBlockAction(world,eye,direction,mode,selected,player,rebuild,{rotation=0}={}){",
+          "last": "}"
+        }
+      ]
+    },
+    {
+      "path": "src/builder-assets/pack3-runtime.mjs",
+      "owner": "pack3",
+      "gitBlob": "7d52ccb7f67b74dc11bffbc616126bc64e4fe34d",
+      "lineCount": 298,
+      "ranges": [
+        {
+          "start": 129,
+          "end": 142,
+          "purpose": "overlay/index register and unregister",
+          "first": "  function register(entry){",
+          "last": "    return true;"
+        },
+        {
+          "start": 158,
+          "end": 200,
+          "purpose": "placement batch",
+          "first": "  function placeMany(records,{playerBody=null}={}){",
+          "last": "  }"
+        },
+        {
+          "start": 233,
+          "end": 235,
+          "purpose": "remove",
+          "first": "  function remove(at){return unregister(at);}",
+          "last": "  function entries(){return Object.freeze([...overlays.values()].sort(compare));}"
+        },
+        {
+          "start": 275,
+          "end": 295,
+          "purpose": "serialize and restore",
+          "first": "  function serialize(){",
+          "last": "    serialize,restore,size:()=>overlays.size"
+        }
+      ]
+    },
+    {
+      "path": "src/builder-assets/pack3-live.mjs",
+      "owner": "pack3",
+      "gitBlob": "3714d571ba60eb199fcace90277612b912af24ab",
+      "lineCount": 126,
+      "ranges": [
+        {
+          "start": 40,
+          "end": 60,
+          "purpose": "bridge hydration and binding",
+          "first": "export function createPack3LiveBridge(world,storage,{worldId='seed-'+world?.seed}={}){",
+          "last": "  world.pack3Runtime=runtime;"
+        },
+        {
+          "start": 61,
+          "end": 115,
+          "purpose": "mutation persistence rebuild rollback",
+          "first": "  function mutate({mode,cell,id=null,orientation=0,player=null,rebuild}){",
+          "last": "  }"
+        }
+      ]
+    },
+    {
+      "path": "src/builder-assets/manual14-layer.mjs",
+      "owner": "manual14",
+      "gitBlob": "b25d683cd3f14fbebab6e5c2b31fcd8f79346991",
+      "lineCount": 236,
+      "ranges": [
+        {
+          "start": 94,
+          "end": 115,
+          "purpose": "placement/removal copy-on-write",
+          "first": " function placeMany(records,options={}){",
+          "last": " }"
+        },
+        {
+          "start": 131,
+          "end": 151,
+          "purpose": "snapshot/restore",
+          "first": " function snapshot(){return Object.freeze({format:MANUAL14_FORMAT,seed:world.seed,",
+          "last": "   entries:()=>Object.freeze([...placed.values()])});"
+        },
+        {
+          "start": 156,
+          "end": 167,
+          "purpose": "bridge hydration",
+          "first": "export function createManual14SavedBridge(world,storage,opts={}){",
+          "last": " }catch(err){readOnly='Protected manual 1/4 sidecar: '+String(err?.message||err);}"
+        },
+        {
+          "start": 168,
+          "end": 226,
+          "purpose": "sidecar edit/rebuild rollback",
+          "first": " function change(action,cells=[]){",
+          "last": "  }"
+        }
+      ]
+    },
+    {
+      "path": "src/main.mjs",
+      "owner": "renderer",
+      "gitBlob": "3768eb68bc2951dd7e6f41490720a9b4c6616a87",
+      "lineCount": 3382,
+      "ranges": [
+        {
+          "start": 933,
+          "end": 950,
+          "purpose": "paired GPU upload/disposal",
+          "first": "  function deleteChunkBuffers(chunk){",
+          "last": "  }"
+        },
+        {
+          "start": 953,
+          "end": 975,
+          "purpose": "layer cache and mesh composition",
+          "first": "  function manual14AtChunk(cx,cz,section){",
+          "last": "  }"
+        },
+        {
+          "start": 976,
+          "end": 1012,
+          "purpose": "terrain refresh and M7 P3 halo",
+          "first": "  function refreshEditedMeshes(x,z,y=0){",
+          "last": "  }"
+        },
+        {
+          "start": 1013,
+          "end": 1026,
+          "purpose": "Pack3 refresh",
+          "first": "  function refreshPhysicalChunk(x,z,y){",
+          "last": "  }"
+        },
+        {
+          "start": 1027,
+          "end": 1063,
+          "purpose": "Manual14 refresh",
+          "first": "  function refreshManual14Cells(cells){",
+          "last": "  }"
+        },
+        {
+          "start": 1184,
+          "end": 1212,
+          "purpose": "hinge and world action rollback/save",
+          "first": "    if(mode==='place'&&pack2IsHinged(selected)){",
+          "last": "  }"
+        },
+        {
+          "start": 1215,
+          "end": 1271,
+          "purpose": "stream publication/eviction",
+          "first": "  function stream(){",
+          "last": "  }"
+        },
+        {
+          "start": 3062,
+          "end": 3101,
+          "purpose": "context loss and restore",
+          "first": "  let graphicsLost=false,graphicsLossCount=0,graphicsRestoreCount=0;",
+          "last": "  });"
+        }
+      ]
+    },
+    {
+      "path": "src/gpu-recovery.mjs",
+      "owner": "renderer",
+      "gitBlob": "422ef73e383bda78ff94607abb858e3c8a57c2d1",
+      "lineCount": 73,
+      "ranges": [
+        {
+          "start": 1,
+          "end": 73,
+          "purpose": "retry and bounded original GPU upload",
+          "first": "// MYTHWROUGHT v0.10 Gate A: bounded retries after WebGL allocation/upload failure.",
+          "last": ""
+        }
+      ]
+    }
+  ],
+  "mainObserved": {
+    "chunkMap": {
+      "pattern": "\\bchunks\\.(?:set|delete|clear)\\(",
+      "sites": [
+        {
+          "line": 1003,
+          "source": "      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,"
+        },
+        {
+          "line": 1022,
+          "source": "    chunks.set(key,{x:cx,z:cz,section,...buffers});"
+        },
+        {
+          "line": 1054,
+          "source": "      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,"
+        },
+        {
+          "line": 1232,
+          "source": "        if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}"
+        },
+        {
+          "line": 1259,
+          "source": "        chunks.set(k,{x,z,section,...buffers});"
+        },
+        {
+          "line": 1269,
+          "source": "      if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}"
+        },
+        {
+          "line": 2599,
+          "source": "    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 2728,
+          "source": "    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 2766,
+          "source": "      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 2837,
+          "source": "    chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 2942,
+          "source": "      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 3051,
+          "source": "      chunks.clear();pending.clear();lastStreamingCenter='';wanted.clear();"
+        },
+        {
+          "line": 3084,
+          "source": "      chunks.clear();pending.clear();wanted.clear();lastStreamingCenter='';"
+        }
+      ]
+    },
+    "worldReplacement": {
+      "pattern": "\\bworld\\s*=\\s*(?:loadWorld\\(|new Pack2LiveWorld\\(|candidate\\b|selected\\.world\\b)",
+      "sites": [
+        {
+          "line": 137,
+          "source": "    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));"
+        },
+        {
+          "line": 140,
+          "source": "    storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));"
+        },
+        {
+          "line": 2603,
+          "source": "    world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);"
+        },
+        {
+          "line": 2731,
+          "source": "    disposeLiveMobSession();g2NewWorld();world=candidate;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();changed=false;respawnPrototype();"
+        },
+        {
+          "line": 2768,
+          "source": "      disposeLiveMobSession();g2NewWorld();world=selected.world;caveOps=loadedOps;"
+        },
+        {
+          "line": 2843,
+          "source": "    caveFarGpu.invalidate();caveSession=null;world=candidate;world.nextPack2State=pack2Selection;"
+        },
+        {
+          "line": 2945,
+          "source": "      disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();"
+        },
+        {
+          "line": 3048,
+          "source": "      disposeLiveMobSession();g2NewWorld();world=candidate;caveSession=null;world.nextPack2State=pack2Selection;pack3=createPack3LiveBridge(world,localStorage);resetManual14ForWorld();resetPack5ForWorld();resetLiveMobSession();storageReadOnly=false;changed=false;"
+        }
+      ]
+    },
+    "contextEvents": {
+      "pattern": "addEventListener\\('webglcontext(?:lost|restored)'",
+      "sites": [
+        {
+          "line": 3063,
+          "source": "  canvas.addEventListener('webglcontextlost',e=>{"
+        },
+        {
+          "line": 3076,
+          "source": "  canvas.addEventListener('webglcontextrestored',()=>{"
+        }
+      ]
+    },
+    "retry": {
+      "pattern": "\\bgpuRetry\\.(?:clear|success|fail|keepOnly)\\(",
+      "sites": [
+        {
+          "line": 1228,
+          "source": "      gpuRetry.keepOnly(wanted);"
+        },
+        {
+          "line": 1257,
+          "source": "        pending.delete(k);gpuRetry.success(k);"
+        },
+        {
+          "line": 1262,
+          "source": "        const state=gpuRetry.fail(k,performance.now(),error.message);"
+        },
+        {
+          "line": 2600,
+          "source": "    gpuRetry.clear();"
+        },
+        {
+          "line": 2729,
+          "source": "    gpuRetry.clear();"
+        },
+        {
+          "line": 2767,
+          "source": "      gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];"
+        },
+        {
+          "line": 2838,
+          "source": "    gpuRetry.clear();outlineKey='';outlineCount=0;lastEditMeshKeys=[];"
+        },
+        {
+          "line": 2943,
+          "source": "    gpuRetry.clear();"
+        },
+        {
+          "line": 3052,
+          "source": "    gpuRetry.clear();"
+        },
+        {
+          "line": 3089,
+          "source": "      gpuRetry.clear();meshCadence.resetCooldown();"
+        }
+      ]
+    }
+  },
+  "heldOwners": [
+    "cave",
+    "mob",
+    "vault",
+    "mirror",
+    "pack5",
+    "cross-tab persistence",
+    "creative registry"
+  ],
+  "safeToIntegrate": false
+}
