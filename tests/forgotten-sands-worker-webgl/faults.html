@@ -1,0 +1,34 @@
+<!doctype html><canvas width="64" height="64"></canvas><script type="module">
+import {createP0BrowserWorkerSession} from '../../src/manual-biomes/forgotten-sands-browser-worker-session.mjs';
+import {uploadChunkBuffer} from '../../src/gpu-recovery.mjs';
+const check=(x,m)=>{if(!x)throw Error(m);},key=(cx,cz,s)=>({cx,cz,s,key:[cx,cz,s].join(',')});
+const wait=async(fn)=>{for(let n=0;n<900;n++){if(fn())return;await new Promise(requestAnimationFrame);}throw Error('wait limit');};
+async function run(){
+  const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2'),results={};
+  check(gl,'WebGL2 required');
+  let clock=0;
+  const silent=new Worker('./silent-worker.mjs',{type:'module'});
+  const timeout=createP0BrowserWorkerSession({worker:silent,canvas,upload:()=>{throw Error('unexpected upload');},retire:()=>{},now:()=>clock,timeoutMs:100});
+  await wait(()=>timeout.snapshot().workerReady);
+  timeout.replace([key(-58,-129,0)]);clock=101;timeout.tick();
+  check(timeout.snapshot().reason==='worker-mesh-timeout'&&timeout.snapshot().resident===0,'timeout cleanup');
+  results.timeout=timeout.snapshot();
+  const w=new Worker('./mesh-worker.mjs',{type:'module'});let retired=0;
+  const s=createP0BrowserWorkerSession({worker:w,canvas,upload:v=>uploadChunkBuffer(gl,v),retire:b=>{gl.deleteBuffer(b);retired++;}});
+  await wait(()=>s.snapshot().workerReady);
+  s.replace([key(-58,-129,0)]);s.replace([key(-59,-128,1)]);
+  await wait(()=>{s.tick();return s.snapshot().resident===1||s.snapshot().stopped;});
+  check(!s.snapshot().stopped&&s.snapshot().discarded===1,'stale epoch');
+  const ext=gl.getExtension('WEBGL_lose_context');check(ext,'context loss extension required');
+  ext.loseContext();await wait(()=>s.snapshot().stopped);
+  check(s.snapshot().reason==='webgl-context-lost'&&s.snapshot().resident===0&&retired===1,'context cleanup');
+  results.context={...s.snapshot(),retired};
+  const bad=new Worker('./error-worker.mjs',{type:'module'});
+  const e=createP0BrowserWorkerSession({worker:bad,canvas,upload:()=>{throw Error('unexpected');},retire:()=>{}});
+  await wait(()=>e.snapshot().workerReady);e.replace([key(-58,-129,0)]);
+  await wait(()=>e.snapshot().stopped);check(e.snapshot().reason.startsWith('worker-error')&&e.snapshot().inFlight===0,'worker fault cleanup');
+  results.error=e.snapshot();
+  return results;
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script>

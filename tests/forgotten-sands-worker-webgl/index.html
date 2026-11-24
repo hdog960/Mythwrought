@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Forgotten Sands isolated WebGL2 probe</title></head><body style="margin:0;background:#302619"><canvas id="scene" width="956" height="440" style="width:100vw;height:100vh"></canvas><script type="module">
+import {prepareP0SecondSite,p0BenchmarkMesh,p0BenchmarkWindow} from '../../src/manual-biomes/forgotten-sands-second-site.mjs';
+import {uploadChunkBuffer} from '../../src/gpu-recovery.mjs';
+import {MeshFrameCadence} from '../../src/foreground.mjs';
+import {createP0BrowserWorkerSession} from '../../src/manual-biomes/forgotten-sands-browser-worker-session.mjs';
+const check=(v,m)=>{if(!v)throw Error(m);};
+const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
+const percentile=(a,p)=>a.slice().sort((a,b)=>a-b)[Math.max(0,Math.ceil(a.length*p)-1)]??0;
+async function run(){
+  check(gl,'WebGL2 required');
+  const {selected,walkCertified,walks}=prepareP0SecondSite(),{view,site}=selected;
+  // Deliberately simple diagnostic camera/shader, not production game shader.
+  // Actual original 9-float mesh, original uploadChunkBuffer and cadence.
+  const compile=(type,code)=>{const s=gl.createShader(type);gl.shaderSource(s,code);gl.compileShader(s);check(gl.getShaderParameter(s,gl.COMPILE_STATUS),gl.getShaderInfoLog(s));return s;};
+  const vs=compile(gl.VERTEX_SHADER,`#version 300 es
+layout(location=0) in vec3 p;layout(location=1) in vec3 rgb;
+uniform vec3 eye;out vec3 c;
+void main(){vec3 d=p-eye;float z=d.z;gl_Position=vec4(d.x/1.9,d.y-.22*z,z*.998-0.2,z);c=rgb;}`);
+  const fs=compile(gl.FRAGMENT_SHADER,`#version 300 es
+precision mediump float;in vec3 c;out vec4 color;void main(){color=vec4(c,1.);}`);
+  const program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
+  check(gl.getProgramParameter(program,gl.LINK_STATUS),gl.getProgramInfoLog(program));gl.deleteShader(vs);gl.deleteShader(fs);
+  gl.useProgram(program);gl.enable(gl.DEPTH_TEST);gl.enableVertexAttribArray(0);gl.enableVertexAttribArray(1);gl.viewport(0,0,canvas.width,canvas.height);
+  const eye=gl.getUniformLocation(program,'eye'),resident=new Map(),cadence=new MeshFrameCadence({budgetMs:10,maxCooldown:2});
+  const frameTimes=[],meshTimes=[],uploadTimes=[],drawTimes=[];let peak=0,peakBytes=0,retired=0,uploads=0,frames=0,transitions=0,previousTime=null;
+  const draw=(cx,cz,feet)=>{
+    const start=performance.now();gl.clearColor(.16,.12,.08,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.uniform3f(eye,cx*16+8,feet+2,cz*16-15);
+    for(const r of resident.values()){
+      if(!r.count)continue;gl.bindBuffer(gl.ARRAY_BUFFER,r.buffer);
+      gl.vertexAttribPointer(0,3,gl.FLOAT,false,36,0);gl.vertexAttribPointer(1,3,gl.FLOAT,false,36,12);gl.drawArrays(gl.TRIANGLES,0,r.count);
+    }
+    check(gl.getError()===gl.NO_ERROR,'draw GL error');drawTimes.push(performance.now()-start);
+  };
+  const worker=new Worker('./mesh-worker.mjs',{type:'module'});
+  const startup=performance.now(),pendingTimes=[],workerTimings=[];
+  let activeKey=null,session;
+  // Observe actual transfer data without duplicating native mesh work on UI thread.
+  worker.addEventListener('message',e=>{if(e.data?.type==='mesh-result'&&!e.data.error){activeKey=e.data.key;workerTimings.push(e.data.meshMs);}});
+  session=createP0BrowserWorkerSession({worker,canvas,timeoutMs:30000,
+    upload(v){const t=performance.now(),buffer=uploadChunkBuffer(gl,v);gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+      check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===v.byteLength,'buffer size mismatch');
+      const r={buffer,count:v.length/9,bytes:v.byteLength,key:activeKey};resident.set(activeKey,r);uploads++;
+      uploadTimes.push(performance.now()-t);return r;},
+    retire(r){gl.deleteBuffer(r.buffer);resident.delete(r.key);retired++;}});
+  while(!session.snapshot().workerReady){await new Promise(requestAnimationFrame);session.tick();check(!session.snapshot().stopped,session.snapshot().reason);}
+  const startupMs=performance.now()-startup;
+  const sequence=[[-58,-129,14,true,false],[-58,-129,36,true,false],[-59,-128,52,true,false],[-59,-128,14,true,false],[-62,-132,8,false,false],[-62,-132,1,false,true],[-62,-132,-50,false,false]];
+  for(const [cx,cz,feet,nearUpperSite,openShaft] of sequence){
+    // Open-shaft mode is a budget stress scenario; it is not a claimed
+    // natural or player-mined opening at this actual seed coordinate.
+    const target=p0BenchmarkWindow(cx,cz,feet,{nearUpperSite,openShaft}).slice().sort((a,b)=>a.distance-b.distance||a.s-b.s||a.cz-b.cz||a.cx-b.cx);
+    check(session.replace(target),'replace refused');let stepFrames=0;
+    while(session.snapshot().resident<target.length){
+      await new Promise(requestAnimationFrame);const now=performance.now();
+      if(previousTime!==null)frameTimes.push(now-previousTime);previousTime=now;frames++;stepFrames++;
+      const start=performance.now();if(cadence.ready()&&session.tick())cadence.finished(performance.now()-start);
+      const q=session.snapshot();check(!q.stopped,q.reason);check(q.resident<=target.length&&q.resident<=34,'resident overflow');
+      check(q.inFlight+q.ready<=1,'CPU transfer overflow');peak=Math.max(peak,q.resident);peakBytes=Math.max(peakBytes,q.vertexBytes);
+      draw(cx,cz,feet);check(stepFrames<1000,'queue failed to drain');
+    }
+    transitions++;
+  }
+  // Match original final screenshot: retire all first, then load same 18 keys.
+  session.replace([]);
+  const keys=p0BenchmarkWindow(-58,-130,14);
+  const measuredWorkerCount=workerTimings.length,measuredUploads=uploadTimes.length;
+  session.replace(keys);
+  while(session.snapshot().resident<keys.length){await new Promise(requestAnimationFrame);session.tick();check(!session.snapshot().stopped,session.snapshot().reason);}
+  draw(-58,-130,14);gl.finish();
+  const pixels=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+  let nonBackground=0;for(let i=0;i<pixels.length;i+=4)if(Math.abs(pixels[i]-41)+Math.abs(pixels[i+1]-31)+Math.abs(pixels[i+2]-20)>12)nonBackground++;
+  check(nonBackground>100,'no rendered terrain pixels');check(gl.getError()===gl.NO_ERROR,'readPixels failure');
+  const result={site,walkCertified,walks,viewport:[canvas.width,canvas.height],renderer:gl.getParameter(gl.RENDERER),version:gl.getParameter(gl.VERSION),frames,transitions,uploads,peak,peakBytes,retired,nonBackground,
+    workerStartupMs:startupMs,meshP95:percentile(workerTimings.slice(0,measuredWorkerCount),.95),uploadP95:percentile(uploadTimes.slice(0,measuredUploads),.95),drawP95:percentile(drawTimes,.95),rafP95:percentile(frameTimes,.95),cadence:cadence.stats()};
+  session.close();gl.deleteProgram(program);
+  check(retired===uploads,'buffer retirement mismatch');check(gl.getError()===gl.NO_ERROR,'cleanup failure');
+  return {...result,retired,finalResident:resident.size,workerRequests:session.snapshot().requests};
+}
+window.p0Done=run().then(r=>{window.p0Result=r;return r;}).catch(e=>{window.p0Error=String(e.stack||e);throw e;});
+</script></body></html>

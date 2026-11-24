@@ -1,0 +1,33 @@
+name: Forgotten Sands P0 browser module worker WebGL2
+on:
+  push:
+    branches: [research/forgotten-sands-p0-browser-worker-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-browser-worker-session.mjs'
+      - 'tests/forgotten-sands-worker-webgl/**'
+      - '.github/workflows/forgotten-sands-p0-browser-worker.yml'
+permissions:
+  contents: read
+jobs:
+  webgl-worker:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 &
+          node tests/forgotten-sands-worker-webgl/run.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-worker-webgl
+          path: p0-worker-webgl-evidence/

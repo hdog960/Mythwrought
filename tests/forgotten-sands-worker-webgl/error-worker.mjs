@@ -1,0 +1,1 @@
+self.postMessage({type:'ready'}); self.onmessage=()=>{throw Error('intentional worker fault');};
