@@ -1,0 +1,54 @@
+name: Mob ecosystem exact native qualification
+on:
+  push:
+    branches:
+      - qualification/mob-native-20261124
+    paths:
+      - '.github/workflows/mob-native-qualification-20261124.yml'
+permissions:
+  contents: read
+jobs:
+  native-exact-baseline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate runner and switch local checkout to exact source baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object scripts/ci/mob-native-qualification.mjs)" = 8866f64ce06cca1856b6b7b999dec028cf890c3f
+          cp scripts/ci/mob-native-qualification.mjs "$RUNNER_TEMP/mob-native-qualification.mjs"
+          git checkout --detach af3d483f64747227a7af69d328269580ef6bdec5
+          test "$(git rev-parse HEAD)" = af3d483f64747227a7af69d328269580ef6bdec5
+          test "$(git rev-parse HEAD^{tree})" = 80125f26a9a572a92807225212ec7120cb534c74
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --version
+      - name: Run verified finite 16-file native qualification
+        run: node "$RUNNER_TEMP/mob-native-qualification.mjs" "$GITHUB_WORKSPACE" "$RUNNER_TEMP/mob-native-evidence"
+      - name: Print native evidence and exact M7 census
+        if: always()
+        shell: bash
+        run: |
+          if [ -d "$RUNNER_TEMP/mob-native-evidence" ]; then
+            cat "$RUNNER_TEMP/mob-native-evidence/qualification.json"
+            for f in "$RUNNER_TEMP"/mob-native-evidence/*.tap; do
+              [ -f "$f" ] || continue
+              sha256sum "$f"
+              grep -E 'MYTHWROUGHT_MOB_M7_REAL_BIRTH|^not ok |^# (tests|pass|fail|skipped|cancelled|todo) ' "$f" || true
+            done
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-native-exact-af3d483f
+          path: ${{ runner.temp }}/mob-native-evidence/
+          if-no-files-found: error
+          retention-days: 14
