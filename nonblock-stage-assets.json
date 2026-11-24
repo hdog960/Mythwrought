@@ -239,7 +239,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "47ef08988541454aad57bdb8008ab4f8997f87ead75a68a3ad557aabb3528ccf",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "dc14022c244d6c8c91c2acb7a75fc654d2243c7bb10cd4798a06b9a2376004ab",
+    "./src/main.mjs": "1fb4e552d28108abe94fa39adadfc72d64d00943c40aa7aa26c33041d472c8b2",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "4e29df94f0b8fd2cbe49a84da78151163b159f94b3f8ca12be2ef3dfacbdb0a6",
