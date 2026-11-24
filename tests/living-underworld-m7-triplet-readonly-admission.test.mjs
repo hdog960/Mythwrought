@@ -53,6 +53,14 @@ const city=()=>({
  seed:179,originalSourceReaderAuthentic:true,noSettlementsPlaced:true,
  rows:[[2,0],[2,1]].map(([rx,rz])=>({
   seed:179,rx,rz,
+  originalM7NativeReaderProvenanceVerified:true,
+  originalM7NativeReaderIssuedByGameModule:true,
+  originalM7NativeWorldConstructorExact:true,
+  originalM7NativeWorldSeedAndGeneratorExact:true,
+  originalM7NativeOriginalWorldMethodsStable:true,
+  originalM7NativeEditsUnchanged:true,
+  originalM7NativeProvenanceZeroAdditionalTerrainReads:true,
+  originalM7NativeSiteSafetyNotAutomaticallyProven:true,
   threeDeepLinksOriginalM7SourceSelected:true,
   joinedCityTerraceAndActualApproachSourceSafe:true,
   joinedFourHubCandidateTopologyApproved:true,
@@ -733,4 +741,49 @@ test('Phase31 both original seed179 site reports must remain research-only despi
  assert.equal(r.cityThinUnderpassHypotheticalMovementSafe,true);
  assert.equal(r.actualPlayerWalkingVerified,false);
  assert.equal(r.releaseApproved,false);
+});
+
+
+test('Phase32 correct native game-module reader identity is an independent source proof, never live-world acceptance',()=>{
+ const report=check();
+ assert.equal(report.cityNativeOriginalM7ReaderProvenanceSafe,true);
+ assert.equal(report.cityThinUnderpassDeepReaderCohortSafe,true);
+ assert.equal(report.cityThinUnderpassHypotheticalMovementSafe,true);
+ assert.equal(report.actualPlayerWalkingVerified,false);
+ assert.equal(report.releaseApproved,false);
+});
+test('Phase32 neither seed179 city original-world witness can omit authentic game-module reader provenance',()=>{
+ for(const mutate of [
+  row=>{row.originalM7NativeReaderProvenanceVerified=false},
+  row=>{row.originalM7NativeReaderIssuedByGameModule=false},
+  row=>{row.originalM7NativeWorldConstructorExact=false},
+  row=>{row.originalM7NativeWorldSeedAndGeneratorExact=false},
+  row=>{row.originalM7NativeOriginalWorldMethodsStable=false},
+  row=>{row.originalM7NativeEditsUnchanged=false},
+  row=>{row.originalM7NativeProvenanceZeroAdditionalTerrainReads=false},
+  row=>{row.originalM7NativeSiteSafetyNotAutomaticallyProven=false},
+  row=>{delete row.originalM7NativeWorldConstructorExact}
+ ]){
+  for(const rowIndex of [0,1]){
+   const c=city();mutate(c.rows[rowIndex]);
+   const proof=check({city:c});
+   assert.equal(proof.cityNativeOriginalM7ReaderProvenanceSafe,false);
+   assert.equal(proof.cityThinUnderpassDeepReaderCohortSafe,false);
+   assert.equal(proof.cityThinUnderpassHypotheticalMovementSafe,false);
+   assert.ok(proof.reasonCodes.includes('RARE_CITY_NATIVE_ORIGINAL_M7_READER_PROVENANCE_HOLD'));
+   assert.equal(proof.releaseApproved,false);
+  }
+ }
+});
+test('Phase32 fabricated prior reader functions cannot upgrade caller-only evidence to true native-world proof',()=>{
+ const c=city();
+ c.rows[0].originalM7NativeReaderIssuedByGameModule=false;
+ c.rows[0].candidateThinUnderpassPriorDeepSourceReaderCohortVerified=true;
+ c.rows[0].candidateThinUnderpassPriorDeepSourceReaderCohortMatchingRoles=4;
+ const result=check({city:c});
+ assert.equal(result.citySourceSafe,true);
+ assert.equal(result.cityNativeOriginalM7ReaderProvenanceSafe,false);
+ assert.equal(result.cityThinUnderpassDeepReaderCohortSafe,false);
+ assert.equal(result.actualPlayerWalkingVerified,false);
+ assert.equal(result.releaseApproved,false);
 });
