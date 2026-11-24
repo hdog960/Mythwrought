@@ -1,0 +1,54 @@
+name: Snow S11 real original snow272 material41 wind contours WebGL2
+on:
+  push:
+    branches:
+      - research/snow-s11-original-snow272-webgl2-isolated-20261123
+    paths:
+      - '.github/workflows/snow-s11-original-snow272-webgl2.yml'
+      - 'scripts/ci/snow-s11-original-snow272-real-webgl2.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: snow-s11-actual-snow272-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  genuine-original-snow-material41-visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original refs, identical S10 palette, exact original shader source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs)" = 03e1241626e703d3e39619db28a31ec35c0856b9
+          test "$(git hash-object src/manual-biomes/snowy-s11-original-snow41-wind-contours.mjs)" = 77ef0bee44dc1863ce0b5184a37e86806c204c62
+          node --check scripts/ci/snow-s11-original-snow272-real-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Install pinned Chromium WebGL2 and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Exact original seed2026 snow272 material41 camera and unchanged player ice
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s11-webgl2.log 2>&1 &
+          node scripts/ci/snow-s11-original-snow272-real-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Preserve original S10 versus experimental S11 PNG source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s11-real-snow272-visual-${{ github.sha }}
+          path: artifacts/snow-s11-snow272-real-webgl2/
+          if-no-files-found: ignore
+          retention-days: 7
