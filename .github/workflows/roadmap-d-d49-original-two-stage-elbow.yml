@@ -1,0 +1,62 @@
+name: Builder D49 isolated ORIGINAL slope-normal departure and two-stage physical elbow ONLY
+on:
+  push:
+    branches:
+      - builder-d-d49-original-normal-elbow-isolated-20261124
+    paths:
+      - 'src/building-pool/roadmap-d/d49-*'
+      - 'tests/building-pool/roadmap-d/d49-*'
+      - 'docs/building-pool/roadmap-d/D49_*'
+      - '.github/workflows/roadmap-d-d49-original-two-stage-elbow.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d49-authentic-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-d49-physical-source-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Authenticate exact D48 parent, unchanged original authored source and exact six D49 files
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '18b849df629f0015cd4c5f0561efb40ca7713ac6'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d47-original-congruent-socket-saddle.mjs)" = 'a45e05cd56d3040cfd5211469caabed267075afd'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs)" = '354933307cc9a333587b54af42ddfc3cc4e8a8f8'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d48-original-saddle-contact-and-bridge-audit.mjs)" = '909e9cf58df6429602ee1ec2854c235167525c2b'
+          git diff --name-only HEAD^ HEAD > /tmp/d49-actual.txt
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d49-original-two-stage-elbow.yml' \
+            'docs/building-pool/roadmap-d/D49_AUTHENTIC_SLOPE_NORMAL_DEPARTURE_AND_TWO_STAGE_ELBOW_GATE.md' \
+            'src/building-pool/roadmap-d/d49-original-two-stage-elbow-audit.mjs' \
+            'src/building-pool/roadmap-d/d49-two-stage-normal-elbow.mjs' \
+            'tests/building-pool/roadmap-d/d49-normal-elbow.pure.test.mjs' \
+            'tests/building-pool/roadmap-d/d49-original-normal-elbow.source.test.mjs' > /tmp/d49-expected.txt
+          diff -u /tmp/d49-expected.txt /tmp/d49-actual.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check ONLY four new D49 source and test modules
+        run: |
+          node --check src/building-pool/roadmap-d/d49-two-stage-normal-elbow.mjs
+          node --check src/building-pool/roadmap-d/d49-original-two-stage-elbow-audit.mjs
+          node --check tests/building-pool/roadmap-d/d49-normal-elbow.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d49-original-normal-elbow.source.test.mjs
+      - name: Run ONLY D49 four new pure and two original W16 W17 Node cases
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d49-normal-elbow.pure.test.mjs \
+            tests/building-pool/roadmap-d/d49-original-normal-elbow.source.test.mjs
