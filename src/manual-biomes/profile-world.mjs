@@ -1,7 +1,7 @@
 // MANUAL M1: canonical, editable four-region world baseline for explicitly NEW profiles.
 // Not loaded by production src/main.mjs until the separately reviewed M2 integration.
 // Legacy VoxelWorld remains unchanged. Schema-1 edit deltas keep their original shape.
-import {VoxelWorld,BLOCK,chunkCoord,terrainHeight,worldKey} from '../voxel.mjs';
+import {VoxelWorld,BLOCK,baseBlock,chunkCoord,terrainHeight,worldKey} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
 import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions.mjs';
@@ -12,6 +12,7 @@ import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
+import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
 import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
@@ -20,14 +21,15 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // are explicitly supported as-is, without automatic upgrades on open/save.
 // Experimental v5 is opt-in via an EXPLICIT generated-world profile only.
 // The default new-world action and all historical saves stay on accepted v4.
-export {M7_ENVIRONMENT_GENERATOR};
+export {M7_ENVIRONMENT_GENERATOR,M8_MOUNTAIN_GENERATOR};
+const environmentalProfile=generator=>generator===M7_ENVIRONMENT_GENERATOR||generator===M8_MOUNTAIN_GENERATOR;
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';
 export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
 export const M3_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
 export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
 const ACCEPTED_GENERATORS=new Set([
-  M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
+  M8_MOUNTAIN_GENERATOR,M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
   M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR
 ]);
 const MAX_EDIT_ROWS=300000;
@@ -61,7 +63,7 @@ export class FourRegionWorld extends VoxelWorld{
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
-    if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
+    if(environmentalProfile(this.profile.generator)){
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
       this._environmentTreeChunks=new Map();
@@ -72,9 +74,14 @@ export class FourRegionWorld extends VoxelWorld{
     const key=x+','+z;
     if(this._biomeColumns.has(key))return this._biomeColumns.get(key);
     let lookup;
-    if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
+    if(environmentalProfile(this.profile.generator)){
       const region=v6BiomeAt(x,z,this.seed);
-      lookup=this._oasisNear(x,z,0,region)?.columns.get(key)??
+      if(this.profile.generator===M8_MOUNTAIN_GENERATOR&&region?.name==='mountain'&&region.weight>=.82){
+        const raw=(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c);
+        lookup=planMountainV8RegisteredTerrain(x,z,this.seed,raw,(a,b,c)=>
+          this.environmentCaves.get(a,b,c)!==undefined||raw(a,b,c)!==baseBlock(a,b,c,this.seed));
+      }
+      lookup=lookup??this._oasisNear(x,z,0,region)?.columns.get(key)??
         planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region);
     }else lookup=this._existingBiomeColumn(x,z);
     this._biomeColumns.set(key,lookup);
@@ -199,7 +206,7 @@ export class FourRegionWorld extends VoxelWorld{
        y>WORLD_MAX_Y||y<terrainHeight(x,z,this.seed)-2)
       return base;
     const overlay=this._columnPlan(x,z).get(y);
-    if(this.profile.generator!==M7_ENVIRONMENT_GENERATOR)return overlay??base;
+    if(!environmentalProfile(this.profile.generator))return overlay??base;
     const ground=overlay??this._environmentBaseline(x,y,z,base);
     // Some Desert shoulder columns deliberately fail the full terrain plan
     // because protected underlying cave air or authored geometry would be

@@ -4,7 +4,7 @@ import {worldSlotKey,SELECTED_SEED_KEY} from '../seeds.mjs';
 import {saveFingerprint,loadWorldSafe,saveWorldSafe,
   SAVE_JOURNAL_SUFFIX,SAVE_BACKUP_SUFFIX} from '../persistence.mjs';
 import {fourRegionProfile,validateFourRegionProfile,FourRegionWorld,
-  restoreFourRegionWorld,FOUR_REGION_GENERATOR} from './profile-world.mjs';
+  restoreFourRegionWorld,FOUR_REGION_GENERATOR,M8_MOUNTAIN_GENERATOR} from './profile-world.mjs';
 
 export const BIOME_PROFILE_SUFFIX='-four-biomes-profile-v1';
 const PROFILE_JOURNAL='-journal';
@@ -61,6 +61,10 @@ export function activateFourRegionProfile(storage,seed,{
   explicitNewWorld=false,generator=FOUR_REGION_GENERATOR
 }={}){
   if(!explicitNewWorld)throw Error('Explicit NEW biome-enabled world choice required');
+  // V8 runtime candidate recognizes its durable profile but browser new-seed
+  // admission needs a separate Vault/Mirror and cross-tab proof. Until that
+  // owner path exists, the existing generic action MUST NOT create V8 slots.
+  if(generator===M8_MOUNTAIN_GENERATOR)throw Error('V8 explicit new-world admission is not yet enabled');
   if(readFourRegionProfile(storage,seed))
     throw Error('World already has a generation profile');
   if(!isUnclaimedWorldSeed(storage,seed))
