@@ -33,6 +33,17 @@ export function meshDepthSection291(world,cx,cz,section){
   const cells=new Uint16Array(side*side*depth);
   cells.fill(65535); // High-ID biome130 physical cells cannot wrap into 8-bit cache.
   const outside=new Map();
+  // Center and axial cube neighbors are guaranteed inside the one-cell halo
+  // for safe integer chunk coordinates. Shaped normals keep the original
+  // general lookup and its outside-map behavior.
+  const fastHalo=Number.isSafeInteger(minX)&&Number.isSafeInteger(minX+side)&&
+    Number.isSafeInteger(minZ)&&Number.isSafeInteger(minZ+side);
+  const plane=side*depth;
+  const faceOffsets=[plane,-plane,1,-1,depth,-depth];
+  const blockAtIndex=(index,x,y,z)=>{
+    const cached=cells[index];
+    return cached!==65535?cached:(cells[index]=world.get(x,y,z));
+  };
   const blockAt=(x,y,z)=>{
     if(x<minX||x>=minX+side||z<minZ||z>=minZ+side||y<minY||y>=minY+depth){
       const key=x+','+y+','+z;
@@ -40,8 +51,7 @@ export function meshDepthSection291(world,cx,cz,section){
       return outside.get(key);
     }
     const index=((x-minX)*side+(z-minZ))*depth+(y-minY);
-    if(cells[index]!==65535)return cells[index];
-    return (cells[index]=world.get(x,y,z));
+    return blockAtIndex(index,x,y,z);
   };
   let vertices=new Float32Array(4096),length=0;
   const emit=(x,y,z,r,g,b,u,v,mat)=>{
@@ -56,7 +66,8 @@ export function meshDepthSection291(world,cx,cz,section){
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
       for(let y=bounds.minY;y<=bounds.maxY;y++){
-        const id=blockAt(x,y,z);
+        const center=((x-minX)*side+(z-minZ))*depth+(y-minY);
+        const id=fastHalo?blockAtIndex(center,x,y,z):blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
         if(isPack2LiveId(id)){
           if(id!==76){
@@ -107,8 +118,10 @@ export function meshDepthSection291(world,cx,cz,section){
         // face order, cache reads and 9-float output exactly.
         let shade;
         const material=naturalGround?0:id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id;
-        for(const face of FACES){
-          const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
+        for(let f=0;f<FACES.length;f++){
+          const face=FACES[f],nx=x+face.d[0],ny=y+face.d[1],nz=z+face.d[2];
+          const neighbor=fastHalo?blockAtIndex(center+faceOffsets[f],nx,ny,nz):
+            blockAt(nx,ny,nz);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor))continue;
           if(shade===undefined)shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
           const r=Math.min(1,color[0]*shade*face.lit),
