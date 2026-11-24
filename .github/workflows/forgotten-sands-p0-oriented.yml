@@ -1,0 +1,27 @@
+name: Forgotten Sands P0 oriented large entrance
+on:
+  push:
+    branches: [research/forgotten-sands-p0-relief-full-mesh-20261123]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-oriented-approach.mjs'
+      - 'tests/forgotten-sands-oriented-approach.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-oriented.yml'
+permissions:
+  contents: read
+jobs:
+  native-oriented:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-oriented-approach.mjs
+          node --check tests/forgotten-sands-oriented-approach.test.mjs
+          node --test tests/forgotten-sands-oriented-approach.test.mjs
