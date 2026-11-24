@@ -28,7 +28,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -107,7 +107,7 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
 function start(nonblockStage=null){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
-  const combinedWorld=()=>world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
+  const combinedWorld=()=>isEnvironmentGenerator(world.base?.generationProfile?.generator);
   const hasLiveScenery=()=>Boolean(nonblockStage||combinedWorld());
   function loadWorld(seed){
     // Legacy startup must NEVER silently reuse a seed reserved for the
@@ -307,7 +307,7 @@ function start(nonblockStage=null){
     }).catch(error=>({supported:false,reason:String(error)}));
   }
   if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR].includes(
         world.base.generationProfile.generator)))
     void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
@@ -2831,6 +2831,15 @@ function start(nonblockStage=null){
     v5Hint.insertAdjacentElement('afterend',createBalancedV6Button);
     createBalancedV6Button.insertAdjacentElement('afterend',v6Hint);
   }
+  const createEnchantedButton=document.createElement('button');
+  createEnchantedButton.id='createEnchantedP2World';createEnchantedButton.type='button';
+  createEnchantedButton.textContent='CREATE NEW ENCHANTED FOREST WORLD';
+  const enchantedHint=document.createElement('p');enchantedHint.className='controlhint';
+  enchantedHint.textContent='New unused seed only. Improved forest trees and ground; existing worlds never convert.';
+  if(seedRow){
+    v6Hint.insertAdjacentElement('afterend',createEnchantedButton);
+    createEnchantedButton.insertAdjacentElement('afterend',enchantedHint);
+  }
   function enterPreparedM2World(candidate,statusText){
     // This commits only a PREVIOUSLY verified and persisted candidate.
     for(const c of chunks.values())deleteChunkBuffers(c);
@@ -2845,7 +2854,7 @@ function start(nonblockStage=null){
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR].includes(
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR].includes(
           world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
@@ -2919,6 +2928,22 @@ function start(nonblockStage=null){
       seedMessage.textContent='Balanced v6 creation refused; original world retained: '+
         String(error.message||error);
     }
+  };
+  createEnchantedButton.onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Choose a different unused seed for Enchanted Forest');
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
+      if(!window.confirm('CREATE NEW ENCHANTED FOREST WORLD for unused seed '+next+'? Existing worlds NEVER convert.'))return;
+      if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents activation');
+      if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
+      const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_ENCHANTED_P2,{confirmed:true});
+      const loaded=openM2World(localStorage,choice);
+      if(loaded.base.generationProfile.generator!==ENCHANTED_P2_GENERATOR)throw Error('Enchanted profile did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('Enchanted save not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,'Enchanted Forest world '+next+' created with separate generation identity.');
+    }catch(error){seedMessage.textContent='Enchanted creation refused; original world retained: '+String(error.message||error);}
   };
   document.getElementById('switchWorld').onclick=()=>{
     try{
