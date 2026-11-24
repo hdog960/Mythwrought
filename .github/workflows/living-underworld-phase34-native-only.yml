@@ -1,0 +1,81 @@
+name: Living Underworld Phase34 — ONE exact-head original M7 read-only triplet
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase34-native-triplet-ci-20261123
+    paths:
+      - .github/workflows/living-underworld-phase34-native-only.yml
+
+# Branch-only targeted research. Not shared CI. No PR/main triggers,
+# no deployments, no workflow cancel-in-progress.
+permissions:
+  contents: read
+
+jobs:
+  exact-original-m7-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact isolated source with no persisted write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Configure exact native Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact checkout and untouched native test entrypoint
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check scripts/underworld/audit-m7-exact-head-triplet.mjs
+          node --version
+          echo "Single pinned original-M7 native research run; NO deploy/merge/save mutation"
+      - name: Execute 25 focused native files and exactly 3 original read-only M7 scripts
+        id: audit
+        shell: bash
+        run: |
+          set +e
+          node scripts/underworld/audit-m7-exact-head-triplet.mjs "$GITHUB_SHA" > "$RUNNER_TEMP/m7-original-triplet.json" 2> "$RUNNER_TEMP/m7-original-triplet.stderr"
+          code=$?
+          echo "native_exit_code=$code" >> "$GITHUB_OUTPUT"
+          echo "Native original M7 runner exit=$code, exact SHA=$GITHUB_SHA"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const path=process.env.RUNNER_TEMP+"/m7-original-triplet.json";
+            const body=fs.existsSync(path)?fs.readFileSync(path,"utf8").trim():"";
+            const last=body.split(/\r?\n/).at(-1);
+            try {
+              const j=JSON.parse(last);
+              console.log(JSON.stringify({
+                expectedHead:j.expectedHead,actualHead:j.actualHead,
+                nativeFullCheckoutExactAndClean:j.nativeFullCheckoutExactAndClean,
+                focusedNativeNodeTestsPassed:j.focusedNativeNodeTestsPassed,
+                trueOriginalM7ScriptsAttempted:j.trueOriginalM7ScriptsAttempted,
+                allThreeExecutedSuccessfully:j.allThreeExecutedSuccessfully,
+                sourceOnlyCandidateAdmission:j.sourceOnlyCandidateAdmission?.cityThinUnderpassHypotheticalMovementSafe,
+                reason:j.reason,
+                nativeTestsTail:j.testSummaryStdoutTail?.slice(-1700),
+                nativeErrorsTail:j.testErrorTail?.slice(-1200)
+              }));
+            } catch (e) {
+              console.log("NO_PARSABLE_NATIVE_REPORT: "+String(e));
+              console.log(body.slice(-2500));
+            }
+          '
+          echo "Native research stderr tail:"
+          tail -c 1800 "$RUNNER_TEMP/m7-original-triplet.stderr" || true
+          exit "$code"
+      - name: Preserve read-only exact-head stdout and stderr whether success or HOLD
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: living-underworld-phase34-original-m7-evidence
+          path: |
+            ${{ runner.temp }}/m7-original-triplet.json
+            ${{ runner.temp }}/m7-original-triplet.stderr
+          if-no-files-found: warn
+          retention-days: 7
