@@ -1,0 +1,32 @@
+name: Mountain V8 developer integration first real profile terrain
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-profile-first-native.yml]
+permissions:
+  contents: read
+jobs:
+  profile-terrain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: current-main
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact candidate and immutable source native tests
+        run: |
+          node --version
+          git -C candidate rev-parse HEAD
+          git -C current-main rev-parse HEAD
+          test "$(git -C current-main rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          export MYTHWROUGHT_P3_MAIN_ROOT="$GITHUB_WORKSPACE/current-main"
+          node --test --test-concurrency=1 candidate/tests/mountain-v8-developer-profile-first-native.test.mjs
