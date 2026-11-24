@@ -15,7 +15,6 @@ const int=Number.isSafeInteger;
 const GROUND=new Set([BLOCK.STONE,BLOCK.DIRT,BLOCK.GRASS,256,257,258,259,260,261]);
 const fullGround=id=>GROUND.has(id)&&(id<256||(
   biome130Block(id).solid&&biome130Block(id).boxes.some(b=>b.every((v,i)=>v===(i<3?0:1)))));
-const key=(x,z)=>x+','+z;
 
 export function defineP0Footprint({seed,x,z,size=15,height=12}){
   if(![seed,x,z,size,height].every(int)||seed!==(seed|0)||
@@ -98,7 +97,9 @@ export function beginP0GroundSurvey(world,input,{reserved,maxRelief=8}={}){
      world.seed!==site.seed||typeof reserved!=='function'||!int(maxRelief)||maxRelief<0||maxRelief>12)
     throw Error('Invalid original M7 survey');
   let cursor=0,edits=0,iterator=null,done=null,min=Infinity,max=-Infinity;
-  const caps=new Map(),total=site.size*site.size;
+  const total=site.size*site.size,caps=new Uint8Array(total);
+  const capAt=(x,z)=>int(x)&&int(z)&&p0FootprintContains(site,x,z)?
+    caps[(z-site.minZ)*site.size+x-site.minX]:undefined;
   const fail=(reason,detail)=>done=Object.freeze({accepted:false,reason,detail,site,
     scannedColumns:cursor,scannedEdits:edits});
   return Object.freeze({
@@ -111,7 +112,7 @@ export function beginP0GroundSurvey(world,input,{reserved,maxRelief=8}={}){
         cursor++;
         const r=inspectP0GroundColumn(world,site,x,z,reserved);
         if(!r.ok)return fail(r.reason,r);
-        caps.set(key(x,z),r.cap);min=Math.min(min,r.cap);max=Math.max(max,r.cap);
+        caps[cursor-1]=r.cap;min=Math.min(min,r.cap);max=Math.max(max,r.cap);
         if(max-min>maxRelief)return fail('excessive-relief',{min,max});
       }
       if(cursor===total){
@@ -126,10 +127,10 @@ export function beginP0GroundSurvey(world,input,{reserved,maxRelief=8}={}){
             return done=Object.freeze({accepted:true,reason:'quiet original M7 footprint surveyed; no placement authority',
               site,scannedColumns:cursor,scannedEdits:edits,minCap:min,maxCap:max,floor,
               maxY:pyramid.maxY,
-              capAt:(x,z)=>caps.get(key(x,z)),
+              capStorageBytes:caps.byteLength,capAt,
               proposedBlock(x,y,z){
                 if(![x,y,z].every(int)||!p0FootprintContains(site,x,z))return null;
-                const cap=caps.get(key(x,z));
+                const cap=capAt(x,z);
                 if(y<=cap)return null;
                 if(y<floor)return BLOCK.STONE;
                 return prototypePyramidBlock(pyramid,x,y,z);
