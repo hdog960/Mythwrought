@@ -1,0 +1,180 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave61-source-handoff.v1",
+  "status": "ORIGINAL SOURCE CANDIDATE ONLY; isolated exact staged test callbacks in V8, not native Node full original repository or runtime.",
+  "protectedParent": "52f61915fe578ab4b541fa91912436192a9c3629",
+  "branch": "builder-b-wave61-alderwisp-three-lantern-seed-court-20261124",
+  "source": "src/building-pool/roadmap-b/builder-b-essentials-wave61.mjs",
+  "tests": "tests/building-pool/roadmap-b/builder-b-essentials-wave61-focused.test.mjs",
+  "id": "r1:greenhouse:temperate:small:003",
+  "ownership": {
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6",
+    "priorAccepted": 228,
+    "b115": 115,
+    "d92": 92,
+    "priorGreenhouseIds": [
+      "r1:greenhouse:temperate:small:002",
+      "r1:greenhouse:snow:small:002",
+      "r1:greenhouse:enchanted-forest:small:002",
+      "r1:greenhouse:desert:small:002",
+      "r1:greenhouse:snow:small:003",
+      "r1:greenhouse:snow:medium:002",
+      "r1:greenhouse:enchanted-forest:medium:003",
+      "r1:greenhouse:temperate:large:003",
+      "r1:greenhouse:snow:large:003",
+      "r1:greenhouse:enchanted-forest:small:003",
+      "r1:greenhouse:snow:large:004",
+      "r1:greenhouse:desert:large:003",
+      "r1:greenhouse:temperate:large:004"
+    ]
+  },
+  "metrics": {
+    "footprint": [
+      31,
+      19,
+      35
+    ],
+    "placements": 2250,
+    "walkable": 689,
+    "rooms": 5,
+    "portals": 10,
+    "stoneFoundation": 837,
+    "pack3RoofCells": 338,
+    "namedRoofWings": [
+      120,
+      101,
+      117
+    ],
+    "dryTrayBases": 44,
+    "dryRims": 38,
+    "traySides": 12,
+    "pack4Panes": 64,
+    "framedBays": 16,
+    "strictD4Comparisons": 104,
+    "maxIoU": 0.23493975903614459,
+    "closest": "r1:greenhouse:temperate:small:002"
+  },
+  "evidence": {
+    "v8ExactStagedCallbacks": [
+      {
+        "name": "Frozen exclusive B115 ownership and no runtime activation",
+        "pass": true
+      },
+      {
+        "name": "Exact physical source counts and 837 real stone footing cells",
+        "pass": true
+      },
+      {
+        "name": "Entrance reaches every walkable source cell, all portal points, actual room interiors and south exit",
+        "pass": true
+      },
+      {
+        "name": "338 unresolved Pack3 roof cells in three genuine named wings, each immediately stone-backed",
+        "pass": true
+      },
+      {
+        "name": "Three original stone bearings are continuous from foundation to each actual roof",
+        "pass": true
+      },
+      {
+        "name": "44 physically solid dry-tray bases, 38 raised rim blocks and 12 accessible sides, no phantom walking",
+        "pass": true
+      },
+      {
+        "name": "64 unresolved Pack4 panes occupy sixteen four-high genuine outward stone-framed bays",
+        "pass": true
+      },
+      {
+        "name": "Thirteen authentic earlier greenhouse constructors and 104 unchanged D4 checks below 0.85",
+        "pass": true
+      }
+    ],
+    "log": [
+      "ALDERWISP_104_D4 {\"total\":104,\"max\":0.23493975903614459,\"closest\":\"r1:greenhouse:temperate:small:002\"}"
+    ],
+    "originalCompilerBlobs": [
+      "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2",
+      "f1e10c5372d49f6ad9b4d138b887cfb6f2297b96",
+      "64b93c02e262b7fe4049408c2458faa985a710a3"
+    ],
+    "originalPeerBlobs": [
+      {
+        "wave": 2,
+        "sha": "7adebc571c9a238eeab6f55adc3b24f6ac7bc998"
+      },
+      {
+        "wave": 7,
+        "sha": "2551361fda0fe94e9da1574695fc3f06a75cf969"
+      },
+      {
+        "wave": 13,
+        "sha": "4813622592632b0b6f28b4180136ea7192495db2"
+      },
+      {
+        "wave": 17,
+        "sha": "36ab1f088b8826740cb87b6d34b6740cf25a5157"
+      },
+      {
+        "wave": 19,
+        "sha": "f1456ffa011a6f758b569e11cb2b00a5b96069e1"
+      },
+      {
+        "wave": 23,
+        "sha": "f8aa2cf5426680708d2ba03c1ac345e91a7b409f"
+      },
+      {
+        "wave": 29,
+        "sha": "82631877cb8987e0442e114072b72c023ecf5209"
+      },
+      {
+        "wave": 31,
+        "sha": "b082816b369c0aadd8f950855096d1e6717b16d8"
+      },
+      {
+        "wave": 37,
+        "sha": "db614f5c6ff5f936a398948c544dc2cdda594df6"
+      },
+      {
+        "wave": 40,
+        "sha": "de3284ecd152d9dcef93436f4d0a9564a79e1ff3"
+      },
+      {
+        "wave": 48,
+        "sha": "7e1f9c55b3951015d3b83beb95377630655cf1e2"
+      },
+      {
+        "wave": 54,
+        "sha": "b52be1de8e69227ed820dc920583391cfbe69c0c"
+      },
+      {
+        "wave": 60,
+        "sha": "d0572ec616fa0ff5b92412fbb41627753fc31d74"
+      }
+    ],
+    "nativeNodeTests": "pending",
+    "installedPack3Pack4": "pending",
+    "realM7": "pending",
+    "browserWebGL2": "pending",
+    "iphonePWA": "pending",
+    "fullAccepted228D4": "pending",
+    "method": "Exact original schema, allocation, sourcePlan and 13 original constructors retrieved at protected Wave60 commit. Staged test callbacks executed via V8 with synchronous node:test/assert/fs stand-ins. No claim of native module-graph acceptance."
+  },
+  "progress": {
+    "servicesAuthoredOrStaged": 61,
+    "servicesRemaining": 54,
+    "residentialAuthoredOrStaged": 10,
+    "residentialRemaining": 169,
+    "totalAuthoredOrStaged": 71,
+    "goal": 294,
+    "remaining": 223
+  },
+  "protected": {
+    "main": "db4bbcc32156e5df311f733bcaa53d559c17313b",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "noRuntimeRegistry": true,
+    "noSettlementChanges": true,
+    "noSaveWrites": true,
+    "noMerge": true,
+    "noDeploy": true
+  },
+  "next": "Run a coordinated targeted native original Wave60/61 gate once; then complete source waves and eventual full accepted228 strict D4, installed assets, M7 player, browser and iPhone PWA acceptance without redundant CI."
+}
