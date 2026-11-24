@@ -68,20 +68,47 @@ test('new underpass cells not previously queried are allowed with zero cross-pha
  assert.equal(r.comparedSourceReturnsAcrossPhases,0);
  assert.equal(r.uniqueCellsByRole.naturalAt,2);
 });
-test('bounded per-role cell budget never silently drops previous-data evidence',()=>{
- const ledger=create(normal(),{maxCoordinatesPerRole:1});
+test('bounded per-role cell budget refuses BEFORE any over-budget original-world callback',()=>{
+ let actualCalls=0;
+ const raw=normal(),src=Object.fromEntries(roles.map(role=>[role,(...args)=>{
+  actualCalls++;return raw[role](...args);
+ }]));
+ const ledger=create(src,{maxCoordinatesPerRole:1});
  read(ledger.readers,0,-80,0);ledger.beginUnderpass();
- read(ledger.readers,1,-80,0);
+ assert.throws(()=>ledger.readers.naturalAt(1,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_CELL_BUDGET/);
+ assert.equal(actualCalls,4);
+ assert.throws(()=>ledger.readers.editedAt(0,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_CELL_BUDGET/);
+ assert.equal(actualCalls,4,'a caught source-budget error must seal the reader');
  const r=ledger.audit();assert.equal(r.ok,false);
  assert.equal(r.reason,'ORIGINAL_SOURCE_LEDGER_CELL_BUDGET');
  assert.equal(r.uniqueCellsByRole.naturalAt,1);
+ assert.equal(r.totalSourceCallbackCalls,4);
+ assert.equal(r.blockedSourceCallbackAttempts,2);
+ assert.equal(r.sourceCallbacksWithinHardCaps,true);
+ assert.equal(r.preReadHardCapsEnforced,true);
  assert.equal(r.noExtraOriginalWorldReads,true);
 });
-test('bounded total role-call budget refuses even when source values remain stable',()=>{
- const ledger=create(normal(),{maxTotalCalls:4});
+test('bounded total role-call budget refuses BEFORE its fifth original-world callback',()=>{
+ let actualCalls=0;
+ const raw=normal(),src=Object.fromEntries(roles.map(role=>[role,(...args)=>{
+  actualCalls++;return raw[role](...args);
+ }]));
+ const ledger=create(src,{maxTotalCalls:4});
  read(ledger.readers,0,-80,0);ledger.beginUnderpass();
- read(ledger.readers,0,-80,0);
- assert.equal(ledger.audit().reason,'ORIGINAL_SOURCE_LEDGER_TOTAL_CALL_BUDGET');
+ assert.throws(()=>ledger.readers.naturalAt(0,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_TOTAL_CALL_BUDGET/);
+ assert.equal(actualCalls,4);
+ assert.throws(()=>ledger.readers.editedAt(0,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_TOTAL_CALL_BUDGET/);
+ assert.equal(actualCalls,4);
+ const report=ledger.audit();
+ assert.equal(report.reason,'ORIGINAL_SOURCE_LEDGER_TOTAL_CALL_BUDGET');
+ assert.equal(report.totalSourceCallbackCalls,4);
+ assert.equal(report.maximumSourceCallbackCalls,4);
+ assert.equal(report.blockedSourceCallbackAttempts,2);
+ assert.equal(report.sourceCallbacksWithinHardCaps,true);
 });
 test('original source role input types are validated without substituting values',()=>{
  const ledger=create({...normal(),naturalAt:()=>Number.NaN});
@@ -91,14 +118,22 @@ test('original source role input types are validated without substituting values
  assert.equal(r.reason,'ORIGINAL_SOURCE_LEDGER_INVALID_ROLE_VALUE');
  assert.equal(r.firstMismatch.role,'naturalAt');
 });
-test('source method replacement is detected even though stable ledger wrappers remain identical',()=>{
- const source=normal();const ledger=create(source);
+test('a changed source role binding seals the underpass BEFORE its first old-world read',()=>{
+ let actualCalls=0;
+ const source=Object.fromEntries(roles.map(role=>[role,()=>{
+  actualCalls++;return role==='naturalAt'?1:role==='authoredAt'?undefined:false;
+ }]));
+ const ledger=create(source);
  read(ledger.readers,0,-80,0);
- source.editedAt=()=>false;
- ledger.beginUnderpass();read(ledger.readers,0,-80,0);
+ source.editedAt=()=>{actualCalls++;return false};
+ ledger.beginUnderpass();
+ assert.throws(()=>ledger.readers.naturalAt(0,-80,0),
+  /ORIGINAL_SOURCE_CALLBACK_BINDING_CHANGED/);
+ assert.equal(actualCalls,4,'even unchanged source roles must not run after a changed binding');
  const r=ledger.audit();assert.equal(r.ok,false);
  assert.equal(r.reason,'ORIGINAL_SOURCE_CALLBACK_BINDING_CHANGED');
  assert.equal(r.originalCallbackBindingsUnchanged,false);
+ assert.equal(r.underpassCalls.naturalAt,0);
 });
 test('premature underpass transition and premature/duplicate audits fail closed',()=>{
  const ledger=create(normal());
@@ -138,4 +173,64 @@ test('malformed input and budgets refuse before invoking any original source rol
  assert.throws(()=>create({...normal(),naturalAt:7}),/Invalid original-world/);
  const ledger=create(normal());assert.throws(()=>ledger.readers.naturalAt(0.5,-80,0),
   /Invalid.*observation/);
+});
+
+test('Phase30 legitimate source visits at the exact configured maximum succeed without a phantom read',()=>{
+ let invoked=0;
+ const src={naturalAt:()=>{invoked++;return 1},
+  authoredAt:()=>{invoked++;return undefined},
+  editedAt:()=>{invoked++;return false},
+  protectedAt:()=>{invoked++;return false}};
+ const ledger=create(src,{maxTotalCalls:8,maxCoordinatesPerRole:1});
+ read(ledger.readers,0,-80,0);ledger.beginUnderpass();
+ read(ledger.readers,0,-80,0);
+ const result=ledger.audit();
+ assert.equal(result.ok,true);assert.equal(invoked,8);
+ assert.equal(result.maximumSourceCallbackCalls,8);
+ assert.equal(result.maximumDistinctCoordinatesPerRole,1);
+ assert.equal(result.blockedSourceCallbackAttempts,0);
+ assert.equal(result.preReadHardCapsEnforced,true);
+ assert.equal(result.sourceCallbacksWithinHardCaps,true);
+});
+test('Phase30 cell-cap refusal triggered during prior survey blocks later source callbacks too',()=>{
+ let actual=0;const raw=normal();
+ const src=Object.fromEntries(roles.map(role=>[role,(...xyz)=>{
+  actual++;return raw[role](...xyz);
+ }]));
+ const ledger=create(src,{maxCoordinatesPerRole:1});
+ read(ledger.readers,0,-80,0);
+ assert.throws(()=>ledger.readers.naturalAt(1,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_CELL_BUDGET/);
+ ledger.beginUnderpass();
+ assert.throws(()=>ledger.readers.naturalAt(0,-80,0),
+  /ORIGINAL_SOURCE_LEDGER_CELL_BUDGET/);
+ assert.equal(actual,4);
+ const report=ledger.audit();
+ assert.equal(report.priorCalls.naturalAt,1);
+ assert.equal(report.underpassCalls.naturalAt,0);
+ assert.equal(report.blockedSourceCallbackAttempts,2);
+});
+test('Phase30 same old-world location after cell budget fills still counts if total budget permits',()=>{
+ let actual=0;const original=normal();
+ const src=Object.fromEntries(roles.map(role=>[role,(...coords)=>{
+  actual++;return original[role](...coords);
+ }]));
+ const ledger=create(src,{maxCoordinatesPerRole:1,maxTotalCalls:12});
+ read(ledger.readers,0,-80,0);ledger.beginUnderpass();
+ read(ledger.readers,0,-80,0);read(ledger.readers,0,-80,0);
+ const report=ledger.audit();assert.equal(report.ok,true);
+ assert.equal(actual,12);assert.equal(report.totalSourceCallbackCalls,12);
+ assert.equal(report.uniqueCellsByRole.naturalAt,1);
+ assert.equal(report.crossPhaseComparedCellsByRole.naturalAt,1);
+});
+test('Phase30 rejected coordinates and sealed source do not invoke the original role',()=>{
+ let calls=0;const source={...normal(),naturalAt:()=>{calls++;return 1}};
+ const ledger=create(source);assert.throws(()=>ledger.readers.naturalAt(NaN,0,0),
+  /Invalid original-world source ledger observation/);
+ assert.equal(calls,0);
+ read(ledger.readers,0,-80,0);ledger.beginUnderpass();
+ read(ledger.readers,0,-80,0);ledger.audit();
+ assert.throws(()=>ledger.readers.naturalAt(0,-80,0),
+  /Invalid original-world source ledger observation/);
+ assert.equal(calls,2);
 });
