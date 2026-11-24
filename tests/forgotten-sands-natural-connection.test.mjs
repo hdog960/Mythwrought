@@ -26,7 +26,7 @@ test('actual disjoint modular site exterior connections preserve every original 
         assert.equal(r.addedCells,0);assert.equal(r.placementAuthority,false);
         assert.ok(r.nodes.every(n=>!excluded(n.x,n.z)));
         const f=walkP0NaturalConnection(w,r.nodes),back=walkP0NaturalConnection(w,[...r.nodes].reverse());
-        if(!f.ok||!back.ok){attempts.push(f.reason??back.reason);continue;}
+        if(!f.ok||!back.ok){attempts.push({reason:f.reason??back.reason,firstFailure:!f.ok?f:back});continue;}
         found={turns:[a.turn,b.turn],nodes:r.nodes.length,forward:f.frames,back:back.frames,from,to};break;
       }
       connections.push({pair:[i,i+1],attempts,found});

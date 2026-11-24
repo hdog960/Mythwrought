@@ -77,7 +77,16 @@ export function walkP0NaturalConnection(world,nodes){
       stepPlayer(world,p,{forward:Math.min(1,dist*2)},1/60);frames++;
       if(collides(world,p.x,p.feet,p.z))return {ok:false,reason:'body-collision',i,frames};
     }
-    for(let j=0;j<12;j++){stepPlayer(world,p,{forward:0},1/60);frames++;}
+    // A one-block natural descent needs more than 0.2 seconds to fall
+    // and settle. Allow up to one second of genuine zero-input physics;
+    // never snap the body to the expected height.
+    let settled=0;
+    for(let j=0;j<60;j++){
+      stepPlayer(world,p,{forward:0},1/60);frames++;
+      if(collides(world,p.x,p.feet,p.z))return {ok:false,reason:'settling-collision',i,frames};
+      if(p.onGround&&Math.abs(p.vY)<.001&&Math.hypot(p.vX,p.vZ)<.025){if(++settled>=3)break;}
+      else settled=0;
+    }
     if(Math.hypot(tx-p.x,tz-p.z)>.2||Math.abs(p.feet-n.feet)>.1||collides(world,p.x,p.feet,p.z))
       return {ok:false,reason:'physical-node-mismatch',i,frames,actual:{x:p.x,z:p.z,feet:p.feet},expected:n};
   }
