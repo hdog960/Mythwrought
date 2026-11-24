@@ -1,0 +1,42 @@
+<!doctype html><canvas width="96" height="64"></canvas><script type="module">
+import {createP0BrowserWorkerSession} from '../../src/manual-biomes/forgotten-sands-browser-worker-session.mjs';
+import {uploadChunkBuffer} from '../../src/gpu-recovery.mjs';
+import {buildGpuPipeline} from '../../src/gpu-pipeline.mjs';
+import {P0_ORIGINAL_SHADERS} from '../../src/manual-biomes/forgotten-sands-original-shaders.mjs';
+const check=(x,m)=>{if(!x)throw Error(m);},key={cx:-58,cz:-129,s:0,key:'-58,-129,0'};
+const wait=async(fn)=>{for(let i=0;i<1200;i++){if(fn())return;await new Promise(requestAnimationFrame);}throw Error('wait limit');};
+const moduleWorker=()=>new Worker('../forgotten-sands-worker-webgl/mesh-worker.mjs',{type:'module'});
+async function run(){
+  const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{preserveDrawingBuffer:true});check(gl,'WebGL2 required');
+  let clock=0;
+  const silent=new Worker('./never-ready.mjs',{type:'module'});
+  const startup=createP0BrowserWorkerSession({worker:silent,canvas,upload:()=>{throw Error('unexpected upload');},retire:()=>{},now:()=>clock,timeoutMs:100});
+  clock=101;startup.tick();check(startup.snapshot().reason==='worker-startup-timeout'&&startup.snapshot().resident===0,'startup timeout');
+  // Inject an upload callback failure after one genuine WebGL buffer exists.
+  let uploads=0,retired=0;
+  const fault=createP0BrowserWorkerSession({worker:moduleWorker(),canvas,upload:v=>{if(++uploads===2)throw Error('intentional upload adapter failure');return uploadChunkBuffer(gl,v);},retire:b=>{gl.deleteBuffer(b);retired++;}});
+  await wait(()=>fault.snapshot().workerReady);
+  fault.replace([key,{cx:-59,cz:-129,s:0,key:'-59,-129,0'}]);
+  await wait(()=>{fault.tick();return fault.snapshot().stopped;});
+  check(fault.snapshot().reason.startsWith('upload:')&&fault.snapshot().resident===0&&retired===1,'upload fault cleanup');
+  let oldRetired=0,newRetired=0;
+  const old=createP0BrowserWorkerSession({worker:moduleWorker(),canvas,upload:v=>uploadChunkBuffer(gl,v),retire:b=>{gl.deleteBuffer(b);oldRetired++;}});
+  await wait(()=>old.snapshot().workerReady);old.replace([key]);
+  await wait(()=>{old.tick();return old.snapshot().resident===1;});
+  const ext=gl.getExtension('WEBGL_lose_context');check(ext,'loss extension');
+  ext.loseContext();await wait(()=>old.snapshot().stopped);
+  check(old.snapshot().reason==='webgl-context-lost'&&oldRetired===1,'loss retirement');
+  let restored=false;canvas.addEventListener('webglcontextrestored',()=>restored=true,{once:true});
+  ext.restoreContext();await wait(()=>restored&&!gl.isContextLost());
+  const pipe=buildGpuPipeline(gl,P0_ORIGINAL_SHADERS);
+  const fresh=createP0BrowserWorkerSession({worker:moduleWorker(),canvas,upload:v=>uploadChunkBuffer(gl,v),retire:b=>{gl.deleteBuffer(b);newRetired++;}});
+  await wait(()=>fresh.snapshot().workerReady);fresh.replace([key]);
+  await wait(()=>{fresh.tick();return fresh.snapshot().resident===1;});
+  check(gl.getError()===gl.NO_ERROR,'restored upload GL error');
+  const beforeClose=fresh.snapshot();fresh.close();
+  gl.deleteBuffer(pipe.outlineBuffer);gl.deleteProgram(pipe.terrainProgram);gl.deleteProgram(pipe.skyProgram);
+  check(newRetired===1&&fresh.snapshot().resident===0,'restored retirement');
+  return {startup:startup.snapshot(),uploadFault:{...fault.snapshot(),retired},loss:{...old.snapshot(),oldRetired},restoration:{event:restored,beforeClose,newRetired,after:fresh.snapshot(),shaderPipelineRebuilt:true}};
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script>

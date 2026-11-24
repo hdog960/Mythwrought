@@ -1,0 +1,58 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Forgotten Sands original-shader overview</title></head><body style="margin:0"><canvas width="956" height="440" style="width:100vw;height:100vh"></canvas><script type="module">
+import {P0_ORIGINAL_SHADERS} from '../../src/manual-biomes/forgotten-sands-original-shaders.mjs';
+import {buildGpuPipeline} from '../../src/gpu-pipeline.mjs';
+import {uploadChunkBuffer} from '../../src/gpu-recovery.mjs';
+const check=(x,m)=>{if(!x)throw Error(m);};
+const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
+const req=(w,m)=>new Promise((resolve,reject)=>{
+  const timer=setTimeout(()=>{clean();reject(Error('Worker request timeout'));},60000);
+  const clean=()=>{clearTimeout(timer);w.removeEventListener('message',onmsg);w.removeEventListener('error',onerr);};
+  const onmsg=e=>{clean();e.data.type==='fault'?reject(Error(e.data.error)):resolve(e.data);};
+  const onerr=e=>{clean();reject(Error(e.message));};w.addEventListener('message',onmsg);w.addEventListener('error',onerr);w.postMessage(m);
+});
+async function run(){
+  check(gl,'WebGL2 required');
+  const index=Number(new URLSearchParams(location.search).get('group')??0);
+  const worker=new Worker('./overview-worker.mjs',{type:'module'}),buffers=[];
+  let pipe;
+  try{
+    const p=await req(worker,{type:'prepare',index});check(p.type==='prepared','prepare result');
+    pipe=buildGpuPipeline(gl,P0_ORIGINAL_SHADERS);
+    const {terrainProgram:program,uniforms:u,atPos,atColor,atUv,atMat}=pipe;
+    let bytes=0,retired=0;const sections=[];
+    for(let s=0;s<=2;s++){
+      const r=await req(worker,{type:'section',index,section:s});
+      check(r.section===s&&r.vertices instanceof Float32Array,'section result');
+      await new Promise(requestAnimationFrame);
+      const b=uploadChunkBuffer(gl,r.vertices);gl.bindBuffer(gl.ARRAY_BUFFER,b);
+      check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===r.vertices.byteLength,'buffer bytes');
+      buffers.push({b,count:r.vertices.length/9});bytes+=r.vertices.byteLength;
+      sections.push({section:s,chunks:r.chunks,bytes:r.vertices.byteLength,meshMs:r.meshMs});
+    }
+    // Wide side view of all three modules. This is a detached overview:
+    // aggregate buffers are not a live near/far streaming budget proposal.
+    const mid=p.spec.modules[1],pitch=-.42,yaw=Math.PI/2,eye=[mid.x-57,43,mid.z];
+    gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.69,.62,.49,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(program);gl.uniform3fv(u.uEye,eye);gl.uniform3fv(u.uForward,[Math.cos(pitch),Math.sin(pitch),0]);
+    gl.uniform3fv(u.uRight,[0,0,1]);gl.uniform3fv(u.uUp,[-Math.sin(pitch),Math.cos(pitch),0]);
+    gl.uniform1f(u.uAspect,canvas.width/canvas.height);gl.uniform1f(u.uTan,Math.tan(72*Math.PI/360));
+    gl.uniform3fv(u.uFog,[.69,.62,.49]);gl.uniform3fv(u.uSkyLight,[1,.95,.85]);gl.uniform1f(u.uCaveHaze,0);gl.uniform1f(u.uArtQuality,1);
+    for(const {b,count} of buffers){gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
+      gl.vertexAttribPointer(atUv,2,gl.FLOAT,false,36,24);gl.vertexAttribPointer(atMat,1,gl.FLOAT,false,36,32);gl.drawArrays(gl.TRIANGLES,0,count);}
+    gl.finish();check(gl.getError()===gl.NO_ERROR,'draw error');
+    const pixels=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,pixels);
+    let visible=0;const bands=[0,0,0];for(let q=0;q<pixels.length;q+=4){
+      if(Math.abs(pixels[q]-176)+Math.abs(pixels[q+1]-158)+Math.abs(pixels[q+2]-125)>15){visible++;bands[Math.min(2,Math.floor((q/4%canvas.width)*3/canvas.width))]++;}
+    }
+    check(visible>1000&&bands.every(n=>n>50),'overview pixels missing');
+    for(const {b} of buffers){gl.deleteBuffer(b);retired++;}buffers.length=0;
+    check(gl.getError()===gl.NO_ERROR,'retirement error');
+    return {index,seed:p.spec.seed,proposedCells:p.proposedCells,sections,bytes,uploads:3,retired,visible,bands,viewport:[canvas.width,canvas.height],renderer:gl.getParameter(gl.RENDERER),overviewOnly:true};
+  }finally{
+    for(const {b} of buffers)gl.deleteBuffer(b);
+    if(pipe){gl.deleteBuffer(pipe.outlineBuffer);gl.deleteProgram(pipe.terrainProgram);gl.deleteProgram(pipe.skyProgram);}
+    worker.terminate();
+  }
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script></body></html>
