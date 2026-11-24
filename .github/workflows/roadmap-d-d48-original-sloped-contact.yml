@@ -1,0 +1,60 @@
+name: Builder D48 isolated source-authentic sloped patch and bridge ONLY
+on:
+  push:
+    branches:
+      - builder-d-d48-original-sloped-patch-bridge-isolated-20261124
+    paths:
+      - 'src/building-pool/roadmap-d/d48-*'
+      - 'tests/building-pool/roadmap-d/d48-*'
+      - 'docs/building-pool/roadmap-d/D48_*'
+      - '.github/workflows/roadmap-d-d48-original-sloped-contact.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d48-authentic-source-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  new-d48-original-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Authenticate exact D47 parent and unchanged original owners
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '337680cf200b1bce66efb67278ccaf5833cac181'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d46-socket-to-fractional-tie-contract.mjs)" = '203e55b8246245b341530d5f81425100f18d17a9'
+          git diff --name-only HEAD^ HEAD > /tmp/d48-actual.txt
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d48-original-sloped-contact.yml' \
+            'docs/building-pool/roadmap-d/D48_EXACT_AUTHORED_SADDLE_COLLISION_AND_UNRATED_SLOPE_BRIDGE_GATE.md' \
+            'src/building-pool/roadmap-d/d48-original-saddle-contact-and-bridge-audit.mjs' \
+            'src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs' \
+            'tests/building-pool/roadmap-d/d48-original-slope-patches.source.test.mjs' \
+            'tests/building-pool/roadmap-d/d48-slope-patch-and-bridge.pure.test.mjs' > /tmp/d48-expected.txt
+          diff -u /tmp/d48-expected.txt /tmp/d48-actual.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax only four new D48 modules
+        run: |
+          node --check src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs
+          node --check src/building-pool/roadmap-d/d48-original-saddle-contact-and-bridge-audit.mjs
+          node --check tests/building-pool/roadmap-d/d48-slope-patch-and-bridge.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d48-original-slope-patches.source.test.mjs
+      - name: Run ONLY D48 four new pure and two original W16/W17 cases
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d48-slope-patch-and-bridge.pure.test.mjs \
+            tests/building-pool/roadmap-d/d48-original-slope-patches.source.test.mjs
