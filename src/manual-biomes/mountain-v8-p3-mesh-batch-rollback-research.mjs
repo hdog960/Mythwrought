@@ -21,7 +21,7 @@ export const V8_RESEARCH_MAX_LOADED_REFRESH=16;
 export const V8_RESEARCH_MAX_STAGE_BYTES=16*1024*1024;
 const key=({cx,cz,section})=>depthMeshKey(cx,cz,section);
 const noPermission=freeze({
-  originalM7P3ColorHaloInherited:false,
+  oldM7P3ColorHaloInherited:false,
   newV8ColorHaloOwnerApproved:false,
   actualGPUUploadPerformed:false,
   originalGPUBufferDeleted:false,
