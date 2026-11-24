@@ -1,0 +1,51 @@
+name: Living Underworld Phase38 - native authored descent join
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase38-authored-descent-join-20261124
+    paths:
+      - .github/workflows/living-underworld-phase38-native.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate clean exact source
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+      - uses: actions/checkout@v4
+        with:
+          ref: 63ae3f3b69a881065f8af1693a5f4456299e7809
+          path: .phase38-reference
+          sparse-checkout: src/manual-caves/entrance-preflight.mjs
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - name: Authenticate original historical planner and execute targeted native suite
+        run: |
+          test "$(git -C .phase38-reference rev-parse HEAD)" = 63ae3f3b69a881065f8af1693a5f4456299e7809
+          test "$(git hash-object .phase38-reference/src/manual-caves/entrance-preflight.mjs)" = 702724cb6ee9d6f41d573069969718188e4c1569
+          cp .phase38-reference/src/manual-caves/entrance-preflight.mjs src/manual-caves/.phase38-historical-entrance.mjs
+          rm -rf .phase38-reference
+          set +e
+          node --test tests/living-underworld-switchback-descent-join.test.mjs tests/living-underworld-switchback-fallback.test.mjs > "$RUNNER_TEMP/phase38.tap" 2>&1
+          code=$?
+          rm src/manual-caves/.phase38-historical-entrance.mjs
+          cat "$RUNNER_TEMP/phase38.tap"
+          test -z "$(git status --porcelain --untracked-files=all)" || exit 4
+          exit "$code"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase38-native-descent-evidence
+          path: ${{ runner.temp }}/phase38.tap
+          retention-days: 7
