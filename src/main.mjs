@@ -454,6 +454,11 @@ function start(nonblockStage=null){
     // Synchronous unmeasured edit work: source action duration minus
     // nonoverlapping original CPU mesh, native upload and schema save.
     unattributedActionMs:new Float64Array(100),sourceActionMs:null,
+    // Unchanged original solid and water mesh CPU subphases and vertex
+    // output, source-saved MINE only; never a replacement mesher.
+    solidMeshCpuMs:new Float64Array(100),waterMeshCpuMs:new Float64Array(100),
+    meshOtherCpuMs:new Float64Array(100),
+    solidMeshVertices:new Uint32Array(100),waterMeshVertices:new Uint32Array(100),
     loadedSections:new Uint16Array(100),phaseMines:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
@@ -648,6 +653,11 @@ function start(nonblockStage=null){
        !Number.isFinite(phase.gpuMs)||phase.gpuMs<0||
        !Number.isSafeInteger(phase.gpuCalls)||phase.gpuCalls<0||
        phase.gpuCalls>4096||
+       !Number.isFinite(phase.solidMs)||phase.solidMs<0||
+       !Number.isFinite(phase.waterMs)||phase.waterMs<0||
+       !Number.isSafeInteger(phase.solidVertices)||phase.solidVertices<0||
+       !Number.isSafeInteger(phase.waterVertices)||phase.waterVertices<0||
+       phase.solidVertices>4294967295||phase.waterVertices>4294967295||
        !Number.isSafeInteger(phase.loadedSections)||phase.loadedSections<0){
       w.invalid=true;
       if(w.invalidReason===null)w.invalidReason='phase-invalid';
@@ -664,8 +674,10 @@ function start(nonblockStage=null){
     // never sample a different RAF or second clock for the residual.
     // 3ms slack allows Safari's coarse performance.now resolution.
     const accountedMs=phase.meshMs+phase.gpuMs+phase.saveMs;
+    const meshSubphases=phase.solidMs+phase.waterMs;
     if(!Number.isFinite(w.sourceActionMs)||w.sourceActionMs<=0||
-       !Number.isFinite(accountedMs)||accountedMs>w.sourceActionMs+3){
+       !Number.isFinite(accountedMs)||accountedMs>w.sourceActionMs+3||
+       !Number.isFinite(meshSubphases)||meshSubphases>phase.meshMs+3){
       w.invalid=true;
       if(w.invalidReason===null)w.invalidReason='phase-time-exceeds-action';
       return;
@@ -676,6 +688,11 @@ function start(nonblockStage=null){
     w.editGpuUploadMs[i]=phase.gpuMs;
     w.editGpuUploadCalls[i]=phase.gpuCalls;
     w.unattributedActionMs[i]=Math.max(0,w.sourceActionMs-accountedMs);
+    w.solidMeshCpuMs[i]=phase.solidMs;
+    w.waterMeshCpuMs[i]=phase.waterMs;
+    w.meshOtherCpuMs[i]=Math.max(0,phase.meshMs-meshSubphases);
+    w.solidMeshVertices[i]=phase.solidVertices;
+    w.waterMeshVertices[i]=phase.waterVertices;
     w.sourceActionMs=null; // reject stale evidence on following mines
     w.loadedSections[i]=phase.loadedSections;
   }
@@ -749,6 +766,18 @@ function start(nonblockStage=null){
         phaseMines:near291Perf.mineWindow.phaseMines,
         meshGenerationP95Ms:percentile(near291Perf.mineWindow.meshCpuMs,
           near291Perf.mineWindow.phaseMines,true),
+        solidMeshGenerationP95Ms:percentile(near291Perf.mineWindow.solidMeshCpuMs,
+          near291Perf.mineWindow.phaseMines,true),
+        waterMeshGenerationP95Ms:percentile(near291Perf.mineWindow.waterMeshCpuMs,
+          near291Perf.mineWindow.phaseMines,true),
+        meshOtherCpuP95Ms:percentile(near291Perf.mineWindow.meshOtherCpuMs,
+          near291Perf.mineWindow.phaseMines,true),
+        maxSolidVerticesPerMine:near291Perf.mineWindow.phaseMines?
+          Math.max(...near291Perf.mineWindow.solidMeshVertices.slice(
+            0,near291Perf.mineWindow.phaseMines)):null,
+        maxWaterVerticesPerMine:near291Perf.mineWindow.phaseMines?
+          Math.max(...near291Perf.mineWindow.waterMeshVertices.slice(
+            0,near291Perf.mineWindow.phaseMines)):null,
         schemaSaveP95Ms:percentile(near291Perf.mineWindow.saveCpuMs,
           near291Perf.mineWindow.phaseMines,true),
         perMineNativeUploadSumP95Ms:percentile(
@@ -1397,8 +1426,20 @@ function start(nonblockStage=null){
       for(const {cx,cz} of editAffectedChunks(x,z)){
         const key=depthMeshKey(cx,cz,section);
         if(!chunks.has(key))continue;
+        // Exact original mesh functions remain unchanged. No public / PWA
+        // timer or GPU call is introduced outside the localhost opt-in.
+        const solidStart=near291EditPhase?performance.now():null;
         const vertices=meshPlayableChunk(cx,cz,section);
+        if(solidStart!==null){
+          near291EditPhase.solidMs+=Math.max(0,performance.now()-solidStart);
+          near291EditPhase.solidVertices+=vertices.length/9;
+        }
+        const waterStart=near291EditPhase?performance.now():null;
         const water=meshPlayableWater(cx,cz,section);
+        if(waterStart!==null){
+          near291EditPhase.waterMs+=Math.max(0,performance.now()-waterStart);
+          near291EditPhase.waterVertices+=water.length/9;
+        }
         batch.push({key,cx,cz,section,vertices,water});
       }
     if(near291MeshStarted!==null){
@@ -1674,6 +1715,8 @@ function start(nonblockStage=null){
     if(near291MineStart!==null){
       near291EditPhase={meshMs:0,loadedSections:0};
       near291EditPhase.gpuMs=0;near291EditPhase.gpuCalls=0;
+      near291EditPhase.solidMs=0;near291EditPhase.waterMs=0;
+      near291EditPhase.solidVertices=0;near291EditPhase.waterVertices=0;
     }
     // Source uploadPack2Chunk() runs synchronously inside the real edit.
     // The first edit is not yet proven successful until apply+save return.
@@ -1706,6 +1749,10 @@ function start(nonblockStage=null){
         meshMs:near291SavedPhase?.meshMs,saveMs:near291SaveMs,
         gpuMs:near291SavedPhase?.gpuMs,
         gpuCalls:near291SavedPhase?.gpuCalls,
+        solidMs:near291SavedPhase?.solidMs,
+        waterMs:near291SavedPhase?.waterMs,
+        solidVertices:near291SavedPhase?.solidVertices,
+        waterVertices:near291SavedPhase?.waterVertices,
         loadedSections:near291SavedPhase?.loadedSections
       });
     }
