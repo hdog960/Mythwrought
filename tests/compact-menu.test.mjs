@@ -7,7 +7,7 @@ const worker=read('sw-m5.js'),updater=read('src/app-update.mjs');
 const menu=html.slice(html.indexOf('<div id="help" hidden>'),html.indexOf('<script type="module"'));
 const primary=menu.split('<details id="advancedMenu">')[0],advanced=menu.split('<div id="advancedTools">')[1];
 test('compact default menu retains requested controls without old generators or diagnostics',()=>{
-  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
+  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','newSnowWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
   for(const id of ['runAudit','caveCreateWorld','caveLoadWorld','pack2Materials','vaultBackup','mirrorSync','renderPreset','checkGameUpdate'])assert.ok(!primary.includes('id="'+id+'"')&&advanced.includes('id="'+id+'"'),id);
   assert.ok(!html.includes('id="g2bFlightProfile"'));
   assert.ok(menu.includes('<details id="advancedMenu">'));
@@ -26,7 +26,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261124-compact-menu-v1';
+  const release='20261124-snow-p1-v1';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));
@@ -40,7 +40,8 @@ function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK
   assert.ok(begin>=0&&end>begin);
   const calls=[],seedMessage={textContent:''},newWorld={},createEnchantedButton={},seedInput={value:'179'};
   const world={seed:179},storage={};
-  const document={getElementById:id=>{assert.equal(id,'newWorld');return newWorld}};
+  const newSnowWorld={};
+  const document={getElementById:id=>{assert.ok(['newWorld','newSnowWorld'].includes(id));return id==='newWorld'?newWorld:newSnowWorld}};
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
   const expected='latest-enchanted-profile';
   const latest={world:{seed:7654321},base:{generationProfile:{generator:expected}}};

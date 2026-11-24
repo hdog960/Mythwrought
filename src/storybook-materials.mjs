@@ -1,3 +1,4 @@
+import {SNOW_WIND_RENDER_TAG} from './environment-ground.mjs';
 import {CRAFTED_TIMBER_GLSL} from './crafted-timber.mjs';
 import {CARVED_MASONRY_GLSL} from './carved-masonry.mjs';
 import {STORYBOOK_ROOF_GLSL} from './storybook-roof.mjs';
@@ -223,6 +224,12 @@ ${CARVED_TRIM_GLSL}  }else if(vMat==18){ // Physical leaf voxels: layered canopy
     shade=.81+.14*band+.09*fleck;
     base=mix(base,vec3(.23,.32,.43),.19*band*near);
     base=mix(base,vec3(.68,.76,.79),.15*seam*near);
+  }else if(vMat==${SNOW_WIND_RENDER_TAG}){ // Snow P1 natural cap render tag, not a block ID.
+    float grit=hashCell(floor(vUv*15.0)+41.0);
+    float sweep=sin(vUv.x*.46+vUv.y*.61+.82*sin(vUv.y*.19));
+    float snowSweepA=sin(vUv.x*.14+vUv.y*.22+.65*sweep);
+    float snowSweepB=sin(vUv.x*.041-vUv.y*.071);
+    shade=.955+.032*sweep+.050*snowSweepA+.022*snowSweepB+.006*(grit-.5);
   }else if(vMat>=40&&vMat<=43){ // Natural terrain uses world-space UV at chunk seams.
     float grit=hashCell(floor(vUv*15.0)+float(vMat));
     float sweep=sin(vUv.x*.46+vUv.y*.61+.82*sin(vUv.y*.19));
@@ -245,6 +252,7 @@ export const STORYBOOK_ART_RULES=Object.freeze({
   renderOnlyGrottoMaterials:Object.freeze([10,11,12]),
   renderOnlyCaveRuneMaterials:Object.freeze([13,14]),
   renderOnlyArchitecturalMaterials:Object.freeze([15,16,17]),
+  renderOnlySnowWindMaterial:SNOW_WIND_RENDER_TAG,
   physicalNaturalMaterials:Object.freeze({leaves:{blockId:7,shaderTag:18},deepstone:{blockId:8,shaderTag:19}}),
   detailStartDistance:10,
   detailEndDistance:38,
