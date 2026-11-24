@@ -1,0 +1,37 @@
+name: Living Underworld Phase39 - retained descent and M7 saves
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase39-retained-descent-route-20261124
+    paths:
+      - .github/workflows/living-underworld-phase39-native.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact isolated native route and save tests
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          set +e
+          node --test tests/living-underworld-retained-descent-route.test.mjs > "$RUNNER_TEMP/phase39.tap" 2>&1
+          code=$?
+          cat "$RUNNER_TEMP/phase39.tap"
+          test -z "$(git status --porcelain --untracked-files=all)" || exit 4
+          exit "$code"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase39-native-retained-descent-evidence
+          path: ${{ runner.temp }}/phase39.tap
+          retention-days: 7
