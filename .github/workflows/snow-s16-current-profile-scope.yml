@@ -1,0 +1,36 @@
+name: Snow S16 current release historical profile scope
+on:
+  push:
+    branches: [research/snow-s16-current-release-profile-scope-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s16-current-release-mesh-compose.mjs'
+      - 'tests/snowy-s16-current-profile-scope.test.mjs'
+      - '.github/workflows/snow-s16-current-profile-scope.yml'
+permissions:
+  contents: read
+jobs:
+  current-release-exact-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: current-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate current release source and accepted helpers
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C current-readonly rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          test "$(git -C current-readonly hash-object src/voxel.mjs)" = e3ba473cc13ec9f8c8950e68b89025e96327256d
+          test "$(git hash-object src/manual-biomes/snowy-s14-edge-pigment.mjs)" = 02fa2493b0ebaa0e6665a83653f3a9e861d306cd
+          node --check src/manual-biomes/snowy-s16-current-release-mesh-compose.mjs
+      - name: Existing M7 and Enchanted-P2 exact mesh bytes and unregistered future render scope
+        run: |
+          node --test tests/snowy-s16-current-profile-scope.test.mjs
+          test -z "$(git -C current-readonly status --porcelain)"
