@@ -119,26 +119,37 @@ export function meshDepthSection291(world,cx,cz,section){
           }
           continue;
         }
-        const naturalGround=rock?undefined:environmentGround(id);
-        const color=naturalGround?.color??COLORS[id]??COLORS[3];
-        // All authoritative color tables are frozen RGB triples. Preserve
-        // original arithmetic order, lazy shade (no work for hidden cells),
-        // face order, cache reads and 9-float output exactly.
-        let shade;
-        const material=naturalGround?0:id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id;
+        // Defer pure color/material lookup and lighting until the first
+        // visible ordinary face; enclosed cells emit no color or material.
+        let shade,color,material;
         for(let f=0;f<FACES.length;f++){
           const face=FACES[f],nx=x+face.d[0],ny=y+face.d[1],nz=z+face.d[2];
           const neighbor=fastHalo?blockAtIndex(center+faceOffsets[f],nx,ny,nz):
             blockAt(nx,ny,nz);
           if(neighbor!==BLOCK.AIR&&
              (isPlainRock(neighbor)||!isPack2LiveId(neighbor)))continue;
-          if(shade===undefined)shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
+          if(shade===undefined){
+            const naturalGround=rock?undefined:environmentGround(id);
+            color=naturalGround?.color??COLORS[id]??COLORS[3];
+            material=naturalGround?0:id===BLOCK.LEAVES?18:id===BLOCK.DEEPSTONE?19:id;
+            shade=.91+((Math.abs(x*13+y*7+z*17)%17)/17)*.12;
+          }
           const r=Math.min(1,color[0]*shade*face.lit),
             g=Math.min(1,color[1]*shade*face.lit),
             b=Math.min(1,color[2]*shade*face.lit);
+          // Reserve the complete ordinary cube face once. Shaped vertices
+          // retain the original single-vertex emitter and growth contract.
+          if(length+54>vertices.length){
+            const bigger=new Float32Array(vertices.length*2);
+            bigger.set(vertices);vertices=bigger;
+          }
           for(const k of TRIANGLE_CORNERS){
             const p=face.q[k],uv=UV[k];
-            emit(x+p[0],y+p[1],z+p[2],r,g,b,uv[0],uv[1],material);
+            vertices[length++]=x+p[0];vertices[length++]=y+p[1];
+            vertices[length++]=z+p[2];vertices[length++]=r;
+            vertices[length++]=g;vertices[length++]=b;
+            vertices[length++]=uv[0];vertices[length++]=uv[1];
+            vertices[length++]=material;
           }
         }
       }
