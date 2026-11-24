@@ -1,0 +1,30 @@
+name: Forgotten Sands P0 current source independent compatibility
+on:
+  push:
+    branches: [research/forgotten-sands-p0-far-shell-20261124]
+    paths:
+      - 'tests/forgotten-sands-current-compat.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-current-compat.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: .current-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          git -C .current-source rev-parse HEAD
+          node --version
+          P0_CURRENT_SOURCE="$PWD/.current-source" node --test tests/forgotten-sands-current-compat.test.mjs
