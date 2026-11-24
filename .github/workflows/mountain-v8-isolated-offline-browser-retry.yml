@@ -1,0 +1,41 @@
+name: Mountain V8 isolated offline browser-only corrected reload wait
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-isolated-offline-browser-retry.yml]
+permissions:
+  contents: read
+jobs:
+  isolated-offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source and script syntax only
+        run: |
+          git rev-parse HEAD
+          git -C prior-production rev-parse HEAD
+          node --check scripts/ci/mountain-v8-isolated-offline.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual old production writer and isolated candidate offline
+        run: node scripts/ci/mountain-v8-isolated-offline.mjs
+      - name: Retain actual game evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-isolated-offline
+          path: artifacts/mountain-v8-isolated-offline/
+          if-no-files-found: warn

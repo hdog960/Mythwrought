@@ -53,7 +53,7 @@ try{
  await page.locator('#advancedMenu > summary').click();
  check('compact-menu-current-controls',await page.locator('#newWorld').isVisible()&&await page.locator('#g2bFlightEnable').count()===1&&await page.locator('#g2bFlightProfile').count()===0);
  await page.locator('#createMountainV8Candidate').click();
- await page.waitForFunction(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator==='mythwrought-five-surface-regions-mountain-v8',null,{timeout:60000});
+ await page.waitForFunction(()=>window.__mythwroughtTest?.fourBiomeProfile()?.generator==='mythwrought-five-surface-regions-mountain-v8',null,{timeout:60000});
  if(await page.locator('#closeHelp').isVisible())await page.locator('#closeHelp').click();
  const scopeState=()=>page.evaluate(async seed=>{
   const {mountainV8Storage,V8_ACTIVE_KEY}=await import('/src/manual-biomes/mountain-v8-isolated-storage.mjs');
