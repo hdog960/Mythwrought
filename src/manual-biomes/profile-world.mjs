@@ -10,6 +10,7 @@ import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
+import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR} from '../environment-ground.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
@@ -54,17 +55,23 @@ export function validateFourRegionProfile(input,seed){
  * All four biomes are deterministic; only bounded column plans are cached.
  */
 export class FourRegionWorld extends VoxelWorld{
-  constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS}={}){
+  constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS,experimentalEnchantedTrees=false}={}){
     super(seed);
     this.profile=validateFourRegionProfile(profile,seed);
     if(!Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
+    if(typeof experimentalEnchantedTrees!=='boolean'||
+       experimentalEnchantedTrees&&this.profile.generator!==M7_ENVIRONMENT_GENERATOR)
+      throw Error('Enchanted tree prototype requires explicit M7 opt-in');
+    // Immutable per-world selection prevents a live cache/profile mismatch.
+    Object.defineProperty(this,'experimentalEnchantedTrees',{value:experimentalEnchantedTrees,enumerable:true});
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
     if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
       this._environmentTreeChunks=new Map();
+      if(this.experimentalEnchantedTrees)this._environmentCandidateSiteBiomes=new EnchantedSiteBiomeCache();
       this._environmentOases=new Map();
     }
   }
@@ -75,7 +82,8 @@ export class FourRegionWorld extends VoxelWorld{
     if(this.profile.generator===M7_ENVIRONMENT_GENERATOR){
       const region=v6BiomeAt(x,z,this.seed);
       lookup=this._oasisNear(x,z,0,region)?.columns.get(key)??
-        planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region);
+        planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region,
+          {experimentalEnchantedTrees:this.experimentalEnchantedTrees});
     }else lookup=this._existingBiomeColumn(x,z);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
@@ -182,7 +190,9 @@ export class FourRegionWorld extends VoxelWorld{
     if(!cells){
       cells=environmentalTreesForChunk(cx,cz,this.seed,
         (a,c)=>this._columnPlan(a,c),
-        (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c));
+        (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
+        {experimentalEnchantedTrees:this.experimentalEnchantedTrees,
+          candidateSiteBiomeCache:this._environmentCandidateSiteBiomes??null});
       this._environmentTreeChunks.set(key,cells);
       if(this._environmentTreeChunks.size>64)
         this._environmentTreeChunks.delete(this._environmentTreeChunks.keys().next().value);
@@ -243,6 +253,12 @@ export class FourRegionWorld extends VoxelWorld{
       }
     }
     return true;
+  }
+  // No durable identity exists for this opt-in yet. Do not save or migrate it.
+  save(){
+    if(this.experimentalEnchantedTrees)
+      throw Error('Experimental enchanted tree candidate cannot be saved as historical M7');
+    return super.save();
   }
   get cachedBiomeColumns(){return this._biomeColumns.size;}
   get generationProfile(){return this.profile;}
