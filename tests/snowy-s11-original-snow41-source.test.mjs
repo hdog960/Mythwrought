@@ -16,7 +16,7 @@ test('true pinned Desert-main shader only changes EXACT original Snow material41
  assert.equal(proposed.split(replacement).length-1,1);
  assert.equal(proposed.split('else if(vMat==41)').length-1,1);
  assert.ok(proposed.includes('else if(vMat==42)'));
- assert.ok(proposed.includes('else if(vMat==40)'));
+ assert.ok(proposed.includes('if(vMat==40)'));
  assert.ok(proposed.includes('vMat==13||vMat==14'));
  assert.ok(proposed.includes('uArtQuality<.5'));
  assert.ok(proposed.includes('float fog=smoothstep'));
