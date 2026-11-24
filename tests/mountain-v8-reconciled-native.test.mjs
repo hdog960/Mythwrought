@@ -41,7 +41,7 @@ test('V8 inherits actual current forest trees without aliasing the historical pr
 test('candidate nonblock manifest verifies every actual asset and includes nine Mountain modules',()=>{
  const m=JSON.parse(readFileSync(new URL('../nonblock-stage-assets.json',import.meta.url)));
  const read=p=>readFileSync(new URL('../'+(p==='./'?'index.html':p.slice(2)),import.meta.url));
- assert.equal(m.version,'20261124-v39-mountain13');
+ assert.equal(m.version,'20261124-v39-mountain14');
  for(const [p,h] of Object.entries(m.assets))assert.equal(hash(read(p)),h,p);
  assert.equal(Object.keys(m.assets).filter(p=>p.includes('/mountain-v8-')).length,9);
  console.log('V8 verified staged manifest entries',Object.keys(m.assets).length);

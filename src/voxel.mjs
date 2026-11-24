@@ -3,7 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
-import {isMountainV8Material,isMountainV8Flora,mountainV8Material,mountainV8MaterialColor} from './manual-biomes/mountain-v8-materials.mjs';
+import {isMountainV8Material,isMountainV8Flora,mountainV8Material,mountainV8MaterialColor,mountainV8FoliageFaceCovered} from './manual-biomes/mountain-v8-materials.mjs';
 import {environmentGround,isEnvironmentGenerator} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
@@ -351,6 +351,7 @@ export function meshChunk(world,cx,cz){
                 boundary=false;break;
               }
             }
+            if(boundary&&mountainV8FoliageFaceCovered(id,neighbor,nx,ny,nz))continue;
             if(boundary&&neighbor!==BLOCK.AIR&&
                 ((!isPhysicalShape(neighbor)&&!isPack2LiveId(neighbor))||
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;

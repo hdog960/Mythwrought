@@ -4,7 +4,7 @@ import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
-import {isMountainV8Flora,mountainV8Material,mountainV8MaterialColor} from './manual-biomes/mountain-v8-materials.mjs';
+import {isMountainV8Flora,mountainV8Material,mountainV8MaterialColor,mountainV8FoliageFaceCovered} from './manual-biomes/mountain-v8-materials.mjs';
 import {environmentGround} from './environment-ground.mjs';
 import {sectionBounds} from './depth.mjs';
 
@@ -88,6 +88,7 @@ export function meshDepthSection(world,cx,cz,section){
                 boundary=false;break;
               }
             }
+            if(boundary&&mountainV8FoliageFaceCovered(id,blockAt(x+nx,y+ny,z+nz),nx,ny,nz))continue;
             if(boundary&&blockAt(x+nx,y+ny,z+nz)!==BLOCK.AIR &&
                !isPhysicalShape(blockAt(x+nx,y+ny,z+nz))&&
                !isPack2LiveId(blockAt(x+nx,y+ny,z+nz)))continue;

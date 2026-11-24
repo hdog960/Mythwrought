@@ -33,9 +33,8 @@ const rows=[
   [.32,0,.32,.68,1,.68],[0,.18,.42,1,.30,.58],
   [.42,.18,0,.58,.30,1]],['#674a32','#795b3d','#59412d'],0],
  ['conifer-needles','Alpine dwarf pine needles',false,[
-  [.16,0,.16,.84,.48,.84],[0,.10,.20,1,.58,.80],
-  [.20,.10,0,.80,.58,1],[.22,.38,.22,.78,.82,.78],
-  [.29,.70,.29,.71,1,.71]],['#345d3d','#426f45','#294e36'],0]
+  [0,0,0,1,.34,1],[.045,.34,.045,.955,.68,.955],
+  [.12,.68,.12,.88,.88,.88],[.23,.88,.23,.77,1,.77]],['#345d3d','#426f45','#294e36'],0]
 ];
 // The runtime module must not import catalogs that themselves import voxel.
 // Qualification supplies the original owner registries to this explicit check.
@@ -57,6 +56,11 @@ export const MOUNTAIN_V8_MATERIAL=Object.freeze(Object.fromEntries([...byName].m
 export const isMountainV8Material=id=>Number.isInteger(id)&&defs.has(id);
 export const mountainV8Material=id=>defs.get(id);
 export const isMountainV8Flora=id=>defs.has(id)&&!defs.get(id).terrain;
+// The authored 512 shape is symmetric and its entire lower horizontal
+// boundary band matches its identical neighbor. Its narrow top is contained
+// by the full-width bottom above. Only those proved internal faces vanish.
+export const mountainV8FoliageFaceCovered=(id,neighbor,nx,ny,nz)=>
+ id===512&&neighbor===512&&Boolean(nx||nz||ny>0);
 export function assertMountainV8Namespace(ids){
  for(const id of ids)if(defs.has(id))throw Error('Existing owner claims Mountain V8 ID '+id);
  return true;
