@@ -15,6 +15,12 @@ const root=process.cwd(),previous=path.resolve(process.env.ENCHANTED_PREVIOUS_RO
 const out=path.join(root,'artifacts/enchanted-versioned-release');
 await mkdir(out,{recursive:true});
 const OLD='mythwrought-m5-shell-20261123-desert-p3-v1',NEW='mythwrought-m5-shell-20261124-enchanted-p2-v1';
+async function shellCount(base){
+ const source=await readFile(path.join(base,'sw-m5.js'),'utf8');
+ const paths=[...source.match(/const SOURCE_ASSETS=\[([\s\S]*?)\];/)[1].matchAll(/^\s*"([.]\/[^"]*)",?$/gm)].map(m=>m[1]);
+ return new Set(paths.map(p=>new URL(p,'http://localhost/').href)).size;
+}
+const counts={[OLD]:await shellCount(previous),[NEW]:await shellCount(root)};
 const seed=179,oldSeed=7,oldPrefix=worldSlotKey(oldSeed),prefix=worldSlotKey(seed);
 const map=new Map(),storage={get length(){return map.size;},key:i=>[...map.keys()][i]??null,
  getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v)),removeItem:k=>map.delete(k)};
@@ -71,12 +77,12 @@ try{
  async function cacheReady(name){
   const deadline=Date.now()+150000;
   while(Date.now()<deadline){
-   const status=await page.evaluate(async name=>{
+   const status=await page.evaluate(async ({name,count})=>{
     if(!navigator.serviceWorker.controller||!(await caches.keys()).includes(name))return null;
     const c=await caches.open(name),keys=await c.keys();
     const index=await c.match(new URL('/index.html',location.href).href);
-    return keys.length>=250&&index?{keys:keys.map(x=>x.url),source:index.headers.get('X-MW-Source')}:null;
-   },name);
+    return keys.length===count&&index?{keys:keys.map(x=>x.url),source:index.headers.get('X-MW-Source')}:null;
+   },{name,count:counts[name]});
    if(status)return status;await page.waitForTimeout(350);
   }
   throw Error('Worker cache did not become complete '+name);
@@ -89,7 +95,7 @@ try{
  // Install genuine new shell over old controlling worker. The older worker
  // must not be able to supply stale bytes to the fresh query install.
  serving=root;
- await page.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration('/');if(!reg)throw Error('Missing prior worker');await reg.update();});
+ await page.evaluate(async()=>{window.__forestControllerChanged=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__forestControllerChanged=true;},{once:true});const reg=await navigator.serviceWorker.getRegistration('/');if(!reg)throw Error('Missing prior worker');await reg.update();});
  const nextCache=await cacheReady(NEW);
  assert.equal(nextCache.source,'candidate');
  const required=['enchanted-tree-candidates','enchanted-tree-footings','enchanted-tree-overlap',
@@ -97,7 +103,7 @@ try{
  for(const file of required)assert.ok(nextCache.keys.some(url=>url.endsWith('/src/manual-biomes/'+file+'.mjs')),file);
  assert.ok(await page.evaluate(async old=>(await caches.keys()).includes(old),OLD));
  // Wait for the new worker's actual control and verified candidate HTML.
- await page.waitForFunction(()=>navigator.serviceWorker.controller?.state==='activated',null,{timeout:90000});
+ await page.waitForFunction(()=>window.__forestControllerChanged===true&&navigator.serviceWorker.controller?.state==='activated',null,{timeout:90000});
  const response=await page.reload({waitUntil:'domcontentloaded',timeout:90000});
  assert.equal(response.headers()['x-mw-source'],'candidate');
  await waitProfile(oldSeed,M7_ENVIRONMENT_GENERATOR);
