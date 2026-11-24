@@ -1,0 +1,41 @@
+name: Enchanted P2 Clean Current-Main Integration Delta
+on:
+  push:
+    branches:
+      - research/enchanted-p2-clean-integration-20261124
+    paths:
+      - .github/workflows/enchanted-p2-clean-integration-native.yml
+permissions:
+  contents: read
+jobs:
+  current-main-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: .baseline-main
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate both original sources and test only new integration delta
+        env:
+          ENCHANTED_BASELINE_ROOT: ${{ github.workspace }}/.baseline-main
+        run: |
+          git rev-parse HEAD
+          test "$(git -C .baseline-main rev-parse HEAD)" = "db4bbcc32156e5df311f733bcaa53d559c17313b"
+          test "$(git hash-object .baseline-main/src/manual-biomes/environment-v7.mjs)" = "7fa5be721d8597baa22df8c45fb9b10536a7c155"
+          test "$(git hash-object .baseline-main/src/manual-biomes/profile-world.mjs)" = "ffad7e10c07e9252bfaaf8381962443ce658abff"
+          for file in src/main.mjs src/voxel.mjs src/physics.mjs src/manual-biomes/profile-storage.mjs src/manual-biomes/m2-runtime-bridge.mjs; do
+            cmp "$file" ".baseline-main/$file"
+          done
+          node --version
+          node --check src/manual-biomes/environment-v7.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --test tests/manual-biomes/enchanted-clean-integration-delta.test.mjs
