@@ -37,17 +37,22 @@ assert.ok(witness);
 const cell=witness[0].split(',').map(Number),id=witness[1];
 const mime={'.html':'text/html','.js':'text/javascript','.mjs':'text/javascript','.css':'text/css',
  '.json':'application/json','.png':'image/png','.svg':'image/svg+xml','.webmanifest':'application/manifest+json'};
-let serving=previous,requests=0,offline=false;const afterCutoff=[];
+let serving=previous,requests=0,offline=false;const afterCutoff=[],workerRequests=[],installRequests={historical:0,candidate:0};
 const server=createServer(async(req,res)=>{
  ++requests;if(offline)afterCutoff.push(req.url);
  try{
   const uri=new URL(req.url,'http://127.0.0.1'),rel=decodeURIComponent(uri.pathname);
   const base=serving,absolute=path.resolve(base,'.'+rel);
+  const epoch=base===root?'candidate':'historical';
+  if(rel==='/sw-m5.js')workerRequests.push({epoch,url:req.url,cacheControl:req.headers['cache-control']??null,serviceWorker:req.headers['service-worker']??null});
+  if(uri.searchParams.has('mw-cache-install'))installRequests[epoch]++;
   if(absolute!==base&&!absolute.startsWith(base+path.sep))throw Error('outside checkout');
   const file=absolute===base?path.join(base,'index.html'):absolute;
   const bytes=await readFile(file);
   res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream',
-   'Cache-Control':rel==='/sw-m5.js'?'public,max-age=300':'no-store',
+   // The harness deliberately publishes a new revision seconds after the old one.
+   // Revalidate the worker script online instead of caching it for 300 seconds.
+   'Cache-Control':'no-store',
    'X-MW-Source':base===root?'candidate':'historical'});
   res.end(bytes);
  }catch(e){res.writeHead(404);res.end(String(e));}
@@ -85,7 +90,13 @@ try{
    },{name,count:counts[name]});
    if(status)return status;await page.waitForTimeout(350);
   }
-  throw Error('Worker cache did not become complete '+name);
+  const diagnostic=await page.evaluate(async()=>{
+    const reg=await navigator.serviceWorker.getRegistration('/');
+    const names=await caches.keys();
+    return {updateViaCache:reg?.updateViaCache,active:reg?.active?.state,installing:reg?.installing?.state,waiting:reg?.waiting?.state,
+      controller:navigator.serviceWorker.controller?.state,counts:await Promise.all(names.map(async name=>({name,entries:(await (await caches.open(name)).keys()).length})))};
+  });
+  throw Error('Worker cache did not become complete '+name+' '+JSON.stringify({expected:counts[name],diagnostic,workerRequests,installRequests}));
  }
  await page.goto(origin+'/',{waitUntil:'domcontentloaded',timeout:90000});
  await waitProfile(oldSeed,M7_ENVIRONMENT_GENERATOR);
@@ -151,4 +162,4 @@ try{
  check('cold-offline-versioned-reopen',{offline:off,editedTreeStillAir:true,versionedBytesUnchanged:true,historicalBytesUnchanged:true,originRequestsAfterCutoff:requests-cutoff});
  report.success=true;
 }catch(e){report.error=String(e);report.stack=e.stack;throw e;}
-finally{report.afterCutoffRequests=afterCutoff;await writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2)+'\n');if(ctx)await ctx.close();if(browser)await browser.close();await new Promise(r=>server.close(r));}
+finally{report.afterCutoffRequests=afterCutoff;report.workerRequests=workerRequests;report.installRequests=installRequests;await writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2)+'\n');if(ctx)await ctx.close();if(browser)await browser.close();await new Promise(r=>server.close(r));}
