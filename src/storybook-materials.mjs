@@ -223,6 +223,12 @@ ${CARVED_TRIM_GLSL}  }else if(vMat==18){ // Physical leaf voxels: layered canopy
     shade=.81+.14*band+.09*fleck;
     base=mix(base,vec3(.23,.32,.43),.19*band*near);
     base=mix(base,vec3(.68,.76,.79),.15*seam*near);
+  }else if(vMat==44){ // Research-only S18 natural Snow cap tag; not a block ID.
+    float grit=hashCell(floor(vUv*15.0)+41.0);
+    float sweep=sin(vUv.x*.46+vUv.y*.61+.82*sin(vUv.y*.19));
+    float snowSweepA=sin(vUv.x*.14+vUv.y*.22+.65*sweep);
+    float snowSweepB=sin(vUv.x*.041-vUv.y*.071);
+    shade=.955+.032*sweep+.050*snowSweepA+.022*snowSweepB+.006*(grit-.5);
   }else if(vMat>=40&&vMat<=43){ // Natural terrain uses world-space UV at chunk seams.
     float grit=hashCell(floor(vUv*15.0)+float(vMat));
     float sweep=sin(vUv.x*.46+vUv.y*.61+.82*sin(vUv.y*.19));

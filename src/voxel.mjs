@@ -371,7 +371,7 @@ export function meshChunk(world,cx,cz){
               }
               appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
-                groundColor?terrainArtMaterial(id):0);
+                groundColor?(snowS17Rgb&&terrainArtMaterial(id)===41?44:terrainArtMaterial(id)):0);
             }
           }
           continue;

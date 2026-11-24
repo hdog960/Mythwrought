@@ -1,0 +1,53 @@
+name: Snow S18 scoped wind and corrected physical edge camera
+on:
+  push:
+    branches: [research/snow-s18-scoped-wind-clear-edge-20261124]
+    paths:
+      - 'src/voxel.mjs'
+      - 'src/storybook-materials.mjs'
+      - 'tests/snowy-s18-scoped-wind.test.mjs'
+      - 'scripts/ci/snow-s18-clear-edge-webgl2.mjs'
+      - '.github/workflows/snow-s18-scoped-wind.yml'
+permissions:
+  contents: read
+jobs:
+  scoped-wind-and-edge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: 6315fe9953e242162e0e1c234000ddfd9863c14b
+          path: s17-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and prior material census
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C s17-readonly rev-parse HEAD)" = 6315fe9953e242162e0e1c234000ddfd9863c14b
+          test "$(git hash-object src/manual-biomes/snowy-s17-fresh-source.mjs)" = c04300cc3ad920f3900d76f35cf267393b0ce6a7
+          test "$(git hash-object src/manual-biomes/snowy-s17-experimental-world.mjs)" = 58771444c08e769c2ae76713420b472c22e96ba1
+          git -C s17-readonly grep -inE '(material|vMat|shaderTag|artTag|aMat)[^;]{0,60}([=:,]|==)[[:space:]]*44([^0-9]|$)' -- src || true
+          node --check scripts/ci/snow-s18-clear-edge-webgl2.mjs
+      - name: Original actual mesh bytes and narrowly scoped new cap material
+        run: node --test tests/snowy-s18-scoped-wind.test.mjs
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual original and generated Snow edge, verified terrain ray hits
+        run: |
+          python3 -m http.server 4173 >/tmp/snow-s18-edge.log 2>&1 &
+          node scripts/ci/snow-s18-clear-edge-webgl2.mjs
+      - name: Preserve real visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s18-clear-edge-${{ github.sha }}
+          path: artifacts/snow-s18-edge/
+          if-no-files-found: ignore
+          retention-days: 7
