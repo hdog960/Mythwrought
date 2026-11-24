@@ -1,0 +1,30 @@
+name: Mountain V8 real browser seed admission and offline dependency closure
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-admission-browser.yml]
+permissions:
+  contents: read
+jobs:
+  admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact candidate native dependency closure
+        run: |
+          node --version
+          git rev-parse HEAD
+          node --check src/manual-biomes/mountain-v8-new-world-admission.mjs
+          node --test tests/mountain-v8-developer-admission.test.mjs
+      - name: Install pinned Chromium
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Real browser storage and two-tab admission
+        run: node scripts/ci/mountain-v8-developer-admission-browser.mjs
