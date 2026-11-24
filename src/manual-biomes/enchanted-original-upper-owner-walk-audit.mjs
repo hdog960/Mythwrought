@@ -74,13 +74,29 @@ function sourceUpperOwner(seed,which){
   return result;
 }
 
+// One research-only entrance to ORIGINAL author voxel source. The caller
+// cannot invent an upper-gallery floor: this requires actual upperCaveCells
+// ownership, real M7 combined AIR and floor, and original whole-body
+// support. No cell map escapes and no source cache survives gameplay.
+export function originalM7UpperOwnedPhysicalFloor(world,name,x,floor,z){
+  if(!original(world)||!Object.hasOwn(known,name)||
+    ![x,floor,z].every(Number.isSafeInteger))
+    throw Error('Original M7 upper owner physical floor requires exact inputs');
+  const result=sourceUpperOwner(world.seed,known[name]);
+  if(!result.ok)return null;
+  const xcap=inspectOwnerCap(world,result.owner,x,floor,z);
+  return xcap.exactM7?xcap.cap:null;
+}
+
 // Two adjacent author route centers may differ by both x and z. An
 // intermediary cell is permitted ONLY when the exact original upper
 // author explicitly owns its floor AND all three headroom AIR voxels, the
 // real M7 world exposes them and the body has actual support. No guessed
 // L-turns, gravity shortcuts or virtual corner blocks.
-export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
-  if(!original(world)||!Object.hasOwn(known,name)||
+// Opt-in source-only planning is permitted ONLY for research routes which
+// subsequently call the genuine full replayOriginalM7CaveAnchorWalk.
+export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8,sourceOnly=false}={}){
+  if(!original(world)||typeof sourceOnly!=='boolean'||!Object.hasOwn(known,name)||
      !Number.isInteger(ownerSteps)||ownerSteps<1||
      ownerSteps>ORIGINAL_UPPER_M7_BOUNDS.ownerSteps)
     throw Error('Invalid original M7 upper route audit');
@@ -185,8 +201,10 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
     upperOwnerName:site.name,sourceOwnedUpperRouteSteps:ownerCount,
     upperOwnerSourceObserved:true,
     fullDeepNetworkAccepted:false});
-  const physics=replayFullOriginalM7CaveAnchorWalk(world,plan);
+  const physics=sourceOnly?null:replayFullOriginalM7CaveAnchorWalk(world,plan);
   return Object.freeze({ok:true,name,siteName:site.name,
+    originalOwnerSourcePlan:plan,
+    sourcePlanOnly:sourceOnly,
     sourceOwnedUpperSteps:ownerCount,
     extraVerifiedPhysicalWaypoints:path.length-base.path.length,
     lastSourceUpperCenter:floorRecord(predecessor),
@@ -195,8 +213,8 @@ export function auditOriginalM7UpperAnchorWalk(world,name,{ownerSteps=8}={}){
       a=>a.kind==='original-upper-owner-overlap-floor')),
     observations:Object.freeze(observations),
     physics,
-    physicallyTraversedUpperSteps:physics.ok?ownerCount:0,
-    upperPhysicsAccepted:physics.ok,
+    physicallyTraversedUpperSteps:physics?.ok?ownerCount:0,
+    upperPhysicsAccepted:physics?.ok===true,
     sourceUnchanged:true,
     wholeUpperNetworkProven:false});
 }
