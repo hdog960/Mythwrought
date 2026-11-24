@@ -1,0 +1,51 @@
+name: Snow S15 certified needle material and original edge visual
+on:
+  push:
+    branches: [research/snow-s15-scoped-needles-and-original-edge-20261124]
+    paths:
+      - 'src/manual-biomes/snowy-s15-*.mjs'
+      - 'tests/snowy-s15-*.test.mjs'
+      - 'scripts/ci/snow-s15-*.mjs'
+      - '.github/workflows/snow-s15-original-source.yml'
+permissions:
+  contents: read
+jobs:
+  original-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/checkout@v4
+        with:
+          ref: db4bbcc32156e5df311f733bcaa53d559c17313b
+          path: production-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact original source and unchanged S14 edge
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C production-readonly rev-parse HEAD)" = db4bbcc32156e5df311f733bcaa53d559c17313b
+          test "$(git hash-object src/manual-biomes/snowy-s14-edge-pigment.mjs)" = 02fa2493b0ebaa0e6665a83653f3a9e861d306cd
+          node --check scripts/ci/snow-s15-original-edge272-webgl2.mjs
+      - name: Genuine original mesher certified snow needles and exact protected vertex bits
+        run: node --test tests/snowy-s15-original-needle-material.test.mjs
+      - name: Install targeted pinned Chromium and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual original snow-side S10 versus S14 edge pigment WebGL2
+        run: |
+          python3 -m http.server 4173 --directory production-readonly >/tmp/snow-s15-original.log 2>&1 &
+          node scripts/ci/snow-s15-original-edge272-webgl2.mjs
+          test -z "$(git -C production-readonly status --porcelain)"
+      - name: Preserve exact edge screenshots and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snow-s15-original-edge-${{ github.sha }}
+          path: artifacts/snow-s15-edge-webgl2/
+          if-no-files-found: ignore
+          retention-days: 7
