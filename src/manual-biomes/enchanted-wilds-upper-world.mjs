@@ -5,7 +5,8 @@ import {ENVIRONMENT_GROUND as G,environmentGround} from '../environment-ground.m
 import {biome130Block,isBiome130BlockId,biome130Color} from '../biome130-registry.mjs';
 import {prototypeSurfaceMesh} from '../shape-prototypes.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
+import {WORLD_MIN_Y,WORLD_MAX_Y,verticalEditSections,depthMeshKey} from '../depth.mjs';
+import {meshDepthSection} from '../depth-mesh.mjs';
 import {SKY_ISLAND_MAX_Y,skyIslandSectionForY,skyIslandSectionBounds,
   skyIslandMeshKey,skyIslandBodyRegions} from '../floating-islands/sky-runtime-adapter.mjs';
 import {createSkyOriginalMaterials,createSkyOriginalWorldView} from '../floating-islands/sky-original-core.mjs';
@@ -80,7 +81,8 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
    for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)horizontal.add(Math.floor((x+dx)/16)+','+Math.floor((z+dz)/16));
    const keys=new Set();
    for(const pos of horizontal){const [cx,cz]=pos.split(',').map(Number);
-     if(y<=20&&y>=-4)keys.add(pos);
+     if(y===20)keys.add(pos);
+     if(y<=WORLD_MAX_Y)for(const section of verticalEditSections(y))keys.add(depthMeshKey(cx,cz,section));
      for(const dy of [-1,0,1]){const s=skyIslandSectionForY(y+dy);if(s!==null)keys.add(skyIslandMeshKey(cx,cz,s));}
    }
    return [...keys].sort();
@@ -105,6 +107,7 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
    collides:(x,feet,z)=>collides(world,x,feet,z),
    raycast:(eye,direction,range=7)=>raycast(world,eye,direction,range),
    meshSurface:(cx,cz)=>meshChunk(world,cx,cz),
+   meshDepth:(cx,cz,section)=>meshDepthSection(world,cx,cz,section),
    meshUpper:(cx,cz,section)=>meshSkyIslandSection({source:world,cx,cz,section,
       shapeFor:materials.shapeFor,appearanceFor:materials.appearanceFor,
       surfaceMeshFor:materials.surfaceMeshFor,rotationFor:world.rotationAt}),
