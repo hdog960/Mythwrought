@@ -84,8 +84,9 @@ test('original Pack3 live bridge genuine failed rebuild rolls back source overla
   if(world.get(x,19,z)===BLOCK.AIR)cell=[x,19,z];
  assert.ok(cell);
  let calls=0;
- const r=bridge.mutate({mode:'place',cell,id:PACK3_BUILDER_IDS[0],orientation:0,rebuild(){calls++;throw Error('in-memory rebuild fault');}});
- assert.equal(calls,1);
+ const r=bridge.mutate({mode:'place',cell,id:PACK3_BUILDER_IDS[0],orientation:0,player:{x:cell[0]+8.5,z:cell[2]+8.5,feet:19},rebuild(){calls++;throw Error('in-memory rebuild fault');}});
+ assert.equal(calls,1,r.reason);
+ assert.match(r.reason,/in-memory rebuild fault/);
  assert.equal(r.ok,false);
  assert.equal(bridge.runtime.serialize(),before);
  assert.equal(storage.getItem(bridge.key),null);
