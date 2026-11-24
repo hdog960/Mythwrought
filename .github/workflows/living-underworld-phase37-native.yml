@@ -1,4 +1,4 @@
-name: Living Underworld Phase37 - original entrance fallback
+name: Living Underworld Phase37 - corrected authored-ownership entrance fallback
 on:
   push:
     branches:
@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
-      - name: Exact native entrance and constructor tests
+      - name: Corrected native entrance, actual isolated M7 controller and constructor tests
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
