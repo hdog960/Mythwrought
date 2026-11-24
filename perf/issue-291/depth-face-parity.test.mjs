@@ -69,3 +69,61 @@ test('invalid deep requests retain original exception contract',()=>{
     assert.throws(()=>meshDepthSection291(...args));
   }
 });
+
+
+test('direct halo indices preserve six axial neighbors at both ends of trimmed bottom section',()=>{
+  const {minY,maxY}=sectionBounds(-13);
+  for(const [cx,cz] of [[0,0],[-3,2],[-2,-4]]){
+    const traceA=[],traceB=[],x0=cx*16,z0=cz*16;
+    const fixture=trace=>({get(x,y,z){
+      trace.push([x,y,z]);
+      return (x===x0||x===x0+15)&&(z===z0||z===z0+15)&&
+        (y===minY||y===maxY)?BLOCK.DEEPSTONE:BLOCK.AIR;
+    }});
+    parity(fixture(traceA),fixture(traceB),cx,cz,-13);
+    assert.deepEqual(traceB,traceA);
+    for(const [x,y,z] of traceB){
+      assert.ok(x>=x0-1&&x<=x0+16&&z>=z0-1&&z<=z0+16);
+      assert.ok(y>=minY-1&&y<=maxY+1);
+    }
+  }
+});
+test('solid negative chunk with one mined boundary cell preserves lazy source read order',()=>{
+  const {minY,maxY}=sectionBounds(-2),cx=-2,cz=-3;
+  for(const target of [[-32,minY,-48],[-17,maxY,-33],[-24,minY+5,-40]]){
+    const traceA=[],traceB=[];
+    const fixture=trace=>({get(x,y,z){
+      trace.push([x,y,z]);
+      return x===target[0]&&y===target[1]&&z===target[2]?BLOCK.AIR:BLOCK.STONE;
+    }});
+    parity(fixture(traceA),fixture(traceB),cx,cz,-2);
+    assert.deepEqual(traceB,traceA);
+  }
+});
+test('direct index cache retains original Uint16 sentinel and first-read coercion behavior',()=>{
+  // Deliberately non-production IDs stress the original cache contract:
+  // sentinel rereads and Uint16 truncation on later cache hits.
+  const traceA=[],traceB=[];
+  const ids=[0,3,8,65535,65536];
+  const fixture=trace=>({get(x,y,z){
+    trace.push([x,y,z]);
+    return ids[Math.abs(x*19+y*17+z*23)%ids.length];
+  }});
+  parity(fixture(traceA),fixture(traceB),-1,2,-1);
+  assert.deepEqual(traceB,traceA);
+});
+test('cache miss exception propagates at identical axial source read without retry',()=>{
+  const {minY}=sectionBounds(-1);
+  const target=[1,minY,0],marker=new Error('original source read failure');
+  const traces=[[],[]];
+  for(const [i,mesh] of [meshDepthSection,meshDepthSection291].entries()){
+    const world={get(x,y,z){
+      traces[i].push([x,y,z]);
+      if(x===target[0]&&y===target[1]&&z===target[2])throw marker;
+      return BLOCK.STONE;
+    }};
+    assert.throws(()=>mesh(world,0,0,-1),error=>error===marker);
+  }
+  assert.deepEqual(traces[1],traces[0]);
+  assert.deepEqual(traces[1].at(-1),target);
+});
