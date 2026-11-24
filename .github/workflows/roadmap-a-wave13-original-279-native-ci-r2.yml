@@ -1,0 +1,41 @@
+name: Roadmap A Wave13 original source twelve and fully supported vault source R2
+on:
+  push:
+    branches:
+      - roadmap-a-wave13-original-279-native-ci-r2-20261123
+    paths:
+      - '.github/workflows/roadmap-a-wave13-original-279-native-ci-r2.yml'
+permissions:
+  contents: read
+jobs:
+  exact-authentic-source-wave13-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify original exact revised source and stronger vault native test Git blobs
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-wave13.mjs)" = "dcd4c65042049ad2232f9ace054f11d35096892f"
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs)" = "2f12a6e952693075665def0e2692e9b3198ed475"
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.mjs)" = "932cc760507cee5fedc04c3c7f22f0846f32d91f"
+          node --check src/building-pool/roadmap-2a/roadmap-a-wave13.mjs
+          node --check src/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.test.mjs
+          node --check tests/building-pool/roadmap-2a/roadmap-a-wave13-protected-128-only-d4.test.mjs
+      - name: Nine new original Wave13 source floor vault and 267 record parity and historic128 D4 tests
+        run: |
+          node --test \
+            tests/building-pool/roadmap-2a/roadmap-a-wave13.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-a5-279-provisional.test.mjs \
+            tests/building-pool/roadmap-2a/roadmap-a-wave13-protected-128-only-d4.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-wave13-279-original-source-provenance-r2
+          path: artifacts/roadmap-a-a5/A5_SETTLEMENT_HANDOFF_279_PROVISIONAL.json
+          if-no-files-found: error
+          retention-days: 14
