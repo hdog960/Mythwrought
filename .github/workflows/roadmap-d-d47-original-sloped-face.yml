@@ -1,0 +1,62 @@
+name: Builder D47 authentic original convex saddle and first fractional source voxel ONLY
+on:
+  push:
+    branches:
+      - builder-d-d47-original-congruent-slope-saddle-isolated-20261123
+    paths:
+      - 'src/building-pool/roadmap-d/d47-*'
+      - 'tests/building-pool/roadmap-d/d47-*'
+      - 'docs/building-pool/roadmap-d/D47_*'
+      - '.github/workflows/roadmap-d-d47-original-sloped-face.yml'
+permissions:
+  contents: read
+concurrency:
+  group: builder-d-d47-original-sloped-owner-only-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  only-new-d47-original-source-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+      - name: Authenticate exact D46 parent, protected original source blobs and strict six-file addition
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git rev-parse HEAD^)" = '5c74764dd236c00404efb972695faff936ad68b2'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
+          test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
+          test "$(git rev-parse HEAD:src/voxel.mjs)" = 'beaa7c9de60e6326128357c9dd3a498a154f255a'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d31-pack2-owner-oblique-preview.mjs)" = '3c06f7b6d8e41b9e3bf194505c82ab9fe686ffb7'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d36-wall-socket-convex-preview.mjs)" = 'b5f96c7b0bf6bd7cae14e7fce85ca05c8fdfb0ba'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d45-source-blocker-and-face-egress.mjs)" = 'ace6bbb9cfb21907570b81c8462c8f316f5ee44b'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d46-socket-to-fractional-tie-contract.mjs)" = '203e55b8246245b341530d5f81425100f18d17a9'
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d46-original-socket-exterior-continuity-audit.mjs)" = '18b4bc3556a19aeb2864af0e183fcc590ce8a807'
+          git diff --name-only HEAD^ HEAD > /tmp/d47-actual.txt
+          printf '%s\n' \
+            '.github/workflows/roadmap-d-d47-original-sloped-face.yml' \
+            'docs/building-pool/roadmap-d/D47_ORIGINAL_CONGRUENT_SLOPE_SADDLE_AND_PHYSICAL_FIRST_VOXEL_GATE.md' \
+            'src/building-pool/roadmap-d/d47-original-congruent-socket-saddle.mjs' \
+            'src/building-pool/roadmap-d/d47-original-slope-and-first-barrier-audit.mjs' \
+            'tests/building-pool/roadmap-d/d47-congruent-saddle-and-barrier.pure.test.mjs' \
+            'tests/building-pool/roadmap-d/d47-original-slope-and-fractional.source.test.mjs' > /tmp/d47-expected.txt
+          diff -u /tmp/d47-expected.txt /tmp/d47-actual.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax check exactly four new D47 source/test files
+        run: |
+          node --check src/building-pool/roadmap-d/d47-original-congruent-socket-saddle.mjs
+          node --check src/building-pool/roadmap-d/d47-original-slope-and-first-barrier-audit.mjs
+          node --check tests/building-pool/roadmap-d/d47-congruent-saddle-and-barrier.pure.test.mjs
+          node --check tests/building-pool/roadmap-d/d47-original-slope-and-fractional.source.test.mjs
+      - name: Run ONLY four new D47 pure and two genuine W16 W17 original source tests
+        run: |
+          node --test --test-concurrency=1 \
+            tests/building-pool/roadmap-d/d47-congruent-saddle-and-barrier.pure.test.mjs \
+            tests/building-pool/roadmap-d/d47-original-slope-and-fractional.source.test.mjs
