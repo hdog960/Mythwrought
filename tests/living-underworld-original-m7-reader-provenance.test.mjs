@@ -119,3 +119,18 @@ test('Phase33 original seed179 city site anchors have repeatable source values w
  assert.equal(inspect(source,{seed:179}).ok,true);
  assert.equal(inspect(source,{seed:179}).actualOriginalWorldSiteSafetyVerified,false);
 });
+
+
+test('Phase33 swapped FourRegionWorld superclass refuses without any original voxel reads',()=>{
+ const originalParent=Object.getPrototypeOf(FourRegionWorld.prototype);
+ try{
+  Object.setPrototypeOf(FourRegionWorld.prototype,{});
+  const result=inspect(source,{seed:179});
+  assert.equal(result.ok,false);
+  assert.equal(result.reason,'ORIGINAL_M7_INHERITED_SOURCE_METHOD_CHANGED');
+  assert.equal(result.originalWorldSourceQueriesDuringAttestation,0);
+ }finally{
+  Object.setPrototypeOf(FourRegionWorld.prototype,originalParent);
+ }
+ assert.equal(inspect(source,{seed:179}).ok,true);
+});
