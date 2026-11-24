@@ -2,7 +2,7 @@
 // Original V2–V5 sky adapter remains byte-identical to accepted PR #269.
 // V6 terrain remains wholly owned by src/manual-biomes/v6-balanced-biomes.mjs.
 import {v6BiomeAt,V6_BIOME_TILE_SIZE} from './manual-biomes/v6-balanced-biomes.mjs';
-import {M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR} from './manual-biomes/profile-world.mjs';
+import {M6_BALANCED_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
 const NAMES=Object.freeze(['mountain','desert','snow','enchanted']);
 const smooth=t=>{const u=Math.max(0,Math.min(1,t));return u*u*(3-2*u);};
 function verifiedV6(world){
