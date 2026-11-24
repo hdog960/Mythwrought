@@ -1,0 +1,48 @@
+name: Mountain V8 compact-menu and current forest reconciliation
+on:
+  push:
+    branches: [mountain-v8-developer-integration-20261124]
+    paths: [.github/workflows/mountain-v8-developer-reconciled.yml]
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          path: production
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Exact source, actual profile parity and compact menu tests
+        run: |
+          node --version
+          git -C candidate rev-parse HEAD
+          test "$(git -C production rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          cd candidate
+          node --check src/main.mjs
+          export MOUNTAIN_PRODUCTION_ROOT="$GITHUB_WORKSPACE/production"
+          node --test --test-concurrency=1 tests/mountain-v8-reconciled-native.test.mjs tests/mountain-v8-compact-menu.test.mjs
+      - name: Install pinned browser
+        working-directory: candidate
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual compact menu local V8 creation and offline reopening
+        working-directory: candidate
+        run: node scripts/ci/mountain-v8-reconciled-browser.mjs
+      - name: Retain real browser captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mountain-v8-reconciled
+          path: candidate/artifacts/mountain-v8-reconciled/
+          if-no-files-found: warn
