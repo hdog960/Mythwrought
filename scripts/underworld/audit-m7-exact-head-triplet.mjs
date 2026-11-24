@@ -67,6 +67,7 @@ const tests=Object.freeze([
  'tests/living-underworld-source-role-overlap-values.test.mjs',
  'tests/living-underworld-source-reader-cohort-provenance.test.mjs',
  'tests/living-underworld-source-cross-audit-ledger.test.mjs',
+ 'tests/living-underworld-original-m7-reader-provenance.test.mjs',
  'tests/living-underworld-m7-triplet-readonly-admission.test.mjs'
 ]);
 const nodeTests=call(process.execPath,['--test',...tests],180000);
