@@ -42,14 +42,16 @@ const readProposal=(x,z)=>surveyMountainV8Column({
   ids:BLOCK
 });
 function realProofs(count=2){
-  const proofs=[];
+  const proofs=[],seenChunks=new Set();
   for(let tz=24;tz<32;tz++)for(let tx=-88;tx<-80;tx++){
     const root=mountainV8TileRoot(tx,tz,SEED);
     const proposal=readProposal(root.rootX,root.rootZ);
     if(!proposal)continue;
     const p=uplift(proposal,{sourceMainHead:'db4bbcc32156e5df311f733bcaa53d559c17313b',
       originalVoxelReaderIdentityVerified:true,originalWorld:world});
-    if(p)proofs.push(p);
+    if(p&&!seenChunks.has(p.geometryMeshKeys[0])){
+      seenChunks.add(p.geometryMeshKeys[0]);proofs.push(p);
+    }
     if(proofs.length===count)return proofs;
   }
   throw Error('Insufficient authentic current-main Mountain uplift source proofs');
