@@ -1,0 +1,51 @@
+name: Mob changed cave floor births and poll cost
+on:
+  push:
+    branches:
+      - qualification/mob-cave-floor-20261124
+    paths:
+      - '.github/workflows/mob-cave-floor-20261124.yml'
+permissions:
+  contents: read
+jobs:
+  cave-floor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact source and timed acceptance
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git hash-object tests/mob-ecosystem-cave-floor-timed.test.mjs)" = 3cac4fbda74afbc15676dbf4717b5cdb276e7805
+          cp tests/mob-ecosystem-cave-floor-timed.test.mjs "$RUNNER_TEMP/cave-floor-timed.test.mjs"
+          git checkout --detach c4d2d385b2504f4d0fb6684f4f006753d3049525
+          test "$(git rev-parse HEAD^{tree})" = 8f4b3bf1d92add168f69f0b9eadc9b62e782cd07
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test "$(git hash-object src/mobs/ecology.mjs)" = 6b398581c0aeebed650f920e8eda3e9b16fd2588
+          test "$(git hash-object src/mobs/cave-spawn-column.mjs)" = 7add46bc15f45ebcbb3db82010bffed846f0540c
+          cp "$RUNNER_TEMP/cave-floor-timed.test.mjs" tests/mob-ecosystem-cave-floor-timed.test.mjs
+          node --version
+          git rev-parse HEAD HEAD^{tree}
+      - name: Actual four-site natural births and native poll timings
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/mob-cave-floor
+          node --test tests/mob-ecosystem-cave-floor-timed.test.mjs | tee artifacts/mob-cave-floor/births.tap
+      - name: Evidence digest
+        if: always()
+        run: |
+          if [ -f artifacts/mob-cave-floor/births.tap ]; then sha256sum artifacts/mob-cave-floor/births.tap; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-cave-floor-c4d2d385
+          path: artifacts/mob-cave-floor/
+          if-no-files-found: error
+          retention-days: 14
