@@ -14,7 +14,8 @@ import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
-import {mountainV8ConifersForChunk,MOUNTAIN_V8_EXISTING_PINE} from './mountain-v8-runtime-conifers.mjs';
+import {mountainV8ConifersForChunk,MOUNTAIN_V8_PINE} from './mountain-v8-runtime-conifers.mjs';
+import {MOUNTAIN_V8_MATERIAL as M,isMountainV8Material} from './mountain-v8-materials.mjs';
 import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {MOUNTAIN_V8_PLANT_PATTERNS} from './mountain-v8-vegetation-cells.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
@@ -265,6 +266,7 @@ export class FourRegionWorld extends VoxelWorld{
     // schema-1 delta format and rotation restrictions. The profile baseline
     // is virtual, so original setter's biomeCellCount can overcount on a
     // no-op that places the same biome ID as the natural surface.
+    if(isMountainV8Material(id)&&this.profile.generator!==M8_MOUNTAIN_GENERATOR)return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     const count=this.biomeCellCount;
     const ok=super.set(x,y,z,id,rotation);
@@ -308,7 +310,7 @@ export class FourRegionWorld extends VoxelWorld{
     if(this.edits.has(worldKey(x,y,z)))return [];
     this._mountainV8ConiferAt(x,y,z);
     const cache=this._mountainV8ConiferChunks.get(chunkCoord(x)+','+chunkCoord(z));
-    const {trunk,needles}=MOUNTAIN_V8_EXISTING_PINE;
+    const {trunk,needles}=MOUNTAIN_V8_PINE;
     if(!cache)return [];
     let bottom=null;
     for(let b=y-2;b<=y+1;b++){
@@ -316,7 +318,7 @@ export class FourRegionWorld extends VoxelWorld{
          cache.get(worldKey(x,b-1,z))!==trunk){bottom=b;break;}
     }
     if(bottom===null||y<bottom-1||y>bottom+2)return [];
-    if(y===bottom-1?this.get(x,y,z)!==BLOCK.GRASS:
+    if(y===bottom-1?this.get(x,y,z)!==M['alpine-grass']:
        this.get(x,y,z)!==trunk)return [];
     const pattern=MOUNTAIN_V8_PLANT_PATTERNS['dwarf-conifer'];
     const cells=pattern.map(([dx,dy,dz,material])=>({

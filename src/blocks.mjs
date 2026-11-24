@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
 import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {MOUNTAIN_V8_MATERIAL_IDS,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {ENVIRONMENT_GROUND,environmentGround} from './environment-ground.mjs';
 import {WORLD_MIN_Y} from './depth.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,
@@ -20,6 +21,7 @@ export const BLOCK_NAMES=Object.freeze({
   [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
   ...Object.fromEntries(Object.values(ENVIRONMENT_GROUND).map(id=>[id,environmentGround(id).name])),
   ...Object.fromEntries(BIOME130_REGISTERED_IDS.map(id=>[id,biome130Block(id).name])),
+  ...Object.fromEntries(MOUNTAIN_V8_MATERIAL_IDS.map(id=>[id,mountainV8Material(id).name])),
   ...PACK2_LIVE_NAMES,
   ...Object.fromEntries(PACK3_BUILDER_IDS.map((id,i)=>[id,resolvePack3BuilderAsset(PACK3_BUILDER_SYMBOLS[i]).name])),
   ...Object.fromEntries(MANUAL_FIVE_PACK_CATALOG.filter(x=>manual14Ids.has(x.numericId))
@@ -34,7 +36,7 @@ export function intersectsPlayerBlock(player,cell,selected=BLOCK.STONE,rotation=
     pack2State??pack2NormalizeState(selected),cell,
     {x:player.x,z:player.z,feet:player.feet,radius:BODY_RADIUS,height:BODY_HEIGHT});
   const boxes=manualPack3SymbolById.has(selected)?manualPack3Shape(selected,rotation):
-    isBiome130BlockId(selected)?biome130Block(selected,rotation).boxes:[[0,0,0,1,1,1]];
+    isBiome130BlockId(selected)?biome130Block(selected,rotation).boxes:mountainV8Material(selected)?.boxes??[[0,0,0,1,1,1]];
   return boxes.some(b=>player.x+BODY_RADIUS>x+b[0]+e&&player.x-BODY_RADIUS<x+b[3]-e&&
     player.feet+BODY_HEIGHT>y+b[1]+e&&player.feet<y+b[4]-e&&
     player.z+BODY_RADIUS>z+b[2]+e&&player.z-BODY_RADIUS<z+b[5]-e);

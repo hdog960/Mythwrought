@@ -5,6 +5,7 @@
 import {BLOCK,CHUNK_SIZE,terrainHeight,worldKey} from '../voxel.mjs';
 import {WORLD_MAX_Y} from '../depth.mjs';
 import {biome130Block} from '../biome130-registry.mjs';
+import {MOUNTAIN_V8_MATERIAL as M} from './mountain-v8-materials.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {naturalTreeTouchesDesert} from './environment-v7.mjs';
 import {mountainV8TileRoot,surveyMountainV8Column} from './mountain-v8-source-adapter.mjs';
@@ -14,6 +15,7 @@ const trunk=biome130Block('biome130:115'),needles=biome130Block('biome130:124');
 export const MOUNTAIN_V8_EXISTING_PINE=Object.freeze({trunk:trunk.blockId,needles:needles.blockId});
 if(trunk.name!=='Pine logs'||!trunk.solid||needles.name!=='Pine needle clusters'||needles.solid)
   throw Error('Original pine physical ownership changed');
+export const MOUNTAIN_V8_PINE=Object.freeze({trunk:M['conifer-trunk'],needles:M['conifer-needles']});
 const core=(x,z,seed)=>{const b=v6BiomeAt(x,z,seed);return b?.name==='mountain'&&b.weight>=.82;};
 export function mountainV8ConifersForChunk(cx,cz,seed,{readOriginal,protectedAt,readColumn,readGround,readExistingTree}){
   const out=new Map();
@@ -26,12 +28,12 @@ export function mountainV8ConifersForChunk(cx,cz,seed,{readOriginal,protectedAt,
     if(!core(x,z,seed))continue;
     const p=surveyMountainV8Column({x,z,seed,worldMaxY:WORLD_MAX_Y,
       biomeAt:v6BiomeAt,heightAt:terrainHeight,readBlock:readOriginal,protectedAt,ids:BLOCK});
-    if(!p||p.vegetation!=='dwarf-conifer')continue;
+    if(!p||!p.vegetation)continue;
     const surface=(a,c)=>{
       const column=readColumn(a,c);
       return column.size?Math.max(...column.keys()):terrainHeight(a,c,seed);
     };
-    if(surface(x,z)!==p.top||readGround(x,p.top,z)!==BLOCK.GRASS)continue;
+    if(surface(x,z)!==p.top||readGround(x,p.top,z)!==M['alpine-grass'])continue;
     const plant=planMountainV8PlantCells(p,{worldMaxY:WORLD_MAX_Y,airId:BLOCK.AIR,
       readOriginalBlock:readOriginal,protectedAt,mountainAt:(a,c)=>core(a,c,seed),
       proposedSurfaceAt:surface});
@@ -43,7 +45,7 @@ export function mountainV8ConifersForChunk(cx,cz,seed,{readOriginal,protectedAt,
       readGround(c.x,c.y,c.z)!==BLOCK.AIR||readExistingTree(c.x,c.y,c.z)!==BLOCK.AIR||
       out.has(worldKey(c.x,c.y,c.z))))continue;
     for(const c of plant.cells)out.set(worldKey(c.x,c.y,c.z),
-      c.material==='conifer-trunk'?trunk.blockId:needles.blockId);
+      M[c.material]);
   }
   return out;
 }

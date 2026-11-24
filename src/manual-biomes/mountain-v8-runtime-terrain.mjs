@@ -4,13 +4,12 @@
 // no new material allocation or placeholders. Final V8 material and flora ledger pending.
 import {BLOCK,terrainHeight} from '../voxel.mjs';
 import {WORLD_MAX_Y} from '../depth.mjs';
-import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
+import {MOUNTAIN_V8_MATERIAL as M} from './mountain-v8-materials.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {surveyMountainV8Column} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
 export const M8_MOUNTAIN_GENERATOR='mythwrought-five-surface-regions-mountain-v8';
-const existingTerrain=Object.freeze({stone:BLOCK.STONE,dirt:BLOCK.DIRT,
-  snow:272,'alpine-grass':BLOCK.GRASS,slate:G.slate,gneiss:G.gneiss,scree:G.scree});
+const existingTerrain=M;
 // Never consult player edits when generating natural baseline. Real get/set
 // owns their precedence; including edits here would make save restore nondeterministic.
 // A protected/cave/landmark veto falls through to the unchanged original P3 plan.
@@ -51,7 +50,7 @@ export function planMountainV8RegisteredTerrain(x,z,seed,readBaseline,protectedA
     if(y<proposal.legacyTop){if(prior.has(y))blended.set(y,prior.get(y));continue;}
     if(protectedAt(x,y,z)||readBaseline(x,y,z)!==(y===proposal.legacyTop?BLOCK.GRASS:BLOCK.AIR))return null;
     blended.set(y,y===top?cap:
-      y>=top-2?(cap===BLOCK.GRASS?BLOCK.DIRT:BLOCK.STONE):BLOCK.STONE);
+      y>=top-2?([BLOCK.GRASS,M['alpine-grass']].includes(cap)?M.dirt:M.stone):M.stone);
   }
   return blended;
 }

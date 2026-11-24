@@ -264,6 +264,7 @@ const SOURCE_ASSETS=[
   "./src/manual-biomes/profile-storage.mjs",
   "./src/manual-biomes/profile-world.mjs",
   "./src/manual-biomes/mountain-v8-candidate.mjs",
+  "./src/manual-biomes/mountain-v8-materials.mjs",
   "./src/manual-biomes/mountain-v8-source-adapter.mjs",
   "./src/manual-biomes/mountain-v8-physical-column.mjs",
   "./src/manual-biomes/mountain-v8-runtime-terrain.mjs",

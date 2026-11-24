@@ -3,9 +3,6 @@
 // This module defines genuine unit-cell geometry and colors, not a global
 // activation switch. Historical world source and original IDs stay unchanged.
 import {validateShape,FULL_CUBE} from '../voxel-shape-interactions.mjs';
-import {BIOME130_REGISTERED_IDS} from '../biome130-registry.mjs';
-import {ENVIRONMENT_GROUND} from '../environment-ground.mjs';
-import {MANUAL_FIVE_PACK_NUMERIC_IDS} from '../builder-assets/manual-five-pack.mjs';
 
 const cube=FULL_CUBE.boxes;
 const rows=[
@@ -33,15 +30,16 @@ const rows=[
   [.60,.13,.55,.80,.32,.75],[.40,.18,.40,.60,.42,.60],
   [.20,.15,.55,.40,.34,.75],[.60,.15,.25,.80,.34,.45]],['#ad679b','#c583b5','#945689'],0],
  ['conifer-trunk','Alpine dwarf pine trunk',true,[
-  [.32,0,.32,.68,1,.68],[.26,.08,.40,.74,.26,.60],
-  [.40,.08,.26,.60,.26,.74]],['#674a32','#795b3d','#59412d'],0],
+  [.32,0,.32,.68,1,.68],[0,.18,.42,1,.30,.58],
+  [.42,.18,0,.58,.30,1]],['#674a32','#795b3d','#59412d'],0],
  ['conifer-needles','Alpine dwarf pine needles',false,[
-  [.18,0,.18,.82,.28,.82],[.08,.16,.26,.92,.48,.74],
-  [.26,.16,.08,.74,.48,.92],[.26,.42,.26,.74,.70,.74],
+  [.18,0,.18,.82,.28,.82],[0,.16,.26,1,.48,.74],
+  [.26,.16,0,.74,.48,1],[.26,.42,.26,.74,.70,.74],
   [.37,.65,.37,.63,1,.63]],['#345d3d','#426f45','#294e36'],0]
 ];
-const occupied=new Set([0,1,2,3,4,5,6,7,8,255,65535,
- ...BIOME130_REGISTERED_IDS,...MANUAL_FIVE_PACK_NUMERIC_IDS,...Object.values(ENVIRONMENT_GROUND)]);
+// The runtime module must not import catalogs that themselves import voxel.
+// Qualification supplies the original owner registries to this explicit check.
+const occupied=new Set([0,1,2,3,4,5,6,7,8,255,65535]);
 const defs=new Map(),byName=new Map();
 for(const [index,[key,name,solid,boxes,hex,materialTag]] of rows.entries()){
  const blockId=500+index;
@@ -58,6 +56,11 @@ export const MOUNTAIN_V8_MATERIAL_IDS=Object.freeze([...defs.keys()]);
 export const MOUNTAIN_V8_MATERIAL=Object.freeze(Object.fromEntries([...byName].map(([k,v])=>[k,v.blockId])));
 export const isMountainV8Material=id=>Number.isInteger(id)&&defs.has(id);
 export const mountainV8Material=id=>defs.get(id);
+export const isMountainV8Flora=id=>defs.has(id)&&!defs.get(id).terrain;
+export function assertMountainV8Namespace(ids){
+ for(const id of ids)if(defs.has(id))throw Error('Existing owner claims Mountain V8 ID '+id);
+ return true;
+}
 export function mountainV8MaterialColor(id,x=0,y=0,z=0,face=0){
  const a=defs.get(id);
  if(!a)throw Error('Unknown Mountain V8 material');

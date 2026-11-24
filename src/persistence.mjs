@@ -3,6 +3,7 @@
 // A verified sidecar journal and a previous-good backup protect those bytes.
 // This is still prototype localStorage, NOT the future IndexedDB save system.
 import {VoxelWorld} from './voxel.mjs';
+import {isMountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {worldSlotKey,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED,SELECTED_SEED_KEY} from './seeds.mjs';
 
 export const SAVE_JOURNAL_SUFFIX='-integrity-v009';
@@ -81,6 +82,8 @@ export function loadWorldSafe(storage,seed){
 export function assertMountainV8WriteIdentity(storage,world){
   const generator='mythwrought-five-surface-regions-mountain-v8';
   const actual=world?.base?.generationProfile??world?.generationProfile;
+  if(actual?.generator!==generator&&[...(world.edits?.values?.()??[])].some(isMountainV8Material))
+    throw Error('Dedicated Mountain V8 edits require V8 source identity');
   const key=worldSlotKey(world.seed)+'-four-biomes-profile-v1';
   const raws=[storage.getItem(key),storage.getItem(key+'-journal')];
   if(actual?.generator!==generator&&!raws.some(raw=>typeof raw==='string'&&raw.includes(generator)))return;

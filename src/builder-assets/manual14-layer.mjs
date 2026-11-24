@@ -3,6 +3,7 @@
 // allocates biome130 IDs, writes schema-1, or registers candidate blocks in VoxelWorld.
 import {BLOCK} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
+import {mountainV8Material} from '../manual-biomes/mountain-v8-materials.mjs';
 import {isBiome130BlockId,biome130Block} from '../biome130-registry.mjs';
 import {isPack2LiveId,pack2ShapeOf} from '../pack2-integration.mjs';
 import {raycastShapes} from '../voxel-shape-interactions.mjs';
@@ -70,6 +71,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   const id=world.get(...at);
   if(id===BLOCK.AIR)return false;
   if(id>0&&id<=BLOCK.DEEPSTONE)return true;
+  if(mountainV8Material(id))return mountainV8Material(id).solid;
   if(isBiome130BlockId(id))
    return biome130Block(id,world.rotationAt?.(...at)??0).solid===true;
   if(isPack2LiveId(id)){

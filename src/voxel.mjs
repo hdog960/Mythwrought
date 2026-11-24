@@ -3,6 +3,7 @@ import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
+import {isMountainV8Material,isMountainV8Flora,mountainV8Material,mountainV8MaterialColor} from './manual-biomes/mountain-v8-materials.mjs';
 import {environmentGround,isEnvironmentGenerator} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
@@ -34,7 +35,10 @@ const BIOME_GROUND_COLORS=new Map([
   const {palette}=biome130Block(id);
   return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
 }));
+const isPhysicalShape=id=>isBiome130BlockId(id)||isMountainV8Flora(id);
+const physicalShape=(id,rotation=0)=>isMountainV8Flora(id)?mountainV8Material(id):biome130Block(id,rotation);
 function terrainArtMaterial(id){
+  if(isMountainV8Material(id))return mountainV8Material(id).materialTag;
   if(id<=264)return 40;
   if(id<=279)return 41;
   if(id>=400&&id<=402||id>=302&&id<=307)return 42;
@@ -154,7 +158,7 @@ export class VoxelWorld{
   set(x,y,z,id,rotation=0){
     if(![x,y,z,id,rotation].every(Number.isInteger)||
        y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
-       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id))||
+       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id)||isMountainV8Material(id))||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     if(isBiome130BlockId(previous))this.biomeCellCount--;
@@ -250,7 +254,7 @@ export function meshChunk(world,cx,cz){
     return mountainVertexWeights.get(key);
   }
   function mountainShoulderCap(x,y,z,id){
-    if(!v8Mountain||![BLOCK.GRASS,BLOCK.STONE,400,401,402].includes(id)||hasEdit(x,y,z))return false;
+    if(!v8Mountain||(![BLOCK.GRASS,BLOCK.STONE,400,401,402].includes(id)&&!mountainV8Material(id)?.terrain)||hasEdit(x,y,z))return false;
     const region=v6BiomeAt(x,z,world.seed);
     if(region?.name!=='mountain'||region.weight>=.96)return false;
     const cap=originalSurface(x,z);
@@ -289,7 +293,7 @@ export function meshChunk(world,cx,cz){
     const cacheKey=id*4+rotation;
     let mesh=biomeSurfaceCache.get(cacheKey);
     if(!mesh){
-      const block=biome130Block(id,rotation);
+      const block=physicalShape(id,rotation);
       mesh=prototypeSurfaceMesh({prototypeOnly:true,boxes:block.boxes});
       if(mesh.indices.length>12000)throw Error('Biome voxel surface budget exceeded');
       biomeSurfaceCache.set(cacheKey,mesh);
@@ -325,7 +329,7 @@ export function meshChunk(world,cx,cz){
           }
           continue;
         }
-        if(isBiome130BlockId(id)){
+        if(isPhysicalShape(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
           const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
           // Strict surface-only Desert visual fade. Protected cave/landmark
@@ -348,7 +352,7 @@ export function meshChunk(world,cx,cz){
               }
             }
             if(boundary&&neighbor!==BLOCK.AIR&&
-                ((!isBiome130BlockId(neighbor)&&!isPack2LiveId(neighbor))||
+                ((!isPhysicalShape(neighbor)&&!isPack2LiveId(neighbor))||
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
             if(!checkedVisibleHardpan&&originalDesertHalo&&groundColor&&id===258){
               checkedVisibleHardpan=true;
@@ -362,7 +366,7 @@ export function meshChunk(world,cx,cz){
             }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
-            const color=groundColor??biome130Color(id,x,y,z,face);
+            const color=groundColor??(isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face));
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
@@ -394,7 +398,7 @@ export function meshChunk(world,cx,cz){
           }
           continue;
         }
-        const newGround=environmentGround(id);
+        const newGround=environmentGround(id)??mountainV8Material(id);
         const color=newGround?.color??COLORS[id]??COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
@@ -404,7 +408,7 @@ export function meshChunk(world,cx,cz){
         for(const face of FACE){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
           if(neighbor!==BLOCK.AIR&&!isPack2LiveId(neighbor)&&
-              (!unifiedTerrain||!isBiome130BlockId(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
+              (!unifiedTerrain||!isPhysicalShape(neighbor)||BIOME_SOLID_CUBES.has(neighbor)))continue;
           if(variance===undefined)variance=.90+noise(x/9,z/9,world.seed+91)*.14+
             hash(x+y*5,z-y*3,world.seed+91)*.08;
           // Reciprocal Desert-to-Mountain RGB only: screen the original top
@@ -430,7 +434,7 @@ export function meshChunk(world,cx,cz){
             const p=face.q[k],uv=FACE_UV[k];
             if(newGround){
               const shade=face.lit*groundTint(x+p[0],z+p[2]);
-              const terrain=id<=405,nx=face.d[0],ny=face.d[1];
+              const terrain=id<=405||mountainV8Material(id)?.terrain,nx=face.d[0],ny=face.d[1];
               const u=terrain?(nx?z+p[2]:x+p[0]):uv[0];
               const v=terrain?(ny?z+p[2]:y+p[1]):uv[1];
               let rgb=color;
@@ -523,8 +527,8 @@ export function raycast(world,eye,direction,maxDistance=7){
       if(id===BLOCK.AIR||id===76)return null;
       if(isPack2LiveId(id))
         return {boxes:pack2ShapeOf(id,world.getPack2State(x,y,z)).boxes};
-      if(isBiome130BlockId(id))
-        return {boxes:biome130Block(id,world.rotationAt?.(x,y,z)??0).boxes};
+      if(isPhysicalShape(id))
+        return {boxes:physicalShape(id,world.rotationAt?.(x,y,z)??0).boxes};
       return FULL_CUBE;
     },maxDistance);
     let nearestWater=null;
@@ -621,8 +625,8 @@ export function collides(world,x,feet,z){
               {x,z,feet,radius:BODY_RADIUS,height:BODY_HEIGHT}))return true;
             continue;
           }
-          if(!isBiome130BlockId(id))return true;
-          const asset=biome130Block(id,world.rotationAt?.(bx,by,bz)??0);
+          if(!isPhysicalShape(id))return true;
+          const asset=physicalShape(id,world.rotationAt?.(bx,by,bz)??0);
           if(!asset.solid)continue;
           for(const box of asset.boxes){
             if(x+BODY_RADIUS>bx+box[0]+e&&x-BODY_RADIUS<bx+box[3]-e&&

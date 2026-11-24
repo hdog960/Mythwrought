@@ -4,6 +4,7 @@ import {BLOCK,CHUNK_SIZE} from './voxel.mjs';
 import {isPack2LiveId,pack2WorldVertices} from './pack2-integration.mjs';
 import {isBiome130BlockId,biome130Block,biome130Color} from './biome130-registry.mjs';
 import {prototypeSurfaceMesh} from './shape-prototypes.mjs';
+import {isMountainV8Flora,mountainV8Material,mountainV8MaterialColor} from './manual-biomes/mountain-v8-materials.mjs';
 import {environmentGround} from './environment-ground.mjs';
 import {sectionBounds} from './depth.mjs';
 
@@ -16,6 +17,7 @@ const FACES=[
   {d:[0,0,-1],q:[[0,0,0],[0,1,0],[1,1,0],[1,0,0]],lit:.67}
 ];
 const UV=[[0,0],[0,1],[1,1],[1,0]];
+const isPhysicalShape=id=>isBiome130BlockId(id)||isMountainV8Flora(id);
 const shapeCache=new Map(); // At most 57 authored IDs x 4 rotations.
 const COLORS={
   1:[.35,.64,.32],2:[.48,.34,.24],3:[.48,.51,.55],
@@ -65,11 +67,11 @@ export function meshDepthSection(world,cx,cz,section){
           }
           continue;
         }
-        if(isBiome130BlockId(id)){
+        if(isPhysicalShape(id)){
           const rotation=world.rotationAt?.(x,y,z)??0,key=id*4+rotation;
           let mesh=shapeCache.get(key);
           if(!mesh){
-            const asset=biome130Block(id,rotation);
+            const asset=isMountainV8Flora(id)?mountainV8Material(id):biome130Block(id,rotation);
             mesh=prototypeSurfaceMesh({prototypeOnly:true,boxes:asset.boxes});
             if(mesh.indices.length>12000)throw Error('Biome surface budget exceeded');
             shapeCache.set(key,mesh);
@@ -87,10 +89,10 @@ export function meshDepthSection(world,cx,cz,section){
               }
             }
             if(boundary&&blockAt(x+nx,y+ny,z+nz)!==BLOCK.AIR &&
-               !isBiome130BlockId(blockAt(x+nx,y+ny,z+nz))&&
+               !isPhysicalShape(blockAt(x+nx,y+ny,z+nz))&&
                !isPack2LiveId(blockAt(x+nx,y+ny,z+nz)))continue;
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
-            const rgb=biome130Color(id,x,y,z,face),lit=[.77,.73,1,.48,.85,.67][face];
+            const rgb=isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face),lit=[.77,.73,1,.48,.85,.67][face];
             for(let k=t;k<t+3;k++){
               const i=mesh.indices[k]*3,px=mesh.positions[i],py=mesh.positions[i+1],pz=mesh.positions[i+2];
               emit(x+px,y+py,z+pz,rgb[0]*lit,rgb[1]*lit,rgb[2]*lit,nx?pz:px,ny?pz:py,0);
@@ -98,7 +100,7 @@ export function meshDepthSection(world,cx,cz,section){
           }
           continue;
         }
-        const naturalGround=environmentGround(id);
+        const naturalGround=environmentGround(id)??mountainV8Material(id);
         const color=naturalGround?.color??COLORS[id]??COLORS[3];
         for(const face of FACES){
           const neighbor=blockAt(x+face.d[0],y+face.d[1],z+face.d[2]);
