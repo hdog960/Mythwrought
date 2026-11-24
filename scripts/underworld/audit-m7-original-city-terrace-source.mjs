@@ -241,6 +241,10 @@ for(const [rx,rz] of regions){
    crossAudit.maximumSourceCallbackCalls??null,
   candidateThinUnderpassCrossAuditDistinctCellCapPerRole:
    crossAudit.maximumDistinctCoordinatesPerRole??null,
+  candidateThinUnderpassCrossAuditPriorUniqueCellsByRole:
+   crossAudit.priorUniqueCellsByRole??null,
+  candidateThinUnderpassCrossAuditTotalUniqueCellsByRole:
+   crossAudit.uniqueCellsByRole??null,
   candidateThinUnderpassSourceOverlapRefusal:
    underpass.overlapValueReason??null,
   candidateThinUnderpassSourceOverlapFirstMismatch:
