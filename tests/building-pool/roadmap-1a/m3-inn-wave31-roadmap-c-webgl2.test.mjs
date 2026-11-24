@@ -14,7 +14,7 @@ const root=resolve('.');
 const wanted=getRoadmapC1AInnWave31().map(b=>b.id);
 const sizes=[[667,375],[844,390],[932,430]],views=['exterior','cutaway'];
 const dest=resolve('artifacts/roadmap-c-1a-wave31-inn/chromium-source-cube');
-const expectedSourceBlob='b4212852dd7182c1edab07b4f90b417c75df7d52';
+const expectedSourceBlob='e87df86aa02af6b78be77247513db9f620dbf5b1';
 async function sourceProvenance(){
  const data=await readFile(resolve('src/building-pool/roadmap-1a/m3-inn-wave31-roadmap-c.mjs'));
  const actualBlob=createHash('sha1').update(Buffer.concat([Buffer.from('blob '+data.length+'\0'),data])).digest('hex');
