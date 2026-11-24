@@ -55,7 +55,8 @@ export function planWildsTowerPrototype(ground,x,z,{height=28}={}){
 export function createWildsUpperResearchWorld(ground,plans=[]){
  if(!ground||typeof ground.get!=='function'||!Number.isInteger(ground.seed)||!Array.isArray(plans)||plans.length>8)
    throw Error('Invalid E2 physical ground source');
- const natural=new Map(),edits=new Map();
+ const natural=new Map(),edits=new Map(),lowerEdits=new Map(),revisions=new Map();
+ let revision=0;
  for(const plan of plans)for(const [x,y,z,id] of plan.cells){
    const k=key(x,y,z);
    if(!coords(x,y,z)||y<0||y>WILDS_PHYSICAL_MAX_Y||!upperId(id)||id===0||
@@ -63,23 +64,43 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
    natural.set(k,id);
  }
  const readNatural=(x,y,z)=>natural.get(key(x,y,z))??(y<=WORLD_MAX_Y?ground.get(x,y,z):BLOCK.AIR);
- const lower={get:(x,y,z)=>readNatural(x,y,z),rotationAt:(...p)=>ground.rotationAt?.(...p)??0,
+ const lower={get:(x,y,z)=>lowerEdits.get(key(x,y,z))??readNatural(x,y,z),rotationAt:(...p)=>ground.rotationAt?.(...p)??0,
    get biomeCellCount(){return ground.biomeCellCount??0;},
    get pack2Cells(){return ground.pack2Cells;},get pack3Runtime(){return ground.pack3Runtime;},
    get manual14Layer(){return ground.manual14Layer;},getPack2State:(...p)=>ground.getPack2State?.(...p)};
  const view=createSkyOriginalWorldView({groundWorld:lower,skyGet:readNatural,skyEdits:edits,validateSkyId:materials.validateId});
- const world=Object.freeze({...view,seed:ground.seed,generationProfile:ground.generationProfile,base:ground,
+ const world=Object.freeze({get rotationAt(){return view.rotationAt;},get biomeCellCount(){return view.biomeCellCount;},
+   get pack2Cells(){return view.pack2Cells;},get pack3Runtime(){return view.pack3Runtime;},
+   get manual14Layer(){return view.manual14Layer;},getPack2State:view.getPack2State,
+   seed:ground.seed,generationProfile:ground.generationProfile,base:ground,
    get: (x,y,z)=>{if(!coords(x,y,z))throw Error('Invalid research coordinate');return y<WILDS_PHYSICAL_MIN_Y||y>WILDS_PHYSICAL_MAX_Y?BLOCK.AIR:view.get(x,y,z);}});
- function setUpper(x,y,z,id){
-   if(!coords(x,y,z)||y<=WORLD_MAX_Y||y>WILDS_PHYSICAL_MAX_Y||!upperId(id))return false;
-   const k=key(x,y,z);
-   if(id===readNatural(x,y,z))edits.delete(k);
-   else{if(!edits.has(k)&&edits.size>=4096)return false;edits.set(k,id);}
+ function affectedKeys(x,y,z){
+   const horizontal=new Set();
+   // Chebyshev halo also covers original surface RGB diagonal seam reads.
+   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)horizontal.add(Math.floor((x+dx)/16)+','+Math.floor((z+dz)/16));
+   const keys=new Set();
+   for(const pos of horizontal){const [cx,cz]=pos.split(',').map(Number);
+     if(y<=20&&y>=-4)keys.add(pos);
+     for(const dy of [-1,0,1]){const s=skyIslandSectionForY(y+dy);if(s!==null)keys.add(skyIslandMeshKey(cx,cz,s));}
+   }
+   return [...keys].sort();
+ }
+ function setPhysical(x,y,z,id){
+   // Research admits only the already certified full-cube material subset.
+   if(!coords(x,y,z)||Math.abs(x)>1e7||Math.abs(z)>1e7||y<WILDS_PHYSICAL_MIN_Y||y>WILDS_PHYSICAL_MAX_Y||!upperId(id))return false;
+   const k=key(x,y,z),map=y>WORLD_MAX_Y?edits:lowerEdits;
+   if(world.get(x,y,z)===id)return true;
+   if(id===readNatural(x,y,z))map.delete(k);
+   else{if(!map.has(k)&&edits.size+lowerEdits.size>=4096)return false;map.set(k,id);}
+   revision++;
+   for(const k of affectedKeys(x,y,z))revisions.set(k,revision);
    return true;
  }
- return Object.freeze({world,setUpper,
+ function setUpper(x,y,z,id){return y>WORLD_MAX_Y&&setPhysical(x,y,z,id);}
+ return Object.freeze({world,setUpper,setPhysical,affectedKeys,
+   get revision(){return revision;},regionRevision:k=>revisions.get(k)??0,
    naturalAt:readNatural,
-   editRows:()=>[...edits].map(([k,id])=>[...k.split(',').map(Number),id]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]),
+   editRows:()=>[...lowerEdits,...edits].map(([k,id])=>[...k.split(',').map(Number),id]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]),
    save(){throw Error('E2 upper-world research is not a durable world profile');},
    collides:(x,feet,z)=>collides(world,x,feet,z),
    raycast:(eye,direction,range=7)=>raycast(world,eye,direction,range),
