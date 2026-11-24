@@ -1,0 +1,24 @@
+name: Forgotten Sands P0 native modular natural connection
+on:
+  push:
+    branches: [research/forgotten-sands-p0-negative-webgl-20261124]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-natural-connection.mjs'
+      - 'tests/forgotten-sands-natural-connection.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-natural-connection.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-natural-connection.mjs
+          node --test tests/forgotten-sands-natural-connection.test.mjs
