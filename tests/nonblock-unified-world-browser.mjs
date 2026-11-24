@@ -91,6 +91,7 @@ try{
 
   async function switchSeed(seed){
     await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
     await page.locator('#seedInput').fill(String(seed));
     await page.locator('#switchWorld').click();
     await wait(value=>window.__mythwroughtTest.snapshot().seed===value,seed);
@@ -109,6 +110,7 @@ try{
   assert.equal(created.oldSave,legacy);
 
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#skySetNight').click();
   await page.locator('#vaultBackup').click();
   await wait(()=>document.querySelector('#vaultStatus').textContent.includes('Verified device backup'));

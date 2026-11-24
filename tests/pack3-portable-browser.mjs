@@ -29,6 +29,7 @@ try{
   throw Error('No suitable physical construction cell');
  });
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  assert.equal(await page.locator('#pack3Export').count(),1);
  assert.equal(await page.locator('#pack3Import').count(),1);
  const downloading=page.waitForEvent('download');

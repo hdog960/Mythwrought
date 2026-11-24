@@ -133,6 +133,7 @@ try{
    await capture('artifacts/mythwrought-v010-context-restored-cycle-'+cycle+'.png');
    if(cycle===1){
      await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
      await page.locator('#renderPreset').selectOption('economy');
      await page.locator('#closeHelp').click();
      await page.waitForFunction(()=>document.querySelector('#scene').dataset.renderPreset==='economy');

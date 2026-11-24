@@ -293,3 +293,33 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .sky-clock-settings .sky-clock-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:8px 0}
 .sky-clock-settings .sky-clock-buttons button{min-width:0;min-height:43px;padding:9px 6px;border:2px solid #cbb179;background:linear-gradient(#526c70,#2d4855);font-size:12px;letter-spacing:.04em;touch-action:manipulation}
 .sky-clock-settings .sky-clock-buttons button:focus-visible{outline:3px solid #fff1bd;outline-offset:2px}
+
+/* Compact player menu. Existing game, controls, palettes and save handlers
+   remain intact; only explicit Advanced expansion can reveal technical tools. */
+#help{padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+.helpbody.compact-menu{width:min(680px,100%);max-width:680px;max-height:100%;min-height:0;padding:12px 14px;border-radius:14px;overflow:auto;touch-action:pan-y;overscroll-behavior:contain}
+.compact-menu-heading{position:sticky;top:-12px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#293b39;padding:4px 0 9px}
+.compact-menu-heading h1{font-size:clamp(15px,2.8vw,23px);letter-spacing:.07em}
+.compact-menu-actions{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin:3px 0 8px}
+.compact-menu-actions .sky-clock-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
+.compact-menu-actions button,.compact-menu-heading button,.compact-menu .seedrow button,.compact-menu summary{min-height:44px;border:1px solid #e3bb79;border-radius:9px;color:#fff4d5;background:linear-gradient(#557469,#284a43);font-size:13px;font-weight:850;touch-action:manipulation;padding:8px 10px}
+.compact-menu-actions #newWorld{background:linear-gradient(#b48843,#775225);color:#fff8da}
+.compact-menu-heading button{white-space:nowrap}
+.compact-menu .compact-code{margin:0;padding:8px;background:#172a2c;border-radius:9px}
+.compact-code label{font-size:11px;margin-bottom:4px;letter-spacing:.05em}
+.compact-code .seedrow{flex-wrap:nowrap}
+.compact-code .seedrow input{font-size:16px;min-height:42px;min-width:0}
+.compact-code .seedrow button{width:auto;min-width:64px}
+.compact-menu-status{display:grid;gap:3px;margin:7px 0 9px}
+.compact-menu-status p{font-size:11px!important;line-height:1.25;margin:0;overflow-wrap:anywhere}
+.compact-menu summary{cursor:pointer;list-style:revert}
+.compact-menu summary span{float:right;font-size:11px;font-weight:500;color:#d7e0cd}
+#advancedTools{padding-top:8px}
+#advancedTools .looksetting{margin-block:8px}
+#advancedTools button,#advancedTools select,#advancedTools input{touch-action:manipulation}
+#legacyWorldTools button{display:block;max-width:100%;min-height:40px;margin-top:7px;background:#405a53;border:1px solid #bba577;border-radius:7px;font-size:11px;font-weight:800;padding:6px 8px}
+.creative-hud{display:inline-flex;flex:none;align-items:center;justify-content:center;gap:4px;border:1px solid #c8ab75;border-radius:7px;background:#263f39;color:#f5edc8;min-height:26px;padding:2px 5px;font-size:clamp(9px,1.2vw,11px);font-weight:850;white-space:nowrap;touch-action:manipulation}
+.creative-hud input{margin:0;width:15px;height:15px;accent-color:#9fe2ae}
+.creative-hud:has(input:checked){background:#3f754d;border-color:#c8ec9e;color:white}
+@media(max-height:355px){.helpbody.compact-menu{padding:8px 10px}.compact-menu-heading{top:-8px;padding-bottom:6px}.compact-menu-actions button,.compact-menu-heading button,.compact-menu summary{min-height:36px}.compact-menu-status p{font-size:10px!important}}
+@media(max-width:700px){.bezel:not(.foot){gap:4px;padding-inline:4px}.bezel:not(.foot)>span:first-child{display:none}.bezel b{font-size:10px;letter-spacing:0}.bezel small{font-size:8px}.creative-hud{padding-inline:3px;gap:2px}.creative-hud input{width:12px;height:12px}}

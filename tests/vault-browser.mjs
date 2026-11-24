@@ -28,6 +28,7 @@ try{
  const unchangedJournal=await get(primary+'-integrity-v009');
 
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#vaultBackup').click();
  await seen('Verified device backup');
  const firstId=await firstOption();
@@ -57,6 +58,7 @@ try{
  const crystalBytes=await get(primary);
  assert.notEqual(crystalBytes,woodBytes);
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#vaultBackup').click();
  await seen('Verified device backup');
  assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),2,'Second snapshot should not replace first');
@@ -81,6 +83,7 @@ try{
  await scene();
  assert.equal(await block(15,18,-1),4,'Restored snapshot did not survive reload');
  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
  await page.locator('#vaultRefresh').click();
  await seen('device backups found');
  assert.equal(await page.locator('#vaultSelect option:not([value=""])').count(),2,'IndexedDB backups lost on page reload');

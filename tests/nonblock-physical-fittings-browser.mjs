@@ -79,6 +79,7 @@ try{
     document.querySelector('#scene').dataset.targetBlock===key,cell.join(','),{timeout:15000});
   await waitHit(door.at);
   await page.locator('#menu').tap();
+  await page.locator('#advancedMenu > summary').tap();
   await page.locator('#pack2Materials [data-block="67"]').tap();
   await page.locator('#closeHelp').tap();
   await page.locator('#place').tap();

@@ -105,6 +105,7 @@ try{
   // choose a physical non-cube from the settings sheet, rotate it, place it,
   // save it, render it, then reload and target it again on the actual canvas.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   assert.ok(await page.locator('#biome130Select').isVisible(),'57+ new materials missing from iPhone settings');
   await page.locator('#biome130Select').selectOption('315'); // 060 geothermal mountain rock
   await page.locator('#biome130Rotation').selectOption('1'); // East
@@ -135,6 +136,7 @@ try{
   // 013: new ancient-ruin fragment selected through the real settings palette,
   // physically placed and restored after browser reload with its orientation.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#biome130Select').selectOption('325');
   await page.locator('#biome130Rotation').selectOption('2');
   await page.locator('#closeHelp').click();
@@ -158,6 +160,7 @@ try{
   // automation palette must be a shape-accurate visible, editable, saved
   // and reloadable high-ID physical block; never a dormant source descriptor.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#biome130Select').selectOption('335');
   await page.locator('#biome130Rotation').selectOption('3');
   await page.locator('#closeHelp').click();

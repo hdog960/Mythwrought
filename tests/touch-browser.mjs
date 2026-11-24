@@ -165,6 +165,7 @@ try{
     'Cancelled mouse gesture must not edit the world');
   // Open settings once for modal-safe input assertions and stick-mode selection.
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   // Continuous stick mode must rotate only while held, using a radial dead zone.
   // Queued synthetic iOS events must not activate action buttons behind settings.
   const blocked=await page.evaluate(()=>{
@@ -267,6 +268,7 @@ try{
   await page.reload({waitUntil:'networkidle'});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   assert.equal(await page.locator('#lookMode').inputValue(),'stick','Look mode not persisted after reload');
   await page.locator('#closeHelp').click();
   // Page blur must clear any active stick to prevent motion after app-switching.

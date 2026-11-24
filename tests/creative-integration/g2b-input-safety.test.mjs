@@ -99,15 +99,15 @@ test('G2B no unsafe change to walking ownership during failed landing',()=>{
 });
 test('G2B mode UI is optional, accessible, not persisted, and labels dynamically change',()=>{
  assert.ok(html.includes('id="g2bFlightEnable"'));
- assert.ok(html.includes('id="g2bFlightProfile"'));
+ assert.ok(!html.includes('id="g2bFlightProfile"'),'Flight speed picker removed by creator');
  assert.ok(html.includes('id="g2bFlightStatus"'));
  assert.ok(src.includes('g2Toggle.checked=false'));
  assert.ok(src.includes('g2Toggle.checked=g2CreativeEnabled'));
  assert.ok(src.includes('g2CreativeEnabled=false;g2Flight=null'));
- assert.ok(html.includes('ENABLE CREATIVE MODE (FLIGHT CONTROLS)'));
+ assert.ok(html.includes('aria-label="Enable Creative Mode flight controls for this session"'));
  assert.ok(src.includes('else if(g2Active()&&!g2Land())'));
  assert.ok(src.includes('lastG2JumpReleaseAt=-Infinity;'));
- assert.ok(src.includes("g2Profile.value='normal'"));
+ assert.ok(src.includes("g2Flight=selectG2FlightProfile(active,'travel')"));
  assert.ok(src.includes("el.setAttribute('aria-label',aria)"));
  assert.ok(!src.includes("localStorage.setItem('g2b"));
 });

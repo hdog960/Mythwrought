@@ -507,7 +507,7 @@ function start(nonblockStage=null){
     '<button id="mobFollow" type="button">COMPANION FOLLOW</button>'+
     '<button id="mobStay" type="button">COMPANION STAY</button>'+
     '<button id="mobStatus" type="button">CREATURE STATUS</button></div>';
-  help.querySelector('.helpbody')?.append(mobActions);
+  document.getElementById('advancedTools').append(mobActions);
   const mobInfo=mobActions.querySelector('#mobInfo');
   mobActions.querySelector('#mobInteract').onclick=()=>{
     const result=mobRuntimeError||!mobRenderer?'Creature simulation paused for GPU safety':
@@ -585,7 +585,6 @@ function start(nonblockStage=null){
     if(now-g2LastControlWarning>1800){g2LastControlWarning=now;message('FLIGHT · '+reason);}
   }
   const g2Toggle=document.getElementById('g2bFlightEnable');
-  const g2Profile=document.getElementById('g2bFlightProfile');
   const g2Status=document.getElementById('g2bFlightStatus');
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
@@ -624,7 +623,7 @@ function start(nonblockStage=null){
   function g2Sync(){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
-    g2Toggle.checked=g2CreativeEnabled;g2Profile.disabled=!g2CreativeEnabled;
+    g2Toggle.checked=g2CreativeEnabled;
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -663,7 +662,7 @@ function start(nonblockStage=null){
         heightBounds:{minFeet:WORLD_MIN_Y,maxFeet:G2_FLIGHT_MAX_FEET}});
       const active=armG2Flight(initial,{enabled:true,isRegionReady:g2Ready,isBodyClear:g2Clear});
       if(active.mode!=='flight'){g2Status.textContent=active.reason;message(active.reason);return false;}
-      g2Flight=selectG2FlightProfile(active,g2Profile.value);
+      g2Flight=selectG2FlightProfile(active,'travel');
       g2Controls=enterG2ControlOwnership(createG2ControlState(),
         {featureEnabled:true,flightReady:true});
       player.vX=player.vY=player.vZ=0;player.onGround=false;player.coyote=0;
@@ -773,7 +772,7 @@ function start(nonblockStage=null){
       g2Status.textContent=g2Flight.reason;
     }catch(e){g2Pause('Flight failed safely: '+e.message);}
   }
-  g2CreativeEnabled=false;g2Toggle.checked=false;g2Profile.value='normal';g2Sync();
+  g2CreativeEnabled=false;g2Toggle.checked=false;g2Sync();
   // Creative enablement is separate from flying: enabling never lifts the player.
   // A failed physical landing cannot silently turn Creative off midair.
   g2Toggle.addEventListener('change',()=>{
@@ -784,11 +783,6 @@ function start(nonblockStage=null){
     }else g2CreativeEnabled=false;
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
-  });
-  g2Profile.addEventListener('change',()=>{
-    if(!g2Active())return;
-    try{g2Flight=selectG2FlightProfile(g2Flight,g2Profile.value);g2Sync();}
-    catch(e){g2Status.textContent=e.message;}
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
@@ -2291,7 +2285,7 @@ function start(nonblockStage=null){
   physicalPalette.append(physicalLabel,biomeSelect,turnLabel,biomeRotation);
   const moreBlockArea=help.querySelector('[data-block="8"]')?.closest('.looksetting');
   if(moreBlockArea?.parentElement)moreBlockArea.insertAdjacentElement('afterend',physicalPalette);
-  else help.querySelector('.helpbody')?.append(physicalPalette);
+  else document.getElementById('advancedTools').append(physicalPalette);
   biomeRotation.addEventListener('change',()=>{
     selectedRotation=Number(biomeRotation.value);
     if(BIOME130_REGISTERED_IDS.includes(selected))
@@ -2354,7 +2348,7 @@ function start(nonblockStage=null){
     manual14RotateLabel,manual14Rotate,manual14UpperLabel,manual14Status);
   const pack2Section=document.getElementById('pack2Materials')?.closest('.looksetting');
   if(pack2Section?.parentElement)pack2Section.insertAdjacentElement('beforebegin',manual14Panel);
-  else help.querySelector('.helpbody')?.append(manual14Panel);
+  else document.getElementById('advancedTools').append(manual14Panel);
   manual14Select.addEventListener('change',()=>{
     const id=Number(manual14Select.value);
     if(!manual14Ids.has(id))return;
@@ -2396,6 +2390,8 @@ function start(nonblockStage=null){
       return {message:result.requiresReload?'Pack 3 restored and reloading':'Pack 3 record already current'};
     }
   });
+  // Retain the actual Pack 3 palette and handlers; relocate its existing panel.
+  document.getElementById('advancedTools').append(pack3Palette.material.closest('.looksetting'));
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
     selected=Number(b.dataset.block);
     biomeSelect.value='';manual14Select.value='';pack3Palette.clear();
@@ -2416,9 +2412,13 @@ function start(nonblockStage=null){
       updatePack2SelectionUI();
     };
   }
-  document.getElementById('menu').onclick=()=>{gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();help.hidden=false;};
+  document.getElementById('menu').onclick=()=>{
+    gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();
+    document.getElementById('advancedMenu').open=false;
+    help.querySelector('.helpbody').scrollTop=0;help.hidden=false;
+  };
   document.getElementById('closeHelp').onclick=()=>{
-    cancelAllPointers();help.hidden=true;
+    cancelAllPointers();document.getElementById('advancedMenu').open=false;help.hidden=true;
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
   };
@@ -2800,9 +2800,9 @@ function start(nonblockStage=null){
   const biomeChoiceHint=document.createElement('p');
   biomeChoiceHint.className='controlhint';
   biomeChoiceHint.textContent='LOAD / CREATE opens saved seeds or starts the current game on an unused seed.';
-  const seedRow=document.getElementById('switchWorld').closest('.seedrow');
+  const seedRow=document.getElementById('legacyWorldTools');
   if(seedRow){
-    seedRow.insertAdjacentElement('afterend',createFourBiomeButton);
+    seedRow.append(createFourBiomeButton);
     createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
   }
   // Different explicit NEW seed action: existing v4 selection stays default.
@@ -2929,21 +2929,38 @@ function start(nonblockStage=null){
         String(error.message||error);
     }
   };
+  function createLatestMenuWorld(next){
+    if(next===world.seed)throw Error('Choose a different unused seed for a new world');
+    rejectLegacyWorldWhereCaveExists(localStorage,next);
+    if(!window.confirm('CREATE NEW WORLD for unused seed '+next+'? Existing worlds stay intact.'))return false;
+    if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents activation');
+    if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
+    const choice=planM2WorldChoice(String(next),M2_WORLD_MODE.CREATE_ENCHANTED_P2,{confirmed:true});
+    const loaded=openM2World(localStorage,choice);
+    if(loaded.base.generationProfile.generator!==ENCHANTED_P2_GENERATOR)throw Error('Latest profile did not activate');
+    const stored=saveM2World(localStorage,loaded.world);
+    if(!stored.ok)throw Error('New world save not verified: '+stored.reason);
+    enterPreparedM2World(loaded.world,'New world '+next+' ready · latest generator.');
+    return true;
+  }
   createEnchantedButton.onclick=()=>{
+    try{createLatestMenuWorld(worldSeedFromText(seedInput.value));}
+    catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
+  };
+  document.getElementById('newWorld').onclick=()=>{
     try{
-      const next=worldSeedFromText(seedInput.value);
-      if(next===world.seed)throw Error('Choose a different unused seed for Enchanted Forest');
-      rejectLegacyWorldWhereCaveExists(localStorage,next);
-      if(!window.confirm('CREATE NEW ENCHANTED FOREST WORLD for unused seed '+next+'? Existing worlds NEVER convert.'))return;
-      if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents activation');
-      if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
-      const choice=planM2WorldChoice(seedInput.value,M2_WORLD_MODE.CREATE_ENCHANTED_P2,{confirmed:true});
-      const loaded=openM2World(localStorage,choice);
-      if(loaded.base.generationProfile.generator!==ENCHANTED_P2_GENERATOR)throw Error('Enchanted profile did not activate');
-      const stored=saveM2World(localStorage,loaded.world);
-      if(!stored.ok)throw Error('Enchanted save not verified: '+stored.reason);
-      enterPreparedM2World(loaded.world,'Enchanted Forest world '+next+' created with separate generation identity.');
-    }catch(error){seedMessage.textContent='Enchanted creation refused; original world retained: '+String(error.message||error);}
+      // A fresh random signed 32-bit seed, checked against the actual existing
+      // profile/slot/sidecar gate. No old world is reinterpreted or deleted.
+      let next=null;
+      for(let attempt=0;attempt<32;attempt++){
+        const candidate=crypto.getRandomValues(new Int32Array(1))[0];
+        if(candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
+           !isUnclaimedWorldSeed(localStorage,candidate))continue;
+        next=candidate;break;
+      }
+      if(next===null)throw Error('Could not find an unused seed. Try again.');
+      createLatestMenuWorld(next);
+    }catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
   };
   document.getElementById('switchWorld').onclick=()=>{
     try{

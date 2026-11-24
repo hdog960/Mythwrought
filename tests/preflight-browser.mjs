@@ -19,6 +19,7 @@ try{
   await page.waitForTimeout(500);
   const before=await saved();
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#runAudit').click();
   await page.waitForFunction(()=>document.querySelector('#auditReport').value.includes('Captured:'));
   let text=await audit.inputValue();
@@ -46,6 +47,7 @@ try{
   const edited=await saved();
   assert.notEqual(edited,before,'Test fixture did not persist');
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#runAudit').click();
   await page.waitForFunction(()=>document.querySelector('#auditReport').value.includes('Save check:'));
   text=await audit.inputValue();
@@ -67,6 +69,7 @@ try{
   await waitForScene();
   assert.equal(await saved(),'{damaged-gate-a','Startup changed damaged canonical data');
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#runAudit').click();
   await page.waitForFunction(()=>document.querySelector('#auditReport').value.includes('source=journal'));
   text=await audit.inputValue();
