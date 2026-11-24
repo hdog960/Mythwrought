@@ -2,9 +2,8 @@
 // 179/(2,0) and 179/(2,1) are verified ORIGINAL deterministic planner
 // candidate sites, not invented cities or developer permission to build one.
 // This script never places settlements, modifies caves, writes saves or PWA.
-import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR}
- from '../../src/manual-biomes/profile-world.mjs';
-import {VoxelWorld,baseBlock} from '../../src/voxel.mjs';
+import {createOriginalM7ReadOnlySource,inspectOriginalM7ReadOnlySource}
+ from '../../src/living-underworld/original-m7-reader-provenance.mjs';
 import {planUnderworldRegion}
  from '../../src/living-underworld/worldwide-network.mjs';
 import {proposeProtectedCityLandingTerrace}
@@ -23,16 +22,14 @@ import {createCitySourceCrossAuditLedger}
  from '../../src/living-underworld/source-cross-audit-ledger.mjs';
 const runStarted=performance.now();
 const seed=179,regions=Object.freeze([[2,0],[2,1]]);
-const world=new FourRegionWorld(seed,
- fourRegionProfile(seed,M7_ENVIRONMENT_GENERATOR));
-const original=new VoxelWorld(seed);
-const originalSource=Object.freeze({
- naturalAt:(x,y,z)=>world.naturalAndLandmarkBlock(x,y,z),
- authoredAt:(x,y,z)=>world.environmentCaves?.get(x,y,z),
- editedAt:(x,y,z)=>world.edits.has(x+','+y+','+z),
- protectedAt:(x,y,z)=>original.naturalAndLandmarkBlock(x,y,z)!==
-  baseBlock(x,y,z,seed)
-});
+// The research script no longer trusts four ad-hoc callback closures.
+ // Its native source constructor belongs to the original M7/Voxel modules.
+const originalSource=createOriginalM7ReadOnlySource(seed);
+const initialNativeProvenance=inspectOriginalM7ReadOnlySource(
+ originalSource,{seed});
+if(!initialNativeProvenance.ok)
+ throw Error('ORIGINAL_M7_READER_FACTORY_REFUSED:'+
+  initialNativeProvenance.reason);
 const rows=[];
 for(const [rx,rz] of regions){
  const siteStarted=performance.now();
@@ -89,9 +86,35 @@ for(const [rx,rz] of regions){
   comparedSourceReturnsAcrossPhases:0,
   originalCallbackBindingsUnchanged:false
  });
+ // Check imported, class-owned native world identity again AFTER every source
+ // callback in this site's prior and proposed underpass surveys. No voxel reads.
+ const nativeSourceProof=inspectOriginalM7ReadOnlySource(originalSource,{seed});
+ if(!nativeSourceProof.ok)
+  throw Error('ORIGINAL_M7_NATIVE_READER_INSTANCE_CHANGED:'+
+   nativeSourceProof.reason);
  rows.push(Object.freeze({seed,rx,rz,
   regionAuditElapsedMs:Math.round((performance.now()-siteStarted)*1000)/1000,
   originalM7TerrainReadOnly:true,
+  originalM7NativeReaderProvenanceVerified:nativeSourceProof.ok===true,
+  originalM7NativeReaderIssuedByGameModule:
+   nativeSourceProof.fourNativeReaderFunctionsFactoryIssued===true,
+  originalM7NativeWorldConstructorExact:
+   nativeSourceProof.originalWorldConstructorVerified===true&&
+   nativeSourceProof.originalWorldClassExact===true&&
+   nativeSourceProof.originalLegacyWorldClassExact===true,
+  originalM7NativeWorldSeedAndGeneratorExact:
+   nativeSourceProof.originalM7SeedExact===true&&
+   nativeSourceProof.originalM7ProfileGeneratorExact===true,
+  originalM7NativeOriginalWorldMethodsStable:
+   nativeSourceProof.originalWorldMethodsStable===true&&
+   nativeSourceProof.originalCaveReaderBindingStable===true,
+  originalM7NativeEditsUnchanged:
+   nativeSourceProof.originalWorldEditMapInstancesStable===true&&
+   nativeSourceProof.originalWorldEditMapsEmpty===true,
+  originalM7NativeProvenanceZeroAdditionalTerrainReads:
+   nativeSourceProof.originalWorldSourceQueriesDuringAttestation===0,
+  originalM7NativeSiteSafetyNotAutomaticallyProven:
+   nativeSourceProof.actualOriginalWorldSiteSafetyVerified===false,
   terraceCandidateSourceSafe:approved||terrace?.ok===true,
   terraceRadius:approved?joined.terraceRadius:terrace?.radius??null,
   terraceSourceAuditedInJoinedProof:approved,
