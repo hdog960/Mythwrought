@@ -451,6 +451,9 @@ function start(nonblockStage=null){
     meshCpuMs:new Float64Array(100),saveCpuMs:new Float64Array(100),
     // Diagnostic-only native upload total for EACH source-saved edit, not streaming.
     editGpuUploadMs:new Float64Array(100),editGpuUploadCalls:new Uint16Array(100),
+    // Synchronous unmeasured edit work: source action duration minus
+    // nonoverlapping original CPU mesh, native upload and schema save.
+    unattributedActionMs:new Float64Array(100),sourceActionMs:null,
     loadedSections:new Uint16Array(100),phaseMines:0,
     frameCount:0,slowFrames:0,elapsedMs:0,prevFrame:null,
     closingFramesRemaining:0,
@@ -632,6 +635,7 @@ function start(nonblockStage=null){
     if(w.phase==='active'){
       w.editPending=false; // original deep voxel edit + save succeeded
       w.savedMines++;
+      w.sourceActionMs=duration; // SAME original timing used for action p95
       if(w.savedMines===100){w.phase='closing';w.closingFramesRemaining=2;}
     }
   }
@@ -656,11 +660,23 @@ function start(nonblockStage=null){
       if(w.invalidReason===null)w.invalidReason='phase-count-mismatch';
       return;
     }
+    // The exact original source-MINE action timing was already sampled:
+    // never sample a different RAF or second clock for the residual.
+    // 3ms slack allows Safari's coarse performance.now resolution.
+    const accountedMs=phase.meshMs+phase.gpuMs+phase.saveMs;
+    if(!Number.isFinite(w.sourceActionMs)||w.sourceActionMs<=0||
+       !Number.isFinite(accountedMs)||accountedMs>w.sourceActionMs+3){
+      w.invalid=true;
+      if(w.invalidReason===null)w.invalidReason='phase-time-exceeds-action';
+      return;
+    }
     const i=w.phaseMines++;
     w.meshCpuMs[i]=phase.meshMs;
     w.saveCpuMs[i]=phase.saveMs;
     w.editGpuUploadMs[i]=phase.gpuMs;
     w.editGpuUploadCalls[i]=phase.gpuCalls;
+    w.unattributedActionMs[i]=Math.max(0,w.sourceActionMs-accountedMs);
+    w.sourceActionMs=null; // reject stale evidence on following mines
     w.loadedSections[i]=phase.loadedSections;
   }
   function near291RecordUpload(duration){
@@ -737,6 +753,9 @@ function start(nonblockStage=null){
           near291Perf.mineWindow.phaseMines,true),
         perMineNativeUploadSumP95Ms:percentile(
           near291Perf.mineWindow.editGpuUploadMs,
+          near291Perf.mineWindow.phaseMines,true),
+        unattributedActionP95Ms:percentile(
+          near291Perf.mineWindow.unattributedActionMs,
           near291Perf.mineWindow.phaseMines,true),
         maxNativeUploadCallsPerMine:near291Perf.mineWindow.phaseMines?
           Math.max(...near291Perf.mineWindow.editGpuUploadCalls.slice(
