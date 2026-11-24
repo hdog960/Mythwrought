@@ -1434,6 +1434,16 @@ function start(nonblockStage=null){
     for(let i=0;i<a.length;i++)if(a[i]!==b[i])return false;
     return true;
   }
+  // Detached exact-size byte witness: never retain mutable mesher storage
+  // or the oversized backing allocation of a small typed-array view.
+  function near291WaterSnapshot(water){
+    if(!(water instanceof Float32Array)||!water.length||water.length%9||
+       water.byteLength>32768)return null;
+    const copy=new Float32Array(water.length);
+    new Uint8Array(copy.buffer).set(new Uint8Array(
+      water.buffer,water.byteOffset,water.byteLength));
+    return copy;
+  }
   function refreshEditedMeshes(x,z,y=0){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
@@ -1476,13 +1486,16 @@ function start(nonblockStage=null){
           near291SameWaterBytes(prior.water291Bytes,item.water);
         // Opaque geometry is ALWAYS uploaded as before. A proven identical
         // live water buffer is never included in staged ready[] cleanup.
+        // Allocate before native staging; retain the prior detached witness
+        // on an exact byte match rather than copying it on every edit.
+        const water291Bytes=retainWater?prior.water291Bytes:
+          reuseEnabled?near291WaterSnapshot(item.water):null;
         const uploaded=uploadPack2Chunk(item.vertices,
           retainWater?new Float32Array(0):item.water);
         ready.push({...item,...uploaded,near291RetainWater:retainWater,
           near291PriorWater:retainWater?prior.waterBuffer:null,
           near291PriorWaterCount:retainWater?prior.waterCount:0,
-          near291WaterBytes:reuseEnabled&&item.water.byteLength>0&&
-            item.water.byteLength<=32768?item.water:null});
+          near291WaterBytes:water291Bytes});
       }
     }catch(err){
       if(!near291Enabled){
@@ -1848,10 +1861,18 @@ function start(nonblockStage=null){
       try{
         const data=meshPlayableChunk(x,z,section);
         const water=meshPlayableWater(x,z,section);
+        // Seed from this exact original successful streaming upload only.
+        // Allocate before upload so failure cannot leak fresh GPU handles.
+        const water291Bytes=near291Enabled&&near291WaterReuse?
+          near291WaterSnapshot(water):null;
         const buffers=uploadPack2Chunk(data,water);
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
-        chunks.set(k,{x,z,section,...buffers});
+        const replacement={x,z,section,...buffers};
+        if(water291Bytes&&buffers.waterBuffer&&
+           buffers.waterCount===water291Bytes.length/9)
+          replacement.water291Bytes=water291Bytes;
+        chunks.set(k,replacement);
         deleteChunkBuffers(old);
       }catch(error){
         const state=gpuRetry.fail(k,performance.now(),error.message);
