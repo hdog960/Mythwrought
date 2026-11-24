@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261123-desert-p3-v1';
-const ASSET_RELEASE='20261123-desert-p3-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261124-mountain-v8-candidate-03';
+const ASSET_RELEASE='20261124-mountain-v8-candidate-03';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
@@ -257,6 +257,13 @@ const SOURCE_ASSETS=[
   "./src/manual-biomes/overland-walk-m5.mjs",
   "./src/manual-biomes/profile-storage.mjs",
   "./src/manual-biomes/profile-world.mjs",
+  "./src/manual-biomes/mountain-v8-candidate.mjs",
+  "./src/manual-biomes/mountain-v8-source-adapter.mjs",
+  "./src/manual-biomes/mountain-v8-physical-column.mjs",
+  "./src/manual-biomes/mountain-v8-runtime-terrain.mjs",
+  "./src/manual-biomes/mountain-v8-runtime-conifers.mjs",
+  "./src/manual-biomes/mountain-v8-vegetation-cells.mjs",
+  "./src/manual-biomes/mountain-v8-new-world-admission.mjs",
   "./src/manual-biomes/shoulder-traversal.mjs",
   "./src/manual-biomes/three-regions-m4.mjs",
   "./src/meadow.mjs",
