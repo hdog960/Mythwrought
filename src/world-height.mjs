@@ -71,3 +71,49 @@ export function physicalBodyRegions({x,feet,z,radius=.28,height=1.78}={}){
       }
   return Object.freeze([...rows.values()].sort((a,b)=>a.key.localeCompare(b.key)));
 }
+
+export function runtimeSectionForY(y){
+  const r=physicalSectionForY(y);return r?r.kind==='upper'?r.section+1:r.section:null;
+}
+export function runtimeMeshKey(cx,cz,section){
+  if(!Number.isSafeInteger(section))throw TypeError('Invalid runtime section');
+  return physicalMeshKey(cx,cz,{kind:section>0?'upper':section===0?'surface':'depth',section:section>0?section-1:section});
+}
+export function runtimeSectionBounds(section){
+  return physicalSectionBounds({kind:section>0?'upper':section===0?'surface':'depth',section:section>0?section-1:section});
+}
+export function runtimeEditSections(y){
+  if(!physicalCellY(y))return [];
+  return [...new Set([-1,0,1].map(d=>runtimeSectionForY(y+d)).filter(s=>s!==null))];
+}
+// Map-compatible, including original rollback/restore operations. Sparse
+// counts cover authored non-AIR upper cells only, never a dense world volume.
+export class UpperIndexedMap extends Map{
+  #counts=new Map();#revision=0;
+  constructor(entries=[]){super();for(const [k,v] of entries)this.set(k,v);}
+  get upperRevision(){return this.#revision;}
+  upperOccupied(key){return this.#counts.has(key);}
+  #key(k){
+    if(typeof k!=='string')return null;
+    const [x,y,z,...rest]=k.split(',').map(Number);
+    if(rest.length||![x,y,z].every(Number.isSafeInteger)||y<UPPER_MIN_Y||!physicalCellY(y))return null;
+    return runtimeMeshKey(Math.floor(x/16),Math.floor(z/16),runtimeSectionForY(y));
+  }
+  #adjust(k,delta){
+    if(!k||!delta)return;
+    const old=this.#counts.get(k)??0,n=old+delta;
+    if(n>0)this.#counts.set(k,n);else this.#counts.delete(k);
+    if((old===0)!==(n===0))this.#revision++;
+  }
+  set(k,v){const old=this.has(k)&&this.get(k)!==0;super.set(k,v);
+    this.#adjust(this.#key(k),Number(v!==0)-Number(old));return this;}
+  delete(k){if(!this.has(k))return false;const old=this.get(k);const result=super.delete(k);
+    if(old!==0)this.#adjust(this.#key(k),-1);return result;}
+  clear(){super.clear();if(this.#counts.size){this.#counts.clear();this.#revision++;}}
+}
+export function upperOccupancy(world,key){
+  return Boolean(world.edits?.upperOccupied?.(key)||world.pack2Cells?.upperOccupied?.(key));
+}
+export function upperOccupancyRevision(world){
+  return (world.edits?.upperRevision??0)+':'+(world.pack2Cells?.upperRevision??0);
+}

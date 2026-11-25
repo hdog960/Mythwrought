@@ -1,0 +1,20 @@
+name: Shared world height H3 native runtime
+on:
+  push:
+    branches: [research/shared-world-height-h1-h2-20261125]
+    paths:
+      - 'tests/shared-world-height-h3.test.mjs'
+      - '.github/workflows/shared-world-height-h3.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: node --check src/main.mjs
+      - run: node --test tests/shared-world-height-h3.test.mjs tests/shared-world-height-h1-h2.test.mjs

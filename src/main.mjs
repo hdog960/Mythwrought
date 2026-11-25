@@ -1,6 +1,8 @@
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
+import {PHYSICAL_MAX_Y,runtimeSectionForY,runtimeMeshKey,runtimeEditSections,physicalBodyRegions,upperOccupancyRevision,upperOccupancy} from './world-height.mjs';
+import {planHeightStream} from './world-height-stream.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -633,29 +635,19 @@ function start(nonblockStage=null){
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
-  // Air above the authored top voxel is still rendered by the existing
-  // surface section (0); no new blocks, meshes, sections, or save data.
-  const G2_FLIGHT_MAX_FEET=WORLD_MAX_Y+48;
-  const g2Section=y=>y>WORLD_MAX_Y&&y<=G2_FLIGHT_MAX_FEET+BODY_HEIGHT+1?0:sectionForY(y);
+  // Positive regions use distinct physical keys, including empty readiness.
+  const G2_FLIGHT_MAX_FEET=PHYSICAL_MAX_Y+1-BODY_HEIGHT;
+  const g2Section=runtimeSectionForY;
   function g2MeshKey(key){
     const parts=key.split(',').map(Number);
-    if(parts.length!==3||!parts.every(Number.isSafeInteger)||parts[2]>0)return null;
-    try{return depthMeshKey(...parts);}catch(_){return null;}
+    if(parts.length!==3||!parts.every(Number.isSafeInteger)||parts[2]>15)return null;
+    try{return runtimeMeshKey(...parts);}catch(_){return null;}
   }
   function g2Ready(p){
     if(!p||!['x','y','z'].every(k=>Number.isFinite(p[k]))||
        p.y<WORLD_MIN_Y||p.y>G2_FLIGHT_MAX_FEET||graphicsLost)return false;
-    const e=1e-5;
-    for(const y of [p.y+e,p.y+BODY_HEIGHT-e]){
-      const section=g2Section(y);
-      if(section===null)return false;
-      for(const x of [p.x-BODY_RADIUS+e,p.x+BODY_RADIUS-e])
-        for(const z of [p.z-BODY_RADIUS+e,p.z+BODY_RADIUS-e]){
-          const c=chunks.get(depthMeshKey(chunkCoord(x),chunkCoord(z),section));
-          if(!c||!c.buffer||c.section!==section)return false;
-        }
-    }
-    return true;
+    const regions=physicalBodyRegions({x:p.x,feet:p.y,z:p.z,radius:BODY_RADIUS,height:BODY_HEIGHT});
+    return !!regions&&regions.every(r=>{const c=chunks.get(r.key);return !!c&&(!!c.buffer||c.section>0&&c.count===0);});
   }
   function g2Clear(p){
     try{return p&&['x','y','z'].every(k=>Number.isFinite(p[k]))&&
@@ -974,10 +966,10 @@ function start(nonblockStage=null){
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
   }
   // Both buffers stage before publishing; on failure neither can leak.
-  function uploadPack2Chunk(vertices,water){
+  function uploadPack2Chunk(vertices,water,section=0){
     let buffer=null,waterBuffer=null;
     try{
-      buffer=uploadChunkBuffer(gl,vertices);
+      if(section<=0||vertices.length)buffer=uploadChunkBuffer(gl,vertices);
       if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
@@ -989,6 +981,7 @@ function start(nonblockStage=null){
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
   function manual14AtChunk(cx,cz,section){
+    if(section>0)return {opaque:new Float32Array(),transparent:new Float32Array(),vertices:0,instances:0};
     const key=depthMeshKey(cx,cz,section);
     if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
     const meshes=meshManual14Chunk(manual14.layer,cx,cz,section);
@@ -1003,11 +996,16 @@ function start(nonblockStage=null){
     return combined;
   }
   function meshPlayableChunk(cx,cz,section){
+    if(section>0){
+      if(!upperOccupancy(world,runtimeMeshKey(cx,cz,section)))return new Float32Array();
+      return meshChunk(world,cx,cz,section);
+    }
     const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
     return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
   }
   function meshPlayableWater(cx,cz,section){
+    if(section>0)return pack2WaterSectionVertices(world,cx,cz,section);
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
@@ -1024,7 +1022,7 @@ function start(nonblockStage=null){
     try{
       for(const item of batch){
         if(gl.isContextLost())throw Error('Graphics context lost during edit mesh staging');
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water,item.section)});
       }
       if(gl.isContextLost()||world!==owner||
          batch.some((item,i)=>chunks.get(item.key)!==originals[i]))
@@ -1048,9 +1046,9 @@ function start(nonblockStage=null){
     // existing depth/geometry refresh for all legacy or non-surface edits.
     const seen=new Set();
     for(const [px,py,pz] of affectedCells??[[x,y,z]])
-      for(const section of verticalEditSections(py))
+      for(const section of runtimeEditSections(py))
       for(const {cx,cz} of desertSeamEditAffectedChunks(world,px,pz,py)){
-        const key=depthMeshKey(cx,cz,section);
+        const key=runtimeMeshKey(cx,cz,section);
         if(seen.has(key)||!chunks.has(key))continue;
         seen.add(key);
         const vertices=meshPlayableChunk(cx,cz,section);
@@ -1252,15 +1250,19 @@ function start(nonblockStage=null){
     const horizontalCenter=name(chunkCoord(player.x),chunkCoord(player.z));
     const nearShaft=player.feet<3&&surfaceOpeningNearby(world,player.x,player.z);
     const visibleSections=sectionWindow(player.feet,nearShaft);
-    const center=visibleSections.length===1&&visibleSections[0]===0?
+    const baseCenter=visibleSections.length===1&&visibleSections[0]===0?
       horizontalCenter:horizontalCenter+'|'+visibleSections.join(',');
+    const active=runtimeSectionForY(player.feet)??0;
+    const occupancy=upperOccupancyRevision(world);
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy:'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
-      const desired=visibleSections.flatMap(section=>
+      const legacy=visibleSections.flatMap(section=>
         chunkWindow(player.x,player.z,sectionChunkRadius(section,visibleSections[0]))
           .map(c=>({...c,section})));
-      wanted=new Set(desired.map(c=>depthMeshKey(c.cx,c.cz,c.section)));
+      const desired=planHeightStream(world,player,legacy);
+      wanted=new Set(desired.map(c=>runtimeMeshKey(c.cx,c.cz,c.section)));
       gpuRetry.keepOnly(wanted);
       // Keep only the immediate bounded vertical section neighborhood.
       // At normal surface height this remains the original 25 GPU chunks.
@@ -1268,14 +1270,14 @@ function start(nonblockStage=null){
         if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
       }
       for(const c of desired){
-        const k=depthMeshKey(c.cx,c.cz,c.section);
+        const k=runtimeMeshKey(c.cx,c.cz,c.section);
         if(!chunks.has(k)&&!pending.has(k))
           pending.set(k,[c.cx,c.cz,c.section]);
       }
     }
     for(const k of pending.keys())if(!wanted.has(k))pending.delete(k);
     const cx=chunkCoord(player.x),cz=chunkCoord(player.z);
-    const activeSection=sectionForY(Math.max(WORLD_MIN_Y,Math.min(19,Math.floor(player.feet))))??0;
+    const activeSection=runtimeSectionForY(player.feet)??0;
     const weight=([x,z,section])=>
       (x-cx)**2+(z-cz)**2+(section-activeSection)**2*12;
     const queue=[...pending.entries()].sort((a,b)=>
@@ -1289,7 +1291,8 @@ function start(nonblockStage=null){
       try{
         const data=meshPlayableChunk(x,z,section);
         const water=meshPlayableWater(x,z,section);
-        const buffers=uploadPack2Chunk(data,water);
+        const buffers=uploadPack2Chunk(data,water,section);
+        if(gl.isContextLost())throw Error('Context lost before chunk publication');
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
         chunks.set(k,{x,z,section,...buffers});
@@ -1521,6 +1524,8 @@ function start(nonblockStage=null){
       canvas.dataset.meshEditBatches=String(editMeshBatches);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
+      canvas.dataset.upperReadySections=String([...chunks.values()].filter(c=>c.section>0).length);
+      canvas.dataset.upperMeshVertices=String([...chunks.values()].filter(c=>c.section>0).reduce((n,c)=>n+c.count,0));
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
       canvas.dataset.pack3SelectedId=String(isPack3BlockId(selected)?selected:0);
       canvas.dataset.manual14PhysicalCount=String(manual14.layer.size());
@@ -1536,6 +1541,7 @@ function start(nonblockStage=null){
       canvas.dataset.manual14MeshVertices=String(manual14ResidentVerts);
       canvas.dataset.manual14VisibleInstances=String(manual14ResidentInstances);
       for(const c of chunks.values()){
+        if(!c.buffer||!c.count)continue;
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
         gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -1607,7 +1613,7 @@ function start(nonblockStage=null){
         gl.depthMask(false);
         waterChunks.sort((a,b)=>{
           const distance=c=>((c.x*16+8-player.x)**2+(c.z*16+8-player.z)**2+
-            (c.section*16-player.feet)**2);
+            ((c.section>0?20+(c.section-1)*16:c.section*16)-player.feet)**2);
           return distance(b)-distance(a);
         });
         for(const chunk of waterChunks){

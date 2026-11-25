@@ -13,6 +13,8 @@ import {PACK_2_INFRASTRUCTURE,infrastructureAsset,infrastructureCell,
 import {WATER_ASSET,WATER_CANDIDATE_ID,waterCell,waterShape,waterPreviewMesh,waterRaycast}
   from './block-packs/pack-2/water.mjs';
 
+import {runtimeSectionForY} from './world-height.mjs';
+
 const specs=Object.freeze([...PACK_2_ASSETS,...PACK_2_JOINERY,...PACK_2_GROUND,
   ...PACK_2_INFRASTRUCTURE,WATER_ASSET].sort((a,b)=>a.id-b.id));
 const byId=new Map(specs.map(s=>[s.id,s]));
@@ -142,7 +144,7 @@ export function pack2CycleState(id,state,action){
 // for each chunk that actually contains a placed water candidate.
 export function pack2WaterSectionVertices(world,cx,cz,section){
   if(!world?.pack2Cells?.size&&!world?.base?.environmentOasisWaterEntries)return new Float32Array();
-  if(![cx,cz,section].every(Number.isInteger)||section>0)
+  if(![cx,cz,section].every(Number.isInteger)||section>15)
     throw new TypeError('Invalid water chunk location');
   const result=[];let length=0;
   // Production Pack2LiveWorld keeps a transient per-chunk fluid index.
@@ -154,7 +156,7 @@ export function pack2WaterSectionVertices(world,cx,cz,section){
   for(const [key,state] of entries){
     if(state.id!==WATER_CANDIDATE_ID)continue;
     const [x,y,z]=key.split(',').map(Number);
-    const actualSection=y>=-3?0:Math.floor((y+3)/16);
+    const actualSection=runtimeSectionForY(y);
     if(actualSection!==section||Math.floor(x/16)!==cx||Math.floor(z/16)!==cz)continue;
     // Remove only *identical* internal fluid side triangles; differing level
     // cells must retain their visible side faces and physical surface heights.
