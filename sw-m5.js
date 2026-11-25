@@ -3,12 +3,16 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261124-compact-menu-v1';
-const ASSET_RELEASE='20261124-compact-menu-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261124-snow-p1-v1';
+const ASSET_RELEASE='20261124-snow-p1-v1';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
   "./src/manual-biomes/environment-v7.mjs",
+  "./src/manual-biomes/snowy-s17-fresh-source.mjs",
+  "./src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs",
+  "./src/manual-biomes/snowy-s14-edge-pigment.mjs",
+  "./src/manual-biomes/snowy-s10-single-mesh-scratch-pigment.mjs",
   "./src/manual-biomes/enchanted-tree-candidates.mjs",
   "./src/manual-biomes/enchanted-tree-footings.mjs",
   "./src/manual-biomes/enchanted-tree-overlap.mjs",
