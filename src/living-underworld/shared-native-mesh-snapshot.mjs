@@ -23,7 +23,7 @@ export function sharedMeshHaloCells(keys){
  }
  return volume;
 }
-export function meshReadOnlySharedBatch(world,keys,{beforeRead=()=>{}}={}){
+export function meshReadOnlySharedBatch(world,keys,{beforeRead=()=>{},afterRead=()=>{}}={}){
  if(!world||typeof world.get!=='function'||!Array.isArray(keys)||!keys.length||
     keys.length>6||new Set(keys).size!==keys.length)
   throw TypeError('Bounded six-section native transaction required');
@@ -39,7 +39,9 @@ export function meshReadOnlySharedBatch(world,keys,{beforeRead=()=>{}}={}){
   // Count them too. Never return a fabricated value or partially admit.
   if(calls>=limits.originalNaturalReads)throw Error('NATIVE_MESH_SOURCE_READ_BUDGET');
   beforeRead(x,y,z);
-  const v=world.get(x,y,z);calls++;cache.set(k,v);return v;
+  let v;
+  try{v=world.get(x,y,z);}finally{afterRead(x,y,z);}
+  calls++;cache.set(k,v);return v;
  }});
  const meshes=[];
  try{
