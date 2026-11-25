@@ -11,6 +11,7 @@ import {auditProtectedSubsurfaceStairs} from './protected-subsurface-stairs.mjs'
 import {createOriginalM7ReadOnlySource,inspectOriginalM7ReadOnlySource}
  from './original-m7-reader-provenance.mjs';
 import {BLOCK} from '../voxel.mjs';
+import {actualGallerySectionCosts,auditGalleryEngineWorkingSet} from './gallery-streaming-working-set.mjs';
 export const GALLERY_CENSUS_SITES=Object.freeze([
  {biome:'plains',rx:-9,rz:0},{biome:'desert',rx:-3,rz:-9},
  {biome:'snow',rx:-6,rz:3},{biome:'mountain',rx:6,rz:9},
@@ -59,7 +60,7 @@ function windowMaximum(rows){
  return {windowsExamined:centers.size,maxFaces,maxCuts,maxOwners,faceCenter,
   diagnosticOnly:true,policyChanged:false,gpuVerified:false};
 }
-export function censusOriginal80GalleryCosts(){
+export function censusOriginal80GalleryCosts({engineWorkingSet=false}={}){
  const seed=179,source=createOriginalM7ReadOnlySource(seed);
  if(!inspectOriginalM7ReadOnlySource(source,{seed}).ok)throw Error('ORIGINAL_SOURCE_IDENTITY');
  const planned=[],floor=new Set(),air=new Set(),minimum=new Set();
@@ -121,6 +122,8 @@ export function censusOriginal80GalleryCosts(){
  }
  const full=measureGalleryCutUnion(cuts,read.naturalAt);
  const min=measureGalleryCutUnion(minCuts,read.naturalAt);
+ const engine=engineWorkingSet?auditGalleryEngineWorkingSet(actualGallerySectionCosts(cuts,read.naturalAt)):null;
+ if(engine&&engine.globalCuts!==cuts.size)throw Error('ENGINE_SECTION_CUT_PARITY');
  if(!inspectOriginalM7ReadOnlySource(source,{seed}).ok)throw Error('ORIGINAL_SOURCE_MUTATED');
  if(visited!==rawCells||regions.length!==5||rows.length!==80||
     rows.reduce((n,r)=>n+r.uniqueAdditionalCuts,0)!==cuts.size)
@@ -131,7 +134,7 @@ export function censusOriginal80GalleryCosts(){
   originalRoleCalls:Object.fromEntries(roles.map(r=>[r,memo[r].size])),
   finiteDiagnosticNaturalEnvelope:naturalEnvelope.size,
   original:compactCost(full),minimumFixedCenterlineHeadroom:compactCost(min),
-  originalAffectedOwnerRows:full.rows,regions,rows,
+  originalAffectedOwnerRows:full.rows,regions,rows,engineWorkingSet:engine,
   illustrative27ChunkWindows:windowMaximum(full.rows),
   limits,constructionAdmission:false,geometryFitsCumulativeCaps:full.ok,
   fixedCenterlineEvenMinimumExceedsCarveLimit:min.ownedCarves>limits.ownedCarves,
