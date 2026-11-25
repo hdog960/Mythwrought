@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {censusOriginal80GalleryCosts} from '../src/living-underworld/full-gallery-cost-census.mjs';
+import {GALLERY_CONSTRUCTION_LIMITS} from '../src/living-underworld/physical-gallery-construction.mjs';
+test('complete native original M7 80-gallery cost diagnostic, never construction approval',()=>{
+ const r=censusOriginal80GalleryCosts();
+ const {originalAffectedOwnerRows,rows,...summary}=r;
+ console.log(JSON.stringify(summary));
+ assert.equal(r.sourceSafeGalleries,80);
+ assert.equal(r.sourceChecks,123840);
+ assert.equal(r.regions.length,5);
+ assert.ok(r.regions.every(x=>x.galleries===16));
+ assert.equal(r.original.ownedCarves,rows.reduce((n,x)=>n+x.uniqueAdditionalCuts,0));
+ assert.equal(r.original.ownedCarves,originalAffectedOwnerRows.reduce((n,x)=>n+x.ownedCarves,0));
+ assert.equal(r.original.faceGrowth,originalAffectedOwnerRows.reduce((n,x)=>n+x.faceGrowth,0));
+ assert.ok(r.originalRoleCalls.naturalAt<=r.finiteDiagnosticNaturalEnvelope);
+ assert.ok(r.minimumFixedCenterlineHeadroom.ownedCarves<=r.original.ownedCarves);
+ assert.deepEqual(r.limits,GALLERY_CONSTRUCTION_LIMITS);
+ assert.equal(r.limits.ownedCarves,10000);
+ assert.equal(r.limits.faceGrowth,3500);
+ assert.equal(r.limits.perChunkFaceGrowth,1200);
+ assert.equal(r.limits.originalNaturalReads,40000);
+ assert.equal(r.geometryFitsCumulativeCaps,false);
+ assert.equal(r.constructionAdmission,false);
+ assert.equal(r.noWorldWrites,true);
+ assert.equal(r.releaseApproved,false);
+});
