@@ -26,7 +26,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261124-compact-menu-v1';
+  const release='20261124-mountain-v8-v1';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));
@@ -35,48 +35,44 @@ test('release ID matches HTML, updater and existing worker cache',()=>{
   assert.ok(worker.includes("CACHE_NAME=CACHE_PREFIX+'"+release+"'"));
 });
 function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK=true,readOnly=false,allClaimed=false}={}){
-  const begin=src.indexOf('  function createLatestMenuWorld(next){');
+  const begin=src.indexOf('  async function createLatestMenuWorld(next){');
   const end=src.indexOf("  document.getElementById('switchWorld').onclick=",begin);
   assert.ok(begin>=0&&end>begin);
   const calls=[],seedMessage={textContent:''},newWorld={},createEnchantedButton={},seedInput={value:'179'};
-  const world={seed:179},storage={};
+  const world={seed:179},storage={},rawStorage={};
   const document={getElementById:id=>{assert.equal(id,'newWorld');return newWorld}};
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
-  const expected='latest-enchanted-profile';
-  const latest={world:{seed:7654321},base:{generationProfile:{generator:expected}}};
-  Function('world','localStorage','window','storageReadOnly','save','rejectLegacyWorldWhereCaveExists','readFourRegionProfile','isUnclaimedWorldSeed','planM2WorldChoice','M2_WORLD_MODE','openM2World','saveM2World','enterPreparedM2World','ENCHANTED_P2_GENERATOR','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto',src.slice(begin,end))(
-    world,storage,{confirm:text=>{calls.push(['confirm',text]);return !cancel}},readOnly,()=>{calls.push(['save-old']);return saveOK},
-    (_,n)=>calls.push(['cave-guard',n]),(_,n)=>n===2026?{}:null,
-    (_,n)=>!allClaimed&&n===7654321,
-    (seed,mode,flags)=>{calls.push(['plan',seed,mode,flags.confirmed]);return {seed,mode}},
-    {CREATE_ENCHANTED_P2:'new-latest'},
-    (_,choice)=>{calls.push(['open',choice.seed]);return latest},
-    ()=>{calls.push(['save-new']);return {ok:writeOK,reason:'fixture write refused'}},
-    (_,status)=>calls.push(['enter',status]),expected,createEnchantedButton,seedInput,seedMessage,Number,document,crypto);
+  const source=src.slice(begin,end),importLine="const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');";
+  assert.ok(source.includes(importLine));
+  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto',source.replace(importLine,''))(
+    world,storage,rawStorage,{confirm:text=>{calls.push(['confirm',text]);return !cancel}},readOnly,()=>{calls.push(['save-old']);return saveOK},
+    (_,n)=>n===2026?{}:null,(_,n)=>!allClaimed&&n===7654321,true,false,
+    async(seed,opts)=>{calls.push(['admit',seed,opts.confirmed]);assert.equal(opts.storage,rawStorage);return {world:{seed:Number(seed)}};},
+    raw=>{assert.equal(raw,rawStorage);return storage;},
+    (scope)=>{assert.equal(scope,storage);calls.push(['save-new']);return {ok:writeOK,reason:'fixture write refused'};},
+    (raw,active)=>{assert.equal(raw,rawStorage);assert.equal(active,true);calls.push(['activate']);},
+    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto);
   return {click:()=>newWorld.onclick(),calls,seedMessage};
 }
-test('NEW WORLD skips current and claimed seeds then uses only current newest generator',()=>{
-  const f=fixture();f.click();
-  assert.deepEqual(f.calls.find(x=>x[0]==='plan'),['plan','7654321','new-latest',true]);
-  assert.deepEqual(f.calls.map(x=>x[0]),['cave-guard','confirm','save-old','plan','open','save-new','enter']);
+test('NEW WORLD skips current and claimed seeds then uses verified isolated Mountain V8 admission',async()=>{
+  const f=fixture();await f.click();
+  assert.deepEqual(f.calls.find(x=>x[0]==='admit'),['admit','7654321',true]);
+  assert.deepEqual(f.calls.map(x=>x[0]),['confirm','save-old','admit','save-new','activate','reload']);
 });
-test('cancel NEW WORLD before creating or saving any new seed',()=>{
-  const f=fixture({cancel:true});f.click();
-  assert.deepEqual(f.calls.map(x=>x[0]),['cave-guard','confirm']);
+test('cancel NEW WORLD before creating or saving any new seed',async()=>{
+  const f=fixture({cancel:true});await f.click();
+  assert.deepEqual(f.calls.map(x=>x[0]),['confirm']);
 });
-test('old save refusal prevents latest world activation',()=>{
-  const f=fixture({saveOK:false});f.click();
-  assert.ok(!f.calls.some(x=>x[0]==='open'));
-  assert.match(f.seedMessage.textContent,/Save current world/);
+test('old save refusal prevents latest world activation',async()=>{
+  const f=fixture({saveOK:false});await f.click();
+  assert.ok(!f.calls.some(x=>x[0]==='admit'));assert.match(f.seedMessage.textContent,/Save current world/);
 });
-test('new save refusal never enters candidate world',()=>{
-  const f=fixture({writeOK:false});f.click();
-  assert.ok(f.calls.some(x=>x[0]==='save-new'));
-  assert.ok(!f.calls.some(x=>x[0]==='enter'));
+test('new save refusal never enters candidate world',async()=>{
+  const f=fixture({writeOK:false});await f.click();
+  assert.ok(f.calls.some(x=>x[0]==='save-new'));assert.ok(!f.calls.some(x=>x[0]==='activate'||x[0]==='reload'));
   assert.match(f.seedMessage.textContent,/not verified/);
 });
-test('bounded random search never creates claimed seed',()=>{
-  const f=fixture({allClaimed:true});f.click();
-  assert.deepEqual(f.calls,[]);
-  assert.match(f.seedMessage.textContent,/unused seed/);
+test('bounded random search never creates claimed seed',async()=>{
+  const f=fixture({allClaimed:true});await f.click();
+  assert.deepEqual(f.calls,[]);assert.match(f.seedMessage.textContent,/unused seed/);
 });

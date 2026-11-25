@@ -1,5 +1,5 @@
 {
-  "version": "20261124-v40-mountain-v8",
+  "version": "20261124-v40",
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "c0932251fb658ac8d580493c1e7b509787ec61d2eebc58327b57f4c2791e07f1",
     "./src/environment-ground.mjs": "21ff107c4bb35365b06f0407563d43d81183393c4368c13a120900cf515c402d",
@@ -258,6 +258,15 @@
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "d0b0d7b00584373b176bf58160bf9c5527059adfcc3e76a9e2c415201943fe69",
     "./src/manual-biomes/profile-world.mjs": "29802eabfe4acc00b869737ac45d8664aee5dec9af2e4fc112636a263e13bde0",
+    "./src/manual-biomes/mountain-v8-candidate.mjs": "798946c6e59e1ac28736950c0ff7594e2289fa48d7f2f349c7c31cc05b7dc859",
+    "./src/manual-biomes/mountain-v8-materials.mjs": "3ed26cb3af6ff535c9be6a1bdfce79a98a78835c8b32ae697fd088dc890a8b3c",
+    "./src/manual-biomes/mountain-v8-isolated-storage.mjs": "26991f53dbe4a0c2cde2606f8a491945e261206ad58d52e029276a8599961102",
+    "./src/manual-biomes/mountain-v8-source-adapter.mjs": "bd90559d9a1f1e80e6c240db0a3a3a3005d52ad51f381d0b7d0bbd7cb82712b0",
+    "./src/manual-biomes/mountain-v8-physical-column.mjs": "86e4efd64518106d24d2239eb3e352f667763bcaf4234e411eb05e293e58a3b5",
+    "./src/manual-biomes/mountain-v8-runtime-terrain.mjs": "10ee7a1f4f6f06127a5c14a74bcab06a10280b074ce40e90f633ef51825ecc6d",
+    "./src/manual-biomes/mountain-v8-runtime-conifers.mjs": "0de899b801f665a0e7d7a85e7eb5a921f9cd5e2e72b284a56417498190465a7f",
+    "./src/manual-biomes/mountain-v8-vegetation-cells.mjs": "95f210670542f11e98ac7fd8a214a469ff18450af53ba0671f71fe73c9592972",
+    "./src/manual-biomes/mountain-v8-new-world-admission.mjs": "5bfa7766a9948d9fe13420989bb70efce623489621e8c920caf6826d80192159",
     "./src/manual-biomes/shoulder-traversal.mjs": "f54ef77060131d8bfd5b43c5ab232d9ab9049d664d7b3a46642f0cd24bb3bffe",
     "./src/manual-biomes/three-regions-m4.mjs": "d499c23d8662c3ac5b246eed7f23a21876ee37c1f7a7e4a9ca9b90b013e46db4",
     "./src/meadow.mjs": "971be34a7b15baaf678265dfc9da2918ef6bc2b72761fc7763f71d94063a3f05",
@@ -312,15 +321,6 @@
     "./styles.css": "d5c769f0f14dede0ed45a90fe7fdf9e61f9fd24ac529f65d39eee3eda1bf3c4e",
     "./sw-m5.js": "05c7e299eec67a3cb18e670f63383b86c9cbea87cc22e30c8e7017633b75b38a",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "381da145bdaa255bfd2c18cebb674f4e12381fb2dca9801815a24a1ec1d2c6d7",
-    "./src/manual-biomes/mountain-v8-candidate.mjs": "798946c6e59e1ac28736950c0ff7594e2289fa48d7f2f349c7c31cc05b7dc859",
-    "./src/manual-biomes/mountain-v8-source-adapter.mjs": "bd90559d9a1f1e80e6c240db0a3a3a3005d52ad51f381d0b7d0bbd7cb82712b0",
-    "./src/manual-biomes/mountain-v8-physical-column.mjs": "86e4efd64518106d24d2239eb3e352f667763bcaf4234e411eb05e293e58a3b5",
-    "./src/manual-biomes/mountain-v8-runtime-terrain.mjs": "10ee7a1f4f6f06127a5c14a74bcab06a10280b074ce40e90f633ef51825ecc6d",
-    "./src/manual-biomes/mountain-v8-runtime-conifers.mjs": "0de899b801f665a0e7d7a85e7eb5a921f9cd5e2e72b284a56417498190465a7f",
-    "./src/manual-biomes/mountain-v8-vegetation-cells.mjs": "95f210670542f11e98ac7fd8a214a469ff18450af53ba0671f71fe73c9592972",
-    "./src/manual-biomes/mountain-v8-new-world-admission.mjs": "5bfa7766a9948d9fe13420989bb70efce623489621e8c920caf6826d80192159",
-    "./src/manual-biomes/mountain-v8-materials.mjs": "3ed26cb3af6ff535c9be6a1bdfce79a98a78835c8b32ae697fd088dc890a8b3c",
-    "./src/manual-biomes/mountain-v8-isolated-storage.mjs": "26991f53dbe4a0c2cde2606f8a491945e261206ad58d52e029276a8599961102"
+    "./sw-nonblock-stage.js": "a34b37db7e3bef76ba93842a4d7d898abfb1115ec9a1483ab85cf43ec315b4e1"
   }
 }
