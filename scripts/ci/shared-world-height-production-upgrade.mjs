@@ -10,20 +10,29 @@ const oldRelease='20261124-mountain-v8-v1',release='20261125-shared-height-v1',p
 const out=path.resolve('artifacts/world-height-upgrade');await mkdir(out,{recursive:true});
 const evidence={oldRelease,release,physicalIphone:false,checks:[]};
 function check(name,value,details={}){evidence.checks.push({name,ok:Boolean(value),...details});console.log('HEIGHT UPGRADE',name,JSON.stringify({ok:Boolean(value),...details}));assert.ok(value,name);}
-let deployment=prior,requests=0;
+let deployment=prior,requests=0;const requestFailures=[];
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
 const server=createServer(async(req,res)=>{requests++;try{
  const u=new URL(req.url,'http://127.0.0.1');if(!u.pathname.startsWith(prefix))throw Error('outside Pages scope');
+ // A blank same-origin bootstrap document creates a real prior-production
+ // saved world through the old admission and save authorities, not fake rows.
+ if(deployment===prior&&u.pathname===prefix+'__height_prior_bootstrap.html'){
+  res.writeHead(200,{'Content-Type':'text/html','Cache-Control':'no-store'});res.end('<!doctype html><title>Prior production source bootstrap</title>');return;
+ }
  const f=decodeURIComponent(u.pathname.slice(prefix.length))||'index.html',file=path.resolve(deployment,f);
  if(!file.startsWith(deployment+path.sep))throw Error('bad path');
- res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});res.end(await readFile(file));
-}catch(e){if(!res.headersSent)res.writeHead(404);res.end(String(e));}});
+ const bytes=await readFile(file);
+ res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});res.end(bytes);
+}catch(e){if(requestFailures.length<80)requestFailures.push({url:req.url,error:String(e)});if(!res.headersSent)res.writeHead(404);res.end(String(e));}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port+prefix;
 let browser,context;
 try{
  browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--no-sandbox']});
  context=await browser.newContext({viewport:{width:956,height:440},deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'allow'});
- const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ const page=await context.newPage(),errors=[],consoleErrors=[];
+ page.on('pageerror',e=>{errors.push(String(e));console.error('HEIGHT PAGE ERROR',String(e));});
+ page.on('console',m=>{if(m.type()==='error'&&consoleErrors.length<80)consoleErrors.push(m.text());});
+ evidence.errors=errors;evidence.consoleErrors=consoleErrors;evidence.requestFailures=requestFailures;
  const waitGame=()=>page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:180000});
  const waitCache=marker=>page.waitForFunction(async({marker,prefix})=>{
   const key='mythwrought-m5-shell-'+marker;
@@ -37,8 +46,28 @@ try{
     raw:localStorage.getItem(p+'mythwrought-v002-world-'+seed),
     active:localStorage.getItem('mythwrought-mountain-v8-active-v1'),glError:document.querySelector('#scene').getContext('webgl2').getError()};
  });
- await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});await waitGame();await waitCache(oldRelease);
- const old=await state();check('exact previous production installed',old.release===oldRelease&&old.profile===profile&&old.raw&&old.active==='1',old);
+ // The previous H8 run timed out before *any* prior-game assertions.
+ // Establish a deterministic existing prior save with unchanged actual old
+ // source, then launch the actual old public game and install its worker.
+ await page.goto(origin+'__height_prior_bootstrap.html',{waitUntil:'load',timeout:30000});
+ const prepared=await page.evaluate(async()=>{
+  const {createMountainV8IsolatedWorld}=await import('./src/manual-biomes/mountain-v8-new-world-admission.mjs');
+  const {mountainV8Storage,setMountainV8Active}=await import('./src/manual-biomes/mountain-v8-isolated-storage.mjs');
+  const {saveM2World}=await import('./src/manual-biomes/m2-runtime-bridge.mjs');
+  const result=await createMountainV8IsolatedWorld('2026',{confirmed:true,storage:localStorage});
+  const scoped=mountainV8Storage(localStorage),saved=saveM2World(scoped,result.world);
+  if(!saved.ok)throw Error('Prior actual source save failed: '+saved.reason);
+  setMountainV8Active(localStorage,true);
+  return {seed:result.world.seed,raw:scoped.getItem('mythwrought-v002-world-2026')};
+ });
+ check('prior existing world created by frozen source',prepared.seed===2026&&!!prepared.raw);
+ await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});
+ try{await waitGame();await waitCache(oldRelease);}catch(error){
+  evidence.startup=await page.evaluate(async()=>({text:document.body.innerText.slice(0,4000),url:location.href,ready:document.readyState,cacheNames:await caches.keys(),worker:(await navigator.serviceWorker.getRegistration())?.active?.scriptURL,loaded:document.querySelector('#scene')?.dataset.loadedChunks,hasGame:!!window.__mythwroughtTest}));
+  await page.screenshot({path:path.join(out,'prior-startup-failure.png')}).catch(()=>{});
+  console.error('HEIGHT PRIOR STARTUP',JSON.stringify(evidence.startup));throw error;
+ }
+ const old=await state();check('exact previous production installed',old.release===oldRelease&&old.profile===profile&&old.seed===prepared.seed&&old.raw===prepared.raw&&old.active==='1',old);
  const priorKey='mythwrought-mountain-v8-isolated-v1:mythwrought-v002-world-'+old.seed;
  const historical=()=>page.evaluate(k=>localStorage.getItem(k),priorKey);
  const priorCache=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
