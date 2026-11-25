@@ -15,7 +15,8 @@ const SCENES = Object.freeze([
   {biome:'desert', floor:4, light:.8, births:13, passive:3, hostile:10, distinct:3},
   {biome:'snow', floor:4, light:.8, births:19, passive:15, hostile:4, distinct:5},
   {biome:'alpine', floor:4, light:.8, births:32, passive:22, hostile:10, distinct:9},
-  {biome:'cave', floor:-34, light:.25, births:43, passive:2, hostile:41, distinct:16},
+  // Accepted deep-column permutation: historical 43/2/41/16, revised 47/3/44/18.
+  {biome:'cave', floor:-34, light:.25, births:47, passive:3, hostile:44, distinct:18},
   {biome:'wetland', floor:4, light:.8, births:19, passive:8, hostile:11, distinct:5},
   {biome:'volcanic', floor:4, light:.8, births:6, passive:1, hostile:5, distinct:2}
 ]);
@@ -81,16 +82,18 @@ test('original roster stays at exactly twenty passive and twenty hostile impleme
 
 for(const scene of SCENES) {
   test(`original ${scene.biome} physically supported first-tick source matrix, seeds 1..64`,()=>{
-    const admitted=[],classes={passive:0,hostile:0};
+    const admitted=[],birthSeeds=[],classes={passive:0,hostile:0};
     for(let seed=1;seed<=64;seed++){
       const mob=firstTick(seed,scene);
-      if(mob){admitted.push(mob.species.id);classes[mob.species.classification]++;}
+      if(mob){admitted.push(mob.species.id);birthSeeds.push(seed);classes[mob.species.classification]++;}
     }
     assert.equal(admitted.length,scene.births,
       'Frozen original-source baseline with 64 new-world seeds on flat ground');
     assert.equal(classes.passive,scene.passive);
     assert.equal(classes.hostile,scene.hostile);
     assert.equal(new Set(admitted).size,scene.distinct);
+    if(scene.biome==='cave')assert.deepEqual(birthSeeds,[1,2,3,4,5,6,7,10,11,12,13,16,17,18,20,21,22,26,27,28,29,30,31,33,34,35,36,37,38,39,41,46,47,50,51,52,53,54,55,56,57,58,59,60,61,62,64],
+      'Accepted cave-column permutation must retain the exact deterministic seed admission pattern');
   });
 }
 

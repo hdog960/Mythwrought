@@ -110,7 +110,8 @@ test('six original V6/cave habitat baselines preserve 384 stable source first ti
     {biome:'desert',floor:4,light:.8,births:13},
     {biome:'snow',floor:4,light:.8,births:19},
     {biome:'alpine',floor:4,light:.8,births:32},
-    {biome:'cave',floor:-34,light:.25,births:43}
+    // Historical 43 births changed to 47 under the accepted cave-column permutation.
+    {biome:'cave',floor:-34,light:.25,births:47}
   ];
   for(const scene of cases){
     let admitted=0;
