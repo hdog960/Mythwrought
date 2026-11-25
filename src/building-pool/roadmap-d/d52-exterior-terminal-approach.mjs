@@ -57,8 +57,14 @@ export function deriveD52ExteriorDoglegApproach(d51,dog,palette,{outwardDistance
   throw TypeError('D52 only exact D51 original cap/valid dogleg/Pack2 palette and bounded exterior staging');
  const originalCap=deriveD51DoglegActualBoundaryCap(dog,{entry:d51.target.entry}),normal=[0,0,0];
  normal[originalCap.axis]=originalCap.sign;
- const sideAxis=dog.plane==='x'?2:0,translation=mul(normal,outwardDistance);
- translation[sideAxis]+=offset;
+ const sideAxis=dog.plane==='x'?2:0,
+  // A lateral dogleg end face has its normal ON sideAxis. The offset MUST
+  // instead follow the orthogonal axial direction, never shorten the real
+  // exterior-normal displacement or make the staging cap appear 'outward'
+  // only by an erroneous normal-axis subtraction.
+  transverseAxis=originalCap.axis===sideAxis?(dog.plane==='x'?0:2):sideAxis,
+  translation=mul(normal,outwardDistance);
+ translation[transverseAxis]+=offset;
  const sourceCap=d51.stages[1].vertices.slice(3,6),exteriorCap=originalCap.triangle.map(p=>add(p,translation));
  const third=hull(sourceCap,exteriorCap,palette,'source-to-exterior-staging-cap'),
   fourth=hull(exteriorCap,originalCap.triangle,palette,'exterior-normal-to-real-dogleg-face');
@@ -114,15 +120,19 @@ export function inspectD52FullOriginalVolume(link,patch,dog,socket,source,wall,{
 /** Offline source palette ray, with true exposed dogleg face as the target. */
 export function sampleD52ExteriorMeshRay(link){
  if(link?.format!=='mythwrought.d52.uninstalled-four-stage-exterior-dogleg-link.v1')throw TypeError('D52 real exterior endcap only');
- const centroid=center(link.originalCap.triangle),n=link.normal,from=add(centroid,mul(n,.09)),dir=mul(n,-1),
+ const targetCenter=center(link.originalCap.triangle),outerCenter=center(link.exteriorCap),
+  // The centroid-to-centroid segment of two supporting triangle caps is
+  // guaranteed INSIDE their true convex hull. A fixed face-normal ray may
+  // instead cross a lateral face first on a genuinely skewed approach.
+  travel=sub(targetCenter,outerCenter),probeDistance=mag(travel)*.5,
+  from=mul(add(targetCenter,outerCenter),.5),dir=unit(travel),
   t=d31RayPreviewTriangles(link.stages[3].mesh,from,dir,1);
- // The real analytic triangle is stored in double precision; the painted
- // preview is an authentic Float32Array. Its ray error must fit the ACTUAL
- // component-wise f32 displacement of these three source-derived vertices.
- // No blanket distance tolerance and no acceptance of a missed ray.
- const rounding=Math.max(...link.originalCap.triangle.map(p=>Math.abs(dot(p.map(x=>Math.fround(x)-x),n)))),
-  tolerance=4e-6+3*rounding,delta=t===null?Infinity:Math.abs(t-.09);
- if(t===null||delta>tolerance)throw Error(`D52 actual dogleg source-mesh/ray differs beyond f32 rounding: t=${t}, delta=${delta}, rounding=${rounding}, bound=${tolerance}`);
- return Object.freeze({sourcePaletteId61Only:true,rayDelta:delta,rayRoundingBound:tolerance,previewOnly:true,
+ // The actual source geometry is double-precision; original-palette mesh
+ // triangles are f32. Derive a strict geometry-specific rounding allowance.
+ const rounding=Math.max(...link.originalCap.triangle.map(p=>Math.abs(dot(p.map(x=>Math.fround(x)-x),dir)))),
+  tolerance=4e-6+3*rounding,delta=t===null?Infinity:Math.abs(t-probeDistance);
+ if(t===null||delta>tolerance)throw Error(`D52 genuine convex terminal centroid-to-endcap mesh/ray mismatch t=${t} expected=${probeDistance} bound=${tolerance}`);
+ return Object.freeze({sourcePaletteId61Only:true,rayDelta:delta,rayRoundingBound:tolerance,
+  probeDistance,originalExteriorSeparation:-link.finalTravel,previewOnly:true,
   actualGameplayPickingPassed:false,constructionAllowed:false});
 }

@@ -86,3 +86,31 @@ because checkout's `fetch-depth: 2` omitted `HEAD^^` for the multi-commit
 ancestry check. The workflow now explicitly fetches depth four and verifies
 every D52 parent back to D51, plus the same six-file D51-to-D52 diff. The
 original source and collision checks remain unchanged.
+
+## D52 true exterior-offset axis correction
+
+At exact native Actions `#45664707753`, the first four pure tests passed
+and all source/ancestry/syntax checks passed; the first original-source ray
+failed with a **real geometry mismatch** (`t=0.05000038` vs assumed `0.09`).
+The root cause was an offset applied to the dogleg endface **normal axis**
+for `second-lateral` entry instead of perpendicular to that axis. It shortened
+the exterior staging distance from 0.16 to 0.04 in a valid trial. D52 now
+selects its transverse axis perpendicular to the authentic endface normal
+for **both** `first-axial` and `second-lateral` entries, and launches the
+independent triangle ray from a point provably **inside** the terminal span.
+The new pure test covers both entries with each of ±0.12/zero shift and
+both exterior distances. Actual dogleg stage intrusion and all structural
+release gates remain fully fail-closed.
+
+D52 local strengthening of the ray witness: a later expanded pure test found
+that even a TRUE transverse offset can make a *face-normal* test ray cross
+a **lateral side of a skewed supporting convex hull** before it reaches the
+terminal dogleg cap. The correct source-authentic witness is the physical
+centroid-to-centroid line between the true exterior staging triangle and the
+true D45 boundary cap: its midpoint is inside the actual convex hull and its
+direction reaches the positive-area terminal triangle. The independent f32
+triangle ray must hit that exact cap at half the measured three-dimensional
+centroid distance, within only the measured Float32 component rounding bound.
+All six fractional offset/distance combinations, both end-face orientations,
+X/Z planes and both lateral signs are tested locally; no occluded side-face ray
+is misrepresented as terminal contact.

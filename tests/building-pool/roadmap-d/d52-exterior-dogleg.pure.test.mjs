@@ -32,13 +32,15 @@ test('D52 actual original D45 X/Z both-side exterior endcaps and new staging cap
   const f=fixture(plane,side,height);
   for(const entry of ['first-axial','second-lateral'])for(const hingeSide of [-1,1]){
    let old;try{old=f.make(entry,hingeSide,12)}catch(e){if(/nonconvex\/twisted/.test(e.message)){invalid++;continue;}throw e;}
-   for(const outwardDistance of [.16,.32]){
-    let x;try{x=deriveD52ExteriorDoglegApproach(old,f.dog,palette,{outwardDistance});}
+   for(const outwardDistance of [.16,.32])for(const offset of [-.12,0,.12]){
+    let x;try{x=deriveD52ExteriorDoglegApproach(old,f.dog,palette,{outwardDistance,offset});}
     catch(e){if(/non-supporting, zero-volume or nonconvex/.test(e.message)){invalid++;continue;}throw e;}
     examined++;
     assert.equal(x.stages.length,4);assert.ok(x.realSocketContactArea>.008&&x.realDoglegCapArea>.001);
     assert.equal(x.genuineSharedTriangleCaps,3);assert.ok(x.faceApproachedFromOutside);
     assert.ok(Math.abs(x.finalTravel+outwardDistance)<1e-7);
+    const ray=sampleD52ExteriorMeshRay(x);assert.ok(ray.rayDelta<=ray.rayRoundingBound);
+    assert.ok(ray.probeDistance<ray.originalExteriorSeparation);
     assert.equal(x.stages[3].mesh.positions.length,x.stages[3].mesh.colors.length);
     const check=inspectD52FullOriginalVolume(x,f.patch,f.dog,f.socket,f.source,f.wall);
     assert.equal(check.exactTerminus,true);assert.equal(check.exactSocket,true);
