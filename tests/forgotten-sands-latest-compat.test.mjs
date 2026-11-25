@@ -25,7 +25,7 @@ test('read-only current-source historical M7 and explicit latest Mountain V8 pro
   const worlds=new Map(),counts={columns:0,cells:0,caveReads:0,planMismatches:0,historicalMismatches:0,currentNewMismatches:0,caveMismatches:0,meshCount:0,meshHistoricalMismatch:0,meshNewMismatch:0};
   const sampleMismatches=[],seenChunks=new Set();
   for(const [seed,x,z,size] of cases){
-    if(!worlds.has(seed))worlds.set(seed,[make(oldProfile,seed,oldProfile.M7_ENVIRONMENT_GENERATOR),make(nowProfile,seed,nowProfile.M7_ENVIRONMENT_GENERATOR),make(nowProfile,seed,nowProfile.ENCHANTED_P2_GENERATOR)]);
+    if(!worlds.has(seed))worlds.set(seed,[make(oldProfile,seed,oldProfile.M7_ENVIRONMENT_GENERATOR),make(nowProfile,seed,nowProfile.M7_ENVIRONMENT_GENERATOR),make(nowProfile,seed,nowProfile.M8_MOUNTAIN_GENERATOR)]);
     const [old,historical,current]=worlds.get(seed),r=(size-1)/2;
     for(let a=x-r;a<=x+r;a++)for(let b=z-r;b<=z+r;b++){
       counts.columns++;
@@ -49,10 +49,10 @@ test('read-only current-source historical M7 and explicit latest Mountain V8 pro
   for(const [seed,[old,historical,current]] of worlds){
     assert.deepEqual(old.save().edits,[]);assert.deepEqual(historical.save().edits,[]);assert.deepEqual(current.save().edits,[]);
     assert.equal(historical.generationProfile.generator,nowProfile.M7_ENVIRONMENT_GENERATOR);
-    assert.equal(current.generationProfile.generator,nowProfile.ENCHANTED_P2_GENERATOR);
+    assert.equal(current.generationProfile.generator,nowProfile.M8_MOUNTAIN_GENERATOR);
   }
   // Census, not a waiver. Report mismatches before asserting historical parity.
-  console.log('P0 CURRENT COMPAT',JSON.stringify({counts,sampleMismatches,historicalGenerator:nowProfile.M7_ENVIRONMENT_GENERATOR,newGenerator:nowProfile.ENCHANTED_P2_GENERATOR}));
+  console.log('P0 CURRENT COMPAT',JSON.stringify({counts,sampleMismatches,historicalGenerator:nowProfile.M7_ENVIRONMENT_GENERATOR,newGenerator:nowProfile.M8_MOUNTAIN_GENERATOR}));
   assert.equal(counts.historicalMismatches,0);assert.equal(counts.meshHistoricalMismatch,0);assert.equal(counts.caveMismatches,0);
   // New profile differences are reported rather than silently waived.
   for(const [seed,[old,historical,current]] of worlds){

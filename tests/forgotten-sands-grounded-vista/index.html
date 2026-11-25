@@ -79,7 +79,10 @@ async function run(){
       if(diff(farOnly,near)>15&&diff(combined,near)<=3&&Math.abs(farOnly[i]-176)+Math.abs(farOnly[i+1]-158)+Math.abs(farOnly[i+2]-125)>20)occluded++;
       if(diff(combined,reverse)>3)orderDiff++;
     }
-    check(visible>100,'grounded far pixels absent');
+    let farOnlyVisible=0;for(let i=0;i<farOnly.length;i+=4)if(Math.abs(farOnly[i]-176)+Math.abs(farOnly[i+1]-158)+Math.abs(farOnly[i+2]-125)>15)farOnlyVisible++;
+    console.log('P0 GROUND STEP',JSON.stringify({epoch,distance,visible,farOnlyVisible,occluded,orderDiff,records:far.records,bytes:far.bytes}));
+    window.p0Partial={index,epoch,distance,visible,farOnlyVisible,occluded,orderDiff,images:{...images,failedStep:capture}};
+    check(visible>100,'grounded far pixels absent: '+JSON.stringify({epoch,distance,visible,farOnlyVisible,occluded,orderDiff}));
     snapshots.push({epoch,distance,nearBuffers:resident.size,farBytes:far.bytes,combinedBytes:bytes(),groundFaces:r.groundFaces,monumentFaces:r.monumentFaces,monumentRects:r.monumentRects,terrainRects:r.terrainRects,groundNearOmitted:r.groundNearOmitted,monumentNearOmitted:r.monumentNearOmitted,visible,occluded,orderDiff,buildMs:r.buildMs,nearPixelParity:true});
     if([1,4,5,7].includes(epoch))images['step'+epoch+'-d'+distance]=capture;
     render(eye);
