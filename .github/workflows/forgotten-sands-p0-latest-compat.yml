@@ -1,0 +1,30 @@
+name: Forgotten Sands P0 exact latest Mountain Snow source compatibility
+on:
+  push:
+    branches: [research/forgotten-sands-p0-grounded-vista-20261125]
+    paths:
+      - 'tests/forgotten-sands-latest-compat.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-latest-compat.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: a0487e34d9f5d00a49da05c3bf5b6545ff923085
+          path: .current-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          git -C .current-source rev-parse HEAD
+          node --version
+          P0_CURRENT_SOURCE="$PWD/.current-source" node --test tests/forgotten-sands-latest-compat.test.mjs
