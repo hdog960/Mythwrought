@@ -215,14 +215,14 @@ export function meshChunk(world,cx,cz){
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
-  const originalDesertHalo=isEnvironmentGenerator(profile?.generator);
   const v8Mountain=profile?.generator==='mythwrought-five-surface-regions-mountain-v8';
+  const originalDesertHalo=isEnvironmentGenerator(profile?.generator)||v8Mountain;
   const unifiedTerrain=originalDesertHalo||v8Mountain;
   // Cached ONLY for this synchronous surface-mesh rebuild. No cross-chunk
   // mutable cache or per-frame source queries. Original plans decide whether
   // a surface is real and protected rather than cave-exposed subsoil.
   const sourceWorld=world.base?.generationProfile?world.base:world;
-  const snowS17=sourceWorld.generationProfile?.generator===SNOW_P1_GENERATOR||sourceWorld.experimentalSnowS17===true;
+  const snowS17=sourceWorld.generationProfile?.generator===SNOW_P1_GENERATOR||v8Mountain||sourceWorld.experimentalSnowS17===true;
   const snowS17Pigment=snowS17?createSnowS14EdgePigment(world.seed,v6BiomeAt):null;
   const sourceCaps=new Map(),seamVertexDistances=new Map(),screeWarmDistances=new Map();
   const hasEdit=(x,y,z)=>world.edits?.has(worldKey(x,y,z))||

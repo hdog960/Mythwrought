@@ -89,6 +89,9 @@ const help=document.getElementById('help');
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powerPreference:'high-performance'});
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
+// Rule #492: alternate generators exist only in loopback developer fixtures.
+const developerWorldFixtures=['localhost','127.0.0.1'].includes(location.hostname)&&
+  !new URLSearchParams(location.search).has('production-ui');
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
 else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
@@ -103,11 +106,38 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     catch(error){console.warn('Nonblock staging effects disabled',error);}
   }
   start(layout?{layout,offline,effects}:null);
-}else start();
+}else void startLatestProductionWorld();
+
+async function startLatestProductionWorld(){
+  // A completely new installation gets the same combined generator as
+  // NEW WORLD. Existing selections and historical saves are never migrated.
+  if(developerWorldFixtures){start();return;}
+  try{
+    const raw=window.localStorage,scope=mountainV8Storage(raw);
+    if(raw.getItem(SELECTED_SEED_KEY)===null&&raw.getItem(V8_ACTIVE_KEY)!=='1'&&
+       scope.getItem(SELECTED_SEED_KEY)===null&&isUnclaimedWorldSeed(raw,DEFAULT_WORLD_SEED)){
+      let seed=null;
+      for(let i=0;i<32;i++){
+        const n=crypto.getRandomValues(new Int32Array(1))[0];
+        if(n!==DEFAULT_WORLD_SEED&&isUnclaimedWorldSeed(raw,n)&&isUnclaimedWorldSeed(scope,n)){seed=n;break;}
+      }
+      if(seed===null)throw Error('No unused world seed available');
+      const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+      const loaded=await createMountainV8IsolatedWorld(String(seed),{confirmed:true,storage:raw});
+      const stored=saveM2World(scope,loaded.world);
+      if(!stored.ok)throw Error('Initial world save not verified: '+stored.reason);
+      setMountainV8Active(raw,true);
+    }
+    start();
+  }catch(error){
+    notice.hidden=false;notice.textContent='World creation refused: '+String(error.message||error)+'. Existing saves were not replaced.';
+    message('World not created');
+  }
+}
 
 function start(nonblockStage=null){
   const rawStorage=window.localStorage;
-  // Creator-authorized release: explicit opt-in on production and local QA.
+  // Combined production profile uses internal storage isolation, not a player opt-in.
   const mountainEnabled=!nonblockStage;
   const isolatedMountain=mountainEnabled&&rawStorage.getItem(V8_ACTIVE_KEY)==='1';
   // Bind once for the lifetime of this game session; no closure can retain an
@@ -137,6 +167,7 @@ function start(nonblockStage=null){
     if(isolatedMountain)throw Error('No isolated Mountain V8 world for this seed');
     const result=loadWorldSafe(localStorage,seed);
     if(!nonblockStage&&isUnclaimedWorldSeed(localStorage,seed,result)){
+      if(!developerWorldFixtures)throw Error('Use NEW WORLD to create the current combined generator');
       const choice=planM2WorldChoice(String(seed),M2_WORLD_MODE.CREATE_ENVIRONMENT_V7,{confirmed:true});
       return openM2World(localStorage,choice).world;
     }
@@ -2800,7 +2831,11 @@ function start(nonblockStage=null){
       });
     }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
   }
-  document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  if(developerWorldFixtures){
+    const fixture=document.getElementById('developerCaveCreateFixture');
+    fixture.replaceWith(fixture.content.cloneNode(true));
+    document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  }
   document.getElementById('caveLoadWorld').onclick=()=>openExplicitCaveWorld('load');
   // Explicit, separate NEW WORLD action in the existing settings sheet:
   // never an implicit alternate seed, ordinary LOAD or save migration.
@@ -2812,7 +2847,7 @@ function start(nonblockStage=null){
   biomeChoiceHint.className='controlhint';
   biomeChoiceHint.textContent='LOAD / CREATE opens saved seeds or starts the current game on an unused seed.';
   const seedRow=document.getElementById('legacyWorldTools');
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     seedRow.append(createFourBiomeButton);
     createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
   }
@@ -2826,7 +2861,7 @@ function start(nonblockStage=null){
   const v5Hint=document.createElement('p');
   v5Hint.className='controlhint';
   v5Hint.textContent='Experimental v5 for NEW UNUSED SEEDS only. The ordinary v4 generator, older worlds and existing saves are unchanged. Use WORLD EXPORT for version-safe backups.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     biomeChoiceHint.insertAdjacentElement('afterend',createV5MountainWorldButton);
     createV5MountainWorldButton.insertAdjacentElement('afterend',v5Hint);
   }
@@ -2838,7 +2873,7 @@ function start(nonblockStage=null){
     'Create unused-seed world with 30 percent Plains and 17.5 percent each other biome');
   const v6Hint=document.createElement('p');v6Hint.className='controlhint';
   v6Hint.textContent='NEW UNUSED SEEDS ONLY: 30% Plains; 17.5% each Mountains, Desert, Snow and Enchanted Forest. Your existing worlds and saves stay intact.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     v5Hint.insertAdjacentElement('afterend',createBalancedV6Button);
     createBalancedV6Button.insertAdjacentElement('afterend',v6Hint);
   }
@@ -2847,7 +2882,7 @@ function start(nonblockStage=null){
   createEnchantedButton.textContent='CREATE NEW ENCHANTED FOREST WORLD';
   const enchantedHint=document.createElement('p');enchantedHint.className='controlhint';
   enchantedHint.textContent='New unused seed only. Improved forest trees and ground; existing worlds never convert.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     v6Hint.insertAdjacentElement('afterend',createEnchantedButton);
     createEnchantedButton.insertAdjacentElement('afterend',enchantedHint);
   }
@@ -2945,14 +2980,14 @@ function start(nonblockStage=null){
   if(mountainEnabled&&seedRow){
     if(isolatedMountain){
       const exit=document.createElement('button');exit.id='exitMountainV8Candidate';exit.type='button';
-      exit.textContent='RETURN TO ORDINARY WORLD';seedRow.append(exit);
+      exit.textContent='RETURN TO PREVIOUS SAVED WORLD';seedRow.append(exit);
       exit.onclick=()=>{try{if(!storageReadOnly&&!save())throw Error('Save Mountain V8 first');
         setMountainV8Active(rawStorage,false);location.reload();
       }catch(error){seedMessage.textContent=String(error.message||error);}};
     }
     if(!isolatedMountain){
       const resume=document.createElement('button');resume.id='resumeMountainV8Candidate';resume.type='button';
-      resume.textContent='RESUME MOUNTAIN V8';
+      resume.textContent='RESUME LATEST SAVED WORLD';
       const scoped=mountainV8Storage(rawStorage);
       resume.hidden=scoped.getItem(SELECTED_SEED_KEY)===null;
       seedRow.append(resume);
@@ -2964,6 +2999,7 @@ function start(nonblockStage=null){
         setMountainV8Active(rawStorage,true);location.reload();
       }catch(error){seedMessage.textContent=String(error.message||error);}};
     }
+    if(developerWorldFixtures){
     const v8Button=document.createElement('button');
     v8Button.id='createMountainV8Candidate';v8Button.type='button';
     v8Button.textContent='CREATE NEW MOUNTAIN V8';
@@ -2986,10 +3022,11 @@ function start(nonblockStage=null){
       }catch(error){seedMessage.textContent='V8 candidate not selected: '+String(error.message||error);}
       finally{v8Button.disabled=false;}
     };
+    }
   }
   if(isolatedMountain){
     for(const button of [createFourBiomeButton,createV5MountainWorldButton,createBalancedV6Button,createEnchantedButton,
-      document.getElementById('newSnowWorld'),document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')]){
+      document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')].filter(Boolean)){
       button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();
         seedMessage.textContent='Return to the ordinary world before using this generator.';},true);
     }
@@ -2997,7 +3034,7 @@ function start(nonblockStage=null){
   async function createLatestMenuWorld(next){
     if(next===world.seed)throw Error('Choose a different unused seed for a new world');
     if(!mountainEnabled)throw Error('Latest world creation not available in staging');
-    if(!window.confirm('CREATE NEW WORLD with Mountain V8 for unused seed '+next+'? Existing worlds stay intact.'))return false;
+    if(!window.confirm('CREATE NEW WORLD with all current released systems for unused seed '+next+'? Existing worlds stay intact.'))return false;
     if(storageReadOnly||!save())throw Error('Save current world before creating a new seed');
     const former=world;
     const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
@@ -3012,21 +3049,6 @@ function start(nonblockStage=null){
     try{await createLatestMenuWorld(worldSeedFromText(seedInput.value));}
     catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
   };
-  document.getElementById('newSnowWorld').onclick=()=>{
-    try{
-      const next=worldSeedFromText(seedInput.value);
-      if(next===world.seed)throw Error('Enter a different unused seed for Snow');
-      rejectLegacyWorldWhereCaveExists(localStorage,next);
-      if(!window.confirm('CREATE NEW SNOW WORLD for unused seed '+next+'? Existing worlds stay intact.'))return;
-      if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents Snow activation');
-      if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
-      const loaded=openM2World(localStorage,planM2WorldChoice(String(next),M2_WORLD_MODE.CREATE_SNOW_P1,{confirmed:true}));
-      if(loaded.base.generationProfile.generator!==SNOW_P1_GENERATOR)throw Error('Snow profile did not activate');
-      const stored=saveM2World(localStorage,loaded.world);
-      if(!stored.ok)throw Error('New Snow save not verified: '+stored.reason);
-      enterPreparedM2World(loaded.world,'New Snow world '+next+' ready · improved winter and Enchanted forests.');
-    }catch(error){seedMessage.textContent='Snow world refused; original world retained: '+String(error.message||error);}
-  };
   document.getElementById('newWorld').onclick=async()=>{
     const button=document.getElementById('newWorld');if(button.disabled)return;button.disabled=true;
     try{
@@ -3035,7 +3057,7 @@ function start(nonblockStage=null){
       let next=null;
       for(let attempt=0;attempt<32;attempt++){
         const candidate=crypto.getRandomValues(new Int32Array(1))[0];
-        if(candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
+        if(candidate===DEFAULT_WORLD_SEED||candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
            !isUnclaimedWorldSeed(localStorage,candidate))continue;
         next=candidate;break;
       }
@@ -3044,12 +3066,29 @@ function start(nonblockStage=null){
     }catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
     finally{button.disabled=false;}
   };
-  document.getElementById('switchWorld').onclick=()=>{
+  document.getElementById('switchWorld').onclick=async()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
       if(caveSession&&next===world.seed)
         throw Error('This seed belongs to a cave profile. LOAD CAVE PROFILE or enter a different ordinary world seed.');
       if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
+      if(!developerWorldFixtures){
+        // Explicit test codes may open saved worlds, or create the exact
+        // same latest profile as NEW WORLD; never create a legacy generator.
+        const other=isolatedMountain?rawStorage:mountainV8Storage(rawStorage);
+        if(isUnclaimedWorldSeed(localStorage,next)){
+          if(isUnclaimedWorldSeed(other,next)){await createLatestMenuWorld(next);return;}
+          const profile=readFourRegionProfile(other,next)?.profile;
+          if(!isolatedMountain&&profile?.generator!==M8_MOUNTAIN_GENERATOR)
+            throw Error('No verified latest saved world for this seed');
+          if(isolatedMountain&&profile?.generator===M8_MOUNTAIN_GENERATOR)
+            throw Error('Unexpected ordinary world profile');
+          if(!save())throw Error('Save current world before loading another seed');
+          other.setItem(SELECTED_SEED_KEY,String(next));
+          if(other.getItem(SELECTED_SEED_KEY)!==String(next))throw Error('Saved world selection not verified');
+          setMountainV8Active(rawStorage,!isolatedMountain);location.reload();return;
+        }
+      }
       rejectLegacyWorldWhereCaveExists(localStorage,next);
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);

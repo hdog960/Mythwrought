@@ -12,7 +12,8 @@ export function desertSeamEditAffectedChunks(world,x,z,y){
   const original=editAffectedChunks(x,z);
   if(!Number.isInteger(y))throw Error('Desert visual edit Y must be integer');
   const sourceWorld=world?.base?.generationProfile?world.base:world;
-  if(!isEnvironmentGenerator(sourceWorld?.generationProfile?.generator)||
+  if(!(isEnvironmentGenerator(sourceWorld?.generationProfile?.generator)||
+       sourceWorld?.generationProfile?.generator==='mythwrought-five-surface-regions-mountain-v8')||
      typeof sourceWorld._columnPlan!=='function')return original;
   // The M7 environmental visual cap is restricted to the original surface
   // vertical envelope. Deep mining must never generate an expensive

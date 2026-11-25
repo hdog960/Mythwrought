@@ -74,7 +74,9 @@ export class FourRegionWorld extends VoxelWorld{
     // Immutable per-world selection prevents a live cache/profile mismatch.
     Object.defineProperty(this,'experimentalEnchantedTrees',{value:experimentalEnchantedTrees,enumerable:true});
     Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR||this.profile.generator===SNOW_P1_GENERATOR,enumerable:true});
-    if(this.profile.generator===SNOW_P1_GENERATOR){
+    // Creator rule #492: unpublished Mountain V8 is the combined successor.
+    // The shipped standalone Snow profile remains immutable for existing saves.
+    if(this.profile.generator===SNOW_P1_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR){
       const raw=(x,y,z)=>VoxelWorld.prototype.naturalAndLandmarkBlock.call(this,x,y,z);
       const cave=(x,y,z)=>this.environmentCaves.get(x,y,z);
       this._snowSource=Object.freeze({raw,cave,site:createSnowS17SitePlanner(seed,raw,cave)});

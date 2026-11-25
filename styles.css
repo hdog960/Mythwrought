@@ -300,10 +300,9 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .helpbody.compact-menu{width:min(680px,100%);max-width:680px;max-height:100%;min-height:0;padding:12px 14px;border-radius:14px;overflow:auto;touch-action:pan-y;overscroll-behavior:contain}
 .compact-menu-heading{position:sticky;top:-12px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#293b39;padding:4px 0 9px}
 .compact-menu-heading h1{font-size:clamp(15px,2.8vw,23px);letter-spacing:.07em}
-.compact-menu-actions{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin:3px 0 8px}
+.compact-menu-actions{display:grid;grid-template-columns:2fr 1fr;gap:8px;margin:3px 0 8px}
 .compact-menu-actions .sky-clock-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
 .compact-menu-actions button,.compact-menu-heading button,.compact-menu .seedrow button,.compact-menu summary{min-height:44px;border:1px solid #e3bb79;border-radius:9px;color:#fff4d5;background:linear-gradient(#557469,#284a43);font-size:13px;font-weight:850;touch-action:manipulation;padding:8px 10px}
-.compact-menu-actions #newSnowWorld{background:linear-gradient(#647f8e,#324c60);color:#f3fbff}
 .compact-menu-actions #newWorld{background:linear-gradient(#b48843,#775225);color:#fff8da}
 .compact-menu-heading button{white-space:nowrap}
 .compact-menu .compact-code{margin:0;padding:8px;background:#172a2c;border-radius:9px}
