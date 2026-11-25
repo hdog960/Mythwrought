@@ -1,0 +1,41 @@
+name: Living Underworld completion 5 - original game owner integration
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase44-game-owner-20261125
+    paths:
+      - .github/workflows/living-underworld-phase44-native.yml
+permissions:
+  contents: read
+jobs:
+  original-game-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source authentication and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check src/main.mjs
+          node --check src/living-underworld/local-gallery-game-witness.mjs
+          node --check src/living-underworld/shared-native-mesh-snapshot.mjs
+          node --check scripts/underworld/phase44-original-game-owner-webgl2.mjs
+      - name: Pinned real browser
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Original index and main real WebGL2 ownership qualification
+        run: node scripts/underworld/phase44-original-game-owner-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase44-original-game-owner-webgl2
+          path: ${{ runner.temp }}/phase44/
+          retention-days: 7
