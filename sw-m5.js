@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261124-mountain-v8-v1';
-const ASSET_RELEASE='20261124-mountain-v8-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261125-creative-candidate-v2';
+const ASSET_RELEASE='20261125-creative-candidate-v2';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
@@ -225,6 +225,10 @@ const SOURCE_ASSETS=[
   "./src/cave-thresholds.mjs",
   "./src/chunks.mjs",
   "./src/crafted-timber.mjs",
+  "./src/creative-integration/creative-catalog.mjs",
+  "./src/creative-integration/creative-history.mjs",
+  "./src/creative-integration/creative-inventory.mjs",
+  "./src/creative-integration/creative-thumbnails.mjs",
   "./src/creative-integration/g2-control-state.mjs",
   "./src/creative-integration/g2-flight.mjs",
   "./src/creative-integration/g2-landing.mjs",
