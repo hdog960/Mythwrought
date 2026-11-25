@@ -1,0 +1,51 @@
+name: Mob P2 actual whole-game 40 species visual qualification
+on:
+  push:
+    branches:
+      - qualification/mob-p2-whole-game-20261125
+    paths:
+      - '.github/workflows/mob-p2-whole-game-20261125.yml'
+permissions:
+  contents: read
+jobs:
+  actual-p2-live-visual:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact P2 source candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git checkout --detach 191af62033674b455488914019341d482b91eabe
+          test "$(git rev-parse HEAD^{tree})" = 1ffb10e7d2f0f9a55e1cc6c83fbc34d0485c4798
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test "$(git hash-object tests/mob-ecosystem-current-p2-whole-game-browser.mjs)" = 13dc34c336747f9264fe00d9ce472bee67aef4c7
+          node --version
+          git rev-parse HEAD HEAD^{tree}
+      - name: Install pinned Chromium and PNG decoder
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Actual P2 whole game 40 species three landscape views
+        run: node tests/mob-ecosystem-current-p2-whole-game-browser.mjs
+      - name: Print terminal manifest summary
+        if: always()
+        run: |
+          if [ -f artifacts/mob-current-p2-whole-game/manifest.json ]; then
+            node --input-type=module -e 'import fs from "node:fs";const m=JSON.parse(fs.readFileSync("artifacts/mob-current-p2-whole-game/manifest.json"));console.log(JSON.stringify({...m,screenshots:m.screenshots.length},null,2))'
+            sha256sum artifacts/mob-current-p2-whole-game/manifest.json
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-p2-whole-game-191af620
+          path: artifacts/mob-current-p2-whole-game/
+          if-no-files-found: error
+          retention-days: 14
