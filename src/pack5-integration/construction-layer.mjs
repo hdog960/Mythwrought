@@ -8,7 +8,7 @@
 import {BLOCK,raycast as raycastLegacy} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
 import {PHYSICAL_MAX_Y,UPPER_MIN_Y} from '../world-height.mjs';
-import {buildPack5UpperSections,pack5UpperMesh} from './upper-sections.mjs';
+import {buildPack5UpperSections,pack5UpperMesh,Pack5UpperIndex} from './upper-sections.mjs';
 import {makePack5Fixture,orientedParts,rotateCellOffset} from '../block-packs/pack-5/fixture.mjs';
 import {PACK5_BUILDER_FAMILIES,PACK5_BUILDER_CATALOG,resolvePack5BuilderAsset} from './catalog.mjs';
 
@@ -47,11 +47,10 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
   if(!world||typeof world.get!=='function'||!Number.isSafeInteger(world.seed))
     throw Error('Builder layer requires a seeded, readable voxel world');
   const seed=world.seed;
-  let fixture=makePack5Fixture(PACK5_BUILDER_FAMILIES),upperIndex=new Map(),upperRevision=0;
+  let fixture=makePack5Fixture(PACK5_BUILDER_FAMILIES),upperIndex=new Pack5UpperIndex(),upperRevision=0;
   const upperEnabled=typeof upperRebuild==='function';
   const withinHost=cell=>validCell(cell)&&cell[1]>=WORLD_MIN_Y&&cell[1]<=(upperEnabled?PHYSICAL_MAX_Y:WORLD_MAX_Y);
-  function publishUpper(next){
-    const affected=new Set([...upperIndex.keys(),...next.keys()]);
+  function publishUpper(next,affected=new Set([...upperIndex.keys(),...next.keys()])){
     if(affected.size)upperRebuild(next,affected);
     upperIndex=next;if(affected.size)upperRevision++;
   }
@@ -117,7 +116,7 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
         return {ok:false,reason:'Pack 5 builder instance budget reached'};
       const result=attempt(fixture,id,anchor,rotation,variant,playerBox);
       if(result.ok&&anchor[1]>=UPPER_MIN_Y){
-        try{publishUpper(buildPack5UpperSections(fixture.snapshot().entries));}
+        try{const record=fixture.cell(anchor);const update=upperIndex.withAdded([...record.anchor,record.symbolicId,record.rotation,record.variant]);publishUpper(update.index,update.affected);}
         catch(error){fixture.remove(anchor);return {ok:false,reason:String(error.message||error)};}
       }
       return result;
@@ -126,7 +125,7 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
       const record=fixture.cell(cell);if(!record)return false;
       const prior=record.anchor[1]>=UPPER_MIN_Y?record:null;
       const removed=fixture.remove(cell);
-      if(removed&&prior){try{publishUpper(buildPack5UpperSections(fixture.snapshot().entries));}
+      if(removed&&prior){try{const update=upperIndex.withRemoved(prior.anchor);publishUpper(update.index,update.affected);}
         catch(error){const restored=attempt(fixture,prior.symbolicId,prior.anchor,prior.rotation,prior.variant);if(!restored.ok)throw Error('Pack5 removal rollback failed');return false;}}
       return removed;
     },

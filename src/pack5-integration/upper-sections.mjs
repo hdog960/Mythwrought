@@ -28,20 +28,55 @@ export function pack5UpperRecord(row){
  }
  return new Map([...owners].map(([k,v])=>[k,new Float32Array(v)]));
 }
-export function buildPack5UpperSections(rows){
- const parts=new Map(),lengths=new Map();
- for(const row of rows){
-  const record=pack5UpperRecord(row);if(!record)continue;
-  for(const [k,mesh] of record){
-   const n=(lengths.get(k)??0)+mesh.length;
-   if(n*4>UPPER_SECTION_BYTES)throw Error('Pack5 upper section geometry budget exceeded');
-   lengths.set(k,n);if(!parts.has(k))parts.set(k,[]);parts.get(k).push(mesh);
+// Sparse copy-on-write index: no world-wide retained packed geometry.
+// Each touched owner holds only source row identities and exact float counts.
+const rowKey=r=>r.slice(0,3).join(',');
+export class Pack5UpperIndex {
+ #owners;#rows;
+ constructor(owners=new Map(),rows=new Map()){this.#owners=owners;this.#rows=rows;}
+ keys(){return this.#owners.keys();}
+ has(k){return this.#owners.has(k);}
+ get size(){return this.#owners.size;}
+ get rowCount(){return this.#rows.size;}
+ get(k){
+  const bucket=this.#owners.get(k);if(!bucket)return undefined;
+  const out=new Float32Array(bucket.floats);let at=0;
+  for(const {row,length} of [...bucket.entries.values()].sort((a,b)=>rowKey(a.row).localeCompare(rowKey(b.row)))){
+   const m=pack5UpperRecord(row)?.get(k);
+   if(!m||m.length!==length)throw Error('Pack5 source geometry changed after indexing');
+   out.set(m,at);at+=m.length;
   }
+  return out;
  }
- return new Map([...parts].map(([k,meshes])=>{
-  const out=new Float32Array(lengths.get(k));let at=0;
-  for(const mesh of meshes){out.set(mesh,at);at+=mesh.length;}
-  return [k,out];
- }));
+ *values(){for(const k of this.keys())yield this.get(k);}
+ withAdded(row){
+  const k=rowKey(row),record=pack5UpperRecord(row);
+  if(!record)return {index:this,affected:new Set()};
+  if(this.#rows.has(k)||this.#rows.size>=4096)throw Error('Pack5 upper index row budget');
+  const owners=new Map(this.#owners),rows=new Map(this.#rows),affected=new Set(record.keys()),frozen=Object.freeze([...row]);
+  for(const [owner,m] of record){
+   const previous=owners.get(owner),entries=new Map(previous?.entries),floats=(previous?.floats??0)+m.length;
+   if(floats*4>UPPER_SECTION_BYTES)throw Error('Pack5 upper section geometry budget exceeded');
+   entries.set(k,{row:frozen,length:m.length});owners.set(owner,{entries,floats});
+  }
+  rows.set(k,affected);return {index:new Pack5UpperIndex(owners,rows),affected:new Set(affected)};
+ }
+ withRemoved(anchor){
+  const k=rowKey(anchor),affected=this.#rows.get(k);
+  if(!affected)return {index:this,affected:new Set()};
+  const owners=new Map(this.#owners),rows=new Map(this.#rows);
+  for(const owner of affected){
+   const old=owners.get(owner),entries=new Map(old.entries),entry=entries.get(k);
+   entries.delete(k);
+   if(entries.size)owners.set(owner,{entries,floats:old.floats-entry.length});else owners.delete(owner);
+  }
+  rows.delete(k);return {index:new Pack5UpperIndex(owners,rows),affected:new Set(affected)};
+ }
+}
+export function buildPack5UpperSections(rows){
+ if(!Array.isArray(rows)||rows.length>4096)throw Error('Pack5 upper row budget');
+ let index=new Pack5UpperIndex();
+ for(const row of rows)index=index.withAdded(row).index;
+ return index;
 }
 export function pack5UpperMesh(index,key){return index.get(key)??EMPTY;}

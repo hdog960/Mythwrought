@@ -3,7 +3,7 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,s
 import {meshDepthSection} from './depth-mesh.mjs';
 import {PHYSICAL_MAX_Y,runtimeSectionForY,runtimeMeshKey,runtimeEditSections,physicalBodyRegions,upperOccupancyRevision,upperOccupancy} from './world-height.mjs';
 import {planHeightStream} from './world-height-stream.mjs';
-import {admitUpperGpuBatch,upperGpuStats,validateUpperSectionGeometry} from './world-height-budget.mjs';
+import {admitUpperGpuBatch,upperGpuStats,validateUpperSectionGeometry,UPPER_STAGE_BYTES} from './world-height-budget.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -1063,13 +1063,16 @@ function start(nonblockStage=null){
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function rebuildUpperPack5(next,affected){
-    const batch=[];
+    const batch=[];let stagedBytes=0;
     for(const key of affected){
       const [cx,cz,s]=key.slice(4).split(',').map(Number),section=s+1;
       const vertices=meshPlayableChunk(cx,cz,section,next.get(key)??new Float32Array());
       const water=meshPlayableWater(cx,cz,section);
-      validateUpperSectionGeometry(vertices,water);
-      if(chunks.has(key))batch.push({key,cx,cz,section,vertices,water});
+      const bytes=validateUpperSectionGeometry(vertices,water);
+      if(chunks.has(key)){
+        stagedBytes+=bytes;if(stagedBytes>UPPER_STAGE_BYTES)throw Error('Pack5 upper staging budget exceeded before retaining batch');
+        batch.push({key,cx,cz,section,vertices,water});
+      }
     }
     publishEditedChunkBatch(batch);
   }
@@ -1270,7 +1273,7 @@ function start(nonblockStage=null){
     const active=runtimeSectionForY(player.feet)??0;
     const occupancy=upperOccupancyRevision(world);
     const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
-    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
