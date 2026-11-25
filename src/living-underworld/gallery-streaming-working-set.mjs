@@ -4,6 +4,7 @@ import {chunkCoord,chunkWindow,BLOCK} from '../voxel.mjs';
 import {sectionForY,sectionBounds,sectionWindow,sectionChunkRadius,depthMeshKey,
  verticalEditSections,LOWEST_SECTION} from '../depth.mjs';
 import {editAffectedChunks} from '../chunks.mjs';
+import {sharedMeshHaloCells} from './shared-native-mesh-snapshot.mjs';
 import {GALLERY_CONSTRUCTION_LIMITS as limits} from './physical-gallery-construction.mjs';
 const xyz=k=>k.split(',').map(Number),key=(x,y,z)=>x+','+y+','+z;
 const dirs=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
@@ -61,6 +62,22 @@ function editPatterns(active,shaft){
    }
  }
  const patterns=[...unique.values()];patternCache.set(cacheKey,patterns);return patterns;
+}
+// Independent shape-only census; no original world requery or network recensus.
+// Existing engine still has separate per-section reads; the shared snapshot
+// is an isolated candidate, never a retroactive pass for the live path.
+export function auditSharedSingleEditHaloBound(){
+ let patterns=0,maxUnshared=0,maxShared=0,peak=null;
+ for(let active=LOWEST_SECTION;active<=0;active++)
+  for(const shaft of active===0?[false,true]:[false])
+   for(const p of editPatterns(active,shaft)){
+    patterns++;
+    const shared=sharedMeshHaloCells(p.keys);
+    maxUnshared=Math.max(maxUnshared,p.halo);
+    if(shared>maxShared){maxShared=shared;peak={active,shaft,keys:p.keys,edit:p.edit,unshared:p.halo};}
+   }
+ return {patterns,maxUnshared,maxShared,peak,withinReadCap:maxShared<=limits.originalNaturalReads,
+  nativeMesherAdditionalReadsNotIncluded:true,liveRendererConnected:false};
 }
 export function auditGalleryEngineWorkingSet(rows){
  const byKey=new Map(rows.map(r=>[r.key,r]));
