@@ -149,10 +149,17 @@ try{
     await page.locator('#closeHelp').click();
   }
   await page.setViewportSize({width:956,height:440});
+  // Persist the ordinary seed using the actual SAVE control before comparing
+  // bytes. A fresh default world may have no selected-seed key until saved.
+  await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
+  await page.locator('#save').click();
+  await page.locator('#closeHelp').click();
   const ordinaryBefore=await page.evaluate(()=>{
     const seed=localStorage.getItem('mythwrought-v002-selected-seed');
     return {seed,raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
   });
+  assert.ok(ordinaryBefore.seed&&ordinaryBefore.raw,'Ordinary fixture was not durably saved');
   const oldSeed=ordinaryBefore.seed;
   await page.locator('#menu').click();
   page.once('dialog',dialog=>dialog.dismiss());
@@ -172,7 +179,7 @@ try{
   assert.notEqual(latest.seed,oldSeed);
   assert.equal(latest.active,'1');assert.equal(latest.actualSeed,latest.seed);
   assert.equal(latest.oldSeed,oldSeed);
-  if(ordinaryBefore.raw!==null)assert.equal(latest.oldRaw,ordinaryBefore.raw);
+  assert.equal(latest.oldRaw,ordinaryBefore.raw);
   assert.equal(JSON.parse(latest.canonical).schema,1);
   assert.equal(await page.locator('#help').isVisible(),false,'New world reload did not close menu');
   console.log('PASS compact menu / native Advanced / latest world creation '+JSON.stringify(latest));
