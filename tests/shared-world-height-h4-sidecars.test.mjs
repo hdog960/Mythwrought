@@ -31,15 +31,15 @@ test('actual Pack3 upper shape uses correct signed owner, collision, ray, storag
  assert.ok(p.mutate({mode:'mine',cell,rebuild}).ok);assert.equal(upperOccupancy(w,key),false);
 });
 test('original Pack1 and Pack4 upper sidecars mesh and restore, enforce support and ceiling',()=>{
- const {w,m,s}=host(),a=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===9),b=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===163);
+ const {w,m,s}=host(),a=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===9),b=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===163),glass=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===159);
  assert.ok(w.set(-12,256,1,3));
- const rows=[{asset:a.symbol,numericId:9,at:[-16,256,0]},{asset:b.symbol,numericId:163,at:[-12,256,0],orientation:0}];
+ const rows=[{asset:a.symbol,numericId:9,at:[-16,256,0]},{asset:b.symbol,numericId:163,at:[-12,256,0],orientation:0},{asset:glass.symbol,numericId:159,at:[-10,256,0],orientation:0}];
  assert.ok(m.placeMany(rows).ok);
  const key='sky:-1,0,14';assert.ok(upperOccupancy(w,key));assert.ok(m.supportsLegacyCell([-12,256,1]));
- const mesh=meshManual14Chunk(m.layer,-1,0,15);assert.equal(mesh.instances,2);
+ const mesh=meshManual14Chunk(m.layer,-1,0,15);assert.equal(mesh.instances,3);
  assert.ok(mesh.opaque.length>0);assert.ok(mesh.transparent.length>0);
  assert.equal(w.set(-16,256,0,3),false);
- const cold=host(VoxelWorld.restore(w.save()),s);assert.equal(cold.m.layer.size(),2);
+ const cold=host(VoxelWorld.restore(w.save()),s);assert.equal(cold.m.layer.size(),3);
  assert.deepEqual(meshManual14Chunk(cold.m.layer,-1,0,15),mesh);
  assert.equal(m.placeMany([{asset:a.symbol,numericId:9,at:[-16,257,0]}]).ok,false);
 });

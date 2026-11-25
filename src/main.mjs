@@ -996,11 +996,13 @@ function start(nonblockStage=null){
     combined.set(base);combined.set(extra,base.length);
     return combined;
   }
-  function meshPlayableChunk(cx,cz,section){
-    if(section>0&&!upperOccupancy(world,runtimeMeshKey(cx,cz,section)))return new Float32Array();
+  function meshPlayableChunk(cx,cz,section,upperPack5Override=null){
+    const key=runtimeMeshKey(cx,cz,section);
+    if(section>0&&!upperOccupancy(world,key)&&!upperPack5Override?.length)return new Float32Array();
     const original=section>=0?meshChunk(world,cx,cz,section):meshDepthSection(world,cx,cz,section);
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
-    return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+    const combined=combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
+    return section>0?combineVertices(combined,upperPack5Override??world.pack5Layer?.upperMesh?.(key)??new Float32Array()):combined;
   }
   function meshPlayableWater(cx,cz,section){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
@@ -1059,6 +1061,17 @@ function start(nonblockStage=null){
     lastEditMeshKeys=ready.map(item=>item.key);
     if(caveSession||combinedWorld())caveFarGpu.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
+  }
+  function rebuildUpperPack5(next,affected){
+    const batch=[];
+    for(const key of affected){
+      const [cx,cz,s]=key.slice(4).split(',').map(Number),section=s+1;
+      const vertices=meshPlayableChunk(cx,cz,section,next.get(key)??new Float32Array());
+      const water=meshPlayableWater(cx,cz,section);
+      validateUpperSectionGeometry(vertices,water);
+      if(chunks.has(key))batch.push({key,cx,cz,section,vertices,water});
+    }
+    publishEditedChunkBatch(batch);
   }
   function refreshPhysicalChunk(x,z,y){
     const section=runtimeSectionForY(y);
@@ -1257,7 +1270,7 @@ function start(nonblockStage=null){
     const active=runtimeSectionForY(player.feet)??0;
     const occupancy=upperOccupancyRevision(world);
     const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
-    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
@@ -2168,12 +2181,12 @@ function start(nonblockStage=null){
         import('./pack5-integration/terrain-buffer.mjs')
       ]);
       if(world!==requestedWorld)return false;
-      const candidate=createPack5LiveAdapter(world,{storage:localStorage});
+      const candidate=createPack5LiveAdapter(world,{storage:localStorage,upperRebuild:rebuildUpperPack5});
       const box=[player.x-.28,player.feet,player.z-.28,
         player.x+.28,player.feet+1.78,player.z+.28];
       if(candidate.layer.collidesPack5(box))
         throw Error('Stored furnishing overlaps player. Move clear before loading.');
-      const renderer=createPack5GpuStream(gl,candidate.layer);
+      const renderer=createPack5GpuStream(gl,candidate.layer,{includeRecord:row=>row.anchor[1]<20});
       if(world!==requestedWorld){renderer.dispose();return false;}
       pack5Builder=candidate;pack5Gpu=renderer;
       world.pack5Collision=box=>candidate.collision(box);

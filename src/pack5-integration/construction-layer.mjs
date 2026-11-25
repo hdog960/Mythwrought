@@ -7,6 +7,8 @@
  */
 import {BLOCK,raycast as raycastLegacy} from '../voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
+import {PHYSICAL_MAX_Y,UPPER_MIN_Y} from '../world-height.mjs';
+import {buildPack5UpperSections,pack5UpperMesh} from './upper-sections.mjs';
 import {makePack5Fixture,orientedParts,rotateCellOffset} from '../block-packs/pack-5/fixture.mjs';
 import {PACK5_BUILDER_FAMILIES,PACK5_BUILDER_CATALOG,resolvePack5BuilderAsset} from './catalog.mjs';
 
@@ -41,16 +43,23 @@ function checkBox(box){
 }
 
 /** A host supplies the REAL read-only voxel world. */
-export function createPack5ConstructionLayer(world){
+export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
   if(!world||typeof world.get!=='function'||!Number.isSafeInteger(world.seed))
     throw Error('Builder layer requires a seeded, readable voxel world');
   const seed=world.seed;
-  let fixture=makePack5Fixture(PACK5_BUILDER_FAMILIES);
+  let fixture=makePack5Fixture(PACK5_BUILDER_FAMILIES),upperIndex=new Map(),upperRevision=0;
+  const upperEnabled=typeof upperRebuild==='function';
+  const withinHost=cell=>validCell(cell)&&cell[1]>=WORLD_MIN_Y&&cell[1]<=(upperEnabled?PHYSICAL_MAX_Y:WORLD_MAX_Y);
+  function publishUpper(next){
+    const affected=new Set([...upperIndex.keys(),...next.keys()]);
+    if(affected.size)upperRebuild(next,affected);
+    upperIndex=next;if(affected.size)upperRevision++;
+  }
   // Newer main hosts registered biome or physical asset IDs beyond legacy
   // 0–8, some of them non-solid. Do not treat *every* nonzero ID as support.
   // Only a future cross-pack registry can certify non-legacy supports.
   const supportSolid=cell=>{
-    if(!within(cell))return false;
+    if(!withinHost(cell))return false;
     const id=world.get(...cell);
     if(!Number.isSafeInteger(id)||id<=BLOCK.AIR)return false;
     if(id<=BLOCK.DEEPSTONE)return true;
@@ -59,7 +68,7 @@ export function createPack5ConstructionLayer(world){
   };
   // Collision against other registered shapes is the combined host's job.
   // Never accidentally turn a decorative registered plant into a full cube.
-  const legacySolid=cell=>within(cell)&&
+  const legacySolid=cell=>withinHost(cell)&&
     Number.isSafeInteger(world.get(...cell))&&
     world.get(...cell)>BLOCK.AIR&&world.get(...cell)<=BLOCK.DEEPSTONE;
   const supportsFor=(into,descriptor,anchor,rotation,parts)=>{
@@ -80,7 +89,10 @@ export function createPack5ConstructionLayer(world){
     const parts=orientedParts(asset.descriptor,rotation).map(p=>({
       ...p,cell:offset(anchor,p.cell)
     }));
-    if(parts.some(p=>!within(p.cell)||world.get(...p.cell)!==BLOCK.AIR||
+    // Cross the new upper-section seams, but retain the separate historical
+    // surface renderer: no mixed legacy/upper instance is admitted yet.
+    if(parts.some(p=>(p.cell[1]>=UPPER_MIN_Y)!==(anchor[1]>=UPPER_MIN_Y)))return {ok:false,reason:'Pack5 instance crosses legacy renderer boundary'};
+    if(parts.some(p=>!withinHost(p.cell)||world.get(...p.cell)!==BLOCK.AIR||
       world.manual14Layer?.get?.(p.cell)||world.pack3Runtime?.get?.(p.cell)))
       return {ok:false,reason:'Legacy or cross-pack physical cell occupied or outside editable bounds'};
     if(playerBox&&parts.some(p=>p.collisionBoxes.some(b=>overlap(worldBox(b,p.cell),playerBox))))
@@ -103,9 +115,23 @@ export function createPack5ConstructionLayer(world){
     place(id,anchor,rotation=0,variant=null,{playerBox=null}={}){
       if(fixture.count()>=PACK5_BUILDER_MAX_INSTANCES)
         return {ok:false,reason:'Pack 5 builder instance budget reached'};
-      return attempt(fixture,id,anchor,rotation,variant,playerBox);
+      const result=attempt(fixture,id,anchor,rotation,variant,playerBox);
+      if(result.ok&&anchor[1]>=UPPER_MIN_Y){
+        try{publishUpper(buildPack5UpperSections(fixture.snapshot().entries));}
+        catch(error){fixture.remove(anchor);return {ok:false,reason:String(error.message||error)};}
+      }
+      return result;
     },
-    remove(cell){return fixture.remove(cell);},
+    remove(cell){
+      const record=fixture.cell(cell);if(!record)return false;
+      const prior=record.anchor[1]>=UPPER_MIN_Y?record:null;
+      const removed=fixture.remove(cell);
+      if(removed&&prior){try{publishUpper(buildPack5UpperSections(fixture.snapshot().entries));}
+        catch(error){const restored=attempt(fixture,prior.symbolicId,prior.anchor,prior.rotation,prior.variant);if(!restored.ok)throw Error('Pack5 removal rollback failed');return false;}}
+      return removed;
+    },
+    upperOccupied:key=>upperIndex.has(key),get upperRevision(){return upperRevision;},
+    upperMesh:key=>pack5UpperMesh(upperIndex,key),
     /** Shape-exact hit, with legacy solid-world occlusion checked first. */
     raycast(origin,direction,maxDistance=6){
       // For low density, retain the source-exact reference behavior.
@@ -154,7 +180,7 @@ export function createPack5ConstructionLayer(world){
     },
     removeRay(origin,direction,maxDistance=6){
       const hit=api.raycast(origin,direction,maxDistance);
-      return hit?fixture.remove(hit.cell):false;
+      return hit?api.remove(hit.cell):false;
     },
     // Spatial shape collision: do not scan every distant decoration on each
     // mobile physics substep. Inspect only occupied cells intersecting the box.
@@ -231,6 +257,7 @@ export function createPack5ConstructionLayer(world){
         const placed=attempt(replacement,row[3],row.slice(0,3),row[4],row[5]??null);
         if(!placed.ok)throw Error('Invalid Pack 5 builder sidecar placement: '+placed.reason);
       }
+      if(upperEnabled)publishUpper(buildPack5UpperSections(replacement.snapshot().entries));
       fixture=replacement;
       return true;
     }

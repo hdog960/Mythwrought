@@ -14,8 +14,8 @@ const playerBounds=p=>{
   if(!p||![p.x,p.feet,p.z].every(Number.isFinite))throw Error('Invalid Pack 5 builder player');
   return [p.x-BODY_RADIUS,p.feet,p.z-BODY_RADIUS,p.x+BODY_RADIUS,p.feet+BODY_HEIGHT,p.z+BODY_RADIUS];
 };
-export function createPack5LiveAdapter(world,{storage=null}={}){
-  const layer=createPack5ConstructionLayer(world);
+export function createPack5LiveAdapter(world,{storage=null,upperRebuild=null}={}){
+  const layer=createPack5ConstructionLayer(world,{upperRebuild});
   const load=storage?loadPack5SidecarSafe(storage,layer):{source:'new',recovered:false,count:0};
   const persist=action=>{
     const old=layer.snapshot(),result=action();

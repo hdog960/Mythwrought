@@ -113,8 +113,8 @@ export class UpperIndexedMap extends Map{
 }
 export function upperOccupancy(world,key){
   return Boolean(world.edits?.upperOccupied?.(key)||world.pack2Cells?.upperOccupied?.(key)||
-    world.pack3Runtime?.upperOccupied?.(key)||world.manual14Layer?.upperOccupied?.(key));
+    world.pack3Runtime?.upperOccupied?.(key)||world.manual14Layer?.upperOccupied?.(key)||world.pack5Layer?.upperOccupied?.(key));
 }
 export function upperOccupancyRevision(world){
-  return [world.edits,world.pack2Cells,world.pack3Runtime,world.manual14Layer].map(o=>o?.upperRevision??0).join(':');
+  return [world.edits,world.pack2Cells,world.pack3Runtime,world.manual14Layer,world.pack5Layer].map(o=>o?.upperRevision??0).join(':');
 }
