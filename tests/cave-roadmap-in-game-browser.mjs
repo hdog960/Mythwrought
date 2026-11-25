@@ -144,9 +144,19 @@ async function requireSettledDeepGameFrame(page,shot,viewport){
  // Only measured original-game physics feet establish the live depth
  // section. A collider can settle just under a seam (e.g. -19.00001),
  // even when the protected authored camera request was y=-19.
- const liveStart=await readActualGameFrame(page);
- const expected=expectedDeepSceneResidency(shot.at,liveStart?.playerFeet);
+ let expected=null;
  try{
+  // The preceding horizontal chunk predicate can observe the previous depth
+  // window in the same chunk. Require a real matching physics/frame sample
+  // before selecting the strict source depth window. Never widen .05, move
+  // the camera again, or accept a different source position.
+  await page.waitForFunction(y=>{
+   const v=document.querySelector('#scene')?.dataset;
+   return !!v&&Number(v.renderedFrames)>0&&Number.isFinite(Number(v.playerFeet))&&
+    Math.abs(Number(v.playerFeet)-(y+.01))<=.05;
+  },shot.at.y,{timeout:90000,polling:'raf'});
+  const liveStart=await readActualGameFrame(page);
+  expected=expectedDeepSceneResidency(shot.at,liveStart?.playerFeet);
   await page.waitForFunction(expected=>{
    const canvas=document.querySelector('#scene'),v=canvas?.dataset,
     gl=canvas?.getContext('webgl2');
@@ -166,7 +176,7 @@ async function requireSettledDeepGameFrame(page,shot,viewport){
   return {expected,receipt:verifyStableDeepSceneFrames(samples,expected)};
  }catch(error){
   const actual=await readActualGameFrame(page).catch(()=>null);
-  const failure={scene:shot.name,viewport,expected,actual,
+  const failure={scene:shot.name,viewport,sourceCamera:shot.at,expected,actual,
    cause:String(error.message||error)};
   report.deepResidencyFailures.push(failure);
   console.error('C6_DEEP_RESIDENCY_BLOCKED',JSON.stringify(failure));

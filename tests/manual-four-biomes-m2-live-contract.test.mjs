@@ -6,7 +6,9 @@ const main=readFileSync(new URL('../src/main.mjs',import.meta.url),'utf8');
 const browser=readFileSync(new URL('../scripts/ci/manual-biomes-m2-live-webgl2.mjs',import.meta.url),'utf8');
 const workflow=readFileSync(new URL('../.github/workflows/manual-four-biomes-m2-live.yml',import.meta.url),'utf8');
 test('M2 live: legacy startup path remains in place; profiled seeds opt into authoritative loader',()=>{
-  assert.match(main,/if\(readFourRegionProfile\(localStorage,seed\)\)/);
+  assert.match(main,/const storedProfile=readFourRegionProfile\(localStorage,seed\)\?\.profile;\s*if\(storedProfile\)\{/);
+  assert.match(main,/if\(\(storedProfile\.generator===M8_MOUNTAIN_GENERATOR\)!==isolatedMountain\)/);
+  assert.match(main,/if\(isolatedMountain\)throw Error\('No isolated Mountain V8 world for this seed'\)/);
   assert.match(main,/openM2World\(localStorage,planM2WorldChoice\(String\(seed\)\)\)/);
   assert.match(main,/const result=loadWorldSafe\(localStorage,seed\)/);
   assert.match(main,/loadPack2LiveWorld\(localStorage,result\.world\)/);
