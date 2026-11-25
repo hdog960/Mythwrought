@@ -11,6 +11,12 @@ export function upperGpuStats(chunks){
  for(const c of chunks.values())if(c.section>0&&size(c)>0){bytes+=size(c);owners++;}
  return {bytes,owners};
 }
+export function validateUpperSectionGeometry(vertices,water){
+ if(!(vertices instanceof Float32Array)||!(water instanceof Float32Array)||vertices.length%9||water.length%9)throw Error('Invalid upper packed vertices');
+ const n=vertices.byteLength+water.byteLength;
+ if(n>UPPER_SECTION_BYTES)throw Error('Upper section exceeds inherited 864 KiB budget');
+ return n;
+}
 // Validate BEFORE any GPU allocation. Replacement peak retains all old
 // buffers plus new staging bytes until atomic publication.
 export function admitUpperGpuBatch(chunks,batch){
@@ -20,10 +26,7 @@ export function admitUpperGpuBatch(chunks,batch){
   if(item.section<=0)continue;
   if(seen.has(item.key))throw Error('Duplicate upper GPU owner');
   seen.add(item.key);
-  if(!(item.vertices instanceof Float32Array)||!(item.water instanceof Float32Array)||
-    item.vertices.length%9||item.water.length%9)throw Error('Invalid upper packed vertices');
-  const n=item.vertices.byteLength+item.water.byteLength;
-  if(n>UPPER_SECTION_BYTES)throw Error('Upper section exceeds inherited 864 KiB budget');
+  const n=validateUpperSectionGeometry(item.vertices,item.water);
   const old=chunks.get(item.key),prior=old?size(old):0;
   staged+=n;bytes+=n-prior;owners+=Number(n>0)-Number(prior>0);
  }

@@ -3,7 +3,7 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,s
 import {meshDepthSection} from './depth-mesh.mjs';
 import {PHYSICAL_MAX_Y,runtimeSectionForY,runtimeMeshKey,runtimeEditSections,physicalBodyRegions,upperOccupancyRevision,upperOccupancy} from './world-height.mjs';
 import {planHeightStream} from './world-height-stream.mjs';
-import {admitUpperGpuBatch,upperGpuStats} from './world-height-budget.mjs';
+import {admitUpperGpuBatch,upperGpuStats,validateUpperSectionGeometry} from './world-height-budget.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -982,8 +982,8 @@ function start(nonblockStage=null){
   let editMeshBatches=0;
   let lastEditMeshKeys=[];
   function manual14AtChunk(cx,cz,section){
-    if(section>0)return {opaque:new Float32Array(),transparent:new Float32Array(),vertices:0,instances:0};
-    const key=depthMeshKey(cx,cz,section);
+    const key=runtimeMeshKey(cx,cz,section);
+    if(section>0&&!manual14.layer.upperOccupied(key))return {opaque:new Float32Array(),transparent:new Float32Array(),vertices:0,instances:0};
     if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
     const meshes=meshManual14Chunk(manual14.layer,cx,cz,section);
     if(manual14MeshCache.size>=30)manual14MeshCache.delete(manual14MeshCache.keys().next().value);
@@ -997,16 +997,12 @@ function start(nonblockStage=null){
     return combined;
   }
   function meshPlayableChunk(cx,cz,section){
-    if(section>0){
-      if(!upperOccupancy(world,runtimeMeshKey(cx,cz,section)))return new Float32Array();
-      return meshChunk(world,cx,cz,section);
-    }
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+    if(section>0&&!upperOccupancy(world,runtimeMeshKey(cx,cz,section)))return new Float32Array();
+    const original=section>=0?meshChunk(world,cx,cz,section):meshDepthSection(world,cx,cz,section);
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
     return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
   }
   function meshPlayableWater(cx,cz,section){
-    if(section>0)return pack2WaterSectionVertices(world,cx,cz,section);
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
@@ -1051,11 +1047,12 @@ function start(nonblockStage=null){
       for(const section of runtimeEditSections(py))
       for(const {cx,cz} of desertSeamEditAffectedChunks(world,px,pz,py)){
         const key=runtimeMeshKey(cx,cz,section);
-        if(seen.has(key)||!chunks.has(key))continue;
+        if(seen.has(key)||section<=0&&!chunks.has(key))continue;
         seen.add(key);
         const vertices=meshPlayableChunk(cx,cz,section);
         const water=meshPlayableWater(cx,cz,section);
-        batch.push({key,cx,cz,section,vertices,water});
+        if(section>0)validateUpperSectionGeometry(vertices,water);
+        if(chunks.has(key))batch.push({key,cx,cz,section,vertices,water});
       }
     const ready=publishEditedChunkBatch(batch);
     editMeshBatches++;
@@ -1064,12 +1061,14 @@ function start(nonblockStage=null){
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function refreshPhysicalChunk(x,z,y){
-    const section=sectionForY(y);
+    const section=runtimeSectionForY(y);
     if(section===null)throw Error('Physical Pack 3 block is outside loaded depth');
-    const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
-    if(!chunks.has(key))return;
+    const cx=chunkCoord(x),cz=chunkCoord(z),key=runtimeMeshKey(cx,cz,section);
+    if(!chunks.has(key)&&section<=0)return;
     const vertices=meshPlayableChunk(cx,cz,section);
     const water=meshPlayableWater(cx,cz,section);
+    if(section>0)validateUpperSectionGeometry(vertices,water);
+    if(!chunks.has(key))return;
     publishEditedChunkBatch([{key,cx,cz,section,vertices,water}]);
     editMeshBatches++;
     lastEditMeshKeys=[key];
@@ -1083,15 +1082,16 @@ function start(nonblockStage=null){
     manual14MeshCache.clear();
     const unique=new Map();
     for(const [x,y,z] of cells){
-      const section=sectionForY(y);
+      const section=runtimeSectionForY(y);
       if(section===null)throw Error('Manual shaped piece outside playable depth');
-      const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
-      if(chunks.has(key))unique.set(key,{key,cx,cz,section});
+      const cx=chunkCoord(x),cz=chunkCoord(z),key=runtimeMeshKey(cx,cz,section);
+      if(section>0||chunks.has(key))unique.set(key,{key,cx,cz,section});
     }
     const batch=[...unique.values()].map(item=>({...item,
       vertices:meshPlayableChunk(item.cx,item.cz,item.section),
       water:meshPlayableWater(item.cx,item.cz,item.section)}));
-    const ready=publishEditedChunkBatch(batch);
+    for(const item of batch)if(item.section>0)validateUpperSectionGeometry(item.vertices,item.water);
+    const ready=publishEditedChunkBatch(batch.filter(item=>chunks.has(item.key)));
     if(ready.length){
       editMeshBatches++;
       lastEditMeshKeys=ready.map(x=>x.key);
@@ -1257,7 +1257,7 @@ function start(nonblockStage=null){
     const active=runtimeSectionForY(player.feet)??0;
     const occupancy=upperOccupancyRevision(world);
     const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
-    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
