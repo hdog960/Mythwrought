@@ -10,16 +10,17 @@ import {engineWantedSections,actualGallerySectionCosts} from './gallery-streamin
 import {VoxelWorld,baseBlock} from '../voxel.mjs';
 import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
 import {planEnvironmentalScenery} from '../nonblock/staged-habitats.mjs';
+import {GALLERY_CONSTRUCTION_LIMITS} from './physical-gallery-construction.mjs';
 const xyz=k=>k.split(',').map(Number);
 const key=(x,y,z)=>x+','+y+','+z;
 export function createLocalGalleryGameWitness(){
  const p=createPeakGalleryProjection(),{original,cuts}=p,projection=Object.create(p.projection);
  let sourceScope=null;
  const charge=kind=>{
-  if(sourceScope){if(sourceScope.reads+sourceScope.direct>=40000)throw Error('GALLERY_COMBINED_SOURCE_READ_LIMIT');sourceScope[kind]++;}
+  if(sourceScope){if(sourceScope.reads+sourceScope.direct>=GALLERY_CONSTRUCTION_LIMITS.originalNaturalReads)throw Error('GALLERY_COMBINED_SOURCE_READ_LIMIT');sourceScope[kind]++;}
  };
  Object.defineProperty(projection,'get',{value(x,y,z){
-  if(sourceScope&&!sourceScope.inMesh)charge('direct');
+  if(sourceScope&&!sourceScope.prepaidGet)charge('direct');
   return p.projection.get(x,y,z);
  }});
  // Existing environmental scenery plans against the natural reader; make
@@ -29,6 +30,13 @@ export function createLocalGalleryGameWitness(){
   charge('direct');
   return cuts.has(key(x,y,z))?BLOCK.AIR:generated(x,y,z);
  }});
+ // Charge direct method entry even during mesh composition. Calls nested
+ // inside the original bound source are not claimed independently measured.
+ for(const method of ['legacyBlockAt','environmentWaterState']){
+  if(typeof original[method]!=='function')continue;
+  const read=original[method].bind(original);
+  Object.defineProperty(projection,method,{value(...args){charge('direct');return read(...args);}});
+ }
  const eligible=[...cuts].map(xyz).filter(([x,y,z])=>
   chunkCoord(x)===-40&&chunkCoord(z)===-135&&sectionForY(y)===-3&&
   projection.get(x,y-1,z)!==BLOCK.AIR&&
@@ -47,11 +55,13 @@ export function createLocalGalleryGameWitness(){
   auditFuture(){return auditPeakFutureNetworkOverlap(p);},
   build(world,keys,compose){
    if(sourceScope)throw Error('NESTED_MESH_TRANSACTION');
-   sourceScope={direct:0,reads:0,inMesh:true};
+   sourceScope={direct:0,reads:0,prepaidGet:false};
    try{
-    const batch=meshReadOnlySharedBatch(world,keys,{beforeRead:()=>charge('reads')});
+    const batch=meshReadOnlySharedBatch(world,keys,{
+     beforeRead:()=>{charge('reads');sourceScope.prepaidGet=true;},
+     afterRead:()=>{sourceScope.prepaidGet=false;}
+    });
     if(!batch.ok)throw Error(batch.reason);
-    sourceScope.inMesh=false;
     const rows=batch.meshes.map(m=>compose(m));
     const direct=sourceScope.direct;
     if(batch.calls!==sourceScope.reads)throw Error('GALLERY_READ_ACCOUNTING_MISMATCH');
