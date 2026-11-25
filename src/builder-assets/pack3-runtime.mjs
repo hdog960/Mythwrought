@@ -4,6 +4,7 @@ import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS} from './pack3.mjs';
 import {FULL_CUBE,raycastShapes} from '../voxel-shape-interactions.mjs';
 import {inspectBodyFit} from '../voxel-shape-fit.mjs';
 import {CHUNK_SIZE,BLOCK} from '../voxel.mjs';
+import {mountainV8Material} from '../manual-biomes/mountain-v8-materials.mjs';
 import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
 import {isPack2LiveId,pack2ShapeOf} from '../pack2-integration.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
@@ -207,6 +208,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     if(e)return resolvePack3BuilderAsset(e.asset,e.yaw).shape;
     const id=world.get(x,y,z);
     if(id===BLOCK.AIR)return null;
+    if(mountainV8Material(id))return {boxes:mountainV8Material(id).boxes};
     if(isBiome130BlockId(id)){
       const source=biome130Block(id,world.rotationAt?.(x,y,z)??0);
       return {boxes:source.boxes};
@@ -226,6 +228,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     // collision path must keep those passable, exactly as the live engine does.
     const id=world.get(x,y,z);
     if(id===76)return null;
+    if(mountainV8Material(id)?.solid===false)return null;
     if(isBiome130BlockId(id)&&!biome130Block(id,world.rotationAt?.(x,y,z)??0).solid)
       return null;
     return readShape(x,y,z);

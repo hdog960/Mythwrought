@@ -3,6 +3,7 @@
 // A verified sidecar journal and a previous-good backup protect those bytes.
 // This is still prototype localStorage, NOT the future IndexedDB save system.
 import {VoxelWorld} from './voxel.mjs';
+import {isMountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {worldSlotKey,LEGACY_WORLD_KEY,DEFAULT_WORLD_SEED,SELECTED_SEED_KEY} from './seeds.mjs';
 
 export const SAVE_JOURNAL_SUFFIX='-integrity-v009';
@@ -75,9 +76,38 @@ export function loadWorldSafe(storage,seed){
   }
   return {world:new VoxelWorld(seed),source:'new',recovered:false};
 }
+// Candidate source-identity fence for V8 writes by THIS build only.
+// Historical already-running code cannot be retroactively made to honor it.
+// This is not a cross-store lock or a stale edit-generation protocol.
+export function assertMountainV8WriteIdentity(storage,world){
+  const generator='mythwrought-five-surface-regions-mountain-v8';
+  const actual=world?.base?.generationProfile??world?.generationProfile;
+  if(actual?.generator!==generator){
+    for(const id of world.edits?.values?.()??[])if(isMountainV8Material(id))
+      throw Error('Dedicated Mountain V8 edits require V8 source identity');
+  }
+  const key=worldSlotKey(world.seed)+'-four-biomes-profile-v1';
+  const raws=[storage.getItem(key),storage.getItem(key+'-journal')];
+  if(actual?.generator!==generator&&!raws.some(raw=>typeof raw==='string'&&raw.includes(generator)))return;
+  if(actual?.generator!==generator||actual.seed!==world.seed)
+    throw Error('V8 source identity mismatch; stale legacy writer refused');
+  if(raws.some(raw=>raw===null))throw Error('V8 write requires both verified profile records');
+  for(const raw of raws){
+    const entry=JSON.parse(raw);
+    if(entry?.version!==1||typeof entry.raw!=='string'||saveFingerprint(entry.raw)!==entry.checksum)
+      throw Error('V8 profile write identity damaged');
+    const p=JSON.parse(entry.raw);
+    if(Object.keys(p).sort().join(',')!=='generator,kind,seed,version'||
+       p.kind!=='mythwrought-generation-profile'||p.version!==1||
+       p.generator!==generator||p.seed!==world.seed)
+      throw Error('V8 profile write identity mismatch');
+  }
+}
+
 export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=false}={}){
   let key,raw,oldPrimary;
   try{
+    assertMountainV8WriteIdentity(storage,world);
     key=worldSlotKey(world.seed);
     raw=JSON.stringify(world.save());
     parseWorldData(raw,world.seed);
@@ -132,5 +162,8 @@ export function saveWorldSafe(storage,world,{select=true,allowReplaceCorrupt=fal
 }
 export function importWorldData(text){
   if(typeof text!=='string'||text.length>MAX_IMPORT_BYTES)throw Error('Import too large or unreadable');
+  const payload=JSON.parse(text);
+  if(payload?.edits?.some(row=>Array.isArray(row)&&isMountainV8Material(row[3])))
+    throw Error('Dedicated Mountain V8 materials require verified profile export');
   return parseWorldData(text);
 }

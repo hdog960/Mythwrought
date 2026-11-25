@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
 import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {MOUNTAIN_V8_MATERIAL_IDS,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {ENVIRONMENT_GROUND,environmentGround} from './environment-ground.mjs';
 import {WORLD_MIN_Y} from './depth.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,
@@ -20,6 +21,7 @@ export const BLOCK_NAMES=Object.freeze({
   [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
   ...Object.fromEntries(Object.values(ENVIRONMENT_GROUND).map(id=>[id,environmentGround(id).name])),
   ...Object.fromEntries(BIOME130_REGISTERED_IDS.map(id=>[id,biome130Block(id).name])),
+  ...Object.fromEntries(MOUNTAIN_V8_MATERIAL_IDS.map(id=>[id,mountainV8Material(id).name])),
   ...PACK2_LIVE_NAMES,
   ...Object.fromEntries(PACK3_BUILDER_IDS.map((id,i)=>[id,resolvePack3BuilderAsset(PACK3_BUILDER_SYMBOLS[i]).name])),
   ...Object.fromEntries(MANUAL_FIVE_PACK_CATALOG.filter(x=>manual14Ids.has(x.numericId))
@@ -34,7 +36,7 @@ export function intersectsPlayerBlock(player,cell,selected=BLOCK.STONE,rotation=
     pack2State??pack2NormalizeState(selected),cell,
     {x:player.x,z:player.z,feet:player.feet,radius:BODY_RADIUS,height:BODY_HEIGHT});
   const boxes=manualPack3SymbolById.has(selected)?manualPack3Shape(selected,rotation):
-    isBiome130BlockId(selected)?biome130Block(selected,rotation).boxes:[[0,0,0,1,1,1]];
+    isBiome130BlockId(selected)?biome130Block(selected,rotation).boxes:mountainV8Material(selected)?.boxes??[[0,0,0,1,1,1]];
   return boxes.some(b=>player.x+BODY_RADIUS>x+b[0]+e&&player.x-BODY_RADIUS<x+b[3]-e&&
     player.feet+BODY_HEIGHT>y+b[1]+e&&player.feet<y+b[4]-e&&
     player.z+BODY_RADIUS>z+b[2]+e&&player.z-BODY_RADIUS<z+b[5]-e);
@@ -82,6 +84,35 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
         next=mode==='mine'?BLOCK.AIR:selected;
   if(previous===next&&(!isBiome130BlockId(next)||previousRotation===rotation))
     return {ok:false,reason:'Block is already in that state'};
+  // The V8 natural support action is one transaction, not repeated single
+  // rebuilds. Only original unedited natural cells may fall. Never remove
+  // Pack2/3/manual or player-authored replacements in the footprint.
+  const base=world.base??world;
+  const supported=mode==='mine'&&!previousPack2?
+    base.mountainV8SupportedTreeCells?.(...cell)??[]:[];
+  if(supported.length){
+    const same=(a,b)=>a.every((v,i)=>v===b[i]);
+    const cells=[cell,...supported.filter(c=>!same(c,cell)&&
+      !world.getPack2State?.(...c)&&!world.pack3Runtime?.get?.(c)&&
+      !world.manual14Layer?.get?.(c)&&!world.pack5Layer?.cell?.(c)&&
+      world.get(...c)===base.get(...c))];
+    const before=cells.map(c=>({cell:c,id:world.get(...c),rotation:world.rotationAt?.(...c)??0}));
+    const written=[];
+    try{
+      for(const entry of before){
+        if(!world.set(...entry.cell,BLOCK.AIR))throw Error('V8 supported cell removal refused');
+        written.push(entry);
+      }
+      if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1],cells);
+    }catch(error){
+      for(const entry of written.reverse()){
+        if(!world.set(...entry.cell,entry.id,entry.rotation))
+          throw Error('V8 supported tree rollback failed');
+      }
+      return {ok:false,reason:'Supported tree update failed; original cells restored',error:String(error)};
+    }
+    return {ok:true,mode,cell,previous,next,block:previous,affectedCells:cells};
+  }
   if(!world.set(...cell,next,mode==='place'&&isBiome130BlockId(next)?rotation:0))
     return {ok:false,reason:'Invalid block ID, rotation or editable height'};
   try{
