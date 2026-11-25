@@ -3,6 +3,7 @@
 // Legacy VoxelWorld remains unchanged. Schema-1 edit deltas keep their original shape.
 import {VoxelWorld,BLOCK,baseBlock,chunkCoord,terrainHeight,worldKey} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
+import {PHYSICAL_MAX_Y} from '../world-height.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
 import {surfaceBiomeFreshColumn,surfaceBiomeAt} from '../surface-regions/regions.mjs';
 import {m3DesertFreshColumn,M3_XERIC_IDS} from './desert-m3.mjs';
@@ -254,6 +255,9 @@ export class FourRegionWorld extends VoxelWorld{
     return cells.get(worldKey(x,y,z))??BLOCK.AIR;
   }
   naturalAndLandmarkBlock(x,y,z){
+    // Existing profile natural sources remain limited to the historical envelope.
+    // Future upper generation requires its own versioned source admission.
+    if(y>WORLD_MAX_Y)return BLOCK.AIR;
     const cave=this.environmentCaves?.get(x,y,z);
     if(cave!==undefined)return cave;
     const base=super.naturalAndLandmarkBlock(x,y,z);
@@ -384,7 +388,7 @@ export function restoreFourRegionWorld(payload,profile){
     if(!Array.isArray(row)||row.length!==4||
        !row.every(Number.isInteger))throw Error('Malformed biome edit');
     const [x,y,z,id]=row,key=worldKey(x,y,z);
-    if(seen.has(key)||y<WORLD_MIN_Y||y>WORLD_MAX_Y||
+    if(seen.has(key)||y<WORLD_MIN_Y||y>PHYSICAL_MAX_Y||
        !world.set(x,y,z,id)||!world.edits.has(key))
       throw Error('Duplicate, out-of-range or noncanonical biome edit');
     seen.add(key);

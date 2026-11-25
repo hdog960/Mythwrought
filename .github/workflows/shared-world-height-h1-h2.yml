@@ -1,0 +1,24 @@
+name: Shared world height H1 H2 native
+on:
+  push:
+    branches: [research/shared-world-height-h1-h2-20261125]
+    paths:
+      - 'src/world-height.mjs'
+      - 'src/voxel.mjs'
+      - 'src/manual-biomes/profile-world.mjs'
+      - 'src/floating-islands/sky-runtime-adapter.mjs'
+      - 'src/floating-islands/sky-source-mesh.mjs'
+      - 'tests/shared-world-height-h1-h2.test.mjs'
+      - '.github/workflows/shared-world-height-h1-h2.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: node --test tests/shared-world-height-h1-h2.test.mjs
