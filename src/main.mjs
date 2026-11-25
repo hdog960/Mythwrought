@@ -3225,6 +3225,10 @@ function start(nonblockStage=null,underworldWitness=null){
         pack5Gpu.refresh(eye());retireLiveScenery();
         return placed;
       },
+      underworldFutureMaskAudit(){
+        if(!underworldWitness)throw Error('No isolated underworld witness');
+        return underworldWitness.auditFuture();
+      },
       underworldGalleryRestage(cells,failAfter=-1){
         if(!underworldWitness)throw Error('No isolated underworld witness');
         const keys=underworldDirtyKeys(cells),before=keys.map(k=>chunks.get(k));
