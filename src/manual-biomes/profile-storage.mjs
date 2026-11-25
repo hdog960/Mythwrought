@@ -41,7 +41,7 @@ export function readFourRegionProfile(storage,seed){
 }
 export function isUnclaimedWorldSeed(storage,seed,loaded=loadWorldSafe(storage,seed)){
   if(loaded.source!=='new'||storage.getItem(SELECTED_SEED_KEY)===String(seed))return false;
-  const prefixes=[worldSlotKey(seed),'mythwrought-exploration-v1-'+seed,
+  const prefixes=[worldSlotKey(seed),'mythwrought-exploration-v1-'+seed,'mythwrought-navigation00-v1-'+seed,
     'mythwrought-sky-s1-clock-'+seed,'mythwrought-sky-s3-lunar-'+seed,
     'mythwrought-mobs-v1-seed-'+seed,'mythwrought.manual14.seed.'+seed,
     'mythwrought-pack3-construction-v1:'+seed,'mythwrought.pack5.builder.seed.'+seed,

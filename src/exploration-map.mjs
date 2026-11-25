@@ -3,6 +3,10 @@
 // Discovery is stored outside the canonical schema-1 voxel save and never rewrites it.
 import {terrainHeight,BLOCK} from './voxel.mjs';
 import {profiledDiscoveredCellInk} from './manual-biomes/exploration-ink.mjs';
+import {createNavigationAdapter} from './navigation00/navigation-adapter.mjs';
+import {createNavigationGestures} from './navigation00/navigation-gestures.mjs';
+import {paintNavigationFrame} from './navigation00/navigation-paint.mjs';
+import {createNavigationLocationReadout} from './navigation00/navigation-location-readout.mjs';
 
 export const MAP_CELL_SIZE=4;
 export const MAP_REVEAL_RADIUS=3;
@@ -140,65 +144,116 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   const coordinates=document.getElementById('explorationCoordinates');
   const summary=document.getElementById('explorationSummary');
   let map=loadExploration(storage,getWorld().seed);
-  let lastPaint=-Infinity,lastSave=-Infinity,zoom=7,panX=0,panZ=0;
+  let lastPaint=-Infinity,lastSave=-Infinity,nav,gestures,paintRequest=null;
+  const captured=new Set();
+  function resetPointers(){
+    gestures?.cancel();
+    for(const id of captured){try{if(large.hasPointerCapture(id))large.releasePointerCapture(id);}catch(_){}}
+    captured.clear();
+  }
+  function resetNavigation(){
+    resetPointers();
+    nav=createNavigationAdapter({seed:map.seed,discovery:map,storage,
+      width:large.width,height:large.height,player:getPlayer()});
+    gestures=createNavigationGestures({viewport:nav.viewport});
+    if(!overlay.hidden)gestures.open();
+  }
+  resetNavigation();
+  function renderExpanded(){
+    if(overlay.hidden)return;
+    const world=getWorld(),player=getPlayer();
+    if(world.seed!==map.seed)return;
+    nav.updatePlayer(player);
+    const frame=nav.frame();
+    paintNavigationFrame(large,frame,{cellInk:cell=>{
+      // Double-check the live discovery owner before ANY terrain read.
+      if(!map.seen.has(cell.x+','+cell.z))return '#122126';
+      return profiledDiscoveredCellInk(world,cell.x,cell.z,MAP_CELL_SIZE)||surfaceInk(world,cell.x,cell.z);
+    }});
+    // Production yaw zero faces +Z; north is -Z, east is +X.
+    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180});
+    coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
+    summary.textContent=map.warning||nav.navigator.warning||map.seen.size+' discovered cells · surface map';
+    large.dataset.navigationZoom=String(frame.zoom);
+  }
+  function queueExpanded(){
+    if(paintRequest!==null)return;
+    paintRequest=requestAnimationFrame(()=>{paintRequest=null;renderExpanded();});
+  }
   function syncSeed(){
     const world=getWorld();
     if(map.seed===world.seed)return;
     map.flush();
     map=loadExploration(storage,world.seed);
-    panX=panZ=0;
+    resetNavigation();
   }
   function render(){
     const world=getWorld(),player=getPlayer();
     paintExploration(mini,map,world,player);
     mini.dataset.discovered=String(map.seen.size);
     mini.dataset.seed=String(map.seed);
-    if(!overlay.hidden){
-      paintExploration(large,map,world,player,{expanded:true,panX,panZ,zoom});
-      coordinates.textContent='X '+Math.floor(player.x)+' · Z '+Math.floor(player.z)+' · Seed '+world.seed;
-      summary.textContent=map.warning||map.seen.size+' discovered map cells · dark areas remain unexplored';
-    }
+    renderExpanded();
   }
   function close(){
     if(overlay.hidden)return;
-    overlay.hidden=true;map.flush();render();document.getElementById('scene').focus({preventScroll:true});
+    overlay.hidden=true;resetPointers();gestures.close();
+    if(paintRequest!==null){cancelAnimationFrame(paintRequest);paintRequest=null;}
+    map.flush();render();document.getElementById('scene').focus({preventScroll:true});
   }
   openButton.addEventListener('click',()=>{
     if(!overlay.hidden||!canOpen())return;
     syncSeed();onOpen();
-    panX=panZ=0;map.flush();
-    overlay.hidden=false;render();closeButton.focus({preventScroll:true});
+    nav.viewport.reset();map.flush();
+    overlay.hidden=false;gestures.open();render();closeButton.focus({preventScroll:true});
   });
   closeButton.addEventListener('click',close);
   overlay.addEventListener('pointerdown',e=>{if(e.target===overlay)close();});
   document.addEventListener('keydown',e=>{
     if(!overlay.hidden&&e.key==='Escape'){e.preventDefault();close();}
   });
-  document.getElementById('mapRecenter').addEventListener('click',()=>{panX=panZ=0;render();});
-  document.getElementById('mapZoomIn').addEventListener('click',()=>{zoom=Math.min(14,zoom+2);render();});
-  document.getElementById('mapZoomOut').addEventListener('click',()=>{zoom=Math.max(4,zoom-2);render();});
-  let drag=null;
-  large.addEventListener('pointerdown',e=>{
-    if(e.button!==0)return;
-    e.preventDefault();
-    drag={id:e.pointerId,x:e.clientX,y:e.clientY,ax:0,az:0};
-    try{large.setPointerCapture(e.pointerId);}catch(_){}
+  document.getElementById('mapRecenter').addEventListener('click',()=>{
+    resetPointers();nav.viewport.reset();renderExpanded();
   });
-  large.addEventListener('pointermove',e=>{
-    if(!drag||drag.id!==e.pointerId)return;
-    e.preventDefault();
-    const cssZoom=zoom*(large.getBoundingClientRect().width/large.width);
-    drag.ax+=e.clientX-drag.x;drag.az+=e.clientY-drag.y;
-    drag.x=e.clientX;drag.y=e.clientY;
-    const dx=Math.trunc(drag.ax/cssZoom),dz=Math.trunc(drag.az/cssZoom);
-    if(dx||dz){
-      panX-=dx*MAP_CELL_SIZE;panZ-=dz*MAP_CELL_SIZE;
-      drag.ax-=dx*cssZoom;drag.az-=dz*cssZoom;render();
-    }
+  function zoomBy(factor){
+    resetPointers();
+    const f=nav.viewport.snapshot().frame;
+    nav.viewport.zoomAt({factor,screenX:f.x+f.width/2,screenY:f.y+f.height/2});
+    renderExpanded();
+  }
+  document.getElementById('mapZoomIn').addEventListener('click',()=>zoomBy(1.25));
+  document.getElementById('mapZoomOut').addEventListener('click',()=>zoomBy(.8));
+  function localPoint(event){
+    const b=large.getBoundingClientRect();
+    if(!large.clientWidth||!large.clientHeight)return null;
+    return {x:(event.clientX-b.left-large.clientLeft)*large.width/large.clientWidth,
+      y:(event.clientY-b.top-large.clientTop)*large.height/large.clientHeight};
+  }
+  large.addEventListener('pointerdown',event=>{
+    if(overlay.hidden||event.button!==0)return;
+    event.preventDefault();event.stopPropagation();
+    const p=localPoint(event);
+    if(!p||!gestures.begin(event.pointerId,p.x,p.y))return;
+    captured.add(event.pointerId);
+    try{large.setPointerCapture(event.pointerId);}catch(_){}
   });
-  for(const event of ['pointerup','pointercancel','lostpointercapture'])
-    large.addEventListener(event,()=>{drag=null;});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)map.flush();});
+  large.addEventListener('pointermove',event=>{
+    if(!captured.has(event.pointerId))return;
+    event.preventDefault();event.stopPropagation();
+    const p=localPoint(event);
+    if(p&&gestures.move(event.pointerId,p.x,p.y))queueExpanded();
+    else if(!gestures.activePointers)resetPointers();
+  });
+  function endPointer(event){
+    if(!captured.delete(event.pointerId))return;
+    event.preventDefault();event.stopPropagation();
+    gestures.end(event.pointerId);
+    try{if(large.hasPointerCapture(event.pointerId))large.releasePointerCapture(event.pointerId);}catch(_){}
+  }
+  large.addEventListener('pointerup',endPointer);
+  for(const event of ['pointercancel','lostpointercapture'])
+    large.addEventListener(event,e=>{if(captured.has(e.pointerId))resetPointers();});
+  window.addEventListener('blur',resetPointers);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){resetPointers();map.flush();}});
   window.addEventListener('pagehide',()=>map.flush());
   return {
     isOpen:()=>!overlay.hidden,
