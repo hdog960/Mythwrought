@@ -110,6 +110,7 @@ async function run(device,mode,fixture){
     if(mode==='candidate')assert.equal(pre.nearStatus?.phase,'ready');
     else assert.equal(pre.nearStatus,null);
     await page.screenshot({path:output+'/'+label+'-before.png'});
+    console.log('291 TRIAL START',label,JSON.stringify({viewport:pre.viewportCss,pixels:pre.viewportPixels,seed:pre.seed,mode:pre.mode,query}));
     for(const [i,item] of plan.entries()){
       if(i!==0)await settleAim(page,item);
       assert.equal(await page.evaluate(cell=>window.__mythwroughtTest.block(...cell),item.cell),item.previous);
@@ -130,6 +131,7 @@ async function run(device,mode,fixture){
       assert.deepEqual(result.witness,[...item.cell,item.previous,0]);
       assert.equal(result.invalid,false);assert.equal(result.interrupted,false);
       assert.equal(result.pending,false);assert.match(result.status,/Removed .* · saved/);
+      if((i+1)%25===0)console.log('291 MINE PROGRESS',label,i+1,JSON.stringify(result.witness));
     }
     await page.waitForFunction(()=>window.__mythwroughtTest.nearPerformance291().mineFrameWindow.phase==='complete',
       null,{timeout:30000});
@@ -145,12 +147,14 @@ async function run(device,mode,fixture){
     assert.deepEqual(await page.evaluate(plan=>plan.map(p=>window.__mythwroughtTest.block(...p.cell)),plan),
       Array(100).fill(0),'source-saved MINE readback after reload');
     assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);
+    console.log('291 TRIAL COMPLETE',label,JSON.stringify({mines:last.trueSavedDeepMines,actionP95:last.miningActionP95Ms,frameP95:last.mineFrameWindow.frameP95Ms,uploadP95:last.mineFrameWindow.successfulGuardedUploadP95Ms,frameGaps:last.mineFrameWindow.frameGapsRecorded,slowFrames:last.mineFrameWindow.slowFrames,reloadReadback:100}));
     return {pre,snapshot:last,reloadReadback:100};
   }catch(error){
     const observed=last??await snap(page).catch(()=>null);
     await writeFile(output+'/'+label+'-failure.json',JSON.stringify({
       device,mode,query,pre,snapshot:observed,errors,missing,error:String(error?.stack??error)
     },null,2)+'\n');
+    console.error('291 TRIAL FAILURE',label,String(error?.stack??error),JSON.stringify({snapshot:observed,errors,missing}));
     throw error;
   }finally{await context.close();}
 }
@@ -170,6 +174,7 @@ try{
     await writeFile(output+'/report.json',JSON.stringify(report,null,2)+'\n');
   }
   report.evaluation=evaluateIssue291FourViewportAB(report);
+  console.log('291 FOUR-VIEWPORT GATE',JSON.stringify(report.evaluation));
   assert.equal(report.evaluation.metricGatesPassed,true,JSON.stringify(report.evaluation.failures));
 } catch(error){
   report.error=String(error?.stack??error);throw error;
