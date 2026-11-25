@@ -92,9 +92,18 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).get('underworld-acceptance')==='phase44'){
   // Never open an existing browser's save namespace for the disposable
   // projection. No public host or normal startup can enable this path.
-  if(localStorage.length!==0)fatal('Underworld acceptance requires fresh browser storage');
-  else import('./living-underworld/local-gallery-game-witness.mjs').then(m=>
-    start(null,m.createLocalGalleryGameWitness())).catch(e=>fatal(String(e)));
+  const boot=window.__underworldAcceptanceBoot={stage:'storage-preflight',error:null};
+  const fail=e=>{boot.stage='failed';boot.error=String(e?.stack??e);console.error('Underworld acceptance startup:',boot.error);fatal(String(e));};
+  if(localStorage.length!==0)fail(Error('Underworld acceptance requires fresh browser storage'));
+  else{
+    boot.stage='import-witness';
+    import('./living-underworld/local-gallery-game-witness.mjs').then(m=>{
+      boot.stage='construct-witness';const witness=m.createLocalGalleryGameWitness();
+      boot.stage='start-game';start(null,witness);
+      if(!window.__mythwroughtTest)throw Error('Game startup returned before regression interface: '+notice.textContent);
+      boot.stage='ready';
+    }).catch(fail);
+  }
 }else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
   const url=new URL(location.href);
