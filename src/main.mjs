@@ -3,7 +3,7 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,s
 import {meshDepthSection} from './depth-mesh.mjs';
 import {PHYSICAL_MAX_Y,runtimeSectionForY,runtimeMeshKey,runtimeEditSections,physicalBodyRegions,upperOccupancyRevision,upperOccupancy} from './world-height.mjs';
 import {planHeightStream} from './world-height-stream.mjs';
-import {admitUpperGpuBatch,upperGpuStats,validateUpperSectionGeometry,UPPER_STAGE_BYTES} from './world-height-budget.mjs';
+import {admitUpperGpuBatch,upperGpuStats,validateUpperSectionGeometry,createUpperBatchBuilder} from './world-height-budget.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -986,8 +986,10 @@ function start(nonblockStage=null){
     if(section>0&&!manual14.layer.upperOccupied(key))return {opaque:new Float32Array(),transparent:new Float32Array(),vertices:0,instances:0};
     if(manual14MeshCache.has(key))return manual14MeshCache.get(key);
     const meshes=meshManual14Chunk(manual14.layer,cx,cz,section);
-    if(manual14MeshCache.size>=30)manual14MeshCache.delete(manual14MeshCache.keys().next().value);
-    manual14MeshCache.set(key,meshes);
+    if(section<=0){
+      if(manual14MeshCache.size>=30)manual14MeshCache.delete(manual14MeshCache.keys().next().value);
+      manual14MeshCache.set(key,meshes);
+    }
     return meshes;
   }
   function combineVertices(base,extra){
@@ -1040,7 +1042,7 @@ function start(nonblockStage=null){
   function refreshEditedMeshes(x,z,y=0,affectedCells=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
-    const batch=[];
+    const staged=createUpperBatchBuilder(key=>chunks.has(key));
     // Original surface-mesh three-block RGB cue can cross an adjacent chunk
     // before the edited source reaches the one-voxel physics seam. Preserve
     // existing depth/geometry refresh for all legacy or non-surface edits.
@@ -1053,28 +1055,23 @@ function start(nonblockStage=null){
         seen.add(key);
         const vertices=meshPlayableChunk(cx,cz,section);
         const water=meshPlayableWater(cx,cz,section);
-        if(section>0)validateUpperSectionGeometry(vertices,water);
-        if(chunks.has(key))batch.push({key,cx,cz,section,vertices,water});
+        staged.add({key,cx,cz,section,vertices,water});
       }
-    const ready=publishEditedChunkBatch(batch);
+    const ready=publishEditedChunkBatch(staged.finish());
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
     if(caveSession||combinedWorld())caveFarGpu.invalidate();
     // Unloaded deep sections always use the current saved world.get on arrival.
   }
   function rebuildUpperPack5(next,affected){
-    const batch=[];let stagedBytes=0;
+    const staged=createUpperBatchBuilder(key=>chunks.has(key));
     for(const key of affected){
       const [cx,cz,s]=key.slice(4).split(',').map(Number),section=s+1;
       const vertices=meshPlayableChunk(cx,cz,section,next.get(key)??new Float32Array());
       const water=meshPlayableWater(cx,cz,section);
-      const bytes=validateUpperSectionGeometry(vertices,water);
-      if(chunks.has(key)){
-        stagedBytes+=bytes;if(stagedBytes>UPPER_STAGE_BYTES)throw Error('Pack5 upper staging budget exceeded before retaining batch');
-        batch.push({key,cx,cz,section,vertices,water});
-      }
+      staged.add({key,cx,cz,section,vertices,water});
     }
-    publishEditedChunkBatch(batch);
+    publishEditedChunkBatch(staged.finish());
   }
   function refreshPhysicalChunk(x,z,y){
     const section=runtimeSectionForY(y);
@@ -1103,11 +1100,11 @@ function start(nonblockStage=null){
       const cx=chunkCoord(x),cz=chunkCoord(z),key=runtimeMeshKey(cx,cz,section);
       if(section>0||chunks.has(key))unique.set(key,{key,cx,cz,section});
     }
-    const batch=[...unique.values()].map(item=>({...item,
+    const staged=createUpperBatchBuilder(key=>chunks.has(key));
+    for(const item of unique.values())staged.add({...item,
       vertices:meshPlayableChunk(item.cx,item.cz,item.section),
-      water:meshPlayableWater(item.cx,item.cz,item.section)}));
-    for(const item of batch)if(item.section>0)validateUpperSectionGeometry(item.vertices,item.water);
-    const ready=publishEditedChunkBatch(batch.filter(item=>chunks.has(item.key)));
+      water:meshPlayableWater(item.cx,item.cz,item.section)});
+    const ready=publishEditedChunkBatch(staged.finish());
     if(ready.length){
       editMeshBatches++;
       lastEditMeshKeys=ready.map(x=>x.key);

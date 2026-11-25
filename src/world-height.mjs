@@ -61,6 +61,7 @@ export function physicalBodyRegions({x,feet,z,radius=.28,height=1.78}={}){
   if(![x,feet,z,radius,height].every(Number.isFinite)||radius<=0||radius>1||height<=0||height>4)
     throw TypeError('Invalid physical body');
   if(feet<PHYSICAL_MIN_Y||feet+height>PHYSICAL_MAX_Y+1)return null;
+  if(![Math.floor(x-radius),Math.floor(x+radius),Math.floor(z-radius),Math.floor(z+radius)].every(Number.isSafeInteger))return null;
   const e=1e-5,rows=new Map();
   for(let bx=Math.floor(x-radius+e);bx<=Math.floor(x+radius-e);bx++)
     for(let bz=Math.floor(z-radius+e);bz<=Math.floor(z+radius-e);bz++)

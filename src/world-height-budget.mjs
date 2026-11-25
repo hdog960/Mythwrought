@@ -34,3 +34,18 @@ export function admitUpperGpuBatch(chunks,batch){
   throw Error('Upper aggregate GPU budget exceeded');
  return {bytes,owners,staged,peak:upperGpuStats(chunks).bytes+staged};
 }
+
+// Retain only resident replacement work; unloaded owners are checked individually.
+export function createUpperBatchBuilder(isResident){
+ if(typeof isResident!=='function')throw TypeError('Invalid resident predicate');
+ const batch=[];let staged=0;
+ return Object.freeze({add(item){
+  if(item.section>0){
+   const n=validateUpperSectionGeometry(item.vertices,item.water);
+   if(!isResident(item.key))return;
+   if(staged+n>UPPER_STAGE_BYTES)throw Error('Upper staging budget exceeded before retaining batch');
+   staged+=n;
+  }else if(!isResident(item.key))return;
+  batch.push(item);
+ },get staged(){return staged;},finish:()=>batch});
+}
