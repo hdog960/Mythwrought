@@ -1,0 +1,45 @@
+name: Builder B Wave66-71 targeted original native source
+on:
+  push:
+    branches:
+      - 'builder-b-wave68-71-final-bathhouse-cohort-20261125'
+    paths:
+      - '.github/workflows/builder-b-wave66-71-native-isolated.yml'
+permissions:
+  contents: read
+jobs:
+  targeted-original-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact checkout and immutable Wave66-67 source and tests
+        env:
+          EXPECTED_HEAD: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
+          test "$(git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave66.mjs)" = 9e450946ab1ed814859a0a8ec1dacc4e2486ffee
+          test "$(git hash-object tests/building-pool/roadmap-b/builder-b-essentials-wave66-focused.test.mjs)" = 6ae8ac1fda050a80b95d7e26479ed8abe7777fe9
+          test "$(git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave67.mjs)" = 97bc0f7a44f4a3e3ee23679dc3d47ad161515fcc
+          test "$(git hash-object tests/building-pool/roadmap-b/builder-b-essentials-wave67-focused.test.mjs)" = ff86f86ad353956b00555d0a4bffcd502207a9fc
+      - name: Execute only new native Wave66-71 source tests
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/builder-b-wave66-71-native
+          git rev-parse HEAD > artifacts/builder-b-wave66-71-native/source-head.txt
+          node --version > artifacts/builder-b-wave66-71-native/node-version.txt
+          git hash-object src/building-pool/roadmap-b/builder-b-essentials-wave{66..71}.mjs tests/building-pool/roadmap-b/builder-b-essentials-wave{66..71}-focused.test.mjs > artifacts/builder-b-wave66-71-native/source-blobs.txt
+          node --test --test-concurrency=1 tests/building-pool/roadmap-b/builder-b-essentials-wave{66..71}-focused.test.mjs | tee artifacts/builder-b-wave66-71-native/node-test.log
+      - name: Upload native evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: builder-b-wave66-71-original-native
+          path: artifacts/builder-b-wave66-71-native/
+          if-no-files-found: warn

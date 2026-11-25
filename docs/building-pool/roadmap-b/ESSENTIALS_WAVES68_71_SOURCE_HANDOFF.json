@@ -1,0 +1,441 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave68-71-source-handoff.v1",
+  "status": "Original source candidates only, exact staged V8 tests passed; native cohort pending.",
+  "branch": "builder-b-wave68-71-final-bathhouse-cohort-20261125",
+  "parent": "5719042335ecfc6983f2edec0414460d5ef36c2a",
+  "reports": [
+    {
+      "wave": 68,
+      "id": "r1:bathhouse:temperate:small:004",
+      "title": "Alderbrook Covered-and-Open Baths",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave68.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave68-focused.test.mjs",
+      "metrics": {
+        "placements": 3623,
+        "walkable": 987,
+        "rooms": 7,
+        "portals": 12,
+        "roles": {
+          "foundation": 1224,
+          "wall": 1213,
+          "support": 527,
+          "roof": 527,
+          "furnishing": 12,
+          "window": 120
+        },
+        "roofCounts": {
+          "north-changing": 140,
+          "covered-west-bath": 240,
+          "east-towel-room": 77,
+          "south-rest-lodge": 70
+        },
+        "ringCells": 128,
+        "benchCells": 12,
+        "gatePositions": 8,
+        "throughRoutes": 4,
+        "coveredCourts": 1,
+        "openCourts": 1,
+        "d4": 72,
+        "maxIoU": 0.389031705227078,
+        "closest": "r1:bathhouse:temperate:small:003",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.2819058423142371
+      },
+      "results": [
+        {
+          "name": "Frozen exclusive B115 ID, no runtime activation, no water or heat",
+          "pass": true
+        },
+        {
+          "name": "Unique placements, exact counts and continuous real stone foundation",
+          "pass": true
+        },
+        {
+          "name": "All room interiors, portals, door approaches and two-high walk cells connected",
+          "pass": true
+        },
+        {
+          "name": "Every authored roof profile exactly occupied and immediately backed; two actual bearings per hall",
+          "pass": true
+        },
+        {
+          "name": "Opaque dry court ring perimeters and all two-wide two-high gates remain exact",
+          "pass": true
+        },
+        {
+          "name": "Covered courts have actual roof and headroom, outdoor courts entirely open sky",
+          "pass": true
+        },
+        {
+          "name": "All benches are truly solid on stone, head clear and excluded from walking",
+          "pass": true
+        },
+        {
+          "name": "Each court has bidirectional interior-only paths and all four gates genuinely accessible",
+          "pass": true
+        },
+        {
+          "name": "Each detached hall shell reaches its own roof backing, excluding explicit doors and panes",
+          "pass": true
+        },
+        {
+          "name": "Outward four-high unresolved panes with real stone sill, header and clear exterior",
+          "pass": true
+        },
+        {
+          "name": "Actual earlier bathhouse constructors, strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE68_D4 {\"n\":72,\"max\":0.389031705227078,\"closest\":\"r1:bathhouse:temperate:small:003\"}"
+      ]
+    },
+    {
+      "wave": 69,
+      "id": "r1:bathhouse:temperate:medium:003",
+      "title": "Wrenmere Three-Court Bath Lodge",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave69.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave69-focused.test.mjs",
+      "metrics": {
+        "placements": 5560,
+        "walkable": 1814,
+        "rooms": 7,
+        "portals": 13,
+        "roles": {
+          "foundation": 2112,
+          "wall": 1844,
+          "support": 720,
+          "roof": 720,
+          "furnishing": 24,
+          "window": 140
+        },
+        "roofCounts": {
+          "northwest-changing": 204,
+          "east-long-bath-hall": 336,
+          "south-rest-hall": 180
+        },
+        "ringCells": 200,
+        "benchCells": 24,
+        "gatePositions": 12,
+        "throughRoutes": 6,
+        "coveredCourts": 1,
+        "openCourts": 2,
+        "d4": 80,
+        "maxIoU": 0.39298496778811737,
+        "closest": "r1:bathhouse:desert:medium:002",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.29891614375356534
+      },
+      "results": [
+        {
+          "name": "Frozen exclusive B115 ID, no runtime activation, no water or heat",
+          "pass": true
+        },
+        {
+          "name": "Unique placements, exact counts and continuous real stone foundation",
+          "pass": true
+        },
+        {
+          "name": "All room interiors, portals, door approaches and two-high walk cells connected",
+          "pass": true
+        },
+        {
+          "name": "Every authored roof profile exactly occupied and immediately backed; two actual bearings per hall",
+          "pass": true
+        },
+        {
+          "name": "Opaque dry court ring perimeters and all two-wide two-high gates remain exact",
+          "pass": true
+        },
+        {
+          "name": "Covered courts have actual roof and headroom, outdoor courts entirely open sky",
+          "pass": true
+        },
+        {
+          "name": "All benches are truly solid on stone, head clear and excluded from walking",
+          "pass": true
+        },
+        {
+          "name": "Each court has bidirectional interior-only paths and all four gates genuinely accessible",
+          "pass": true
+        },
+        {
+          "name": "Each detached hall shell reaches its own roof backing, excluding explicit doors and panes",
+          "pass": true
+        },
+        {
+          "name": "Outward four-high unresolved panes with real stone sill, header and clear exterior",
+          "pass": true
+        },
+        {
+          "name": "Actual earlier bathhouse constructors, strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE69_D4 {\"n\":80,\"max\":0.39298496778811737,\"closest\":\"r1:bathhouse:desert:medium:002\"}"
+      ]
+    },
+    {
+      "wave": 70,
+      "id": "r1:bathhouse:desert:large:003",
+      "title": "Ambercrown Five-Court Dry Bath Complex",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave70.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave70-focused.test.mjs",
+      "metrics": {
+        "placements": 10730,
+        "walkable": 3182,
+        "rooms": 10,
+        "portals": 19,
+        "roles": {
+          "foundation": 3712,
+          "wall": 3964,
+          "support": 1382,
+          "roof": 1382,
+          "furnishing": 50,
+          "window": 240
+        },
+        "roofCounts": {
+          "north-grand-changing": 336,
+          "west-covered-baths": 378,
+          "east-covered-baths": 416,
+          "south-rest-gallery": 252
+        },
+        "ringCells": 356,
+        "benchCells": 50,
+        "gatePositions": 20,
+        "throughRoutes": 10,
+        "coveredCourts": 2,
+        "openCourts": 3,
+        "d4": 88,
+        "maxIoU": 0.48954821308159135,
+        "closest": "r1:bathhouse:desert:medium:002",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.2776659959758551
+      },
+      "results": [
+        {
+          "name": "Frozen exclusive B115 ID, no runtime activation, no water or heat",
+          "pass": true
+        },
+        {
+          "name": "Unique placements, exact counts and continuous real stone foundation",
+          "pass": true
+        },
+        {
+          "name": "All room interiors, portals, door approaches and two-high walk cells connected",
+          "pass": true
+        },
+        {
+          "name": "Every authored roof profile exactly occupied and immediately backed; two actual bearings per hall",
+          "pass": true
+        },
+        {
+          "name": "Opaque dry court ring perimeters and all two-wide two-high gates remain exact",
+          "pass": true
+        },
+        {
+          "name": "Covered courts have actual roof and headroom, outdoor courts entirely open sky",
+          "pass": true
+        },
+        {
+          "name": "All benches are truly solid on stone, head clear and excluded from walking",
+          "pass": true
+        },
+        {
+          "name": "Each court has bidirectional interior-only paths and all four gates genuinely accessible",
+          "pass": true
+        },
+        {
+          "name": "Each detached hall shell reaches its own roof backing, excluding explicit doors and panes",
+          "pass": true
+        },
+        {
+          "name": "Outward four-high unresolved panes with real stone sill, header and clear exterior",
+          "pass": true
+        },
+        {
+          "name": "Actual earlier bathhouse constructors, strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE70_D4 {\"n\":88,\"max\":0.48954821308159135,\"closest\":\"r1:bathhouse:desert:medium:002\"}"
+      ]
+    },
+    {
+      "wave": 71,
+      "id": "r1:bathhouse:snow:small:003",
+      "title": "Snowlark Double-Hall Winter Baths",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave71.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave71-focused.test.mjs",
+      "metrics": {
+        "placements": 4168,
+        "walkable": 1096,
+        "rooms": 6,
+        "portals": 11,
+        "roles": {
+          "foundation": 1326,
+          "wall": 1496,
+          "support": 613,
+          "roof": 613,
+          "furnishing": 20,
+          "window": 100
+        },
+        "roofCounts": {
+          "winter-double-bath-hall": 480,
+          "rear-drying-hut": 133
+        },
+        "ringCells": 164,
+        "benchCells": 20,
+        "gatePositions": 12,
+        "throughRoutes": 6,
+        "coveredCourts": 2,
+        "openCourts": 1,
+        "d4": 96,
+        "maxIoU": 0.31607629427792916,
+        "closest": "r1:bathhouse:temperate:medium:003",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.23055859802847756
+      },
+      "results": [
+        {
+          "name": "Frozen exclusive B115 ID, no runtime activation, no water or heat",
+          "pass": true
+        },
+        {
+          "name": "Unique placements, exact counts and continuous real stone foundation",
+          "pass": true
+        },
+        {
+          "name": "All room interiors, portals, door approaches and two-high walk cells connected",
+          "pass": true
+        },
+        {
+          "name": "Every authored roof profile exactly occupied and immediately backed; two actual bearings per hall",
+          "pass": true
+        },
+        {
+          "name": "Opaque dry court ring perimeters and all two-wide two-high gates remain exact",
+          "pass": true
+        },
+        {
+          "name": "Covered courts have actual roof and headroom, outdoor courts entirely open sky",
+          "pass": true
+        },
+        {
+          "name": "All benches are truly solid on stone, head clear and excluded from walking",
+          "pass": true
+        },
+        {
+          "name": "Each court has bidirectional interior-only paths and all four gates genuinely accessible",
+          "pass": true
+        },
+        {
+          "name": "Each detached hall shell reaches its own roof backing, excluding explicit doors and panes",
+          "pass": true
+        },
+        {
+          "name": "Outward four-high unresolved panes with real stone sill, header and clear exterior",
+          "pass": true
+        },
+        {
+          "name": "Actual earlier bathhouse constructors, strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE71_D4 {\"n\":96,\"max\":0.31607629427792916,\"closest\":\"r1:bathhouse:temperate:medium:003\"}"
+      ]
+    }
+  ],
+  "ownership": {
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6",
+    "priorAccepted": 228,
+    "b115": 115,
+    "d92": 92,
+    "greenhouseComplete": 18,
+    "bathhouseLineageIds": [
+      "r1:bathhouse:desert:small:004",
+      "r1:bathhouse:snow:small:002",
+      "r1:bathhouse:temperate:medium:002",
+      "r1:bathhouse:snow:medium:003",
+      "r1:bathhouse:desert:medium:003",
+      "r1:bathhouse:snow:large:003",
+      "r1:bathhouse:temperate:large:003",
+      "r1:bathhouse:temperate:small:003",
+      "r1:bathhouse:desert:medium:002",
+      "r1:bathhouse:temperate:small:004",
+      "r1:bathhouse:temperate:medium:003",
+      "r1:bathhouse:desert:large:003",
+      "r1:bathhouse:snow:small:003"
+    ],
+    "alternate": {
+      "head": "342fba1c9ba522b5e9012aedb6829dfa41e34b0d",
+      "sourceBlob": "f6db14d617bbe45d7649128fc71aae4a488968d3",
+      "id": "r1:bathhouse:snow:small:004",
+      "notCounted": true
+    },
+    "all14IdsAccountedFor": true
+  },
+  "v8Method": "Exact staged test callback bodies executed against immutable original schema, sourcePlan and all earlier same-category lineage constructors with isolated test/assert/fs adapters. Alternate Rimewhorl constructor also evaluated independently, not imported into native tests.",
+  "compilerBlobs": [
+    "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2",
+    "f1e10c5372d49f6ad9b4d138b887cfb6f2297b96",
+    "64b93c02e262b7fe4049408c2458faa985a710a3"
+  ],
+  "nativeReuse": [
+    {
+      "run": 45428318556,
+      "passed": 32
+    },
+    {
+      "run": 45458030376,
+      "job": 138672659619,
+      "passed": 30,
+      "artifact": 14951302355
+    }
+  ],
+  "nativeNew": {
+    "workflow": ".github/workflows/builder-b-wave66-71-native-isolated.yml",
+    "scope": [
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+    ],
+    "expectedTests": 62,
+    "runPending": true
+  },
+  "progress": {
+    "services": 71,
+    "servicesRemaining": 44,
+    "residential": 10,
+    "residentialRemaining": 169,
+    "total": 81,
+    "goal": 294,
+    "remaining": 213
+  },
+  "protected": {
+    "main": "a0487e34d9f5d00a49da05c3bf5b6545ff923085",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "noMerge": true,
+    "noDeploy": true,
+    "noSettlements": true,
+    "noRegistry": true,
+    "noSaveWrites": true
+  },
+  "pending": [
+    "Exact-head native cohort result",
+    "Owner-coordinated alternate Rimewhorl reconciliation without overwriting prior waves",
+    "Full accepted228 D4",
+    "Installed asset producers",
+    "M7 physical walking",
+    "WebGL2",
+    "iPhone Home Screen PWA",
+    "Creator visual approval"
+  ]
+}
