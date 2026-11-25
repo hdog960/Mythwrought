@@ -124,8 +124,12 @@ export function hostileModels(model) {
       }
     }),
     projectile: model(box => {
-      box(0,0,0,.025,.025,.28,'9f7757');
-      box(0,0,.147,.038,.032,.069,'e4d1aa',0,.0,.45);
+      // Readable end-on arrow silhouette on phone-size perspective views.
+      // Render geometry only: combat sweep, velocity and damage are unchanged.
+      box(0,0,0,.055,.055,.28,'9f7757');
+      box(0,0,.147,.145,.115,.092,'f4ddb0',0,0,.68);
+      box(0,0,-.105,.13,.052,.092,'c99756',0,0,.8);
+      box(0,0,-.105,.052,.13,.092,'c99756',0,0,.8);
     })
   };
 }

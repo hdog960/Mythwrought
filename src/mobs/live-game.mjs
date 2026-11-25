@@ -2,9 +2,12 @@
 // are used against actual loaded voxel chunks, not the preview's fake scene.
 // All new persistence is a per-seed, checksummed sidecar; Schema-1 is untouched.
 import {createMobHostView} from './host-view.mjs';
+import {createM7MobCollisionReader} from './ecosystem-world-geometry.mjs';
+import {isEnvironmentGenerator} from '../manual-biomes/profile-world.mjs';
 import {MobEngine,DEFAULT_ACTIVE_MOBS} from './engine.mjs';
 import {BehaviorController} from './behavior.mjs';
 import {MobCombat} from './combat.mjs';
+import {LIVE_PROJECTILE_LIMIT} from './live-projectile-budget.mjs';
 import {CompanionManager} from './companion.mjs';
 import {AnimalInteractions} from './animal-interactions.mjs';
 import {PopulationManager} from './ecology.mjs';
@@ -36,13 +39,18 @@ export function mobSaveKey(seed,worldKind='normal'){
   return worldKind==='cave'?'mythwrought-mobs-v1-caves-seed-'+seed:PREFIX+seed;
 }
 export function classifyLiveBiome(name,feet,cave){
-  if(cave&&feet<-3.5)return 'cave';
-  return TERRAIN_BIOMES[name]||'meadow';
+  // Never turn a missing or unrecognized source biome into a safe meadow.
+  // The canonical host view treats a null biome as hazardous/unknown and
+  // original spawnEligible rejects it. Keep the five accepted V6 mappings.
+  if(cave===true&&Number.isFinite(feet)&&feet<-3.5)return 'cave';
+  if(typeof name!=='string'||!Object.hasOwn(TERRAIN_BIOMES,name))return null;
+  return TERRAIN_BIOMES[name];
 }
 
 export function createLiveMobSession({
   world,seed,storage,resident,biomeAt,skyAt,caveAt,playerAt,
-  worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{}
+  worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{},
+  sourceRevision
 }={}){
   if(!world||typeof world.get!=='function'||!storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
@@ -51,8 +59,22 @@ export function createLiveMobSession({
     throw TypeError('Invalid live mob host');
   const key=mobSaveKey(seed,worldKind);
   let damaged=false,readOnly=false,damageCooldown=0,health=100,lastStored='',elapsed=0;
-  const query=createMobHostView(world,{
-    resident,revision:()=>world.editRevision||0,
+  // Original M7 ground IDs 400–410 are physical full cubes, but the generic
+  // source mob shape reader treats them as unknown. The current owner approves
+  // historical M7, Enchanted P2, Snow P1 and Mountain V8 exact profiles.
+  // Legacy/other profiles keep their original world reader byte-semantically.
+  const generator=world.base?.generationProfile?.generator??
+    world.generationProfile?.generator;
+  const collisionWorld=isEnvironmentGenerator(generator)?
+    createM7MobCollisionReader(world):world;
+  // A real original VoxelWorld/Pack2LiveWorld does NOT expose editRevision.
+  // Keep the legacy fallback for existing hosts, but a trusted embedding
+  // may supply a monotonic revision witness without monkey-patching world.set.
+  // The fallback alone is NOT proof of source edit consistency.
+  if(sourceRevision!==undefined&&typeof sourceRevision!=='function')
+    throw new TypeError('Invalid live mob source revision authority');
+  const query=createMobHostView(collisionWorld,{
+    resident,revision:sourceRevision??(()=>world.editRevision||0),
     biomeAt(point){
       const biome=classifyLiveBiome(biomeAt(point),point[1],caveAt(point)?.underground);
       return {id:biome,hazard:false,climbable:biome==='cave'||biome==='alpine'};
@@ -92,7 +114,7 @@ export function createLiveMobSession({
   const raw=storage.getItem(key);
   if(raw!==null){
     try{
-      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query));
+      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT}));
       lastStored=raw;
     }catch(error){
       readOnly=true;
@@ -102,7 +124,7 @@ export function createLiveMobSession({
   if(!engine){
     engine=new MobEngine(query,seed,{maxEntities:32,maxActive:LIVE_MOB_ACTIVE_LIMIT});
     behavior=new BehaviorController(engine,query);
-    combat=new MobCombat(engine,query,behavior);
+    combat=new MobCombat(engine,query,behavior,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT});
     companions=new CompanionManager(engine,query,combat);
     animals=new AnimalInteractions(engine,query);
   }
@@ -156,7 +178,7 @@ export function createLiveMobSession({
     // Real hostile ranged attacks must not strike an invisible projectile.
     // Use the four original authored preview projectile meshes with real
     // position/velocity from MobCombat, not synthetic screen-space sprites.
-    const projectiles=combat.projectiles.slice(0,8).map(shot=>({
+    const projectiles=combat.projectiles.map(shot=>({
       ...shot,species:{id:shot.visual},state:'active',juvenile:false,
       yaw:Math.atan2(shot.velocity[0],shot.velocity[2]),visual:'projectile'
     }));

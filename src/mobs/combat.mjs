@@ -70,10 +70,14 @@ export class MobCombat {
   #attempts = new Map();
   #events = [];
   #projectiles = [];
+  #maxProjectiles;
   #sequence = 0;
   #time = 0;
 
-  constructor(engine, world, behavior, access = null) {
+  constructor(engine, world, behavior, access = null, { maxProjectiles = 32 } = {}) {
+    if (!Number.isInteger(maxProjectiles) || maxProjectiles < 1 || maxProjectiles > 32)
+      throw new TypeError('Invalid projectile capacity');
+    this.#maxProjectiles = maxProjectiles;
     this.#engine = engine;
     this.#world = world;
     this.#behavior = behavior;
@@ -91,7 +95,7 @@ export class MobCombat {
   }
 
   #launch(mob,target) {
-    if (this.#projectiles.length >= 32 || !eligibleTarget(target) ||
+    if (this.#projectiles.length >= this.#maxProjectiles || !eligibleTarget(target) ||
         distanceTo(mob.position,target.position)>mob.species.combat.reach) return false;
     const position = eye(mob.position,mob.species.body.height);
     const aim = eye(target.position,target.height);
