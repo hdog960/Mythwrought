@@ -830,7 +830,8 @@ function start(nonblockStage=null){
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
-    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
+    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost,
+    residentAt:(x,y,z)=>{const section=sectionForY(y);return section!==null&&chunks.has(depthMeshKey(chunkCoord(x),chunkCoord(z),section));}});
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
@@ -1345,7 +1346,7 @@ function start(nonblockStage=null){
       // Low-frequency real-cave check: no synthetic map markers or geometry.
       if(help.hidden&&!exploration.isOpen()&&frame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
-        if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
+        if(caveDiscovery.entered){exploration.observeCavePassage();message('Natural cave passage discovered · explore carefully');}
       }
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;

@@ -324,3 +324,20 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .creative-hud:has(input:checked){background:#3f754d;border-color:#c8ec9e;color:white}
 @media(max-height:355px){.helpbody.compact-menu{padding:8px 10px}.compact-menu-heading{top:-8px;padding-bottom:6px}.compact-menu-actions button,.compact-menu-heading button,.compact-menu summary{min-height:36px}.compact-menu-status p{font-size:10px!important}}
 @media(max-width:700px){.bezel:not(.foot){gap:4px;padding-inline:4px}.bezel:not(.foot)>span:first-child{display:none}.bezel b{font-size:10px;letter-spacing:0}.bezel small{font-size:8px}.creative-hud{padding-inline:3px;gap:2px}.creative-hud input{width:12px;height:12px}}
+
+/* Navigation N3: existing modal owns all map touch; no new world controls. */
+#explorationOverlay{padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
+.exploration-panel{width:min(650px,100%);display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,200px);grid-template-rows:auto auto minmax(0,1fr) auto auto;gap:4px 10px}
+.exploration-heading,.map-coordinates{grid-column:1/-1}
+#expandedMap{grid-column:1;grid-row:3;justify-self:center;width:min(100%,54dvh,320px);max-height:none}
+.map-summary{grid-column:1;grid-row:4}
+.map-controls{grid-column:1;grid-row:5}
+.nav-marker-editor{grid-column:2;grid-row:3/6;display:flex;flex-direction:column;gap:5px;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;color:#f0d3a0;font-size:11px}
+.nav-marker-editor label{font-weight:800}
+.nav-marker-editor select,.nav-marker-editor input{min-width:0;width:100%;min-height:34px;font-size:16px;color:#fff1c8;background:#162c30;border:1px solid #bda474;border-radius:5px;padding:3px 5px;touch-action:manipulation}
+.nav-marker-actions{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.nav-marker-actions button{font-size:10px;min-height:33px;color:#fff1c8;background:#34564f;border:1px solid #bda474;border-radius:5px;touch-action:manipulation}
+.nav-marker-actions button:disabled{opacity:.45}
+#navMarkerStatus{margin:0;font-size:10px;overflow-wrap:anywhere}
+.nav-marker-editor small{font-size:9px;color:#b9d1c4}
+@media(max-width:480px){.exploration-panel{display:flex;overflow:auto}.nav-marker-editor{width:100%;flex:none}.nav-marker-actions{grid-template-columns:repeat(5,1fr)}}

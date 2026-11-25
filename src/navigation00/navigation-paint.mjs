@@ -1,6 +1,6 @@
 // Opt-in discovered-only map painter. Consumes navigation-adapter frames, never terrain.
 export const NAV00_PAINT_VERSION=1;
-export function paintNavigationFrame(canvas, frame, {background='#122126',cellColor='#648b80',pinColor='#ffcf78',playerColor='#ffffff',cellInk=null}={}) {
+export function paintNavigationFrame(canvas, frame, {background='#122126',cellColor='#648b80',pinColor='#ffcf78',playerColor='#ffffff',cellInk=null,landmarks=[],target=null,selectedId=null}={}) {
   if (!canvas || !frame || !frame.frame || !Array.isArray(frame.cells) || !Array.isArray(frame.pins)) throw Error('Invalid navigation frame');
   const ctx=canvas.getContext?.('2d');
   if (!ctx) throw Error('2D canvas unavailable');
@@ -22,8 +22,15 @@ export function paintNavigationFrame(canvas, frame, {background='#122126',cellCo
       ctx.fillStyle=cellInk?cellInk(cell):cellColor;
       ctx.fillRect(Math.floor(cell.screenX-frame.zoom/2),Math.floor(cell.screenY-frame.zoom/2),Math.ceil(frame.zoom),Math.ceil(frame.zoom));
     }
-    ctx.fillStyle=pinColor;
+    for(const mark of landmarks.slice(0,128)){
+      if(![mark.screenX,mark.screenY].every(Number.isFinite)||mark.screenX<x||mark.screenX>x+width||mark.screenY<y||mark.screenY>y+height)continue;
+      ctx.fillStyle='#bca6ff';ctx.fillRect(Math.floor(mark.screenX)-3,Math.floor(mark.screenY)-3,7,7);
+    }
+    if(target&&[target.screenX,target.screenY].every(Number.isFinite)){
+      ctx.fillStyle='#a7d7f4';ctx.fillRect(Math.floor(target.screenX)-3,Math.floor(target.screenY)-3,7,7);
+    }
     for(const pin of frame.pins) {
+      ctx.fillStyle=pin.id===selectedId?'#fff3bf':pinColor;
       if(pin.screenX<x || pin.screenX>x+width || pin.screenY<y || pin.screenY>y+height)continue;
       ctx.fillRect(Math.floor(pin.screenX)-2,Math.floor(pin.screenY)-2,5,5);
     }

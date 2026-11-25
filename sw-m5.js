@@ -242,6 +242,7 @@ const SOURCE_ASSETS=[
   "./src/navigation00/navigation-gesture-history.mjs",
   "./src/navigation00/navigation-gestures.mjs",
   "./src/navigation00/navigation-location-readout.mjs",
+  "./src/navigation00/navigation-live-observation.mjs",
   "./src/navigation00/navigation-map-hit-test.mjs",
   "./src/navigation00/navigation-map-pointer.mjs",
   "./src/navigation00/navigation-map-reflow.mjs",

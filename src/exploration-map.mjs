@@ -7,6 +7,9 @@ import {createNavigationAdapter} from './navigation00/navigation-adapter.mjs';
 import {createNavigationGestures} from './navigation00/navigation-gestures.mjs';
 import {paintNavigationFrame} from './navigation00/navigation-paint.mjs';
 import {createNavigationLocationReadout} from './navigation00/navigation-location-readout.mjs';
+import {navigationPose,observeNavigationSurface,eligibleSurfaceDiscovery} from './navigation00/navigation-live-observation.mjs';
+import {createObservedLandmarks} from './navigation00/navigation-observed-landmarks.mjs';
+import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
 
 export const MAP_CELL_SIZE=4;
 export const MAP_REVEAL_RADIUS=3;
@@ -49,14 +52,15 @@ export function loadExploration(storage,seed){
     get readOnly(){return readOnly;},
     get warning(){return warning;},
     has(x,z){return seen.has(mapCell(x,z));},
-    reveal(x,z){
+    reveal(x,z,eligible=()=>true){
+      if(!Number.isFinite(x)||!Number.isFinite(z)||typeof eligible!=='function')return 0;
       const cx=Math.floor(x/MAP_CELL_SIZE),cz=Math.floor(z/MAP_CELL_SIZE);
       let added=0;
       for(let dz=-MAP_REVEAL_RADIUS;dz<=MAP_REVEAL_RADIUS;dz++){
         for(let dx=-MAP_REVEAL_RADIUS;dx<=MAP_REVEAL_RADIUS;dx++){
           if(dx*dx+dz*dz>MAP_REVEAL_RADIUS*MAP_REVEAL_RADIUS)continue;
           const cell=(cx+dx)+','+(cz+dz);
-          if(seen.has(cell))continue;
+          if(seen.has(cell)||!eligible((cx+dx)*MAP_CELL_SIZE+2,(cz+dz)*MAP_CELL_SIZE+2))continue;
           if(seen.size>=MAP_MAX_CELLS){
             warning='Exploration record full; older discoveries remain preserved';
             return added;
@@ -135,7 +139,7 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
     ctx.font='bold 15px system-ui';ctx.fillStyle='#f7e5b7';ctx.fillText('N',12,22);
   }
 }
-export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen}){
+export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen,residentAt=()=>false}){
   const mini=document.getElementById('miniMap');
   const openButton=document.getElementById('miniMapButton');
   const overlay=document.getElementById('explorationOverlay');
@@ -144,36 +148,81 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   const coordinates=document.getElementById('explorationCoordinates');
   const summary=document.getElementById('explorationSummary');
   let map=loadExploration(storage,getWorld().seed);
-  let lastPaint=-Infinity,lastSave=-Infinity,nav,gestures,paintRequest=null;
+  let lastPaint=-Infinity,lastSave=-Infinity,nav,gestures,landmarks,paintRequest=null,observation=null,selected=null,tap=null;
+  const markerList=document.getElementById('navMarkerList'),markerName=document.getElementById('navMarkerName');
+  const markerStatus=document.getElementById('navMarkerStatus');
+  const addMarker=document.getElementById('navMarkerAdd'),renameMarker=document.getElementById('navMarkerRename');
+  const removeMarker=document.getElementById('navMarkerRemove'),undoMarker=document.getElementById('navMarkerUndo');
+  const hereMarker=document.getElementById('navMarkerHere');
+  const pose=()=>navigationPose(getPlayer());
+  function refreshMarkers(){
+    const pins=nav.navigator.visiblePins(),pin=pins.find(p=>p.id===selected?.id);
+    const signature=JSON.stringify(pins.map(p=>[p.id,p.label]));
+    if(markerList.dataset.signature!==signature){
+      markerList.replaceChildren(new Option('Select waypoint',''));
+      for(const p of pins)markerList.add(new Option(p.label,p.id));
+      markerList.dataset.signature=signature;
+    }
+    markerList.value=pin?.id||'';
+    const writable=!nav.navigator.readOnly;
+    addMarker.disabled=!writable||!selected||!!pin||!map.has(selected.x,selected.z);
+    renameMarker.disabled=removeMarker.disabled=!writable||!pin;
+    undoMarker.disabled=!nav.navigator.canUndo;
+    markerStatus.textContent=nav.navigator.warning||(pin?'Waypoint · X '+pin.x.toFixed(1)+' Z '+pin.z.toFixed(1):
+      selected?'Target · X '+selected.x.toFixed(1)+' Z '+selected.z.toFixed(1)+(map.has(selected.x,selected.z)?'':' · unexplored'):
+      'Tap a discovered tile or select HERE.');
+  }
+  function selectTarget(target){
+    selected=target;markerName.value=target?.label||'';refreshMarkers();renderExpanded();
+  }
+  function editMarker(action){
+    const n=nav.navigator,label=markerName.value.trim();
+    let ok=false;
+    if(action==='add'&&selected&&!selected.id&&label&&map.has(selected.x,selected.z)){
+      const id='p-'+Array.from(crypto.getRandomValues(new Uint32Array(2)),v=>v.toString(16)).join('-');
+      ok=n.pin({id,x:selected.x,z:selected.z,label});if(ok)selected={...selected,id,label};
+    }else if(action==='rename'&&selected?.id&&label){ok=n.rename(selected.id,label);if(ok)selected={...selected,label};}
+    else if(action==='remove'&&selected?.id){ok=n.unpin(selected.id);if(ok)selected=null;}
+    else if(action==='undo'){ok=n.undo();if(ok)selected=null;}
+    refreshMarkers();renderExpanded();
+    if(!ok&&!n.warning)markerStatus.textContent='No change saved. Select a valid discovered target and name.';
+  }
   const captured=new Set();
   function resetPointers(){
     gestures?.cancel();
-    for(const id of captured){try{if(large.hasPointerCapture(id))large.releasePointerCapture(id);}catch(_){}}
-    captured.clear();
+    tap=null;
+    const ids=[...captured];captured.clear();
+    for(const id of ids){try{if(large.hasPointerCapture(id))large.releasePointerCapture(id);}catch(_){}}
   }
   function resetNavigation(){
     resetPointers();
     nav=createNavigationAdapter({seed:map.seed,discovery:map,storage,
-      width:large.width,height:large.height,player:getPlayer()});
+      width:large.width,height:large.height,player:pose(),exact:true});
+    landmarks=createObservedLandmarks({worldSeed:map.seed,discovery:map});
+    selected=null;observation=null;
     gestures=createNavigationGestures({viewport:nav.viewport});
     if(!overlay.hidden)gestures.open();
   }
   resetNavigation();
   function renderExpanded(){
     if(overlay.hidden)return;
-    const world=getWorld(),player=getPlayer();
+    const world=getWorld(),player=pose();
     if(world.seed!==map.seed)return;
     nav.updatePlayer(player);
     const frame=nav.frame();
-    paintNavigationFrame(large,frame,{cellInk:cell=>{
+    const marks=landmarks.visible().map(p=>({...p,...frame.projection.world(p.x,p.z)}));
+    const target=selected&&!selected.id?frame.projection.world(selected.x,selected.z):null;
+    paintNavigationFrame(large,frame,{landmarks:marks,target,selectedId:selected?.id,cellInk:cell=>{
       // Double-check the live discovery owner before ANY terrain read.
       if(!map.seen.has(cell.x+','+cell.z))return '#122126';
       return profiledDiscoveredCellInk(world,cell.x,cell.z,MAP_CELL_SIZE)||surfaceInk(world,cell.x,cell.z);
     }});
     // Production yaw zero faces +Z; north is -Z, east is +X.
-    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180});
+    const currentObservation=observation?.x===Math.floor(player.x)&&observation?.z===Math.floor(player.z)?observation:null;
+    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,surfaceY:currentObservation?.surfaceY??null});
     coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
-    summary.textContent=map.warning||nav.navigator.warning||map.seen.size+' discovered cells · surface map';
+    summary.textContent=map.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+location.depthLabel:currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
+    refreshMarkers();
     large.dataset.navigationZoom=String(frame.zoom);
   }
   function queueExpanded(){
@@ -203,10 +252,14 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   openButton.addEventListener('click',()=>{
     if(!overlay.hidden||!canOpen())return;
     syncSeed();onOpen();
-    nav.viewport.reset();map.flush();
+    nav.viewport.reset();selected=null;markerName.value='';map.flush();
     overlay.hidden=false;gestures.open();render();closeButton.focus({preventScroll:true});
   });
   closeButton.addEventListener('click',close);
+  hereMarker.addEventListener('click',()=>{const p=pose();selectTarget({x:p.x,z:p.z});});
+  markerList.addEventListener('change',()=>selectTarget(nav.navigator.visiblePins().find(p=>p.id===markerList.value)||null));
+  for(const [button,action] of [[addMarker,'add'],[renameMarker,'rename'],[removeMarker,'remove'],[undoMarker,'undo']])
+    button.addEventListener('click',()=>editMarker(action));
   overlay.addEventListener('pointerdown',e=>{if(e.target===overlay)close();});
   document.addEventListener('keydown',e=>{
     if(!overlay.hidden&&e.key==='Escape'){e.preventDefault();close();}
@@ -233,6 +286,8 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     event.preventDefault();event.stopPropagation();
     const p=localPoint(event);
     if(!p||!gestures.begin(event.pointerId,p.x,p.y))return;
+    if(captured.size===0)tap={id:event.pointerId,x:p.x,y:p.y,moved:false};
+    else tap=null;
     captured.add(event.pointerId);
     try{large.setPointerCapture(event.pointerId);}catch(_){}
   });
@@ -240,13 +295,21 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     if(!captured.has(event.pointerId))return;
     event.preventDefault();event.stopPropagation();
     const p=localPoint(event);
+    if(tap&&p&&Math.hypot(p.x-tap.x,p.y-tap.y)>7)tap.moved=true;
     if(p&&gestures.move(event.pointerId,p.x,p.y))queueExpanded();
     else if(!gestures.activePointers)resetPointers();
   });
   function endPointer(event){
     if(!captured.delete(event.pointerId))return;
     event.preventDefault();event.stopPropagation();
-    gestures.end(event.pointerId);
+    const point=localPoint(event);
+    const isTap=tap?.id===event.pointerId&&!tap.moved&&captured.size===0&&point&&Math.hypot(point.x-tap.x,point.y-tap.y)<=7;
+    tap=null;gestures.end(event.pointerId);
+    if(isTap){
+      const f=nav.frame(),nearest=f.pins.map(p=>({p,d:Math.hypot(p.screenX-point.x,p.screenY-point.y)})).sort((a,b)=>a.d-b.d)[0];
+      if(nearest&&nearest.d<=9)selectTarget(nav.navigator.visiblePins().find(p=>p.id===nearest.p.id));
+      else{const target=f.projection.atScreen(point.x,point.y);if(target)selectTarget(target);}
+    }
     try{if(large.hasPointerCapture(event.pointerId))large.releasePointerCapture(event.pointerId);}catch(_){}
   }
   large.addEventListener('pointerup',endPointer);
@@ -259,9 +322,23 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     isOpen:()=>!overlay.hidden,
     tick(now){
       syncSeed();
-      if(overlay.hidden&&canOpen())map.reveal(getPlayer().x,getPlayer().z);
-      if(now-lastPaint>320){render();lastPaint=now;}
+      if(now-lastPaint>320){
+        if(overlay.hidden&&canOpen()){
+          const player=pose(),world=getWorld();
+          observation=observeNavigationSurface({world,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y});
+          if(eligibleSurfaceDiscovery(observation,player))map.reveal(player.x,player.z,(x,z)=>residentAt(x,LEGACY_WORLD_MIN_Y,z));
+        }
+        render();lastPaint=now;
+      }
       if(now-lastSave>5000){map.flush();lastSave=now;}
+    },
+    observeCavePassage(){
+      syncSeed();const p=pose();
+      if(!overlay.hidden||!canOpen()||!map.has(p.x,p.z))return false;
+      const x=Math.floor(p.x/4),z=Math.floor(p.z/4);
+      const id='cave-'+x+'-'+z;
+      if(landmarks.visible().length>=128)return false;
+      return landmarks.observe({id,x:p.x,z:p.z,kind:'other',label:'Observed cave passage'},{observed:true});
     },
     flush:()=>map.flush(),
     close
