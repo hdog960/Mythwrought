@@ -2,6 +2,7 @@ import {createSnowS14EdgePigment} from './manual-biomes/snowy-s14-edge-pigment.m
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
 import {PHYSICAL_MAX_Y,UpperIndexedMap,runtimeSectionBounds} from './world-height.mjs';
+import {UPPER_SECTION_BYTES} from './world-height-budget.mjs';
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
@@ -310,9 +311,9 @@ export function meshChunk(world,cx,cz,upperSection=0){
   // the original 9-float vertex layout and existing seed/save semantics.
   let solidBuffer=new Float32Array(16384),solidLength=0;
   const appendVertex=(x,y,z,r,g,b,u,w,id)=>{
-    if(upperSection&&solidLength+9>8*1024*1024/4)throw Error('Upper mesh exceeds original staging budget');
+    if(upperSection&&solidLength+9>UPPER_SECTION_BYTES/4)throw Error('Upper mesh exceeds original staging budget');
     if(solidLength+9>solidBuffer.length){
-      const grown=new Float32Array(solidBuffer.length*2);
+      const grown=new Float32Array(upperSection?Math.min(UPPER_SECTION_BYTES/4,solidBuffer.length*2):solidBuffer.length*2);
       grown.set(solidBuffer);solidBuffer=grown;
     }
     solidBuffer[solidLength++]=x;solidBuffer[solidLength++]=y;

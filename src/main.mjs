@@ -3,6 +3,7 @@ import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,s
 import {meshDepthSection} from './depth-mesh.mjs';
 import {PHYSICAL_MAX_Y,runtimeSectionForY,runtimeMeshKey,runtimeEditSections,physicalBodyRegions,upperOccupancyRevision,upperOccupancy} from './world-height.mjs';
 import {planHeightStream} from './world-height-stream.mjs';
+import {admitUpperGpuBatch,upperGpuStats} from './world-height-budget.mjs';
 import {DEFAULT_WORLD_SEED,SELECTED_SEED_KEY,LEGACY_WORLD_KEY,worldSeedFromText,worldSlotKey} from './seeds.mjs';
 import {SKY_VERTEX_SHADER,SKY_FRAGMENT_SHADER} from './sky.mjs';
 import {sampleSkyAtmosphere,projectSunToScreen} from './sky-atmosphere.mjs';
@@ -962,7 +963,7 @@ function start(nonblockStage=null){
   }
   function deleteChunkBuffers(chunk){
     if(!chunk)return;
-    gl.deleteBuffer(chunk.buffer);
+    if(chunk.buffer)gl.deleteBuffer(chunk.buffer);
     if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
   }
   // Both buffers stage before publishing; on failure neither can leak.
@@ -1015,6 +1016,7 @@ function start(nonblockStage=null){
   // the batch rather than publishing dead handles.
   function publishEditedChunkBatch(batch){
     if(gl.isContextLost())throw Error('Graphics context lost before edit mesh staging');
+    admitUpperGpuBatch(chunks,batch);
     const owner=world;
     const originals=batch.map(item=>chunks.get(item.key));
     if(originals.some(item=>!item))throw Error('Edited chunk no longer resident');
@@ -1254,7 +1256,8 @@ function start(nonblockStage=null){
       horizontalCenter:horizontalCenter+'|'+visibleSections.join(',');
     const active=runtimeSectionForY(player.feet)??0;
     const occupancy=upperOccupancyRevision(world);
-    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy:'');
+    const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
@@ -1281,7 +1284,7 @@ function start(nonblockStage=null){
     const weight=([x,z,section])=>
       (x-cx)**2+(z-cz)**2+(section-activeSection)**2*12;
     const queue=[...pending.entries()].sort((a,b)=>
-      weight(a[1])-weight(b[1])||
+      Number(bodyKeys.has(b[0]))-Number(bodyKeys.has(a[0]))||weight(a[1])-weight(b[1])||
       a[1][2]-b[1][2]||a[1][1]-b[1][1]||a[1][0]-b[1][0]);
     const now=performance.now();
     const next=queue.find(([k])=>gpuRetry.ready(k,now));
@@ -1291,6 +1294,7 @@ function start(nonblockStage=null){
       try{
         const data=meshPlayableChunk(x,z,section);
         const water=meshPlayableWater(x,z,section);
+        admitUpperGpuBatch(chunks,[{key:k,section,vertices:data,water}]);
         const buffers=uploadPack2Chunk(data,water,section);
         if(gl.isContextLost())throw Error('Context lost before chunk publication');
         pending.delete(k);gpuRetry.success(k);
@@ -1526,6 +1530,9 @@ function start(nonblockStage=null){
       canvas.dataset.renderedMeshVertices=String([...chunks.values()].reduce((sum,c)=>sum+c.count,0));
       canvas.dataset.upperReadySections=String([...chunks.values()].filter(c=>c.section>0).length);
       canvas.dataset.upperMeshVertices=String([...chunks.values()].filter(c=>c.section>0).reduce((n,c)=>n+c.count,0));
+      const upperStats=upperGpuStats(chunks);
+      canvas.dataset.upperGpuBytes=String(upperStats.bytes);
+      canvas.dataset.upperGpuOwners=String(upperStats.owners);
       canvas.dataset.pack3PhysicalCount=String(pack3.runtime.size());
       canvas.dataset.pack3SelectedId=String(isPack3BlockId(selected)?selected:0);
       canvas.dataset.manual14PhysicalCount=String(manual14.layer.size());
@@ -3465,6 +3472,18 @@ function start(nonblockStage=null){
         }
         return {...result,scene:pack5Gpu.stats(),worldSchema:world.save().schema};
       },
+      heightFixture(){
+        if(!developerWorldFixtures||g2Active())throw Error('Local height fixture only');
+        const x=Math.floor(player.x),z=Math.floor(player.z);
+        const cells=[];
+        for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)cells.push([x+dx,252,z+dz,3]);
+        cells.push([x+5,256,z,3]);
+        for(const row of cells)if(!world.set(...row))throw Error('Fixture edit refused');
+        for(const [a,b,c] of cells)refreshEditedMeshes(a,c,b);
+        changed=true;if(!save())throw Error('Fixture save refused');
+        return {x,z,target:[x+5,256,z],platformY:252};
+      },
+      heightTarget(){return inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation);},
       flightInfo(){return {creativeEnabled:g2CreativeEnabled,active:g2Active(),profile:g2Active()?g2Flight.profile:'off',
         position:{x:player.x,y:player.feet,z:player.z},
         blocked:Boolean(g2Flight?.blocked),reason:g2Flight?.reason||'off',
