@@ -44,7 +44,7 @@ test('edited or occupied plants and mounts are excluded without changing saved e
   assert.equal(world.set(x,y,z,BLOCK.WOOD),true);
   const original=new Map(world.edits);
   assert.deepEqual(planStagedHabitat(world,[sites[1]]),[]);
-  assert.deepEqual(world.edits,original);
+  assert.deepEqual(new Map(world.edits),original);
   assert.deepEqual(planStagedHabitat(new FourRegionWorld(seed),[sites[1]],{
     occupied:(a,b,c)=>a===x&&b===y&&c===z
   }),[]);

@@ -15,7 +15,7 @@ for(const seed of [179,1,2026,-77]){
     assert.equal(plan.safeToApply,false);
     assert.equal(plan.runtimeVerified,false);
     assert.equal(plan.requiresSurfaceOwner,true);
-    assert.deepEqual(world.edits,before,'proposal must never mutate saves');
+    assert.deepEqual(new Map(world.edits),before,'proposal must never mutate saves');
     const keys=new Set(plan.cells.map(c=>worldKey(c.x,c.y,c.z)));
     assert.equal(keys.size,plan.cells.length,'legacy cells must be deduplicated');
     assert.ok(plan.cells.every(c=>c.y>=LEGACY_WORLD_MIN_Y&&c.id===BLOCK.AIR));

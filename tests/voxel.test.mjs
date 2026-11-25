@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {VoxelWorld,BLOCK,CHUNK_SIZE,chunkCoord,chunkWindow,terrainHeight,baseBlock,meshChunk,raycast,outlineVertices,collides,WORLD_MAX_Y} from '../src/voxel.mjs';
 
+import {PHYSICAL_MAX_Y} from '../src/world-height.mjs';
+
 test('deterministic positive and negative coordinates',()=>{
   const a=new VoxelWorld(917),b=new VoxelWorld(917);
   for(let x=-39;x<39;x+=7)for(let z=-29;z<29;z+=9){
@@ -27,9 +29,12 @@ test('edits survive restore and original values revert cleanly',()=>{
 });
 test('invalid saves and out of bounds edits are rejected',()=>{
   const w=new VoxelWorld(1);
-  assert.equal(w.set(0,WORLD_MAX_Y+1,0,BLOCK.STONE),false);
+  assert.equal(w.set(0,WORLD_MAX_Y+1,0,BLOCK.STONE),true);
+  assert.equal(w.set(0,PHYSICAL_MAX_Y,0,BLOCK.STONE),true);
+  assert.equal(VoxelWorld.restore(w.save()).get(0,PHYSICAL_MAX_Y,0),BLOCK.STONE);
+  assert.equal(w.set(0,PHYSICAL_MAX_Y+1,0,BLOCK.STONE),false);
   assert.throws(()=>VoxelWorld.restore({schema:2,seed:1,edits:[]}));
-  assert.throws(()=>VoxelWorld.restore({schema:1,seed:1,edits:[[0,20,0,3]]}));
+  assert.throws(()=>VoxelWorld.restore({schema:1,seed:1,edits:[[0,PHYSICAL_MAX_Y+1,0,3]]}));
 });
 test('chunk mesh has valid triangles and non-empty geometry',()=>{
   const a=new VoxelWorld(179);

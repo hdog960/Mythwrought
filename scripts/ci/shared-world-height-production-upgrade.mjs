@@ -54,6 +54,17 @@ try{
   return {exists,count:c?(await c.keys()).length:0,exact:!!html&&(await html.text()).includes('data-mw-release="'+marker+'"'),controller:navigator.serviceWorker.controller?.state??null};
  },{marker,prefix});
  const waitCache=marker=>poll('complete '+marker+' cache',()=>cacheState(marker),s=>s.exists&&s.count===(marker===release?332:323)&&s.exact&&s.controller==='activated');
+ const settled=()=>poll('settled surface owner window',()=>page.evaluate(()=>{
+  const t=window.__mythwroughtTest,s=t.snapshot(),p=t.m5ObservedPose(),cx=Math.floor(p.x/16),cz=Math.floor(p.z/16),core=[];
+  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)core.push((cx+dx)+','+(cz+dz));
+  return {chunks:s.chunks.length,pending:s.pending.length,core:core.every(k=>s.chunks.includes(k)),glError:document.querySelector('#scene').getContext('webgl2').getError()};
+ }),s=>s.chunks===25&&s.pending===0&&s.core&&s.glError===0);
+ const exportPack5=async()=>{
+  await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();
+  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#pack5Export').click()]);
+  const data=JSON.parse(await readFile(await download.path(),'utf8'));
+  await page.locator('#closeHelp').click();return data;
+ };
  const state=()=>page.evaluate(()=>{
   const t=window.__mythwroughtTest,p='mythwrought-mountain-v8-isolated-v1:',seed=t.snapshot().seed;
   return {release:document.querySelector('meta[name="mythwrought-release"]').content,profile:t.fourBiomeProfile()?.generator??null,seed,
@@ -118,7 +129,7 @@ try{
  }
  // Actual navigation, not a direct network bypass or synthetic version marker.
  await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});await waitGame();
- const upgraded=await state();await page.screenshot({path:path.join(out,'upgraded-installed-956x440.png')});check('same installation exact historical world',upgraded.release===release&&upgraded.seed===old.seed&&upgraded.raw===old.raw&&upgraded.profile===profile,upgraded);
+ const upgraded=await state();check('settled upgraded ground owners',true,await settled());await page.screenshot({path:path.join(out,'upgraded-installed-956x440.png')});check('same installation exact historical world',upgraded.release===release&&upgraded.seed===old.seed&&upgraded.raw===old.raw&&upgraded.profile===profile,upgraded);
  const priorPreserved=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
  check('previous shell preserved',priorPreserved===priorCache);
  const ui=await page.evaluate(()=>({ordinary:document.querySelectorAll('#newWorld').length,alternate:['newSnowWorld','createFourBiomeWorld','createExperimentalV5World','createBalancedV6World','createEnchantedP2World','createMountainV8Candidate','caveCreateWorld'].filter(id=>document.getElementById(id))}));
@@ -154,9 +165,12 @@ try{
  await page.waitForFunction(()=>Number(document.querySelector('#scene').dataset.upperMeshVertices)>0,null,{timeout:60000});
  const rendered=await inspect();check('actual upper render bounded',Number(rendered.data.upperGpuBytes)>0&&Number(rendered.data.upperGpuBytes)<=7077888&&Number(rendered.data.upperGpuOwners)<=8,{vertices:rendered.data.upperMeshVertices,bytes:rendered.data.upperGpuBytes,owners:rendered.data.upperGpuOwners});
  await page.screenshot({path:path.join(out,'upper-all-packs-956x440.png')});
+ const beforeFurniture=await exportPack5();check('actual Pack5 live exported anchor and material',beforeFurniture.entries.some(row=>row.slice(0,3).every((n,i)=>n===cells.p5[i])&&row[3]==='pack5:080'),{entries:beforeFurniture.entries});
  const saved=await state();check('upper canonical edit saved',JSON.parse(saved.raw).edits.some(row=>row[1]===36&&row[3]===3)&&await historical()===old.raw);
  await context.setOffline(true);await page.reload({waitUntil:'load',timeout:90000});await waitGame();
  await page.waitForFunction(()=>document.getElementById('pack5Status').textContent.includes('restored'),null,{timeout:60000});
  const cold=await state(),restored=await inspect();check('cold offline new-world and all original owners restored',cold.release===release&&cold.profile===profile&&cold.raw===saved.raw&&cold.glError===0&&JSON.stringify(restored.ids)===JSON.stringify(initial.ids)&&await historical()===old.raw,cold);
+ const afterFurniture=await exportPack5();check('actual cold Pack5 owner export byte-equivalent',JSON.stringify(afterFurniture)===JSON.stringify(beforeFurniture),{entries:afterFurniture.entries});
+ check('settled offline ground owners',true,await settled());
  await page.screenshot({path:path.join(out,'offline-new-world-956x440.png')});check('zero page errors',errors.length===0,{errors});evidence.finished=true;
 }finally{await writeFile(path.join(out,'manifest.json'),JSON.stringify(evidence,null,2));await context?.close();await browser?.close();await new Promise(r=>server.close(r));}
