@@ -37,6 +37,31 @@ export function engineWantedSections(cx,cz,active,shaft=false){
   .map(p=>depthMeshKey(p.cx,p.cz,s)));
 }
 const haloSize=s=>18*18*(sectionBounds(s).maxY-sectionBounds(s).minY+3);
+const patternCache=new Map();
+function editPatterns(active,shaft){
+ const cacheKey=active+':'+shaft;if(patternCache.has(cacheKey))return patternCache.get(cacheKey);
+ const wanted=engineWantedSections(0,0,active,shaft),set=new Set(wanted);
+ const editOwners=new Set(),unique=new Map();
+ for(const k of wanted){
+  const {cx:x,cz:z,s}=decode(k);
+  for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)for(let ds=-1;ds<=1;ds++){
+   const a=s+ds;if(a>=LOWEST_SECTION&&a<=0)editOwners.add(depthMeshKey(x+dx,z+dz,a));
+  }
+ }
+ for(const k of editOwners){
+  const {cx:x,cz:z,s}=decode(k),b=sectionBounds(s);
+  for(const y of new Set([b.minY,b.maxY,Math.floor((b.minY+b.maxY)/2)]))
+   for(const ox of [0,8,15])for(const oz of [0,8,15]){
+    const edit=[x*16+ox,y,z*16+oz];
+    const keys=verticalEditSections(y).flatMap(a=>editAffectedChunks(edit[0],edit[2])
+     .map(p=>depthMeshKey(p.cx,p.cz,a))).filter(k=>set.has(k)).sort();
+    if(!keys.length)continue;
+    const id=keys.join('|');
+    if(!unique.has(id))unique.set(id,{keys,edit,halo:keys.reduce((n,k)=>n+haloSize(decode(k).s),0)});
+   }
+ }
+ const patterns=[...unique.values()];patternCache.set(cacheKey,patterns);return patterns;
+}
 export function auditGalleryEngineWorkingSet(rows){
  const byKey=new Map(rows.map(r=>[r.key,r]));
  if(byKey.size!==rows.length)throw Error('DUPLICATE_ENGINE_OWNER');
@@ -47,7 +72,7 @@ export function auditGalleryEngineWorkingSet(rows){
   for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)
    centers.add(key(r.cx+dx,0,r.cz+dz));
  let windows=0,maxResidentFaces=0,maxResidentCuts=0,maxResidentSections=0;
- let maxEditStagedFaces=0,maxEditGenerationHalo=0,maxFullReplacementFaces=0;
+ let maxEditStagedFaces=0,maxEditStagedCuts=0,maxEditGenerationHalo=0,maxFullReplacementFaces=0;
  let maxFullReplacementHalo=0,maxOneArrivalHalo=0,peak=null,peakEdit=null;
  const total=(ks,field)=>ks.reduce((n,k)=>n+(byKey.get(k)?.[field]??0),0);
  // Normal streaming evicts unwanted owners before new uploads (main stream).
@@ -58,7 +83,7 @@ export function auditGalleryEngineWorkingSet(rows){
   const [cx,,cz]=xyz(c);
   for(let active=LOWEST_SECTION;active<=0;active++)
    for(const shaft of active===0?[false,true]:[false]){
-    const wanted=engineWantedSections(cx,cz,active,shaft),set=new Set(wanted);
+    const wanted=engineWantedSections(cx,cz,active,shaft);
     const faces=total(wanted,'faces'),cuts=total(wanted,'cuts');
     if(!faces&&!cuts)continue;
     windows++;maxResidentCuts=Math.max(maxResidentCuts,cuts);
@@ -67,42 +92,25 @@ export function auditGalleryEngineWorkingSet(rows){
     maxFullReplacementFaces=Math.max(maxFullReplacementFaces,faces*2);
     maxFullReplacementHalo=Math.max(maxFullReplacementHalo,wanted.reduce((n,k)=>n+haloSize(decode(k).s),0));
     maxOneArrivalHalo=Math.max(maxOneArrivalHalo,...wanted.map(k=>haloSize(decode(k).s)));
-    // Actual refreshEditedMeshes uses verticalEditSections * editAffectedChunks.
-    // Enumerate section interiors and both boundary heights, and horizontal
-    // interior, edges and corners in every wanted owner. Staging uses old
-    // resident buffers plus replacement copies; missing chunks never stage.
-    // Any edit with no resident affected chunk has zero staged cost.
-    const editOwners=new Set();
-    for(const k of wanted){
-     const {cx:x,cz:z,s}=decode(k);
-     for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)
-      for(let ds=-1;ds<=1;ds++){
-       const a=s+ds;if(a>=LOWEST_SECTION&&a<=0)editOwners.add(depthMeshKey(x+dx,z+dz,a));
-      }
-    }
-    for(const k of editOwners){
-     const {cx:x,cz:z,s}=decode(k),b=sectionBounds(s);
-     for(const y of new Set([b.minY,b.maxY,Math.floor((b.minY+b.maxY)/2)]))
-      for(const ox of [0,8,15])for(const oz of [0,8,15]){
-       const staged=verticalEditSections(y).flatMap(a=>editAffectedChunks(x*16+ox,z*16+oz)
-        .map(p=>depthMeshKey(p.cx,p.cz,a))).filter(k=>set.has(k));
-       const growth=faces+total(staged,'faces');
-       const halo=staged.reduce((n,k)=>n+haloSize(decode(k).s),0);
-       if(growth>maxEditStagedFaces){maxEditStagedFaces=growth;peakEdit={cx,cz,active,shaft,
-        edit:[x*16+ox,y,z*16+oz],staged,faces:growth};}
-       maxEditGenerationHalo=Math.max(maxEditGenerationHalo,halo);
-      }
+    for(const pattern of editPatterns(active,shaft)){
+     const staged=pattern.keys.map(k=>{const p=decode(k);return depthMeshKey(cx+p.cx,cz+p.cz,p.s);});
+     const growth=faces+total(staged,'faces');
+     const cutWork=cuts+total(staged,'cuts');
+     if(growth>maxEditStagedFaces){maxEditStagedFaces=growth;peakEdit={cx,cz,active,shaft,
+      edit:[cx*16+pattern.edit[0],pattern.edit[1],cz*16+pattern.edit[2]],staged,faces:growth};}
+     maxEditStagedCuts=Math.max(maxEditStagedCuts,cutWork);
+     maxEditGenerationHalo=Math.max(maxEditGenerationHalo,pattern.halo);
     }
    }
  }
  const maxOwnerFaces=Math.max(0,...rows.map(r=>r.faces));
  return {windows,maxResidentFaces,maxResidentCuts,maxResidentSections,maxOwnerFaces,
-  maxEditStagedFaces,maxEditGenerationHalo,maxOneArrivalHalo,maxFullReplacementFaces,maxFullReplacementHalo,
+  maxEditStagedFaces,maxEditStagedCuts,maxEditGenerationHalo,maxOneArrivalHalo,maxFullReplacementFaces,maxFullReplacementHalo,
   peak,peakEdit,globalCuts:rows.reduce((n,r)=>n+r.cuts,0),
   globalPositiveFaces:rows.reduce((n,r)=>n+r.faces,0),
   galleryResidentAndSingleEditWithinNumericLimits:maxResidentFaces<=limits.faceGrowth&&
    maxResidentCuts<=limits.ownedCarves&&maxOwnerFaces<=limits.perChunkFaceGrowth&&
-   maxEditStagedFaces<=limits.faceGrowth&&maxEditGenerationHalo<=limits.originalNaturalReads,
+   maxEditStagedFaces<=limits.faceGrowth&&maxEditStagedCuts<=limits.ownedCarves&&maxEditGenerationHalo<=limits.originalNaturalReads,
   arbitraryReplacementBatchQualified:false,combinedFutureOverlaysQualified:false,
   actualGPUQualified:false,constructionAdmission:false};
 }
