@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 // Pack 3 isolated physical runtime bridge candidate. Not activated in main.mjs.
 // The existing VoxelWorld, schema-1 saves and player control path are unchanged.
 import {resolvePack3BuilderAsset,PACK3_BUILDER_SYMBOLS} from './pack3.mjs';
@@ -136,6 +137,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   function unregister(at){
     const k=key(at),entry=overlays.get(k);
     if(!entry)return false;
+    markMobSourceMutation(world);
     const bucket=bucketKey(entry.at),cells=byChunk.get(bucket);
     if(!cells||!cells.delete(k))throw new Error('Pack 3 chunk index desynchronized');
     if(!cells.size)byChunk.delete(bucket);
@@ -196,6 +198,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
       if(!inspectBodyFit(playerBody,proposed).fits)
         throw new Error('Physical construction intersects player');
     }
+    markMobSourceMutation(world);
     for(const e of planned.values())register(e);
     return records.length;
   }

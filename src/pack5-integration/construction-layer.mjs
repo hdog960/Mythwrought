@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 /**
  * Opt-in builder construction layer for the 18 REAL physical Pack 5 families.
  * No VoxelWorld.set(), no legacy ID allocation, no localStorage writes.
@@ -103,9 +104,11 @@ export function createPack5ConstructionLayer(world){
     place(id,anchor,rotation=0,variant=null,{playerBox=null}={}){
       if(fixture.count()>=PACK5_BUILDER_MAX_INSTANCES)
         return {ok:false,reason:'Pack 5 builder instance budget reached'};
-      return attempt(fixture,id,anchor,rotation,variant,playerBox);
+      const result=attempt(fixture,id,anchor,rotation,variant,playerBox);
+      if(result.ok)markMobSourceMutation(world);
+      return result;
     },
-    remove(cell){return fixture.remove(cell);},
+    remove(cell){const removed=fixture.remove(cell);if(removed)markMobSourceMutation(world);return removed;},
     /** Shape-exact hit, with legacy solid-world occlusion checked first. */
     raycast(origin,direction,maxDistance=6){
       // For low density, retain the source-exact reference behavior.
@@ -154,7 +157,7 @@ export function createPack5ConstructionLayer(world){
     },
     removeRay(origin,direction,maxDistance=6){
       const hit=api.raycast(origin,direction,maxDistance);
-      return hit?fixture.remove(hit.cell):false;
+      return hit?api.remove(hit.cell):false;
     },
     // Spatial shape collision: do not scan every distant decoration on each
     // mobile physics substep. Inspect only occupied cells intersecting the box.
@@ -231,6 +234,7 @@ export function createPack5ConstructionLayer(world){
         const placed=attempt(replacement,row[3],row.slice(0,3),row[4],row[5]??null);
         if(!placed.ok)throw Error('Invalid Pack 5 builder sidecar placement: '+placed.reason);
       }
+      markMobSourceMutation(world);
       fixture=replacement;
       return true;
     }

@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {createSnowS14EdgePigment} from './manual-biomes/snowy-s14-edge-pigment.mjs';
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
@@ -162,6 +163,7 @@ export class VoxelWorld{
        !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id)||isMountainV8Material(id))||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
+    markMobSourceMutation(this);
     if(isBiome130BlockId(previous))this.biomeCellCount--;
     if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);

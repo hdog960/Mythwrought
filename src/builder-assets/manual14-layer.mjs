@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 // Integrator-owned physical construction adapter for MANUAL Block Packs 1 and 4.
 // Source geometry comes from the independent pack builders. This adapter never
 // allocates biome130 IDs, writes schema-1, or registers candidate blocks in VoxelWorld.
@@ -104,6 +105,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   }
   verifyEntries(future,options); // fail closed before any mutation
   validateManual14ChunkBudgets([...future.values()]); // even UNLOADED deep/GPU chunks
+  markMobSourceMutation(world);
   placed=future;
   return records.length;
  }
@@ -113,7 +115,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   if(!found)return false;
   for(const entry of placed.values())if(entry!==found&&entry.supports.some(c=>key(c)===k))
    throw Error('Remove mounted dependent objects before their backing block');
-  const next=new Map(placed);next.delete(k);placed=next;return true;
+  const next=new Map(placed);next.delete(k);markMobSourceMutation(world);placed=next;return true;
  }
  function get(at){if(!coordinate(at))throw TypeError('Invalid physical cell');return placed.get(key(at))??null;}
  function readShape(x,y,z,kind='selection'){
@@ -146,6 +148,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   }
   verifyEntries(rebuilt);
   validateManual14ChunkBudgets([...rebuilt.values()]); // corrupt/dense saved scenes stay protected
+  markMobSourceMutation(world);
   placed=rebuilt;return rebuilt.size;
  }
  return Object.freeze({world,placeMany,remove,get,target,collision,readShape,

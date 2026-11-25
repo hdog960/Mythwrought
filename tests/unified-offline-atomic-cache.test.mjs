@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261124-mountain-v8-v1';
+const RELEASE='20261125-living-ecosystem-final-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261124-snow-p1-v1';
+const PREVIOUS='mythwrought-m5-shell-20261124-mountain-v8-v1';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
@@ -124,4 +124,12 @@ test('missing Snow planner dependency fails closed and retains previous-good she
  assert.equal(candidate.skipped,0);
  assert.equal(candidate.all.has(CACHE),false);
  assert.equal(candidate.all.get(PREVIOUS).size,1);
+});
+
+test('missing new Mob dependency fails atomically and retains prior shell',async()=>{
+  const candidate=stage({missing:'src/mobs/cave-spawn-column.mjs'});
+  await assert.rejects(candidate.install(),/Cannot verify\/cache/);
+  assert.equal(candidate.skipped,0);
+  assert.equal(candidate.all.has(CACHE),false);
+  assert.equal(candidate.all.get(PREVIOUS).size,1);
 });
