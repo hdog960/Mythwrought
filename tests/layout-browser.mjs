@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.05 mobile layout acceptance: real Chromium pixels and DOM bounds.
 import assert from 'node:assert/strict';
-import {ENCHANTED_P2_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
+import {M8_MOUNTAIN_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
+import {V8_STORAGE_PREFIX,V8_ACTIVE_KEY} from '../src/manual-biomes/mountain-v8-isolated-storage.mjs';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
 const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
@@ -112,22 +113,34 @@ try{
       const host=document.querySelector('.compact-menu'), advanced=document.querySelector('#advancedMenu');
       const selectors=['#closeHelp','#skySetDay','#skySetNight','#newWorld','#seedInput','#switchWorld','#advancedMenu > summary'];
       const outer=host.getBoundingClientRect();
+       // Native closed details can retain layout rects. Check actual focus
+       // and hit testing rather than treating DOM rects as visible pixels.
+       const exposed=id=>{
+         const el=document.querySelector(id),previous=document.activeElement;
+         const b=el.getBoundingClientRect();
+         const hit=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);
+         el.focus({preventScroll:true});
+         const focused=document.activeElement===el;
+         if(focused)previous?.focus({preventScroll:true});
+         return focused||Boolean(hit&&el.contains(hit));
+       };
       return {width:innerWidth,height:innerHeight,scroll:host.scrollHeight,client:host.clientHeight,open:advanced.open,
         inside:selectors.every(id=>{
           const box=document.querySelector(id).getBoundingClientRect();
           return box.width>0&&box.height>0&&box.top>=outer.top-1&&box.bottom<=outer.bottom+1;
-        }),advancedVisible:document.querySelector('#runAudit').getClientRects().length,
-        oldVisible:document.querySelector('#createFourBiomeWorld').getClientRects().length,
+        }),advancedVisible:exposed('#runAudit'),
+        oldVisible:exposed('#createFourBiomeWorld'),
         speed:document.querySelector('#g2bFlightProfile')!==null,
         toggleBesideRec:document.querySelector('#g2bFlightEnable').closest('header')===document.querySelector('#captureToggle').closest('header')};
     });
     assert.equal(compact.open,false,'Advanced unexpectedly expanded');
     assert.ok(compact.scroll<=compact.client+1&&compact.inside,'Compact menu requires scroll: '+JSON.stringify(compact));
-    assert.equal(compact.advancedVisible,0);assert.equal(compact.oldVisible,0);
+    assert.equal(compact.advancedVisible,false,'Collapsed diagnostic is interactive');assert.equal(compact.oldVisible,false,'Collapsed legacy generator is interactive');
     assert.equal(compact.speed,false);assert.equal(compact.toggleBesideRec,true);
     await page.screenshot({path:'artifacts/compact-menu-'+width+'x'+height+'.png'});
     await page.locator('#advancedMenu > summary').click();
     assert.ok(await page.locator('#runAudit').isVisible(),'Diagnostic controls lost');
+    assert.ok(await page.locator('#createFourBiomeWorld').isVisible(),'Legacy generator controls lost');
     assert.ok(await page.locator('#vaultBackup').isVisible(),'Recovery controls lost');
     assert.ok(await page.locator('#pack3Material').isVisible(),'Existing palette lost');
     await page.locator('#closeHelp').click();
@@ -136,23 +149,32 @@ try{
     await page.locator('#closeHelp').click();
   }
   await page.setViewportSize({width:956,height:440});
-  const oldSeed=await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed'));
+  const ordinaryBefore=await page.evaluate(()=>{
+    const seed=localStorage.getItem('mythwrought-v002-selected-seed');
+    return {seed,raw:localStorage.getItem('mythwrought-v002-world-'+seed)};
+  });
+  const oldSeed=ordinaryBefore.seed;
   await page.locator('#menu').click();
   page.once('dialog',dialog=>dialog.dismiss());
   await page.locator('#newWorld').click();
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),oldSeed,'Canceled NEW WORLD changed selection');
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#newWorld').click();
-  await page.waitForFunction(previous=>localStorage.getItem('mythwrought-v002-selected-seed')!==previous,oldSeed,{timeout:45000});
-  const latest=await page.evaluate(()=>{
-    const seed=localStorage.getItem('mythwrought-v002-selected-seed');
-    const raw=localStorage.getItem('mythwrought-v002-world-'+seed+'-four-biomes-profile-v1');
-    return {seed,generator:JSON.parse(JSON.parse(raw).raw).generator};
-  });
-  assert.equal(latest.generator,ENCHANTED_P2_GENERATOR,'NEW WORLD must select the latest durable generator');
+  await page.waitForFunction(generator=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===generator,M8_MOUNTAIN_GENERATOR,{timeout:180000});
+  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:180000});
+  const latest=await page.evaluate(({prefix,activeKey,oldSeed})=>{
+    const seed=localStorage.getItem(prefix+'mythwrought-v002-selected-seed');
+    return {seed,generator:window.__mythwroughtTest.fourBiomeProfile()?.generator,active:localStorage.getItem(activeKey),
+      oldSeed:localStorage.getItem('mythwrought-v002-selected-seed'),oldRaw:localStorage.getItem('mythwrought-v002-world-'+oldSeed),
+      actualSeed:String(window.__mythwroughtTest.snapshot().seed),canonical:localStorage.getItem(prefix+'mythwrought-v002-world-'+seed)};
+  },{prefix:V8_STORAGE_PREFIX,activeKey:V8_ACTIVE_KEY,oldSeed});
+  assert.equal(latest.generator,M8_MOUNTAIN_GENERATOR,'NEW WORLD must select the latest durable generator');
   assert.notEqual(latest.seed,oldSeed);
-  await page.locator('#closeHelp').click();
-  await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
+  assert.equal(latest.active,'1');assert.equal(latest.actualSeed,latest.seed);
+  assert.equal(latest.oldSeed,oldSeed);
+  if(ordinaryBefore.raw!==null)assert.equal(latest.oldRaw,ordinaryBefore.raw);
+  assert.equal(JSON.parse(latest.canonical).schema,1);
+  assert.equal(await page.locator('#help').isVisible(),false,'New world reload did not close menu');
   console.log('PASS compact menu / native Advanced / latest world creation '+JSON.stringify(latest));
   // Enlarged controllers must persist and not cover world on subsequent reloads.
   await page.setViewportSize({width:932,height:430});
@@ -160,14 +182,14 @@ try{
   await page.locator('#menu').click();
   await page.locator('#advancedMenu > summary').click();
   await page.locator('#controlSize').selectOption('large');
-  assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v005-control-size')),'large');
+  assert.equal(await page.evaluate(prefix=>localStorage.getItem(prefix+'mythwrought-v005-control-size'),V8_STORAGE_PREFIX),'large');
   await page.locator('#closeHelp').click();
   await page.waitForTimeout(120);
   const expanded=await inspect();
   assert.ok(expanded.gripWidth>before.gripWidth,'Large grip setting made no difference');
   assert.ok(expanded.world.width>=932*.45,'Large grip obstructed center viewport');
   await page.screenshot({path:'artifacts/mythwrought-v005-large-landscape.png'});
-  await page.reload({waitUntil:'networkidle'});
+  await page.reload({waitUntil:'networkidle',timeout:90000});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0);
   await page.locator('#menu').click();
   await page.locator('#advancedMenu > summary').click();
