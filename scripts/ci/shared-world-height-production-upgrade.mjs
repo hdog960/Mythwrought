@@ -1,0 +1,91 @@
+// Frozen production checkout -> exact candidate on the same Pages scope.
+// Uses real normal NEW WORLD UI, original owners, original worker and actual WebGL2.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {readFile,mkdir,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {chromium} from 'playwright';
+const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
+const oldRelease='20261124-mountain-v8-v1',release='20261125-shared-height-v1',profile='mythwrought-five-surface-regions-mountain-v8';
+const out=path.resolve('artifacts/world-height-upgrade');await mkdir(out,{recursive:true});
+const evidence={oldRelease,release,physicalIphone:false,checks:[]};
+function check(name,value,details={}){evidence.checks.push({name,ok:Boolean(value),...details});console.log('HEIGHT UPGRADE',name,JSON.stringify({ok:Boolean(value),...details}));assert.ok(value,name);}
+let deployment=prior,requests=0;
+const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript','.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json'};
+const server=createServer(async(req,res)=>{requests++;try{
+ const u=new URL(req.url,'http://127.0.0.1');if(!u.pathname.startsWith(prefix))throw Error('outside Pages scope');
+ const f=decodeURIComponent(u.pathname.slice(prefix.length))||'index.html',file=path.resolve(deployment,f);
+ if(!file.startsWith(deployment+path.sep))throw Error('bad path');
+ res.writeHead(200,{'Content-Type':mime[path.extname(file)]||'application/octet-stream','Cache-Control':'no-store'});res.end(await readFile(file));
+}catch(e){if(!res.headersSent)res.writeHead(404);res.end(String(e));}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port+prefix;
+let browser,context;
+try{
+ browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--no-sandbox']});
+ context=await browser.newContext({viewport:{width:956,height:440},deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'allow'});
+ const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ const waitGame=()=>page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:180000});
+ const waitCache=marker=>page.waitForFunction(async({marker,prefix})=>{
+  const key='mythwrought-m5-shell-'+marker;
+  if(!(await caches.keys()).includes(key)||!navigator.serviceWorker.controller)return false;
+  const c=await caches.open(key),html=await c.match(location.origin+prefix+'index.html');
+  return Boolean(html)&&(await html.text()).includes('data-mw-release="'+marker+'"');
+ },{marker,prefix},{timeout:180000});
+ const state=()=>page.evaluate(()=>{
+  const t=window.__mythwroughtTest,p='mythwrought-mountain-v8-isolated-v1:',seed=t.snapshot().seed;
+  return {release:document.querySelector('meta[name="mythwrought-release"]').content,profile:t.fourBiomeProfile()?.generator??null,seed,
+    raw:localStorage.getItem(p+'mythwrought-v002-world-'+seed),
+    active:localStorage.getItem('mythwrought-mountain-v8-active-v1'),glError:document.querySelector('#scene').getContext('webgl2').getError()};
+ });
+ await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});await waitGame();await waitCache(oldRelease);
+ const old=await state();check('exact previous production installed',old.release===oldRelease&&old.profile===profile&&old.raw&&old.active==='1',old);
+ const priorKey='mythwrought-mountain-v8-isolated-v1:mythwrought-v002-world-'+old.seed;
+ const historical=()=>page.evaluate(k=>localStorage.getItem(k),priorKey);
+ const priorCache=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
+ deployment=current;
+ await page.evaluate(()=>{window.__heightChanged=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__heightChanged=true},{once:true});});
+ await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();if(!r)throw Error('Missing worker');await r.update();});
+ await page.waitForFunction(()=>window.__heightChanged===true,null,{timeout:180000});await waitCache(release);
+ await page.reload({waitUntil:'load',timeout:90000});await waitGame();
+ const upgraded=await state();check('same installation exact historical world',upgraded.release===release&&upgraded.seed===old.seed&&upgraded.raw===old.raw&&upgraded.profile===profile,upgraded);
+ const priorPreserved=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
+ check('previous shell preserved',priorPreserved===priorCache);
+ const ui=await page.evaluate(()=>({ordinary:document.querySelectorAll('#newWorld').length,alternate:['newSnowWorld','createFourBiomeWorld','createExperimentalV5World','createBalancedV6World','createEnchantedP2World','createMountainV8Candidate','caveCreateWorld'].filter(id=>document.getElementById(id))}));
+ check('creator rule 492 ordinary creation control',ui.ordinary===1&&ui.alternate.length===0,ui);
+ await page.locator('#menu').click();page.once('dialog',d=>d.dismiss());await page.locator('#newWorld').click();
+ check('cancel does not replace old world',(await state()).seed===old.seed&&await historical()===old.raw);
+ page.once('dialog',d=>d.accept());await page.locator('#newWorld').click();
+ await page.waitForFunction(seed=>window.__mythwroughtTest?.snapshot().seed!==seed,old.seed,{timeout:180000});await waitGame();
+ const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.seed!==old.seed&&fresh.profile===profile&&fresh.raw&&await historical()===old.raw,fresh);
+ // Use localhost-only source-owned fixture actions, not a simulated mesh.
+ // Full real player-controlled ceiling flight is already H7 accepted.
+ const cells=await page.evaluate(()=>{
+  const t=window.__mythwroughtTest,p=t.m5ObservedPose(),x=Math.floor(p.x)+4,z=Math.floor(p.z),y=36;
+  const base=[x,y-1,z],core=[x,y,z],p1=[x,y,z+1],p2=[x,y,z+2],p3=[x,y,z+3],p4=[x,y,z+4],p5=[x,y,z+5];
+  for(let dz=0;dz<=5;dz++)t.placeFixture(x,y-1,z+dz,3);
+  t.placeFixture(...core,3);t.placeManual14Fixture(...p1,9);t.placeFixture(...p2,76);t.placePack3Fixture(...p3,116,0);t.placeManual14Fixture(...p4,159);
+  return {base,core,p1,p2,p3,p4,p5};
+ });
+ await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#pack5Enabled').check();
+ await page.waitForFunction(()=>document.getElementById('pack5Status').textContent.includes('Pack 5 ON'),null,{timeout:30000});
+ await page.locator('#closeHelp').click();
+ const furnishing=await page.evaluate(p=>window.__mythwroughtTest.placePack5TestFixture(...p),cells.p5);
+ check('Pack5 actual owner placement',furnishing.ok&&furnishing.worldSchema===1,furnishing);
+ const inspect=()=>page.evaluate(c=>{const t=window.__mythwroughtTest;return {ids:[c.core,c.p1,c.p2,c.p3,c.p4].map(p=>t.block(...p)),snap:t.snapshot(),data:{...document.querySelector('#scene').dataset}}},cells);
+ const initial=await inspect();check('all upper physical owner IDs',JSON.stringify(initial.ids)===JSON.stringify([3,9,76,116,159])&&initial.snap.pack3PhysicalBlocks>=1&&initial.snap.manual14PhysicalBlocks>=2,initial.ids);
+ // Fly to the upper construction section using real controls. Camera aim is test-only.
+ await page.locator('#g2bFlightEnable').check();
+ const cdp=await context.newCDPSession(page),jump=await page.locator('#jump').boundingBox(),time=Date.now()/1000;
+ for(let i=0;i<2;i++){await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:jump.x+jump.width/2,y:jump.y+jump.height/2,id:i+1}],timestamp:time+i*.3});await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[],timestamp:time+i*.3+.075});}
+ await page.waitForFunction(()=>window.__mythwroughtTest.flightInfo().active,null,{timeout:15000});await page.locator('#scene').focus();
+ await page.keyboard.down('e');try{await page.waitForFunction(()=>window.__mythwroughtTest.flightInfo().position.y>=36.5,null,{timeout:60000});}finally{await page.keyboard.up('e');}
+ await page.evaluate(p=>window.__mythwroughtTest.aimAt(...p),cells.p3);
+ await page.waitForFunction(()=>Number(document.querySelector('#scene').dataset.upperMeshVertices)>0,null,{timeout:60000});
+ const rendered=await inspect();check('actual upper render bounded',Number(rendered.data.upperGpuBytes)>0&&Number(rendered.data.upperGpuBytes)<=7077888&&Number(rendered.data.upperGpuOwners)<=8,{vertices:rendered.data.upperMeshVertices,bytes:rendered.data.upperGpuBytes,owners:rendered.data.upperGpuOwners});
+ await page.screenshot({path:path.join(out,'upper-all-packs-956x440.png')});
+ const saved=await state();check('upper canonical edit saved',JSON.parse(saved.raw).edits.some(row=>row[1]===36&&row[3]===3)&&await historical()===old.raw);
+ await context.setOffline(true);await page.reload({waitUntil:'load',timeout:90000});await waitGame();
+ await page.waitForFunction(()=>document.getElementById('pack5Status').textContent.includes('restored'),null,{timeout:60000});
+ const cold=await state(),restored=await inspect();check('cold offline new-world and all original owners restored',cold.release===release&&cold.profile===profile&&cold.raw===saved.raw&&cold.glError===0&&JSON.stringify(restored.ids)===JSON.stringify(initial.ids)&&await historical()===old.raw,cold);
+ await page.screenshot({path:path.join(out,'offline-new-world-956x440.png')});check('zero page errors',errors.length===0,{errors});evidence.finished=true;
+}finally{await writeFile(path.join(out,'manifest.json'),JSON.stringify(evidence,null,2));await context?.close();await browser?.close();await new Promise(r=>server.close(r));}
