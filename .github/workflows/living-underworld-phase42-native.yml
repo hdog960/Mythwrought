@@ -1,4 +1,4 @@
-name: Living Underworld completion 3 - actual section ownership
+name: Living Underworld completion 3 - shared native mesh snapshot
 on:
   push:
     branches:
@@ -19,12 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
-      - name: Exact native engine section and staged working-set census
+      - name: Exact native shared snapshot and mesh parity
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -z "$(git status --porcelain --untracked-files=all)"
           set +e
-          node --test tests/living-underworld-gallery-streaming-working-set.test.mjs > "$RUNNER_TEMP/phase42.tap" 2>&1
+          node --test tests/living-underworld-shared-native-mesh-snapshot.test.mjs > "$RUNNER_TEMP/phase42.tap" 2>&1
           code=$?
           cat "$RUNNER_TEMP/phase42.tap"
           test -z "$(git status --porcelain --untracked-files=all)" || exit 4
@@ -32,6 +32,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: phase42-native-engine-working-set
+          name: phase42-native-shared-mesh-snapshot
           path: ${{ runner.temp }}/phase42.tap
           retention-days: 7
