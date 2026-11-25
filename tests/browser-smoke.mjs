@@ -110,3 +110,6 @@ try{
 }finally{
   await browser.close();
 }
+
+// Isolated #291 per-call bottleneck probe; never merge this test entry.
+await import('../perf/issue-291/current-production-upload-attribution.mjs');
