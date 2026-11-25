@@ -1,0 +1,39 @@
+name: Living Underworld completion 4 - peak gallery real WebGL2
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase43-gallery-renderer-20261125
+    paths:
+      - .github/workflows/living-underworld-phase43-native.yml
+permissions:
+  contents: read
+jobs:
+  gallery-webgl2:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate source and check syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check src/living-underworld/peak-gallery-acceptance-renderer.mjs
+          node --check scripts/underworld/phase43-peak-gallery-webgl2.mjs
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Native source meshing and genuine WebGL2 staged buffers
+        run: node scripts/underworld/phase43-peak-gallery-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase43-peak-gallery-webgl2
+          path: ${{ runner.temp }}/phase43/
+          retention-days: 7
