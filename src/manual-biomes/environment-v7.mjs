@@ -271,7 +271,10 @@ function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
     onCandidateSiteSummary=null,disableCandidateSiteCulling=false,
     disableCandidateDensityCulling=false,
     candidateSiteBiomeCache=null,
+    snowTreeAtSite=null,snowNeedles=null,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
+  if(snowTreeAtSite!==null&&(typeof snowTreeAtSite!=='function'||!(snowNeedles instanceof Set)||!experimentalEnchantedTrees))
+    throw Error('Snow experimental source requires explicit Enchanted-P2 successor context');
   // This capacity parameter is for isolated source-memory experiments;
   // ordinary candidate runtime always uses its fixed reviewed default.
   if(!Number.isInteger(candidateSourceCacheCapacity)||
@@ -376,7 +379,11 @@ function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       const grounded=root===column.get(floor)&&readNatural(x,floor-1,z)!==BLOCK.AIR;
       if(!grounded)continue;
       let tree;
-      if(candidate){
+      const snowCandidate=snowTreeAtSite!==null&&biome.name==='snow';
+      if(snowCandidate){
+        tree=snowTreeAtSite({tx,tz,x,z,floor,roll,root,readColumn,readCell});
+        if(!tree)continue;
+      }else if(candidate){
         // Deterministic species choice independent of the legacy density roll.
         const shaped=buildEnchantedTreeCandidate(x,floor,z,treeRoll(tx,tz,seed+151));
         if(!shaped)continue;
@@ -417,6 +424,10 @@ function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         const previous=candidate?cells.get(key):undefined;
         cells.set(key,previous===undefined?id:
           resolveEnchantedTreeOverlap(previous,id));
+        if(snowNeedles){
+          if(snowCandidate&&id===G.snowyNeedles&&cells.get(key)===id)snowNeedles.add(key);
+          else snowNeedles.delete(key);
+        }
       }
     }
   if(onCandidateSiteSummary){

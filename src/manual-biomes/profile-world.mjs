@@ -10,9 +10,10 @@ import {m4ThreeRegionFreshColumn,M4_REGION_NAMES} from './three-regions-m4.mjs';
 import {m5V5MountainFreshColumn} from './mountain-pass-v5.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
+import {createSnowS17SitePlanner,snowS17ColumnPlan} from './snowy-s17-fresh-source.mjs';
 import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
-import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
+import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
 import {mountainV8ConifersForChunk,MOUNTAIN_V8_PINE} from './mountain-v8-runtime-conifers.mjs';
 import {MOUNTAIN_V8_MATERIAL as M,isMountainV8Material} from './mountain-v8-materials.mjs';
@@ -26,7 +27,7 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // are explicitly supported as-is, without automatic upgrades on open/save.
 // Experimental v5 is opt-in via an EXPLICIT generated-world profile only.
 // The default new-world action and all historical saves stay on accepted v4.
-export {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,M8_MOUNTAIN_GENERATOR};
+export {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR};
 export const isEnvironmentGenerator=generator=>originalEnvironmentGenerator(generator)||generator===M8_MOUNTAIN_GENERATOR;
 const environmentalProfile=isEnvironmentGenerator;
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
@@ -35,7 +36,7 @@ export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
 export const M3_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
 export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
 const ACCEPTED_GENERATORS=new Set([
-  M8_MOUNTAIN_GENERATOR,ENCHANTED_P2_GENERATOR,M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
+  M8_MOUNTAIN_GENERATOR,SNOW_P1_GENERATOR,ENCHANTED_P2_GENERATOR,M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
   M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR
 ]);
 const MAX_EDIT_ROWS=300000;
@@ -72,7 +73,13 @@ export class FourRegionWorld extends VoxelWorld{
       throw Error('Enchanted tree prototype requires explicit M7 opt-in');
     // Immutable per-world selection prevents a live cache/profile mismatch.
     Object.defineProperty(this,'experimentalEnchantedTrees',{value:experimentalEnchantedTrees,enumerable:true});
-    Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR,enumerable:true});
+    Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR||this.profile.generator===SNOW_P1_GENERATOR,enumerable:true});
+    if(this.profile.generator===SNOW_P1_GENERATOR){
+      const raw=(x,y,z)=>VoxelWorld.prototype.naturalAndLandmarkBlock.call(this,x,y,z);
+      const cave=(x,y,z)=>this.environmentCaves.get(x,y,z);
+      this._snowSource=Object.freeze({raw,cave,site:createSnowS17SitePlanner(seed,raw,cave)});
+      this._snowNeedleChunks=new Map();
+    }
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
     if(this.profile.generator===M8_MOUNTAIN_GENERATOR)this._mountainV8ConiferChunks=new Map();
@@ -100,6 +107,7 @@ export class FourRegionWorld extends VoxelWorld{
         planEnvironmentalColumn(x,z,this.seed,(a,b,c)=>this._environmentBaseline(a,b,c),region,
           {experimentalEnchantedTrees:this.enchantedTreesEnabled});
     }else lookup=this._existingBiomeColumn(x,z);
+    if(this._snowSource)lookup=snowS17ColumnPlan(lookup,x,z,this.seed,this._snowSource.raw,this._snowSource.cave);
     this._biomeColumns.set(key,lookup);
     if(this._biomeColumns.size>this.maxCachedColumns)
       this._biomeColumns.delete(this._biomeColumns.keys().next().value);
@@ -203,16 +211,28 @@ export class FourRegionWorld extends VoxelWorld{
     const cx=chunkCoord(x),cz=chunkCoord(z),key=cx+','+cz;
     let cells=this._environmentTreeChunks.get(key);
     if(!cells){
+      const needles=this._snowSource?new Set():null;
       cells=environmentalTreesForChunk(cx,cz,this.seed,
         (a,c)=>this._columnPlan(a,c),
         (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
         {experimentalEnchantedTrees:this.enchantedTreesEnabled,
-          candidateSiteBiomeCache:this._environmentCandidateSiteBiomes??null});
+          candidateSiteBiomeCache:this._environmentCandidateSiteBiomes??null,
+          ...(this._snowSource?{snowTreeAtSite:this._snowSource.site,snowNeedles:needles}:{})});
       this._environmentTreeChunks.set(key,cells);
-      if(this._environmentTreeChunks.size>64)
-        this._environmentTreeChunks.delete(this._environmentTreeChunks.keys().next().value);
+      if(needles)this._snowNeedleChunks.set(key,needles);
+      if(this._environmentTreeChunks.size>64){
+        const first=this._environmentTreeChunks.keys().next().value;
+        this._environmentTreeChunks.delete(first);
+        this._snowNeedleChunks?.delete(first);
+      }
     }
     return cells.get(worldKey(x,y,z))??BLOCK.AIR;
+  }
+  snowS17NaturalNeedleAt(x,y,z){
+    if(!this._snowSource||this.edits.has(worldKey(x,y,z))||
+       this.environmentCaves.get(x,y,z)!==undefined||
+       this.naturalAndLandmarkBlock(x,y,z)!==407)return undefined;
+    return this._snowNeedleChunks.get(chunkCoord(x)+','+chunkCoord(z))?.has(worldKey(x,y,z))?407:undefined;
   }
   _mountainV8ConiferAt(x,y,z){
     const cx=chunkCoord(x),cz=chunkCoord(z),key=cx+','+cz;

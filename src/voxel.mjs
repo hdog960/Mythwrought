@@ -1,10 +1,11 @@
+import {createSnowS14EdgePigment} from './manual-biomes/snowy-s14-edge-pigment.mjs';
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {isMountainV8Material,isMountainV8Flora,mountainV8Material,mountainV8MaterialColor,mountainV8FoliageFaceCovered} from './manual-biomes/mountain-v8-materials.mjs';
-import {environmentGround,isEnvironmentGenerator} from './environment-ground.mjs';
+import {environmentGround,isEnvironmentGenerator,SNOW_P1_GENERATOR,SNOW_WIND_RENDER_TAG} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {canWarmSourceScree,canUseDesertHardpanCue,nearestDesertHardpanSquared,warmScreeVertexColor} from './manual-biomes/desert-bilateral-rgb.mjs';
@@ -221,6 +222,8 @@ export function meshChunk(world,cx,cz){
   // mutable cache or per-frame source queries. Original plans decide whether
   // a surface is real and protected rather than cave-exposed subsoil.
   const sourceWorld=world.base?.generationProfile?world.base:world;
+  const snowS17=sourceWorld.generationProfile?.generator===SNOW_P1_GENERATOR||sourceWorld.experimentalSnowS17===true;
+  const snowS17Pigment=snowS17?createSnowS14EdgePigment(world.seed,v6BiomeAt):null;
   const sourceCaps=new Map(),seamVertexDistances=new Map(),screeWarmDistances=new Map();
   const hasEdit=(x,y,z)=>world.edits?.has(worldKey(x,y,z))||
     sourceWorld.edits?.has(worldKey(x,y,z));
@@ -332,6 +335,7 @@ export function meshChunk(world,cx,cz){
         if(isPhysicalShape(id)){
           const surface=getBiomeGeometry(id,world.rotationAt?.(x,y,z)??0);
           const groundColor=unifiedTerrain&&!world.edits?.has(worldKey(x,y,z))?BIOME_GROUND_COLORS.get(id):undefined;
+          let snowS17Rgb,snowS17Checked=false;
           // Strict surface-only Desert visual fade. Protected cave/landmark
           // vetoes, player edits and underground exposed subsoil never tint.
           // Calculate only once after the first actually surviving face.
@@ -355,6 +359,13 @@ export function meshChunk(world,cx,cz){
             if(boundary&&neighbor!==BLOCK.AIR&&
                 ((!isPhysicalShape(neighbor)&&!isPack2LiveId(neighbor))||
                   unifiedTerrain&&BIOME_SOLID_CUBES.has(neighbor)))continue;
+            if(!snowS17Checked&&snowS17Pigment&&(id===272||id===276||id===279)){
+              snowS17Checked=true;
+              snowS17Rgb=snowS17Pigment.colorAt(x,y,z,id,originalSurface(x,z),
+                blockAt(x,y,z),blockAt(x,y-1,z),blockAt(x,y+1,z),
+                hasEdit(x,y,z),hasEdit(x,y-1,z),sourceWorld.environmentCaves?.get(x,y,z),
+                sourceWorld.environmentCaves?.get(x,y-1,z));
+            }
             if(!checkedVisibleHardpan&&originalDesertHalo&&groundColor&&id===258){
               checkedVisibleHardpan=true;
               const region=v6BiomeAt(x,z,world.seed);
@@ -367,7 +378,7 @@ export function meshChunk(world,cx,cz){
             }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
-            const color=groundColor??(isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face));
+            const color=snowS17Rgb??groundColor??(isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face));
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];
@@ -394,12 +405,13 @@ export function meshChunk(world,cx,cz){
               }
               appendVertex(x+px,y+py,z+pz,clamp(rgb[0]*shade,0,1),clamp(rgb[1]*shade,0,1),clamp(rgb[2]*shade,0,1),
                 (nx?pz:px)+(groundColor?(nx?z:x):0),(ny?pz:py)+(groundColor?(ny?z:y):0),
-                groundColor?terrainArtMaterial(id):0);
+                groundColor?(snowS17Rgb&&terrainArtMaterial(id)===41?SNOW_WIND_RENDER_TAG:terrainArtMaterial(id)):0);
             }
           }
           continue;
         }
         const newGround=environmentGround(id)??mountainV8Material(id);
+        const snowS17Needle=snowS17&&id===407&&newGround&&!hasEdit(x,y,z)&&sourceWorld.snowS17NaturalNeedleAt(x,y,z)===407;
         const color=newGround?.color??COLORS[id]??COLORS[3];
         // Most underground voxels are fully enclosed. Defer the two noise
         // samples and tint calculation until the FIRST exposed face; otherwise
@@ -470,7 +482,7 @@ export function meshChunk(world,cx,cz){
               }
               if(blendMountainTop)rgb=mountainShoulderRgb(rgb,x+p[0],z+p[2]);
               appendVertex(x+p[0],y+p[1],z+p[2],rgb[0]*shade,rgb[1]*shade,rgb[2]*shade,
-                u,v,terrain?terrainArtMaterial(id):id===408?4:18);
+                u,v,terrain?terrainArtMaterial(id):id===408?4:snowS17Needle?0:18);
             }else{
               const rgb=blendMountainTop?mountainShoulderRgb(color,x+p[0],z+p[2]):null;
               appendVertex(x+p[0],y+p[1],z+p[2],

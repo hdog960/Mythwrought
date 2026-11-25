@@ -8,7 +8,7 @@ import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData,MAX_IMPORT_BY
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
   pack2ExportBundle,pack2ImportBundle} from '../pack2-world.mjs';
 import {FourRegionWorld,fourRegionProfile,FOUR_REGION_GENERATOR,
-  M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR} from './profile-world.mjs';
+  M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR} from './profile-world.mjs';
 import {loadFourRegionWorld,saveFourRegionWorld,readFourRegionProfile,
   exportFourRegionWorld,inspectFourRegionExport} from './profile-storage.mjs';
 
@@ -19,6 +19,7 @@ export const M2_WORLD_MODE=Object.freeze({
   CREATE_BALANCED_V6:'create-new-balanced-five-biomes-v6',
   CREATE_ENVIRONMENT_V7:'create-new-environment-five-biomes-v7',
   CREATE_ENCHANTED_P2:'create-new-enchanted-p2',
+  CREATE_SNOW_P1:'create-new-snow-p1',
   IMPORT_PROFILE:'import-verified-four-biome-profile'
 });
 
@@ -67,7 +68,8 @@ function validChoice(c){
 export function openM2World(storage,choice){
   if(!validChoice(choice))throw Error('Invalid/unconfirmed M2 world choice');
   const fresh=choice.mode!==M2_WORLD_MODE.OPEN;
-  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_ENCHANTED_P2?ENCHANTED_P2_GENERATOR:
+  const newGenerator=choice.mode===M2_WORLD_MODE.CREATE_SNOW_P1?SNOW_P1_GENERATOR:
+    choice.mode===M2_WORLD_MODE.CREATE_ENCHANTED_P2?ENCHANTED_P2_GENERATOR:
     choice.mode===M2_WORLD_MODE.CREATE_ENVIRONMENT_V7?
     M7_ENVIRONMENT_GENERATOR:choice.mode===M2_WORLD_MODE.CREATE_BALANCED_V6?
     M6_BALANCED_GENERATOR:choice.mode===M2_WORLD_MODE.CREATE_FOUR_V5?

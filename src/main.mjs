@@ -28,7 +28,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -320,7 +320,7 @@ function start(nonblockStage=null){
     }).catch(error=>({supported:false,reason:String(error)}));
   }
   if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
         world.base.generationProfile.generator)))
     void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
@@ -2865,7 +2865,7 @@ function start(nonblockStage=null){
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
           world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
@@ -2989,7 +2989,7 @@ function start(nonblockStage=null){
   }
   if(isolatedMountain){
     for(const button of [createFourBiomeButton,createV5MountainWorldButton,createBalancedV6Button,createEnchantedButton,
-      document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')]){
+      document.getElementById('newSnowWorld'),document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')]){
       button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();
         seedMessage.textContent='Return to the ordinary world before using this generator.';},true);
     }
@@ -3011,6 +3011,21 @@ function start(nonblockStage=null){
   createEnchantedButton.onclick=async()=>{
     try{await createLatestMenuWorld(worldSeedFromText(seedInput.value));}
     catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
+  };
+  document.getElementById('newSnowWorld').onclick=()=>{
+    try{
+      const next=worldSeedFromText(seedInput.value);
+      if(next===world.seed)throw Error('Enter a different unused seed for Snow');
+      rejectLegacyWorldWhereCaveExists(localStorage,next);
+      if(!window.confirm('CREATE NEW SNOW WORLD for unused seed '+next+'? Existing worlds stay intact.'))return;
+      if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents Snow activation');
+      if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
+      const loaded=openM2World(localStorage,planM2WorldChoice(String(next),M2_WORLD_MODE.CREATE_SNOW_P1,{confirmed:true}));
+      if(loaded.base.generationProfile.generator!==SNOW_P1_GENERATOR)throw Error('Snow profile did not activate');
+      const stored=saveM2World(localStorage,loaded.world);
+      if(!stored.ok)throw Error('New Snow save not verified: '+stored.reason);
+      enterPreparedM2World(loaded.world,'New Snow world '+next+' ready · improved winter and Enchanted forests.');
+    }catch(error){seedMessage.textContent='Snow world refused; original world retained: '+String(error.message||error);}
   };
   document.getElementById('newWorld').onclick=async()=>{
     const button=document.getElementById('newWorld');if(button.disabled)return;button.disabled=true;
