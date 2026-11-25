@@ -1,0 +1,50 @@
+name: Mob final Mountain Snow native compatibility
+on:
+  push:
+    branches:
+      - qualification/mob-final-mountain-snow-20261125
+    paths:
+      - '.github/workflows/mob-final-mountain-snow-20261125.yml'
+permissions:
+  contents: read
+jobs:
+  native-current-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact current production derived Mob candidate
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git checkout --detach 00ece5e2fd17fbf827b8344d3e5146d3b3efd4df
+          test "$(git rev-parse HEAD^{tree})" = 77e534f04f18d2be2aaa51d9538a91946472acb7
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test "$(git hash-object tests/mob-ecosystem-current-mountain-v8.test.mjs)" = 40ed80ca8b39fa3d594bd970c900673ef11d3408
+          test "$(git hash-object src/mobs/ecosystem-world-geometry.mjs)" = cc3fece9526dbee3b368d4dfc2cb0ef4fc346759
+          test "$(git hash-object src/mobs/live-game.mjs)" = 271308e32d9be0607f698640286c06c0d7d68122
+          test "$(git hash-object src/mobs/world-query.mjs)" = 5321f325f16b20fe4d6dff80ec09cb6ba379664f
+          node --version
+          git rev-parse HEAD HEAD^{tree}
+      - name: Current Mountain Snow native compatibility
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/mob-final-native
+          node --test --test-reporter=tap --test-concurrency=1 tests/mob-ecosystem-current-mountain-v8.test.mjs | tee artifacts/mob-final-native/current.tap
+      - name: Evidence digest
+        if: always()
+        run: |
+          if [ -f artifacts/mob-final-native/current.tap ]; then sha256sum artifacts/mob-final-native/current.tap; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-final-mountain-snow-00ece5e2
+          path: artifacts/mob-final-native/
+          if-no-files-found: error
+          retention-days: 14
