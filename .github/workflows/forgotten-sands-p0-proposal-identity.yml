@@ -1,0 +1,25 @@
+name: Forgotten Sands P0 portable detached proposal identity
+on:
+  push:
+    branches: [research/forgotten-sands-p0-grounded-vista-20261125]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-proposal-identity.mjs'
+      - 'tests/forgotten-sands-proposal-identity.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-proposal-identity.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --test tests/forgotten-sands-proposal-identity.test.mjs

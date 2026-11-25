@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {FourRegionWorld,fourRegionProfile,M7_ENVIRONMENT_GENERATOR,restoreFourRegionWorld} from '../src/manual-biomes/profile-world.mjs';
+import {BLOCK} from '../src/voxel.mjs';
+import {P0_MIXED_GROUPS} from '../src/manual-biomes/forgotten-sands-mixed-mesh-audit.mjs';
+import {exportP0ResearchProposal,inspectP0ResearchProposal,P0_RESEARCH_ID} from '../src/manual-biomes/forgotten-sands-proposal-identity.mjs';
+test('portable historical proposal revalidates actual geometry after detached save reopen, never grants writer capability',async()=>{
+ const spec=P0_MIXED_GROUPS[1],world=new FourRegionWorld(spec.seed,fourRegionProfile(spec.seed,M7_ENVIRONMENT_GENERATOR));
+ const before=JSON.stringify(world.save());let rev='detached-owner-r1';const authority={reserved:()=>false,ownerRevision:()=>rev};
+ const r=await exportP0ResearchProposal(world,spec,authority);assert.equal(r.accepted,true);assert.equal(r.placementAuthority,false);
+ assert.equal(r.proposedCells,31459);const data=JSON.parse(r.raw);assert.equal(data.payload.kind,P0_RESEARCH_ID);
+ const reopened=restoreFourRegionWorld(JSON.parse(before),world.generationProfile),q=await inspectP0ResearchProposal(r.raw,reopened,authority);
+ assert.equal(q.accepted,true);assert.equal(q.placementAuthority,false);assert.equal(q.checksum,r.checksum);
+ assert.equal(JSON.stringify(reopened.save()),before);assert.equal(JSON.stringify(world.save()),before);
+ const changed=JSON.parse(r.raw);changed.payload.turns[0]=(changed.payload.turns[0]+1)%4;
+ assert.equal((await inspectP0ResearchProposal(JSON.stringify(changed),reopened,authority)).accepted,false);
+ assert.equal((await inspectP0ResearchProposal(r.raw,reopened,{})).reason,'missing-reservation-authority');
+ rev='detached-owner-r2';assert.equal((await inspectP0ResearchProposal(r.raw,reopened,authority)).reason,'stale-research-source');rev='detached-owner-r1';
+ assert.equal(reopened.set(spec.modules[0].x,-210,spec.modules[0].z,BLOCK.AIR),true);
+ assert.equal((await inspectP0ResearchProposal(r.raw,reopened,authority)).reason,'stale-research-source');
+ assert.equal((await inspectP0ResearchProposal(r.raw,world,{...authority,reserved:()=>undefined})).accepted,false);
+ console.log('P0 PROPOSAL ID',JSON.stringify({checksum:r.checksum,geometrySha:data.payload.geometrySha,saveSha:data.payload.saveSha,proposedCells:r.proposedCells,descriptorBytes:new TextEncoder().encode(r.raw).byteLength,placementAuthority:false}));
+});
