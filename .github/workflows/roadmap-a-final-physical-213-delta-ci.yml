@@ -1,0 +1,33 @@
+name: Roadmap A 213 physical qualification delta only
+on:
+  push:
+    branches: [roadmap-a-final-physical-213-delta-ci-20261125]
+    paths: ['.github/workflows/roadmap-a-final-physical-213-delta-ci.yml']
+permissions:
+  contents: read
+jobs:
+  original-213-delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Verify exact original source and new diagnostic
+        run: |
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-213-physical-delta.mjs)" = "465deef76c99e57620eae2b4c73a3cb55f5dda62"
+          node --check src/building-pool/roadmap-2a/roadmap-a-213-physical-delta.mjs
+          test "$(git rev-parse HEAD:tests/building-pool/roadmap-2a/roadmap-a-213-physical-delta.test.mjs)" = "af622a9e7ac1ca02994dca0e18e1eb1145d9925d"
+          node --check tests/building-pool/roadmap-2a/roadmap-a-213-physical-delta.test.mjs
+          test "$(git rev-parse HEAD:src/building-pool/roadmap-2a/roadmap-a-a5-420-provisional.mjs)" = "c86b7e1db1dcedeccdcc25c217eed9ee5675418e"
+          test "$(git rev-parse HEAD:src/builder-assets/manual-five-pack.mjs)" = "0d8e4c66f63e086132a2779875e2ce2df4d784cc"
+      - name: Only new 213-design source physical HOLD census
+        run: node --test tests/building-pool/roadmap-2a/roadmap-a-213-physical-delta.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: roadmap-a-213-physical-delta-holds
+          path: artifacts/roadmap-a-213-physical-delta/ROADMAP_A_213_PHYSICAL_DELTA_HOLDS.json
+          if-no-files-found: error
+          retention-days: 14
