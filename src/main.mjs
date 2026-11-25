@@ -89,6 +89,13 @@ function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
 else if(['localhost','127.0.0.1'].includes(location.hostname)&&
+    new URLSearchParams(location.search).get('underworld-acceptance')==='phase44'){
+  // Never open an existing browser's save namespace for the disposable
+  // projection. No public host or normal startup can enable this path.
+  if(localStorage.length!==0)fatal('Underworld acceptance requires fresh browser storage');
+  else import('./living-underworld/local-gallery-game-witness.mjs').then(m=>
+    start(null,m.createLocalGalleryGameWitness())).catch(e=>fatal(String(e)));
+}else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
   const url=new URL(location.href);
   let layout;
@@ -103,7 +110,7 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
   start(layout?{layout,offline,effects}:null);
 }else start();
 
-function start(nonblockStage=null){
+function start(nonblockStage=null,underworldWitness=null){
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
   const combinedWorld=()=>world.base?.generationProfile?.generator===M7_ENVIRONMENT_GENERATOR;
@@ -133,7 +140,7 @@ function start(nonblockStage=null){
   }
   try{
     const choice=localStorage.getItem(SELECTED_SEED_KEY);
-    world=loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
+    world=underworldWitness?new Pack2LiveWorld(underworldWitness.projection):loadWorld(choice===null?DEFAULT_WORLD_SEED:worldSeedFromText(choice));
   }catch(err){
     // A damaged seed is NEVER replaced by auto-saving a fresh starter world.
     storageReadOnly=true;world=new Pack2LiveWorld(new VoxelWorld(DEFAULT_WORLD_SEED));
@@ -880,6 +887,7 @@ function start(nonblockStage=null){
   }
   const saveHealth=document.getElementById('saveHealth');
   function save(){
+    if(underworldWitness)return false; // disposable projected terrain is never a save
     if(storageReadOnly){
       message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
@@ -963,8 +971,8 @@ function start(nonblockStage=null){
     combined.set(base);combined.set(extra,base.length);
     return combined;
   }
-  function meshPlayableChunk(cx,cz,section){
-    const original=section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section);
+  function meshPlayableChunk(cx,cz,section,prepared=null){
+    const original=prepared??(section===0?meshChunk(world,cx,cz):meshDepthSection(world,cx,cz,section));
     const pack3Mesh=combinePack3ChunkMesh(original,pack3.runtime,cx,cz,section);
     return combineVertices(pack3Mesh,manual14AtChunk(cx,cz,section).opaque);
   }
@@ -972,7 +980,58 @@ function start(nonblockStage=null){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
-  function refreshEditedMeshes(x,z,y=0){
+  let underworldStageStats={batches:0,maxSourceCalls:0,maxGetReads:0,maxDirectReads:0,cacheHits:0,
+    maxStagedNearBytes:0,refusals:0,rollbackPreserved:false};
+  function prepareUnderworldRows(keys){
+    const batch=underworldWitness.build(world,keys,m=>{
+      const [cx,cz,section=0]=m.key.split(',').map(Number);
+      return {key:m.key,cx,cz,section,vertices:meshPlayableChunk(cx,cz,section,m.vertices),
+        water:meshPlayableWater(cx,cz,section)};
+    });
+    underworldStageStats.batches++;
+    underworldStageStats.maxSourceCalls=Math.max(underworldStageStats.maxSourceCalls,batch.sourceCalls);
+    underworldStageStats.maxGetReads=Math.max(underworldStageStats.maxGetReads,batch.reads);
+    underworldStageStats.maxDirectReads=Math.max(underworldStageStats.maxDirectReads,batch.direct);
+    underworldStageStats.cacheHits+=batch.hits;
+    return batch.rows;
+  }
+  function publishUnderworldRows(keys,{failAfter=-1}={}){
+    if(!keys.length)return [];
+    const originals=keys.map(k=>chunks.get(k)),owner=world,ready=[];
+    const bytes=c=>36*((c?.count??0)+(c?.waterCount??0));
+    try{
+      const batch=prepareUnderworldRows(keys);
+      if(gl.isContextLost())throw Error('GRAPHICS_LOST');
+      for(const item of batch){
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+        underworldStageStats.maxStagedNearBytes=Math.max(underworldStageStats.maxStagedNearBytes,
+          [...chunks.values()].reduce((n,c)=>n+bytes(c),0)+ready.reduce((n,c)=>n+bytes(c),0));
+        if(ready.length===failAfter)throw Error('UNDERWORLD_INJECTED_STAGE_FAILURE');
+      }
+      if(gl.isContextLost()||owner!==world||keys.some((k,i)=>chunks.get(k)!==originals[i]))
+        throw Error('UNDERWORLD_MESH_OWNER_CHANGED');
+    }catch(error){
+      if(!gl.isContextLost())for(const item of ready)deleteChunkBuffers(item);
+      underworldStageStats.refusals++;
+      underworldStageStats.rollbackPreserved=keys.every((k,i)=>chunks.get(k)===originals[i]);
+      throw error;
+    }
+    for(const item of ready)chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+      buffer:item.buffer,count:item.count,waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+    for(const old of originals)deleteChunkBuffers(old);
+    return ready;
+  }
+  function underworldDirtyKeys(cells){
+    return [...new Set(cells.flatMap(([x,y,z])=>verticalEditSections(y).flatMap(s=>
+      editAffectedChunks(x,z).map(c=>depthMeshKey(c.cx,c.cz,s)))))].filter(k=>chunks.has(k));
+  }
+  function refreshEditedMeshes(x,z,y=0,affectedCells=null){
+    if(underworldWitness){
+      const keys=underworldDirtyKeys(affectedCells??[[x,y,z]]);
+      const ready=publishUnderworldRows(keys);
+      editMeshBatches++;lastEditMeshKeys=ready.map(r=>r.key);
+      caveFarGpu.invalidate();return;
+    }
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
@@ -1010,6 +1069,9 @@ function start(nonblockStage=null){
     if(section===null)throw Error('Physical Pack 3 block is outside loaded depth');
     const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
     if(!chunks.has(key))return;
+    if(underworldWitness){
+      publishUnderworldRows([key]);editMeshBatches++;lastEditMeshKeys=[key];return;
+    }
     const vertices=meshPlayableChunk(cx,cz,section);
     const water=meshPlayableWater(cx,cz,section);
     const buffers=uploadPack2Chunk(vertices,water);
@@ -1032,6 +1094,11 @@ function start(nonblockStage=null){
       if(section===null)throw Error('Manual shaped piece outside playable depth');
       const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
       if(chunks.has(key))unique.set(key,{key,cx,cz,section});
+    }
+    if(underworldWitness){
+      const ready=publishUnderworldRows([...unique.keys()]);
+      if(ready.length){editMeshBatches++;lastEditMeshKeys=ready.map(r=>r.key);}
+      return;
     }
     const ready=[];
     try{
@@ -1246,13 +1313,16 @@ function start(nonblockStage=null){
       const [k,[x,z,section]]=next;
       const begin=performance.now();
       try{
-        const data=meshPlayableChunk(x,z,section);
-        const water=meshPlayableWater(x,z,section);
-        const buffers=uploadPack2Chunk(data,water);
+        if(underworldWitness)publishUnderworldRows([k]);
+        else{
+          const data=meshPlayableChunk(x,z,section);
+          const water=meshPlayableWater(x,z,section);
+          const buffers=uploadPack2Chunk(data,water);
+          const old=chunks.get(k);
+          chunks.set(k,{x,z,section,...buffers});
+          deleteChunkBuffers(old);
+        }
         pending.delete(k);gpuRetry.success(k);
-        const old=chunks.get(k);
-        chunks.set(k,{x,z,section,...buffers});
-        deleteChunkBuffers(old);
       }catch(error){
         const state=gpuRetry.fail(k,performance.now(),error.message);
         if(state.attempt===1)message('Chunk GPU upload deferred safely; retry scheduled');
@@ -3118,6 +3188,50 @@ function start(nonblockStage=null){
   if(['localhost','127.0.0.1'].includes(location.hostname)){
     // Local-only regression interface; absent from the public Pages runtime.
     window.__mythwroughtTest=Object.freeze({
+      underworldGalleryInfo(){
+        if(!underworldWitness)throw Error('No isolated underworld witness');
+        return {camera:[...underworldWitness.camera],nearby:underworldWitness.nearby.length,
+          sourceChecks:underworldWitness.sourceChecks,projectedCuts:underworldWitness.cuts.size,
+          sourceSaveUnchanged:underworldWitness.verifySave(),stage:{...underworldStageStats},
+          residentKeys:[...chunks.keys()],pending:pending.size,
+          nearBytes:[...chunks.values()].reduce((n,c)=>n+36*(c.count+c.waterCount),0),
+          far:caveFarGpu.stats(),pack5:pack5Gpu?.stats()??null,
+          sceneryBytes:nonblockVertexCount*36,effectAllocatedBytes:effectBytes,
+          sourceProfile:world.base?.generationProfile?.generator};
+      },
+      async underworldGalleryOverlays(){
+        if(!underworldWitness)throw Error('No isolated underworld witness');
+        if(!await ensurePack5Loaded())throw Error('Pack5 unavailable');
+        const used=new Set(),placed={};
+        const pick=(label,fn)=>{
+          for(const at of underworldWitness.nearby){
+            if(used.has(at.join(','))||world.get(...at)!==BLOCK.AIR)continue;
+            try{if(fn(at)){used.add(at.join(','));placed[label]=at;return;}}catch(_){}
+          }
+          throw Error('No actual '+label+' compatibility witness');
+        };
+        pick('pack2Water',at=>{
+          if(!world.placePack2(...at,76,{}))return false;
+          try{refreshEditedMeshes(at[0],at[2],at[1]);return true;}
+          catch(e){world.set(...at,BLOCK.AIR);throw e;}
+        });
+        pick('pack3',at=>pack3.mutate({mode:'place',cell:at,id:116,orientation:0,
+          player,rebuild:refreshPhysicalChunk}).ok);
+        pick('manual14',at=>{
+          const row=manual14ById.get(9);
+          return manual14.placeMany([{asset:row.symbol,numericId:9,at,orientation:0,variant:'lower'}]).ok;
+        });
+        pick('pack5',at=>pack5Builder.layer.place('pack5:080',at,0).ok);
+        pack5Gpu.refresh(eye());retireLiveScenery();
+        return placed;
+      },
+      underworldGalleryRestage(cells,failAfter=-1){
+        if(!underworldWitness)throw Error('No isolated underworld witness');
+        const keys=underworldDirtyKeys(cells),before=keys.map(k=>chunks.get(k));
+        try{publishUnderworldRows(keys,{failAfter});return {ok:true,keys};}
+        catch(error){return {ok:false,reason:error.message,keys,
+          preserved:keys.every((k,i)=>chunks.get(k)===before[i])};}
+      },
       caveMode(){return {enabled:!!caveSession,seed:world.seed,
         profile:caveSession?.profile??null,
         entranceSites:caveSession?.runtime.entrancePlan.entrances.map(e=>({
