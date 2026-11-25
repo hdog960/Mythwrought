@@ -89,6 +89,10 @@ try{
       await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle',timeout:45000});
       await waitStage(page);
       await page.locator('#menu').click();
+      // Compact production menu keeps SAVE inside Advanced. Use the visible
+      // real player menu, not a programmatic save or forced hidden click.
+      if(!await page.locator('#advancedMenu').evaluate(el=>el.open))
+        await page.locator('#advancedMenu > summary').click();
       await page.locator('#save').click();
       await page.locator('#closeHelp').click();
       const saved=await nonClock(page);
