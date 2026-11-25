@@ -174,6 +174,7 @@ try{
       await page.locator('#closeHelp').click();
       assert.deepEqual(await storageExceptClock(),beforeAudit,
         'Read-only performance audit changed non-clock saved data');
+      await page.waitForFunction(()=>{const c=document.querySelector('#scene');return +c.dataset.loadedChunks===25&&+c.dataset.pendingChunks===0;},null,{timeout:45000});
       const end=await state();
       assert.equal(end.glError,end.glNoError,'WebGL error after S1 controls');
       assert.equal(end.chunks,25);

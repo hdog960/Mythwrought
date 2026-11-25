@@ -7,7 +7,7 @@ const worker=read('sw-m5.js'),updater=read('src/app-update.mjs');
 const menu=html.slice(html.indexOf('<div id="help" hidden>'),html.indexOf('<script type="module"'));
 const primary=menu.split('<details id="advancedMenu">')[0],advanced=menu.split('<div id="advancedTools">')[1];
 test('compact default menu retains requested controls without old generators or diagnostics',()=>{
-  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
+  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','newSnowWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
   for(const id of ['runAudit','caveCreateWorld','caveLoadWorld','pack2Materials','vaultBackup','mirrorSync','renderPreset','checkGameUpdate'])assert.ok(!primary.includes('id="'+id+'"')&&advanced.includes('id="'+id+'"'),id);
   assert.ok(!html.includes('id="g2bFlightProfile"'));
   assert.ok(menu.includes('<details id="advancedMenu">'));
@@ -40,7 +40,8 @@ function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK
   assert.ok(begin>=0&&end>begin);
   const calls=[],seedMessage={textContent:''},newWorld={},createEnchantedButton={},seedInput={value:'179'};
   const world={seed:179},storage={},rawStorage={};
-  const document={getElementById:id=>{assert.equal(id,'newWorld');return newWorld}};
+  const newSnowWorld={};
+  const document={getElementById:id=>{assert.ok(['newWorld','newSnowWorld'].includes(id));return id==='newWorld'?newWorld:newSnowWorld}};
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
   const source=src.slice(begin,end),importLine="const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');";
   assert.ok(source.includes(importLine));

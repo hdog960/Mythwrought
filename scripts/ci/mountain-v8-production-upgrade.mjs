@@ -6,7 +6,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
 const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
-const oldRelease='20261124-compact-menu-v1',release='20261124-mountain-v8-v1',profile='mythwrought-five-surface-regions-mountain-v8';
+const oldRelease='20261124-snow-p1-v1',release='20261124-mountain-v8-v1',profile='mythwrought-five-surface-regions-mountain-v8';
 const out=path.resolve('artifacts/mountain-v8-production');await mkdir(out,{recursive:true});
 const evidence={oldRelease,release,physicalIphone:false,checks:[]};
 function check(name,value,details={}){evidence.checks.push({name,ok:Boolean(value),...details});console.log('MOUNTAIN RELEASE',name,JSON.stringify({ok:Boolean(value),...details}));assert.ok(value,name);}

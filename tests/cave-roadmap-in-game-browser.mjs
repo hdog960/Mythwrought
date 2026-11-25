@@ -339,6 +339,50 @@ try{
     }
     const raw=await page.screenshot({
      path:join(folder,'realgame-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
+    // Creature sprite eye pixels can satisfy the sky color classifier.
+    // Preserve normal gameplay capture above; independently render the same
+    // source camera without actor draws using the existing test-only hook.
+    // No sky, terrain, meshes, classifier, or zero-pixel limit is changed.
+    let skyRaw=raw;
+    if(farExpected.has(shot.name)){
+     assert.equal((await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceSnapshot())).visible,true);
+     const frameBefore=await readActualGameFrame(page);
+     try{
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceVisible(false)),false);
+      await page.waitForFunction(previous=>{
+       const s=document.querySelector('#scene')?.dataset;
+       return Number(s?.renderedFrames)>previous &&
+        s?.mobActors==='0'&&s?.mobDrawCalls==='0';
+      },frameBefore.renderedFrames,{timeout:90000,polling:'raf'});
+      const isolated=await requireSettledDeepGameFrame(page,shot,width+'x'+height);
+      assert.equal(isolated.expected.expectedCenter,deepGate.expected.expectedCenter);
+      const actorBefore=await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceSnapshot());
+      assert.equal(actorBefore.visible,false);
+      assert.equal(actorBefore.drawn,0);
+      assert.equal(actorBefore.drawCalls,0);
+      assert.equal(actorBefore.contextLost,false);
+      assert.equal(actorBefore.glError,0);
+      skyRaw=await page.screenshot({
+       path:join(folder,'sky-only-'+shot.name+'-'+width+'x'+height+'.png'),fullPage:true});
+      const actorAfter=await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceSnapshot());
+      assert.equal(actorAfter.visible,false);
+      assert.equal(actorAfter.drawn,0);
+      assert.equal(actorAfter.drawCalls,0);
+      assert.equal(actorAfter.contextLost,false);
+      assert.equal(actorAfter.glError,0);
+      const after=await readActualGameFrame(page);
+      assert.equal(assessDeepSceneFrame(after,isolated.expected).ok,true);
+      assert.ok(after.renderedFrames>=isolated.receipt.lastFrame);
+      const normal=inspect(raw,width,height),sky=inspect(skyRaw,width,height);
+      report.skyActorIsolation??=[];
+      report.skyActorIsolation.push({scene:shot.name,viewport:[width,height],
+       normalSHA256:normal.sha256,isolatedSHA256:sky.sha256,
+       normalBrightPixels:normal.brightCyanGapPixels,isolatedBrightPixels:sky.brightCyanGapPixels,
+       actorDraws:actorAfter.drawCalls,stableFrames:isolated.receipt.samples});
+     }finally{
+      assert.equal(await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceVisible(true)),true);
+     }
+    }
     if(shot.name==='named-vaulted-stone-fan'&&(width===667||width===844)){
      // Read-only, genuinely captured original-game source-ray diagnosis.
      // Preserve the real sky-leak ASSERTION below; no color substitutions,
@@ -354,7 +398,7 @@ try{
        Math.hypot(shot.to.x-shot.at.x,shot.to.z-shot.at.z))};
      const plan=planCaveFarWallSources(sourceWorld,camera,
       [rect.bufferWidth,rect.bufferHeight]);
-     const pixels=PNG.sync.read(raw),blue=[];
+     const pixels=PNG.sync.read(skyRaw),blue=[];
      for(let py=Math.floor(rect.top+rect.height*.06);
          py<Math.floor(rect.top+rect.height*.48);py+=5)
       // The 844px failure exposes source-world sky at the far left edge;
@@ -414,7 +458,7 @@ try{
        Math.hypot(shot.to.x-shot.at.x,shot.to.z-shot.at.z))};
      const plan=planCaveFarWallSources(sourceWorld,camera,
       [rect.bufferWidth,rect.bufferHeight]);
-     const png=PNG.sync.read(raw),blue=[];
+     const png=PNG.sync.read(skyRaw),blue=[];
      for(let py=Math.floor(height*.09);py<Math.floor(height*.56);py++)
       for(let px=Math.floor(width*.19);px<Math.floor(width*.70);px++){
        const i=(py*png.width+px)*4;
@@ -487,9 +531,9 @@ try{
     // not the intentionally open-sky East Gallery. Assert REAL screenshot
     // closure, not just resident-count / far-GPU activity / image hashes.
     if(farExpected.has(shot.name))
-     assert.equal(stats.brightCyanGapPixels,0,
+     assert.equal(inspect(skyRaw,width,height).brightCyanGapPixels,0,
       'C6_DEEP_SKY_VISUAL_LEAK '+shot.name+' '+width+'x'+height+
-      ' bright source-world sky pixels='+stats.brightCyanGapPixels);
+      ' bright source-world sky pixels='+inspect(skyRaw,width,height).brightCyanGapPixels);
     if(shot.name==='historic-east-gallery')
      assert.ok(stats.originalOpenSkyPixels>500,
       'The historical East Gallery must retain its intentionally visible open sky');
