@@ -9,6 +9,7 @@ import {sectionBounds} from '../depth.mjs';
 import {engineWantedSections,actualGallerySectionCosts} from './gallery-streaming-working-set.mjs';
 import {VoxelWorld,baseBlock} from '../voxel.mjs';
 import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
+import {planEnvironmentalScenery} from '../nonblock/staged-habitats.mjs';
 const xyz=k=>k.split(',').map(Number);
 const key=(x,y,z)=>x+','+y+','+z;
 export function createLocalGalleryGameWitness(){
@@ -33,7 +34,11 @@ export function createLocalGalleryGameWitness(){
   projection.get(x,y-1,z)!==BLOCK.AIR&&
   !collides(projection,x+.5,y+.01,z+.5));
  if(!eligible.length)throw Error('NO_SAFE_PEAK_GALLERY_CAMERA');
- const camera=eligible[Math.floor(eligible.length/2)];
+ const scenes=new Map();
+ for(const at of eligible){const section=Math.floor(at[1]/8);if(!scenes.has(section))scenes.set(section,planEnvironmentalScenery(projection,-40,-135,{caveSection:section}).length);}
+ const bestSection=[...scenes].sort((a,b)=>b[1]-a[1])[0][0];
+ const candidates=eligible.filter(at=>Math.floor(at[1]/8)===bestSection);
+ const camera=candidates[Math.floor(candidates.length/2)];
  const nearby=[...cuts].map(xyz).filter(([x,y,z])=>
   sectionForY(y)===-3&&Math.hypot(x-camera[0],z-camera[2])<=20&&
   Math.hypot(x-camera[0],z-camera[2])>=4&&
