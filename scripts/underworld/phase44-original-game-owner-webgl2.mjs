@@ -16,7 +16,7 @@ const server=createServer(async(req,res)=>{
  }catch{res.writeHead(404);res.end();}
 });
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
-let browser,report={status:'INCOMPLETE',errors:[]};
+let browser,page,report={status:'INCOMPLETE',errors:[],consoleErrors:[],failedRequests:[],httpErrors:[]};
 try{
  browser=await chromium.launch({headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  const context=await browser.newContext({viewport:{width:844,height:390},serviceWorkers:'block'});
@@ -45,9 +45,15 @@ try{
   };
   window.__underworldGlStats=()=>[...states.values()].map(({live,...s})=>({...s,buffers:live.size}));
  });
- const page=await context.newPage();page.on('pageerror',e=>report.errors.push(String(e)));
+ page=await context.newPage();
+ page.on('pageerror',e=>report.errors.push(String(e.stack??e)));
+ page.on('console',m=>{if(m.type()==='error')report.consoleErrors.push(m.text());});
+ page.on('requestfailed',r=>report.failedRequests.push({url:r.url(),reason:r.failure()?.errorText}));
+ page.on('response',r=>{if(r.status()>=400)report.httpErrors.push({url:r.url(),status:r.status()});});
  await page.goto('http://127.0.0.1:'+server.address().port+'/?underworld-acceptance=phase44');
- await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),{},{timeout:120000});
+ await page.waitForFunction(()=>Boolean(window.__mythwroughtTest)||window.__underworldAcceptanceBoot?.stage==='failed'||(()=>{const n=document.getElementById('notice');return n&&!n.hidden&&n.textContent.includes('renderer');})(),{},{timeout:120000});
+ report.boot=await page.evaluate(()=>({state:window.__underworldAcceptanceBoot??null,notice:document.getElementById('notice')?.textContent,status:document.getElementById('status')?.textContent,hook:Boolean(window.__mythwroughtTest)}));
+ assert.ok(report.boot.hook&&report.boot.state?.stage==='ready','GAME_BOOT_FAILED: '+JSON.stringify(report.boot));
  const first=await page.evaluate(()=>{
   const t=window.__mythwroughtTest,r=t.underworldGalleryInfo();
   t.teleportCave(...r.camera);t.setOrientation(0,0);
@@ -104,5 +110,12 @@ try{
  assert.equal(returned.game.sourceSaveUnchanged,true);
  assert.equal(future.constructionAdmission,false);
  assert.deepEqual(report.errors,[]);
-} catch(e){report.errors.push(String(e));console.error(e);throw e;}
+} catch(e){
+ report.errors.push(String(e.stack??e));
+ if(page){
+  try{report.failureState=await page.evaluate(()=>({boot:window.__underworldAcceptanceBoot??null,notice:document.getElementById('notice')?.textContent,status:document.getElementById('status')?.textContent,hook:Boolean(window.__mythwroughtTest),dataset:{...document.getElementById('scene')?.dataset}}));}catch(d){report.errors.push('failure-state: '+String(d));}
+  try{await page.screenshot({path:resolve(out,'failure.png'),timeout:10000});}catch(d){report.errors.push('failure-screenshot: '+String(d));}
+ }
+ console.error(JSON.stringify(report));console.error(e);throw e;
+}
 finally{await writeFile(resolve(out,'report.json'),JSON.stringify(report,null,2));await browser?.close();server.close();}
