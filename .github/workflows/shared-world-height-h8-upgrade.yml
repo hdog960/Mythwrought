@@ -29,8 +29,8 @@ jobs:
           node scripts/ci/build-stage-cache-manifest.mjs --check
           echo 'e24d30d6ee4d5d742262f240c190ba120cec5f642a55f3d9c2a2ab5204ae8077  nonblock-stage-assets.json' | sha256sum -c -
           node --check scripts/ci/shared-world-height-production-upgrade.mjs
-      - name: Changed existing depth and cache contract regressions
-        run: node --test tests/depth.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/app-update.test.mjs
+      # Unchanged native regression sources: exact prior 28/28 PASS #45687931714.
+      # Only the browser qualification harness changed.
       - run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2
           npx playwright install chromium

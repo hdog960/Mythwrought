@@ -55,12 +55,13 @@ try{
   const {mountainV8Storage,setMountainV8Active}=await import('./src/manual-biomes/mountain-v8-isolated-storage.mjs');
   const {saveM2World}=await import('./src/manual-biomes/m2-runtime-bridge.mjs');
   const result=await createMountainV8IsolatedWorld('2026',{confirmed:true,storage:localStorage});
+  if(!result.world.set(4,-100,4,3))throw Error('Prior historical source edit refused');
   const scoped=mountainV8Storage(localStorage),saved=saveM2World(scoped,result.world);
   if(!saved.ok)throw Error('Prior actual source save failed: '+saved.reason);
   setMountainV8Active(localStorage,true);
   return {seed:result.world.seed,raw:scoped.getItem('mythwrought-v002-world-2026')};
  });
- check('prior existing world created by frozen source',prepared.seed===2026&&!!prepared.raw);
+ check('prior existing world created by frozen source',prepared.seed===2026&&JSON.parse(prepared.raw).edits.some(row=>row[0]===4&&row[1]===-100&&row[2]===4&&row[3]===3));
  await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});
  try{await waitGame();await waitCache(oldRelease);}catch(error){
   evidence.startup=await page.evaluate(async()=>({text:document.body.innerText.slice(0,4000),url:location.href,ready:document.readyState,cacheNames:await caches.keys(),worker:(await navigator.serviceWorker.getRegistration())?.active?.scriptURL,loaded:document.querySelector('#scene')?.dataset.loadedChunks,hasGame:!!window.__mythwroughtTest}));
@@ -71,12 +72,38 @@ try{
  const priorKey='mythwrought-mountain-v8-isolated-v1:mythwrought-v002-world-'+old.seed;
  const historical=()=>page.evaluate(k=>localStorage.getItem(k),priorKey);
  const priorCache=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
+ await page.waitForFunction(()=>navigator.serviceWorker.controller?.state==='activated',null,{timeout:60000});
+ await page.screenshot({path:path.join(out,'prior-installed-956x440.png')});
  deployment=current;
- await page.evaluate(()=>{window.__heightChanged=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__heightChanged=true},{once:true});});
+ // A controllerchange or the presence of the new cache alone is insufficient:
+ // require the replaced, activated controller AND a cache-served version witness.
+ await page.evaluate(()=>{
+  const sw=navigator.serviceWorker;window.__heightPriorController=sw.controller;
+  window.__heightWorkerEvents=[];
+  sw.addEventListener('controllerchange',()=>window.__heightWorkerEvents.push({state:sw.controller?.state,changed:sw.controller!==window.__heightPriorController}));
+ });
  await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();if(!r)throw Error('Missing worker');await r.update();});
- await page.waitForFunction(()=>window.__heightChanged===true,null,{timeout:180000});await waitCache(release);
- await page.reload({waitUntil:'load',timeout:90000});await waitGame();
- const upgraded=await state();check('same installation exact historical world',upgraded.release===release&&upgraded.seed===old.seed&&upgraded.raw===old.raw&&upgraded.profile===profile,upgraded);
+ try{
+  await page.waitForFunction(async()=>{
+   const sw=navigator.serviceWorker,r=await sw.getRegistration();
+   return !!sw.controller&&sw.controller!==window.__heightPriorController&&sw.controller===r?.active&&sw.controller.state==='activated';
+  },null,{timeout:180000});
+  await waitCache(release);
+  const controlled=await page.evaluate(async({prefix,release})=>{
+   const key='mythwrought-m5-shell-'+release,c=await caches.open(key);
+   const cacheCount=(await c.keys()).length;
+   const response=await fetch(prefix+'index.html');
+   const html=await response.text();
+   return {cacheCount,controlledRelease:html.includes('data-mw-release="'+release+'"'),events:window.__heightWorkerEvents,controller:navigator.serviceWorker.controller?.state};
+  },{prefix,release});
+  check('new worker controls canonical cached source',controlled.cacheCount===332&&controlled.controlledRelease&&controlled.controller==='activated',controlled);
+ }catch(error){
+  evidence.upgradeWorker=await page.evaluate(async()=>{const sw=navigator.serviceWorker,r=await sw.getRegistration();return {controller:sw.controller?.state,changed:sw.controller!==window.__heightPriorController,active:r?.active?.state,installing:r?.installing?.state,waiting:r?.waiting?.state,events:window.__heightWorkerEvents,cacheNames:await caches.keys()};});
+  console.error('HEIGHT WORKER DIAGNOSTICS',JSON.stringify(evidence.upgradeWorker));throw error;
+ }
+ // Actual navigation, not a direct network bypass or synthetic version marker.
+ await page.goto(origin+'?production-ui=1',{waitUntil:'load',timeout:90000});await waitGame();
+ const upgraded=await state();await page.screenshot({path:path.join(out,'upgraded-installed-956x440.png')});check('same installation exact historical world',upgraded.release===release&&upgraded.seed===old.seed&&upgraded.raw===old.raw&&upgraded.profile===profile,upgraded);
  const priorPreserved=await page.evaluate(async({prefix,oldRelease})=>{const c=await caches.open('mythwrought-m5-shell-'+oldRelease);return (await c.match(location.origin+prefix+'index.html')).text();},{prefix,oldRelease});
  check('previous shell preserved',priorPreserved===priorCache);
  const ui=await page.evaluate(()=>({ordinary:document.querySelectorAll('#newWorld').length,alternate:['newSnowWorld','createFourBiomeWorld','createExperimentalV5World','createBalancedV6World','createEnchantedP2World','createMountainV8Candidate','caveCreateWorld'].filter(id=>document.getElementById(id))}));
