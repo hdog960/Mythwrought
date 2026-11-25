@@ -1,0 +1,42 @@
+name: Enchanted Wilds E2C current source and actual GPU
+on:
+  push:
+    branches: [research/enchanted-wilds-e2c-current-natural-20261125]
+    paths: [.github/workflows/enchanted-wilds-e2c-current-native.yml]
+permissions:
+  contents: read
+jobs:
+  current-natural-native-and-webgl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: a0487e34d9f5d00a49da05c3bf5b6545ff923085
+          path: original
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate current production and native natural source
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git -C ../original rev-parse HEAD)" = a0487e34d9f5d00a49da05c3bf5b6545ff923085
+          for f in src/depth.mjs src/voxel.mjs src/physics.mjs src/main.mjs src/pack2-world.mjs src/manual-biomes/mountain-v8-runtime-terrain.mjs src/manual-biomes/mountain-v8-runtime-conifers.mjs src/manual-biomes/snowy-s17-fresh-source.mjs src/manual-biomes/profile-storage.mjs src/manual-biomes/m2-runtime-bridge.mjs; do cmp "$f" "../original/$f"; done
+          for f in src/manual-biomes/enchanted-wilds-*.mjs; do node --check "$f"; done
+          WILDS_CURRENT_ROOT="$PWD/../original" node --test tests/manual-biomes/enchanted-wilds-e2c-natural.test.mjs
+      - name: Real Chromium WebGL2 source buffer verification
+        if: ${{ !cancelled() }}
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/wilds-e2c-server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          node scripts/ci/enchanted-wilds-e2c-real-upload.mjs
