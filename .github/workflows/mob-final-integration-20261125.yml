@@ -1,0 +1,78 @@
+name: Mob final integrated source revision and offline qualification
+on:
+  push:
+    branches:
+      - qualification/mob-final-integration-20261125
+    paths:
+      - '.github/workflows/mob-final-integration-20261125.yml'
+permissions:
+  contents: read
+jobs:
+  final-integrated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticate exact isolated source
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git checkout --detach f38ccfdf1ce92b0c4f31ab98cf09c9588a76ca30
+          test "$(git rev-parse HEAD^{tree})" = 2f9a35118a438ef8f209c9f1e5acea3f0a3acdf8
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test "$(git hash-object tests/mob-final-source-revision.test.mjs)" = 05fbe1cc616bd5ab54ce4ac5099489a08ca95b2c
+          test "$(git hash-object tests/mob-final-offline-upgrade-browser.mjs)" = 49993513f170ec34d240e9223f207dd7f5329629
+          node --version
+          git rev-parse HEAD HEAD^{tree}
+      - name: Generate exact source manifest with existing owner generator
+        run: |
+          set -euo pipefail
+          node scripts/ci/build-stage-cache-manifest.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          test "$(git diff --name-only)" = nonblock-stage-assets.json
+          mkdir -p artifacts/mob-final-integration
+          cp nonblock-stage-assets.json artifacts/mob-final-integration/
+          sha256sum nonblock-stage-assets.json
+          git hash-object nonblock-stage-assets.json
+          printf 'MOB_FINAL_MANIFEST_BASE64 '
+          base64 -w0 nonblock-stage-assets.json
+          printf '\n'
+      - name: Targeted actual changed owner native revision rollback and cache tests
+        run: |
+          set -o pipefail
+          node --test --test-concurrency=1 tests/mob-final-source-revision.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs tests/manual-five-pack-live.test.mjs tests/pack3-live.test.mjs tests/manual14-layer.test.mjs tests/pack5-integration-live.test.mjs | tee artifacts/mob-final-integration/native.tap
+      - name: Exact previous production worktree and browser dependency
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          test -f artifacts/mob-final-integration/nonblock-stage-assets.json
+          git worktree add --detach "$RUNNER_TEMP/mob-previous-production" a0487e34d9f5d00a49da05c3bf5b6545ff923085
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual previous Mountain app failed upgrade rollback and successful offline Mob upgrade
+        if: success() || failure()
+        run: MOB_PREVIOUS_ROOT="$RUNNER_TEMP/mob-previous-production" node tests/mob-final-offline-upgrade-browser.mjs
+      - name: Actual staged digest mismatch rollback and recovery
+        if: success() || failure()
+        run: node tests/nonblock-cache-recovery-browser.mjs
+      - name: Evidence digests
+        if: always()
+        run: |
+          if [ -d artifacts/mob-final-integration ]; then sha256sum artifacts/mob-final-integration/*; fi
+          if [ -f artifacts/mob-final-offline/report.json ]; then cat artifacts/mob-final-offline/report.json; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mob-final-integration-f38ccfdf
+          path: |
+            artifacts/mob-final-integration/
+            artifacts/mob-final-offline/
+            artifacts/nonblock-cache-recovery/
+          if-no-files-found: error
+          retention-days: 14
