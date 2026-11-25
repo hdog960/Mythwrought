@@ -86,6 +86,7 @@ async function run(device,mode,fixture){
           scene.dataset.playerGrounded==='true'&&scene.dataset.playerColliding==='false'&&
           Math.abs(p.feet-c.feet)<.05&&!p.creative;
       },{c,target,resident:count(c.feet)},{timeout:90000});
+      const priorSave=await saved(page);
       const before=await page.evaluate(()=>{
         const d=document.querySelector('#scene').dataset;
         return {feet:Number(d.playerFeet),landings:Number(d.landings)||0,
@@ -110,8 +111,14 @@ async function run(device,mode,fixture){
       assert.equal(await page.evaluate(target=>window.__mythwroughtTest.block(...target),target),0);
       assert.match(await page.locator('#status').textContent(),/Removed .* · saved/);
       const afterSave=await saved(page);assert.equal(afterSave.schema,1);
-      assert.ok(afterSave.edits.some(row=>row.length===4&&row[0]===target[0]&&
-        row[1]===target[1]&&row[2]===target[2]&&row[3]===0));
+      const atTarget=row=>row.length===4&&row[0]===target[0]&&
+        row[1]===target[1]&&row[2]===target[2];
+      const priorRow=priorSave.edits.find(atTarget),afterRow=afterSave.edits.find(atTarget);
+      // Source saves canonicalize edits: mining an authored block in
+      // natural AIR removes its previous edit rather than retaining AIR.
+      assert.ok(afterRow?.[3]===0||(!afterRow&&priorRow?.[3]===c.id),
+        'Missing canonical source save change for removed support');
+      assert.notDeepEqual(afterSave,priorSave);
       await page.waitForFunction(({c,before,resident})=>{
         const d=document.querySelector('#scene').dataset;
         return Math.abs(Number(d.playerFeet)-c.land)<.05&&
