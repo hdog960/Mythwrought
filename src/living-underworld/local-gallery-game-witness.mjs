@@ -12,13 +12,20 @@ import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
 const xyz=k=>k.split(',').map(Number);
 const key=(x,y,z)=>x+','+y+','+z;
 export function createLocalGalleryGameWitness(){
- const p=createPeakGalleryProjection(),{original,projection,cuts}=p;
+ const p=createPeakGalleryProjection(),{original,cuts}=p,projection=Object.create(p.projection);
  let sourceScope=null;
+ const charge=kind=>{
+  if(sourceScope){if(sourceScope.reads+sourceScope.direct>=40000)throw Error('GALLERY_COMBINED_SOURCE_READ_LIMIT');sourceScope[kind]++;}
+ };
+ Object.defineProperty(projection,'get',{value(x,y,z){
+  if(sourceScope&&!sourceScope.inMesh)charge('direct');
+  return p.projection.get(x,y,z);
+ }});
  // Existing environmental scenery plans against the natural reader; make
  // projected AIR visible to it, not just to the terrain get/collision path.
  const generated=original.naturalAndLandmarkBlock.bind(original);
  Object.defineProperty(projection,'naturalAndLandmarkBlock',{value(x,y,z){
-  if(sourceScope){if(++sourceScope.direct>40000)throw Error('GALLERY_DIRECT_READ_LIMIT');}
+  charge('direct');
   return cuts.has(key(x,y,z))?BLOCK.AIR:generated(x,y,z);
  }});
  const eligible=[...cuts].map(xyz).filter(([x,y,z])=>
@@ -31,16 +38,18 @@ export function createLocalGalleryGameWitness(){
   sectionForY(y)===-3&&Math.hypot(x-camera[0],z-camera[2])<=20&&
   Math.hypot(x-camera[0],z-camera[2])>=4&&
   projection.get(x,y-1,z)!==BLOCK.AIR);
- return {...p,camera,nearby,
+ return {...p,projection,camera,nearby,
+  auditFuture(){return auditPeakFutureNetworkOverlap(p);},
   build(world,keys,compose){
    if(sourceScope)throw Error('NESTED_MESH_TRANSACTION');
-   sourceScope={direct:0};
+   sourceScope={direct:0,reads:0,inMesh:true};
    try{
-    const batch=meshReadOnlySharedBatch(world,keys);
+    const batch=meshReadOnlySharedBatch(world,keys,{beforeRead:()=>charge('reads')});
     if(!batch.ok)throw Error(batch.reason);
+    sourceScope.inMesh=false;
     const rows=batch.meshes.map(m=>compose(m));
     const direct=sourceScope.direct;
-    if(batch.calls+direct>40000)throw Error('GALLERY_COMBINED_SOURCE_READ_LIMIT');
+    if(batch.calls!==sourceScope.reads)throw Error('GALLERY_READ_ACCOUNTING_MISMATCH');
     return {rows,reads:batch.calls,direct,hits:batch.hits,sourceCalls:batch.calls+direct};
    }finally{sourceScope=null;}
   },
