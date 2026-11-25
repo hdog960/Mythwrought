@@ -1,0 +1,37 @@
+name: Living Underworld completion 2 - full gallery cost census
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase41-full-gallery-cost-20261125
+    paths:
+      - .github/workflows/living-underworld-phase41-native.yml
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: One exact native original 80-gallery cost census
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          set +e
+          node --test tests/living-underworld-full-gallery-cost-census.test.mjs > "$RUNNER_TEMP/phase41.tap" 2>&1
+          code=$?
+          cat "$RUNNER_TEMP/phase41.tap"
+          test -z "$(git status --porcelain --untracked-files=all)" || exit 4
+          exit "$code"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase41-native-full-gallery-cost
+          path: ${{ runner.temp }}/phase41.tap
+          retention-days: 7
