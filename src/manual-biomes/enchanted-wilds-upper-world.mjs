@@ -59,7 +59,7 @@ export function createWildsUpperResearchWorld(ground,plans=[],{naturalSource=nul
    throw Error('Invalid E2 physical ground source');
  if(naturalSource!==null&&(typeof naturalSource.get!=='function'||naturalSource.seed!==ground.seed||plans.length))throw Error('Invalid separate natural tower authority');
  const natural=new Map(),edits=new Map(),lowerEdits=new Map(),revisions=new Map();
- let revision=0;
+ let revision=0,revisionFloor=0;
  for(const plan of plans)for(const [x,y,z,id] of plan.cells){
    const k=key(x,y,z);
    if(!coords(x,y,z)||y<0||y>WILDS_PHYSICAL_MAX_Y||!upperId(id)||id===0||
@@ -94,6 +94,11 @@ export function createWildsUpperResearchWorld(ground,plans=[],{naturalSource=nul
      if(y<=WORLD_MAX_Y)for(const section of verticalEditSections(y))keys.add(depthMeshKey(cx,cz,section));
      for(const dy of [-1,0,1]){const s=skyIslandSectionForY(y+dy);if(s!==null)keys.add(skyIslandMeshKey(cx,cz,s));}
    }
+   // Current production's desert/snow/mountain surface visual sampling may
+   // span farther than the one-voxel physical halo. Conservative bounded
+   // four-cell surface invalidation; no change to native owner source.
+   if(y>=-3&&y<=WORLD_MAX_Y)for(let cx=Math.floor((x-4)/16);cx<=Math.floor((x+4)/16);cx++)
+     for(let cz=Math.floor((z-4)/16);cz<=Math.floor((z+4)/16);cz++)keys.add(depthMeshKey(cx,cz,0));
    return [...keys].sort();
  }
  function setPhysical(x,y,z,id){
@@ -105,11 +110,14 @@ export function createWildsUpperResearchWorld(ground,plans=[],{naturalSource=nul
    else{if(!map.has(k)&&edits.size+lowerEdits.size>=4096)return false;map.set(k,id);}
    revision++;
    for(const k of affectedKeys(x,y,z))revisions.set(k,revision);
+   // Bounded revision memory; conservative global invalidation on rollover.
+   // Never silently resurrect a stale resident with an old revision number.
+   if(revisions.size>8192){revisions.clear();revisionFloor=revision;}
    return true;
  }
  function setUpper(x,y,z,id){return y>WORLD_MAX_Y&&setPhysical(x,y,z,id);}
  return Object.freeze({world,setUpper,setPhysical,affectedKeys,
-   get revision(){return revision;},regionRevision:k=>revisions.get(k)??0,
+   get revision(){return revision;},regionRevision:k=>Math.max(revisionFloor,revisions.get(k)??0),
    naturalAt:readNatural,
    editRows:()=>[...lowerEdits,...edits].map(([k,id])=>[...k.split(',').map(Number),id]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2]),
    save(){throw Error('E2 upper-world research is not a durable world profile');},
