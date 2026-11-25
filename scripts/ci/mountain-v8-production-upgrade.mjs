@@ -42,7 +42,13 @@ try{
  await page.goto(origin,{waitUntil:'load',timeout:90000});await waitGame();
  await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#save').click();await page.locator('#closeHelp').click();
  await waitCache(oldRelease);
- const old=await state();check('old installed shell and save',old.release===oldRelease&&old.oldSeed&&old.oldRaw&&!old.active,old);
+ // Exercise the actually published Snow profile before upgrading the same install.
+ await page.locator('#menu').click();await page.locator('#seedInput').fill('2026');
+ page.once('dialog',d=>d.accept());await page.locator('#newSnowWorld').click();
+ await page.waitForFunction(()=>window.__mythwroughtTest?.fourBiomeProfile()?.generator==='mythwrought-five-surface-regions-v7-snow-p1',null,{timeout:180000});
+ if(await page.locator('#help').isVisible())await page.locator('#closeHelp').click();
+ await waitGame();
+ const old=await state();check('old installed shell and save',old.release===oldRelease&&old.profile==='mythwrought-five-surface-regions-v7-snow-p1'&&old.oldSeed&&old.oldRaw&&!old.active,old);
  // Existing worker and installed page remain on exactly the same origin.
  deployment=current;
  await page.evaluate(()=>{window.__mwChanged=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{window.__mwChanged=true},{once:true});});

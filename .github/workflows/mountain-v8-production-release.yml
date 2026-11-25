@@ -15,7 +15,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          ref: cf02e734a9791c1cf40cf1a801e04263f8f4401b
           path: prior-production
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -26,7 +26,7 @@ jobs:
           MOUNTAIN_PRIOR_ROOT: ${{ github.workspace }}/prior-production
         run: |
           git rev-parse HEAD
-          test "$(git -C prior-production rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          test "$(git -C prior-production rev-parse HEAD)" = cf02e734a9791c1cf40cf1a801e04263f8f4401b
           node scripts/ci/build-stage-cache-manifest.mjs --check
           node --test tests/mountain-v8-release/*.test.mjs
       - uses: actions/cache@v4
