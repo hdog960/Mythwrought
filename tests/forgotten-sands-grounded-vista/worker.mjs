@@ -16,7 +16,7 @@ self.onmessage=e=>{try{
     const v=p0BenchmarkMesh(state.group.view,k.cx,k.cz,k.s);self.postMessage({type:'near',epoch,key:k.key,vertices:v},[v.buffer]);return;
   }
   if(m.type==='far'){
-    const t=performance.now(),s=buildP0GroundedVista(state.world,state.group.view,state.spec.modules,near,{eye}),plan=planP0FarSlot(near,{feet:15,nearBytes:m.nearBytes,farBytes:s.vertices.byteLength});
+    const t=performance.now(),s=buildP0GroundedVista(state.world,state.group.view,state.spec.modules,near,{eye,unitMonuments:true}),plan=planP0FarSlot(near,{feet:15,nearBytes:m.nearBytes,farBytes:s.vertices.byteLength});
     self.postMessage({type:'far',epoch,vertices:s.vertices,plan,groundFaces:s.groundFaces,monumentFaces:s.monumentFaces,groundNearOmitted:s.groundNearOmitted,monumentNearOmitted:s.monumentNearOmitted,monumentRects:s.monumentRects,terrainRects:s.terrainRects,buildMs:performance.now()-t},[s.vertices.buffer]);return;
   }
   throw Error('Unknown request');

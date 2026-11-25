@@ -82,8 +82,13 @@ async function run(){
     let farOnlyVisible=0;for(let i=0;i<farOnly.length;i+=4)if(Math.abs(farOnly[i]-176)+Math.abs(farOnly[i+1]-158)+Math.abs(farOnly[i+2]-125)>15)farOnlyVisible++;
     console.log('P0 GROUND STEP',JSON.stringify({epoch,distance,visible,farOnlyVisible,occluded,orderDiff,records:far.records,bytes:far.bytes}));
     window.p0Partial={index,epoch,distance,visible,farOnlyVisible,occluded,orderDiff,images:{...images,failedStep:capture}};
-    check(visible>100,'grounded far pixels absent: '+JSON.stringify({epoch,distance,visible,farOnlyVisible,occluded,orderDiff}));
-    snapshots.push({epoch,distance,nearBuffers:resident.size,farBytes:far.bytes,combinedBytes:bytes(),groundFaces:r.groundFaces,monumentFaces:r.monumentFaces,monumentRects:r.monumentRects,terrainRects:r.terrainRects,groundNearOmitted:r.groundNearOmitted,monumentNearOmitted:r.monumentNearOmitted,visible,occluded,orderDiff,buildMs:r.buildMs,nearPixelParity:true});
+    // At the 16-block near-wall station, genuine depth occlusion may hide
+    // every far face. Require actual far-only pixels, strong occlusion and
+    // draw-order parity, not an unconditional far-visible assertion.
+    const closeOcclusion=distance===16&&visible<=100&&farOnlyVisible>1000&&occluded/farOnlyVisible>.90&&orderDiff===0;
+    check(visible>100||closeOcclusion,'grounded far pixels absent: '+JSON.stringify({epoch,distance,visible,farOnlyVisible,occluded,orderDiff}));
+    check(orderDiff<100,'depth draw-order disagreement');
+    snapshots.push({epoch,distance,nearBuffers:resident.size,farBytes:far.bytes,combinedBytes:bytes(),groundFaces:r.groundFaces,monumentFaces:r.monumentFaces,monumentRects:r.monumentRects,terrainRects:r.terrainRects,groundNearOmitted:r.groundNearOmitted,monumentNearOmitted:r.monumentNearOmitted,visible,farOnlyVisible,occluded,orderDiff,closeOcclusion,buildMs:r.buildMs,nearPixelParity:true});
     if([1,4,5,7].includes(epoch))images['step'+epoch+'-d'+distance]=capture;
     render(eye);
   }

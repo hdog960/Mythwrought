@@ -34,7 +34,7 @@ export function p0CompressPlanes(rows){
   }
   return Object.freeze(rects);
 }
-export function buildP0GroundedVista(world,view,modules,near,{eye}={}){
+export function buildP0GroundedVista(world,view,modules,near,{eye,unitMonuments=false}={}){
   if(!Array.isArray(eye)||eye.length!==3||!eye.every(Number.isFinite)||!Array.isArray(near)||near.length!==18)throw Error('Invalid vista request');
   const shell=buildP0FarShell(world,view,modules,near),rows=shell.rectangles.map(r=>({...r,kind:0,id:3}));
   const nearSet=new Set(near.map(k=>k.key)),caps=new Map();
@@ -66,7 +66,15 @@ export function buildP0GroundedVista(world,view,modules,near,{eye}={}){
       }
     }
   }
-  const rects=p0CompressPlanes(rows),vertices=new Float32Array(rects.length*9);
+  const compressed=p0CompressPlanes(rows);
+  // Unit grid on monument faces only: no long-edge T junctions at the
+  // physical stair-step silhouette. Terrain retains exact coplanar merging.
+  const rects=unitMonuments?Object.freeze(compressed.flatMap(q=>{
+    if(q.kind!==0)return [q];const out=[];
+    for(let row=q.row;row<q.end;row++)for(let a=q.a;a<q.b;a++)out.push(Object.freeze({...q,row,end:row+1,a,b:a+1}));
+    return out;
+  })):compressed;
+  const vertices=new Float32Array(rects.length*9);
   let at=0,monumentRects=0,terrainRects=0;
   for(const r of rects){
     const rgb=r.kind===0?stone[r.d]:(palette[r.id]??palette[3]).map(v=>v*shades[r.d]);
@@ -77,6 +85,6 @@ export function buildP0GroundedVista(world,view,modules,near,{eye}={}){
   }
   if(vertices.byteLength>P0_FAR_MAX_BYTES)throw Error('Grounded vista instance cap');
   return Object.freeze({vertices,rectangles:rects,bounds:Object.freeze(bounds),monumentFaces:shell.sourceFaces,groundFaces,groundColumns,groundNearOmitted,
-    monumentNearOmitted:shell.nearOmitted,oldMonumentRects:shell.rectangles.length,monumentRects,terrainRects});
+    monumentNearOmitted:shell.nearOmitted,oldMonumentRects:shell.rectangles.length,monumentRects,terrainRects,unitMonuments});
 }
 export {planP0FarSlot};
