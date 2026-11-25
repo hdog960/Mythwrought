@@ -34,12 +34,26 @@ try{
  page.on('console',m=>{if(m.type()==='error'&&consoleErrors.length<80)consoleErrors.push(m.text());});
  evidence.errors=errors;evidence.consoleErrors=consoleErrors;evidence.requestFailures=requestFailures;
  const waitGame=()=>page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:180000});
- const waitCache=marker=>page.waitForFunction(async({marker,prefix})=>{
-  const key='mythwrought-m5-shell-'+marker;
-  if(!(await caches.keys()).includes(key)||!navigator.serviceWorker.controller)return false;
-  const c=await caches.open(key),html=await c.match(location.origin+prefix+'index.html');
-  return Boolean(html)&&(await html.text()).includes('data-mw-release="'+marker+'"');
- },{marker,prefix},{timeout:180000});
+ // Do not pass an async predicate to waitForFunction: the H10 gate
+ // advanced with only 75 assets, no controllerchange and worker installing.
+ // Await every observed snapshot in the Node process, accept strict boolean
+ // evidence only, and bound polling by an explicit deadline.
+ const poll=async(label,observe,accept,timeout=180000)=>{
+  const deadline=Date.now()+timeout;let last=null;
+  do{
+   last=await observe();
+   if(accept(last)===true)return last;
+   await new Promise(resolve=>setTimeout(resolve,250));
+  }while(Date.now()<deadline);
+  throw Error(label+' timed out: '+JSON.stringify(last));
+ };
+ const cacheState=marker=>page.evaluate(async({marker,prefix})=>{
+  const key='mythwrought-m5-shell-'+marker,exists=(await caches.keys()).includes(key);
+  const c=exists?await caches.open(key):null;
+  const html=c?await c.match(location.origin+prefix+'index.html'):null;
+  return {exists,count:c?(await c.keys()).length:0,exact:!!html&&(await html.text()).includes('data-mw-release="'+marker+'"'),controller:navigator.serviceWorker.controller?.state??null};
+ },{marker,prefix});
+ const waitCache=marker=>poll('complete '+marker+' cache',()=>cacheState(marker),s=>s.exists&&s.count===(marker===release?332:323)&&s.exact&&s.controller==='activated');
  const state=()=>page.evaluate(()=>{
   const t=window.__mythwroughtTest,p='mythwrought-mountain-v8-isolated-v1:',seed=t.snapshot().seed;
   return {release:document.querySelector('meta[name="mythwrought-release"]').content,profile:t.fourBiomeProfile()?.generator??null,seed,
@@ -84,10 +98,11 @@ try{
  });
  await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();if(!r)throw Error('Missing worker');await r.update();});
  try{
-  await page.waitForFunction(async()=>{
+  const transition=await poll('new activated controlling worker',()=>page.evaluate(async()=>{
    const sw=navigator.serviceWorker,r=await sw.getRegistration();
-   return !!sw.controller&&sw.controller!==window.__heightPriorController&&sw.controller===r?.active&&sw.controller.state==='activated';
-  },null,{timeout:180000});
+   return {changed:!!sw.controller&&sw.controller!==window.__heightPriorController,activeMatch:!!sw.controller&&sw.controller===r?.active,state:sw.controller?.state??null,installing:r?.installing?.state??null,waiting:r?.waiting?.state??null,events:[...window.__heightWorkerEvents]};
+  }),s=>s.changed&&s.activeMatch&&s.state==='activated'&&s.installing===null&&s.waiting===null&&s.events.some(e=>e.changed===true));
+  check('distinct activated controller observed',true,transition);
   await waitCache(release);
   const controlled=await page.evaluate(async({prefix,release})=>{
    const key='mythwrought-m5-shell-'+release,c=await caches.open(key);
@@ -96,7 +111,7 @@ try{
    const html=await response.text();
    return {cacheCount,controlledRelease:html.includes('data-mw-release="'+release+'"'),events:window.__heightWorkerEvents,controller:navigator.serviceWorker.controller?.state};
   },{prefix,release});
-  check('new worker controls canonical cached source',controlled.cacheCount===332&&controlled.controlledRelease&&controlled.controller==='activated',controlled);
+  check('new worker controls canonical cached source',controlled.cacheCount===332&&controlled.controlledRelease&&controlled.controller==='activated'&&controlled.events.some(e=>e.changed===true),controlled);
  }catch(error){
   evidence.upgradeWorker=await page.evaluate(async()=>{const sw=navigator.serviceWorker,r=await sw.getRegistration();return {controller:sw.controller?.state,changed:sw.controller!==window.__heightPriorController,active:r?.active?.state,installing:r?.installing?.state,waiting:r?.waiting?.state,events:window.__heightWorkerEvents,cacheNames:await caches.keys()};});
   console.error('HEIGHT WORKER DIAGNOSTICS',JSON.stringify(evidence.upgradeWorker));throw error;
@@ -112,7 +127,7 @@ try{
  check('cancel does not replace old world',(await state()).seed===old.seed&&await historical()===old.raw);
  page.once('dialog',d=>d.accept());await page.locator('#newWorld').click();
  await page.waitForFunction(seed=>window.__mythwroughtTest?.snapshot().seed!==seed,old.seed,{timeout:180000});await waitGame();
- const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.seed!==old.seed&&fresh.profile===profile&&fresh.raw&&await historical()===old.raw,fresh);
+ const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.release===release&&fresh.seed!==old.seed&&fresh.profile===profile&&fresh.raw&&await historical()===old.raw,fresh);
  // Use localhost-only source-owned fixture actions, not a simulated mesh.
  // Full real player-controlled ceiling flight is already H7 accepted.
  const cells=await page.evaluate(()=>{
