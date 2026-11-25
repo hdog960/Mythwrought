@@ -80,3 +80,9 @@ within the corresponding bounded quantization error. A missing ray is ALWAYS
 rejected. No structural, collision or tensile-attachment test was relaxed.
 The follow-up pins both D51 and the original D52 ancestry; the cumulative
 D51-to-D52 diff remains exactly the six isolated new files.
+
+The next narrow qualification run `#45664527607` also stopped **before tests**
+because checkout's `fetch-depth: 2` omitted `HEAD^^` for the multi-commit
+ancestry check. The workflow now explicitly fetches depth four and verifies
+every D52 parent back to D51, plus the same six-file D51-to-D52 diff. The
+original source and collision checks remain unchanged.
