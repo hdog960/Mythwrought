@@ -107,3 +107,7 @@ try{
 }finally{
   await browser.close();
 }
+
+// Isolated issue #291 benchmark entry point; original smoke above remains intact.
+// This research-only invocation must not be shipped to production.
+await import('../perf/issue-291/four-viewport-gameplay-browser.mjs');
