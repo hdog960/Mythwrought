@@ -1,0 +1,49 @@
+name: Mountain V8 exact production integration and Home Screen upgrade
+on:
+  push:
+    branches: [release/mountain-v8-production-20261124]
+    paths: [.github/workflows/mountain-v8-production-release.yml]
+permissions:
+  contents: read
+jobs:
+  mountain-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Changed integration and exact manifest acceptance
+        env:
+          MOUNTAIN_PRIOR_ROOT: ${{ github.workspace }}/prior-production
+        run: |
+          git rev-parse HEAD
+          test "$(git -C prior-production rev-parse HEAD)" = bc60a3b5891ee4f3b474378043c9a4a61fb5cc2e
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/mountain-v8-release/*.test.mjs
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+          key: mythwrought-ubuntu-node22-playwright1.58.2-pngjs7-v1
+      - name: Install pinned browser
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual old installed shell to public Mountain NEW WORLD and offline
+        run: node scripts/ci/mountain-v8-production-upgrade.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mountain-v8-production-upgrade
+          path: artifacts/mountain-v8-production/
+          if-no-files-found: warn
