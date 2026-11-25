@@ -29,7 +29,8 @@ const state=()=>page.evaluate(()=>{
 });
 const settle=async (x,z)=>page.waitForFunction(({x,z})=>{
  const c=document.querySelector('#scene');
- return c?.dataset.chunkCenter===Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16)&&
+ return c?.dataset.chunkCenter?.split('|height:')[0]===Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16)&&
+  window.__mythwroughtTest.snapshot().chunks.includes(Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16))&&
   +c.dataset.loadedChunks===25&&+c.dataset.pendingChunks===0;
 },{x,z},{timeout:50000});
 const capture=async(path)=>{

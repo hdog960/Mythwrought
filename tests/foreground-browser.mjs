@@ -83,7 +83,7 @@ try{
 
  // Cross-chunk streaming remains bounded, non-starving and preserves edits.
  await page.evaluate(()=>window.__mythwroughtTest.teleport(-16.5,-.5));
- await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter==='-2,-1',
+ await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter.split('|height:')[0]==='-2,-1'&&window.__mythwroughtTest.snapshot().chunks.includes('-2,-1'),
   null,{timeout:7000});
  await page.waitForFunction(()=>Number(document.querySelector('#scene').dataset.loadedChunks)===25&&
   Number(document.querySelector('#scene').dataset.pendingChunks)===0,null,{timeout:35000});

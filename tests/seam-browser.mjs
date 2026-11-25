@@ -104,7 +104,7 @@ try{
     const dev=window.__mythwroughtTest;
     dev.teleport(16.5,.5);dev.setOrientation(Math.PI,-.14);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter==='1,0',null,{timeout:7000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter.split('|height:')[0]==='1,0'&&window.__mythwroughtTest.snapshot().chunks.includes('1,0'),null,{timeout:7000});
   await populated();
   const positive=await get();
   assert.ok(positive.loaded<=25&&positive.pending===0&&positive.vertices>0&&positive.vertices<5000000);
@@ -113,7 +113,7 @@ try{
     const dev=window.__mythwroughtTest;
     dev.teleport(-16.5,-.5);dev.setOrientation(Math.PI,-.14);
   });
-  await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter==='-2,-1',null,{timeout:7000});
+  await page.waitForFunction(()=>document.querySelector('#scene').dataset.chunkCenter.split('|height:')[0]==='-2,-1'&&window.__mythwroughtTest.snapshot().chunks.includes('-2,-1'),null,{timeout:7000});
   await populated();
   const negative=await get();
   assert.equal(negative.loaded,25);
