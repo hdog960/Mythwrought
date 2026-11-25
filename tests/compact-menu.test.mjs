@@ -7,9 +7,12 @@ const worker=read('sw-m5.js'),updater=read('src/app-update.mjs');
 const menu=html.slice(html.indexOf('<div id="help" hidden>'),html.indexOf('<script type="module"'));
 const primary=menu.split('<details id="advancedMenu">')[0],advanced=menu.split('<div id="advancedTools">')[1];
 test('compact default menu retains requested controls without old generators or diagnostics',()=>{
-  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','newSnowWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
+  for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
   for(const id of ['runAudit','caveCreateWorld','caveLoadWorld','pack2Materials','vaultBackup','mirrorSync','renderPreset','checkGameUpdate'])assert.ok(!primary.includes('id="'+id+'"')&&advanced.includes('id="'+id+'"'),id);
   assert.ok(!html.includes('id="g2bFlightProfile"'));
+  assert.ok(!html.includes('id="newSnowWorld"'));
+  assert.ok(src.includes('if(seedRow&&developerWorldFixtures)'));
+  assert.ok(src.includes("!new URLSearchParams(location.search).has('production-ui')"));
   assert.ok(menu.includes('<details id="advancedMenu">'));
 });
 test('HUD creative checkbox and REC are siblings within world header',()=>{
@@ -40,19 +43,18 @@ function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK
   assert.ok(begin>=0&&end>begin);
   const calls=[],seedMessage={textContent:''},newWorld={},createEnchantedButton={},seedInput={value:'179'};
   const world={seed:179},storage={},rawStorage={};
-  const newSnowWorld={};
-  const document={getElementById:id=>{assert.ok(['newWorld','newSnowWorld'].includes(id));return id==='newWorld'?newWorld:newSnowWorld}};
+  const document={getElementById:id=>{assert.equal(id,'newWorld');return newWorld}};
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
   const source=src.slice(begin,end),importLine="const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');";
   assert.ok(source.includes(importLine));
-  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto',source.replace(importLine,''))(
+  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto','DEFAULT_WORLD_SEED',source.replace(importLine,''))(
     world,storage,rawStorage,{confirm:text=>{calls.push(['confirm',text]);return !cancel}},readOnly,()=>{calls.push(['save-old']);return saveOK},
     (_,n)=>n===2026?{}:null,(_,n)=>!allClaimed&&n===7654321,true,false,
     async(seed,opts)=>{calls.push(['admit',seed,opts.confirmed]);assert.equal(opts.storage,rawStorage);return {world:{seed:Number(seed)}};},
     raw=>{assert.equal(raw,rawStorage);return storage;},
     (scope)=>{assert.equal(scope,storage);calls.push(['save-new']);return {ok:writeOK,reason:'fixture write refused'};},
     (raw,active)=>{assert.equal(raw,rawStorage);assert.equal(active,true);calls.push(['activate']);},
-    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto);
+    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto,179);
   return {click:()=>newWorld.onclick(),calls,seedMessage};
 }
 test('NEW WORLD skips current and claimed seeds then uses verified isolated Mountain V8 admission',async()=>{

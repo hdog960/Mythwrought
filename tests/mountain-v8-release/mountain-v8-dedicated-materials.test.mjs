@@ -12,7 +12,7 @@ import {MOUNTAIN_V8_MATERIAL_IDS as ids,MOUNTAIN_V8_MATERIAL as M,mountainV8Mate
 import {BIOME130_REGISTERED_IDS,biome130Block} from '../../src/biome130-registry.mjs';
 import {ENVIRONMENT_GROUND} from '../../src/environment-ground.mjs';
 import {MANUAL_FIVE_PACK_NUMERIC_IDS} from '../../src/builder-assets/manual-five-pack.mjs';
-import {FourRegionWorld,fourRegionProfile,M8_MOUNTAIN_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,restoreFourRegionWorld} from '../../src/manual-biomes/profile-world.mjs';
+import {FourRegionWorld,fourRegionProfile,M8_MOUNTAIN_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,restoreFourRegionWorld} from '../../src/manual-biomes/profile-world.mjs';
 import {MOUNTAIN_V8_PLANT_PATTERNS} from '../../src/manual-biomes/mountain-v8-vegetation-cells.mjs';
 import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
 import {applyBlockAction,BLOCK_NAMES} from '../../src/blocks.mjs';
@@ -91,15 +91,15 @@ test('historical M7 and P2 changed renderer comparison against exact previous so
  const previous=await import(pathToFileURL(path.join(root,'src/manual-biomes/profile-world.mjs')).href);
  const previousVox=await import(pathToFileURL(path.join(root,'src/voxel.mjs')).href);
  const bytes=m=>Buffer.from(m.buffer,m.byteOffset,m.byteLength);
- for(const gen of [M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR]){
+ for(const gen of [M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR]){
   const a=new FourRegionWorld(seed,fourRegionProfile(seed,gen)),b=new previous.FourRegionWorld(seed,previous.fourRegionProfile(seed,gen));
   assert.deepEqual(a.save(),b.save());
-  for(const [cx,cz] of [[-30,0],[-3,-33]])assert.deepEqual(bytes(meshChunk(a,cx,cz)),bytes(previousVox.meshChunk(b,cx,cz)));
+  for(const [cx,cz] of [[-30,0],[-3,-33],[0,32]])assert.deepEqual(bytes(meshChunk(a,cx,cz)),bytes(previousVox.meshChunk(b,cx,cz)));
  }
 });
 test('exact staged manifest and worker closure',()=>{
  const m=JSON.parse(readFileSync(new URL('../../nonblock-stage-assets.json',import.meta.url)));
- assert.equal(m.version,'20261124-v40');
+ assert.equal(m.version,'20261124-v41');
  for(const [p,h] of Object.entries(m.assets)){
   const bytes=readFileSync(new URL('../../'+(p==='./'?'index.html':p.slice(2)),import.meta.url));
   assert.equal(createHash('sha256').update(bytes).digest('hex'),h,p);
@@ -108,4 +108,26 @@ test('exact staged manifest and worker closure',()=>{
  const worker=readFileSync(new URL('../../sw-m5.js',import.meta.url),'utf8');
  assert.ok(worker.includes('20261124-mountain-v8-v1')&&worker.includes('./src/manual-biomes/mountain-v8-materials.mjs'));
  console.log('manifest assets',Object.keys(m.assets).length);
+});
+
+test('rule #492: same fresh combined profile has physical Snow and Mountain systems, immutable Snow parity',()=>{
+ const seed=2026,combined=new FourRegionWorld(seed,fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR));
+ const snow=new FourRegionWorld(seed,fourRegionProfile(seed,SNOW_P1_GENERATOR));
+ const needle=[-44,11,499];
+ assert.equal(combined.get(...needle),407);assert.equal(combined.snowS17NaturalNeedleAt(...needle),407);
+ assert.equal(snow.get(...needle),407);assert.equal(snow.snowS17NaturalNeedleAt(...needle),407);
+ const bytes=m=>Buffer.from(m.buffer,m.byteOffset,m.byteLength);
+ assert.deepEqual(bytes(meshChunk(combined,-3,31)),bytes(meshChunk(snow,-3,31)),'Same real Snow mesh and pigment');
+ let mountain=null;
+ for(let x=-560;x<=-464&&!mountain;x+=8)for(let z=-48;z<=48&&!mountain;z+=8){
+   for(let y=19;y>=0;y--){const id=combined.get(x,y,z);if(id>=500&&id<=506){mountain={x,y,z,id};break;}}
+ }
+ assert.ok(mountain,'Combined world has no physical dedicated mountain terrain');
+ assert.equal(combined.set(...needle,0),true);
+ assert.equal(combined.set(mountain.x,mountain.y,mountain.z,0),true);
+ const restored=restoreFourRegionWorld(combined.save(),combined.generationProfile);
+ assert.deepEqual(restored.save(),combined.save());assert.equal(restored.get(...needle),0);
+ assert.equal(restored.get(mountain.x,mountain.y,mountain.z),0);
+ assert.equal(snow.get(...needle),407);
+ console.log('RULE492_COMBINED_SOURCE',JSON.stringify({seed,needle,mountain,saveRestore:true}));
 });

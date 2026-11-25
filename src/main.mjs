@@ -3083,7 +3083,8 @@ function start(nonblockStage=null){
             throw Error('No verified latest saved world for this seed');
           if(isolatedMountain&&profile?.generator===M8_MOUNTAIN_GENERATOR)
             throw Error('Unexpected ordinary world profile');
-          if(!save())throw Error('Save current world before loading another seed');
+          if(isolatedMountain)rejectLegacyWorldWhereCaveExists(other,next);
+          if(storageReadOnly||!save())throw Error('Save current world before loading another seed');
           other.setItem(SELECTED_SEED_KEY,String(next));
           if(other.getItem(SELECTED_SEED_KEY)!==String(next))throw Error('Saved world selection not verified');
           setMountainV8Active(rawStorage,!isolatedMountain);location.reload();return;
