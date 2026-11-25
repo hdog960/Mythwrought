@@ -6,6 +6,7 @@ import {biome130Block,isBiome130BlockId,biome130Color} from '../biome130-registr
 import {prototypeSurfaceMesh} from '../shape-prototypes.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,verticalEditSections,depthMeshKey} from '../depth.mjs';
+import {mountainV8Material} from './mountain-v8-materials.mjs';
 import {meshDepthSection} from '../depth-mesh.mjs';
 import {SKY_ISLAND_MAX_Y,skyIslandSectionForY,skyIslandSectionBounds,
   skyIslandMeshKey,skyIslandBodyRegions} from '../floating-islands/sky-runtime-adapter.mjs';
@@ -53,9 +54,10 @@ export function planWildsTowerPrototype(ground,x,z,{height=28}={}){
 }
 // Read-only lower natural overlay and upper natural/explicit edit maps. All
 // source identities and storage remain isolated; no historical save alias.
-export function createWildsUpperResearchWorld(ground,plans=[]){
+export function createWildsUpperResearchWorld(ground,plans=[],{naturalSource=null}={}){
  if(!ground||typeof ground.get!=='function'||!Number.isInteger(ground.seed)||!Array.isArray(plans)||plans.length>8)
    throw Error('Invalid E2 physical ground source');
+ if(naturalSource!==null&&(typeof naturalSource.get!=='function'||naturalSource.seed!==ground.seed||plans.length))throw Error('Invalid separate natural tower authority');
  const natural=new Map(),edits=new Map(),lowerEdits=new Map(),revisions=new Map();
  let revision=0;
  for(const plan of plans)for(const [x,y,z,id] of plan.cells){
@@ -64,7 +66,12 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
       natural.has(k)||ground.get(x,y,z)!==BLOCK.AIR)throw Error('Unsafe overlapping research tree');
    natural.set(k,id);
  }
- const readNatural=(x,y,z)=>natural.get(key(x,y,z))??(y<=WORLD_MAX_Y?ground.get(x,y,z):BLOCK.AIR);
+ const readNatural=(x,y,z)=>{
+   const authored=natural.get(key(x,y,z));if(authored!==undefined)return authored;
+   const base=y<=WORLD_MAX_Y?ground.get(x,y,z):BLOCK.AIR;
+   // Only query lazy tree plans for actual air in the bounded tower band.
+   return base===BLOCK.AIR&&naturalSource&&y>=1&&y<=57?naturalSource.get(x,y,z):base;
+ };
  const lower={get:(x,y,z)=>lowerEdits.get(key(x,y,z))??readNatural(x,y,z),rotationAt:(...p)=>ground.rotationAt?.(...p)??0,
    get biomeCellCount(){return ground.biomeCellCount??0;},
    get pack2Cells(){return ground.pack2Cells;},get pack3Runtime(){return ground.pack3Runtime;},
@@ -74,6 +81,8 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
    get pack2Cells(){return view.pack2Cells;},get pack3Runtime(){return view.pack3Runtime;},
    get manual14Layer(){return view.manual14Layer;},getPack2State:view.getPack2State,
    seed:ground.seed,generationProfile:ground.generationProfile,base:ground,
+   edits:Object.freeze({has:k=>lowerEdits.has(k)||edits.has(k)}),
+   get hasNaturalNonCubeShapes(){return ground.hasNaturalNonCubeShapes===true;},
    get: (x,y,z)=>{if(!coords(x,y,z))throw Error('Invalid research coordinate');return y<WILDS_PHYSICAL_MIN_Y||y>WILDS_PHYSICAL_MAX_Y?BLOCK.AIR:view.get(x,y,z);}});
  function affectedKeys(x,y,z){
    const horizontal=new Set();
@@ -109,7 +118,9 @@ export function createWildsUpperResearchWorld(ground,plans=[]){
    meshSurface:(cx,cz)=>meshChunk(world,cx,cz),
    meshDepth:(cx,cz,section)=>meshDepthSection(world,cx,cz,section),
    meshUpper:(cx,cz,section)=>meshSkyIslandSection({source:world,cx,cz,section,
-      shapeFor:materials.shapeFor,appearanceFor:materials.appearanceFor,
+      // Current M8 terrain can be a Y19 halo neighbor; its partial flora
+      // cannot occlude a whole upper face. Upper edit IDs stay restricted.
+      shapeFor:id=>{const m=mountainV8Material(id);return m?{cube:m.terrain,opaque:m.terrain}:materials.shapeFor(id);},appearanceFor:materials.appearanceFor,
       surfaceMeshFor:materials.surfaceMeshFor,rotationFor:world.rotationAt}),
    bounds:section=>skyIslandSectionBounds(section),
    sectionForY:skyIslandSectionForY,meshKey:skyIslandMeshKey,bodyRegions:skyIslandBodyRegions
