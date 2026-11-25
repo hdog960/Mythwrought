@@ -1,0 +1,238 @@
+{
+  "schema": "mythwrought.builder-b.roadmap-b.wave66-67-source-handoff.v1",
+  "status": "Source candidates only; isolated original V8 tests passed, native new tests pending.",
+  "branch": "builder-b-wave66-67-dry-bathhouses-20261125",
+  "parent": "d2dae96e0c31f9a2bef5d268ec87df98f99d5fec",
+  "reports": [
+    {
+      "wave": 66,
+      "id": "r1:bathhouse:temperate:small:003",
+      "title": "Elmwater Twin Walk-Through Dry Baths",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave66.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave66-focused.test.mjs",
+      "metrics": {
+        "placements": 1902,
+        "walkable": 701,
+        "rooms": 6,
+        "portals": 8,
+        "roles": {
+          "foundation": 840,
+          "wall": 516,
+          "support": 237,
+          "roof": 237,
+          "furnishing": 12,
+          "window": 60
+        },
+        "roofCounts": {
+          "changing-hall": 189,
+          "west-towel-porch": 24,
+          "east-rest-porch": 24
+        },
+        "ringCells": 112,
+        "benchCells": 12,
+        "gatePositions": 8,
+        "throughRoutes": 4,
+        "d4": 56,
+        "maxIoU": 0.2388663967611336,
+        "closest": "r1:bathhouse:snow:large:003",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.2632600258732212
+      },
+      "results": [
+        {
+          "name": "Frozen B115 only and inactive bath source lifecycle",
+          "pass": true
+        },
+        {
+          "name": "Exact unique source and contiguous stone foundation",
+          "pass": true
+        },
+        {
+          "name": "Every grounded portal and room interior reachable, each doorway axis genuinely clear",
+          "pass": true
+        },
+        {
+          "name": "All roofs immediately stone-backed, both bearings per hall continuous to actual roof",
+          "pass": true
+        },
+        {
+          "name": "Dry court solid rings, actual two-wide two-high gates, and full sky clearance",
+          "pass": true
+        },
+        {
+          "name": "Every dry stone bench is solid founded, not phantom walking",
+          "pass": true
+        },
+        {
+          "name": "Two actual opposing gate routes per court traverse its own interior, all gates reachable outside",
+          "pass": true
+        },
+        {
+          "name": "Four-high unresolved windows physically framed and outward facing",
+          "pass": true
+        },
+        {
+          "name": "Earlier original bathhouse constructors pass strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE66_D4 {\"n\":56,\"max\":0.2388663967611336,\"closest\":\"r1:bathhouse:snow:large:003\"}"
+      ]
+    },
+    {
+      "wave": 67,
+      "id": "r1:bathhouse:desert:medium:002",
+      "title": "Ochrestep Crosswind Dry Bathhouse",
+      "source": "src/building-pool/roadmap-b/builder-b-essentials-wave67.mjs",
+      "test": "tests/building-pool/roadmap-b/builder-b-essentials-wave67-focused.test.mjs",
+      "metrics": {
+        "placements": 5271,
+        "walkable": 1539,
+        "rooms": 8,
+        "portals": 14,
+        "roles": {
+          "foundation": 1845,
+          "wall": 1808,
+          "support": 720,
+          "roof": 720,
+          "furnishing": 22,
+          "window": 156
+        },
+        "roofCounts": {
+          "north-changing": 189,
+          "west-wash-gallery": 231,
+          "east-drying-gallery": 198,
+          "south-rest-hall": 102
+        },
+        "ringCells": 160,
+        "benchCells": 22,
+        "gatePositions": 12,
+        "throughRoutes": 6,
+        "d4": 64,
+        "maxIoU": 0.3305988515176374,
+        "closest": "r1:bathhouse:temperate:small:003",
+        "alternateD4": 8,
+        "alternateMaxIoU": 0.3245459871118922
+      },
+      "results": [
+        {
+          "name": "Frozen B115 only and inactive bath source lifecycle",
+          "pass": true
+        },
+        {
+          "name": "Exact unique source and contiguous stone foundation",
+          "pass": true
+        },
+        {
+          "name": "Every grounded portal and room interior reachable, each doorway axis genuinely clear",
+          "pass": true
+        },
+        {
+          "name": "All roofs immediately stone-backed, both bearings per hall continuous to actual roof",
+          "pass": true
+        },
+        {
+          "name": "Dry court solid rings, actual two-wide two-high gates, and full sky clearance",
+          "pass": true
+        },
+        {
+          "name": "Every dry stone bench is solid founded, not phantom walking",
+          "pass": true
+        },
+        {
+          "name": "Two actual opposing gate routes per court traverse its own interior, all gates reachable outside",
+          "pass": true
+        },
+        {
+          "name": "Four-high unresolved windows physically framed and outward facing",
+          "pass": true
+        },
+        {
+          "name": "Earlier original bathhouse constructors pass strict D4 and distinct fingerprints",
+          "pass": true
+        }
+      ],
+      "log": [
+        "WAVE67_D4 {\"n\":64,\"max\":0.3305988515176374,\"closest\":\"r1:bathhouse:temperate:small:003\"}"
+      ]
+    }
+  ],
+  "ownership": {
+    "freezeBlob": "c45b2cff7997ba88986af3de0746be3f13c669d6",
+    "priorAccepted": 228,
+    "b115": 115,
+    "d92": 92,
+    "greenhouseComplete": 18,
+    "priorBathhouseIds": [
+      "r1:bathhouse:desert:small:004",
+      "r1:bathhouse:snow:small:002",
+      "r1:bathhouse:temperate:medium:002",
+      "r1:bathhouse:snow:medium:003",
+      "r1:bathhouse:desert:medium:003",
+      "r1:bathhouse:snow:large:003",
+      "r1:bathhouse:temperate:large:003",
+      "r1:bathhouse:temperate:small:003",
+      "r1:bathhouse:desert:medium:002"
+    ],
+    "alternate": {
+      "head": "342fba1c9ba522b5e9012aedb6829dfa41e34b0d",
+      "sourceBlob": "f6db14d617bbe45d7649128fc71aae4a488968d3",
+      "id": "r1:bathhouse:snow:small:004",
+      "notCounted": true
+    }
+  },
+  "v8Method": "Exact staged callback bodies using immutable original schema, sourcePlan, allocation and genuine earlier constructors; node:test/assert/fs adapters, not native ESM. Alternate branch tested independently, not imported into stored tests.",
+  "compilerBlobs": [
+    "ea1cb53b48dd7f4c51c8da69bf59531d1226aad2",
+    "f1e10c5372d49f6ad9b4d138b887cfb6f2297b96",
+    "64b93c02e262b7fe4049408c2458faa985a710a3"
+  ],
+  "nativeReuse": [
+    {
+      "run": 45428318556,
+      "job": 138566321674,
+      "passed": 32,
+      "artifact": 14937351961
+    },
+    {
+      "run": 45458030376,
+      "job": 138672659619,
+      "head": "d2dae96e0c31f9a2bef5d268ec87df98f99d5fec",
+      "passed": 30,
+      "failed": 0,
+      "durationMs": 3212.031132,
+      "artifact": 14951302355,
+      "digest": "sha256:46ea39183fcbd1ec8873dab74031e9e8376064600733acc5910cc4a3a82e5ff5",
+      "digestEvidence": "GitHub upload log and metadata agree; bytes not independently downloaded."
+    }
+  ],
+  "progress": {
+    "services": 67,
+    "servicesRemaining": 48,
+    "residential": 10,
+    "residentialRemaining": 169,
+    "total": 77,
+    "goal": 294,
+    "remaining": 217
+  },
+  "protected": {
+    "main": "a0487e34d9f5d00a49da05c3bf5b6545ff923085",
+    "mainAdvance": "Independent merged Mountain/Snow PR491",
+    "pr407": "20755ffa29b520bb8a934270216b17a33dc87367",
+    "noMerge": true,
+    "noDeploy": true,
+    "noSettlements": true,
+    "noRegistry": true,
+    "noSaveWrites": true
+  },
+  "pending": [
+    "Batch new native tests with next new wave, no repeated greenhouse cohorts",
+    "Full accepted228 historical D4",
+    "Installed asset physics",
+    "M7 player",
+    "WebGL2",
+    "iPhone Home Screen PWA",
+    "Creator visual approval"
+  ]
+}
