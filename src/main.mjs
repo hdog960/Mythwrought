@@ -28,7 +28,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -43,7 +43,8 @@ import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
-import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy} from './mirror.mjs';
+import {mountainV8Storage,mountainV8DatabaseFactory,V8_ACTIVE_KEY,setMountainV8Active} from './manual-biomes/mountain-v8-isolated-storage.mjs';
+import {MIRROR_PREF,MirrorWriteQueue,inspectMirror,getMirrorCopy,writeMirror} from './mirror.mjs';
 import {normalizeRenderPreset,bufferDimensions,RENDER_PREF} from './render-budget.mjs';
 import {installExplorationMap} from './exploration-map.mjs';
 import {createG2FlightState,armG2Flight,selectG2FlightProfile,planG2FlightStep,
@@ -88,6 +89,9 @@ const help=document.getElementById('help');
 const gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,powerPreference:'high-performance'});
 function message(s){status.textContent=s;}
 function fatal(s){notice.hidden=false;notice.textContent=s;message('3D renderer unavailable');}
+// Rule #492: alternate generators exist only in loopback developer fixtures.
+const developerWorldFixtures=['localhost','127.0.0.1'].includes(location.hostname)&&
+  !new URLSearchParams(location.search).has('production-ui');
 if(!gl)fatal('This browser does not provide WebGL2. A compatible iPhone or desktop browser is required.');
 else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     new URLSearchParams(location.search).has('nonblock-stage')){
@@ -102,9 +106,44 @@ else if(['localhost','127.0.0.1'].includes(location.hostname)&&
     catch(error){console.warn('Nonblock staging effects disabled',error);}
   }
   start(layout?{layout,offline,effects}:null);
-}else start();
+}else void startLatestProductionWorld();
+
+async function startLatestProductionWorld(){
+  // A completely new installation gets the same combined generator as
+  // NEW WORLD. Existing selections and historical saves are never migrated.
+  if(developerWorldFixtures){start();return;}
+  try{
+    const raw=window.localStorage,scope=mountainV8Storage(raw);
+    if(raw.getItem(SELECTED_SEED_KEY)===null&&raw.getItem(V8_ACTIVE_KEY)!=='1'&&
+       scope.getItem(SELECTED_SEED_KEY)===null&&isUnclaimedWorldSeed(raw,DEFAULT_WORLD_SEED)){
+      let seed=null;
+      for(let i=0;i<32;i++){
+        const n=crypto.getRandomValues(new Int32Array(1))[0];
+        if(n!==DEFAULT_WORLD_SEED&&isUnclaimedWorldSeed(raw,n)&&isUnclaimedWorldSeed(scope,n)){seed=n;break;}
+      }
+      if(seed===null)throw Error('No unused world seed available');
+      const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+      const loaded=await createMountainV8IsolatedWorld(String(seed),{confirmed:true,storage:raw});
+      const stored=saveM2World(scope,loaded.world);
+      if(!stored.ok)throw Error('Initial world save not verified: '+stored.reason);
+      setMountainV8Active(raw,true);
+    }
+    start();
+  }catch(error){
+    notice.hidden=false;notice.textContent='World creation refused: '+String(error.message||error)+'. Existing saves were not replaced.';
+    message('World not created');
+  }
+}
 
 function start(nonblockStage=null){
+  const rawStorage=window.localStorage;
+  // Combined production profile uses internal storage isolation, not a player opt-in.
+  const mountainEnabled=!nonblockStage;
+  const isolatedMountain=mountainEnabled&&rawStorage.getItem(V8_ACTIVE_KEY)==='1';
+  // Bind once for the lifetime of this game session; no closure can retain an
+  // ordinary storage writer after entering the isolated candidate.
+  const localStorage=isolatedMountain?mountainV8Storage(rawStorage):rawStorage;
+  const databaseFactory=isolatedMountain?mountainV8DatabaseFactory(globalThis.indexedDB):globalThis.indexedDB;
   let gameplayRecorder=null;
   let world,storageReadOnly=false,recoveryNote='',caveSession=null,caveOps=null;
   const combinedWorld=()=>isEnvironmentGenerator(world.base?.generationProfile?.generator);
@@ -116,14 +155,19 @@ function start(nonblockStage=null){
     // Profiled worlds must never be restored using the old bare VoxelWorld
     // baseline, which can silently discard legacy-equivalent player edits.
     // The old loader below remains EXACT for every ordinary legacy seed.
-    if(readFourRegionProfile(localStorage,seed)){
+    const storedProfile=readFourRegionProfile(localStorage,seed)?.profile;
+    if(storedProfile){
+      if((storedProfile.generator===M8_MOUNTAIN_GENERATOR)!==isolatedMountain)
+        throw Error('Mountain V8 profile requires its isolated storage session');
       const result=openM2World(localStorage,planM2WorldChoice(String(seed)));
       if(result.recovered)recoveryNote=result.warning||
         'Recovered a verified four-biome profile; export a backup';
       return result.world;
     }
+    if(isolatedMountain)throw Error('No isolated Mountain V8 world for this seed');
     const result=loadWorldSafe(localStorage,seed);
     if(!nonblockStage&&isUnclaimedWorldSeed(localStorage,seed,result)){
+      if(!developerWorldFixtures)throw Error('Use NEW WORLD to create the current combined generator');
       const choice=planM2WorldChoice(String(seed),M2_WORLD_MODE.CREATE_ENVIRONMENT_V7,{confirmed:true});
       return openM2World(localStorage,choice).world;
     }
@@ -307,7 +351,7 @@ function start(nonblockStage=null){
     }).catch(error=>({supported:false,reason:String(error)}));
   }
   if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR].includes(
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
         world.base.generationProfile.generator)))
     void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
@@ -795,7 +839,7 @@ function start(nonblockStage=null){
   const frameHistory=new FrameHistory(360);
   const meshCadence=new MeshFrameCadence({budgetMs:12,maxCooldown:2});
   const gpuRetry=new GpuUploadRetry({baseDelayMs:250,maxDelayMs:8000});
-  const mirrorQueue=new MirrorWriteQueue();
+  const mirrorQueue=new MirrorWriteQueue(raw=>writeMirror(raw,databaseFactory));
   const mirrorStatus=document.getElementById('mirrorStatus');
   const mirrorSlot=document.getElementById('mirrorSlot');
   const mirrorDownload=document.getElementById('mirrorDownload');
@@ -967,38 +1011,53 @@ function start(nonblockStage=null){
     return combineVertices(pack2WaterSectionVertices(world,cx,cz,section),
       manual14AtChunk(cx,cz,section).transparent);
   }
-  function refreshEditedMeshes(x,z,y=0){
+  // Synchronous real renderer owner: retain all old loaded entries until
+  // the complete upload batch is ready. No awaits, save writes or callbacks
+  // between final validation and map publication. Context loss invalidates
+  // the batch rather than publishing dead handles.
+  function publishEditedChunkBatch(batch){
+    if(gl.isContextLost())throw Error('Graphics context lost before edit mesh staging');
+    const owner=world;
+    const originals=batch.map(item=>chunks.get(item.key));
+    if(originals.some(item=>!item))throw Error('Edited chunk no longer resident');
+    const ready=[];
+    try{
+      for(const item of batch){
+        if(gl.isContextLost())throw Error('Graphics context lost during edit mesh staging');
+        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
+      }
+      if(gl.isContextLost()||world!==owner||
+         batch.some((item,i)=>chunks.get(item.key)!==originals[i]))
+        throw Error('Edited mesh owner changed before publication');
+    }catch(error){
+      if(!gl.isContextLost())for(const item of ready)deleteChunkBuffers(item);
+      throw error;
+    }
+    for(const item of ready)chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+      buffer:item.buffer,count:item.count,waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+    // All replacements are visible before any old handle is retired.
+    if(!gl.isContextLost())for(const old of originals)deleteChunkBuffers(old);
+    return ready;
+  }
+  function refreshEditedMeshes(x,z,y=0,affectedCells=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const batch=[];
     // Original surface-mesh three-block RGB cue can cross an adjacent chunk
     // before the edited source reaches the one-voxel physics seam. Preserve
     // existing depth/geometry refresh for all legacy or non-surface edits.
-    const affected=desertSeamEditAffectedChunks(world,x,z,y);
-    for(const section of verticalEditSections(y))
-      for(const {cx,cz} of affected){
+    const seen=new Set();
+    for(const [px,py,pz] of affectedCells??[[x,y,z]])
+      for(const section of verticalEditSections(py))
+      for(const {cx,cz} of desertSeamEditAffectedChunks(world,px,pz,py)){
         const key=depthMeshKey(cx,cz,section);
-        if(!chunks.has(key))continue;
+        if(seen.has(key)||!chunks.has(key))continue;
+        seen.add(key);
         const vertices=meshPlayableChunk(cx,cz,section);
         const water=meshPlayableWater(cx,cz,section);
         batch.push({key,cx,cz,section,vertices,water});
       }
-    const ready=[];
-    try{
-      for(const item of batch){
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water)});
-      }
-    }catch(err){
-      for(const item of ready)deleteChunkBuffers(item);
-      throw err;
-    }
-    for(const item of ready){
-      const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
-    }
+    const ready=publishEditedChunkBatch(batch);
     editMeshBatches++;
     lastEditMeshKeys=ready.map(item=>item.key);
     if(caveSession||combinedWorld())caveFarGpu.invalidate();
@@ -1011,10 +1070,7 @@ function start(nonblockStage=null){
     if(!chunks.has(key))return;
     const vertices=meshPlayableChunk(cx,cz,section);
     const water=meshPlayableWater(cx,cz,section);
-    const buffers=uploadPack2Chunk(vertices,water);
-    const old=chunks.get(key);
-    chunks.set(key,{x:cx,z:cz,section,...buffers});
-    deleteChunkBuffers(old);
+    publishEditedChunkBatch([{key,cx,cz,section,vertices,water}]);
     editMeshBatches++;
     lastEditMeshKeys=[key];
   }
@@ -1032,24 +1088,10 @@ function start(nonblockStage=null){
       const cx=chunkCoord(x),cz=chunkCoord(z),key=depthMeshKey(cx,cz,section);
       if(chunks.has(key))unique.set(key,{key,cx,cz,section});
     }
-    const ready=[];
-    try{
-      for(const item of unique.values()){
-        const vertices=meshPlayableChunk(item.cx,item.cz,item.section);
-        const water=meshPlayableWater(item.cx,item.cz,item.section);
-        ready.push({...item,...uploadPack2Chunk(vertices,water)});
-      }
-    }catch(error){
-      for(const item of ready)deleteChunkBuffers(item);
-      throw error;
-    }
-    for(const item of ready){
-      const old=chunks.get(item.key);
-      chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-        buffer:item.buffer,count:item.count,
-        waterBuffer:item.waterBuffer,waterCount:item.waterCount});
-      deleteChunkBuffers(old);
-    }
+    const batch=[...unique.values()].map(item=>({...item,
+      vertices:meshPlayableChunk(item.cx,item.cz,item.section),
+      water:meshPlayableWater(item.cx,item.cz,item.section)}));
+    const ready=publishEditedChunkBatch(batch);
     if(ready.length){
       editMeshBatches++;
       lastEditMeshKeys=ready.map(x=>x.key);
@@ -2528,7 +2570,7 @@ function start(nonblockStage=null){
   }
   async function refreshVault(prefer=''){
     clearVaultLink();
-    const records=await listVaultBackups();
+    const records=await listVaultBackups(databaseFactory);
     const selected=prefer||vaultSelect.value;
     vaultSelect.replaceChildren();
     const prompt=document.createElement('option');
@@ -2552,7 +2594,7 @@ function start(nonblockStage=null){
     const capturedSeed=world.seed;
     const raw=world.base instanceof FourRegionWorld?exportM2World(world):JSON.stringify(world.pack2Cells.size?
       pack2ExportBundle(world):world.save());
-    const snapshot=await createVaultBackup(raw);
+    const snapshot=await createVaultBackup(raw,databaseFactory);
     if(capturedSeed!==snapshot.seed)throw Error('Snapshot seed mismatch');
     await refreshVault(snapshot.id);
     vaultStatus.textContent='Verified device backup for seed '+snapshot.seed+
@@ -2562,7 +2604,7 @@ function start(nonblockStage=null){
   });
   document.getElementById('vaultPrepare').onclick=()=>useVault(async()=>{
     clearVaultLink();
-    const snapshot=await inspectVaultBackup(chosenVaultId());
+    const snapshot=await inspectVaultBackup(chosenVaultId(),databaseFactory);
     // A second user tap on the actual link preserves Safari's download gesture.
     vaultObjectUrl=URL.createObjectURL(new Blob([snapshot.raw],{type:'application/json'}));
     vaultLink.href=vaultObjectUrl;
@@ -2573,7 +2615,7 @@ function start(nonblockStage=null){
   document.getElementById('vaultRestore').onclick=()=>useVault(async()=>{
     clearVaultLink();
     const activeSeed=world.seed;
-    const snapshot=await inspectVaultBackup(chosenVaultId());
+    const snapshot=await inspectVaultBackup(chosenVaultId(),databaseFactory);
     const candidate=prepareSnapshotRestore(snapshot.raw,snapshot.seed);
     // Always require approval, including when restoring a different seed.
     if(!window.confirm('RESTORE device backup for seed '+snapshot.seed+' with '+snapshot.edits+
@@ -2614,14 +2656,14 @@ function start(nonblockStage=null){
   document.getElementById('vaultDelete').onclick=()=>useVault(async()=>{
     clearVaultLink();
     const id=chosenVaultId();
-    const all=await listVaultBackups();
+    const all=await listVaultBackups(databaseFactory);
     const entry=all.find(item=>item.id===id);
     if(!entry)throw Error('Selected backup no longer exists');
     if(!window.confirm('Permanently DELETE only this device backup from seed '+(entry.seed??'?')+
       '? This cannot be undone. Your live world and other snapshots will not be touched.')){
       vaultStatus.textContent='Deletion cancelled. No backup changed.';return;
     }
-    await deleteVaultBackup(id);
+    await deleteVaultBackup(id,databaseFactory);
     const remaining=await refreshVault();
     vaultStatus.textContent='Selected snapshot deleted and verified; '+remaining.length+' backups remain. Live world unchanged.';
   });
@@ -2682,7 +2724,7 @@ function start(nonblockStage=null){
   });
   document.getElementById('mirrorCheck').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
-    const state=await inspectMirror(world.seed);
+    const state=await inspectMirror(world.seed,databaseFactory);
     if(!state.exists){mirrorStatus.textContent='No device mirror for seed '+world.seed+'. Save and SYNC to make one.';return;}
     const summarize=(label,slot)=>label+': '+(slot===null?'absent':
       slot.valid?'verified, '+slot.edits+' edits, '+slot.createdAt:'DAMAGED ('+slot.error+')');
@@ -2694,7 +2736,7 @@ function start(nonblockStage=null){
   document.getElementById('mirrorPrepare').onclick=()=>withMirror(async()=>{
     await settleMirrorWrites();
     const selectedSeed=world.seed,selectedVersion=mirrorSlot.value;
-    const snap=await getMirrorCopy(selectedSeed,selectedVersion);
+    const snap=await getMirrorCopy(selectedSeed,selectedVersion,databaseFactory);
     if(world.seed!==selectedSeed)throw Error('Active world changed during export; select this seed again');
     mirrorDownloadUrl=URL.createObjectURL(new Blob([snap.raw],{type:'application/json'}));
     mirrorDownload.href=mirrorDownloadUrl;
@@ -2706,7 +2748,7 @@ function start(nonblockStage=null){
     if(storageReadOnly)throw Error('Read-only startup protection active; use the regular IMPORT flow to repair damaged saved bytes');
     await settleMirrorWrites(); // Never let an older queued write race a restore.
     const seed=world.seed,which=mirrorSlot.value;
-    const snap=await getMirrorCopy(seed,which);
+    const snap=await getMirrorCopy(seed,which,databaseFactory);
     const candidate=prepareSnapshotRestore(snap.raw,seed);
     if(!window.confirm('RESTORE the '+which+' verified mirror of seed '+seed+
       ' with '+snap.edits+' edits? The current primary will be kept in the previous-good local backup. Cancel changes nothing.')){
@@ -2789,7 +2831,11 @@ function start(nonblockStage=null){
       });
     }catch(err){caveWorldStatus.textContent='CAVE NOT ACTIVATED: '+err.message;}
   }
-  document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  if(developerWorldFixtures){
+    const fixture=document.getElementById('developerCaveCreateFixture');
+    fixture.replaceWith(fixture.content.cloneNode(true));
+    document.getElementById('caveCreateWorld').onclick=()=>openExplicitCaveWorld('create');
+  }
   document.getElementById('caveLoadWorld').onclick=()=>openExplicitCaveWorld('load');
   // Explicit, separate NEW WORLD action in the existing settings sheet:
   // never an implicit alternate seed, ordinary LOAD or save migration.
@@ -2801,7 +2847,7 @@ function start(nonblockStage=null){
   biomeChoiceHint.className='controlhint';
   biomeChoiceHint.textContent='LOAD / CREATE opens saved seeds or starts the current game on an unused seed.';
   const seedRow=document.getElementById('legacyWorldTools');
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     seedRow.append(createFourBiomeButton);
     createFourBiomeButton.insertAdjacentElement('afterend',biomeChoiceHint);
   }
@@ -2815,7 +2861,7 @@ function start(nonblockStage=null){
   const v5Hint=document.createElement('p');
   v5Hint.className='controlhint';
   v5Hint.textContent='Experimental v5 for NEW UNUSED SEEDS only. The ordinary v4 generator, older worlds and existing saves are unchanged. Use WORLD EXPORT for version-safe backups.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     biomeChoiceHint.insertAdjacentElement('afterend',createV5MountainWorldButton);
     createV5MountainWorldButton.insertAdjacentElement('afterend',v5Hint);
   }
@@ -2827,7 +2873,7 @@ function start(nonblockStage=null){
     'Create unused-seed world with 30 percent Plains and 17.5 percent each other biome');
   const v6Hint=document.createElement('p');v6Hint.className='controlhint';
   v6Hint.textContent='NEW UNUSED SEEDS ONLY: 30% Plains; 17.5% each Mountains, Desert, Snow and Enchanted Forest. Your existing worlds and saves stay intact.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     v5Hint.insertAdjacentElement('afterend',createBalancedV6Button);
     createBalancedV6Button.insertAdjacentElement('afterend',v6Hint);
   }
@@ -2836,7 +2882,7 @@ function start(nonblockStage=null){
   createEnchantedButton.textContent='CREATE NEW ENCHANTED FOREST WORLD';
   const enchantedHint=document.createElement('p');enchantedHint.className='controlhint';
   enchantedHint.textContent='New unused seed only. Improved forest trees and ground; existing worlds never convert.';
-  if(seedRow){
+  if(seedRow&&developerWorldFixtures){
     v6Hint.insertAdjacentElement('afterend',createEnchantedButton);
     createEnchantedButton.insertAdjacentElement('afterend',enchantedHint);
   }
@@ -2854,7 +2900,7 @@ function start(nonblockStage=null){
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR].includes(
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
           world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
@@ -2929,60 +2975,121 @@ function start(nonblockStage=null){
         String(error.message||error);
     }
   };
-  function createLatestMenuWorld(next){
+  // Public explicit new-world admission uses the qualified isolated namespace.
+  // Older tabs retain their ordinary keys, never the Mountain save namespace.
+  if(mountainEnabled&&seedRow){
+    if(isolatedMountain){
+      const exit=document.createElement('button');exit.id='exitMountainV8Candidate';exit.type='button';
+      exit.textContent='RETURN TO PREVIOUS SAVED WORLD';seedRow.append(exit);
+      exit.onclick=()=>{try{if(!storageReadOnly&&!save())throw Error('Save Mountain V8 first');
+        setMountainV8Active(rawStorage,false);location.reload();
+      }catch(error){seedMessage.textContent=String(error.message||error);}};
+    }
+    if(!isolatedMountain){
+      const resume=document.createElement('button');resume.id='resumeMountainV8Candidate';resume.type='button';
+      resume.textContent='RESUME LATEST SAVED WORLD';
+      const scoped=mountainV8Storage(rawStorage);
+      resume.hidden=scoped.getItem(SELECTED_SEED_KEY)===null;
+      seedRow.append(resume);
+      resume.onclick=()=>{try{
+        const seed=worldSeedFromText(scoped.getItem(SELECTED_SEED_KEY));
+        if(readFourRegionProfile(scoped,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+          throw Error('No verified isolated Mountain save');
+        if(!storageReadOnly&&!save())throw Error('Save ordinary world first');
+        setMountainV8Active(rawStorage,true);location.reload();
+      }catch(error){seedMessage.textContent=String(error.message||error);}};
+    }
+    if(developerWorldFixtures){
+    const v8Button=document.createElement('button');
+    v8Button.id='createMountainV8Candidate';v8Button.type='button';
+    v8Button.textContent='CREATE NEW MOUNTAIN V8';
+    seedRow.append(v8Button);
+    v8Button.onclick=async()=>{
+      if(v8Button.disabled)return;
+      v8Button.disabled=true;
+      try{
+        const next=worldSeedFromText(seedInput.value),former=world;
+        if(next===former.seed)throw Error('Choose a different unused seed');
+        if(!window.confirm('Create isolated Mountain V8 world for unused seed '+next+'?'))return;
+        if(!storageReadOnly&&!save())throw Error('Current world must be saved first');
+        const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+        const candidate=await createMountainV8IsolatedWorld(String(next),{confirmed:true,storage:rawStorage});
+        if(world!==former||changed)throw Error('Current world changed while admission ran; candidate saved separately, not selected');
+        const scoped=mountainV8Storage(rawStorage);
+        const stored=saveM2World(scoped,candidate.world);
+        if(!stored.ok)throw Error('V8 save verification failed: '+stored.reason);
+        setMountainV8Active(rawStorage,true);location.reload();
+      }catch(error){seedMessage.textContent='V8 candidate not selected: '+String(error.message||error);}
+      finally{v8Button.disabled=false;}
+    };
+    }
+  }
+  if(isolatedMountain){
+    for(const button of [createFourBiomeButton,createV5MountainWorldButton,createBalancedV6Button,createEnchantedButton,
+      document.getElementById('caveCreateWorld'),document.getElementById('caveLoadWorld')].filter(Boolean)){
+      button.addEventListener('click',event=>{event.preventDefault();event.stopImmediatePropagation();
+        seedMessage.textContent='Return to the ordinary world before using this generator.';},true);
+    }
+  }
+  async function createLatestMenuWorld(next){
     if(next===world.seed)throw Error('Choose a different unused seed for a new world');
-    rejectLegacyWorldWhereCaveExists(localStorage,next);
-    if(!window.confirm('CREATE NEW WORLD for unused seed '+next+'? Existing worlds stay intact.'))return false;
-    if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents activation');
-    if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
-    const choice=planM2WorldChoice(String(next),M2_WORLD_MODE.CREATE_ENCHANTED_P2,{confirmed:true});
-    const loaded=openM2World(localStorage,choice);
-    if(loaded.base.generationProfile.generator!==ENCHANTED_P2_GENERATOR)throw Error('Latest profile did not activate');
-    const stored=saveM2World(localStorage,loaded.world);
+    if(!mountainEnabled)throw Error('Latest world creation not available in staging');
+    if(!window.confirm('CREATE NEW WORLD with all current released systems for unused seed '+next+'? Existing worlds stay intact.'))return false;
+    if(storageReadOnly||!save())throw Error('Save current world before creating a new seed');
+    const former=world;
+    const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+    const loaded=await createMountainV8IsolatedWorld(String(next),{confirmed:true,storage:rawStorage});
+    if(world!==former||changed)throw Error('Current world changed; new world retained separately');
+    const stored=saveM2World(mountainV8Storage(rawStorage),loaded.world);
     if(!stored.ok)throw Error('New world save not verified: '+stored.reason);
-    enterPreparedM2World(loaded.world,'New world '+next+' ready · latest generator.');
+    setMountainV8Active(rawStorage,true);location.reload();
     return true;
   }
-  createEnchantedButton.onclick=()=>{
-    try{createLatestMenuWorld(worldSeedFromText(seedInput.value));}
+  createEnchantedButton.onclick=async()=>{
+    try{await createLatestMenuWorld(worldSeedFromText(seedInput.value));}
     catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
   };
-  document.getElementById('newSnowWorld').onclick=()=>{
-    try{
-      const next=worldSeedFromText(seedInput.value);
-      if(next===world.seed)throw Error('Enter a different unused seed for Snow');
-      rejectLegacyWorldWhereCaveExists(localStorage,next);
-      if(!window.confirm('CREATE NEW SNOW WORLD for unused seed '+next+'? Existing worlds stay intact.'))return;
-      if(!isUnclaimedWorldSeed(localStorage,next))throw Error('Existing seed/save prevents Snow activation');
-      if(!storageReadOnly&&!save())throw Error('Save current world before creating a new seed');
-      const loaded=openM2World(localStorage,planM2WorldChoice(String(next),M2_WORLD_MODE.CREATE_SNOW_P1,{confirmed:true}));
-      if(loaded.base.generationProfile.generator!==SNOW_P1_GENERATOR)throw Error('Snow profile did not activate');
-      const stored=saveM2World(localStorage,loaded.world);
-      if(!stored.ok)throw Error('New Snow save not verified: '+stored.reason);
-      enterPreparedM2World(loaded.world,'New Snow world '+next+' ready · improved winter and Enchanted forests.');
-    }catch(error){seedMessage.textContent='Snow world refused; original world retained: '+String(error.message||error);}
-  };
-  document.getElementById('newWorld').onclick=()=>{
+  document.getElementById('newWorld').onclick=async()=>{
+    const button=document.getElementById('newWorld');if(button.disabled)return;button.disabled=true;
     try{
       // A fresh random signed 32-bit seed, checked against the actual existing
       // profile/slot/sidecar gate. No old world is reinterpreted or deleted.
       let next=null;
       for(let attempt=0;attempt<32;attempt++){
         const candidate=crypto.getRandomValues(new Int32Array(1))[0];
-        if(candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
+        if(candidate===DEFAULT_WORLD_SEED||candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
            !isUnclaimedWorldSeed(localStorage,candidate))continue;
         next=candidate;break;
       }
       if(next===null)throw Error('Could not find an unused seed. Try again.');
-      createLatestMenuWorld(next);
+      await createLatestMenuWorld(next);
     }catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
+    finally{button.disabled=false;}
   };
-  document.getElementById('switchWorld').onclick=()=>{
+  document.getElementById('switchWorld').onclick=async()=>{
     try{
       const next=worldSeedFromText(seedInput.value);
       if(caveSession&&next===world.seed)
         throw Error('This seed belongs to a cave profile. LOAD CAVE PROFILE or enter a different ordinary world seed.');
       if(next===world.seed&&!storageReadOnly){seedMessage.textContent='Already exploring this seed.';return;}
+      if(!developerWorldFixtures){
+        // Explicit test codes may open saved worlds, or create the exact
+        // same latest profile as NEW WORLD; never create a legacy generator.
+        const other=isolatedMountain?rawStorage:mountainV8Storage(rawStorage);
+        if(isUnclaimedWorldSeed(localStorage,next)){
+          if(isUnclaimedWorldSeed(other,next)){await createLatestMenuWorld(next);return;}
+          const profile=readFourRegionProfile(other,next)?.profile;
+          if(!isolatedMountain&&profile?.generator!==M8_MOUNTAIN_GENERATOR)
+            throw Error('No verified latest saved world for this seed');
+          if(isolatedMountain&&profile?.generator===M8_MOUNTAIN_GENERATOR)
+            throw Error('Unexpected ordinary world profile');
+          if(isolatedMountain)rejectLegacyWorldWhereCaveExists(other,next);
+          if(storageReadOnly||!save())throw Error('Save current world before loading another seed');
+          other.setItem(SELECTED_SEED_KEY,String(next));
+          if(other.getItem(SELECTED_SEED_KEY)!==String(next))throw Error('Saved world selection not verified');
+          setMountainV8Active(rawStorage,!isolatedMountain);location.reload();return;
+        }
+      }
       rejectLegacyWorldWhereCaveExists(localStorage,next);
       if(!storageReadOnly&&!save())throw Error('Current world is not verified saved. Export before switching.');
       const candidate=loadWorld(next);
@@ -3049,16 +3156,29 @@ function start(nonblockStage=null){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
+      if(isolatedMountain&&incoming?.profile?.generator!==M8_MOUNTAIN_GENERATOR)
+        throw Error('Return to the ordinary world to import a non-Mountain profile');
       if(incoming?.kind==='mythwrought-four-biomes-export'){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.
         const examined=inspectM2WorldExport(rawImport);
+        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR&&!mountainEnabled)
+          throw Error('Mountain V8 import is not publicly enabled');
         if(storageReadOnly)throw Error('Read-only save protection is active');
         if(examined.seed===world.seed)
           throw Error('Biome bundle cannot replace your active seed; export your world and choose a separate unused seed');
         if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
           return;
         if(!save())throw Error('Save your current world before importing');
+        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR){
+          if(!mountainEnabled)throw Error('Mountain V8 import is not publicly enabled');
+          const {importMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
+          const former=world;
+          const imported=await importMountainV8IsolatedWorld(rawImport,{confirmed:true,storage:rawStorage});
+          if(world!==former||changed)throw Error('Current world changed; imported Mountain save retained separately');
+          if(imported.base.generationProfile.generator!==M8_MOUNTAIN_GENERATOR)throw Error('Mountain import profile mismatch');
+          setMountainV8Active(rawStorage,true);location.reload();return;
+        }
         // Preserve EXACT imported generator identity, even for older v2/v3.
         const intent=planM2WorldChoice(String(examined.seed),
           M2_WORLD_MODE.IMPORT_PROFILE,{confirmed:true,

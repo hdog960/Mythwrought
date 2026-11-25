@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261124-snow-p1-v1';
+const RELEASE='20261124-mountain-v8-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261124-compact-menu-v1';
+const PREVIOUS='mythwrought-m5-shell-20261124-snow-p1-v1';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));

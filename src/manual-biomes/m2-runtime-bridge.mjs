@@ -173,7 +173,9 @@ export function inspectSnapshotWorld(raw,seed){
   if(record?.kind!=='mythwrought-four-biomes-export'){
     if(record&&(Object.hasOwn(record,'profile')||Object.hasOwn(record,'kind')))
       throw Error('Unsupported snapshot profile');
-    return parseWorldData(raw,seed);
+    const world=importWorldData(raw);
+    if(seed!==undefined&&seed!==world.seed)throw Error('Snapshot world seed mismatch');
+    return world;
   }
   const {world}=inspectM2WorldExport(raw);
   if(seed!==undefined&&seed!==world.seed)throw Error('Snapshot world seed mismatch');

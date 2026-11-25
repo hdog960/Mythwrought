@@ -114,6 +114,12 @@ try{
       // Cross-world isolation: only in the largest viewport to keep evidence focused.
       let seedIsolation=null;
       if(width===932){
+        const clockRaw=seed=>page.evaluate(seed=>localStorage.getItem('mythwrought-sky-s1-clock-'+seed),seed);
+        const originalClock=await clockRaw(179);
+        assert.ok(originalClock,'Missing original persisted clock');
+        const originalRecord=JSON.parse(originalClock);
+        assert.equal(originalRecord.seed,179);
+        assert.equal(originalRecord.anchorPhaseMs,720000);
         await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
         await page.locator('#seedInput').fill('Moonlit Vale');
         await page.locator('#switchWorld').click();
@@ -125,16 +131,30 @@ try{
         await page.locator('#skySetNight').click();
         const otherNight=await state();
         assert.ok(otherNight.phase<20000);
+        const otherClock=await clockRaw(other.seed);
+        assert.equal(JSON.parse(otherClock).anchorPhaseMs,0);
+        assert.equal(await clockRaw(179),originalClock,'Night in other world overwrote seed179 clock');
         await page.locator('#seedInput').fill('179');
         await page.locator('#switchWorld').click();
         await page.waitForFunction(()=>document.querySelector('#scene')?.dataset.skyClockSeed==='179');
         await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.loadedChunks===25,
           null,{timeout:45000});
         const back=await state();
-        assert.ok(back.phase>=720000&&back.phase<750000,
-          'World 179 clock was replaced by Moonlit Vale time');
+        assert.equal(back.seed,'179');
+        assert.equal(await clockRaw(179),originalClock,'Returning to seed179 rewrote its saved clock');
+        assert.equal(await clockRaw(other.seed),otherClock,'Returning to seed179 rewrote other saved clock');
+        // A world clock deliberately advances during time spent in another world.
+        // Compare the measured renderer phase to its own immutable persisted wall anchor,
+        // not an arbitrary 30-second noon window on slow software-rendered runners.
+        const receipt=await page.evaluate(record=>{
+          const cycle=1440000,now=Date.now(),phase=Number(document.querySelector('#scene').dataset.skyClockPhaseMs);
+          const expected=(record.anchorPhaseMs+Math.max(0,now-record.wallAnchorMs))%cycle;
+          const delta=Math.abs(phase-expected);
+          return {phase,expected,wallNow:now,wallAnchorMs:record.wallAnchorMs,phaseError:Math.min(delta,cycle-delta)};
+        },originalRecord);
+        assert.ok(receipt.phaseError<2000,'Returned renderer clock disagrees with original saved wall anchor '+JSON.stringify(receipt));
         seedIsolation={otherSeed:other.seed,otherPhase:other.phase,otherNightPhase:otherNight.phase,
-          returningSeed:back.seed,returnPhase:back.phase};
+          returningSeed:back.seed,returnPhase:back.phase,originalClockPreserved:true,otherClockPreserved:true,receipt};
         await page.locator('#closeHelp').click();
       }
       // Measure actual game FrameHistory rather than claiming FPS from CI success.
@@ -154,8 +174,6 @@ try{
       await page.locator('#closeHelp').click();
       assert.deepEqual(await storageExceptClock(),beforeAudit,
         'Read-only performance audit changed non-clock saved data');
-      // The returning world's stream may still be settling after the audit modal.
-      // Retain the full 25-chunk gate and require the actual pending queue to drain.
       await page.waitForFunction(()=>{const c=document.querySelector('#scene');return +c.dataset.loadedChunks===25&&+c.dataset.pendingChunks===0;},null,{timeout:45000});
       const end=await state();
       assert.equal(end.glError,end.glNoError,'WebGL error after S1 controls');

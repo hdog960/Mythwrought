@@ -164,8 +164,11 @@ try{
     }
     await page.locator('#menu').click(); await page.locator('#advancedMenu > summary').click();
     await page.locator('#save').click();
-    await page.reload({waitUntil:'load'});
-    await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:25000});
+    // Software WebGL2 completed all 18 captures but the last 932x430 reload
+    // exceeded Playwright's implicit 30s navigation timeout. Keep all source,
+    // saved edit, profile, image and error assertions; bound the reload wait.
+    await page.reload({waitUntil:'load',timeout:90000});
+    await page.waitForFunction(()=>Boolean(window.__mythwroughtTest),null,{timeout:90000});
     const restored=await page.evaluate(points=>({
       blocks:points.map(p=>window.__mythwroughtTest.block(p.x,p.y,p.z)),
       profile:window.__mythwroughtTest.fourBiomeProfile()?.generator,
