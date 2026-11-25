@@ -27,7 +27,8 @@ jobs:
           EXPECTED_HEAD: ${{ github.sha }}
         run: |
           test "$(git rev-parse HEAD)" = "$EXPECTED_HEAD"
-          test "$(git rev-parse HEAD^)" = '461a95b7ae2b56514ced547aab9d70cc6700e38b'
+          test "$(git rev-parse HEAD^)" = '5485d3edb087ff09a7e7bd7526580b0b52f032a0'
+          test "$(git rev-parse HEAD^^)" = '461a95b7ae2b56514ced547aab9d70cc6700e38b'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave16.mjs)" = 'da58c75008bbc286d2512ac8c47ee6b44b6f822d'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d1-original-institutions-wave17.mjs)" = 'efa2763a2ad40fe2df5179c1138b3e56732b3031'
           test "$(git rev-parse HEAD:src/block-packs/pack-2/definitions.mjs)" = 'f9583417467c991674e5a1bd8c14b9b2816a58f9'
@@ -38,7 +39,7 @@ jobs:
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d48-original-saddle-patches-and-bridge.mjs)" = '354933307cc9a333587b54af42ddfc3cc4e8a8f8'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d51-articulated-true-endface-link.mjs)" = '319c91ac400ce9c9aec862904e1dde7e41551e40'
           test "$(git rev-parse HEAD:src/building-pool/roadmap-d/d51-original-rotated-endface-audit.mjs)" = '5dd4c18e304cfee5afa91092f0878309dc376fe3'
-          git diff --name-only HEAD^ HEAD > /tmp/d52-actual
+          git diff --name-only HEAD^^ HEAD > /tmp/d52-actual
           printf '%s\n' \
             '.github/workflows/roadmap-d-d52-original-exterior-terminal.yml' \
             'docs/building-pool/roadmap-d/D52_TRUE_EXTERIOR_DOGLEG_ENDCAP_FOUR_STAGE_SOURCE_GATE.md' \

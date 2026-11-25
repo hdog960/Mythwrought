@@ -66,3 +66,17 @@ no existing files modified. Never merge, deploy, cancel CI or weaken tests.
 - Generated-world terrain/caves, independent footing, structural uplift and
   fatigue, true collision/selection/WebGL2 and installed PWA untested.
 - Original 59,412 distant roof cells remain structurally uncertified.
+
+## Focused native ray-evidence correction
+
+Initial isolated Actions `#45664162268` failed 1/6 after all protected-source
+checks and four pure tests passed: a source-native colored-triangle ray was
+compared to a fixed double-precision `1e-5` tolerance without accounting for
+real `Float32Array` vertex rounding at original W16/W17 coordinates. The
+follow-up keeps the analytic D45 boundary plane and double-precision source
+triangle unchanged, explicitly computes the **normal-projected f32 error of
+each original source-derived cap vertex**, and only accepts a mesh ray hit
+within the corresponding bounded quantization error. A missing ray is ALWAYS
+rejected. No structural, collision or tensile-attachment test was relaxed.
+The follow-up pins both D51 and the original D52 ancestry; the cumulative
+D51-to-D52 diff remains exactly the six isolated new files.

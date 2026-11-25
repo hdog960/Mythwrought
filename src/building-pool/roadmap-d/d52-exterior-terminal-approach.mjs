@@ -116,7 +116,13 @@ export function sampleD52ExteriorMeshRay(link){
  if(link?.format!=='mythwrought.d52.uninstalled-four-stage-exterior-dogleg-link.v1')throw TypeError('D52 real exterior endcap only');
  const centroid=center(link.originalCap.triangle),n=link.normal,from=add(centroid,mul(n,.09)),dir=mul(n,-1),
   t=d31RayPreviewTriangles(link.stages[3].mesh,from,dir,1);
- if(t===null||Math.abs(t-.09)>1e-5)throw Error('D52 true dogleg exterior face preview mesh/ray mismatch');
- return Object.freeze({sourcePaletteId61Only:true,rayDelta:Math.abs(t-.09),previewOnly:true,
+ // The real analytic triangle is stored in double precision; the painted
+ // preview is an authentic Float32Array. Its ray error must fit the ACTUAL
+ // component-wise f32 displacement of these three source-derived vertices.
+ // No blanket distance tolerance and no acceptance of a missed ray.
+ const rounding=Math.max(...link.originalCap.triangle.map(p=>Math.abs(dot(p.map(x=>Math.fround(x)-x),n)))),
+  tolerance=4e-6+3*rounding,delta=t===null?Infinity:Math.abs(t-.09);
+ if(t===null||delta>tolerance)throw Error(`D52 actual dogleg source-mesh/ray differs beyond f32 rounding: t=${t}, delta=${delta}, rounding=${rounding}, bound=${tolerance}`);
+ return Object.freeze({sourcePaletteId61Only:true,rayDelta:delta,rayRoundingBound:tolerance,previewOnly:true,
   actualGameplayPickingPassed:false,constructionAllowed:false});
 }

@@ -53,7 +53,7 @@ export function auditD52OriginalExteriorDogleg(b,primary,secondary,d25,{maxRaySa
   D52SourceSolidHits:0,D52WalkingHits:0,D52SocketHits:0,D52MemberHits:0,D52DoglegHits:0,
   D52SelfOverlapEvents:0,D52SourceSocketClear:0,D52FullyGeometricClear:0,
   D52RootsWithAnyGeometryClear:0,D52SaddlesWithAllFourCourseCandidates:0,
-  D52RaySamples:0,D52MaxRayDelta:0,realFasteners:0,registeredOwnerIDs:0,approvedFootings:0,
+  D52RaySamples:0,D52MaxRayDelta:0,D52MaxRayRoundingBound:0,realFasteners:0,registeredOwnerIDs:0,approvedFootings:0,
   buildingSourceWrites:0,gameplayWrites:0};
  const examples=[],perRoot=[];
  for(const row of d29.proposedOriginalLongBays){
@@ -135,7 +135,8 @@ export function auditD52OriginalExteriorDogleg(b,primary,secondary,d25,{maxRaySa
       if(proof.solid+proof.walk+proof.socket===0)t.D52SourceSocketClear++;
       if(proof.geometricConnectorClear){t.D52FullyGeometricClear++;rootNewClear=true;}
       if(t.D52RaySamples<maxRaySamples){const ray=sampleD52ExteriorMeshRay(candidate);
-       t.D52RaySamples++;t.D52MaxRayDelta=Math.max(t.D52MaxRayDelta,ray.rayDelta);}
+       t.D52RaySamples++;t.D52MaxRayDelta=Math.max(t.D52MaxRayDelta,ray.rayDelta);
+       t.D52MaxRayRoundingBound=Math.max(t.D52MaxRayRoundingBound,ray.rayRoundingBound);}
       rootValid++;
       if(!firstFailure)firstFailure={height,entry,hingeSide,hingeAngle,distance,offset,
        source:proof.solid,walk:proof.walk,socket:proof.socket,member:proof.member,dogleg:proof.dogleg,

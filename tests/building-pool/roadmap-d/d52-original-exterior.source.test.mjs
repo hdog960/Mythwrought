@@ -30,6 +30,7 @@ test('D52 exact original 16 W16/W17 source: authenticated D51 108-case prefilter
    tally[key]=(tally[key]??0)+report[key];
   tally.roof+=report.originalRoofCells;tally.far+=report.originalFarRoofUncertified;
   tally.zones+=report.originalFarRegions;tally.D52MaxRayDelta=Math.max(tally.D52MaxRayDelta??0,report.D52MaxRayDelta);
+  tally.D52MaxRayRoundingBound=Math.max(tally.D52MaxRayRoundingBound??0,report.D52MaxRayRoundingBound);
   assert.equal(report.originalPack2AndRootedAuthoredSourceUnmodified,true);
   assert.equal(report.originalAuthorWalkingAndWeatherPlanePreserved,true);
   assert.equal(report.sourceOnlyExteriorFaceContactNotMechanicalRetention,true);
@@ -58,7 +59,7 @@ test('D52 exact original 16 W16/W17 source: authenticated D51 108-case prefilter
  assert.equal(tally.D52FullSharedCapCount,tally.D52ValidSupportingHulls*3);
  assert.ok(tally.D52TerminalDoglegClear>=0&&tally.D52TerminalDoglegClear<=tally.D52ValidSupportingHulls);
  assert.ok(tally.D52FullyGeometricClear<=tally.D52SourceSocketClear);
- assert.ok(tally.D52MaxRayDelta<1e-5);
+ assert.ok(tally.D52MaxRayDelta<=tally.D52MaxRayRoundingBound);
  assert.equal(tally.realFasteners,0);assert.equal(tally.registeredOwnerIDs,0);
  assert.equal(tally.approvedFootings,0);assert.equal(tally.buildingSourceWrites,0);
  assert.equal(tally.gameplayWrites,0);
