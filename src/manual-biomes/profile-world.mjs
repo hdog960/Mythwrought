@@ -287,6 +287,22 @@ export class FourRegionWorld extends VoxelWorld{
     }
     return BLOCK.AIR;
   }
+  hasHistoricalXericCascade(){
+    return [M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,M3_FOUR_REGION_GENERATOR].includes(this.profile.generator);
+  }
+  historicalXericSupportedCells(x,y,z){
+    if(!this.hasHistoricalXericCascade()||![x,y,z].every(Number.isSafeInteger))return [];
+    const cells=[];
+    // The exact original setter predicate, evaluated before any mutation.
+    for(let above=y+1;above<=WORLD_MAX_Y;above++){
+      const k=worldKey(x,above,z);
+      if(this.edits.has(k))break;
+      const natural=this.naturalAndLandmarkBlock(x,above,z);
+      if(!M3_XERIC_IDS.includes(natural)||this.get(x,above,z)!==natural)break;
+      cells.push([x,above,z]);
+    }
+    return cells;
+  }
   set(x,y,z,id,rotation=0){
     // Original setter knows the original block registry, validation,
     // schema-1 delta format and rotation restrictions. The profile baseline
@@ -301,10 +317,7 @@ export class FourRegionWorld extends VoxelWorld{
     this.biomeCellCount=count-Number(isBiome130BlockId(previous))+
       Number(isBiome130BlockId(next));
     if(!this.edits.has(key))this.rotations.delete(key);
-    if((this.profile.generator===M6_BALANCED_GENERATOR||
-        this.profile.generator===M5_EXPERIMENTAL_GENERATOR||
-        this.profile.generator===FOUR_REGION_GENERATOR||
-        this.profile.generator===M3_FOUR_REGION_GENERATOR)&&id===BLOCK.AIR){
+    if(this.hasHistoricalXericCascade()&&id===BLOCK.AIR){
       // When the player mines the support of a naturally authored xeric
       // formation, persist AIR edits for its supported stack, too. No fake
       // floating cactus after mining or after a cold world reload.

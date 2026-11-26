@@ -1158,8 +1158,9 @@ function start(nonblockStage=null){
   // Plain historical VoxelWorld has a single-cell authoritative setter.
   // Older profiled generators may cascade implicitly in set(); retain their
   // conservative restriction until exact footprint/rollback is qualified.
+  const historicalXericWorld=()=>world.base?.hasHistoricalXericCascade?.()===true;
   const safeCreativeVoxelWorld=()=>!caveSession&&(world.base?.constructor===VoxelWorld||
-    world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR);
+    world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR||historicalXericWorld());
   function recordCreativeOwner(owner,cell,before){
     if(!g2CreativeEnabled||caveSession)return;
     try{
@@ -1176,7 +1177,7 @@ function start(nonblockStage=null){
         entry.target.map(c=>creativeOwnerState('voxel',c)):creativeOwnerState(entry.owner,entry.target),
       apply:(entry,desired,expected)=>{
         if(entry.owner==='voxel-batch'){
-          if(!safeCreativeVoxelWorld()||world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)return false;
+          if(!safeCreativeVoxelWorld()||!historicalXericWorld()&&world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)return false;
           const cells=entry.target,keys=new Set(cells.map(c=>c.join(',')));
           return replayCreativeVoxelBatch({cells,desired,expected,
             read:c=>creativeOwnerState('voxel',c),
@@ -1187,7 +1188,8 @@ function start(nonblockStage=null){
                  manual14.supportsLegacyCell(c)||pack5Builder?.supportsLegacyCell(c))return false;
               if(d.id!==BLOCK.AIR&&(intersectsPlayerBlock(player,c,d.id,d.rotation,null)||
                  hasLiveScenery()&&stagedScene()?.bodyIntersects([...c,...c.map(n=>n+1)])))return false;
-              if(d.id===BLOCK.AIR&&(world.base?.mountainV8SupportedTreeCells?.(...c)??[]).some(p=>!keys.has(p.join(','))))return false;
+              if(d.id===BLOCK.AIR&&[...(world.base?.mountainV8SupportedTreeCells?.(...c)??[]),
+                ...(world.base?.historicalXericSupportedCells?.(...c)??[])].some(p=>!keys.has(p.join(','))))return false;
               return true;
             },
             write:(c,d)=>world.set(...c,d.id,d.rotation),
@@ -1205,7 +1207,8 @@ function start(nonblockStage=null){
           if(!safeCreativeVoxelWorld()||desired?.foreign||expected?.foreign)return false;
           if(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell))return false;
           if(desired.id!==BLOCK.AIR&&intersectsPlayerBlock(player,cell,desired.id,desired.rotation,desired.pack2))return false;
-          if(desired.id===BLOCK.AIR&&(world.base?.mountainV8SupportedTreeCells?.(...cell)??[]).length)return false;
+          if(desired.id===BLOCK.AIR&&((world.base?.mountainV8SupportedTreeCells?.(...cell)??[]).length||
+            (world.base?.historicalXericSupportedCells?.(...cell)??[]).length))return false;
           const write=state=>{
             if(state.pack2){
               if(world.pack2Cells?.has(cell.join(',')))return world.updatePack2State(...cell,state.pack2);
@@ -1415,13 +1418,18 @@ function start(nonblockStage=null){
     // Capture the actual natural support footprint before the original owner
     // changes it. Only the authoritative returned affectedCells are journaled.
     let batchBefore=null;
-    if(historyBefore&&!historyBefore.foreign&&mode==='mine'&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR){
-      const support=world.base.mountainV8SupportedTreeCells?.(...historyCell)??[];
+    if(historyBefore&&!historyBefore.foreign&&mode==='mine'){
+      const support=[...(world.base?.mountainV8SupportedTreeCells?.(...historyCell)??[]),
+        ...(world.base?.historicalXericSupportedCells?.(...historyCell)??[])];
       if(support.length&&support.length<=511){
         batchBefore=new Map([historyCell,...support].map(c=>[c.join(','),creativeOwnerState('voxel',c)]));
       }
     }
-    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{
+      rotation:selectedRotation,
+      allowAffectedCell:c=>!manual14.supportsLegacyCell(c)&&!pack5Builder?.supportsLegacyCell(c)
+    });
+    if(result.requiresRecovery){storageReadOnly=true;clearCreativeHistory();}
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;

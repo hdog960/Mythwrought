@@ -67,7 +67,7 @@ export function inspectBlockTarget(world,eye,direction,selected,player,rotation=
   return {hit,adjacent,canMine,canPlace,distance:target.distance,block,reason};
 }
 
-export function applyBlockAction(world,eye,direction,mode,selected,player,rebuild,{rotation=0}={}){
+export function applyBlockAction(world,eye,direction,mode,selected,player,rebuild,{rotation=0,allowAffectedCell=()=>true}={}){
   if(mode!=='mine'&&mode!=='place')return {ok:false,reason:'Unknown block action'};
   const state=inspectBlockTarget(world,eye,direction,selected,player,rotation);
   if(!state.hit)return {ok:false,reason:state.reason};
@@ -89,6 +89,36 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
   // rebuilds. Only original unedited natural cells may fall. Never remove
   // Pack2/3/manual or player-authored replacements in the footprint.
   const base=world.base??world;
+  const xeric=mode==='mine'&&!previousPack2?
+    base.historicalXericSupportedCells?.(...cell)??[]:[];
+  if(xeric.length){
+    const cells=[cell,...xeric];
+    // Reject a mixed or externally supported footprint, never silently
+    // remove terrain beneath independently owned physical construction.
+    if(cells.length>512||cells.some(c=>!allowAffectedCell(c)||
+      world.getPack2State?.(...c)||world.pack3Runtime?.get?.(c)||
+      world.manual14Layer?.get?.(c)||world.pack5Layer?.cell?.(c)||
+      world.get(...c)!==base.get(...c)))
+      return {ok:false,reason:'Historical supported stack has a protected owner'};
+    const before=cells.map(c=>({cell:c,id:world.get(...c),rotation:world.rotationAt?.(...c)??0}));
+    try{
+      // Remove highest first. The existing recursive setter now encounters
+      // already edited AIR above, so it cannot mutate an untracked cell.
+      for(const e of before.slice().reverse())
+        if(!world.set(...e.cell,BLOCK.AIR))throw Error('Historical stack removal refused');
+      if(cells.some(c=>world.get(...c)!==BLOCK.AIR))throw Error('Historical stack readback mismatch');
+      if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1],cells);
+    }catch(error){
+      let restored=true;
+      for(const e of before){
+        try{if((world.get(...e.cell)!==e.id||(world.rotationAt?.(...e.cell)??0)!==e.rotation)&&
+          !world.set(...e.cell,e.id,e.rotation))restored=false;}catch(_){restored=false;}
+      }
+      try{if(before.some(e=>world.get(...e.cell)!==e.id||(world.rotationAt?.(...e.cell)??0)!==e.rotation))restored=false;}catch(_){restored=false;}
+      return {ok:false,reason:restored?'Historical stack update failed; original cells restored':'Historical stack rollback unverified; protect save',requiresRecovery:!restored,error:String(error)};
+    }
+    return {ok:true,mode,cell,previous,next,block:previous,affectedCells:cells};
+  }
   const supported=mode==='mine'&&!previousPack2?
     base.mountainV8SupportedTreeCells?.(...cell)??[]:[];
   if(supported.length){

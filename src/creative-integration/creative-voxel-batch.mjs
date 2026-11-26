@@ -14,16 +14,21 @@ export function replayCreativeVoxelBatch({cells,desired,expected,read,allowed,wr
   for(let i=0;i<cells.length;i++)if(!same(read(cells[i]),expected[i])||
     !allowed(cells[i],desired[i],expected[i]))return false;
  }catch(_){return false;}
- let attempted=0;
+ // Top-down writes prevent the legacy AIR setter from implicitly
+ // removing a not-yet-written supported cell. Restore every admitted cell
+ // on failure, even when a setter changed a neighbor before throwing.
+ const order=states=>cells.map((_,i)=>i).sort((a,b)=>
+   Number(states[b]?.id===0)-Number(states[a]?.id===0)||
+   (states[a]?.id===0?cells[b][1]-cells[a][1]:cells[a][1]-cells[b][1]));
  try{
-  for(let i=0;i<cells.length;i++){
-   attempted=i+1;
+  for(const i of order(desired)){
    if(!write(cells[i],desired[i])||!same(read(cells[i]),desired[i]))throw Error('Voxel write refused');
   }
+  if(cells.some((c,i)=>!same(read(c),desired[i])))throw Error('Full footprint changed during write');
   rebuild(cells);
  }catch(_){
   let restored=true;
-  for(let i=attempted-1;i>=0;i--){
+  for(const i of order(expected)){
    try{if(!same(read(cells[i]),expected[i])&&!write(cells[i],expected[i]))restored=false;}
    catch(_){restored=false;}
   }
