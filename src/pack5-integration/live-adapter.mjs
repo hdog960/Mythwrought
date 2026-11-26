@@ -7,7 +7,7 @@ import {BLOCK,BODY_RADIUS,BODY_HEIGHT,raycast as legacyRaycast} from '../voxel.m
 import {createPack5ConstructionLayer} from './construction-layer.mjs';
 import {resolvePack5BuilderAsset} from './catalog.mjs';
 import {orientedParts,rotateCellOffset} from '../block-packs/pack-5/fixture.mjs';
-import {loadPack5SidecarSafe,savePack5SidecarSafe,importPack5SidecarSafe} from './sidecar-storage.mjs';
+import {pack5SidecarKey,loadPack5SidecarSafe,savePack5SidecarSafe,importPack5SidecarSafe} from './sidecar-storage.mjs';
 export const PACK5_REACH=6;
 const validVec3=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isFinite);
 const playerBounds=p=>{
@@ -78,6 +78,18 @@ export function createPack5LiveAdapter(world,{storage=null,upperRebuild=null}={}
       if(!shape)return {ok:false,reason:'No Pack 5 shaped object targeted'};
       const ok=persist(()=>layer.remove(shape.cell));
       return typeof ok==='object'?ok:{ok,reason:ok?'':'No placed shape'};
+    },
+    replayCreative(anchor,desired,expected,player){
+      if(!storage||!validVec3(anchor)||!anchor.every(Number.isSafeInteger))return {ok:false,reason:'Invalid history target'};
+      const row=layer.cell(anchor);
+      const current=row?{anchor:[...row.anchor],symbolicId:row.symbolicId,rotation:row.rotation,variant:row.variant??null}:null;
+      const equal=(a,b)=>a===null||b===null?a===b:a.anchor.join(',')===b.anchor.join(',')&&a.symbolicId===b.symbolicId&&a.rotation===b.rotation&&a.variant===b.variant;
+      if(!equal(current,expected)||desired&&desired.anchor.join(',')!==anchor.join(','))return {ok:false,reason:'History owner conflict'};
+      const raw=storage.getItem(pack5SidecarKey(layer.seed));
+      if(raw!==JSON.stringify(layer.snapshot())&&!(raw===null&&layer.count()===0))return {ok:false,reason:'External furnishing save changed'};
+      if(current&&desired)return {ok:false,reason:'Replacement history is not supported'};
+      const result=persist(()=>desired?layer.place(desired.symbolicId,anchor,desired.rotation,desired.variant,{playerBox:playerBounds(player)}):layer.remove(anchor));
+      return typeof result==='object'?result:{ok:result===true};
     },
     save(){if(!storage)throw Error('No Pack 5 sidecar storage supplied');
       return savePack5SidecarSafe(storage,layer);},

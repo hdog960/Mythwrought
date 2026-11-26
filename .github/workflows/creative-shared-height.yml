@@ -1,0 +1,40 @@
+name: Creative shared height owner qualification
+on:
+  push:
+    branches: [creative-shared-height-20261125]
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --check src/main.mjs
+          node --check src/pack5-integration/live-adapter.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-integration/creative-history.test.mjs tests/creative-integration/creative-pack5-history.test.mjs tests/creative-physical-material-census.test.mjs tests/creative-catalog.test.mjs tests/creative-thumbnails.test.mjs
+  building:
+    needs: native
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4174 > /tmp/creative-http.log 2>&1 &
+          node tests/creative-integration/phase5-building-controls-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: creative-shared-height-building
+          path: artifacts/creative-building/
