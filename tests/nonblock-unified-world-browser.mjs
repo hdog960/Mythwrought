@@ -78,16 +78,81 @@ try{
     return d.chunkCenter===expectedCenter&&Number(d.loadedChunks)===requiredChunks&&
       Number(d.pendingChunks)===0&&d.skyBackdrop==='deep-cave';
   },depth);
+  // Preserve the actual ordinary gameplay screenshot before isolating actor
+  // draws. Creature eyes share the sky classifier's color range; the source
+  // camera, terrain, sky, residency and zero-pixel threshold must not change.
   const deepPng=await page.screenshot({path:output+'/ordinary-stepped-echo-hall-844x390.png',timeout:90000});
-  const pixels=pngjs.PNG.sync.read(deepPng);
-  let brightSkyPixels=0;
-  for(let y=Math.floor(pixels.height*.09);y<Math.floor(pixels.height*.56);y++){
-    for(let x=Math.floor(pixels.width*.19);x<Math.floor(pixels.width*.70);x++){
-      const i=4*(y*pixels.width+x),[r,g,b]=pixels.data.subarray(i,i+3);
-      if(r>=140&&g>=155&&b>=170&&b-r>=10)brightSkyPixels++;
+  const countBrightSky=raw=>{
+    const pixels=pngjs.PNG.sync.read(raw);
+    let count=0;
+    for(let y=Math.floor(pixels.height*.09);y<Math.floor(pixels.height*.56);y++){
+      for(let x=Math.floor(pixels.width*.19);x<Math.floor(pixels.width*.70);x++){
+        const i=4*(y*pixels.width+x),[r,g,b]=pixels.data.subarray(i,i+3);
+        if(r>=140&&g>=155&&b>=170&&b-r>=10)count++;
+      }
     }
+    return count;
+  };
+  const normalBrightPixels=countBrightSky(deepPng);
+  const captureState=()=>page.evaluate(()=>{
+    const api=window.__mythwroughtTest,d=document.querySelector('#scene').dataset;
+    return {pose:api.m5ObservedPose(),actor:api.mobAcceptanceSnapshot(),
+      center:d.chunkCenter,loaded:Number(d.loadedChunks),pending:Number(d.pendingChunks),
+      sky:d.skyBackdrop,vertices:Number(d.renderedMeshVertices)};
+  });
+  const originalFrame=await captureState();
+  assert.equal(originalFrame.actor.visible,true);
+  let isolatedFrame,brightSkyPixels;
+  const requireSameScene=frame=>{
+    assert.equal(frame.center,depth.expectedCenter);
+    assert.equal(frame.loaded,depth.requiredChunks);
+    assert.equal(frame.pending,0);
+    assert.equal(frame.sky,'deep-cave');
+    assert.ok(frame.vertices>800);
+    assert.equal(frame.pose.seed,originalFrame.pose.seed);
+    assert.equal(frame.pose.x,originalFrame.pose.x);
+    assert.equal(frame.pose.z,originalFrame.pose.z);
+    assert.equal(frame.pose.yaw,originalFrame.pose.yaw);
+    assert.ok(Math.abs(frame.pose.feet-originalFrame.pose.feet)<=.05);
+    assert.equal(frame.actor.glError,0);
+    assert.equal(frame.actor.contextLost,false);
+  };
+  try{
+    assert.equal(await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceVisible(false)),false);
+    await wait(({previous,expectedCenter,requiredChunks})=>{
+      const d=document.querySelector('#scene').dataset;
+      return Number(d.renderedFrames)>previous&&d.mobActors==='0'&&
+        d.mobDrawCalls==='0'&&d.chunkCenter===expectedCenter&&
+        Number(d.loadedChunks)===requiredChunks&&Number(d.pendingChunks)===0&&
+        d.skyBackdrop==='deep-cave';
+    },{previous:originalFrame.actor.renderedFrames,...depth});
+    // Require four distinct real rendered frames with the unchanged source
+    // scene and the same established test-only actor visibility fence.
+    let previous=originalFrame.actor.renderedFrames;
+    for(let i=0;i<4;i++){
+      await wait(frame=>Number(document.querySelector('#scene').dataset.renderedFrames)>frame,previous);
+      isolatedFrame=await captureState();
+      requireSameScene(isolatedFrame);
+      assert.equal(isolatedFrame.actor.visible,false);
+      assert.equal(isolatedFrame.actor.drawn,0);
+      assert.equal(isolatedFrame.actor.drawCalls,0);
+      assert.ok(isolatedFrame.actor.renderedFrames>previous);
+      previous=isolatedFrame.actor.renderedFrames;
+    }
+    const isolatedPng=await page.screenshot({path:output+'/sky-only-stepped-echo-hall-844x390.png',timeout:90000});
+    const after=await captureState();
+    requireSameScene(after);
+    assert.equal(after.actor.visible,false);
+    assert.equal(after.actor.drawn,0);
+    assert.equal(after.actor.drawCalls,0);
+    brightSkyPixels=countBrightSky(isolatedPng);
+    console.log('UNIFIED_DEEP_SKY_ACTOR_ISOLATION',JSON.stringify({normalBrightPixels,brightSkyPixels,originalFrame,isolatedFrame,after}));
+    assert.equal(brightSkyPixels,0,'Procedural outdoor sky leaked into the sealed deep chamber');
+  }finally{
+    assert.equal(await page.evaluate(()=>window.__mythwroughtTest.mobAcceptanceVisible(true)),true);
+    await wait(frame=>Number(document.querySelector('#scene').dataset.renderedFrames)>frame,isolatedFrame?.actor.renderedFrames??originalFrame.actor.renderedFrames);
+    assert.equal((await captureState()).actor.visible,true);
   }
-  assert.equal(brightSkyPixels,0,'Procedural outdoor sky leaked into the sealed deep chamber');
 
   async function switchSeed(seed){
     await page.locator('#menu').click();
@@ -134,7 +199,7 @@ try{
   assert.equal(reopened.generator,initial.generator);
   assert.equal(reopened.oldSave,legacy);
   assert.deepEqual(errors,[]);
-  const deep={chamber:chamber.name,at,brightSkyPixels,requiredChunks:depth.requiredChunks};
+  const deep={chamber:chamber.name,at,normalBrightPixels,brightSkyPixels,requiredChunks:depth.requiredChunks};
   await writeFile(output+'/report.json',JSON.stringify({initial,oasis,deep,existing,created,night,reopened},null,2)+'\n');
   console.log('Verified ordinary creation, legacy seed bytes, day/night and generation-aware vault and mirror in WebGL2');
 }finally{await browser.close();}
