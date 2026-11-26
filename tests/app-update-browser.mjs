@@ -141,7 +141,7 @@ try{
     if(!reg)throw Error('Previous registration missing');
     await reg.update();
   });
-  // The cache name is created BEFORE the 332 real file fetches complete.
+  // The cache name is created BEFORE the 336 real file fetches complete.
   // A failed or in-flight installation must never count as an upgraded app.
   await waitForAsyncCondition(page,async({cacheName,release})=>{
     const names=await caches.keys();
@@ -149,7 +149,7 @@ try{
     if(!names.includes(cacheName))return false;
     const cache=await caches.open(cacheName);
     const files=await cache.keys();
-    if(files.length!==332)return false;
+    if(files.length!==336)return false;
     const registration=await navigator.serviceWorker.getRegistration('/');
     if(registration?.active?.state!=='activated'||navigator.serviceWorker.controller!==registration.active||registration.installing||registration.waiting)return false;
     const index=new URL('/index.html',location.href).href;
@@ -159,7 +159,7 @@ try{
     const html=await response.text();
     return html.includes('data-mw-release="'+release+'"')&&
       html.includes('id="captureToggle"')&&
-      ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs'].every(p=>files.some(f=>f.url.endsWith('/'+p)));
+      ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs'].every(p=>files.some(f=>f.url.endsWith('/'+p)));
   },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
     const cache=await caches.open('mythwrought-m5-shell-20261125-living-ecosystem-height-v1');
@@ -181,7 +181,7 @@ try{
       oldCacheAssetCount:(await (await caches.open('mythwrought-m5-shell-20261118-v5-recorder')).keys()).length};
   });
   if(installed.origin!=='new')console.error('HOME SCREEN CACHE DIAGNOSTIC',JSON.stringify(installed));
-  assert.equal(installed.cachedKeyCount,332,'Full exact current offline shell required');
+  assert.equal(installed.cachedKeyCount,336,'Full exact current offline shell required');
   assert.equal(installed.origin,'new',
     'The worker installation copied an old cached index instead of fresh origin source');
   assert.ok(installed.cacheNames.includes(OLD_CACHE)&&

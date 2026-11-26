@@ -188,9 +188,9 @@ try{
       secure:window.isSecureContext};
   });
   check('atomic-versioned-shell-install',online.secure&&
-    online.name===report.serviceWorkerVersion&&online.cacheCount===332&&
+    online.name===report.serviceWorkerVersion&&online.cacheCount===336&&
     online.controller?.endsWith('/sw-m5.js')&&
-    ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs','src/world-height.mjs','src/world-height-mesh-pages.mjs','src/world-height-budget.mjs','src/pack5-integration/upper-sections.mjs',
+    ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs','src/world-height.mjs','src/world-height-mesh-pages.mjs','src/world-height-budget.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs',
      'src/manual-biomes/profile-world.mjs',
      'src/manual-biomes/m5-offline-registration.mjs','index.html',
      'manifest.webmanifest','styles.css'].every(p=>online.urls.some(u=>

@@ -188,7 +188,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Native strict 263-source atomic cache and old-install recovery contracts
+      - name: Native strict 336-source atomic cache and old-install recovery contracts
         run: |
           node --check sw-m5.js
           node --check src/app-update.mjs
@@ -210,5 +210,18 @@ jobs:
         with:
           name: mythwrought-five-system-same-original-home-screen-RC11
           path: artifacts/pwa-safe-refresh/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Check combined manifest and real prior-height upgrade with bad-dependency rollback
+        run: |
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          git worktree add --detach "${RUNNER_TEMP}/mythwrought-prior-height" c1138b52bc8041c0db12be31b13fe9ab0fb276e0
+          MOB_PREVIOUS_ROOT="${RUNNER_TEMP}/mythwrought-prior-height" node tests/mob-final-offline-upgrade-browser.mjs
+      - name: Preserve exact prior-height upgrade evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mythwrought-height-to-living-ecosystem-offline
+          path: artifacts/mob-final-offline/
           if-no-files-found: warn
           retention-days: 14

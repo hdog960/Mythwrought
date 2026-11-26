@@ -1,4 +1,4 @@
-// Genuine current-production Mountain V8 -> Living Ecosystem same-origin
+// Genuine current-production Shared World Height -> Living Ecosystem same-origin
 // service-worker upgrade and rollback. Uses actual old checkout, new checkout,
 // original isolated save API and original live-game Mob acceptance fixture.
 import assert from 'node:assert/strict';
@@ -10,7 +10,7 @@ import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 const oldRoot=resolve(process.env.MOB_PREVIOUS_ROOT??'');
 const root=resolve('.');
-const oldHead='a0487e34d9f5d00a49da05c3bf5b6545ff923085';
+const oldHead='c1138b52bc8041c0db12be31b13fe9ab0fb276e0';
 assert.equal(execFileSync('git',['-C',oldRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),oldHead);
 assert.notEqual(oldRoot,root);
 const release='20261125-living-ecosystem-height-v1',prior='20261125-shared-height-v1';
@@ -92,7 +92,7 @@ try{
   const {saveM2World}=await import('/src/manual-biomes/m2-runtime-bridge.mjs');
   const {SELECTED_SEED_KEY}=await import('/src/seeds.mjs');
   const result=await createMountainV8IsolatedWorld('2026',{confirmed:true,storage:localStorage});
-  if(!result.world.set(500,-20,500,3))throw Error('Fixture edit refused');
+  if(!result.world.set(500,-20,500,3)||!result.world.set(500,256,500,3))throw Error('Prior lower/upper fixture edit refused');
   const scoped=mountainV8Storage(localStorage);
   if(!saveM2World(scoped,result.world).ok)throw Error('Original save failed');
   scoped.setItem(SELECTED_SEED_KEY,'2026');
@@ -102,8 +102,9 @@ try{
  assert.equal(boot.generator,report.profile);
  await page.goto(origin+'/');await ready();
  const original=await readSaves();assert.ok(original.world&&original.profile);assert.equal(original.legacy,null);
+ assert.ok(JSON.parse(original.world).edits.some(row=>row[0]===500&&row[1]===256&&row[2]===500&&row[3]===3),'Prior ceiling edit missing from original saved bytes');
  await wait(async cache=>Boolean(navigator.serviceWorker.controller)&&await caches.has(cache),oldCache);
- const oldBank=await bank(oldCache);assert.ok(oldBank.html.includes('data-mw-release="'+prior+'"'));assert.ok(oldBank.count>300);
+ const oldBank=await bank(oldCache);assert.ok(oldBank.html.includes('data-mw-release="'+prior+'"'));assert.equal(oldBank.count,332);
  report.events.push({stage:'old exact current production',assets:oldBank.count});
  publish='broken';
  assert.equal(await trigger(),'redundant');assert.ok(brokenRequests>0);
@@ -132,7 +133,7 @@ try{
    if(digest!==expected)throw Error('Wrong actual cached bytes '+p);n++;
   }return n;
  },{name:newCache,entries:Object.entries(manifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p))});
- assert.equal(checked,expected.length);
+ assert.equal(checked,336);assert.equal(checked,expected.length);
  report.events.push({stage:'new complete exact-byte shell installed; old bank preserved',assets:checked});
  await ctx.setOffline(true);
  const response=await page.reload({waitUntil:'load'});assert.equal(response.fromServiceWorker(),true);
