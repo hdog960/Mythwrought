@@ -100,6 +100,9 @@ try{
       await page.locator('#miniMapButton').tap();
       assert.equal(await page.locator('#navMarkerList option').count(),2,'waypoint survives cold reload');
       await page.locator('#closeExploration').tap();
+      const oldMap=await page.evaluate(()=>({fog:localStorage.getItem('mythwrought-exploration-v1-179'),
+        pins:localStorage.getItem('mythwrought-navigation00-v1-179')}));
+      assert.ok(oldMap.fog&&oldMap.pins);
       await page.locator('#menu').click();
       await page.locator('#seedInput').fill('28629');
       page.once('dialog',dialog=>dialog.accept());
@@ -107,8 +110,23 @@ try{
       await page.locator('#closeHelp').click();
       await page.waitForFunction(()=>document.querySelector('#seed')?.textContent==='WORLD 28629');
       await page.waitForFunction(()=>document.querySelector('#miniMap')?.dataset.seed==='28629');
-      assert.ok(Number(await page.locator('#miniMap').getAttribute('data-discovered'))<explored,
-        'different seed must begin unexplored');
+      // A fresh seed can see more nearby cells than an older fog sample.
+      // Compare actual saved cells, origin and pin namespaces, not timing-dependent totals.
+      await page.waitForFunction(()=>Number(document.querySelector('#miniMap')?.dataset.discovered)>0);
+      await page.locator('#miniMapButton').tap();
+      assert.equal(await page.locator('#navMarkerList option').count(),1,'Old waypoint leaked into different seed');
+      await page.locator('#closeExploration').tap();
+      const isolated=await page.evaluate(()=>({fog:JSON.parse(localStorage.getItem('mythwrought-exploration-v1-28629')),
+        pose:window.__mythwroughtTest.m5ObservedPose(),
+        old:{fog:localStorage.getItem('mythwrought-exploration-v1-179'),pins:localStorage.getItem('mythwrought-navigation00-v1-179')}}));
+      assert.equal(isolated.fog.seed,28629);assert.equal(isolated.pose.seed,28629);
+      const cx=Math.floor(isolated.pose.x/4),cz=Math.floor(isolated.pose.z/4);
+      assert.ok(isolated.fog.cells.length>0&&isolated.fog.cells.length<=29);
+      assert.ok(isolated.fog.cells.every(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2<=9;}),'Fresh world revealed cells outside actual spawn radius');
+      assert.deepEqual(isolated.old,oldMap,'Switching seeds changed prior fog or waypoints');
+      const remote=JSON.parse(oldMap.fog).cells.filter(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2>9;});
+      assert.ok(remote.length>0,'Fixture must witness old-world remote discovery');
+      assert.ok(remote.every(k=>!isolated.fog.cells.includes(k)),'Old remote exploration leaked into new seed');
       assert.deepEqual(errors,[],'Map browser JavaScript errors at '+width+'x'+height);
       console.log('PASS exploration map',width+'x'+height,{start,explored,placement});
     }finally{await context.close();}

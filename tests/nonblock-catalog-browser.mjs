@@ -128,7 +128,10 @@ try{
   },aim);
   const waitForTerrain=({x,z})=>page.waitForFunction(center=>{
     const data=document.querySelector('#scene').dataset;
-    return data.chunkCenter===center&&Number(data.loadedChunks)===25&&Number(data.pendingChunks)===0;
+    const actual=[Math.floor(Number(data.playerX)/16),Math.floor(Number(data.playerZ)/16)].join(',');
+    // Shared height adds a legitimate |height: owner suffix. Still require
+    // the actual source player and horizontal streaming center, all owners settled.
+    return data.chunkCenter?.split('|')[0]===center&&actual===center&&Number(data.loadedChunks)===25&&Number(data.pendingChunks)===0;
   },chunkCoord(x)+','+chunkCoord(z),{timeout:45000});
   await waitForTerrain(await setView(benchmark));
   await page.waitForFunction(expected=>{

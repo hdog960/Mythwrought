@@ -19,8 +19,11 @@ assert.equal(catalog.blocks.length,241);
 assert.equal(catalog.creatures.length,40);
 const offset=Number(process.env.EGG_OFFSET??0);
 assert.ok(Number.isInteger(offset)&&offset>=0&&offset<10,'EGG_OFFSET must be 0..9');
-const eggs=catalog.creatures.slice(shard*10+offset,shard*10+10);
-assert.equal(eggs.length,10-offset);
+const shardEggs=catalog.creatures.slice(shard*10+offset,shard*10+10);
+const selected=process.env.EGG_IDS?.split(',')??null;
+if(selected)assert.ok(selected.length>0&&new Set(selected).size===selected.length&&selected.every(id=>shardEggs.some(e=>e.id===id)),'Invalid targeted species selection');
+const eggs=selected?shardEggs.filter(e=>selected.includes(e.id)):shardEggs;
+assert.equal(eggs.length,selected?selected.length:10-offset);
 assert.equal(new Set(catalog.creatures.map(e=>e.id)).size,40);
 const OUT='artifacts/creative-eggs/shard-'+shard;
 await mkdir(OUT,{recursive:true});
@@ -63,10 +66,21 @@ try{
     page.on('pageerror',e=>errors.push(String(e.message)));
     page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
     try{
+      if(process.env.EGG_FIXED_SEEDS==='1')await page.addInitScript(()=>{
+        // Test-only deterministic input for the real automatic NEW WORLD
+        // flow; source admission, confirmation, saves and rendering unchanged.
+        // These exact seeds passed the prior installed-upgrade evidence.
+        const seeds=[2026,-1772484778],native=crypto.getRandomValues.bind(crypto);
+        Object.defineProperty(crypto,'getRandomValues',{configurable:true,value(array){
+          if(array instanceof Int32Array&&array.length===1&&seeds.length){array[0]=seeds.shift();return array;}
+          return native(array);
+        }});
+      });
       await page.goto('http://127.0.0.1:4174/?production-ui=1',{
         waitUntil:'networkidle',timeout:120000});
       await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,null,{timeout:120000});
       const originalSeed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
+      if(process.env.EGG_FIXED_SEEDS==='1')assert.equal(originalSeed,2026,'Expected actual first source seed');
       await page.locator('#menu').click();
       assert.equal(await page.locator('#advancedMenu').evaluate(e=>e.open),false);
       stage='new-world';
@@ -78,6 +92,7 @@ try{
       },{generator:M8_MOUNTAIN_GENERATOR,originalSeed},{timeout:180000});
       const created=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),status:document.querySelector('#seedMessage')?.textContent,seed:window.__mythwroughtTest?.snapshot()?.seed}));
       assert.equal(created.profile?.generator,M8_MOUNTAIN_GENERATOR,'NEW WORLD failed: '+JSON.stringify({created,dialogs}));
+      if(process.env.EGG_FIXED_SEEDS==='1')assert.equal(created.seed,-1772484778,'Expected actual new source seed');
       assert.notEqual(created.seed,originalSeed,'NEW WORLD did not change seed: '+JSON.stringify({created,dialogs}));
       console.log('REAL_CREATIVE_WORLD_READY',JSON.stringify({id:egg.id,created,dialogs}));
       stage='physical-setup';
@@ -201,7 +216,7 @@ try{
           images:[live.sha256,reloaded.sha256]}));
       await saveProof();
     }catch(err){
-      const diagnostics=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),seed:window.__mythwroughtTest?.snapshot()?.seed,status:document.querySelector('#seedMessage')?.textContent,saveHealth:document.querySelector('#saveHealth')?.textContent,loadedChunks:document.querySelector('#scene')?.dataset.loadedChunks,targetPlace:document.querySelector('#scene')?.dataset.targetPlace,mobs:window.__mythwroughtTest?.mobStatus()})).catch(e=>({diagnosticError:String(e)}));
+      const diagnostics=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),seed:window.__mythwroughtTest?.snapshot()?.seed,notice:document.querySelector('#notice')?.textContent,status:document.querySelector('#seedMessage')?.textContent,saveHealth:document.querySelector('#saveHealth')?.textContent,loadedChunks:document.querySelector('#scene')?.dataset.loadedChunks,targetPlace:document.querySelector('#scene')?.dataset.targetPlace,mobs:window.__mythwroughtTest?.mobStatus()})).catch(e=>({diagnosticError:String(e)}));
       const failure={id:egg.id,stage,error:String(err?.stack||err),diagnostics,dialogs,pageErrors:errors,missing};
       report.errors.push(failure);
       console.error('REAL_CREATIVE_EGG_FAILURE',JSON.stringify(failure));
