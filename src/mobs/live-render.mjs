@@ -3,10 +3,11 @@
 // The old preview renderer is deliberately not used as a second game canvas.
 import {meshes} from '../../mob-preview/models.mjs';
 import {speciesRegistry} from './species.mjs';
+import {LIVE_CREATURE_DRAW_LIMIT,LIVE_PROJECTILE_IDS,selectLiveDrawEntries} from './live-projectile-budget.mjs';
 
-const MAX_VISIBLE=8, MAX_GPU_MODELS=12, MAX_DISTANCE=32;
+const MAX_VISIBLE=LIVE_CREATURE_DRAW_LIMIT, MAX_GPU_MODELS=12, MAX_DISTANCE=32;
 const modelIds=new Set(speciesRegistry.map(s=>s.id));
-const projectileIds=new Set(['projectile','briar-spore','frost-splinter','void-mote']);
+const projectileIds=new Set(LIVE_PROJECTILE_IDS);
 const renderIds=new Set([...modelIds,...projectileIds]);
 if(modelIds.size!==40 || [...renderIds].some(id=>!(meshes[id] instanceof Float32Array)))
   throw Error('Incomplete original 40-creature 3D model registry');
@@ -141,7 +142,7 @@ export function createLiveMobRenderer(gl){
       selected.push({e,d:dx*dx+dy*dy+dz*dz});
     }
     selected.sort((a,b)=>a.d-b.d);
-    for(const {e} of selected.slice(0,MAX_VISIBLE)){
+    for(const {e} of selectLiveDrawEntries(selected)){
       const id=e.species.id;
       if(!groups.has(id))groups.set(id,[]);
       groups.get(id).push(e);

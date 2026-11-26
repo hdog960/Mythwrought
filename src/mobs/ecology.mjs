@@ -4,6 +4,7 @@ import { getSpecies, speciesRegistry } from './species.mjs';
 import { validPoint } from './world-query.mjs';
 import { supportedPosition } from './movement.mjs';
 import { distanceTo } from './behavior.mjs';
+import { caveSpawnColumn, caveSupportedFallback } from './cave-spawn-column.mjs';
 
 const MAX_REGIONS = 64;
 const INTERVAL = .5;
@@ -32,15 +33,29 @@ function validRegion(region) {
 export function spawnEligible(world, species, point, observer) {
   if (!validPoint(point) || !validPoint(observer) || species?.implementation !== 'preview' ||
       !species.lifecycle.replenishes) return false;
+  // Original source coordinates and the authoritative world version must
+  // remain the same across habitat and physically supported spawn reads.
+  // Admission never writes the world, engine or private ecology clock.
+  const originalPoint = Object.freeze([...point]);
+  const originalObserver = Object.freeze([...observer]);
+  const hasRevision = typeof world.revision === 'function';
+  const version = hasRevision ? world.revision() : null;
   const range = distanceTo(point, observer);
   if (range < MIN_SPAWN_DISTANCE || range > MAX_SPAWN_DISTANCE) return false;
   const { biome, light, hazard } = world.environment(point);
   const { biomes, depth, light: bounds } = species.habitat;
-  return !hazard && biomes.includes(biome) && Number.isFinite(light) &&
+  const eligible = !hazard && biomes.includes(biome) && Number.isFinite(light) &&
     light >= bounds[0] && light <= bounds[1] && point[1] >= depth[0] &&
     point[1] <= depth[1] && (world.grounded(point, species.body) ||
       (species.movement.capabilities.includes('swim') && world.volume(point,species.body) === 'clear' &&
         world.medium?.([point[0],point[1] + Math.min(.18,species.body.height*.3),point[2]]) === 'water'));
+  if (!eligible || originalPoint.some((value,i)=>!Object.is(value,point[i])) ||
+      originalObserver.some((value,i)=>!Object.is(value,observer[i]))) return false;
+  if (typeof world.residentAt === 'function' && world.residentAt(originalPoint)!==true)
+    return false;
+  if (hasRevision && !Object.is(world.revision(),version)) return false;
+  return !originalPoint.some((value,i)=>!Object.is(value,point[i])) &&
+    !originalObserver.some((value,i)=>!Object.is(value,observer[i]));
 }
 
 export class PopulationManager {
@@ -146,9 +161,14 @@ export class PopulationManager {
       const count = record.high.get(species.id);
       if (count >= species.population.localLimit || (random >>> 16) / 65536 > species.population.rarity)
         continue;
-      const x = cx * CHUNK_SIZE + (random & 15) + .5;
-      const z = cz * CHUNK_SIZE + ((random >>> 4) & 15) + .5;
-      const point = supportedPosition(this.#world, x, z, feet + 1, feet - 1.5, species.body);
+      // Deep sections use a full-column permutation rather than repeat the
+      // same species-coupled X residues. Surface selection stays identical.
+      const column = section < 0 ? caveSpawnColumn(this.#seed,cx,cz,section,record.serial) :
+        [random & 15,(random >>> 4) & 15];
+      const x = cx * CHUNK_SIZE + column[0] + .5;
+      const z = cz * CHUNK_SIZE + column[1] + .5;
+      const point = supportedPosition(this.#world, x, z, feet + 1, feet - 1.5, species.body) ??
+        (section < 0 ? caveSupportedFallback(this.#world,x,z,feet,species.body,section,sectionForY) : null);
       if (!point || sectionForY(Math.floor(point[1])) !== section ||
           !spawnEligible(this.#world, species, point, observer) ||
           entities.some(mob => distanceTo(mob.position, point) < 1.2)) continue;

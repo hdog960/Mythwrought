@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 /**
  * Opt-in builder construction layer for the 18 REAL physical Pack 5 families.
  * No VoxelWorld.set(), no legacy ID allocation, no localStorage writes.
@@ -115,9 +116,10 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
       if(fixture.count()>=PACK5_BUILDER_MAX_INSTANCES)
         return {ok:false,reason:'Pack 5 builder instance budget reached'};
       const result=attempt(fixture,id,anchor,rotation,variant,playerBox);
+      if(result.ok)markMobSourceMutation(world);
       if(result.ok&&anchor[1]>=UPPER_MIN_Y){
         try{const record=fixture.cell(anchor);const update=upperIndex.withAdded([...record.anchor,record.symbolicId,record.rotation,record.variant]);publishUpper(update.index,update.affected);}
-        catch(error){fixture.remove(anchor);return {ok:false,reason:String(error.message||error)};}
+        catch(error){fixture.remove(anchor);markMobSourceMutation(world);return {ok:false,reason:String(error.message||error)};}
       }
       return result;
     },
@@ -125,8 +127,9 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
       const record=fixture.cell(cell);if(!record)return false;
       const prior=record.anchor[1]>=UPPER_MIN_Y?record:null;
       const removed=fixture.remove(cell);
+      if(removed)markMobSourceMutation(world);
       if(removed&&prior){try{const update=upperIndex.withRemoved(prior.anchor);publishUpper(update.index,update.affected);}
-        catch(error){const restored=attempt(fixture,prior.symbolicId,prior.anchor,prior.rotation,prior.variant);if(!restored.ok)throw Error('Pack5 removal rollback failed');return false;}}
+        catch(error){const restored=attempt(fixture,prior.symbolicId,prior.anchor,prior.rotation,prior.variant);if(!restored.ok)throw Error('Pack5 removal rollback failed');markMobSourceMutation(world);return false;}}
       return removed;
     },
     upperOccupied:key=>upperIndex.has(key),get upperRevision(){return upperRevision;},
@@ -257,6 +260,7 @@ export function createPack5ConstructionLayer(world,{upperRebuild=null}={}){
         if(!placed.ok)throw Error('Invalid Pack 5 builder sidecar placement: '+placed.reason);
       }
       if(upperEnabled)publishUpper(buildPack5UpperSections(replacement.snapshot().entries));
+      markMobSourceMutation(world);
       fixture=replacement;
       return true;
     }

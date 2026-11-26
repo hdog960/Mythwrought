@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261125-shared-height-v1';
-const ASSET_RELEASE='20261125-shared-height-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261125-living-ecosystem-height-v1';
+const ASSET_RELEASE='20261125-living-ecosystem-height-v1';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
@@ -59,6 +59,10 @@ const SOURCE_ASSETS=[
   "./src/mobs/host-view.mjs",
   "./src/mobs/hostile-tactics.mjs",
   "./src/mobs/live-game.mjs",
+  "./src/mobs/ecosystem-world-geometry.mjs",
+  "./src/mobs/live-projectile-budget.mjs",
+  "./src/mobs/cave-spawn-column.mjs",
+  "./src/mobs/source-edit-epoch.mjs",
   "./src/mobs/live-render.mjs",
   "./src/mobs/movement.mjs",
   "./src/mobs/navigation.mjs",

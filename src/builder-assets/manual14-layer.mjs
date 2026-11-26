@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 // Integrator-owned physical construction adapter for MANUAL Block Packs 1 and 4.
 // Source geometry comes from the independent pack builders. This adapter never
 // allocates biome130 IDs, writes schema-1, or registers candidate blocks in VoxelWorld.
@@ -63,6 +64,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
  function commitPlaced(next){
   // New map snapshots are atomic; monotonic revision survives replacement.
   if([...placed.values()].some(e=>e.at[1]>19)||[...next.values()].some(e=>e.at[1]>19))upperRevision++;
+  markMobSourceMutation(world);
   placed=next;
  }
  const externalAt=at=>Boolean(externalCell?.([...at]))||

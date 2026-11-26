@@ -50,6 +50,8 @@ export function createWorldQuery(world, {
       const shape = biome130Block(id, world.rotationAt?.(x, y, z) ?? 0);
       return shape.solid ? shape : EMPTY;
     }
+    const mountain=world.mobMountainShape?.(id);
+    if(mountain)return mountain.solid?mountain:EMPTY;
     return Number.isInteger(id) && id >= BLOCK.GRASS && id <= BLOCK.DEEPSTONE ? FULL_CUBE : null;
   }
 

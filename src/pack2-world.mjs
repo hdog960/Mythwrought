@@ -1,3 +1,4 @@
+import {markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 // Creator-authorized Block Pack 2 opt-in editable overlay.
 // Legacy VoxelWorld and schema-1 saves remain byte-for-byte unchanged.
 // New candidate cells are written to a separate checksummed per-seed sidecar;
@@ -95,6 +96,7 @@ export class Pack2LiveWorld{
       const requested=this.nextPack2State?.id===id?this.nextPack2State:null;
       let state;try{state=pack2NormalizeState(id,requested??{})}catch{return false}
       if(!previous&&this.pack2Cells.size>=MAX_CELLS)return false;
+      markMobSourceMutation(this);
       this.pack2Cells.set(key,state);
       this._updateWaterBucket(key,previous,state);
       return true;
@@ -105,10 +107,12 @@ export class Pack2LiveWorld{
       // Removing an overlay is NOT a terrain mutation; its underlying air
       // (including an explicit existing AIR edit) stays untouched.
       if(id===BLOCK.AIR){
+        markMobSourceMutation(this);
         this.pack2Cells.delete(key);this._updateWaterBucket(key,previous,null);
         return true;
       }
       if(!this.base.set(x,y,z,id,rotation))return false;
+      markMobSourceMutation(this);
       this.pack2Cells.delete(key);this._updateWaterBucket(key,previous,null);
       return true;
     }
@@ -125,6 +129,7 @@ export class Pack2LiveWorld{
     const key=coord(x,y,z),prior=this.pack2Cells.get(key);
     if(!prior)return false;
     const normalized=pack2NormalizeState(prior.id,state);
+    markMobSourceMutation(this);
     this.pack2Cells.set(key,normalized);
     this._updateWaterBucket(key,prior,normalized);
     return true;

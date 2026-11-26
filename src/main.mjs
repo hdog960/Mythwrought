@@ -1,3 +1,4 @@
+import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
@@ -493,6 +494,7 @@ function start(nonblockStage=null){
     try{
       mobSession=createLiveMobSession({
         world,seed:world.seed,storage:localStorage,
+        sourceRevision:createMobSourceRevision(world),
         worldKind:caveSession?'cave':'normal',
         spawnOnFirstVisit:combinedWorld(),
         resident:(cx,cz,section)=>chunks.has(depthMeshKey(cx,cz,section)),
@@ -1147,6 +1149,7 @@ function start(nonblockStage=null){
       const hit=scene?.pick(origin,direction);
       if(hit){
         const removed=scene.breakHit(hit,origin,direction);
+        if(removed)markMobSourceMutation(world);
         if(scene.recovered)message('Staged scenery recovered from backup · removals are read-only');
         else message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
         return;
@@ -3557,6 +3560,7 @@ function start(nonblockStage=null){
         glError:gl.getError(),contextLost:gl.isContextLost(),
         scene:canvas.dataset.skyDrawn,renderedFrames:Number(canvas.dataset.renderedFrames)
       };},
+      mobSourceRevision(){return mobSession?.query.revision()??null;},
       mobStatus(){return mobSession?.status()??null;},
       mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
