@@ -10,7 +10,7 @@ const frozen=p=>Object.freeze({x:p.x,y:p.y,z:p.z});
 export function g2RegionKey(point,sectionForY){
   if(!validPoint(point)||typeof sectionForY!=='function')fail('valid point and real sectionForY reader required');
   const section=sectionForY(point.y);
-  if(!Number.isSafeInteger(section)||section>0)fail('invalid streamed vertical section');
+  if(!Number.isSafeInteger(section)||section>15)fail('invalid streamed vertical section');
   return Math.floor(point.x/G2_CHUNK_EDGE)+','+Math.floor(point.z/G2_CHUNK_EDGE)+','+section;
 }
 export function createG2PrefetchState(worldToken='unbound',intentToken='idle'){

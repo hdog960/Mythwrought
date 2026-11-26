@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,baseBlock,VoxelWorld,meshChunk,WORLD_MAX_Y,WORLD_MIN_Y as LEGACY_PUBLIC_MIN_Y} from '../src/voxel.mjs';
 import {meshDepthSection} from '../src/depth-mesh.mjs';
+import {PHYSICAL_MAX_Y,runtimeSectionForY} from '../src/world-height.mjs';
 import {caveRoute} from '../src/experimental-cave-route.mjs';
 import {
   WORLD_MIN_Y,LEGACY_WORLD_MIN_Y,LEGACY_WORLD_HEIGHT,WORLD_DEPTH_MULTIPLIER,
@@ -75,7 +76,15 @@ test('new deep rock remains physical and is individually editable',()=>{
   assert.equal(w.set(0,-90,0,BLOCK.DEEPSTONE),true);
   assert.equal(w.edits.has('0,-90,0'),false);
   assert.equal(w.set(0,WORLD_MIN_Y-1,0,BLOCK.AIR),false);
-  assert.equal(w.set(0,WORLD_MAX_Y+1,0,BLOCK.AIR),false);
+  // The historic terrain ceiling is immutable, not the physical edit ceiling.
+  assert.equal(baseBlock(0,WORLD_MAX_Y+1,0,179),BLOCK.AIR);
+  assert.equal(runtimeSectionForY(WORLD_MAX_Y+1),1);
+  assert.equal(w.set(0,WORLD_MAX_Y+1,0,BLOCK.STONE),true);
+  assert.equal(w.get(0,WORLD_MAX_Y+1,0),BLOCK.STONE);
+  assert.equal(PHYSICAL_MAX_Y,256);
+  assert.equal(w.set(0,PHYSICAL_MAX_Y,0,BLOCK.WOOD),true);
+  assert.equal(VoxelWorld.restore(w.save()).get(0,PHYSICAL_MAX_Y,0),BLOCK.WOOD);
+  assert.equal(w.set(0,PHYSICAL_MAX_Y+1,0,BLOCK.AIR),false);
 });
 
 test('legacy surface voxels and schema-1 saved edits retain original coordinates',()=>{

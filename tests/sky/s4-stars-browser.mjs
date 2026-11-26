@@ -78,6 +78,8 @@ async function state(page){
       phase:+c.dataset.skyClockPhaseMs,daylight:+c.dataset.skyDaylight,
       yaw:+c.dataset.cameraYaw,pitch:+c.dataset.cameraPitch,
       lunarPersistence:c.dataset.skyLunarPersistence,
+      lunarAgeDays:+c.dataset.skyLunarAgeDays,wallNowMs:Date.now(),
+      lunarEpochRaw:localStorage.getItem('mythwrought-sky-s3-lunar-179'),
       frame:[c.width,c.height],skyDrawn:c.dataset.skyDrawn,
       noticeHidden:document.querySelector('#notice').hidden
     };
@@ -105,12 +107,39 @@ async function choose(page,which){
 }
 async function pitchUp(page){
   await page.locator('#scene').focus();
-  await page.keyboard.down('ArrowUp');
+  // Actual accepted 932x430 evidence aimed at pitch 0.43744 radians.
+  // The original unmodified ArrowUp held across slow SwiftShader frames can
+  // overshoot this target and put the *real* moon projection outside view.
+  // Use the game's normal precision control (Shift+Arrow) to reproduce the
+  // physically accepted camera angle; retain the unchanged 3-moon pixel gate.
+  await page.keyboard.down('ShiftLeft');
   try{
-    await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.cameraPitch>.42,
+    await page.keyboard.down('ArrowUp');
+    try{
+      await page.waitForFunction(()=>
+        +document.querySelector('#scene')?.dataset.cameraPitch>=.435,
       null,{timeout:20000});
-  }finally{await page.keyboard.up('ArrowUp');}
-  await page.waitForTimeout(500);
+    }finally{await page.keyboard.up('ArrowUp');}
+    const angle=await page.evaluate(()=>
+      +document.querySelector('#scene').dataset.cameraPitch);
+    if(angle>.51){
+      await page.keyboard.down('ArrowDown');
+      try{
+        await page.waitForFunction(()=>
+          +document.querySelector('#scene')?.dataset.cameraPitch<=.47,
+        null,{timeout:20000});
+      }finally{await page.keyboard.up('ArrowDown');}
+    }
+  }finally{await page.keyboard.up('ShiftLeft');}
+  // Wait for at least one full new sky-uniform sampling cadence, not only
+  // the camera label: slower software WebGL2 samples celestial uniforms
+  // intermittently. Otherwise the assertion compares a new camera pitch
+  // against an old moonScreens frame.
+  const start=await page.evaluate(()=>
+    +document.querySelector('#scene')?.dataset.renderedFrames);
+  await page.waitForFunction(start=>
+    +document.querySelector('#scene')?.dataset.renderedFrames>=start+16,
+  start,{timeout:45000});
 }
 async function clockOnlyJump(page,phaseMs){
   await page.evaluate(phaseMs=>{
@@ -179,8 +208,37 @@ try{
       assert.ok(movement.percentage>.25,
         'No real moving cloud/night sky pixels after 4 in-game hours');
       assert.ok(dawn.moonCount===3&&dawn.glError===dawn.glNoError);
-      assert.ok(dawn.moonPhases.every((p,i)=>Math.abs(p-night.moonPhases[i])<.002),
-        'Cloud movement must not reset or modify lunar age');
+      // Lunar age advances with real elapsed time, NOT with the manually
+      // changed S1 phase. Preserve exact epoch bytes and independently check
+      // measured age against wall time and each rounded lunar phase.
+      assert.equal(dawn.lunarPersistence,'saved');
+      assert.ok(night.lunarEpochRaw,'Expected actual persisted lunar epoch');
+      assert.equal(dawn.lunarEpochRaw,night.lunarEpochRaw,'S1 jump rewrote lunar epoch');
+      const epoch=JSON.parse(night.lunarEpochRaw);
+      assert.equal(epoch.version,1);assert.equal(epoch.seed,179);
+      assert.ok(Number.isSafeInteger(epoch.wallEpochMs));
+      const dayMs=24*60*1000,periods=[7,11,17],offsets=[.50,.20,.66];
+      const circularError=(a,b)=>Math.abs((((a-b+.5)%1)+1)%1-.5);
+      for(const observed of [night,dawn]){
+        assert.ok(Number.isFinite(observed.lunarAgeDays)&&observed.lunarAgeDays>=0);
+        const expectedAge=(observed.wallNowMs-epoch.wallEpochMs)/dayMs;
+        // Original .002 fastest-moon tolerance around expected elapsed age.
+        assert.ok(Math.abs(observed.lunarAgeDays-expectedAge)<.002*periods[0],
+          'Lunar age does not match preserved wall epoch');
+        assert.equal(observed.moonPhases.length,3);
+        assert.ok(observed.moonPhases.every((p,i)=>
+          circularError(p,offsets[i]+observed.lunarAgeDays/periods[i])<.00002),
+          'Actual rendered lunar phases disagree with observed age');
+      }
+      const elapsedDays=(dawn.wallNowMs-night.wallNowMs)/dayMs;
+      const ageDelta=dawn.lunarAgeDays-night.lunarAgeDays;
+      assert.ok(ageDelta>0&&Math.abs(ageDelta-elapsedDays)<.002*periods[0],
+        'Cloud movement reset or incorrectly advanced independent lunar age');
+      assert.ok(dawn.moonPhases.every((p,i)=>
+        circularError(p,night.moonPhases[i]+ageDelta/periods[i])<.00003),
+        'Cloud movement changed phase independently of actual elapsed lunar age');
+      console.log('SKY_S4_LUNAR_AGE_DIAGNOSTIC',JSON.stringify({
+        w,h,elapsedDays,ageDelta,nightPhases:night.moonPhases,dawnPhases:dawn.moonPhases}));
       assert.deepEqual(await nonSky(page),original,'S4 moved canonical save bytes');
       let rotated=null;
       if(w===932){

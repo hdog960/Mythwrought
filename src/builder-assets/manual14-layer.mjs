@@ -3,7 +3,7 @@ import {markMobSourceMutation} from '../mobs/source-edit-epoch.mjs';
 // Source geometry comes from the independent pack builders. This adapter never
 // allocates biome130 IDs, writes schema-1, or registers candidate blocks in VoxelWorld.
 import {BLOCK} from '../voxel.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y} from '../depth.mjs';
+import {PHYSICAL_MIN_Y as WORLD_MIN_Y,PHYSICAL_MAX_Y as WORLD_MAX_Y,UpperIndexedMap} from '../world-height.mjs';
 import {mountainV8Material} from '../manual-biomes/mountain-v8-materials.mjs';
 import {isBiome130BlockId,biome130Block} from '../biome130-registry.mjs';
 import {isPack2LiveId,pack2ShapeOf} from '../pack2-integration.mjs';
@@ -60,7 +60,13 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
    !Number.isSafeInteger(maxCells)||maxCells<1||maxCells>MANUAL14_MAX_CELLS||
    (externalCell!==null&&typeof externalCell!=='function'))
    throw TypeError('Invalid manual 1/4 layer host');
- let placed=new Map();
+ let placed=new UpperIndexedMap(),upperRevision=0;
+ function commitPlaced(next){
+  // New map snapshots are atomic; monotonic revision survives replacement.
+  if([...placed.values()].some(e=>e.at[1]>19)||[...next.values()].some(e=>e.at[1]>19))upperRevision++;
+  markMobSourceMutation(world);
+  placed=next;
+ }
  const externalAt=at=>Boolean(externalCell?.([...at]))||
    Boolean(world.pack3Runtime?.get?.(at))||
    Boolean(world.pack5Layer?.cell?.(at));
@@ -97,7 +103,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
  function placeMany(records,options={}){
   if(!Array.isArray(records)||!records.length||placed.size+records.length>maxCells)
    throw RangeError('Invalid manual 1/4 blueprint batch');
-  const future=new Map(placed);
+  const future=new UpperIndexedMap(placed);
   for(const raw of records){
    const entry=decodeRecord(raw),k=key(entry.at);
    if(future.has(k))throw Error('Overlapping manually authored construction '+k);
@@ -105,8 +111,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   }
   verifyEntries(future,options); // fail closed before any mutation
   validateManual14ChunkBudgets([...future.values()]); // even UNLOADED deep/GPU chunks
-  markMobSourceMutation(world);
-  placed=future;
+  commitPlaced(future);
   return records.length;
  }
  function remove(at){
@@ -115,7 +120,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   if(!found)return false;
   for(const entry of placed.values())if(entry!==found&&entry.supports.some(c=>key(c)===k))
    throw Error('Remove mounted dependent objects before their backing block');
-  const next=new Map(placed);next.delete(k);markMobSourceMutation(world);placed=next;return true;
+  const next=new UpperIndexedMap(placed);next.delete(k);commitPlaced(next);return true;
  }
  function get(at){if(!coordinate(at))throw TypeError('Invalid physical cell');return placed.get(key(at))??null;}
  function readShape(x,y,z,kind='selection'){
@@ -140,7 +145,7 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   if(!doc||doc.format!==MANUAL14_FORMAT||doc.seed!==world.seed||
     !Array.isArray(doc.entries)||doc.entries.length>maxCells)
    throw Error('Foreign, damaged or oversized manual 1/4 sidecar');
-  const rebuilt=new Map();
+  const rebuilt=new UpperIndexedMap();
   for(const row of doc.entries){
    const item=decodeRecord(row),k=key(item.at);
    if(rebuilt.has(k))throw Error('Duplicate saved physical cell');
@@ -148,11 +153,11 @@ export function createManual14Layer(world,{maxCells=MANUAL14_MAX_CELLS,externalC
   }
   verifyEntries(rebuilt);
   validateManual14ChunkBudgets([...rebuilt.values()]); // corrupt/dense saved scenes stay protected
-  markMobSourceMutation(world);
-  placed=rebuilt;return rebuilt.size;
+  commitPlaced(rebuilt);return rebuilt.size;
  }
  return Object.freeze({world,placeMany,remove,get,target,collision,readShape,
    snapshot,restore,supportsLegacyCell,size:()=>placed.size,
+   upperOccupied:key=>placed.upperOccupied(key),get upperRevision(){return upperRevision;},
    entries:()=>Object.freeze([...placed.values()])});
 }
 

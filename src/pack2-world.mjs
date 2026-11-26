@@ -4,7 +4,8 @@ import {markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 // New candidate cells are written to a separate checksummed per-seed sidecar;
 // corrupted existing data is NEVER silently replaced, reset or migrated.
 import {VoxelWorld,BLOCK,CHUNK_SIZE} from './voxel.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY} from './depth.mjs';
+import {WORLD_MIN_Y} from './depth.mjs';
+import {PHYSICAL_MAX_Y,runtimeSectionForY,UpperIndexedMap} from './world-height.mjs';
 import {worldSlotKey} from './seeds.mjs';
 import {saveFingerprint,assertMountainV8WriteIdentity} from './persistence.mjs';
 import {isPack2LiveId,pack2NormalizeState} from './pack2-integration.mjs';
@@ -15,10 +16,10 @@ const coord=(x,y,z)=>x+','+y+','+z;
 // This index is transient: it is rebuilt from each validated sidecar and
 // never becomes part of the schema-1 or Pack 2 save representation.
 const waterBucket=(x,y,z)=>Math.floor(x/CHUNK_SIZE)+','+
-  Math.floor(z/CHUNK_SIZE)+','+sectionForY(y);
+  Math.floor(z/CHUNK_SIZE)+','+runtimeSectionForY(y);
 const sortCells=(a,b)=>a[0]-b[0]||a[1]-b[1]||a[2]-b[2];
 const within=(x,y,z)=>[x,y,z].every(Number.isSafeInteger)&&
-  y>=WORLD_MIN_Y&&y<=WORLD_MAX_Y;
+  y>=WORLD_MIN_Y&&y<=PHYSICAL_MAX_Y;
 const isExactState=(id,state)=>{
   if(!state||typeof state!=='object'||Array.isArray(state))return false;
   let canonical;try{canonical=pack2NormalizeState(id,state)}catch{return false}
@@ -30,7 +31,7 @@ export class Pack2LiveWorld{
     if(!(base instanceof VoxelWorld))throw new TypeError('Expected actual production VoxelWorld');
     this.base=base;this.seed=base.seed;this.edits=base.edits;
     this.rotations=base.rotations;
-    this.pack2Cells=new Map();this._pack2WaterBuckets=new Map();
+    this.pack2Cells=new UpperIndexedMap();this._pack2WaterBuckets=new Map();
     this.nextPack2State=null;
     if(!Array.isArray(records)||records.length>MAX_CELLS)throw new TypeError('Invalid Pack 2 records');
     for(const row of records){
@@ -62,7 +63,7 @@ export class Pack2LiveWorld{
     }
   }
   pack2WaterSectionEntries(cx,cz,section){
-    if(![cx,cz,section].every(Number.isInteger)||section>0)
+    if(![cx,cz,section].every(Number.isInteger)||section>15)
       throw new TypeError('Invalid Pack 2 water chunk');
     const placed=this._pack2WaterBuckets.get(cx+','+cz+','+section)?.entries()??[];
     if(section!==0||!this.base.environmentOasisWaterEntries)return placed;

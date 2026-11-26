@@ -1,6 +1,7 @@
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
-import {BLOCK,WORLD_MAX_Y,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {BLOCK,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
+import {PHYSICAL_MAX_Y as WORLD_MAX_Y} from './world-height.mjs';
 import {MOUNTAIN_V8_MATERIAL_IDS,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {ENVIRONMENT_GROUND,environmentGround} from './environment-ground.mjs';
 import {WORLD_MIN_Y} from './depth.mjs';

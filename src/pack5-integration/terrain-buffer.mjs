@@ -66,7 +66,7 @@ export function createPack5GpuStream(gl,layer,{
   maxInstances=PACK5_DRAW_INSTANCE_BUDGET,maxDistance=PACK5_DRAW_DISTANCE,
   maxBytes=PACK5_GPU_RESIDENT_BYTES,maxPages=PACK5_GPU_MAX_PAGES,
   pageBytes=PACK5_GPU_PAGE_BYTES,pageInstances=PACK5_GPU_PAGE_INSTANCES,
-  uploadsPerRefresh=1
+  uploadsPerRefresh=1,includeRecord=()=>true
 }={}){
   if(!gl||typeof gl.createBuffer!=='function'||typeof gl.deleteBuffer!=='function'||
     !layer||typeof layer.list!=='function'||typeof layer.meshAt!=='function'||
@@ -84,7 +84,7 @@ export function createPack5GpuStream(gl,layer,{
     lastDrawCalls=0,totalUploadedBytes=0,maxUploadedPageBytes=0;
   function choose(eye){
     const max2=maxDistance*maxDistance;
-    const nearby=layer.list().map(record=>{
+    const nearby=layer.list().filter(includeRecord).map(record=>{
       // Dense houses and caves have multiple vertical floors. Prioritize
       // genuinely nearby *3D* furniture, not distant upstairs items sharing
       // the same horizontal cell as the player.

@@ -8,7 +8,7 @@ import {CHUNK_SIZE,BLOCK} from '../voxel.mjs';
 import {mountainV8Material} from '../manual-biomes/mountain-v8-materials.mjs';
 import {biome130Block,isBiome130BlockId} from '../biome130-registry.mjs';
 import {isPack2LiveId,pack2ShapeOf} from '../pack2-integration.mjs';
-import {WORLD_MIN_Y,WORLD_MAX_Y,sectionBounds,sectionForY} from '../depth.mjs';
+import {PHYSICAL_MIN_Y as WORLD_MIN_Y,PHYSICAL_MAX_Y as WORLD_MAX_Y,runtimeSectionBounds as sectionBounds,runtimeSectionForY as sectionForY,UpperIndexedMap} from '../world-height.mjs';
 
 export const PACK3_RUNTIME_FORMAT='mythwrought.pack3-construction-overlay.v1';
 export const PACK3_RUNTIME_LIMIT=4096;
@@ -125,7 +125,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   validWorld(world);worldIdentity(worldId);
   if(!Number.isSafeInteger(maxCells)||maxCells<1||maxCells>PACK3_RUNTIME_LIMIT)
     throw new RangeError('Invalid construction overlay budget');
-  const overlays=new Map(),byChunk=new Map();
+  const overlays=new UpperIndexedMap(),byChunk=new Map();
   const bucketKey=at=>Math.floor(at[0]/CHUNK_SIZE)+','+
     Math.floor(at[2]/CHUNK_SIZE)+','+sectionForY(at[1]);
   function register(entry){
@@ -237,14 +237,18 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
     return readShape(x,y,z);
   }
   function remove(at){return unregister(at);}
-  function get(at){return overlays.get(key(at))??null;}
+  function get(at){
+    if(!Array.isArray(at)||at.length!==3||!at.every(Number.isSafeInteger))throw TypeError('Invalid physical query');
+    if(at[1]<WORLD_MIN_Y||at[1]>WORLD_MAX_Y)return null;
+    return overlays.get(key(at))??null;
+  }
   function entries(){return Object.freeze([...overlays.values()].sort(compare));}
   function target(origin,direction,reach=6){
     return raycastShapes(origin,direction,readShape,reach);
   }
   function playerFits(bounds){return inspectBodyFit(bounds,readCollisionShape);}
   function chunkMesh(cx,cz,section=0,{maxVertices=100000}={}){
-    if(![cx,cz,section].every(Number.isInteger)||section>0||
+    if(![cx,cz,section].every(Number.isInteger)||section>15||
         !Number.isSafeInteger(maxVertices)||maxVertices<1)throw new TypeError('Invalid chunk request');
     const y=sectionBounds(section),selected=[],startX=cx*CHUNK_SIZE,startZ=cz*CHUNK_SIZE;
     // Dense settlements must not scan every placed block to build one
@@ -298,6 +302,7 @@ export function createPack3RuntimeStage(world,{worldId='builder-preview',maxCell
   return Object.freeze({
     format:PACK3_RUNTIME_FORMAT,liveGameRegistered:false,
     placeMany,remove,get,entries,readShape,target,playerFits,chunkMesh,
-    serialize,restore,size:()=>overlays.size
+    serialize,restore,size:()=>overlays.size,
+    upperOccupied:key=>overlays.upperOccupied(key),get upperRevision(){return overlays.upperRevision;}
   });
 }

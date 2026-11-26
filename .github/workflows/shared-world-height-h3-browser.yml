@@ -1,0 +1,32 @@
+name: Shared world height H3 budget and original WebGL2
+on:
+  push:
+    branches: [research/shared-world-height-h1-h2-20261125]
+    paths:
+      - 'tests/shared-world-height-h3-budget.test.mjs'
+      - 'tests/shared-world-height-browser.mjs'
+      - '.github/workflows/shared-world-height-h3-browser.yml'
+permissions:
+  contents: read
+jobs:
+  native-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: node --check src/main.mjs
+      - run: node --test tests/shared-world-height-h3-budget.test.mjs
+      - run: npm install --no-save --package-lock=false playwright@1.51.1
+      - run: npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 4174 >/tmp/height-http.log 2>&1 &
+          node tests/shared-world-height-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shared-height-original-webgl
+          path: artifacts/world-height/
+          if-no-files-found: ignore

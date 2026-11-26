@@ -16,7 +16,8 @@ const loaded=()=>page.waitForFunction(()=>Number(document.querySelector('#scene'
   Number(document.querySelector('#scene')?.dataset.pendingChunks)===0,null,{timeout:40000});
 const settledAt=point=>page.waitForFunction(({x,z})=>{
  const canvas=document.querySelector('#scene');
- return canvas?.dataset.chunkCenter===Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16)&&
+ return canvas?.dataset.chunkCenter?.split('|height:')[0]===Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16)&&
+   window.__mythwroughtTest.snapshot().chunks.includes(Math.floor((x+.5)/16)+','+Math.floor((z+.5)/16))&&
    Number(canvas.dataset.loadedChunks)===25&&Number(canvas.dataset.pendingChunks)===0;
 },point,{timeout:45000});
 const data=()=>page.evaluate(()=>{

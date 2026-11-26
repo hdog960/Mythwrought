@@ -1,0 +1,36 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
+import {Pack2LiveWorld} from '../src/pack2-world.mjs';
+import {createPack5ConstructionLayer} from '../src/pack5-integration/construction-layer.mjs';
+import {pack5TerrainVertices} from '../src/pack5-integration/terrain-buffer.mjs';
+import {pack5UpperRecord} from '../src/pack5-integration/upper-sections.mjs';
+import {upperOccupancy} from '../src/world-height.mjs';
+import {savePack5SidecarSafe,loadPack5SidecarSafe} from '../src/pack5-integration/sidecar-storage.mjs';
+test('real two-cell bed crosses signed horizontal upper owner seam, with all source triangles retained',()=>{
+ const w=new Pack2LiveWorld(new VoxelWorld(179));
+ for(const z of [-1,0])assert.ok(w.set(-16,254,z,3));
+ let last=null;const layer=createPack5ConstructionLayer(w,{upperRebuild:(next,affected)=>{last=next;}});
+ w.pack5Layer=layer;
+ const result=layer.place('pack5:082',[-16,255,-1],0);assert.ok(result.ok,result.reason);
+ assert.equal(layer.count(),1);assert.ok(layer.cell([-16,255,-1]));assert.ok(layer.cell([-16,255,0]));
+ assert.ok(upperOccupancy(w,'sky:-1,-1,14'));assert.ok(upperOccupancy(w,'sky:-1,0,14'));
+ assert.equal(w.set(-16,255,0,3),false);
+ const original=pack5TerrainVertices(layer.meshAt([-16,255,-1]));
+ const actual=[...last.values()].reduce((n,m)=>n+m.length,0);assert.equal(actual,original.length);
+ const tri=m=>Array.from({length:m.length/27},(_,i)=>Array.from(m.subarray(i*27,(i+1)*27)).join(','));
+ assert.deepEqual([...last.values()].flatMap(tri).sort(),tri(original).sort());
+ const storage=new Map(),s={getItem:k=>storage.get(k)??null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)};
+ savePack5SidecarSafe(s,layer);
+ const coldWorld=new Pack2LiveWorld(VoxelWorld.restore(w.save())),cold=createPack5ConstructionLayer(coldWorld,{upperRebuild:()=>{}});
+ assert.equal(loadPack5SidecarSafe(s,cold).count,1);assert.deepEqual(cold.snapshot(),layer.snapshot());
+ assert.deepEqual(cold.upperMesh('sky:-1,0,14'),layer.upperMesh('sky:-1,0,14'));
+ assert.ok(layer.remove([-16,255,0]));assert.equal(layer.upperOccupied('sky:-1,0,14'),false);
+});
+test('upper source callback failure rolls physical placement back, original default retains legacy bounds',()=>{
+ const w=new Pack2LiveWorld(new VoxelWorld(179));
+ const layer=createPack5ConstructionLayer(w,{upperRebuild:()=>{throw Error('Injected GPU failure');}});
+ const result=layer.place('pack5:080',[0,256,0]);assert.equal(result.ok,false);assert.match(result.reason,/Injected GPU failure/);
+ assert.equal(layer.count(),0);assert.equal(layer.upperOccupied('sky:0,0,14'),false);
+ assert.equal(layer.place('pack5:080',[0,257,0]).ok,false);
+ assert.equal(createPack5ConstructionLayer(w).place('pack5:080',[0,256,0]).ok,false);
+});
