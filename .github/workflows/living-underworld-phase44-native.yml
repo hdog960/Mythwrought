@@ -1,8 +1,8 @@
-name: Living Underworld completion 5 - startup repair and original owner integration
+name: Living Underworld completion 6 - supported gallery game ownership
 on:
   push:
     branches:
-      - dev/living-underworld-phase44-startup-repair-20261125
+      - dev/living-underworld-phase45-safe-camera-20261126
     paths:
       - .github/workflows/living-underworld-phase44-native.yml
 permissions:
