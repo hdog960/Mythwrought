@@ -2,6 +2,7 @@ import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-
 import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
 import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
 import {createCreativeHistory} from './creative-integration/creative-history.mjs';
+import {replayCreativeVoxelBatch} from './creative-integration/creative-voxel-batch.mjs';
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
@@ -1154,6 +1155,11 @@ function start(nonblockStage=null){
       ...(manual.supportAt?{supportAt:[...manual.supportAt]}:{})}:null;
     throw Error('Unknown Creative history owner');
   }
+  // Plain historical VoxelWorld has a single-cell authoritative setter.
+  // Older profiled generators may cascade implicitly in set(); retain their
+  // conservative restriction until exact footprint/rollback is qualified.
+  const safeCreativeVoxelWorld=()=>!caveSession&&(world.base?.constructor===VoxelWorld||
+    world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR);
   function recordCreativeOwner(owner,cell,before){
     if(!g2CreativeEnabled||caveSession)return;
     try{
@@ -1166,15 +1172,37 @@ function start(nonblockStage=null){
   function replayCreativeOwner(direction){
     if(!g2CreativeEnabled||g2Active()||!help.hidden||exploration.isOpen()||
        document.hidden||graphicsLost||storageReadOnly||caveSession)return;
-    const adapter={worldToken:g2Token(),read:entry=>creativeOwnerState(entry.owner,entry.target),
+    const adapter={worldToken:g2Token(),read:entry=>entry.owner==='voxel-batch'?
+        entry.target.map(c=>creativeOwnerState('voxel',c)):creativeOwnerState(entry.owner,entry.target),
       apply:(entry,desired,expected)=>{
+        if(entry.owner==='voxel-batch'){
+          if(!safeCreativeVoxelWorld()||world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)return false;
+          const cells=entry.target,keys=new Set(cells.map(c=>c.join(',')));
+          return replayCreativeVoxelBatch({cells,desired,expected,
+            read:c=>creativeOwnerState('voxel',c),
+            allowed:(c,d,e)=>{
+              const section=runtimeSectionForY(c[1]);
+              if(section===null||!chunks.has(runtimeMeshKey(chunkCoord(c[0]),chunkCoord(c[2]),section))||
+                 !d||!e||d.foreign||e.foreign||d.pack2||e.pack2||
+                 manual14.supportsLegacyCell(c)||pack5Builder?.supportsLegacyCell(c))return false;
+              if(d.id!==BLOCK.AIR&&(intersectsPlayerBlock(player,c,d.id,d.rotation,null)||
+                 hasLiveScenery()&&stagedScene()?.bodyIntersects([...c,...c.map(n=>n+1)])))return false;
+              if(d.id===BLOCK.AIR&&(world.base?.mountainV8SupportedTreeCells?.(...c)??[]).some(p=>!keys.has(p.join(','))))return false;
+              return true;
+            },
+            write:(c,d)=>world.set(...c,d.id,d.rotation),
+            rebuild:cs=>refreshEditedMeshes(cs[0][0],cs[0][2],cs[0][1],cs),
+            save:()=>{changed=true;return save();},
+            protect:()=>{storageReadOnly=true;}
+          });
+        }
         const cell=entry.target;
         const section=runtimeSectionForY(cell[1]);
         if(section===null||!chunks.has(runtimeMeshKey(chunkCoord(cell[0]),chunkCoord(cell[2]),section)))return false;
         if(desired===null&&(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell)))return false;
         if(desired!==null&&hasLiveScenery()&&stagedScene()?.bodyIntersects([...cell,...cell.map(n=>n+1)]))return false;
         if(entry.owner==='voxel'){
-          if(world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR||desired?.foreign||expected?.foreign)return false;
+          if(!safeCreativeVoxelWorld()||desired?.foreign||expected?.foreign)return false;
           if(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell))return false;
           if(desired.id!==BLOCK.AIR&&intersectsPlayerBlock(player,cell,desired.id,desired.rotation,desired.pack2))return false;
           if(desired.id===BLOCK.AIR&&(world.base?.mountainV8SupportedTreeCells?.(...cell)??[]).length)return false;
@@ -1372,7 +1400,7 @@ function start(nonblockStage=null){
         catch(error){world.updatePack2State(...targeted,existing);
           message('Gate update failed; original shape retained: '+error.message);return;}
         changed=true;const persisted=save();
-        if(persisted&&g2CreativeEnabled&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR&&world.pack2Cells?.has(targeted.join(',')))
+        if(persisted&&g2CreativeEnabled&&safeCreativeVoxelWorld()&&world.pack2Cells?.has(targeted.join(',')))
           recordCreativeOwner('voxel',targeted,{id:existing.id,rotation:0,pack2:{...existing}});
         else clearCreativeHistory();
         message((next.open?'Opened ':'Closed ')+BLOCK_NAMES[selected]+
@@ -1382,16 +1410,33 @@ function start(nonblockStage=null){
     }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
     const historyCell=mode==='place'?physicalState.adjacent:physicalState.hit;
-    const historyBefore=g2CreativeEnabled&&historyCell&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR?
+    const historyBefore=g2CreativeEnabled&&historyCell&&safeCreativeVoxelWorld()?
       creativeOwnerState('voxel',historyCell):null;
+    // Capture the actual natural support footprint before the original owner
+    // changes it. Only the authoritative returned affectedCells are journaled.
+    let batchBefore=null;
+    if(historyBefore&&!historyBefore.foreign&&mode==='mine'&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR){
+      const support=world.base.mountainV8SupportedTreeCells?.(...historyCell)??[];
+      if(support.length&&support.length<=511){
+        batchBefore=new Map([historyCell,...support].map(c=>[c.join(','),creativeOwnerState('voxel',c)]));
+      }
+    }
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
     const persisted=save();
-    if(persisted&&historyBefore&&!historyBefore.foreign&&!result.affectedCells?.length&&historyCell.join(',')===result.cell.join(','))
-      recordCreativeOwner('voxel',historyCell,historyBefore);
-    else clearCreativeHistory();
+    if(persisted&&historyBefore&&!historyBefore.foreign&&historyCell.join(',')===result.cell.join(',')){
+      if(!result.affectedCells?.length)recordCreativeOwner('voxel',historyCell,historyBefore);
+      else try{
+        const cells=result.affectedCells;
+        if(!batchBefore||cells.length>512||new Set(cells.map(c=>c.join(','))).size!==cells.length)throw Error('Untracked batch');
+        const before=cells.map(c=>batchBefore.get(c.join(','))),after=cells.map(c=>creativeOwnerState('voxel',c));
+        if([...before,...after].some(d=>!d||d.foreign||d.pack2))throw Error('Mixed owner');
+        creativeHistory.record({worldToken:g2Token(),owner:'voxel-batch',target:cells,before,after});
+        creativeInventory?.syncHistory();
+      }catch(_){clearCreativeHistory();}
+    }else clearCreativeHistory();
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
