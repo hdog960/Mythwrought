@@ -1,0 +1,30 @@
+name: Forgotten Sands P0 actual released shared height compatibility
+on:
+  push:
+    branches: [research/forgotten-sands-p0-cached-vista-20261126]
+    paths:
+      - 'tests/forgotten-sands-shared-height.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-shared-height.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          path: .current-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          git -C .current-source rev-parse HEAD
+          node --version
+          P0_CURRENT_SOURCE="$PWD/.current-source" node --test tests/forgotten-sands-shared-height.test.mjs
