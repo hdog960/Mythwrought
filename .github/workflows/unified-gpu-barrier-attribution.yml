@@ -1,0 +1,34 @@
+name: Unified exact-workload GPU barrier attribution
+on:
+  push:
+    branches: [probe/unified-gpu-barrier-attribution-20261126]
+    paths: ['perf/issue-291/unified-gpu-barrier-attribution.mjs','.github/workflows/unified-gpu-barrier-attribution.yml']
+permissions:
+  contents: read
+jobs:
+  real-barriers:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact frozen runtime, original 100-cell mining fixture and actual framebuffer witnesses
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css)"
+          node --check perf/issue-291/unified-gpu-barrier-attribution.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-barrier.log 2>&1 &
+          node perf/issue-291/unified-gpu-barrier-attribution.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-gpu-barrier-attribution
+          path: artifacts/unified-gpu-barrier-attribution/
+          if-no-files-found: warn
