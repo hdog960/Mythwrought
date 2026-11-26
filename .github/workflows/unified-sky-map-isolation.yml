@@ -1,0 +1,69 @@
+name: Unified outstanding sky and map source qualification
+on:
+  push:
+    branches: [probe/unified-sky-map-isolation-20261126]
+    paths:
+      - 'tests/**'
+      - '.github/workflows/unified-sky-map-isolation.yml'
+permissions:
+  contents: read
+jobs:
+  sky:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        script: [s2-atmosphere-browser, s3-moons-browser, s4-stars-browser, s5-events-browser, s6-legacy-browser]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Freeze game and validate isolation contract
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json)"
+          node --test tests/sky/storage-isolation.test.mjs
+          node --check tests/sky/${{ matrix.script }}.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+      - name: Previously failing or unexecuted sky stage
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-sky.log 2>&1 &
+          node tests/sky/${{ matrix.script }}.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-sky-${{ matrix.script }}
+          path: artifacts/sky-*/
+          if-no-files-found: warn
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Actual remote discovery and separate-world touch isolation
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json)"
+          node --check tests/exploration-map-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-map.log 2>&1 &
+          node tests/exploration-map-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-map-remote-discovery
+          path: artifacts/
+          if-no-files-found: warn

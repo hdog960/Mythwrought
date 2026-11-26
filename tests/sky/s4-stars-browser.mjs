@@ -1,6 +1,7 @@
 // Genuine Mythwrought S4 panoramic-star + clock-driven-cloud acceptance.
 // Real S1 menu clicks, real live original WebGL2, no mocked screenshots.
 import assert from 'node:assert/strict';
+import {assertSkyStorageIsolation} from './storage-isolation.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -192,7 +193,7 @@ try{
       assert.equal(day.starVisibility,0);
       await shot(page,w,h,'clean-daylight');
       const dayCanvas=await shot(page,w,h,'clean-daylight',true);
-      assert.deepEqual(await nonSky(page),original,'S4 day/night modified original saves');
+      assertSkyStorageIsolation(await nonSky(page),original,'S4 day/night modified original saves');
       // Advance only the S1 phase to 04:00: both states still nocturnal but
       // cloud positions must drift and the real GPU image must change.
       await clockOnlyJump(page,240000);
@@ -239,7 +240,7 @@ try{
         'Cloud movement changed phase independently of actual elapsed lunar age');
       console.log('SKY_S4_LUNAR_AGE_DIAGNOSTIC',JSON.stringify({
         w,h,elapsedDays,ageDelta,nightPhases:night.moonPhases,dawnPhases:dawn.moonPhases}));
-      assert.deepEqual(await nonSky(page),original,'S4 moved canonical save bytes');
+      assertSkyStorageIsolation(await nonSky(page),original,'S4 moved canonical save bytes');
       let rotated=null;
       if(w===932){
         await page.locator('#scene').focus();

@@ -3,6 +3,7 @@
 // This physically proves fail-closed S5 parity until separately authorized
 // four-biome runtime source exists in the same repository.
 import assert from 'node:assert/strict';
+import {assertSkyStorageIsolation} from './storage-isolation.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -128,7 +129,7 @@ try{
         [true,true,true]);
       await capture(page,w,h,'authentic-legacy-day',false);
       await capture(page,w,h,'authentic-legacy-day',true);
-      assert.deepEqual(await nonClock(page),saved,'Legacy world save changed under S6');
+      assertSkyStorageIsolation(await nonClock(page),saved,'Legacy world save changed under S6');
       assert.deepEqual(errors,[]);
       assert.deepEqual(missing,[]);
       manifest.viewports.push({w,h,night,day,
