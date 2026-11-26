@@ -47,7 +47,7 @@ import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
-import {GpuUploadRetry,uploadChunkBuffer} from './gpu-recovery.mjs';
+import {GpuUploadRetry,uploadChunkBuffer,stageEditedChunkBuffers} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {mountainV8Storage,mountainV8DatabaseFactory,V8_ACTIVE_KEY,setMountainV8Active} from './manual-biomes/mountain-v8-isolated-storage.mjs';
@@ -1041,12 +1041,9 @@ function start(nonblockStage=null){
     const owner=world;
     const originals=batch.map(item=>chunks.get(item.key));
     if(originals.some(item=>!item))throw Error('Edited chunk no longer resident');
-    const ready=[];
+    let ready=[];
     try{
-      for(const item of batch){
-        if(gl.isContextLost())throw Error('Graphics context lost during edit mesh staging');
-        ready.push({...item,...uploadPack2Chunk(item.vertices,item.water,item.section)});
-      }
+      ready=stageEditedChunkBuffers(gl,batch);
       if(gl.isContextLost()||world!==owner||
          batch.some((item,i)=>chunks.get(item.key)!==originals[i]))
         throw Error('Edited mesh owner changed before publication');

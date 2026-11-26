@@ -52,7 +52,7 @@ export function createLiveMobSession({
   worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{},
   sourceRevision
 }={}){
-  if(!world||typeof world.get!=='function'||world.seed!==seed||
+  if(!world||typeof world.get!=='function'||(world.seed!==undefined&&world.seed!==seed)||
     !storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
     typeof skyAt!=='function'||typeof caveAt!=='function'||

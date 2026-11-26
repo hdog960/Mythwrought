@@ -10,13 +10,25 @@ import {chromium} from 'playwright';
 const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
 const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
 const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
-const NEW_CACHE='mythwrought-m5-shell-20261126-unified-candidate-v1';
-const RELEASE='20261126-unified-candidate-v1';
+const NEW_CACHE='mythwrought-m5-shell-20261126-unified-candidate-v2';
+const RELEASE='20261126-unified-candidate-v2';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
  'sw-m5.js':execFileSync('git',['show',BASE_CACHE_FIRST+':sw-m5.js'],{encoding:'utf8'})
 };
+// Historical main must load historical transitive modules, not the new
+// candidate's incompatible live-game contract. Keep the actual cache-first
+// worker from its historical revision; any later worker-only asset is read
+// from that same historical tree, never from the current candidate.
+const oldPaths=new Set(execFileSync('git',['ls-tree','-r','--name-only',BASE_REC_LESS],{encoding:'utf8'}).trim().split('\n'));
+const oldCachePaths=new Set(execFileSync('git',['ls-tree','-r','--name-only',BASE_CACHE_FIRST],{encoding:'utf8'}).trim().split('\n'));
+function historical(relative){
+ if(Object.hasOwn(oldFiles,relative))return oldFiles[relative];
+ const ref=oldPaths.has(relative)?BASE_REC_LESS:oldCachePaths.has(relative)?BASE_CACHE_FIRST:null;
+ if(!ref)throw Error('Missing historical source '+relative);
+ return oldFiles[relative]=execFileSync('git',['show',ref+':'+relative],{maxBuffer:16*1024*1024});
+}
 const root=process.cwd();
 let deploy='old',requests=0,serverEpoch='a';
 function mime(file){
@@ -33,8 +45,8 @@ const server=createServer(async(req,res)=>{
  if(relative.includes('..')){res.writeHead(403);res.end();return;}
  ++requests;
  try{
-   const fromOld=deploy==='old'&&Object.prototype.hasOwnProperty.call(oldFiles,relative);
-   const content=fromOld?oldFiles[relative]:await readFile(path.resolve(root,relative));
+   const fromOld=deploy==='old';
+   const content=fromOld?historical(relative):await readFile(path.resolve(root,relative));
    res.writeHead(200,{'Content-Type':mime(relative),'Cache-Control':'no-store',
      'X-MW-Origin-Build':fromOld?'old':'new',
      'X-MW-Server-Epoch':serverEpoch});
@@ -162,7 +174,7 @@ try{
       ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs'].every(p=>files.some(f=>f.url.endsWith('/'+p)));
   },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
-    const cache=await caches.open('mythwrought-m5-shell-20261126-unified-candidate-v1');
+    const cache=await caches.open('mythwrought-m5-shell-20261126-unified-candidate-v2');
     const index=new URL('/index.html',location.href).href;
     const response=await cache.match(index);
     const rootResponse=await cache.match(new URL('/',location.href).href);
