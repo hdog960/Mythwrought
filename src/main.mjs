@@ -47,6 +47,7 @@ import {createLiveMobSession} from './mobs/live-game.mjs';
 import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
+import {GpuFrameAdmission} from './gpu-frame-admission.mjs';
 import {GpuUploadRetry,uploadChunkBuffer,stageEditedChunkBuffers} from './gpu-recovery.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
@@ -1854,8 +1855,9 @@ function start(nonblockStage=null){
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
     }
   }
+  const gpuFrameAdmission=new GpuFrameAdmission(gl);
   const frameDriver=new ForegroundFrameDriver(
-    callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
+    callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),now=>gpuFrameAdmission.run(now,draw)
   );
   // iPhone Touch.identifier is stable across simultaneous fingers even if
   // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
@@ -3418,7 +3420,7 @@ function start(nonblockStage=null){
     // storage. Prevent default allows the browser to attempt recovery.
     e.preventDefault();
     if(graphicsLost)return;
-    graphicsLost=true;graphicsLossCount++;
+    graphicsLost=true;graphicsLossCount++;gpuFrameAdmission.reset();
     mobRenderer=null;
     caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
