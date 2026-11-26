@@ -1,0 +1,39 @@
+name: Unified experimental bounded GPU frame admission
+on:
+  push:
+    branches: [probe/unified-gpu-frame-admission-20261126]
+    paths: ['src/**','tests/gpu-frame-admission.test.mjs','perf/issue-291/unified-gpu-frame-admission-ab.mjs','.github/workflows/unified-gpu-frame-admission.yml']
+permissions:
+  contents: read
+jobs:
+  frame-admission:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Native fence ownership and original edit transaction contracts
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          node --check src/main.mjs
+          node --check perf/issue-291/unified-gpu-frame-admission-ab.mjs
+          node --test tests/gpu-frame-admission.test.mjs tests/gpu-edit-batch.test.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual 200 mines and rendered-frame cadence
+        env:
+          AB_VIEWPORT: 956x440
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-frame-admission.log 2>&1 &
+          node perf/issue-291/unified-gpu-frame-admission-ab.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-gpu-frame-admission
+          path: artifacts/unified-gpu-frame-admission/
+          if-no-files-found: warn
