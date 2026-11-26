@@ -3,6 +3,16 @@
 // Discovery is stored outside the canonical schema-1 voxel save and never rewrites it.
 import {terrainHeight,BLOCK} from './voxel.mjs';
 import {profiledDiscoveredCellInk} from './manual-biomes/exploration-ink.mjs';
+import {createNavigationAdapter} from './navigation00/navigation-adapter.mjs';
+import {createNavigationGestures} from './navigation00/navigation-gestures.mjs';
+import {paintNavigationFrame} from './navigation00/navigation-paint.mjs';
+import {createNavigationLocationReadout} from './navigation00/navigation-location-readout.mjs';
+import {navigationPose,observeNavigationSurface,eligibleSurfaceDiscovery} from './navigation00/navigation-live-observation.mjs';
+import {createObservationCatalog,sampleNearbyObservations} from './navigation00/navigation-observation-catalog.mjs';
+import {classifyHeightObservation,inspectUpperCover} from './navigation00/navigation-height-observation.mjs';
+import {MOUNTAIN_V8_MATERIAL,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
+import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
+import {PHYSICAL_MAX_Y,UPPER_SECTION_COUNT,runtimeSectionBounds} from './world-height.mjs';
 
 export const MAP_CELL_SIZE=4;
 export const MAP_REVEAL_RADIUS=3;
@@ -45,14 +55,15 @@ export function loadExploration(storage,seed){
     get readOnly(){return readOnly;},
     get warning(){return warning;},
     has(x,z){return seen.has(mapCell(x,z));},
-    reveal(x,z){
+    reveal(x,z,eligible=()=>true){
+      if(!Number.isFinite(x)||!Number.isFinite(z)||typeof eligible!=='function')return 0;
       const cx=Math.floor(x/MAP_CELL_SIZE),cz=Math.floor(z/MAP_CELL_SIZE);
       let added=0;
       for(let dz=-MAP_REVEAL_RADIUS;dz<=MAP_REVEAL_RADIUS;dz++){
         for(let dx=-MAP_REVEAL_RADIUS;dx<=MAP_REVEAL_RADIUS;dx++){
           if(dx*dx+dz*dz>MAP_REVEAL_RADIUS*MAP_REVEAL_RADIUS)continue;
           const cell=(cx+dx)+','+(cz+dz);
-          if(seen.has(cell))continue;
+          if(seen.has(cell)||!eligible((cx+dx)*MAP_CELL_SIZE+2,(cz+dz)*MAP_CELL_SIZE+2))continue;
           if(seen.size>=MAP_MAX_CELLS){
             warning='Exploration record full; older discoveries remain preserved';
             return added;
@@ -93,7 +104,7 @@ function surfaceInk(world,cx,cz){
   if(h>=4)return '#588d66';
   return '#477a69';
 }
-export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,panZ=0,zoom=7}={}){
+export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,panZ=0,zoom=7,observedInk=null}={}){
   const ctx=canvas.getContext('2d');
   if(!ctx)return;
   const w=canvas.width,h=canvas.height,px=expanded?zoom:5;
@@ -109,8 +120,8 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
       // CRITICAL: the fog check above must happen before ALL source calls.
       // Use actual profiled-world solid geology for previously visited tiles;
       // preserve the old source-exact color path on every legacy seed.
-      ctx.fillStyle=profiledDiscoveredCellInk(world,cx,cz,MAP_CELL_SIZE)||
-        surfaceInk(world,cx,cz);
+      ctx.fillStyle=observedInk?observedInk(cx,cz):(profiledDiscoveredCellInk(world,cx,cz,MAP_CELL_SIZE)||
+        surfaceInk(world,cx,cz));
       ctx.fillRect(Math.floor(w/2+dx*px-px/2),Math.floor(h/2+dz*px-px/2),px,px);
     }
   }
@@ -131,7 +142,7 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
     ctx.font='bold 15px system-ui';ctx.fillStyle='#f7e5b7';ctx.fillText('N',12,22);
   }
 }
-export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen}){
+export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen,residentAt=()=>false,upperOccupiedAt=()=>true,upperResidentAt=()=>false,readUpper=()=>1}){
   const mini=document.getElementById('miniMap');
   const openButton=document.getElementById('miniMapButton');
   const overlay=document.getElementById('explorationOverlay');
@@ -140,75 +151,220 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   const coordinates=document.getElementById('explorationCoordinates');
   const summary=document.getElementById('explorationSummary');
   let map=loadExploration(storage,getWorld().seed);
-  let lastPaint=-Infinity,lastSave=-Infinity,zoom=7,panX=0,panZ=0;
+  let lastPaint=-Infinity,lastSave=-Infinity,nav,gestures,catalog,paintRequest=null,observation=null,selected=null,tap=null,sampleIndex=0;
+  const markerList=document.getElementById('navMarkerList'),markerName=document.getElementById('navMarkerName');
+  const markerStatus=document.getElementById('navMarkerStatus');
+  const addMarker=document.getElementById('navMarkerAdd'),renameMarker=document.getElementById('navMarkerRename');
+  const removeMarker=document.getElementById('navMarkerRemove'),undoMarker=document.getElementById('navMarkerUndo');
+  const hereMarker=document.getElementById('navMarkerHere');
+  const pose=()=>navigationPose(getPlayer());
+  function refreshMarkers(){
+    const pins=nav.navigator.visiblePins(),pin=pins.find(p=>p.id===selected?.id);
+    const signature=JSON.stringify(pins.map(p=>[p.id,p.label]));
+    if(markerList.dataset.signature!==signature){
+      markerList.replaceChildren(new Option('Select waypoint',''));
+      for(const p of pins)markerList.add(new Option(p.label,p.id));
+      markerList.dataset.signature=signature;
+    }
+    markerList.value=pin?.id||'';
+    const writable=!nav.navigator.readOnly;
+    addMarker.disabled=!writable||!selected||!!pin||!map.has(selected.x,selected.z);
+    renameMarker.disabled=removeMarker.disabled=!writable||!pin;
+    undoMarker.disabled=!nav.navigator.canUndo;
+    markerStatus.textContent=nav.navigator.warning||(pin?'Waypoint · X '+pin.x.toFixed(1)+' Z '+pin.z.toFixed(1):
+      selected?'Target · X '+selected.x.toFixed(1)+' Z '+selected.z.toFixed(1)+(map.has(selected.x,selected.z)?'':' · unexplored'):
+      'Tap a discovered tile or select HERE.');
+  }
+  function selectTarget(target){
+    selected=target;markerName.value=target?.label||'';refreshMarkers();renderExpanded();
+  }
+  function editMarker(action){
+    const n=nav.navigator,label=markerName.value.trim();
+    let ok=false;
+    if(action==='add'&&selected&&!selected.id&&label&&map.has(selected.x,selected.z)){
+      const id='p-'+Array.from(crypto.getRandomValues(new Uint32Array(2)),v=>v.toString(16)).join('-');
+      ok=n.pin({id,x:selected.x,z:selected.z,label});if(ok)selected={...selected,id,label};
+    }else if(action==='rename'&&selected?.id&&label){ok=n.rename(selected.id,label);if(ok)selected={...selected,label};}
+    else if(action==='remove'&&selected?.id){ok=n.unpin(selected.id);if(ok)selected=null;}
+    else if(action==='undo'){ok=n.undo();if(ok)selected=null;}
+    refreshMarkers();renderExpanded();
+    if(!ok&&!n.warning)markerStatus.textContent='No change saved. Select a valid discovered target and name.';
+  }
+  const captured=new Set();
+  function resetPointers(){
+    gestures?.cancel();
+    tap=null;
+    const ids=[...captured];captured.clear();
+    for(const id of ids){try{if(large.hasPointerCapture(id))large.releasePointerCapture(id);}catch(_){}}
+  }
+  function resetNavigation(){
+    resetPointers();
+    nav=createNavigationAdapter({seed:map.seed,discovery:map,storage,
+      width:large.width,height:large.height,player:pose(),exact:true});
+    catalog=createObservationCatalog({seed:map.seed,discovery:map,storage});sampleIndex=0;
+    selected=null;observation=null;
+    gestures=createNavigationGestures({viewport:nav.viewport});
+    if(!overlay.hidden)gestures.open();
+  }
+  resetNavigation();
+  function renderExpanded(){
+    if(overlay.hidden)return;
+    const world=getWorld(),player=pose();
+    if(world.seed!==map.seed)return;
+    nav.updatePlayer(player);
+    const frame=nav.frame();
+    const marks=catalog.visible().map(p=>({...p,...frame.projection.world(p.x,p.z)}));
+    const target=selected&&!selected.id?frame.projection.world(selected.x,selected.z):null;
+    paintNavigationFrame(large,frame,{landmarks:marks,target,selectedId:selected?.id,cellInk:cell=>catalog.ink(cell.x,cell.z)});
+    // Production yaw zero faces +Z; north is -Z, east is +X.
+    const currentObservation=observation?.x===Math.floor(player.x)&&observation?.z===Math.floor(player.z)?observation:null;
+    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,surfaceY:currentObservation?.surfaceY??null});
+    coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
+    summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='upper'?'Upper world · surface not sampled':currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':location.depthLabel):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
+    large.dataset.observedTiles=String(catalog.tileCount);
+    large.dataset.observedLandmarks=String(marks.length);
+    refreshMarkers();
+    large.dataset.navigationZoom=String(frame.zoom);
+  }
+  function queueExpanded(){
+    if(paintRequest!==null)return;
+    paintRequest=requestAnimationFrame(()=>{paintRequest=null;renderExpanded();});
+  }
   function syncSeed(){
     const world=getWorld();
     if(map.seed===world.seed)return;
-    map.flush();
+    flushAll();
     map=loadExploration(storage,world.seed);
-    panX=panZ=0;
+    resetNavigation();
   }
   function render(){
     const world=getWorld(),player=getPlayer();
-    paintExploration(mini,map,world,player);
+    paintExploration(mini,map,world,player,{observedInk:(x,z)=>catalog.ink(x,z)});
     mini.dataset.discovered=String(map.seen.size);
     mini.dataset.seed=String(map.seed);
-    if(!overlay.hidden){
-      paintExploration(large,map,world,player,{expanded:true,panX,panZ,zoom});
-      coordinates.textContent='X '+Math.floor(player.x)+' · Z '+Math.floor(player.z)+' · Seed '+world.seed;
-      summary.textContent=map.warning||map.seen.size+' discovered map cells · dark areas remain unexplored';
-    }
+    renderExpanded();
   }
+  function flushAll(){const fog=map.flush(),observed=catalog.flush();return fog&&observed;}
   function close(){
     if(overlay.hidden)return;
-    overlay.hidden=true;map.flush();render();document.getElementById('scene').focus({preventScroll:true});
+    overlay.hidden=true;resetPointers();gestures.close();
+    if(paintRequest!==null){cancelAnimationFrame(paintRequest);paintRequest=null;}
+    flushAll();render();document.getElementById('scene').focus({preventScroll:true});
   }
   openButton.addEventListener('click',()=>{
     if(!overlay.hidden||!canOpen())return;
     syncSeed();onOpen();
-    panX=panZ=0;map.flush();
-    overlay.hidden=false;render();closeButton.focus({preventScroll:true});
+    nav.viewport.reset();selected=null;markerName.value='';flushAll();
+    overlay.hidden=false;gestures.open();render();closeButton.focus({preventScroll:true});
   });
   closeButton.addEventListener('click',close);
+  hereMarker.addEventListener('click',()=>{const p=pose();selectTarget({x:p.x,z:p.z});});
+  markerList.addEventListener('change',()=>selectTarget(nav.navigator.visiblePins().find(p=>p.id===markerList.value)||null));
+  for(const [button,action] of [[addMarker,'add'],[renameMarker,'rename'],[removeMarker,'remove'],[undoMarker,'undo']])
+    button.addEventListener('click',()=>editMarker(action));
   overlay.addEventListener('pointerdown',e=>{if(e.target===overlay)close();});
   document.addEventListener('keydown',e=>{
     if(!overlay.hidden&&e.key==='Escape'){e.preventDefault();close();}
   });
-  document.getElementById('mapRecenter').addEventListener('click',()=>{panX=panZ=0;render();});
-  document.getElementById('mapZoomIn').addEventListener('click',()=>{zoom=Math.min(14,zoom+2);render();});
-  document.getElementById('mapZoomOut').addEventListener('click',()=>{zoom=Math.max(4,zoom-2);render();});
-  let drag=null;
-  large.addEventListener('pointerdown',e=>{
-    if(e.button!==0)return;
-    e.preventDefault();
-    drag={id:e.pointerId,x:e.clientX,y:e.clientY,ax:0,az:0};
-    try{large.setPointerCapture(e.pointerId);}catch(_){}
+  document.getElementById('mapRecenter').addEventListener('click',()=>{
+    resetPointers();nav.viewport.reset();renderExpanded();
   });
-  large.addEventListener('pointermove',e=>{
-    if(!drag||drag.id!==e.pointerId)return;
-    e.preventDefault();
-    const cssZoom=zoom*(large.getBoundingClientRect().width/large.width);
-    drag.ax+=e.clientX-drag.x;drag.az+=e.clientY-drag.y;
-    drag.x=e.clientX;drag.y=e.clientY;
-    const dx=Math.trunc(drag.ax/cssZoom),dz=Math.trunc(drag.az/cssZoom);
-    if(dx||dz){
-      panX-=dx*MAP_CELL_SIZE;panZ-=dz*MAP_CELL_SIZE;
-      drag.ax-=dx*cssZoom;drag.az-=dz*cssZoom;render();
+  function zoomBy(factor){
+    resetPointers();
+    const f=nav.viewport.snapshot().frame;
+    nav.viewport.zoomAt({factor,screenX:f.x+f.width/2,screenY:f.y+f.height/2});
+    renderExpanded();
+  }
+  document.getElementById('mapZoomIn').addEventListener('click',()=>zoomBy(1.25));
+  document.getElementById('mapZoomOut').addEventListener('click',()=>zoomBy(.8));
+  function localPoint(event){
+    const b=large.getBoundingClientRect();
+    if(!large.clientWidth||!large.clientHeight)return null;
+    return {x:(event.clientX-b.left-large.clientLeft)*large.width/large.clientWidth,
+      y:(event.clientY-b.top-large.clientTop)*large.height/large.clientHeight};
+  }
+  large.addEventListener('pointerdown',event=>{
+    if(overlay.hidden||event.button!==0)return;
+    event.preventDefault();event.stopPropagation();
+    const p=localPoint(event);
+    if(!p||!gestures.begin(event.pointerId,p.x,p.y))return;
+    if(captured.size===0)tap={id:event.pointerId,x:p.x,y:p.y,moved:false};
+    else tap=null;
+    captured.add(event.pointerId);
+    try{large.setPointerCapture(event.pointerId);}catch(_){}
+  });
+  large.addEventListener('pointermove',event=>{
+    if(!captured.has(event.pointerId))return;
+    event.preventDefault();event.stopPropagation();
+    const p=localPoint(event);
+    if(tap&&p&&Math.hypot(p.x-tap.x,p.y-tap.y)>7)tap.moved=true;
+    if(p&&gestures.move(event.pointerId,p.x,p.y))queueExpanded();
+    else if(!gestures.activePointers)resetPointers();
+  });
+  function endPointer(event){
+    if(!captured.delete(event.pointerId))return;
+    event.preventDefault();event.stopPropagation();
+    const point=localPoint(event);
+    const isTap=tap?.id===event.pointerId&&!tap.moved&&captured.size===0&&point&&Math.hypot(point.x-tap.x,point.y-tap.y)<=7;
+    tap=null;gestures.end(event.pointerId);
+    if(isTap){
+      const f=nav.frame(),nearest=f.pins.map(p=>({p,d:Math.hypot(p.screenX-point.x,p.screenY-point.y)})).sort((a,b)=>a.d-b.d)[0];
+      if(nearest&&nearest.d<=9)selectTarget(nav.navigator.visiblePins().find(p=>p.id===nearest.p.id));
+      else{const target=f.projection.atScreen(point.x,point.y);if(target)selectTarget(target);}
     }
-  });
-  for(const event of ['pointerup','pointercancel','lostpointercapture'])
-    large.addEventListener(event,()=>{drag=null;});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)map.flush();});
-  window.addEventListener('pagehide',()=>map.flush());
+    try{if(large.hasPointerCapture(event.pointerId))large.releasePointerCapture(event.pointerId);}catch(_){}
+  }
+  large.addEventListener('pointerup',endPointer);
+  for(const event of ['pointercancel','lostpointercapture'])
+    large.addEventListener(event,e=>{if(captured.has(e.pointerId))resetPointers();});
+  window.addEventListener('blur',resetPointers);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){resetPointers();flushAll();}});
+  window.addEventListener('pagehide',flushAll);
   return {
     isOpen:()=>!overlay.hidden,
     tick(now){
       syncSeed();
-      if(overlay.hidden&&canOpen())map.reveal(getPlayer().x,getPlayer().z);
-      if(now-lastPaint>320){render();lastPaint=now;}
-      if(now-lastSave>5000){map.flush();lastSave=now;}
+      if(now-lastPaint>320){
+        if(overlay.hidden&&canOpen()){
+          const player=pose(),world=getWorld();
+          const upperCover=player.y>=LEGACY_WORLD_MIN_Y&&player.y<=WORLD_MAX_Y+1?inspectUpperCover({player,sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,
+            occupied:upperOccupiedAt,resident:upperResidentAt,read:readUpper}):null;
+          const legacy=upperCover===false?observeNavigationSurface({world,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y}):null;
+          observation=classifyHeightObservation({player,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,legacyObservation:legacy,upperCover});
+          if(eligibleSurfaceDiscovery(observation,player)){
+            map.reveal(player.x,player.z,(x,z)=>residentAt(x,LEGACY_WORLD_MIN_Y,z));
+            sampleNearbyObservations({catalog,discovery:map,player,refreshIndex:sampleIndex++,
+              residentAt:(x,z)=>residentAt(x,WORLD_MAX_Y,z),
+              sample:(x,z)=>{
+                for(let y=WORLD_MAX_Y;y>=LEGACY_WORLD_MIN_Y;y--){
+                  const id=world.get(x,y,z);if(id===BLOCK.AIR)continue;
+                  const material=mountainV8Material(id);
+                  const ink=material?material.palette[0].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''):null;
+                  const color=ink?'#'+ink:({1:'#6f9a6d',2:'#8b7b62',3:'#a49d8d',4:'#806747',7:'#477a69',76:'#468ca8',256:'#d5b276',257:'#bd765c',258:'#aa8a63',259:'#dfd4ae',272:'#e0edf0',277:'#a7d5df',278:'#b7c3c4',279:'#d2ddde',286:'#8e6ca8',293:'#a184bf',294:'#9278ac',302:'#858995',303:'#676d7c',305:'#686c7a',307:'#a87866'}[id]||'#8b9081');
+                  return {ink:color,y:y+1};
+                }
+                return null;
+              }});
+            const x=Math.floor(player.x),z=Math.floor(player.z),y=observation.surfaceY-1;
+            const id=world.get(x,y,z),base=world.base??world;
+            if(player.y>=y+1&&player.y<=y+3&&[MOUNTAIN_V8_MATERIAL.stone,MOUNTAIN_V8_MATERIAL.slate,MOUNTAIN_V8_MATERIAL.gneiss].includes(id)&&
+                typeof base.naturalAndLandmarkBlock==='function'&&base.naturalAndLandmarkBlock(x,y,z)===id&&!base.edits?.has(x+','+y+','+z)){
+              catalog.observeLandmark({id:'alpine-'+Math.floor(x/16)+'-'+Math.floor(z/16),kind:'alpine',x:player.x,y:player.y,z:player.z},{witnessed:true});
+            }
+          }
+        }
+        render();lastPaint=now;
+      }
+      if(now-lastSave>5000){flushAll();lastSave=now;}
     },
-    flush:()=>map.flush(),
+    observeCavePassage(){
+      syncSeed();const p=pose();
+      if(!overlay.hidden||!canOpen()||!map.has(p.x,p.z))return false;
+      const x=Math.floor(p.x/4),z=Math.floor(p.z/4);
+      const id='cave-'+x+'-'+z;
+      return catalog.observeLandmark({id,x:p.x,y:p.y,z:p.z,kind:'cave'},{witnessed:true});
+    },
+    flush:flushAll,
     close
   };
 }

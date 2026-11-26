@@ -823,7 +823,11 @@ function start(nonblockStage=null){
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
-    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
+    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost,
+    residentAt:(x,y,z)=>{const s=runtimeSectionForY(y);return s!==null&&chunks.has(runtimeMeshKey(chunkCoord(x),chunkCoord(z),s));},
+    upperOccupiedAt:(x,z,s)=>upperOccupancy(world,runtimeMeshKey(chunkCoord(x),chunkCoord(z),s)),
+    upperResidentAt:(x,z,s)=>chunks.has(runtimeMeshKey(chunkCoord(x),chunkCoord(z),s)),
+    readUpper:(x,y,z)=>manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??(pack5Builder?.layer.cell([x,y,z])?1:world.get(x,y,z))});
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
@@ -1365,7 +1369,7 @@ function start(nonblockStage=null){
       // Low-frequency real-cave check: no synthetic map markers or geometry.
       if(help.hidden&&!exploration.isOpen()&&frame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
-        if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
+        if(caveDiscovery.entered){exploration.observeCavePassage();message('Natural cave passage discovered · explore carefully');}
       }
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;

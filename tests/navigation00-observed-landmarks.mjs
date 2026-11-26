@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createObservedLandmarks} from '../src/navigation00/navigation-observed-landmarks.mjs';
+const point = {id:'ridge1',x:8,z:-4,kind:'ridge',label:'High ridge'};
+const setup = () => {const seen=new Set(['8,-4']);const nav=createObservedLandmarks({worldSeed:2026,discovery:{has:(x,z)=>seen.has(`${x},${z}`)}});return {seen,nav};};
+test('observed discovered landmark is immutable and defensive',()=>{const {nav}=setup();assert.equal(nav.observe(point,{observed:true}),true);point.label='mutated';assert.equal(nav.visible()[0].label,'High ridge');assert.throws(()=>nav.visible().push(1));});
+test('unobserved and undiscovered records are rejected without side effects',()=>{const {nav}=setup();assert.throws(()=>nav.observe(point));assert.throws(()=>nav.observe({...point,x:9},{observed:true}));assert.deepEqual(nav.visible(),[]);});
+test('discovery revocation hides existing landmark without revealing terrain',()=>{const {nav,seen}=setup();nav.observe(point,{observed:true});seen.clear();assert.deepEqual(nav.visible(),[]);seen.add('8,-4');assert.equal(nav.visible().length,1);});
+test('seed mismatch rejects reads and writes',()=>{const {nav}=setup();assert.throws(()=>nav.observe(point,{observed:true,seed:12}));assert.throws(()=>nav.visible({seed:12}));assert.throws(()=>nav.remove('ridge1',{seed:12}));});
+test('capacity bounded, replacement permitted, remove and clear',()=>{const seen=new Set(['8,-4']);const nav=createObservedLandmarks({worldSeed:2026,limit:1,discovery:{has:(x,z)=>seen.has(`${x},${z}`)}});nav.observe(point,{observed:true});nav.observe({...point,label:'New ridge'},{observed:true});assert.equal(nav.visible()[0].label,'New ridge');assert.throws(()=>nav.observe({...point,id:'other'},{observed:true}));assert.equal(nav.remove('ridge1'),true);assert.equal(nav.visible().length,0);nav.observe(point,{observed:true});nav.clear();assert.equal(nav.visible().length,0);});
+test('malformed coordinates, labels and categories rejected',()=>{const {nav}=setup();for(const p of [{...point,x:Infinity},{...point,z:40000001},{...point,label:'<script>'},{...point,kind:'village'},{...point,id:'bad id'}])assert.throws(()=>nav.observe(p,{observed:true}));});
