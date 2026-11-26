@@ -1,0 +1,36 @@
+name: Unified actual historical xeric Creative controls
+on:
+  push:
+    branches: [probe/unified-historical-xeric-ui-20261126]
+    paths: ['tests/creative-integration/historical-xeric-browser.mjs','.github/workflows/unified-historical-xeric-ui.yml']
+permissions:
+  contents: read
+jobs:
+  actual-historical-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact runtime from four successful historical source contracts
+        run: |
+          test "$(git rev-parse HEAD^)" = fec336aea3758908638e83a77454d02af0776d1f
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json)"
+          node --check tests/creative-integration/historical-xeric-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual M3 V4 M5 M6 source stack mine undo redo stale veto and cold reload
+        run: |
+          python3 -m http.server 4174 >/tmp/unified-xeric-ui.log 2>&1 &
+          node tests/creative-integration/historical-xeric-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-historical-xeric-ui
+          path: artifacts/creative-historical-xeric-ui/
+          if-no-files-found: warn
