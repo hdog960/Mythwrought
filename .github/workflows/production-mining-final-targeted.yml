@@ -1,0 +1,57 @@
+name: Mining diagnostic final targeted historical qualification
+on:
+  push:
+    branches: [probe/production-mining-final-targeted-20261126]
+    paths: ['.github/workflows/production-mining-final-targeted.yml']
+permissions:
+  contents: read
+jobs:
+  historical-upgrade-and-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 766fd0bd3dc1b792ba052faf577accc758d00a13
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: c1138b52bc8041c0db12be31b13fe9ab0fb276e0
+          path: prior-height
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Execute exact staged evidence guard without repeating successful diagnostic
+        run: |
+          test "$(git rev-parse HEAD)" = '766fd0bd3dc1b792ba052faf577accc758d00a13'
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('.github/workflows/production-mining-diagnostic.yml').read_text().splitlines()
+          marker = '      - name: Verify exact diagnostic evidence inputs before reuse'
+          start = source.index(marker)
+          assert source[start+1] == '        run: |'
+          body = []
+          for line in source[start+2:]:
+              if not line.startswith('          '):
+                  break
+              body.append(line[10:])
+          assert body and body[0] == 'set -euo pipefail'
+          Path('/tmp/mining-exact-guard.sh').write_text('\n'.join(body)+'\n')
+          PY
+          bash /tmp/mining-exact-guard.sh
+          node --check tests/mob-final-offline-upgrade-browser.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+      - name: Qualify only corrected historical Height offline upgrade
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          MOB_PREVIOUS_ROOT="$PWD/prior-height" node tests/mob-final-offline-upgrade-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: diagnostic-final-targeted-historical
+          path: |
+            artifacts/mining-diagnostic-upgrade/evidence-reuse.txt
+            artifacts/mob-final-offline/
+          if-no-files-found: error
