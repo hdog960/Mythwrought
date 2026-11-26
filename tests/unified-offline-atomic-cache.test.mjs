@@ -139,6 +139,6 @@ test('missing shared height runtime dependency refuses installation and preserve
 
 test('missing Creative history dependency preserves installed Shared Height',async()=>{
  const candidate=stage({missing:'/src/creative-integration/creative-history.mjs'});
- await assert.rejects(candidate.install(),/Cannot verify\\/cache original source/);
+ await assert.rejects(candidate.install(),/Cannot verify\/cache original source/);
  assert.equal(candidate.skipped,0);assert.equal(candidate.all.has(CACHE),false);assert.equal(candidate.all.get(PREVIOUS).size,1);
 });

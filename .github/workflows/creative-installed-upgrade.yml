@@ -5,6 +5,9 @@ on:
     paths:
       - scripts/ci/creative-shared-height-upgrade.mjs
       - .github/workflows/creative-installed-upgrade.yml
+      - tests/unified-offline-atomic-cache.test.mjs
+      - tests/app-update.test.mjs
+      - tests/compact-menu.test.mjs
 permissions:
   contents: read
 jobs:
