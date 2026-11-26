@@ -37,7 +37,7 @@ try{
      d.teleport(site.x+5,site.z+9);
      d.aimAt(site.x,site.groundY+3,site.z);
    },{site,expectedKey});
-   await page.waitForFunction(expected=>document.querySelector('#scene')?.dataset.chunkCenter===expected,expectedKey,{timeout:15000});
+   await page.waitForFunction(expected=>document.querySelector('#scene')?.dataset.chunkCenter?.split('|height:')[0]===expected&&window.__mythwroughtTest.snapshot().chunks.includes(expected),expectedKey,{timeout:15000});
    await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)===25,null,{timeout:20000});
    assert.equal(await page.evaluate(p=>window.__mythwroughtTest.block(...p),coords),material,kind+' must be physical on the game page');
    assert.ok(await page.evaluate(()=>Number(document.querySelector('#scene').dataset.renderedMeshVertices))>1000);

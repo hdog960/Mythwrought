@@ -3,7 +3,7 @@
 // Pack 1 uses original source face pixels (bounded 4x4 texel bake); Pack 4
 // preserves its original opaque and translucent source material triangles.
 import {CHUNK_SIZE} from '../voxel.mjs';
-import {sectionBounds,sectionForY} from '../depth.mjs';
+import {runtimeSectionBounds as sectionBounds,runtimeSectionForY as sectionForY} from '../world-height.mjs';
 import {candidateSurface,candidateFaceTexture} from '../block-packs/pack-1/webgl2-candidates.mjs';
 import {pack4BuilderAsset} from '../block-packs/pack-4/builder-handoff.mjs';
 

@@ -1,6 +1,8 @@
 import {createSnowS14EdgePigment} from './manual-biomes/snowy-s14-edge-pigment.mjs';
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
 import {WORLD_MIN_Y as DEEP_WORLD_MIN_Y,WORLD_MAX_Y,LEGACY_WORLD_MIN_Y} from './depth.mjs';
+import {PHYSICAL_MAX_Y,UpperIndexedMap,runtimeSectionBounds} from './world-height.mjs';
+import {UpperMeshPages} from './world-height-mesh-pages.mjs';
 import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
@@ -104,7 +106,7 @@ export function baseBlock(x,y,z,seed=179){
 export class VoxelWorld{
   constructor(seed=179){
     this.seed=seed|0;
-    this.edits=new Map();
+    this.edits=new UpperIndexedMap();
     this.rotations=new Map();
     this.biomeCellCount=0;
     // Limited per-world cache: streaming an endless world cannot retain every
@@ -157,15 +159,15 @@ export class VoxelWorld{
   }
   rotationAt(x,y,z){return this.rotations.get(worldKey(x,y,z))??0;}
   set(x,y,z,id,rotation=0){
-    if(![x,y,z,id,rotation].every(Number.isInteger)||
-       y<DEEP_WORLD_MIN_Y||y>WORLD_MAX_Y||
+    if(![x,y,z,id,rotation].every(Number.isSafeInteger)||
+       y<DEEP_WORLD_MIN_Y||y>PHYSICAL_MAX_Y||
        !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id)||isMountainV8Material(id))||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     if(isBiome130BlockId(previous))this.biomeCellCount--;
     if(this.naturalAndLandmarkBlock(x,y,z)===id)this.edits.delete(key);
     else this.edits.set(key,id);
-    if(isBiome130BlockId(id)){
+    if(isBiome130BlockId(this.edits.get(key))){
       this.biomeCellCount++;
       if(rotation)this.rotations.set(key,rotation);
       else this.rotations.delete(key);
@@ -204,13 +206,15 @@ export class VoxelWorld{
     return world;
   }
 }
-export function meshChunk(world,cx,cz){
+export function meshChunk(world,cx,cz,upperSection=0){
+  if(!Number.isSafeInteger(upperSection)||upperSection<0||upperSection>15)throw Error('Invalid upper mesh section');
+  const bounds=upperSection?runtimeSectionBounds(upperSection):{minY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y};
   // A face check repeatedly visits the same neighboring voxel (often six
   // times). Cache only cells actually queried by this synchronous rebuild.
   // The one-block halo includes chunk boundaries and the vertical limits;
   // reads still go through world.get so schema-1 edits override seeded caves.
-  const side=CHUNK_SIZE+2, depth=WORLD_MAX_Y-LEGACY_WORLD_MIN_Y+3;
-  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=LEGACY_WORLD_MIN_Y-1;
+  const side=CHUNK_SIZE+2, depth=bounds.maxY-bounds.minY+3;
+  const minX=cx*CHUNK_SIZE-1,minZ=cz*CHUNK_SIZE-1,minY=bounds.minY-1;
   const cells=new Uint16Array(side*side*depth);
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
@@ -305,8 +309,10 @@ export function meshChunk(world,cx,cz){
   };
   // Typed solid-mesh staging: conserve allocations while preserving exactly
   // the original 9-float vertex layout and existing seed/save semantics.
-  let solidBuffer=new Float32Array(16384),solidLength=0;
+  const upperPages=upperSection?new UpperMeshPages():null;
+  let solidBuffer=upperSection?null:new Float32Array(16384),solidLength=0;
   const appendVertex=(x,y,z,r,g,b,u,w,id)=>{
+    if(upperPages){upperPages.append(x,y,z,r,g,b,u,w,id);return;}
     if(solidLength+9>solidBuffer.length){
       const grown=new Float32Array(solidBuffer.length*2);
       grown.set(solidBuffer);solidBuffer=grown;
@@ -319,7 +325,7 @@ export function meshChunk(world,cx,cz){
   };
   for(let x=cx*CHUNK_SIZE;x<(cx+1)*CHUNK_SIZE;x++)
     for(let z=cz*CHUNK_SIZE;z<(cz+1)*CHUNK_SIZE;z++)
-      for(let y=LEGACY_WORLD_MIN_Y;y<=WORLD_MAX_Y;y++){
+      for(let y=bounds.minY;y<=bounds.maxY;y++){
         const id=blockAt(x,y,z);
         if(id===BLOCK.AIR)continue;
         if(isPack2LiveId(id)){
@@ -505,7 +511,7 @@ export function meshChunk(world,cx,cz){
   // the separate :48 interactive non-block object roadmap. Terrain, physical
   // LEAVES/WOOD, caves, mined structures and all saved edits remain exactly
   // as before; there are no new draw calls, saves, IDs or worldgen changes.
-  return solidBuffer.slice(0,solidLength);
+  return upperPages?upperPages.finish():solidBuffer.slice(0,solidLength);
 }
 const biomeSurfaceCache=new Map(); // 57 assets x 4 rotations, bounded by registry.
 // Exact voxel grid traversal: consistent selection through chunk borders and negative space.

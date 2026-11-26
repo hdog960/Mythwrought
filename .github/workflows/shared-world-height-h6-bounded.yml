@@ -1,0 +1,20 @@
+name: Shared height H6 bounded source index
+on:
+  push:
+    branches: [research/shared-world-height-h1-h2-20261125]
+    paths:
+      - 'tests/shared-world-height-h6-bounded.test.mjs'
+      - '.github/workflows/shared-world-height-h6-bounded.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: node --check src/main.mjs
+      - run: node --test tests/shared-world-height-h6-bounded.test.mjs tests/shared-world-height-h5-pack5.test.mjs

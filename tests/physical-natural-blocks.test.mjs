@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK,VoxelWorld,meshChunk,WORLD_MIN_Y,WORLD_MAX_Y,baseBlock,raycast,collides} from '../src/voxel.mjs';
+import {PHYSICAL_MAX_Y} from '../src/world-height.mjs';
 import {BUILD_MATERIALS,BLOCK_NAMES,applyBlockAction} from '../src/blocks.mjs';
 import {WORLD_MIN_Y as EDITABLE_WORLD_MIN_Y,LEGACY_WORLD_MIN_Y} from '../src/depth.mjs';
 import {STORYBOOK_MATERIAL_FRAGMENT_SHADER as FS,STORYBOOK_ART_RULES as ART} from '../src/storybook-materials.mjs';
@@ -31,7 +32,11 @@ test('new natural voxels are actual solid editable raycastable and save-restorab
   assert.equal(restored.get(37,16,33),BLOCK.DEEPSTONE);
   assert.equal(restored.set(35,16,33,BLOCK.AIR),true);
   assert.equal(restored.get(35,16,33),BLOCK.AIR);
-  assert.equal(world.set(35,WORLD_MAX_Y+1,33,BLOCK.LEAVES),false);
+  assert.equal(baseBlock(35,WORLD_MAX_Y+1,33,seed),BLOCK.AIR);
+  assert.equal(world.set(35,WORLD_MAX_Y+1,33,BLOCK.LEAVES),true);
+  assert.equal(world.set(35,PHYSICAL_MAX_Y,33,BLOCK.LEAVES),true);
+  assert.equal(VoxelWorld.restore(world.save()).get(35,PHYSICAL_MAX_Y,33),BLOCK.LEAVES);
+  assert.equal(world.set(35,PHYSICAL_MAX_Y+1,33,BLOCK.LEAVES),false);
   // The preserved cave-generation floor is -3, but engine-owned edits now
   // extend to -210; reject exactly below the NEW editable floor, not -4.
   assert.equal(WORLD_MIN_Y,LEGACY_WORLD_MIN_Y);
