@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261125-living-ecosystem-height-v1';
+const RELEASE='20261126-mining-diagnostic-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261125-shared-height-v1';
+const PREVIOUS='mythwrought-m5-shell-20261125-living-ecosystem-height-v1';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
@@ -143,4 +143,10 @@ test('missing new Mob dependency fails atomically and retains prior shell',async
   assert.equal(candidate.skipped,0);
   assert.equal(candidate.all.has(CACHE),false);
   assert.equal(candidate.all.get(PREVIOUS).size,1);
+});
+
+test('missing new mining trace refuses install and preserves previous-good app',async()=>{
+ const candidate=stage({missing:'src/mining-trace.mjs'});
+ await assert.rejects(candidate.install(),/Cannot verify\/cache/);
+ assert.equal(candidate.skipped,0);assert.equal(candidate.all.has(CACHE),false);assert.equal(candidate.all.get(PREVIOUS).size,1);
 });

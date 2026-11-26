@@ -913,8 +913,17 @@ function start(nonblockStage=null){
     const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale*(precise ? .4 : 1));
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
-  const miningTrace=new URLSearchParams(location.search).get('mw-perf')==='1'?createMiningTrace():null;
-  const traceMeasure=miningTrace?(name,fn)=>miningTrace.measure(name,fn):null;
+  // Temporary opt-in, in-memory diagnostic. Off at every cold launch.
+  let miningTrace=null,traceMeasure=null,traceStartedAt=null;
+  const traceButton=document.getElementById('startMiningTrace');
+  const traceStatus=document.getElementById('miningTraceStatus');
+  traceButton.onclick=()=>{
+    miningTrace=createMiningTrace();
+    traceMeasure=miningTrace.measure;
+    traceStartedAt=new Date().toISOString();
+    traceStatus.textContent='Recording. RETURN to gameplay, then RUN DEVICE CHECK to finish and copy.';
+    document.getElementById('auditReport').value='';
+  };
   const traceContext=()=>({seed:world.seed,profile:world.base?.generationProfile?.generator??null,
     feet:player.feet,x:player.x,z:player.z,owners:chunks.size,framebuffer:[canvas.width,canvas.height],preset:renderPreset});
   const saveHealth=document.getElementById('saveHealth');
@@ -2505,6 +2514,7 @@ function start(nonblockStage=null){
   document.getElementById('menu').onclick=()=>{
     gameplayRecorder?.interrupt('Settings opened');cancelAllPointers();
     document.getElementById('advancedMenu').open=false;
+    miningTrace?.resetContinuity();
     help.querySelector('.helpbody').scrollTop=0;help.hidden=false;
   };
   document.getElementById('closeHelp').onclick=()=>{
@@ -2560,7 +2570,11 @@ function start(nonblockStage=null){
         render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries,
         save:saved,probe,quota
       });
-      if(miningTrace)auditReport.value+='\nMINING TRACE v1 (diagnostic only; CPU wall times, nested phases not additive; not GPU presentation)\n'+JSON.stringify({baselineSource:'2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0',release:document.querySelector('meta[name="mythwrought-release"]')?.content,moduleUrl:import.meta.url,context:traceContext(),...miningTrace.report()});
+      if(miningTrace){
+        auditReport.value+='\nMINING TRACE v1 (diagnostic only; CPU wall times, nested phases not additive; not GPU presentation)\n'+JSON.stringify({baselineSource:'2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0',release:document.querySelector('meta[name="mythwrought-release"]')?.content,moduleUrl:import.meta.url,startedAt:traceStartedAt,context:traceContext(),...miningTrace.report()});
+        miningTrace=null;traceMeasure=null;traceStartedAt=null;
+        traceStatus.textContent='Capture finished. COPY REPORT. Recording is off.';
+      }
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
     }catch(err){auditStatus.textContent='Device check could not finish: '+String(err);}
   };

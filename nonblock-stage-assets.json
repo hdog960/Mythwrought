@@ -1,6 +1,7 @@
 {
-  "version": "20261125-v43",
+  "version": "20261126-v47",
   "assets": {
+    "./src/mining-trace.mjs": "c8c186674a362042f791047f5e2ccff2e47844579dfbeec4e24cdadf5c638397",
     "./src/nonblock/staged-habitats.mjs": "c0932251fb658ac8d580493c1e7b509787ec61d2eebc58327b57f4c2791e07f1",
     "./src/environment-ground.mjs": "981efb10f091147ae09d2786531d925ea6bb054a1acdd08f834b917f9000ab8e",
     "./src/manual-biomes/environment-v7.mjs": "46eee5eac4eaf592289b00196bb0788218416a98fcb5ef72b7a87200ba82c125",
@@ -99,9 +100,9 @@
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
     "./src/sky-v6-adapter.mjs": "b0a44a8c103a11af026578e47484ecaf3fa19110638dd903b3d4398f853c25dd",
-    "./": "9b3ae073171a3617637491701f54ae061117add2889b0b231b74dc4ab4c8fb35",
+    "./": "1f4e45ef499e3c912e65cf28d312f4e3b3af63a90046b919fa4949e4ac81c512",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
-    "./index.html": "9b3ae073171a3617637491701f54ae061117add2889b0b231b74dc4ab4c8fb35",
+    "./index.html": "1f4e45ef499e3c912e65cf28d312f4e3b3af63a90046b919fa4949e4ac81c512",
     "./manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
     "./src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "bc9f916c76bd32789ed2b482cf887528f4e519e20e8062592d2d4d0368d0359e",
     "./src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a0be2ccba487cd44db302d95773bbae2dd296efcab51e53b85b0a19837b6a0d5",
@@ -240,16 +241,16 @@
     "./src/fallen-giant.mjs": "8196f77eaf54a69f8265bc4e73d371215081fb0e84f525b09d704b8206803366",
     "./src/foreground.mjs": "c7ce52f14bb838e39d598b7a80c3178b4984277abcad7cdea3ebe9200bf4b844",
     "./src/gpu-pipeline.mjs": "5f3033a4e270bf04c986902a15deada5de9f608e42e93c98429f7bae3ab7b380",
-    "./src/gpu-recovery.mjs": "54d68cc2fad5c1d472943d852d28b06c2da5c5655f16e84329fc8b830ddeaded",
+    "./src/gpu-recovery.mjs": "fb114381c26bc367b714daedc66c6b105aa1c858163b23f10cad2d040422a566",
     "./src/grotto.mjs": "34f0d419c38b971353ad477bc886c9d1e180417d639b240477cffdc81f4036de",
     "./src/grove.mjs": "432e2f369d1b735921d281e80451789e1444e9390d1e0ee229a4414a7143b242",
     "./src/input.mjs": "24db264b704abc6668bcaaed62744ab349cd68ea51c9c2d50582936f1940c99b",
     "./src/interactions/shape-edit-transaction.mjs": "6e2605bbaa9894e3a130baff1622f7ee92b46a2e0a1eef47329b8892b859d6b1",
     "./src/layout.mjs": "237a5529c726300291cde7fbed0b7ecc98ae545748aff23e31528aecbc1beea0",
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
-    "./src/app-update.mjs": "d92f2d7443ee1ac05d9fdce6ce941fe7720b91386e14cec76c533d61025eab4d",
+    "./src/app-update.mjs": "f74634fcf6c54c22fb47cc4b0616d79553ade5bb02c23cf0819f9148522781ee",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "5268c6cb4ee46688fab5ac5527313bb72cb4cff967fcb8920469b9997bca2f44",
+    "./src/main.mjs": "8a53a69557a0a632c7cf0fdac7bcf938a3d2d30291640adf7706f66ca68439ab",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/desert-bilateral-rgb.mjs": "7819c6a5ada37da04267dd774e994649c874d891268fd80b71ecd4c7515b6b5e",
     "./src/manual-biomes/desert-seam-vertex-tint.mjs": "4eff1be29be0a18f87050f496d50fb07892b52bf4d69133160ba2a62e9e7ab0f",
@@ -336,8 +337,8 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "f6f97595169cfeed281cb26bca70e77069b01a0772659391169d92be5fc334c9",
-    "./sw-m5.js": "0d1d8b634261f315a11377a80ce2b4d89077764ff2e87db06c94b091a6be0d3c",
+    "./sw-m5.js": "ab4bac56ce364e695b920b6b21b0d69d615fd7d6bbddc9424457b73347dc7afc",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "25826af22d77c535ca1e8a0e87cea4c2a6d3f51f329764f1d0ba05e94a1dc0b4"
+    "./sw-nonblock-stage.js": "c894717f9e18ca8017b586388729cba20e8af09af3e7143dc9e7a155fc0e986c"
   }
 }
