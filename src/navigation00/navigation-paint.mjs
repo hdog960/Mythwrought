@@ -44,6 +44,9 @@ export function paintNavigationFrame(canvas, frame, {background='#122126',cellCo
       ctx.lineTo(p.screenX+Math.sin(angle-2.5)*6,p.screenY+Math.cos(angle-2.5)*6);
       ctx.closePath();ctx.fill();
     }
+    if(typeof ctx.fillText==='function'){
+      ctx.font='bold 12px system-ui';ctx.fillStyle='#f7e5b7';ctx.fillText('N ↑',x+7,y+15);
+    }
   } finally {ctx.restore();}
   return Object.freeze({cells:frame.cells.length,pins:frame.pins.length,viewport:{x,y,width,height}});
 }

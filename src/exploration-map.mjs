@@ -229,6 +229,10 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,decimals:1,surfaceY:currentObservation?.surfaceY??null});
     coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
     summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='upper'?'Upper world · surface not sampled':currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':'Cover '+location.depth.toFixed(1)+' blocks above feet'):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
+    if(!map.warning&&!catalog.warning&&currentObservation?.kind==='underground'){
+      const priorTop=catalog.height(Math.floor(player.x/4),Math.floor(player.z/4));
+      if(priorTop!==null)summary.textContent=map.seen.size+' discovered cells · Underground · '+Math.max(0,priorTop-player.y).toFixed(1)+' below last observed tile top (approx.)';
+    }
     large.dataset.observedTiles=String(catalog.tileCount);
     large.dataset.observedLandmarks=String(marks.length);
     refreshMarkers();
@@ -347,7 +351,8 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
           const player=pose(),world=getWorld();
           const upperCover=player.y>=LEGACY_WORLD_MIN_Y&&player.y<=WORLD_MAX_Y+1?inspectUpperCover({player,sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,
             occupied:upperOccupiedAt,resident:upperResidentAt,read:readUpper}):null;
-          const legacy=upperCover===false?observeNavigationSurface({world,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y}):null;
+          const physicalRead={get:readUpper};
+          const legacy=upperCover===false?observeNavigationSurface({world:physicalRead,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y}):null;
           observation=classifyHeightObservation({player,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,legacyObservation:legacy,upperCover});
           if(eligibleSurfaceDiscovery(observation,player)){
             const cx=Math.floor(player.x/4),cz=Math.floor(player.z/4);
@@ -357,10 +362,10 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
               admit:(x,z)=>{map.reveal(player.x,player.z,(a,b)=>Math.floor(a/4)===x&&Math.floor(b/4)===z);return map.seen.has(x+','+z);},
               sample:(x,z)=>{
                 for(let y=WORLD_MAX_Y;y>=LEGACY_WORLD_MIN_Y;y--){
-                  const id=world.get(x,y,z);if(id===BLOCK.AIR)continue;
+                  const id=readUpper(x,y,z);if(id===BLOCK.AIR)continue;
                   if(!surfaceWitness({eye:[player.x,player.y+1.55,player.z],target:[x+.5,y+1.01,z+.5],
                     resident:(a,b,c)=>b<=PHYSICAL_MAX_Y&&(b>WORLD_MAX_Y?(upperResidentAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))||!upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))):residentAt(a,b,c)),
-                    read:(a,b,c)=>b>WORLD_MAX_Y?(upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))?readUpper(a,b,c):0):world.get(a,b,c)}))return null;
+                    read:(a,b,c)=>b>WORLD_MAX_Y?(upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))?readUpper(a,b,c):0):readUpper(a,b,c)}))return null;
                   const material=mountainV8Material(id);
                   const ink=material?material.palette[0].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''):null;
                   const color=ink?'#'+ink:({1:'#6f9a6d',2:'#8b7b62',3:'#a49d8d',4:'#806747',7:'#477a69',76:'#468ca8',256:'#d5b276',257:'#bd765c',258:'#aa8a63',259:'#dfd4ae',272:'#e0edf0',277:'#a7d5df',278:'#b7c3c4',279:'#d2ddde',286:'#8e6ca8',293:'#a184bf',294:'#9278ac',302:'#858995',303:'#676d7c',305:'#686c7a',307:'#a87866'}[id]||'#8b9081');
