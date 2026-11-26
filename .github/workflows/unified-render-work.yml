@@ -2,7 +2,7 @@ name: Unified exact opaque work reduction and bounded queue experiment
 on:
   push:
     branches: [probe/unified-render-work-20261126]
-    paths: ['src/**','tests/gpu-frame-admission.test.mjs','tests/terrain-clip-culling.test.mjs','perf/issue-291/unified-render-work-ab.mjs','.github/workflows/unified-render-work.yml']
+    paths: ['src/**','tests/gpu-frame-admission.test.mjs','tests/terrain-clip-culling.test.mjs','tests/gpu-edit-batch.test.mjs','perf/issue-291/unified-render-work-ab.mjs','.github/workflows/unified-render-work.yml']
 permissions:
   contents: read
 jobs:
@@ -12,14 +12,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 3
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22.16.0'
       - name: Exact isolated geometry and GPU contracts
         run: |
-          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test "$(git rev-parse HEAD^)" = b690bf16ae0d4340f920c8300b61f425419875d9
+          test "$(git rev-parse HEAD^^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src)"
           node --check src/main.mjs
           node --check perf/issue-291/unified-render-work-ab.mjs
           node --test tests/terrain-clip-culling.test.mjs tests/gpu-frame-admission.test.mjs tests/gpu-edit-batch.test.mjs

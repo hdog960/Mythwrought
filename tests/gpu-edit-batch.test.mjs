@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {terrainMeshBounds} from '../src/terrain-clip-culling.mjs';
 import {stageEditedChunkBuffers,MAX_EDIT_UPLOAD_BUFFERS} from '../src/gpu-recovery.mjs';
 const v=()=>new Float32Array(9),empty=()=>new Float32Array();
 const batch=()=>[{key:'a',cx:0,cz:0,section:-1,vertices:v(),water:v()},
@@ -66,7 +67,7 @@ const source=readFileSync(new URL('../src/main.mjs',import.meta.url),'utf8');
 const start=source.indexOf('  function publishEditedChunkBatch(batch){');
 const end=source.indexOf('  function refreshEditedMeshes(',start);
 assert.ok(start>=0&&end>start);
-const publisher=Function('gl','chunks','world','admitUpperGpuBatch','stageEditedChunkBuffers','deleteChunkBuffers',
+const publisher=Function('gl','chunks','world','admitUpperGpuBatch','stageEditedChunkBuffers','deleteChunkBuffers','terrainMeshBounds',
  source.slice(start,end)+'\nreturn publishEditedChunkBatch;');
 function ownerFixture(m,stage=stageEditedChunkBuffers){
  const old=[{buffer:{id:'old-a'}},{buffer:{id:'old-b'}}],chunks=new Map([['a',old[0]],['b',old[1]]]);
@@ -74,7 +75,7 @@ function ownerFixture(m,stage=stageEditedChunkBuffers){
  const publish=publisher(m.gl,chunks,{},()=>{},stage,item=>{
   retired.push(item);if(item.buffer)m.gl.deleteBuffer(item.buffer);
   if(item.waterBuffer)m.gl.deleteBuffer(item.waterBuffer);
- });
+ },terrainMeshBounds);
  return {old,chunks,retired,publish};
 }
 test('actual publisher retains both old owners on silent second upload fault',()=>{
@@ -93,7 +94,7 @@ test('actual publisher retires old handles only after both replacements are visi
  const m=mock(),old=[{buffer:{id:'old-a'}},{buffer:{id:'old-b'}}],chunks=new Map([['a',old[0]],['b',old[1]]]),retired=[];
  const publish=publisher(m.gl,chunks,{},()=>{},stageEditedChunkBuffers,item=>{
   assert.notEqual(chunks.get('a'),old[0]);assert.notEqual(chunks.get('b'),old[1]);retired.push(item);
- });
+ },terrainMeshBounds);
  publish(batch());assert.deepEqual(retired,old);
 });
 test('actual publisher refuses owner identity change and retires staged buffers',()=>{

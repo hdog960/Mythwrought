@@ -11,7 +11,9 @@ const sha=x=>createHash('sha256').update(x).digest('hex');
 const src=await readFile('src/main.mjs','utf8');
 assert.equal(git('hash-object','src/main.mjs'),git('rev-parse','HEAD:src/main.mjs'));
 assert.equal(git('hash-object','src/gpu-recovery.mjs'),'0613b2c65227068c8d7fcc5c518c632d4deaf18c');
-assert.equal(git('rev-parse','HEAD^'),frozen);
+assert.equal(git('rev-parse','HEAD^'),'b690bf16ae0d4340f920c8300b61f425419875d9');
+assert.equal(git('rev-parse','HEAD^^'),frozen);
+assert.equal(git('diff','HEAD^','HEAD','--','src'),'');
 // Exact frozen control source, instrument only original draw boundary.
 const frozenMain=git('show',frozen+':src/main.mjs');
 assert.equal(git('rev-parse',frozen+':src/main.mjs'),'3d8ff44d2cf7de9125bc4eda8e07983511e10d53');
