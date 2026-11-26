@@ -1,0 +1,35 @@
+name: Unified framebuffer and existing shader-path attribution
+on:
+  push:
+    branches: [probe/unified-framebuffer-cost-20261126]
+    paths: ['perf/issue-291/unified-framebuffer-cost.mjs','.github/workflows/unified-framebuffer-cost.yml']
+permissions:
+  contents: read
+jobs:
+  framebuffer-cost:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 3
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact original renderer; same resolution painted, base-color, clear-only and painted repeat
+        run: |
+          test "$(git rev-parse HEAD^)" = 142c52deb5c4bb14a660b4c31577d5eb88697add
+          test "$(git rev-parse HEAD^^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^^ HEAD -- src index.html styles.css)"
+          node --check perf/issue-291/unified-framebuffer-cost.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-framebuffer.log 2>&1 &
+          node perf/issue-291/unified-framebuffer-cost.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-framebuffer-cost
+          path: artifacts/unified-framebuffer-cost/
+          if-no-files-found: warn
