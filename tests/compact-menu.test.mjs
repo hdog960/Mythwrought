@@ -29,7 +29,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261125-living-ecosystem-height-v1';
+  const release='20261126-unified-candidate-v1';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));

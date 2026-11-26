@@ -1,0 +1,27 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {VoxelWorld} from '../../src/voxel.mjs';
+import {Pack2LiveWorld} from '../../src/pack2-world.mjs';
+import {createPack5LiveAdapter} from '../../src/pack5-integration/live-adapter.mjs';
+import {pack5SidecarKey} from '../../src/pack5-integration/sidecar-storage.mjs';
+import {createCreativeHistory} from '../../src/creative-integration/creative-history.mjs';
+const player={x:30,feet:250,z:30};
+test('actual saved multi-cell upper Pack5 owner undo and redo, cold restoration, stale save refusal',()=>{
+ const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,String(v)),removeItem:k=>data.delete(k)};
+ const w=new Pack2LiveWorld(new VoxelWorld(179)),anchor=[-16,255,-1],other=[-16,255,0];
+ for(const z of [-1,0])assert.equal(w.set(-16,254,z,3),true);
+ const p=createPack5LiveAdapter(w,{storage,upperRebuild:()=>{}});w.pack5Layer=p.layer;
+ const read=()=>{const e=p.layer.cell(anchor);return e?{anchor:[...e.anchor],symbolicId:e.symbolicId,rotation:e.rotation,variant:e.variant??null}:null;};
+ const first=p.layer.place('pack5:082',anchor,0);assert.equal(first.ok,true,first.reason);p.save();
+ const before=read(),history=createCreativeHistory();assert.ok(p.layer.cell(other));
+ history.record({worldToken:'179#1',owner:'pack5',target:anchor,before:null,after:before});
+ const adapter={worldToken:'179#1',read,apply:(e,d,x)=>p.replayCreative(e.target,d,x,player).ok===true};
+ assert.equal(history.undo(adapter).ok,true);assert.equal(p.layer.cell(other),null);
+ assert.equal(history.redo(adapter).ok,true);assert.deepEqual(read(),before);assert.ok(p.layer.cell(other));
+ const cold=createPack5LiveAdapter(new Pack2LiveWorld(VoxelWorld.restore(w.save())),{storage,upperRebuild:()=>{}});
+ assert.deepEqual(cold.snapshot(),p.snapshot());
+ const key=pack5SidecarKey(w.seed),raw=storage.getItem(key);
+ storage.setItem(key,raw+' ');
+ assert.equal(history.undo(adapter).ok,false);assert.deepEqual(read(),before);assert.equal(storage.getItem(key),raw+' ');
+ storage.setItem(key,raw);assert.equal(history.undo(adapter).ok,true);
+});

@@ -178,15 +178,15 @@ try{
         return false;
       const cache=await caches.open(name);
       const urls=(await cache.keys()).map(request=>request.url);
-      return urls.length===336&&
+      return urls.length===364&&
         ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs'].every(p=>urls.some(url=>url.endsWith('/'+p)))&&
         urls.some(url=>url.endsWith('/src/main.mjs'))&&
         urls.some(url=>url.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs'))&&
         urls.some(url=>url.endsWith('/src/app-update.mjs'))&&
         urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
-    },'mythwrought-m5-shell-20261125-living-ecosystem-height-v1',{timeout:180000});
+    },'mythwrought-m5-shell-20261126-unified-candidate-v1',{timeout:180000});
     const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261125-living-ecosystem-height-v1';
+      const name='mythwrought-m5-shell-20261126-unified-candidate-v1';
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
@@ -195,7 +195,7 @@ try{
         controlled:Boolean(navigator.serviceWorker.controller),
         save:localStorage.getItem('mythwrought-v002-world-179')};
     });
-    if(!before.hasV6||!before.hasMain||before.assets!==336||
+    if(!before.hasV6||!before.hasMain||before.assets!==364||
        !before.controlled||!before.save)
       throw Error('V6 online atomic cache missing '+JSON.stringify(before));
     await context.setOffline(true);

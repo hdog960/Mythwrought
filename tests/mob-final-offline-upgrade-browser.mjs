@@ -13,7 +13,7 @@ const root=resolve('.');
 const oldHead='c1138b52bc8041c0db12be31b13fe9ab0fb276e0';
 assert.equal(execFileSync('git',['-C',oldRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),oldHead);
 assert.notEqual(oldRoot,root);
-const release='20261125-living-ecosystem-height-v1',prior='20261125-shared-height-v1';
+const release='20261126-unified-candidate-v1',prior='20261125-shared-height-v1';
 const oldCache='mythwrought-m5-shell-'+prior,newCache='mythwrought-m5-shell-'+release;
 const out=resolve('artifacts/mob-final-offline');
 await mkdir(out,{recursive:true});
@@ -133,7 +133,7 @@ try{
    if(digest!==expected)throw Error('Wrong actual cached bytes '+p);n++;
   }return n;
  },{name:newCache,entries:Object.entries(manifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p))});
- assert.equal(checked,336);assert.equal(checked,expected.length);
+ assert.equal(checked,364);assert.equal(checked,expected.length);
  report.events.push({stage:'new complete exact-byte shell installed; old bank preserved',assets:checked});
  await ctx.setOffline(true);
  const response=await page.reload({waitUntil:'load'});assert.equal(response.fromServiceWorker(),true);

@@ -1,4 +1,7 @@
 import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
+import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
+import {installCreativeInventory} from './creative-integration/creative-inventory.mjs';
+import {createCreativeHistory} from './creative-integration/creative-history.mjs';
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
 import {meshDepthSection} from './depth-mesh.mjs';
@@ -23,7 +26,7 @@ import {chunkKey,editAffectedChunks} from './chunks.mjs';
 import {desertSeamEditAffectedChunks} from './manual-biomes/desert-seam-invalidation.mjs';
 import {calculateGripWidth,normalizeControlSize} from './layout.mjs';
 import {newPlayer,stepPlayer,findSafeSpawn} from './physics.mjs';
-import {applyBlockAction,inspectBlockTarget,BLOCK_NAMES} from './blocks.mjs';
+import {applyBlockAction,inspectBlockTarget,intersectsPlayerBlock,BLOCK_NAMES} from './blocks.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block} from './biome130-registry.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,pack2ExportBundle,pack2ImportBundle} from './pack2-world.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
@@ -605,6 +608,7 @@ function start(nonblockStage=null){
   resetManual14ForWorld();
   // Real Pack 5 geometry is opt-in; the production cube palette is unchanged.
   let pack5Builder=null,pack5Gpu=null,pack5Mode=false;
+  let pack5ToggleEpoch=0;
   // The future settlement-builder source imports exactly this contract.
   // All five owner-specific save sidecars remain authoritative and isolated.
   const fivePackBuilder=createManualFivePackLiveBuilder({
@@ -617,8 +621,9 @@ function start(nonblockStage=null){
       pack5Gpu.refresh(eye());}
   });
   function resetPack5ForWorld(){
+    pack5ToggleEpoch++;
     if(pack5Gpu){pack5Gpu.dispose();pack5Gpu=null;}
-    pack5Builder=null;pack5Mode=false;
+    pack5Builder=null;pack5Mode=false;creativePack5Owned=false;
     const toggle=document.getElementById('pack5Enabled');
     if(toggle)toggle.checked=false;
     queueMicrotask(()=>{void restoreSavedPack5Scene();});
@@ -635,6 +640,10 @@ function start(nonblockStage=null){
   }
   const g2Toggle=document.getElementById('g2bFlightEnable');
   const g2Status=document.getElementById('g2bFlightStatus');
+  const inventoryHeader=document.getElementById('creativeInventoryToggle');
+  let creativeInventory=null,creativeActivationEpoch=0,creativeSpawnSpecies=null;
+  let creativePack5Owned=false;
+  const creativeHistory=createCreativeHistory();
   const g2Active=()=>g2Flight?.mode==='flight';
   const g2Token=()=>world.seed+'#'+g2Epoch;
   // G2A uses cx,cz,section; the GPU uses cx,cz for surface, cx,cz,section deep.
@@ -663,6 +672,8 @@ function start(nonblockStage=null){
     const on=g2Active();
     document.body.classList.toggle('g2b-flight-active',on);
     g2Toggle.checked=g2CreativeEnabled;
+    inventoryHeader.hidden=!g2CreativeEnabled;
+    creativeInventory?.setEnabled(g2CreativeEnabled);
     for(const [id,label,aria] of [
       ['dig',on?'DOWN':'MINE',on?'Hold to descend':'Mine targeted block'],
       ['place',on?'UP':'PLACE',on?'Hold to ascend':'Place selected block'],
@@ -685,6 +696,7 @@ function start(nonblockStage=null){
   function g2NewWorld(){
     // The original world-change code immediately installs a safe newPlayer.
     g2CreativeEnabled=false;g2Flight=null;g2Controls=createG2ControlState();
+    creativeActivationEpoch++;creativeSpawnSpecies=null;creativeHistory.reset();
     g2TouchVertical.up=g2TouchVertical.down=false;g2Epoch++;g2Sync();
   }
   function g2Start(){
@@ -819,13 +831,20 @@ function start(nonblockStage=null){
     else if(g2Active()&&!g2Land()){
       g2CreativeEnabled=true;
       message('Creative remains enabled: land safely before switching off');
-    }else g2CreativeEnabled=false;
+    }else {
+      g2CreativeEnabled=false;creativeActivationEpoch++;creativeSpawnSpecies=null;creativeHistory.reset();
+      if(creativePack5Owned){pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;}
+    }
     lastG2JumpReleaseAt=-Infinity;
     g2Sync();
   });
   // Manual UI-owned feature: distinct from the five autonomous world-content lanes.
   const exploration=installExplorationMap({storage:localStorage,getWorld:()=>world,getPlayer:()=>player,
-    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost});
+    onOpen:()=>cancelAllPointers(),canOpen:()=>help.hidden&&!document.hidden&&!graphicsLost,
+    residentAt:(x,y,z)=>{const s=runtimeSectionForY(y);return s!==null&&chunks.has(runtimeMeshKey(chunkCoord(x),chunkCoord(z),s));},
+    upperOccupiedAt:(x,z,s)=>upperOccupancy(world,runtimeMeshKey(chunkCoord(x),chunkCoord(z),s)),
+    upperResidentAt:(x,z,s)=>chunks.has(runtimeMeshKey(chunkCoord(x),chunkCoord(z),s)),
+    readUpper:(x,y,z)=>manual14.layer.get([x,y,z])?.numericId??pack3.getAt(x,y,z)?.id??(pack5Builder?.layer.cell([x,y,z])?1:world.get(x,y,z))});
   let jumpQueued=false;
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
@@ -1112,9 +1131,106 @@ function start(nonblockStage=null){
       lastEditMeshKeys=ready.map(x=>x.key);
     }
   }
+  // Session-only history uses the original checked sidecar transaction owners.
+  // Never replay a raw save snapshot or a natural multi-cell terrain removal.
+  function clearCreativeHistory(){
+    creativeHistory.reset(g2Token());creativeInventory?.syncHistory();
+  }
+  function creativeOwnerState(owner,cell){
+    const manual=manual14.layer.get(cell),roof=pack3.getAt(...cell);
+    if(owner==='voxel'){
+      if(manual||roof||pack5Builder?.layer.cell(cell))return {foreign:true};
+      const id=world.get(...cell),overlay=world.pack2Cells?.get(cell.join(','))??null;
+      if(world.getPack2State?.(...cell)&&!overlay)return {foreign:true}; // natural water
+      return {id,rotation:world.rotationAt?.(...cell)??0,pack2:overlay?{...overlay}:null};
+    }
+    if(owner==='pack5'){
+      const row=pack5Builder?.layer.cell(cell);
+      if(!pack5Builder||manual||roof||world.get(...cell)!==BLOCK.AIR||row&&row.anchor.join(',')!==cell.join(','))return {foreign:true};
+      return row?{symbolicId:row.symbolicId,anchor:[...row.anchor],rotation:row.rotation,variant:row.variant??null}:null;
+    }
+    if(world.get(...cell)!==BLOCK.AIR||pack5Builder?.layer.cell(cell)||
+       (owner==='pack3'&&manual)||(owner==='manual14'&&roof))return {foreign:true};
+    if(owner==='pack3')return roof?{id:roof.id,orientation:roof.yaw}:null;
+    if(owner==='manual14')return manual?{asset:manual.asset,numericId:manual.numericId,at:[...manual.at],
+      orientation:manual.orientation,...(manual.sourcePack===1?{variant:manual.variant}:{}),
+      ...(manual.supportAt?{supportAt:[...manual.supportAt]}:{})}:null;
+    throw Error('Unknown Creative history owner');
+  }
+  function recordCreativeOwner(owner,cell,before){
+    if(!g2CreativeEnabled||caveSession)return;
+    try{
+      const after=creativeOwnerState(owner,cell);
+      if(before?.foreign||after?.foreign)throw Error('Foreign owner');
+      creativeHistory.record({worldToken:g2Token(),owner,target:cell,before,after});
+    }catch(_){creativeHistory.reset(g2Token());}
+    creativeInventory?.syncHistory();
+  }
+  function replayCreativeOwner(direction){
+    if(!g2CreativeEnabled||g2Active()||!help.hidden||exploration.isOpen()||
+       document.hidden||graphicsLost||storageReadOnly||caveSession)return;
+    const adapter={worldToken:g2Token(),read:entry=>creativeOwnerState(entry.owner,entry.target),
+      apply:(entry,desired,expected)=>{
+        const cell=entry.target;
+        const section=runtimeSectionForY(cell[1]);
+        if(section===null||!chunks.has(runtimeMeshKey(chunkCoord(cell[0]),chunkCoord(cell[2]),section)))return false;
+        if(desired===null&&(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell)))return false;
+        if(desired!==null&&hasLiveScenery()&&stagedScene()?.bodyIntersects([...cell,...cell.map(n=>n+1)]))return false;
+        if(entry.owner==='voxel'){
+          if(world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR||desired?.foreign||expected?.foreign)return false;
+          if(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell))return false;
+          if(desired.id!==BLOCK.AIR&&intersectsPlayerBlock(player,cell,desired.id,desired.rotation,desired.pack2))return false;
+          if(desired.id===BLOCK.AIR&&(world.base?.mountainV8SupportedTreeCells?.(...cell)??[]).length)return false;
+          const write=state=>{
+            if(state.pack2){
+              if(world.pack2Cells?.has(cell.join(',')))return world.updatePack2State(...cell,state.pack2);
+              return world.placePack2(...cell,state.id,state.pack2);
+            }
+            return world.set(...cell,state.id,state.rotation);
+          };
+          if(!write(desired))return false;
+          try{refreshEditedMeshes(cell[0],cell[2],cell[1]);}
+          catch(error){if(!write(expected))storageReadOnly=true;return false;}
+          changed=true;
+          // save() verifies original base and Pack2 readers. A partial durable
+          // failure is not a verified undo; protect the session, do not erase bytes.
+          if(!save()){storageReadOnly=true;return false;}
+          return true;
+        }
+        if(entry.owner==='pack5'){
+          if(!pack5Builder||!pack5Gpu)return false;
+          const result=pack5Builder.replayCreative(cell,desired,expected,player);
+          if(result.ok)pack5Gpu.refresh(eye());
+          return result.ok===true;
+        }
+        if(entry.owner==='pack3'){
+          return pack3.mutate({mode:desired?'place':'mine',cell,id:desired?.id??null,
+            orientation:desired?.orientation??0,player,rebuild:refreshPhysicalChunk}).ok===true;
+        }
+        if(entry.owner==='manual14'){
+          return (desired?manual14.placeMany([desired],{playerBody:[player.x-.28,player.feet,player.z-.28,
+            player.x+.28,player.feet+1.78,player.z+.28]}):manual14.remove(cell)).ok===true;
+        }
+        return false;
+      }};
+    const result=creativeHistory[direction](adapter);
+    creativeInventory?.syncHistory();
+    message(result.ok?(direction==='undo'?'Undid':'Redid')+' physical construction · verified save':result.reason);
+  }
   function edit(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
+    if(storageReadOnly){message('Protected world is read-only; edit refused');return;}
+    if(mode==='place'&&creativeSpawnSpecies){
+      const species=getSpecies(creativeSpawnSpecies),target=raycast(world,eye(),facing(),6);
+      if(!g2CreativeEnabled||!species||!target?.adjacent||!mobSession||!mobRenderer||mobRuntimeError){
+        message('Creature egg requires a clear, loaded physical target');return;
+      }
+      const [x,y,z]=target.adjacent;
+      const result=mobSession.spawnCreative(species.id,[x+.5,y,z+.5]);
+      if(!result.ok){message('Cannot summon '+species.displayName+': '+result.reason);return;}
+      clearCreativeHistory();message('Summoned '+species.displayName+' · verified creature roster saved');return;
+    }
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
       const hit=mobSession?.attack(eye(),facing());
       if(hit){mobSession.save();message('Hit '+hit.name+' · '+
@@ -1130,6 +1246,9 @@ function start(nonblockStage=null){
     }
     if(pack5Mode&&pack5Builder){
       if(storageReadOnly){message('Protected world read-only; Pack 5 edit blocked');return;}
+      const focus=g2CreativeEnabled?pack5Builder.inspect(eye(),facing()):null;
+      const historyCell=mode==='place'?focus?.adjacent:focus?.shape?.anchor;
+      const historyBefore=historyCell?creativeOwnerState('pack5',historyCell):null;
       const result=mode==='place'?
         pack5Builder.placeFacing(eye(),facing(),
           document.getElementById('pack5Family').value,
@@ -1137,6 +1256,8 @@ function start(nonblockStage=null){
           document.getElementById('pack5Variant').value,player):
         pack5Builder.removeFacing(eye(),facing());
       if(result.ok){
+        if(historyCell)recordCreativeOwner('pack5',historyCell,historyBefore);
+        else clearCreativeHistory();
         pack5Gpu?.refresh(eye());
         message(mode==='place'?'Pack 5 furnishing placed · separate save verified':
           'Pack 5 furnishing removed · separate save verified');
@@ -1150,6 +1271,7 @@ function start(nonblockStage=null){
       if(hit){
         const removed=scene.breakHit(hit,origin,direction);
         if(removed)markMobSourceMutation(world);
+        if(removed)clearCreativeHistory();
         if(scene.recovered)message('Staged scenery recovered from backup · removals are read-only');
         else message(removed?'Scenery removed · staged save verified':'Scenery removal could not be saved');
         return;
@@ -1167,6 +1289,8 @@ function start(nonblockStage=null){
     const existingPack3=physicalState.hit?pack3.getAt(...physicalState.hit):null;
     const existingManual14=physicalState.hit?manual14.layer.get(physicalState.hit):null;
     if((mode==='place'&&manual14Ids.has(selected))||(mode==='mine'&&existingManual14)){
+      const historyCell=mode==='place'?physicalState.adjacent:physicalState.hit;
+      const historyBefore=g2CreativeEnabled&&historyCell?creativeOwnerState('manual14',historyCell):null;
       let result;
       if(storageReadOnly)result={ok:false,reason:'Protected world read-only'};
       else if(manual14.blocked)result={ok:false,reason:manual14.blocked};
@@ -1191,6 +1315,7 @@ function start(nonblockStage=null){
             player.x+.28,player.feet+1.78,player.z+.28]});
       }
       if(!result.ok){message(result.reason);return;}
+      recordCreativeOwner('manual14',historyCell,historyBefore);
       message((mode==='mine'?'Removed ':'Placed ')+
         (BLOCK_NAMES[existingManual14?.numericId??selected]||'shaped block')+
         ' · physical save readback verified');
@@ -1202,6 +1327,8 @@ function start(nonblockStage=null){
       message('This cell supports mounted Pack 1/4 objects. Remove attachments first.');return;
     }
     if((mode==='place'&&isPack3BlockId(selected))||(mode==='mine'&&existingPack3)){
+      const historyCell=mode==='place'?physicalState.adjacent:physicalState.hit;
+      const historyBefore=g2CreativeEnabled&&historyCell?creativeOwnerState('pack3',historyCell):null;
       let result;
       if(storageReadOnly)result={ok:false,reason:'Protected world read-only'};
       else if(!physicalState.hit)result={ok:false,reason:physicalState.reason};
@@ -1213,6 +1340,7 @@ function start(nonblockStage=null){
       editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),
         mode==='place'?physicalState:null);
       if(!result.ok){message(result.reason);return;}
+      recordCreativeOwner('pack3',historyCell,historyBefore);
       message((mode==='mine'?'Removed ':'Placed ')+
         (BLOCK_NAMES[result.block]||'Pack 3 shaped block')+' · separate save verified');
       return;
@@ -1247,17 +1375,26 @@ function start(nonblockStage=null){
         catch(error){world.updatePack2State(...targeted,existing);
           message('Gate update failed; original shape retained: '+error.message);return;}
         changed=true;const persisted=save();
+        if(persisted&&g2CreativeEnabled&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR&&world.pack2Cells?.has(targeted.join(',')))
+          recordCreativeOwner('voxel',targeted,{id:existing.id,rotation:0,pack2:{...existing}});
+        else clearCreativeHistory();
         message((next.open?'Opened ':'Closed ')+BLOCK_NAMES[selected]+
           (persisted?' · saved':' · save not verified'));
         return;
       }
     }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
+    const historyCell=mode==='place'?physicalState.adjacent:physicalState.hit;
+    const historyBefore=g2CreativeEnabled&&historyCell&&world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR?
+      creativeOwnerState('voxel',historyCell):null;
     const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
     const persisted=save();
+    if(persisted&&historyBefore&&!historyBefore.foreign&&!result.affectedCells?.length&&historyCell.join(',')===result.cell.join(','))
+      recordCreativeOwner('voxel',historyCell,historyBefore);
+    else clearCreativeHistory();
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
@@ -1368,7 +1505,7 @@ function start(nonblockStage=null){
       // Low-frequency real-cave check: no synthetic map markers or geometry.
       if(help.hidden&&!exploration.isOpen()&&frame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
-        if(caveDiscovery.entered)message('Natural cave passage discovered · explore carefully');
+        if(caveDiscovery.entered){exploration.observeCavePassage();message('Natural cave passage discovered · explore carefully');}
       }
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
@@ -2225,6 +2362,8 @@ function start(nonblockStage=null){
     }
   }
   pack5Enabled.addEventListener('change',async()=>{
+    const activation=++pack5ToggleEpoch;
+    creativePack5Owned=false;
     if(caveSession){
       pack5Enabled.checked=false;pack5Mode=false;
       pack5Status.textContent='Cave World keeps a separate voxel-only profile; shaped furnishings are available in ordinary worlds.';
@@ -2237,11 +2376,13 @@ function start(nonblockStage=null){
     }
     try{
       const loaded=await ensurePack5Loaded();
-      if(!loaded||!pack5Enabled.checked)return;
-      pack5Mode=true;
+      if(!loaded||!pack5Enabled.checked||activation!==pack5ToggleEpoch)return;
+      pack5Mode=true;creativeSpawnSpecies=null;
+      creativeInventory?.syncSelection();
       pack5Status.textContent='Pack 5 ON · MINE/PLACE edit shaped furniture · '+
         pack5Builder.layer.count()+' pieces in verified separate seed sidecar.';
     }catch(error){
+      if(activation!==pack5ToggleEpoch)return;
       pack5Mode=false;pack5Enabled.checked=false;
       pack5Status.textContent='Pack 5 unavailable; original saves preserved: '+
         String(error.message||error);
@@ -2362,9 +2503,14 @@ function start(nonblockStage=null){
     if(BIOME130_REGISTERED_IDS.includes(selected))
       message('Selected '+biome130Block(selected).name+' · '+biomeRotation.selectedOptions[0].textContent);
   });
+  function clearCreativePlacementOverride(){
+    creativeSpawnSpecies=null;
+    if(g2CreativeEnabled){pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;}
+  }
   biomeSelect.addEventListener('change',()=>{
     const chosen=Number(biomeSelect.value);
     if(!BIOME130_REGISTERED_IDS.includes(chosen))return;
+    clearCreativePlacementOverride();
     selected=chosen;selectedRotation=Number(biomeRotation.value);
     manual14Select.value='';pack3Palette.clear();pack2Selection=null;world.nextPack2State=null;
     document.getElementById('pack2StateText').textContent='Select a Pack 2 block to adjust its state.';
@@ -2423,6 +2569,7 @@ function start(nonblockStage=null){
   manual14Select.addEventListener('change',()=>{
     const id=Number(manual14Select.value);
     if(!manual14Ids.has(id))return;
+    clearCreativePlacementOverride();
     selected=id;manual14Yaw=Number(manual14Rotate.value);
     manual14Variant=manual14Upper.checked?'upper':'lower';
     if(manual14Variant==='upper'&&id!==15&&id!==16){
@@ -2441,6 +2588,7 @@ function start(nonblockStage=null){
     manual14Variant=(manual14Upper.checked&&[15,16].includes(selected))?'upper':'lower';
   });
   const pack3Palette=installPack3Palette(help,(id,yaw)=>{
+    clearCreativePlacementOverride();
     selected=id;pack3Yaw=yaw;biomeSelect.value='';manual14Select.value='';
     pack2Selection=null;updatePack2SelectionUI();
     document.querySelectorAll('[data-block]').forEach(q=>{
@@ -2464,6 +2612,7 @@ function start(nonblockStage=null){
   // Retain the actual Pack 3 palette and handlers; relocate its existing panel.
   document.getElementById('advancedTools').append(pack3Palette.material.closest('.looksetting'));
   document.querySelectorAll('[data-block]').forEach(b=>b.onclick=()=>{
+    clearCreativePlacementOverride();
     selected=Number(b.dataset.block);
     biomeSelect.value='';manual14Select.value='';pack3Palette.clear();
     pack2Selection=isPack2LiveId(selected)?pack2NormalizeState(selected):null;
@@ -2490,6 +2639,7 @@ function start(nonblockStage=null){
   };
   document.getElementById('closeHelp').onclick=()=>{
     cancelAllPointers();document.getElementById('advancedMenu').open=false;help.hidden=true;
+    if(g2CreativeEnabled)creativeInventory?.syncSelection();
     // Return keyboard/gamepad-like input focus to world after closing modal.
     canvas.focus({preventScroll:true});
   };
@@ -3563,6 +3713,9 @@ function start(nonblockStage=null){
       mobSourceRevision(){return mobSession?.query.revision()??null;},
       mobStatus(){return mobSession?.status()??null;},
       mobRoster(){return mobSession?.drawEntities().map(m=>({id:m.id,species:m.species.id,position:m.position,state:m.state}))??[];},
+      mobPersistedRoster(){return mobSession?.engine.checkpoint().entities.map(m=>({
+        id:m.id,species:m.species,position:[...m.position],state:m.state,important:m.important
+      }))??[];},
       snapshot(){return {chunks:[...chunks.keys()],pending:[...pending.keys()],
         lastEditMeshKeys:[...lastEditMeshKeys],editMeshBatches,seed:world.seed,
         frameDriver:frameDriver.snapshot(),meshCadence:meshCadence.stats(),
@@ -3572,6 +3725,93 @@ function start(nonblockStage=null){
           restoredCount:graphicsRestoreCount,shaderReady:Boolean(program&&skyProgram)}};}
     });
   }
+  // Creative Phase 3: reuse the installed physical placement owners.
+  const creativeCatalog=buildCreativeCatalog();
+  creativeInventory=installCreativeInventory({
+    catalog:creativeCatalog,includeCreatures:true,
+    historyStatus:()=>creativeHistory.status(),onHistory:replayCreativeOwner,
+    getActiveKey:()=>{
+      if(creativeSpawnSpecies)return 'spawn:'+creativeSpawnSpecies;
+      if(pack5Mode&&pack5Builder)return creativeCatalog.blocks.find(item=>item.owner==='pack5'&&item.symbol===pack5Family.value)?.key??null;
+      return 'block:'+selected;
+    },
+    onOpen:()=>{
+      if(!g2CreativeEnabled||!help.hidden||exploration.isOpen()||document.hidden||graphicsLost)return false;
+      gameplayRecorder?.interrupt('Creative inventory opened');cancelAllPointers();
+      help.hidden=false;help.classList.add('mw-inventory-paused');return true;
+    },
+    onClose:()=>{
+      creativeActivationEpoch++;
+      help.classList.remove('mw-inventory-paused');help.hidden=true;
+      canvas.focus({preventScroll:true});
+    },
+    onRotate:item=>{
+      if(item.kind==='spawn')return 'Creature eggs have no orientation';
+      if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
+      const next=field=>{
+        const n=(Number(field.value)+1)%4;field.value=String(n);
+        field.dispatchEvent(new Event('change',{bubbles:true}));
+        return item.name+' · rotated '+n*90+'°';
+      };
+      if(item.owner==='biome130')return next(biomeRotation);
+      if(item.owner==='pack1'||item.owner==='pack4')return next(manual14Rotate);
+      if(item.owner==='pack3')return pack3Palette.yaw.disabled?'Fixed orientation':next(pack3Palette.yaw);
+      if(item.owner==='pack2'){document.getElementById('pack2Rotate').click();return pack2StateText.textContent;}
+      if(item.owner==='pack5')return next(document.getElementById('pack5Rotation'));
+      return item.name+' has fixed orientation';
+    },
+    onVariant:item=>{
+      if(item.kind==='spawn')return 'Creature eggs have no material variant';
+      if(!g2CreativeEnabled||storageReadOnly)return 'Editing unavailable';
+      if(item.owner==='pack2'){
+        document.getElementById(/water/i.test(item.name)?'pack2WaterLevel':'pack2Variant').click();
+        return pack2StateText.textContent;
+      }
+      if(item.owner==='pack5'&&item.variants?.length){
+        pack5Variant.value=item.variants[(item.variants.indexOf(pack5Variant.value)+1)%item.variants.length];
+        return item.name+' · '+pack5Variant.value;
+      }
+      return item.name+' · variants are separate catalog entries';
+    },
+    onSelect:async item=>{
+      if(!g2CreativeEnabled||storageReadOnly)throw Error('Creative editing unavailable');
+      if(item.kind==='spawn'){
+        if(!getSpecies(item.id)||!mobSession||typeof mobSession.spawnCreative!=='function'||
+           mobSession.status()?.readonly!==false||!mobRenderer||mobRuntimeError)
+          throw Error('Creature egg requires a writable live creature host and renderer');
+        pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;
+        creativeSpawnSpecies=item.id;return;
+      }
+      if(item.kind!=='block')throw Error('Unknown Creative item');
+      if(caveSession&&!['core','biome130'].includes(item.owner))throw Error('Shaped materials require a normal world');
+      if(item.owner==='pack5'){
+        const requestedWorld=world,epoch=creativeActivationEpoch;
+        if(!await ensurePack5Loaded()||world!==requestedWorld||epoch!==creativeActivationEpoch||
+           !g2CreativeEnabled||storageReadOnly||caveSession)throw Error('Pack 5 selection canceled');
+        pack5Family.value=item.symbol;
+        if(pack5Family.value!==item.symbol)throw Error('Pack 5 family not installed');
+        pack5Family.dispatchEvent(new Event('change',{bubbles:true}));
+        pack5Variant.value=item.variants[0];
+        if(pack5Variant.value!==item.variants[0])throw Error('Pack 5 variant not installed');
+        pack5ToggleEpoch++;pack5Enabled.checked=true;pack5Mode=true;creativePack5Owned=true;creativeSpawnSpecies=null;return;
+      }
+      let target;
+      if(item.owner==='core'||item.owner==='pack2')target=document.querySelector('[data-block="'+item.id+'"]');
+      else if(item.owner==='biome130')target=biomeSelect;
+      else if(item.owner==='pack1'||item.owner==='pack4')target=manual14Select;
+      else if(item.owner==='pack3')target=pack3Palette.material;
+      if(!target)throw Error('Placement owner not mounted: '+item.key);
+      if(target.dataset.block)target.click();
+      else {target.value=String(item.id);target.dispatchEvent(new Event('change',{bubbles:true}));}
+      if(selected!==item.id)throw Error('Material selection not confirmed: '+item.key);
+      pack5ToggleEpoch++;pack5Mode=false;pack5Enabled.checked=false;creativePack5Owned=false;creativeSpawnSpecies=null;
+    }
+  });
+  inventoryHeader.addEventListener('click',()=>{
+    if(g2CreativeEnabled)creativeInventory.open();
+  });
+  g2Sync();
+
   saveHealth.textContent=storageReadOnly?
     'READ ONLY: damaged world data preserved; import or select another seed.':
     'Schema-1 saved edits; checksum journal and verified previous-world backup.';
