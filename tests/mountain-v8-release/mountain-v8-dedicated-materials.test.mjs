@@ -99,14 +99,14 @@ test('historical M7 and P2 changed renderer comparison against exact previous so
 });
 test('exact staged manifest and worker closure',()=>{
  const m=JSON.parse(readFileSync(new URL('../../nonblock-stage-assets.json',import.meta.url)));
- assert.equal(m.version,'20261125-v1');
+ assert.equal(m.version,'20261125-v43');
  for(const [p,h] of Object.entries(m.assets)){
   const bytes=readFileSync(new URL('../../'+(p==='./'?'index.html':p.slice(2)),import.meta.url));
   assert.equal(createHash('sha256').update(bytes).digest('hex'),h,p);
  }
  assert.ok(m.assets['./src/manual-biomes/mountain-v8-materials.mjs']);
  const worker=readFileSync(new URL('../../sw-m5.js',import.meta.url),'utf8');
- assert.ok(worker.includes('20261125-living-ecosystem-final-v1')&&worker.includes('./src/manual-biomes/mountain-v8-materials.mjs'));
+ assert.ok(worker.includes('20261125-living-ecosystem-height-v1')&&worker.includes('./src/manual-biomes/mountain-v8-materials.mjs'));
  console.log('manifest assets',Object.keys(m.assets).length);
 });
 

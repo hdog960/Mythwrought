@@ -86,3 +86,47 @@ test('actual live host rejects mixed-time habitat after a real source edit and u
   resident=false;assert.equal(live.query.environment([8,4,8]).hazard,true);
  }finally{live.dispose();}
 });
+
+// Combined production regression: upper geometry must retain both independent
+// owner transactions and Mob invalidation, including failed GPU publication.
+test('shared-height accepted upper voxel and Pack2 edits invalidate only their source',()=>{
+ const w=fresh(),other=fresh(),r=createMobSourceRevision(w),o=createMobSourceRevision(other);
+ const cell=[500,35,500],initial=JSON.stringify(w.save());
+ assert.equal(check(r,()=>w.set(...cell,BLOCK.STONE)),true);
+ assert.equal(check(r,()=>w.set(...cell,BLOCK.AIR)),true);
+ assert.equal(check(r,()=>w.set(...cell,59)),true);
+ assert.ok(w.getPack2State(...cell));
+ assert.equal(check(r,()=>w.set(...cell,BLOCK.AIR)),true);
+ const prior=r();assert.equal(w.set(500,257,500,BLOCK.STONE),false);
+ assert.equal(r(),prior);assert.equal(o(),0);assert.equal(JSON.stringify(w.save()),initial);
+});
+test('shared-height Manual14 and Pack3 upper owner changes invalidate Mob source',()=>{
+ const w=fresh(),r=createMobSourceRevision(w);
+ const p=createPack3RuntimeStage(w),m=createManual14Layer(w);
+ check(r,()=>{w.pack3Runtime=p;w.manual14Layer=m;});
+ const roof={at:[530,35,500],asset:'pack3:069',orientation:0};
+ const stone=MANUAL_FIVE_PACK_CATALOG.find(x=>x.numericId===9&&x.pack===1);
+ const row={asset:stone.symbol,numericId:9,at:[500,256,500]};
+ assert.equal(check(r,()=>p.placeMany([roof])),1);
+ assert.equal(check(r,()=>m.placeMany([row])),1);
+ const prior=r();assert.throws(()=>m.placeMany([row]),/Overlapping/);assert.equal(r(),prior);
+ assert.equal(check(r,()=>p.remove(roof.at)),true);
+ assert.equal(check(r,()=>m.remove(row.at)),true);
+});
+test('shared-height Pack5 rollback invalidates transient source and retains actual owner state',()=>{
+ const w=fresh(),r=createMobSourceRevision(w),initial=JSON.stringify(w.save());
+ let reject=true;
+ const layer=createPack5ConstructionLayer(w,{upperRebuild:()=>{if(reject)throw Error('Injected GPU failure');}});
+ check(r,()=>{w.pack5Layer=layer;});
+ const cell=[0,256,0];
+ const fail=check(r,()=>layer.place('pack5:080',cell));
+ assert.equal(fail.ok,false);assert.match(fail.reason,/Injected GPU failure/);
+ assert.equal(layer.count(),0);assert.equal(layer.upperOccupied('sky:0,0,14'),false);
+ reject=false;assert.equal(check(r,()=>layer.place('pack5:080',cell)).ok,true);
+ assert.equal(layer.upperOccupied('sky:0,0,14'),true);
+ reject=true;assert.equal(check(r,()=>layer.remove(cell)),false);
+ assert.equal(layer.count(),1);assert.equal(layer.upperOccupied('sky:0,0,14'),true);
+ reject=false;assert.equal(check(r,()=>layer.remove(cell)),true);
+ assert.equal(layer.count(),0);assert.equal(layer.upperOccupied('sky:0,0,14'),false);
+ assert.equal(JSON.stringify(w.save()),initial);
+});
