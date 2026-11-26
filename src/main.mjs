@@ -453,6 +453,12 @@ function start(nonblockStage=null,underworldWitness=null){
   const caveFarGpu=createCaveFarWallGpu(gl);
   const name=chunkKey;
   const player=newPlayer(world);
+  if(underworldWitness){
+    const [x,y,z]=underworldWitness.camera;
+    if(collides(world,x+.5,y+.01,z+.5)||!collides(world,x+.5,y-.03,z+.5))
+      throw Error('GALLERY_CAMERA_FAILED_NATIVE_BODY_RECHECK');
+    Object.assign(player,{x:x+.5,feet:y+.01,z:z+.5,vX:0,vY:0,vZ:0,onGround:true});
+  }
   let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
   let mobAcceptanceFrozen=false,mobAcceptanceHidden=false,mobRuntimeError=null;
   function resetLiveMobSession(){
@@ -3199,7 +3205,8 @@ function start(nonblockStage=null,underworldWitness=null){
     window.__mythwroughtTest=Object.freeze({
       underworldGalleryInfo(){
         if(!underworldWitness)throw Error('No isolated underworld witness');
-        return {camera:[...underworldWitness.camera],nearby:underworldWitness.nearby.length,
+        return {camera:[...underworldWitness.camera],cameraProof:underworldWitness.cameraProof,nearby:underworldWitness.nearby.length,
+          pose:{x:player.x,y:player.feet,z:player.z},gpuRetry:gpuRetry.stats(),
           sourceChecks:underworldWitness.sourceChecks,projectedCuts:underworldWitness.cuts.size,
           sourceSaveUnchanged:underworldWitness.verifySave(),stage:{...underworldStageStats},
           residentKeys:[...chunks.keys()],pending:pending.size,
@@ -3211,13 +3218,17 @@ function start(nonblockStage=null,underworldWitness=null){
       async underworldGalleryOverlays(){
         if(!underworldWitness)throw Error('No isolated underworld witness');
         if(!await ensurePack5Loaded())throw Error('Pack5 unavailable');
-        const used=new Set(),placed={};
+        const used=new Set(),placed={},attempts={};
         const pick=(label,fn)=>{
+          attempts[label]={tested:0,errors:[]};
           for(const at of underworldWitness.nearby){
-            if(used.has(at.join(','))||world.get(...at)!==BLOCK.AIR)continue;
-            try{if(fn(at)){used.add(at.join(','));placed[label]=at;return;}}catch(_){}
+            if(used.has(at.join(','))||world.get(...at)!==BLOCK.AIR||!chunks.has(depthMeshKey(chunkCoord(at[0]),chunkCoord(at[2]),sectionForY(at[1]))))continue;
+            attempts[label].tested++;
+            try{const result=fn(at);if(result===true||result?.ok){used.add(at.join(','));placed[label]=at;return;}
+              if(attempts[label].errors.length<4)attempts[label].errors.push(result?.reason??'refused');
+            }catch(e){if(attempts[label].errors.length<4)attempts[label].errors.push(String(e));}
           }
-          throw Error('No actual '+label+' compatibility witness');
+          throw Error('No actual '+label+' compatibility witness: '+JSON.stringify(attempts[label]));
         };
         pick('pack2Water',at=>{
           if(!world.placePack2(...at,76,{}))return false;
@@ -3225,14 +3236,14 @@ function start(nonblockStage=null,underworldWitness=null){
           catch(e){world.set(...at,BLOCK.AIR);throw e;}
         });
         pick('pack3',at=>pack3.mutate({mode:'place',cell:at,id:116,orientation:0,
-          player,rebuild:refreshPhysicalChunk}).ok);
+          player,rebuild:refreshPhysicalChunk}));
         pick('manual14',at=>{
           const row=manual14ById.get(9);
-          return manual14.placeMany([{asset:row.symbol,numericId:9,at,orientation:0,variant:'lower'}]).ok;
+          return manual14.placeMany([{asset:row.symbol,numericId:9,at,orientation:0,variant:'lower'}]);
         });
-        pick('pack5',at=>pack5Builder.layer.place('pack5:080',at,0).ok);
+        pick('pack5',at=>pack5Builder.layer.place('pack5:080',at,0,null,{playerBox:[player.x-.28,player.feet,player.z-.28,player.x+.28,player.feet+1.78,player.z+.28]}));
         pack5Gpu.refresh(eye());retireLiveScenery();
-        return placed;
+        return {placed,attempts};
       },
       underworldFutureMaskAudit(){
         if(!underworldWitness)throw Error('No isolated underworld witness');
