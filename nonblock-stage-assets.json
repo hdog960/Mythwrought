@@ -1,5 +1,5 @@
 {
-  "version": "20261126-v45",
+  "version": "20261126-v46",
   "assets": {
     "./src/nonblock/staged-habitats.mjs": "c0932251fb658ac8d580493c1e7b509787ec61d2eebc58327b57f4c2791e07f1",
     "./src/environment-ground.mjs": "981efb10f091147ae09d2786531d925ea6bb054a1acdd08f834b917f9000ab8e",
@@ -99,9 +99,9 @@
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
     "./src/sky-v6-adapter.mjs": "b0a44a8c103a11af026578e47484ecaf3fa19110638dd903b3d4398f853c25dd",
-    "./": "b6a977cfac4429f41658f04bfdfd891f92aeafe7f8f40a909db3435221f056e8",
+    "./": "f97c63e0b33c4e4ade8b9d4e0478c3f95cf89533677a5a91e542c3b2a3ad22d6",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
-    "./index.html": "b6a977cfac4429f41658f04bfdfd891f92aeafe7f8f40a909db3435221f056e8",
+    "./index.html": "f97c63e0b33c4e4ade8b9d4e0478c3f95cf89533677a5a91e542c3b2a3ad22d6",
     "./manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
     "./src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "bc9f916c76bd32789ed2b482cf887528f4e519e20e8062592d2d4d0368d0359e",
     "./src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a0be2ccba487cd44db302d95773bbae2dd296efcab51e53b85b0a19837b6a0d5",
@@ -201,7 +201,7 @@
     "./src/block-packs/pack-5/residential-furnishings.mjs": "3758a513b9dd410a9a71c35f8fc4cc5a96f520d5436f0c5bee6ae109cd3c50ea",
     "./src/block-packs/pack-5/shop-workshop.mjs": "71ccd7439c9bda004282d368bb8e17b32d841380955e53cbc34a31e01d471f0b",
     "./src/block-packs/pack-5/workshop-fixtures.mjs": "428bee5bf57c3780dace7a7a9cc788bc211201eddaa958af493780e76f43b759",
-    "./src/blocks.mjs": "89202895ba6f1e28b9d4c8a580ade701304d22b9e8f6979c762cb8b49df20b67",
+    "./src/blocks.mjs": "abe420889929d9284cd19b992d9f4a594edbd133dd570143723a4740fdaba357",
     "./src/branched-cave-world.mjs": "892e7a3dacd69fcea75d442b90ff17428f21251edbd0b46bd6298f959fc4502a",
     "./src/builder-assets/biome130.mjs": "f60b289ed05aa058b6324c27ada95b7ca7ef9fd1068fdfd8dbbaade30b1bb313",
     "./src/builder-assets/manual-five-pack-live.mjs": "86ebc68be5bb5e4d196fb5472868e6522c46c6f16fc814d3e51036cd90c4b7be",
@@ -249,7 +249,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "314b86705436779d0e6f76aa7d9fb9ec89e9508b99fdd3f9e602ca2dfdcce651",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "ae29a3d9824798521ae40fa0886840703939e9446b5a0119a2867f675425fdb2",
+    "./src/main.mjs": "38b53d6ba1a33edc21d9e86ad686eb005b79d1ff6efed8f96dc2412f74564216",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/desert-bilateral-rgb.mjs": "7819c6a5ada37da04267dd774e994649c874d891268fd80b71ecd4c7515b6b5e",
     "./src/manual-biomes/desert-seam-vertex-tint.mjs": "4eff1be29be0a18f87050f496d50fb07892b52bf4d69133160ba2a62e9e7ab0f",
@@ -261,7 +261,7 @@
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "09ba61fc862bd69ed85f09e9403f637038f37c46c58771d3a6ff5f847e0122ff",
-    "./src/manual-biomes/profile-world.mjs": "529c9f00a31a055becd8e894fe8f8e692eb3ac8fd8ef28b84b132a1e0bc5c6be",
+    "./src/manual-biomes/profile-world.mjs": "1a40ab8512160799765cc31d1c755c2fb3eb28c9bdd0ecb94352dbf983e599eb",
     "./src/manual-biomes/snowy-s17-fresh-source.mjs": "de3db9032fd4250512ca9fe7fdbbab9f23e561319e804809c6fa91eb01874a49",
     "./src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs": "a4d442c69bffd32afae0a4d0260d553439827da00f091127f7d16c2dee05e1fa",
     "./src/manual-biomes/snowy-s14-edge-pigment.mjs": "847d5a269f51056f116f7822bafe8bbca22f4461df3efef344bcb88f20876630",
@@ -336,9 +336,10 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "326493a23e278ff7f3c38dcbfad7666bb9ef3a90c3a05e649c60a57007171898",
-    "./sw-m5.js": "3f4e1087d3f5eeeaacc281728da6b705f734f52593c5b0aabd3165683453866d",
+    "./sw-m5.js": "4d36d6714f4d67439cec4d07042a854dccfc457de6d610cbf8a98db0ed686324",
     "./src/creative-integration/creative-catalog.mjs": "72a76b50e101ae5bea974abc6777c8bb4f764721c77de043f093b66979bbe797",
     "./src/creative-integration/creative-history.mjs": "e37efc8732e8da68af46977db0e4f4b6ade09bd5fc4123b5e08a97d71ff43585",
+    "./src/creative-integration/creative-voxel-batch.mjs": "4f917f319753bae1f90ab179d1a7b4829379fa874d2f7d7ec5f7da57081c0548",
     "./src/creative-integration/creative-inventory.mjs": "154c4849b086e41f6df8603b5a0271769b73e134667e8edc687fed2e8fdf06fd",
     "./src/creative-integration/creative-thumbnails.mjs": "91a984ff723898d19b1eda800ce1a751804953cf2aa301f6cc97480a9ebca87b",
     "./src/navigation00/navigation-adapter.mjs": "5cca335071690e122d0a5970ff83d712b6b4e70f8c84e63f5187f30189488166",
@@ -366,6 +367,6 @@
     "./src/navigation00/observed-landmarks.mjs": "db1ebda10858507e499d970389fcdeb1cf1817b08691fbb4a0350d254b1948ba",
     "./src/navigation00/observed-navigation.mjs": "367f9eda050601e47c517c96cdd1b692ea1d90788120a5192cd7ec90645b258d",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "777635b4d49582b6091054b18a7525598ef57ac496cc5c08aae49560328c7348"
+    "./sw-nonblock-stage.js": "65698115385bed6ff470fc275764ede363803039686f83a58012c8af5fc3950e"
   }
 }
