@@ -72,6 +72,47 @@ try{
  await wait(cameraKeys);
  const sample=()=>page.evaluate(()=>({game:window.__mythwroughtTest.underworldGalleryInfo(),gpu:window.__underworldGlStats(),
   dataset:{...document.getElementById('scene').dataset}}));
+ // Require actual owner identity, a rendered frame AFTER teleport, and
+ // completion of the far GPU planner. A resident count alone can be stale.
+ const authoredKeys=await page.evaluate(async()=>{
+  const {engineWantedSections}=await import('/src/living-underworld/gallery-streaming-working-set.mjs');
+  const {chunkCoord}=await import('/src/voxel.mjs');const {sectionForY}=await import('/src/depth.mjs');
+  return engineWantedSections(chunkCoord(204),chunkCoord(136),sectionForY(-124));
+ });
+ const travel=async(camera,keys,needFar)=>{
+  const previous=await sample(),frame=Number(previous.dataset.renderedFrames);
+  const teleport=await page.evaluate(at=>window.__mythwroughtTest.teleportCave(...at),camera);
+  await page.waitForFunction(({keys,frame,needFar})=>{
+   const r=window.__mythwroughtTest.underworldGalleryInfo(),d=document.getElementById('scene').dataset;
+   return Number(d.renderedFrames)>frame&&r.pending===0&&r.residentKeys.length===keys.length&&
+    keys.every(k=>r.residentKeys.includes(k))&&r.far.pending===0&&r.far.sourceSamples>0&&
+    (!needFar||r.far.bytes>0&&Number(d.c6FarDrawn)>0);
+  },{keys,frame,needFar},{timeout:60000});
+  const result=await sample();assert.ok(Number(result.dataset.renderedFrames)>frame);
+  assert.deepEqual([...result.game.residentKeys].sort(),[...keys].sort());
+  assert.ok(result.game.far.chunks<=4&&result.game.far.bytes<=1048576);
+  assert.equal(result.game.far.failures,0);
+  return {teleport,previousFrame:frame,result};
+ };
+ if(process.argv.includes('--far-transition-only')){
+  report.mode='far-transition-only';
+  // Accepted overlay placements are setup, not a repeat of the future mask
+  // census or rollback test. Verify retirement with real active owner state.
+  report.overlays=await page.evaluate(()=>window.__mythwroughtTest.underworldGalleryOverlays());
+  await page.waitForFunction(()=>Number(document.getElementById('scene').dataset.pack5MeshVertices)>0,{},{timeout:60000});
+  await wait(cameraKeys);report.departure=await sample();
+  assert.ok(report.departure.game.pack5.bytes>0);
+  report.authored=await travel([204,-124,136],authoredKeys,true);
+  await page.screenshot({path:resolve(out,'actual-authored-far-transition.png')});
+  assert.ok(report.authored.result.game.far.bytes>0);
+  assert.equal(report.authored.result.game.pack5.bytes,0);
+  report.returned=await travel(first.camera,cameraKeys,false);
+  assert.ok(report.returned.result.game.pack5.bytes>0);
+  assert.equal(report.returned.result.game.sourceSaveUnchanged,true);
+  assert.deepEqual(report.errors,[]);
+  report.status='FAR_TRANSITION_CHECKS_PASSED';
+  console.log('FAR_TRANSITION '+JSON.stringify({departure:report.departure,authored:report.authored,returned:report.returned}));
+ }else{
  const before=await sample();report.before=before;
  await page.screenshot({path:resolve(out,'actual-game-supported-gallery.png')});
  // Run this independently of furnishing placement so future-source conflicts
@@ -97,12 +138,9 @@ try{
  await page.screenshot({path:resolve(out,'actual-game-gallery.png')});
  // Move to the historical original authored cave and back, using original
  // main renderer residency and retirement rather than a second GL context.
- const transition=await page.evaluate(()=>window.__mythwroughtTest.teleportCave(204,-124,136));
- await wait();
- const authored=await sample();report.authored=authored;
- await page.evaluate(camera=>window.__mythwroughtTest.teleportCave(...camera),first.camera);
- await wait(cameraKeys);
- const returned=await sample();
+ const authoredTravel=await travel([204,-124,136],authoredKeys,true);
+ const transition=authoredTravel.teleport,authored=authoredTravel.result;report.authored=authored;
+ const returned=(await travel(first.camera,cameraKeys,false)).result;
  report={...report,status:'LOCAL_GAME_WITNESS_MEASURED',first,before,overlays,withOverlays,stages,after,future,transition,authored,returned,
   productionDeployed:false,actualIPhone:false,constructionAdmission:false};
  console.log(JSON.stringify({camera:first.camera,projectedCuts:first.projectedCuts,sourceChecks:first.sourceChecks,overlays,
@@ -133,6 +171,7 @@ try{
   authoredFarGpu:authored.game.far.bytes>0,futureMaskSourceSafe:future.fullFutureMaskSourceSafe,
   combinedFutureGeometryQualified:false,currentProductionHeightAndDesertQualified:false,physicalIPhoneQualified:false,constructionAdmission:false};
  console.log('REMAINING_GATES '+JSON.stringify(report.remainingGates));
+ }
 } catch(e){
  report.errors.push(String(e.stack??e));
  if(page){
