@@ -163,7 +163,30 @@ try{
   await page.waitForTimeout(300);
  }
  const raw=await audit(),trace=JSON.parse(raw.split('\n').at(-1));
- assert.equal(trace.release,release);assert.ok(trace.moduleUrl.includes('mw-release='+release));
+ // Preserve real diagnostic evidence even if a subsequent identity assertion fails.
+ await writeFile(resolve(out,'device-report.txt'),raw);
+ // CacheStorage retains the fetched Response URL (mw-cache-install=bank).
+ // Chromium may report that URL as import.meta.url for the pinned module.
+ // Accept only the exact shell request or exact verified cached Response URL,
+ // on the same origin and canonical module path; never accept an arbitrary URL.
+ const identity=await page.evaluate(async name=>{
+   const requested=document.querySelector('script[type="module"][src*="src/main.mjs"]').src;
+   const cache=await caches.open(name);
+   const canonical=new URL('src/main.mjs',location.href).href;
+   const response=await cache.match(canonical);
+   if(!response)throw Error('Verified main module missing');
+   const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await response.arrayBuffer()))].map(x=>x.toString(16).padStart(2,'0')).join('');
+   return {requested,canonical,cachedResponseUrl:response.url,digest};
+ },newCache);
+ report.events.push({stage:'actual module identity',reported:trace.moduleUrl,...identity});
+ const pinned=new URL(identity.canonical);pinned.searchParams.set('mw-release',release);
+ const fetched=new URL(identity.canonical);fetched.searchParams.set('mw-cache-install',newCache);
+ assert.equal(identity.requested,pinned.href);
+ assert.equal(identity.cachedResponseUrl,fetched.href);
+ assert.equal(identity.digest,manifest.assets['./src/main.mjs']);
+ assert.equal(trace.release,release);
+ assert.equal(trace.baselineSource,oldHead);
+ assert.ok([pinned.href,fetched.href].includes(trace.moduleUrl),'Unexpected actual module URL '+trace.moduleUrl);
  const edits=trace.edits.filter(e=>e.outcome==='voxelSaved');assert.equal(edits.length,2);
  for(const e of edits)assert.ok(e.meshOwners.length&&e.phases.cpuOpaqueMesh.count&&e.phases.glPreGetError.count&&e.phases.glPostGetError.count&&e.phases.saveAndExistingReadback.count===1&&Number.isFinite(e.nextDrawEndMs));
  assert.ok(trace.frames.some(f=>f.phases.stream)&&trace.frames.some(f=>f.editIds.length));

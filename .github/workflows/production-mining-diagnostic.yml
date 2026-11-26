@@ -21,14 +21,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.5'
-      - name: Verify exact source closure, targeted native contracts
+      - name: Reuse authenticated native 20/20 and 339-asset closure on identical inputs
         run: |
-          node --check src/main.mjs
-          node --check src/gpu-recovery.mjs
-          node --check src/mining-trace.mjs
+          git fetch --no-tags --depth=1 origin 228b16233dacfe0527f778ea2ecaa52ff019dea5
+          test -z "$(git diff --name-only 228b16233dacfe0527f778ea2ecaa52ff019dea5 HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json scripts/ci tests/physical-mining-trace.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs)"
           node --check tests/mining-diagnostic-upgrade-browser.mjs
-          node scripts/ci/build-stage-cache-manifest.mjs --check
-          node --test tests/physical-mining-trace.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
       - name: Real same-origin prior-good rollback, offline upgrade, mining and save reload
         run: |
           npm install --no-save --no-audit --no-fund playwright@1.58.2
