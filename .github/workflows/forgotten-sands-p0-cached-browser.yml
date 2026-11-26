@@ -1,0 +1,32 @@
+name: Forgotten Sands P0 fixed far buffer moving browser
+on:
+  push:
+    branches: [research/forgotten-sands-p0-cached-vista-20261126]
+    paths:
+      - 'tests/forgotten-sands-cached-vista/**'
+      - '.github/workflows/forgotten-sands-p0-cached-browser.yml'
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 &
+          node tests/forgotten-sands-cached-vista/run.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p0-cached-vista
+          path: p0-cached-evidence/
