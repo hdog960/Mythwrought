@@ -1,0 +1,58 @@
+name: Unified historical single-cell profile UI and exact prior renderer parity
+on:
+  push:
+    branches: [probe/unified-single-profile-history-20261126]
+    paths: ['src/main.mjs','tests/creative-integration/single-profile-history-browser.mjs','.github/workflows/unified-single-profile-history.yml']
+permissions:
+  contents: read
+jobs:
+  profile-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact isolated source
+        run: |
+          test "$(git rev-parse HEAD^)" = fec336aea3758908638e83a77454d02af0776d1f
+          node --check src/main.mjs
+          node --check tests/creative-integration/single-profile-history-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Actual historical M2 M7 P2 Snow placement undo redo cold reload
+        run: |
+          python3 -m http.server 4174 >/tmp/unified-single-profile.log 2>&1 &
+          node tests/creative-integration/single-profile-history-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-single-profile-history
+          path: artifacts/creative-single-profile-history/
+          if-no-files-found: warn
+  prior-renderer-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: cf02e734a9791c1cf40cf1a801e04263f8f4401b
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Execute previously missing exact historical renderer comparison only
+        env:
+          MOUNTAIN_PRIOR_ROOT: ${{ github.workspace }}/prior-production
+        run: |
+          test "$(git -C prior-production rev-parse HEAD)" = cf02e734a9791c1cf40cf1a801e04263f8f4401b
+          node --test --test-name-pattern='historical M7 and P2 changed renderer comparison against exact previous source' tests/mountain-v8-release/mountain-v8-dedicated-materials.test.mjs

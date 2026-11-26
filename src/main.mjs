@@ -36,7 +36,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M2_FOUR_REGION_GENERATOR,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -1155,12 +1155,14 @@ function start(nonblockStage=null){
       ...(manual.supportAt?{supportAt:[...manual.supportAt]}:{})}:null;
     throw Error('Unknown Creative history owner');
   }
-  // Plain historical VoxelWorld has a single-cell authoritative setter.
-  // Older profiled generators may cascade implicitly in set(); retain their
-  // conservative restriction until exact footprint/rollback is qualified.
-  const historicalXericWorld=()=>world.base?.hasHistoricalXericCascade?.()===true;
+  // Explicitly admitted original source owners only. The audited M2/M7/P2/
+  // Snow setter is single-cell; historical xeric and V8 cascades have their
+  // separate full-footprint admission. Never admit experimental profiles.
+  const historicalXericWorld=()=>world.base?.constructor===FourRegionWorld&&world.base.hasHistoricalXericCascade()===true;
   const safeCreativeVoxelWorld=()=>!caveSession&&(world.base?.constructor===VoxelWorld||
-    world.base?.generationProfile?.generator===M8_MOUNTAIN_GENERATOR||historicalXericWorld());
+    world.base?.constructor===FourRegionWorld&&!world.base.experimentalEnchantedTrees&&
+    ([M2_FOUR_REGION_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR]
+      .includes(world.base.generationProfile?.generator)||historicalXericWorld()));
   function recordCreativeOwner(owner,cell,before){
     if(!g2CreativeEnabled||caveSession)return;
     try{
