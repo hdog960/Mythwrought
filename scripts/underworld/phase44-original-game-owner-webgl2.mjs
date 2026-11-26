@@ -60,35 +60,50 @@ try{
   const help=document.getElementById('help');if(help)help.hidden=true;
   return r;
  });
- const wait=()=>page.waitForFunction(()=>{const r=window.__mythwroughtTest.underworldGalleryInfo();return r.residentKeys.length===27&&r.pending===0;},{},{timeout:120000});
- await wait();
+ report.first=first;
+ const cameraKeys=first.cameraProof.keys;
+ assert.equal(first.cameraProof.supported,true);assert.equal(first.cameraProof.collisionFree,true);
+ assert.equal(cameraKeys.length,27);assert.equal(first.cameraProof.stageKeys.length,6);
+ assert.equal(first.cameraProof.peakCosts.faces,1546);assert.equal(first.cameraProof.peakCosts.cuts,843);
+ assert.ok(first.cameraProof.faces>0&&first.cameraProof.faces<=1546);
+ assert.ok(first.cameraProof.sourceCalls<=40000);
+ console.log('SUPPORTED_CAMERA '+JSON.stringify(first.cameraProof));
+ const wait=(keys=null)=>page.waitForFunction(keys=>{const r=window.__mythwroughtTest.underworldGalleryInfo();return r.residentKeys.length===27&&r.pending===0&&(!keys||keys.every(k=>r.residentKeys.includes(k)));},keys,{timeout:120000});
+ await wait(cameraKeys);
  const sample=()=>page.evaluate(()=>({game:window.__mythwroughtTest.underworldGalleryInfo(),gpu:window.__underworldGlStats(),
   dataset:{...document.getElementById('scene').dataset}}));
- const before=await sample();
- const overlays=await page.evaluate(()=>window.__mythwroughtTest.underworldGalleryOverlays());
+ const before=await sample();report.before=before;
+ await page.screenshot({path:resolve(out,'actual-game-supported-gallery.png')});
+ // Run this independently of furnishing placement so future-source conflicts
+ // survive a later overlay failure. Shared owner coordinates are audited once.
+ const future=await page.evaluate(()=>window.__mythwroughtTest.underworldFutureMaskAudit());
+ report.future=future;console.log('FUTURE_MASK '+JSON.stringify(future));
+ assert.equal(future.constructionAdmission,false);assert.ok(future.maxOwnerSourceReads<=40000);
+ const overlays=await page.evaluate(()=>window.__mythwroughtTest.underworldGalleryOverlays());report.overlays=overlays;
+ console.log('OVERLAYS '+JSON.stringify(overlays));
  await page.waitForFunction(()=>Number(document.getElementById('scene').dataset.pack5MeshVertices)>0,{},{timeout:60000});
- await wait();
- const withOverlays=await sample();
- const cells=[[-625,-36,-2160],[-625,-35,-2160]];
+ await wait(cameraKeys);
+ const withOverlays=await sample();report.withOverlays=withOverlays;
+ const cells=first.cameraProof.stageCells;
  const stages=await page.evaluate(cells=>{
   const t=window.__mythwroughtTest,failed=t.underworldGalleryRestage(cells,2),success=t.underworldGalleryRestage(cells);
   return {failed,success};
  },cells);
- await wait();
- const after=await sample();
+ report.stages=stages;
+ assert.deepEqual([...stages.failed.keys].sort(),first.cameraProof.stageKeys);
+ assert.deepEqual([...stages.success.keys].sort(),first.cameraProof.stageKeys);
+ await wait(cameraKeys);
+ const after=await sample();report.after=after;
  await page.screenshot({path:resolve(out,'actual-game-gallery.png')});
- // Complete native original mask overlap diagnostic on this SAME projection,
- // without any new geometry construction or additional source census.
- const future=await page.evaluate(()=>window.__mythwroughtTest.underworldFutureMaskAudit());
  // Move to the historical original authored cave and back, using original
  // main renderer residency and retirement rather than a second GL context.
  const transition=await page.evaluate(()=>window.__mythwroughtTest.teleportCave(204,-124,136));
  await wait();
- const authored=await sample();
+ const authored=await sample();report.authored=authored;
  await page.evaluate(camera=>window.__mythwroughtTest.teleportCave(...camera),first.camera);
- await wait();
+ await wait(cameraKeys);
  const returned=await sample();
- report={...report,status:'COMPLETE_LOCAL_GAME_WITNESS',first,before,overlays,withOverlays,stages,after,future,transition,authored,returned,
+ report={...report,status:'LOCAL_GAME_WITNESS_MEASURED',first,before,overlays,withOverlays,stages,after,future,transition,authored,returned,
   productionDeployed:false,actualIPhone:false,constructionAdmission:false};
  console.log(JSON.stringify({camera:first.camera,projectedCuts:first.projectedCuts,sourceChecks:first.sourceChecks,overlays,
   resident:after.game.residentKeys.length,stage:after.game.stage,stages,nearBytes:after.game.nearBytes,
@@ -103,6 +118,8 @@ try{
  assert.equal(stages.success.keys.length,6);
  assert.ok(after.game.stage.maxSourceCalls<=40000);
  assert.ok(after.game.pack5.bytes>0);
+ assert.ok(Number(withOverlays.dataset.manual14MeshVertices)>0);
+ assert.ok(Number(withOverlays.dataset.pack5MeshVertices)>0);
  assert.ok(Number(withOverlays.dataset.pack3PhysicalCount)>0);
  assert.ok(Number(withOverlays.dataset.manual14PhysicalCount)>0);
  assert.ok(Number(withOverlays.dataset.waterSections)>0);
@@ -110,6 +127,12 @@ try{
  assert.equal(returned.game.sourceSaveUnchanged,true);
  assert.equal(future.constructionAdmission,false);
  assert.deepEqual(report.errors,[]);
+ report.status='LOCAL_GAME_WITNESS_CHECKS_PASSED';
+ report.remainingGates={exactPeakGameplayWindow:first.cameraProof.exactPeakCamera,
+  nonblockGpuInGallery:after.game.sceneryBytes>0,nonzeroFarGpuInGallery:after.game.far.bytes>0,
+  authoredFarGpu:authored.game.far.bytes>0,futureMaskSourceSafe:future.fullFutureMaskSourceSafe,
+  combinedFutureGeometryQualified:false,currentProductionHeightAndDesertQualified:false,physicalIPhoneQualified:false,constructionAdmission:false};
+ console.log('REMAINING_GATES '+JSON.stringify(report.remainingGates));
 } catch(e){
  report.errors.push(String(e.stack??e));
  if(page){
