@@ -1,0 +1,45 @@
+name: Unified exact-source GPU A/B evidence
+on:
+  push:
+    branches: [probe/unified-gpu-ab-20261126]
+    paths:
+      - 'perf/issue-291/unified-atomic-batch-ab.mjs'
+      - '.github/workflows/unified-gpu-ab.yml'
+permissions:
+  contents: read
+jobs:
+  paired-mining:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [667x375, 844x390, 932x430, 956x440]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Freeze exact game source and install browser
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          git fetch --no-tags --depth=1 origin 84bcf874566ea6404d1b377128e0943c185bfa30
+          test "$(git diff --name-only HEAD^ HEAD | sort)" = "$(printf '%s\n' .github/workflows/unified-gpu-ab.yml perf/issue-291/unified-atomic-batch-ab.mjs)"
+          node --check perf/issue-291/unified-atomic-batch-ab.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+      - name: Two original game 100-mine trials, exact same input
+        env:
+          AB_VIEWPORT: ${{ matrix.viewport }}
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-ab-http.log 2>&1 &
+          node perf/issue-291/unified-atomic-batch-ab.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-gpu-ab-${{ matrix.viewport }}
+          path: artifacts/unified-gpu-ab/
+          if-no-files-found: warn
