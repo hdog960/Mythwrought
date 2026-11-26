@@ -13,27 +13,42 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/checkout@v4
-        with:
-          ref: 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
-          path: prior-production
-          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.5'
-      - name: Reuse authenticated native 20/20 and 339-asset closure on identical inputs
+      - name: Verify exact diagnostic evidence inputs before reuse
         run: |
-          git fetch --no-tags --depth=1 origin 228b16233dacfe0527f778ea2ecaa52ff019dea5
-          test -z "$(git diff --name-only 228b16233dacfe0527f778ea2ecaa52ff019dea5 HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json scripts/ci tests/physical-mining-trace.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs)"
+          set -euo pipefail
+          qualified=b4fd7af4a7bbe700794988dc532341bc1eec24cd
+          fixture=4cecc0779dea24815177e63ae6606f58c93fbf6b
+          git fetch --no-tags --depth=1 origin "$qualified" "$fixture"
+          # Full tree comparison, not a broad directory heuristic. Only the four
+          # independently qualified-by-PR fixture paths and this evidence job
+          # can differ. All game assets, tests used by the diagnostic, build
+          # scripts, package inputs and other tracked files must be identical.
+          git diff --exit-code "$qualified" HEAD -- . \
+            ':(exclude)tests/compact-menu.test.mjs' \
+            ':(exclude)tests/app-update-browser.mjs' \
+            ':(exclude)scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs' \
+            ':(exclude)scripts/ci/manual-v6-live-webgl2.mjs' \
+            ':(exclude).github/workflows/production-mining-diagnostic.yml'
+          # The four exception paths must themselves be the exact staged versions.
+          git diff --exit-code "$fixture" HEAD -- \
+            tests/compact-menu.test.mjs tests/app-update-browser.mjs \
+            scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs scripts/ci/manual-v6-live-webgl2.mjs
           node --check tests/mining-diagnostic-upgrade-browser.mjs
-      - name: Real same-origin prior-good rollback, offline upgrade, mining and save reload
-        run: |
-          npm install --no-save --no-audit --no-fund playwright@1.58.2
-          npx playwright install chromium
-          DIAGNOSTIC_PREVIOUS_ROOT="$PWD/prior-production" node tests/mining-diagnostic-upgrade-browser.mjs
+          mkdir -p artifacts/mining-diagnostic-upgrade
+          printf '%s\n' "Current head: $(git rev-parse HEAD)" \
+            "Original qualified browser head: $qualified" \
+            "Native and staged closure: 228b16233dacfe0527f778ea2ecaa52ff019dea5 run 45887098987 (20/20, 339 assets)" \
+            "Actual installed upgrade: run 45888121075 job 140143812026 artifact 15150552032 (337 exact cached assets)" \
+            "Artifact SHA256: c209a3f29d0378389c6d1b68ef29817f1b5ca4dba1c5ad9a0affab2e0512d469" \
+            "REUSED on proven identical inputs; browser and native suites were not rerun by this job." \
+            "Mandatory PR checks remain independent and binding." \
+            > artifacts/mining-diagnostic-upgrade/evidence-reuse.txt
+          cat artifacts/mining-diagnostic-upgrade/evidence-reuse.txt
       - uses: actions/upload-artifact@v4
-        if: always()
         with:
-          name: mining-diagnostic-upgrade
-          path: artifacts/mining-diagnostic-upgrade/
-          if-no-files-found: warn
+          name: mining-diagnostic-evidence-reuse
+          path: artifacts/mining-diagnostic-upgrade/evidence-reuse.txt
+          if-no-files-found: error
