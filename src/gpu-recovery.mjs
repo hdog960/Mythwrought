@@ -46,11 +46,12 @@ export class GpuUploadRetry{
 // but a caller's previously displayed healthy buffer is never touched here.
 // Test adapters can produce an actual numeric WebGL OUT_OF_MEMORY code without
 // monkeypatching browser-owned native methods.
-export function uploadChunkBuffer(gl,vertices){
+export function uploadChunkBuffer(gl,vertices,measure=null){
+  const timed=(name,fn)=>measure?measure(name,fn):fn();
   if(!gl||typeof gl.createBuffer!=='function'||typeof gl.getError!=='function')
     throw Error('No usable WebGL upload context');
   validateChunkUploadBytes(vertices);
-  const buffer=gl.createBuffer();
+  const buffer=timed('glCreateBuffer',()=>gl.createBuffer());
   if(!buffer)throw Error('WebGL buffer allocation unavailable');
   try{
     // Some drivers carry unrelated GL errors from an earlier drawing command.
@@ -59,14 +60,14 @@ export function uploadChunkBuffer(gl,vertices){
     // A bounded drain avoids unresponsive loops on a broken context.
     let cleared=false;
     for(let i=0;i<8;i++){
-      if(gl.getError()===gl.NO_ERROR){cleared=true;break;}
+      if(timed('glPreGetError',()=>gl.getError())===gl.NO_ERROR){cleared=true;break;}
     }
     if(!cleared)throw Error('WebGL error queue did not clear before upload');
-    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-    gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW);
-    const error=gl.getError();
+    timed('glBindBuffer',()=>gl.bindBuffer(gl.ARRAY_BUFFER,buffer));
+    timed('glBufferData',()=>gl.bufferData(gl.ARRAY_BUFFER,vertices,gl.STATIC_DRAW));
+    const error=timed('glPostGetError',()=>gl.getError());
     if(error!==gl.NO_ERROR)
       throw Error('WebGL buffer upload error '+error);
     return buffer;
-  }catch(error){gl.deleteBuffer(buffer);throw error;}
+  }catch(error){timed('glDeleteFailedBuffer',()=>gl.deleteBuffer(buffer));throw error;}
 }

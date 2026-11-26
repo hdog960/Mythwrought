@@ -1,3 +1,4 @@
+import {createMiningTrace} from './mining-trace.mjs';
 import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {VoxelWorld,BLOCK,BODY_RADIUS,BODY_HEIGHT,chunkCoord,chunkWindow,terrainHeight,meshChunk,raycast,outlineVertices,collides} from './voxel.mjs';
 import {WORLD_MIN_Y,WORLD_MAX_Y,sectionForY,sectionWindow,surfaceOpeningNearby,sectionChunkRadius,verticalEditSections,depthMeshKey} from './depth.mjs';
@@ -912,8 +913,13 @@ function start(nonblockStage=null){
     const adjusted=clampLook(player.yaw,player.pitch,dx,dy,sensitivity,scale*(precise ? .4 : 1));
     player.yaw=adjusted.yaw;player.pitch=adjusted.pitch;
   }
+  const miningTrace=new URLSearchParams(location.search).get('mw-perf')==='1'?createMiningTrace():null;
+  const traceMeasure=miningTrace?(name,fn)=>miningTrace.measure(name,fn):null;
+  const traceContext=()=>({seed:world.seed,profile:world.base?.generationProfile?.generator??null,
+    feet:player.feet,x:player.x,z:player.z,owners:chunks.size,framebuffer:[canvas.width,canvas.height],preset:renderPreset});
   const saveHealth=document.getElementById('saveHealth');
-  function save(){
+  function save(){return traceMeasure?traceMeasure('saveAndExistingReadback',saveOriginal):saveOriginal();}
+  function saveOriginal(){
     if(storageReadOnly){
       message('SAVE PROTECTION ACTIVE — damaged original world not overwritten');
       saveHealth.textContent='READ ONLY: original damaged save preserved. Import a verified backup or choose another seed.';
@@ -972,8 +978,8 @@ function start(nonblockStage=null){
   function uploadPack2Chunk(vertices,water,section=0){
     let buffer=null,waterBuffer=null;
     try{
-      if(section<=0||vertices.length)buffer=uploadChunkBuffer(gl,vertices);
-      if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
+      if(section<=0||vertices.length)buffer=uploadChunkBuffer(gl,vertices,traceMeasure);
+      if(water.length)waterBuffer=uploadChunkBuffer(gl,water,traceMeasure);
       return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
@@ -1016,7 +1022,8 @@ function start(nonblockStage=null){
   // the complete upload batch is ready. No awaits, save writes or callbacks
   // between final validation and map publication. Context loss invalidates
   // the batch rather than publishing dead handles.
-  function publishEditedChunkBatch(batch){
+  function publishEditedChunkBatch(batch){return traceMeasure?traceMeasure('gpuBatchPublish',()=>publishEditedChunkBatchOriginal(batch)):publishEditedChunkBatchOriginal(batch);}
+  function publishEditedChunkBatchOriginal(batch){
     if(gl.isContextLost())throw Error('Graphics context lost before edit mesh staging');
     admitUpperGpuBatch(chunks,batch);
     const owner=world;
@@ -1041,7 +1048,8 @@ function start(nonblockStage=null){
     if(!gl.isContextLost())for(const old of originals)deleteChunkBuffers(old);
     return ready;
   }
-  function refreshEditedMeshes(x,z,y=0,affectedCells=null){
+  function refreshEditedMeshes(x,z,y=0,affectedCells=null){return traceMeasure?traceMeasure('editMeshTransaction',()=>refreshEditedMeshesOriginal(x,z,y,affectedCells)):refreshEditedMeshesOriginal(x,z,y,affectedCells);}
+  function refreshEditedMeshesOriginal(x,z,y=0,affectedCells=null){
     // Rebuild every LOADED neighboring horizontal chunk AND adjacent vertical
     // sections at Y-seams. All buffers stage before any published replacement.
     const staged=createUpperBatchBuilder(key=>chunks.has(key));
@@ -1055,8 +1063,8 @@ function start(nonblockStage=null){
         const key=runtimeMeshKey(cx,cz,section);
         if(seen.has(key)||section<=0&&!chunks.has(key))continue;
         seen.add(key);
-        const vertices=meshPlayableChunk(cx,cz,section);
-        const water=meshPlayableWater(cx,cz,section);
+        const vertices=traceMeasure?traceMeasure('cpuOpaqueMesh',()=>meshPlayableChunk(cx,cz,section)):meshPlayableChunk(cx,cz,section);
+        const water=traceMeasure?traceMeasure('cpuWaterMesh',()=>meshPlayableWater(cx,cz,section)):meshPlayableWater(cx,cz,section);
         staged.add({key,cx,cz,section,vertices,water});
       }
     const ready=publishEditedChunkBatch(staged.finish());
@@ -1112,7 +1120,8 @@ function start(nonblockStage=null){
       lastEditMeshKeys=ready.map(x=>x.key);
     }
   }
-  function edit(mode){
+  function edit(mode){return miningTrace?miningTrace.action(mode,traceContext(),()=>editOriginal(mode)):editOriginal(mode);}
+  function editOriginal(mode){
     // No world mutation behind settings, during app suspension, or on lost WebGL.
     if(!help.hidden||exploration.isOpen()||document.hidden||graphicsLost||g2Active())return;
     if(mode==='mine'&&mobRenderer&&!mobRuntimeError){
@@ -1253,11 +1262,14 @@ function start(nonblockStage=null){
       }
     }
     const inspection=mode==='place'?inspectBlockTarget(world,eye(),facing(),selected,player,selectedRotation):null;
-    const result=applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    const apply=()=>applyBlockAction(world,eye(),facing(),mode,selected,player,refreshEditedMeshes,{rotation:selectedRotation});
+    const result=traceMeasure?traceMeasure('applyBlockAction',apply):apply();
+    miningTrace?.mark(result.ok?'voxelApplied':'voxelRejected',{block:result.block??null});
     editFeedback=recordWorldEditFeedback(editFeedback,result,performance.now(),inspection);
     if(!result.ok){message(result.reason);return;}
     changed=true;
     const persisted=save();
+    miningTrace?.mark(persisted?'voxelSaved':'voxelSaveFailed',{block:result.block??null,meshOwners:lastEditMeshKeys.slice()});
     const label=BLOCK_NAMES[result.block]||'block';
     const action=mode==='mine'?'Removed':'Placed';
     message(action+' '+label+(persisted?' · saved':' · save failed, export backup'));
@@ -1359,6 +1371,11 @@ function start(nonblockStage=null){
     if(player.feet<WORLD_MIN_Y-12)respawnPrototype();
   }
   function draw(now){
+    if(!miningTrace)return drawOriginal(now);
+    const eligible=!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost;
+    return miningTrace.frame(now,eligible,{feet:player.feet,owners:chunks.size},()=>drawOriginal(now));
+  }
+  function drawOriginal(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
     frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
@@ -1946,6 +1963,7 @@ function start(nonblockStage=null){
   });
   window.addEventListener('blur',cancelAllPointers);
   document.addEventListener('visibilitychange',()=>{
+    miningTrace?.resetContinuity();
     if(document.hidden){
       frameDriver.pause();
       frameHistory.frame(performance.now(),false);
@@ -2541,6 +2559,7 @@ function start(nonblockStage=null){
         render:graphicsLost?'WebGL context lost':'WebGL2 active, '+chunks.size+' loaded GPU chunks; '+renderPreset+' '+canvas.width+'×'+canvas.height+' framebuffer pixels; mesh uploads '+meshCadence.meshes+', deferred frames '+meshCadence.skipped+', longest measured mesh '+meshCadence.slowestMs+' ms; GPU upload retry faults '+gpuRetry.stats().failures+', pending '+gpuRetry.stats().pendingRetries,
         save:saved,probe,quota
       });
+      if(miningTrace)auditReport.value+='\nMINING TRACE v1 (diagnostic only; CPU wall times, nested phases not additive; not GPU presentation)\n'+JSON.stringify({baselineSource:'2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0',release:document.querySelector('meta[name="mythwrought-release"]')?.content,moduleUrl:import.meta.url,context:traceContext(),...miningTrace.report()});
       auditStatus.textContent='Report ready. Copy it for Gate A review; manual iPhone and art approval remain open.';
     }catch(err){auditStatus.textContent='Device check could not finish: '+String(err);}
   };
