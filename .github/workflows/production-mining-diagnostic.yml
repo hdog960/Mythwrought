@@ -20,21 +20,22 @@ jobs:
         run: |
           set -euo pipefail
           qualified=b4fd7af4a7bbe700794988dc532341bc1eec24cd
-          fixture=4cecc0779dea24815177e63ae6606f58c93fbf6b
+          fixture=a9aa98cc05f6aebe97a5400eacf9a3f1db95662f
           git fetch --no-tags --depth=1 origin "$qualified" "$fixture"
-          # Full tree comparison, not a broad directory heuristic. Only the four
+          # Full tree comparison, not a broad directory heuristic. Only the five
           # independently qualified-by-PR fixture paths and this evidence job
           # can differ. All game assets, tests used by the diagnostic, build
           # scripts, package inputs and other tracked files must be identical.
           git diff --exit-code "$qualified" HEAD -- . \
             ':(exclude)tests/compact-menu.test.mjs' \
             ':(exclude)tests/app-update-browser.mjs' \
+            ':(exclude)tests/mob-final-offline-upgrade-browser.mjs' \
             ':(exclude)scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs' \
             ':(exclude)scripts/ci/manual-v6-live-webgl2.mjs' \
             ':(exclude).github/workflows/production-mining-diagnostic.yml'
-          # The four exception paths must themselves be the exact staged versions.
+          # The five exception paths must themselves be the exact staged versions.
           git diff --exit-code "$fixture" HEAD -- \
-            tests/compact-menu.test.mjs tests/app-update-browser.mjs \
+            tests/compact-menu.test.mjs tests/app-update-browser.mjs tests/mob-final-offline-upgrade-browser.mjs \
             scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs scripts/ci/manual-v6-live-webgl2.mjs
           node --check tests/mining-diagnostic-upgrade-browser.mjs
           mkdir -p artifacts/mining-diagnostic-upgrade
