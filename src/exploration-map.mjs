@@ -9,6 +9,7 @@ import {paintNavigationFrame} from './navigation00/navigation-paint.mjs';
 import {createNavigationLocationReadout} from './navigation00/navigation-location-readout.mjs';
 import {navigationPose,observeNavigationSurface,eligibleSurfaceDiscovery} from './navigation00/navigation-live-observation.mjs';
 import {createObservationCatalog,sampleNearbyObservations} from './navigation00/navigation-observation-catalog.mjs';
+import {surfaceWitness,nearestVisibleMarker} from './navigation00/navigation-surface-witness.mjs';
 import {classifyHeightObservation,inspectUpperCover} from './navigation00/navigation-height-observation.mjs';
 import {MOUNTAIN_V8_MATERIAL,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
@@ -26,9 +27,9 @@ export function loadExploration(storage,seed){
   if(!Number.isInteger(seed))throw Error('Map needs an integer world seed');
   const key=mapStorageKey(seed);
   const seen=new Set();
-  let dirty=false,readOnly=false,warning='';
+  let dirty=false,readOnly=false,warning='',rawBefore=null;
   try{
-    const raw=storage.getItem(key);
+    const raw=storage.getItem(key);rawBefore=raw;
     if(raw!==null){
       if(raw.length>3600000)throw Error('Exploration record exceeds safe size');
       const data=JSON.parse(raw);
@@ -78,9 +79,10 @@ export function loadExploration(storage,seed){
       if(readOnly)return false;
       try{
         const raw=JSON.stringify({version:1,seed,cellSize:MAP_CELL_SIZE,cells:[...seen].sort()});
+        if(storage.getItem(key)!==rawBefore){readOnly=true;throw Error('Exploration changed in another session');}
         storage.setItem(key,raw);
-        if(storage.getItem(key)!==raw)throw Error('Exploration map read-back differed');
-        dirty=false;warning='';return true;
+        if(storage.getItem(key)!==raw){readOnly=true;throw Error('Exploration map read-back differed');}
+        rawBefore=raw;dirty=false;warning='';return true;
       }catch(error){
         warning='Map exploration not saved: '+String(error);
         return false;
@@ -156,7 +158,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   const markerStatus=document.getElementById('navMarkerStatus');
   const addMarker=document.getElementById('navMarkerAdd'),renameMarker=document.getElementById('navMarkerRename');
   const removeMarker=document.getElementById('navMarkerRemove'),undoMarker=document.getElementById('navMarkerUndo');
-  const hereMarker=document.getElementById('navMarkerHere');
+  const hereMarker=document.getElementById('navMarkerHere'),landmarkList=document.getElementById('navLandmarkList'),focusMarker=document.getElementById('navMarkerFocus');
   const pose=()=>navigationPose(getPlayer());
   function refreshMarkers(){
     const pins=nav.navigator.visiblePins(),pin=pins.find(p=>p.id===selected?.id);
@@ -167,11 +169,17 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
       markerList.dataset.signature=signature;
     }
     markerList.value=pin?.id||'';
+    const marks=catalog.visible(),ms=JSON.stringify(marks.map(p=>[p.id,p.label]));
+    if(landmarkList.dataset.signature!==ms){landmarkList.replaceChildren(new Option('Select landmark',''));for(const m of marks)landmarkList.add(new Option(m.label,m.id));landmarkList.dataset.signature=ms;}
+    landmarkList.value=selected?.landmarkId||'';
+    focusMarker.disabled=!selected;
+    markerName.disabled=!!selected?.landmarkId;
     const writable=!nav.navigator.readOnly;
-    addMarker.disabled=!writable||!selected||!!pin||!map.has(selected.x,selected.z);
+    addMarker.disabled=!writable||!selected||!!pin||!!selected.landmarkId||!map.has(selected.x,selected.z);
     renameMarker.disabled=removeMarker.disabled=!writable||!pin;
     undoMarker.disabled=!nav.navigator.canUndo;
     markerStatus.textContent=nav.navigator.warning||(pin?'Waypoint · X '+pin.x.toFixed(1)+' Z '+pin.z.toFixed(1):
+      selected?.landmarkId?selected.label+' · X '+selected.x.toFixed(1)+' Y '+selected.y.toFixed(1)+' Z '+selected.z.toFixed(1):
       selected?'Target · X '+selected.x.toFixed(1)+' Z '+selected.z.toFixed(1)+(map.has(selected.x,selected.z)?'':' · unexplored'):
       'Tap a discovered tile or select HERE.');
   }
@@ -181,7 +189,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   function editMarker(action){
     const n=nav.navigator,label=markerName.value.trim();
     let ok=false;
-    if(action==='add'&&selected&&!selected.id&&label&&map.has(selected.x,selected.z)){
+    if(action==='add'&&selected&&!selected.id&&!selected.landmarkId&&label&&map.has(selected.x,selected.z)){
       const id='p-'+Array.from(crypto.getRandomValues(new Uint32Array(2)),v=>v.toString(16)).join('-');
       ok=n.pin({id,x:selected.x,z:selected.z,label});if(ok)selected={...selected,id,label};
     }else if(action==='rename'&&selected?.id&&label){ok=n.rename(selected.id,label);if(ok)selected={...selected,label};}
@@ -218,9 +226,9 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     paintNavigationFrame(large,frame,{landmarks:marks,target,selectedId:selected?.id,cellInk:cell=>catalog.ink(cell.x,cell.z)});
     // Production yaw zero faces +Z; north is -Z, east is +X.
     const currentObservation=observation?.x===Math.floor(player.x)&&observation?.z===Math.floor(player.z)?observation:null;
-    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,surfaceY:currentObservation?.surfaceY??null});
+    const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,decimals:1,surfaceY:currentObservation?.surfaceY??null});
     coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
-    summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='upper'?'Upper world · surface not sampled':currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':location.depthLabel):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
+    summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='upper'?'Upper world · surface not sampled':currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':'Cover '+location.depth.toFixed(1)+' blocks above feet'):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
     large.dataset.observedTiles=String(catalog.tileCount);
     large.dataset.observedLandmarks=String(marks.length);
     refreshMarkers();
@@ -244,7 +252,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     mini.dataset.seed=String(map.seed);
     renderExpanded();
   }
-  function flushAll(){const fog=map.flush(),observed=catalog.flush();return fog&&observed;}
+  function flushAll(){const fog=map.flush();return fog&&catalog.flush();}
   function close(){
     if(overlay.hidden)return;
     overlay.hidden=true;resetPointers();gestures.close();
@@ -260,6 +268,13 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   closeButton.addEventListener('click',close);
   hereMarker.addEventListener('click',()=>{const p=pose();selectTarget({x:p.x,z:p.z});});
   markerList.addEventListener('change',()=>selectTarget(nav.navigator.visiblePins().find(p=>p.id===markerList.value)||null));
+  function selectLandmark(id){const p=catalog.visible().find(m=>m.id===id);selectTarget(p?{...p,id:undefined,landmarkId:p.id}:null);}
+  landmarkList.addEventListener('change',()=>selectLandmark(landmarkList.value));
+  focusMarker.addEventListener('click',()=>{
+    if(!selected)return;
+    resetPointers();nav.viewport.reset();const player=pose(),zoom=nav.viewport.snapshot().zoom;
+    nav.viewport.panPixels({dx:(player.x-selected.x)*zoom/4,dy:(player.z-selected.z)*zoom/4});renderExpanded();
+  });
   for(const [button,action] of [[addMarker,'add'],[renameMarker,'rename'],[removeMarker,'remove'],[undoMarker,'undo']])
     button.addEventListener('click',()=>editMarker(action));
   overlay.addEventListener('pointerdown',e=>{if(e.target===overlay)close();});
@@ -298,6 +313,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     event.preventDefault();event.stopPropagation();
     const p=localPoint(event);
     if(tap&&p&&Math.hypot(p.x-tap.x,p.y-tap.y)>7)tap.moved=true;
+    if(tap&&!tap.moved)return;
     if(p&&gestures.move(event.pointerId,p.x,p.y))queueExpanded();
     else if(!gestures.activePointers)resetPointers();
   });
@@ -308,8 +324,10 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     const isTap=tap?.id===event.pointerId&&!tap.moved&&captured.size===0&&point&&Math.hypot(point.x-tap.x,point.y-tap.y)<=7;
     tap=null;gestures.end(event.pointerId);
     if(isTap){
-      const f=nav.frame(),nearest=f.pins.map(p=>({p,d:Math.hypot(p.screenX-point.x,p.screenY-point.y)})).sort((a,b)=>a.d-b.d)[0];
-      if(nearest&&nearest.d<=9)selectTarget(nav.navigator.visiblePins().find(p=>p.id===nearest.p.id));
+      const f=nav.frame(),marks=catalog.visible().map(p=>({...p,...f.projection.world(p.x,p.z)}));
+      const nearest=nearestVisibleMarker({point,pins:f.pins,landmarks:marks,frame:f.frame});
+      if(nearest?.kind==='waypoint')selectTarget(nav.navigator.visiblePins().find(p=>p.id===nearest.id));
+      else if(nearest?.kind==='landmark')selectLandmark(nearest.id);
       else{const target=f.projection.atScreen(point.x,point.y);if(target)selectTarget(target);}
     }
     try{if(large.hasPointerCapture(event.pointerId))large.releasePointerCapture(event.pointerId);}catch(_){}
@@ -332,12 +350,17 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
           const legacy=upperCover===false?observeNavigationSurface({world,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y}):null;
           observation=classifyHeightObservation({player,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,legacyObservation:legacy,upperCover});
           if(eligibleSurfaceDiscovery(observation,player)){
-            map.reveal(player.x,player.z,(x,z)=>residentAt(x,LEGACY_WORLD_MIN_Y,z));
+            const cx=Math.floor(player.x/4),cz=Math.floor(player.z/4);
+            if(!map.readOnly)map.reveal(player.x,player.z,(x,z)=>Math.floor(x/4)===cx&&Math.floor(z/4)===cz);
             sampleNearbyObservations({catalog,discovery:map,player,refreshIndex:sampleIndex++,
-              residentAt:(x,z)=>residentAt(x,WORLD_MAX_Y,z),
+              residentAt:(x,z)=>!map.readOnly&&residentAt(x,WORLD_MAX_Y,z),
+              admit:(x,z)=>{map.reveal(player.x,player.z,(a,b)=>Math.floor(a/4)===x&&Math.floor(b/4)===z);return map.seen.has(x+','+z);},
               sample:(x,z)=>{
                 for(let y=WORLD_MAX_Y;y>=LEGACY_WORLD_MIN_Y;y--){
                   const id=world.get(x,y,z);if(id===BLOCK.AIR)continue;
+                  if(!surfaceWitness({eye:[player.x,player.y+1.55,player.z],target:[x+.5,y+1.01,z+.5],
+                    resident:(a,b,c)=>b<=PHYSICAL_MAX_Y&&(b>WORLD_MAX_Y?(upperResidentAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))||!upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))):residentAt(a,b,c)),
+                    read:(a,b,c)=>b>WORLD_MAX_Y?(upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))?readUpper(a,b,c):0):world.get(a,b,c)}))return null;
                   const material=mountainV8Material(id);
                   const ink=material?material.palette[0].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''):null;
                   const color=ink?'#'+ink:({1:'#6f9a6d',2:'#8b7b62',3:'#a49d8d',4:'#806747',7:'#477a69',76:'#468ca8',256:'#d5b276',257:'#bd765c',258:'#aa8a63',259:'#dfd4ae',272:'#e0edf0',277:'#a7d5df',278:'#b7c3c4',279:'#d2ddde',286:'#8e6ca8',293:'#a184bf',294:'#9278ac',302:'#858995',303:'#676d7c',305:'#686c7a',307:'#a87866'}[id]||'#8b9081');

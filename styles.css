@@ -347,3 +347,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .exploration-panel{margin:auto;max-height:calc(100dvh - 20px);overflow:auto}
 #expandedMap{width:min(100%,50dvh,320px)}
 @media(max-height:375px){.nav-marker-editor{gap:3px}.nav-marker-actions button{min-height:30px}.exploration-panel{gap:3px 8px}}
+
+/* Navigation interaction: scroll editor without dragging the world. */
+#explorationOverlay{touch-action:pan-y}
+#expandedMap{touch-action:none}
+.nav-marker-editor{touch-action:pan-y;scrollbar-width:thin}
+.nav-marker-editor input:focus,.nav-marker-editor select:focus{outline:2px solid #ffe2a5;outline-offset:1px}
+@media(min-width:481px){.exploration-panel{grid-template-columns:minmax(0,1fr) minmax(180px,220px)}}

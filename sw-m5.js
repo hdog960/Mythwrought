@@ -257,6 +257,7 @@ const SOURCE_ASSETS=[
   "./src/navigation00/navigation-projection.mjs",
   "./src/navigation00/navigation-safe-area.mjs",
   "./src/navigation00/navigation-safe-controls.mjs",
+  "./src/navigation00/navigation-surface-witness.mjs",
   "./src/navigation00/navigation-touch-guard.mjs",
   "./src/navigation00/navigation-viewport.mjs",
   "./src/navigation00/observed-landmarks.mjs",

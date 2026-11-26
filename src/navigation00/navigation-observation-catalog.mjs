@@ -53,24 +53,25 @@ export function createObservationCatalog({seed,discovery,storage=null}){
   }
  });
 }
-export function sampleNearbyObservations({catalog,discovery,player,residentAt,sample,refreshIndex=0}){
+export function sampleNearbyObservations({catalog,discovery,player,residentAt,sample,refreshIndex=0,admit=null}){
  if(![player.x,player.z].every(Number.isFinite))return 0;
  const cx=Math.floor(player.x/4),cz=Math.floor(player.z/4),candidates=[];
  for(let dz=-3;dz<=3;dz++)for(let dx=-3;dx<=3;dx++){
   if(dx*dx+dz*dz>9)continue;
   const x=cx+dx,z=cz+dz;
-  if(discovery.seen.has(keyOf(x,z)))candidates.push({x,z,d:dx*dx+dz*dz});
+  if(admit||discovery.seen.has(keyOf(x,z)))candidates.push({x,z,d:dx*dx+dz*dz});
  }
  candidates.sort((a,b)=>a.d-b.d||a.z-b.z||a.x-b.x);
  const missing=candidates.filter(t=>!catalog.has(t.x,t.z)),known=candidates.filter(t=>catalog.has(t.x,t.z));
  const rotate=known.length?Math.abs(refreshIndex)%known.length:0;
+ const shift=missing.length?Math.abs(refreshIndex*SAMPLE_LIMIT)%missing.length:0;
  let sampled=0;
- for(const t of [...missing,...known.slice(rotate),...known.slice(0,rotate)]){
+ for(const t of [...missing.slice(shift),...missing.slice(0,shift),...known.slice(rotate),...known.slice(0,rotate)]){
   if(sampled>=SAMPLE_LIMIT)break;
   const x=t.x*4+2,z=t.z*4+2;
   if(!residentAt(x,z))continue;
   sampled++;const observed=sample(x,z);
-  if(observed)catalog.observeTile(t.x,t.z,observed.ink,observed.y,{witnessed:true});
+  if(observed&&(!admit||admit(t.x,t.z)))catalog.observeTile(t.x,t.z,observed.ink,observed.y,{witnessed:true});
  }
  return sampled;
 }
