@@ -86,7 +86,7 @@ try{
    const r=window.__mythwroughtTest.underworldGalleryInfo(),d=document.getElementById('scene').dataset;
    return Number(d.renderedFrames)>frame&&r.pending===0&&r.residentKeys.length===keys.length&&
     keys.every(k=>r.residentKeys.includes(k))&&r.far.pending===0&&r.far.sourceSamples>0&&
-    (!needFar||r.far.bytes>0&&Number(d.c6FarDrawn)>0);
+    (needFar?r.far.bytes>0&&Number(d.c6FarDrawn)>0&&r.pack5?.bytes===0:r.pack5?.bytes>0);
   },{keys,frame,needFar},{timeout:60000});
   const result=await sample();assert.ok(Number(result.dataset.renderedFrames)>frame);
   assert.deepEqual([...result.game.residentKeys].sort(),[...keys].sort());
