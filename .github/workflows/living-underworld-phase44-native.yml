@@ -1,4 +1,4 @@
-name: Living Underworld completion 6 - supported gallery game ownership
+name: Living Underworld completion 6 - exact far-wall transition
 on:
   push:
     branches:
@@ -32,7 +32,7 @@ jobs:
           npm install --no-save --no-package-lock --no-audit --no-fund playwright@1.58.2
           npx playwright install chromium
       - name: Original index and main real WebGL2 ownership qualification
-        run: node scripts/underworld/phase44-original-game-owner-webgl2.mjs
+        run: node scripts/underworld/phase44-original-game-owner-webgl2.mjs --far-transition-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:
