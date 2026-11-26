@@ -48,6 +48,7 @@ import {createLiveMobRenderer} from './mobs/live-render.mjs';
 import {getSpecies} from './mobs/species.mjs';
 import {ForegroundFrameDriver,MeshFrameCadence} from './foreground.mjs';
 import {GpuUploadRetry,uploadChunkBuffer,stageEditedChunkBuffers} from './gpu-recovery.mjs';
+import {terrainMeshBounds,terrainClipPlanes,terrainBoundsOutside} from './terrain-clip-culling.mjs';
 import {buildGpuPipeline} from './gpu-pipeline.mjs';
 import {createVaultBackup,listVaultBackups,inspectVaultBackup,deleteVaultBackup} from './vault.mjs';
 import {mountainV8Storage,mountainV8DatabaseFactory,V8_ACTIVE_KEY,setMountainV8Active} from './manual-biomes/mountain-v8-isolated-storage.mjs';
@@ -993,7 +994,8 @@ function start(nonblockStage=null){
     try{
       if(section<=0||vertices.length)buffer=uploadChunkBuffer(gl,vertices);
       if(water.length)waterBuffer=uploadChunkBuffer(gl,water);
-      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9};
+      return {buffer,count:vertices.length/9,waterBuffer,waterCount:water.length/9,
+        clipBounds:terrainMeshBounds(vertices),waterClipBounds:terrainMeshBounds(water)};
     }catch(error){
       if(buffer)gl.deleteBuffer(buffer);
       if(waterBuffer)gl.deleteBuffer(waterBuffer);
@@ -1041,6 +1043,7 @@ function start(nonblockStage=null){
     const owner=world;
     const originals=batch.map(item=>chunks.get(item.key));
     if(originals.some(item=>!item))throw Error('Edited chunk no longer resident');
+    const clipBounds=batch.map(item=>({clipBounds:terrainMeshBounds(item.vertices),waterClipBounds:terrainMeshBounds(item.water)}));
     let ready=[];
     try{
       ready=stageEditedChunkBuffers(gl,batch);
@@ -1051,8 +1054,8 @@ function start(nonblockStage=null){
       if(!gl.isContextLost())for(const item of ready)deleteChunkBuffers(item);
       throw error;
     }
-    for(const item of ready)chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
-      buffer:item.buffer,count:item.count,waterBuffer:item.waterBuffer,waterCount:item.waterCount});
+    for(const [i,item] of ready.entries())chunks.set(item.key,{x:item.cx,z:item.cz,section:item.section,
+      buffer:item.buffer,count:item.count,waterBuffer:item.waterBuffer,waterCount:item.waterCount,...clipBounds[i]});
     // All replacements are visible before any old handle is retired.
     if(!gl.isContextLost())for(const old of originals)deleteChunkBuffers(old);
     return ready;
@@ -1581,12 +1584,17 @@ function start(nonblockStage=null){
       }
       gl.enable(gl.DEPTH_TEST);
       gl.useProgram(program);
-      gl.uniform3fv(U.uEye,eye());
-      gl.uniform3fv(U.uForward,facing());
-      gl.uniform3fv(U.uRight,[-Math.cos(player.yaw),0,Math.sin(player.yaw)]);
-      gl.uniform3fv(U.uUp,[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)]);
-      gl.uniform1f(U.uAspect,w/h);
-      gl.uniform1f(U.uTan,Math.tan(72*Math.PI/360));
+      const viewEye=eye(),viewForward=facing();
+      const viewRight=[-Math.cos(player.yaw),0,Math.sin(player.yaw)];
+      const viewUp=[-Math.sin(player.pitch)*Math.sin(player.yaw),Math.cos(player.pitch),-Math.sin(player.pitch)*Math.cos(player.yaw)];
+      const viewAspect=w/h,viewTan=Math.tan(72*Math.PI/360);
+      const terrainClip=terrainClipPlanes(viewEye,viewForward,viewRight,viewUp,viewAspect,viewTan);
+      gl.uniform3fv(U.uEye,viewEye);
+      gl.uniform3fv(U.uForward,viewForward);
+      gl.uniform3fv(U.uRight,viewRight);
+      gl.uniform3fv(U.uUp,viewUp);
+      gl.uniform1f(U.uAspect,viewAspect);
+      gl.uniform1f(U.uTan,viewTan);
       if(caveShade>0)gl.uniform3fv(U.uFog,fog);
       else{
         gl.uniform3fv(U.uFog,atmosphere.fog);
@@ -1697,8 +1705,11 @@ function start(nonblockStage=null){
       }
       canvas.dataset.manual14MeshVertices=String(manual14ResidentVerts);
       canvas.dataset.manual14VisibleInstances=String(manual14ResidentInstances);
+      let terrainDraws=0,terrainCulled=0,terrainDrawnVertices=0,terrainCulledVertices=0;
       for(const c of chunks.values()){
         if(!c.buffer||!c.count)continue;
+        if(terrainBoundsOutside(c.clipBounds,terrainClip)){terrainCulled++;terrainCulledVertices+=c.count;continue;}
+        terrainDraws++;terrainDrawnVertices+=c.count;
         gl.bindBuffer(gl.ARRAY_BUFFER,c.buffer);
         gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
         gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -1774,6 +1785,8 @@ function start(nonblockStage=null){
           return distance(b)-distance(a);
         });
         for(const chunk of waterChunks){
+          if(terrainBoundsOutside(chunk.waterClipBounds,terrainClip)){terrainCulled++;terrainCulledVertices+=chunk.waterCount;continue;}
+          terrainDraws++;terrainDrawnVertices+=chunk.waterCount;
           gl.bindBuffer(gl.ARRAY_BUFFER,chunk.waterBuffer);
           gl.vertexAttribPointer(atPos,3,gl.FLOAT,false,36,0);
           gl.vertexAttribPointer(atColor,3,gl.FLOAT,false,36,12);
@@ -1783,6 +1796,10 @@ function start(nonblockStage=null){
         }
         gl.depthMask(true);gl.disable(gl.BLEND);
       }
+      canvas.dataset.terrainDraws=String(terrainDraws);
+      canvas.dataset.terrainCulled=String(terrainCulled);
+      canvas.dataset.terrainDrawnVertices=String(terrainDrawnVertices);
+      canvas.dataset.terrainCulledVertices=String(terrainCulledVertices);
       const effects=nonblockStage?.effects??worldEffects;
       const wet=combinedWorld()&&!nonblockStage?.effects?waterChunks:null;
       if(effects||wet?.length)drawStagedEffects(now,effects,wet);

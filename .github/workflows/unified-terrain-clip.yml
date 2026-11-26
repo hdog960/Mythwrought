@@ -1,0 +1,43 @@
+name: Unified measured terrain clip experiment
+on:
+  push:
+    branches: [probe/unified-terrain-clip-20261126]
+    paths:
+      - 'src/**'
+      - 'perf/issue-291/unified-terrain-clip-ab.mjs'
+      - 'tests/terrain-clip-culling.test.mjs'
+      - '.github/workflows/unified-terrain-clip.yml'
+permissions:
+  contents: read
+jobs:
+  iphone-size-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact isolated native geometry contracts
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          node --check src/main.mjs
+          node --check perf/issue-291/unified-terrain-clip-ab.mjs
+          node --test tests/terrain-clip-culling.test.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+      - name: Actual same-source 956x440 draw reduction, pixel and 200 mining witness
+        env:
+          AB_VIEWPORT: 956x440
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-clip-http.log 2>&1 &
+          node perf/issue-291/unified-terrain-clip-ab.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-terrain-clip-956x440
+          path: artifacts/unified-terrain-cull/
+          if-no-files-found: warn
