@@ -1,0 +1,61 @@
+name: Unified simulation-render separation and real phase attribution
+on:
+  push:
+    branches: [probe/unified-simulation-render-20261126]
+    paths: ['src/main.mjs','perf/issue-291/unified-gpu-phase-cost.mjs','.github/workflows/unified-simulation-render.yml']
+permissions:
+  contents: read
+jobs:
+  simulation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact isolated source and browser prerequisites
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          node --check src/main.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+      - name: Actual original movement and navigation source safety
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-simulation.log 2>&1 &
+          node tests/movement-browser.mjs
+          node tests/exploration-map-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-simulation-render-safety
+          path: artifacts/
+          if-no-files-found: warn
+  phase-cost:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Frozen original renderer, diagnostic only
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          node --check perf/issue-291/unified-gpu-phase-cost.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-phase-cost.log 2>&1 &
+          node perf/issue-291/unified-gpu-phase-cost.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-gpu-phase-cost
+          path: artifacts/unified-gpu-phase-cost/
+          if-no-files-found: warn

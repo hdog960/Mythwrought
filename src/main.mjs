@@ -849,7 +849,7 @@ function start(nonblockStage=null){
   const keys=new Set(),joystick={x:0,y:0},lookStick={x:0,y:0};
   const heldPointers=new Map();
   let precisionHeld=false;
-  let frame=0,lastFrame=performance.now(),changed=false;
+  let frame=0,simulationFrame=0,lastFrame=performance.now(),changed=false;
   const frameHistory=new FrameHistory(360);
   const meshCadence=new MeshFrameCadence({budgetMs:12,maxCooldown:2});
   const gpuRetry=new GpuUploadRetry({baseDelayMs:250,maxDelayMs:8000});
@@ -1492,18 +1492,50 @@ function start(nonblockStage=null){
     }
     if(player.feet<WORLD_MIN_Y-12)respawnPrototype();
   }
-  function draw(now){
+  function updateSimulation(now){
     const dt=Math.min(.035,Math.max(0,(now-lastFrame)/1000));lastFrame=now;
-    frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
     if(!document.hidden&&!graphicsLost){
       paintSkyClock(now);
-      frame++;if(help.hidden&&!exploration.isOpen())move(dt);
-      if(frame%16===0)exploration.tick(now);
+      simulationFrame++;if(help.hidden&&!exploration.isOpen())move(dt);
+      if(simulationFrame%16===0)exploration.tick(now);
       // Low-frequency real-cave check: no synthetic map markers or geometry.
-      if(help.hidden&&!exploration.isOpen()&&frame%24===0){
+      if(help.hidden&&!exploration.isOpen()&&simulationFrame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
         if(caveDiscovery.entered){exploration.observeCavePassage();message('Natural cave passage discovered · explore carefully');}
       }
+      // Advance actual creature simulation on the same foreground callback
+      // as player input, independently of whether a render is admitted.
+      const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
+      mobEnvironment=atmosphere;
+      if(help.hidden&&!exploration.isOpen()&&mobSession&&mobRenderer&&
+         !mobAcceptanceFrozen&&!mobRuntimeError){
+        try{
+        const section=sectionForY(Math.floor(player.feet))??0;
+        const regions=[...chunks.values()].filter(c=>c.section===section)
+          .sort((a,b)=>(a.x*16+8-player.x)**2+(a.z*16+8-player.z)**2-
+            ((b.x*16+8-player.x)**2+(b.z*16+8-player.z)**2))
+          .slice(0,32).map(c=>({cx:c.x,cz:c.z,section:c.section,feet:player.feet}));
+        mobSession.advance(dt,regions);
+        const riding=mobSession.riderPosition();
+        if(riding){
+          [player.x,player.feet,player.z]=riding;
+          player.vX=player.vY=player.vZ=0;player.onGround=true;
+        }
+        if(now-mobLastSave>12000){mobSession.save();mobLastSave=now;}
+        }catch(error){
+          mobRuntimeError=String(error?.message||error);
+          console.error('MYTHWROUGHT CREATURE SIMULATION PAUSED',error);
+          message('Creatures paused safely · terrain and saved world remain active');
+        }
+      }
+      return atmosphere;
+    }
+    return null;
+  }
+  function draw(now,atmosphere){
+    frameHistory.frame(now,!document.hidden&&help.hidden&&!exploration.isOpen()&&!graphicsLost);
+    if(!document.hidden&&!graphicsLost&&atmosphere){
+      frame++;
       const buffer=bufferDimensions(canvas.clientWidth,canvas.clientHeight,renderPreset,devicePixelRatio||1);
       const w=buffer.width,h=buffer.height;
       canvas.dataset.renderPreset=renderPreset;
@@ -1512,7 +1544,6 @@ function start(nonblockStage=null){
       if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}
       // S2 uses one authoritative S1 timestamp for the sky, terrain fog and
       // ambient block lighting. Movement's clamped dt never drives solar time.
-      const atmosphere=sampleSkyAtmosphere(sampleSkyClock(skyClock,now));
       const s6V6=hasValidatedV6SkyProfile(world);
       const s6Biome=s6V6?resolveV6SkyBiome(world,player.x,player.z):
         resolveS6Biome(world,player.x,player.z,s6Source);
@@ -1637,28 +1668,6 @@ function start(nonblockStage=null){
         canvas.dataset.skyS5EventTypes=String(S5_EVENT_CONTRACT.kinds);
       }
       stream();
-      mobEnvironment=atmosphere;
-      if(help.hidden&&!exploration.isOpen()&&mobSession&&mobRenderer&&
-         !mobAcceptanceFrozen&&!mobRuntimeError){
-        try{
-        const section=sectionForY(Math.floor(player.feet))??0;
-        const regions=[...chunks.values()].filter(c=>c.section===section)
-          .sort((a,b)=>(a.x*16+8-player.x)**2+(a.z*16+8-player.z)**2-
-            ((b.x*16+8-player.x)**2+(b.z*16+8-player.z)**2))
-          .slice(0,32).map(c=>({cx:c.x,cz:c.z,section:c.section,feet:player.feet}));
-        mobSession.advance(dt,regions);
-        const riding=mobSession.riderPosition();
-        if(riding){
-          [player.x,player.feet,player.z]=riding;
-          player.vX=player.vY=player.vZ=0;player.onGround=true;
-        }
-        if(now-mobLastSave>12000){mobSession.save();mobLastSave=now;}
-        }catch(error){
-          mobRuntimeError=String(error?.message||error);
-          console.error('MYTHWROUGHT CREATURE SIMULATION PAUSED',error);
-          message('Creatures paused safely · terrain and saved world remain active');
-        }
-      }
       const c6Far=caveFarGpu?.step({world,player,nearChunks:chunks,
         nearPending:pending,frame,viewport:[w,h],enabled:!!caveSession||combinedWorld()})??
         {chunks:0,bytes:0,pending:0,uncovered:0,vertices:0,failures:0,uploads:0,lastMeshMs:0};
@@ -1671,6 +1680,7 @@ function start(nonblockStage=null){
       canvas.dataset.c6FarUploads=String(c6Far.uploads);
       canvas.dataset.c6FarMeshMs=String(c6Far.lastMeshMs);
       canvas.dataset.renderedFrames=String(frame);
+      canvas.dataset.simulationFrames=String(simulationFrame);
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
       canvas.dataset.loadedChunks=String(chunks.size);
       canvas.dataset.pendingChunks=String(pending.size);
@@ -1854,8 +1864,12 @@ function start(nonblockStage=null){
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
     }
   }
+  function foregroundGameFrame(now){
+    const atmosphere=updateSimulation(now);
+    if(atmosphere)draw(now,atmosphere);
+  }
   const frameDriver=new ForegroundFrameDriver(
-    callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),draw
+    callback=>requestAnimationFrame(callback),id=>cancelAnimationFrame(id),foregroundGameFrame
   );
   // iPhone Touch.identifier is stable across simultaneous fingers even if
   // WebKit drops a synthetic PointerEvent/pointer capture during another tap.
