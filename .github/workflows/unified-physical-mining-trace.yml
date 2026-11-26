@@ -1,0 +1,26 @@
+name: Isolated physical mining trace contracts
+on:
+  push:
+    branches: [probe/unified-physical-mining-baseline-20261126]
+    paths:
+      - 'src/mining-trace.mjs'
+      - 'src/main.mjs'
+      - 'src/gpu-recovery.mjs'
+      - 'tests/physical-mining-trace.test.mjs'
+      - '.github/workflows/unified-physical-mining-trace.yml'
+permissions:
+  contents: read
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          node --check src/main.mjs
+          node --check src/gpu-recovery.mjs
+          node --check src/mining-trace.mjs
+          node --test tests/physical-mining-trace.test.mjs

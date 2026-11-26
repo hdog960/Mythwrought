@@ -5,10 +5,10 @@ export function createMiningTrace(clock=()=>performance.now()){
   const push=(r,v)=>{r.items[r.cursor%r.limit]=v;r.cursor++;};
   const values=r=>r.cursor<=r.limit?r.items.slice():
     r.items.slice(r.cursor%r.limit).concat(r.items.slice(0,r.cursor%r.limit));
-  let active=null,lastFrame=null,seq=0,pending=[];
+  let active=null,activeFrame=null,lastFrame=null,seq=0,pending=[];
   const ms=(a,b)=>Math.round(Math.max(0,b-a)*100)/100;
   function measure(name,fn){
-    const e=active;
+    const e=active??activeFrame;
     if(!e)return fn();
     const start=clock();
     try{return fn();}finally{
@@ -32,10 +32,12 @@ export function createMiningTrace(clock=()=>performance.now()){
     if(!eligible){lastFrame=null;pending=[];return fn();}
     const start=clock(),gap=lastFrame===null?null:ms(lastFrame,now);lastFrame=now;
     const waiting=pending;pending=[];
+    const sample={gapMs:gap,drawMs:0,editIds:waiting.map(e=>e.id),...context,phases:{}};
+    activeFrame=sample;
     try{return fn();}finally{
       const end=clock();
       for(const e of waiting){e.nextDrawStartMs=ms(e.end,start);e.nextDrawEndMs=ms(e.end,end);}
-      push(frames,{gapMs:gap,drawMs:ms(start,end),editIds:waiting.map(e=>e.id),...context});
+      activeFrame=null;sample.drawMs=ms(start,end);push(frames,sample);
     }
   }
   return {measure,action,mark,frame,resetContinuity(){lastFrame=null;pending=[];},

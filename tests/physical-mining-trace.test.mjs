@@ -22,3 +22,11 @@ test('optional upload timing preserves exact GL call order, error code and clean
  return calls;}
  for(const fail of [false,true])assert.deepEqual(run(true,fail),run(false,fail));
 });
+test('frame streaming measurement is separate from edit phases',()=>{
+ let t=0;const trace=createMiningTrace(()=>t);
+ trace.frame(0,true,{},()=>{trace.measure('stream',()=>{t=8;});t=10;});
+ t=12;trace.action('mine',{},()=>{trace.measure('glPreGetError',()=>{t=20;});});
+ const r=trace.report();assert.equal(r.frames[0].phases.stream.totalMs,8);
+ assert.equal(r.frames[0].drawMs,10);assert.equal(r.edits[0].phases.glPreGetError.totalMs,8);
+ assert.equal(r.frames[0].phases.glPreGetError,undefined);
+});

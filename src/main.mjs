@@ -971,8 +971,8 @@ function start(nonblockStage=null){
   }
   function deleteChunkBuffers(chunk){
     if(!chunk)return;
-    if(chunk.buffer)gl.deleteBuffer(chunk.buffer);
-    if(chunk.waterBuffer)gl.deleteBuffer(chunk.waterBuffer);
+    if(chunk.buffer){if(traceMeasure)traceMeasure('glDeleteRetiredBuffer',()=>gl.deleteBuffer(chunk.buffer));else gl.deleteBuffer(chunk.buffer);}
+    if(chunk.waterBuffer){if(traceMeasure)traceMeasure('glDeleteRetiredBuffer',()=>gl.deleteBuffer(chunk.waterBuffer));else gl.deleteBuffer(chunk.waterBuffer);}
   }
   // Both buffers stage before publishing; on failure neither can leak.
   function uploadPack2Chunk(vertices,water,section=0){
@@ -1276,7 +1276,8 @@ function start(nonblockStage=null){
   }
   let lastStreamingCenter='';
   let wanted=new Set();
-  function stream(){
+  function stream(){return traceMeasure?traceMeasure('stream',streamOriginal):streamOriginal();}
+  function streamOriginal(){
     const horizontalCenter=name(chunkCoord(player.x),chunkCoord(player.z));
     const nearShaft=player.feet<3&&surfaceOpeningNearby(world,player.x,player.z);
     const visibleSections=sectionWindow(player.feet,nearShaft);
