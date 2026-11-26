@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createNavigationGestureHistory} from '../src/navigation00/navigation-gesture-history.mjs';
+const session={open:true};
+const e=(phase,id=1,x=50,y=50,activeTouches=phase==='end'?0:1,movementTouchActive=false)=>({phase,id,x,y,activeTouches,movementTouchActive});
+const make=()=>{let calls=0;const guard=createNavigationGestureHistory({dispatch:(s,p)=>{calls++;return {action:'zoom-in',session:s};}});return {guard,count:()=>calls};};
+test('single clean tap dispatches once',()=>{const {guard,count}=make();guard.handle(session,e('start'));assert.equal(guard.handle(session,e('end')).action,'zoom-in');assert.equal(count(),1);});
+test('end without start never dispatches',()=>{const {guard,count}=make();guard.handle(session,e('end'));assert.equal(count(),0);});
+test('drag beyond travel threshold never dispatches',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('move',1,90,50));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('multitouch interruption poisons gesture',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('start',2,60,50,2));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('movement thumb interruption poisons gesture',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('move',1,50,50,1,true));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('cancel never dispatches',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('cancel'));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('wrong pointer cannot finish gesture',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('end',2));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('closed session resets pending tap',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle({open:false},e('move'));guard.handle(session,e('end'));assert.equal(count(),0);});
+test('fresh gesture after cancel works',()=>{const {guard,count}=make();guard.handle(session,e('start'));guard.handle(session,e('cancel'));guard.handle(session,e('start'));guard.handle(session,e('end'));assert.equal(count(),1);});
+test('invalid coordinates rejected',()=>{const {guard}=make();assert.throws(()=>guard.handle(session,e('start',1,NaN)));});
+test('no save mutations',()=>{const save=JSON.stringify({schema:1,edits:[[1,2,3]]});const {guard}=make();guard.handle(session,e('start'));guard.handle(session,e('end'));assert.equal(save,JSON.stringify({schema:1,edits:[[1,2,3]]}));});

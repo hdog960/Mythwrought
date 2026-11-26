@@ -3,9 +3,9 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX='mythwrought-nonblock-stage-shell-';
-const STAGE_VERSION='20261125-v42';
+const STAGE_VERSION='20261125-v43';
 const STAGE_PREVIOUS_VERSION='20261124-v41';
-const SITE_RELEASE='20261125-shared-height-v1';
+const SITE_RELEASE='20261125-navigation-v1';
 const CACHE_NAME=CACHE_PREFIX+STAGE_VERSION;
 const scopeUrl=new URL(self.registration.scope);
 const manifestUrl=new URL('./nonblock-stage-assets.json',scopeUrl).href;

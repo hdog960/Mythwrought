@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261125-shared-height-v1';
-const ASSET_RELEASE='20261125-shared-height-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261125-navigation-v1';
+const ASSET_RELEASE='20261125-navigation-v1';
 const SOURCE_ASSETS=[
   "./src/nonblock/staged-habitats.mjs",
   "./src/environment-ground.mjs",
@@ -238,6 +238,30 @@ const SOURCE_ASSETS=[
   "./src/experimental-cave-route.mjs",
   "./src/exploration-cues.mjs",
   "./src/exploration-map.mjs",
+  "./src/navigation00/navigation-adapter.mjs",
+  "./src/navigation00/navigation-gesture-history.mjs",
+  "./src/navigation00/navigation-gestures.mjs",
+  "./src/navigation00/navigation-height-observation.mjs",
+  "./src/navigation00/navigation-live-observation.mjs",
+  "./src/navigation00/navigation-location-readout.mjs",
+  "./src/navigation00/navigation-map-hit-test.mjs",
+  "./src/navigation00/navigation-map-pointer.mjs",
+  "./src/navigation00/navigation-map-reflow.mjs",
+  "./src/navigation00/navigation-map-session.mjs",
+  "./src/navigation00/navigation-marker-history.mjs",
+  "./src/navigation00/navigation-observation-catalog.mjs",
+  "./src/navigation00/navigation-observed-landmarks.mjs",
+  "./src/navigation00/navigation-observed-marker-adapter.mjs",
+  "./src/navigation00/navigation-observed-readout-adapter.mjs",
+  "./src/navigation00/navigation-paint.mjs",
+  "./src/navigation00/navigation-projection.mjs",
+  "./src/navigation00/navigation-safe-area.mjs",
+  "./src/navigation00/navigation-safe-controls.mjs",
+  "./src/navigation00/navigation-surface-witness.mjs",
+  "./src/navigation00/navigation-touch-guard.mjs",
+  "./src/navigation00/navigation-viewport.mjs",
+  "./src/navigation00/observed-landmarks.mjs",
+  "./src/navigation00/observed-navigation.mjs",
   "./src/fallen-giant.mjs",
   "./src/foreground.mjs",
   "./src/gpu-pipeline.mjs",
