@@ -1,0 +1,32 @@
+name: Enchanted Wilds E3 E4 physical family native
+on:
+  push:
+    branches: [research/enchanted-wilds-e3-e4-shared-height-20261126]
+    paths: [.github/workflows/enchanted-wilds-e3-e4-native.yml]
+permissions:
+  contents: read
+jobs:
+  original-native-families:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          path: original
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Original current source and physical family verification
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git -C ../original rev-parse HEAD)" = 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          for f in src/world-height.mjs src/world-height-stream.mjs src/world-height-budget.mjs src/world-height-natural-contract.mjs src/main.mjs src/voxel.mjs src/depth.mjs src/pack2-world.mjs src/manual-biomes/mountain-v8-runtime-terrain.mjs src/manual-biomes/snowy-s17-fresh-source.mjs; do cmp "$f" "../original/$f"; done
+          node --check src/manual-biomes/enchanted-wilds-families.mjs
+          node --check src/manual-biomes/enchanted-wilds-family-source.mjs
+          WILDS_CURRENT_ROOT="$PWD/../original" node --test tests/manual-biomes/enchanted-wilds-e3-e4-families.test.mjs
