@@ -2,6 +2,14 @@ name: Creative shared height owner qualification
 on:
   push:
     branches: [creative-shared-height-20261125]
+    paths:
+      - 'src/**'
+      - 'index.html'
+      - 'styles.css'
+      - 'sw*.js'
+      - 'nonblock-stage-assets.json'
+      - 'tests/creative-integration/phase5-building-controls-browser.mjs'
+      - 'tests/creative-integration/creative-pack5-history.test.mjs'
 permissions:
   contents: read
 jobs:

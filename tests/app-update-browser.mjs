@@ -10,8 +10,8 @@ import {chromium} from 'playwright';
 const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
 const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
 const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
-const NEW_CACHE='mythwrought-m5-shell-20261125-shared-height-v1';
-const RELEASE='20261125-shared-height-v1';
+const NEW_CACHE='mythwrought-m5-shell-20261125-creative-candidate-v3';
+const RELEASE='20261125-creative-candidate-v3';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
@@ -141,7 +141,7 @@ try{
     if(!reg)throw Error('Previous registration missing');
     await reg.update();
   });
-  // The cache name is created BEFORE the 332 real file fetches complete.
+  // The cache name is created BEFORE the 336 real file fetches complete.
   // A failed or in-flight installation must never count as an upgraded app.
   await waitForAsyncCondition(page,async({cacheName,release})=>{
     const names=await caches.keys();
@@ -149,7 +149,7 @@ try{
     if(!names.includes(cacheName))return false;
     const cache=await caches.open(cacheName);
     const files=await cache.keys();
-    if(files.length!==332)return false;
+    if(files.length!==336)return false;
     const registration=await navigator.serviceWorker.getRegistration('/');
     if(registration?.active?.state!=='activated'||navigator.serviceWorker.controller!==registration.active||registration.installing||registration.waiting)return false;
     const index=new URL('/index.html',location.href).href;
@@ -162,7 +162,7 @@ try{
       ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs'].every(p=>files.some(f=>f.url.endsWith('/'+p)));
   },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
   const installed=await page.evaluate(async()=>{
-    const cache=await caches.open('mythwrought-m5-shell-20261125-shared-height-v1');
+    const cache=await caches.open('mythwrought-m5-shell-20261125-creative-candidate-v3');
     const index=new URL('/index.html',location.href).href;
     const response=await cache.match(index);
     const rootResponse=await cache.match(new URL('/',location.href).href);
@@ -181,7 +181,7 @@ try{
       oldCacheAssetCount:(await (await caches.open('mythwrought-m5-shell-20261118-v5-recorder')).keys()).length};
   });
   if(installed.origin!=='new')console.error('HOME SCREEN CACHE DIAGNOSTIC',JSON.stringify(installed));
-  assert.equal(installed.cachedKeyCount,332,'Full exact current offline shell required');
+  assert.equal(installed.cachedKeyCount,336,'Full exact current offline shell required');
   assert.equal(installed.origin,'new',
     'The worker installation copied an old cached index instead of fresh origin source');
   assert.ok(installed.cacheNames.includes(OLD_CACHE)&&

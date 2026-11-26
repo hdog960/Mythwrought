@@ -1,0 +1,39 @@
+name: Creative exact shared-height installed upgrade
+on:
+  push:
+    branches: [creative-shared-height-20261125]
+    paths:
+      - scripts/ci/creative-shared-height-upgrade.mjs
+      - .github/workflows/creative-installed-upgrade.yml
+permissions:
+  contents: read
+jobs:
+  installed-upgrade:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: c1138b52bc8041c0db12be31b13fe9ab0fb276e0
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: |
+          test "$(git -C prior-production rev-parse HEAD)" = c1138b52bc8041c0db12be31b13fe9ab0fb276e0
+          node --check scripts/ci/creative-shared-height-upgrade.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/app-update.test.mjs tests/compact-menu.test.mjs tests/unified-offline-atomic-cache.test.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node scripts/ci/creative-shared-height-upgrade.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: creative-installed-upgrade
+          path: artifacts/creative-installed-upgrade/
+          if-no-files-found: warn
