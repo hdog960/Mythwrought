@@ -1,0 +1,98 @@
+name: Unified final map isolation and previously unexecuted root gates
+on:
+  push:
+    branches: [probe/unified-root-remainder-20261126]
+    paths:
+      - 'tests/exploration-map-browser.mjs'
+      - '.github/workflows/unified-root-remainder.yml'
+permissions:
+  contents: read
+jobs:
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Actual four-view remote map isolation after final old-world flush
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json)"
+          node --check tests/exploration-map-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-map.log 2>&1 &
+          node tests/exploration-map-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-final-map-isolation
+          path: artifacts/
+          if-no-files-found: warn
+  missing-root:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [controls, persistence, terrain, scenery-a, scenery-b, scenery-c]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Prepare exact frozen source
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          test -z "$(git diff HEAD^ HEAD -- src index.html styles.css sw-m5.js sw-nonblock-stage.js nonblock-stage-assets.json)"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+      - name: Only original root gates not reached after prior failures
+        env:
+          GROUP: ${{ matrix.group }}
+        run: |
+          python3 -m http.server 4173 >/tmp/unified-remainder.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          failed=0
+          gate() {
+            echo "GATE START $*"
+            if "$@"; then echo "GATE PASS $*"; else echo "GATE FAIL $*"; failed=1; fi
+          }
+          case "$GROUP" in
+            controls)
+              for s in touch layout seam movement blocks; do gate node "tests/$s-browser.mjs"; done ;;
+            persistence)
+              for s in persistence preflight vault mirror foreground context-restore; do gate node "tests/$s-browser.mjs"; done ;;
+            terrain)
+              for s in meadow grove canopy storybook grotto voxel-landmarks live-world; do gate node "tests/$s-browser.mjs"; done ;;
+            scenery-a)
+              gate env NONBLOCK_CATALOG_SET=meadow-woodland node tests/nonblock-catalog-browser.mjs
+              gate env NONBLOCK_CATALOG_SET=enchanted-fungi node tests/nonblock-catalog-browser.mjs
+              gate node tests/nonblock-cave-browser.mjs
+              gate node tests/nonblock-inherited-extra-browser.mjs
+              gate env NONBLOCK_EXTRA_SET=world-props node tests/nonblock-inherited-extra-browser.mjs ;;
+            scenery-b)
+              for s in offline physical-fittings effects cache-recovery habitat; do gate node "tests/nonblock-$s-browser.mjs"; done ;;
+            scenery-c)
+              gate env NONBLOCK_REVIEW_SET=forest-floor NONBLOCK_REVIEW_LABEL=after NONBLOCK_REVIEW_ORIGIN=http://127.0.0.1:4173 node tests/nonblock-foliage-review-browser.mjs
+              gate node tests/nonblock-lod-browser.mjs
+              gate env NONBLOCK_EXTRA_COMPARISON=after node tests/nonblock-inherited-extra-browser.mjs
+              gate node tests/nonblock-parity-browser.mjs ;;
+            *) exit 2 ;;
+          esac
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-root-remainder-${{ matrix.group }}
+          path: artifacts/
+          if-no-files-found: warn
