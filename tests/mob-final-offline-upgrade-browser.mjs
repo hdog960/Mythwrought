@@ -13,7 +13,7 @@ const root=resolve('.');
 const oldHead='a0487e34d9f5d00a49da05c3bf5b6545ff923085';
 assert.equal(execFileSync('git',['-C',oldRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),oldHead);
 assert.notEqual(oldRoot,root);
-const release='20261125-living-ecosystem-final-v1',prior='20261124-mountain-v8-v1';
+const release='20261125-living-ecosystem-height-v1',prior='20261125-shared-height-v1';
 const oldCache='mythwrought-m5-shell-'+prior,newCache='mythwrought-m5-shell-'+release;
 const out=resolve('artifacts/mob-final-offline');
 await mkdir(out,{recursive:true});
