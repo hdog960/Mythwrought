@@ -31,6 +31,23 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // The default new-world action and all historical saves stay on accepted v4.
 export {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR};
 export const isEnvironmentGenerator=generator=>originalEnvironmentGenerator(generator)||usesMountainV8Terrain(generator);
+// Random world selection may skip a seed whose read-only existing cave
+// entrance planner refused it. Explicit seed admission remains unchanged;
+// unknown failures are not retryable and no geometry or storage is altered.
+export function canAdmitCombinedRandomSeed(seed){
+  try{combinedEnvironmentCaves(seed);return true;}
+  catch(error){
+    if(error instanceof Error&&error.message.startsWith('New cave surface entrances not safe: ')){
+      const failures=JSON.parse(error.message.slice('New cave surface entrances not safe: '.length));
+      if(Array.isArray(failures)&&failures.length>0&&failures.every(f=>
+        typeof f.name==='string'&&Array.isArray(f.attempts)&&f.attempts.length===4&&
+        f.attempts.every(reason=>['HEIGHT_LIMIT','WORLD_BOUNDS','OTHER_ENTRANCE_COLLISION',
+          'AUTHORED_SOURCE_COLLISION','PLAYER_EDIT_PROTECTION','PROTECTED_EXISTING_LANDMARK',
+          'INTERNAL_PORTAL_CONFLICT','NO_SUPPORTED_SURFACE_MOUTH'].includes(reason))))return false;
+    }
+    throw error;
+  }
+}
 const environmentalProfile=isEnvironmentGenerator;
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';

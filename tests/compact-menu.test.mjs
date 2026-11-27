@@ -38,7 +38,7 @@ test('release ID matches HTML, updater and existing worker cache',()=>{
   assert.ok(worker.includes("ASSET_RELEASE='"+release+"'"));
   assert.ok(worker.includes("CACHE_NAME=CACHE_PREFIX+'"+release+"'"));
 });
-function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK=true,readOnly=false,allClaimed=false}={}){
+function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK=true,readOnly=false,allClaimed=false,unsafe=[]}={}){
   const begin=src.indexOf('  async function createLatestMenuWorld(next){');
   const end=src.indexOf("  document.getElementById('switchWorld').onclick=",begin);
   assert.ok(begin>=0&&end>begin);
@@ -48,14 +48,14 @@ function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
   const source=src.slice(begin,end),importLine="const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');";
   assert.ok(source.includes(importLine));
-  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto','DEFAULT_WORLD_SEED','VEILREACH_GENERATOR',source.replace(importLine,''))(
+  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto','DEFAULT_WORLD_SEED','VEILREACH_GENERATOR','canAdmitCombinedRandomSeed',source.replace(importLine,''))(
     world,storage,rawStorage,{confirm:text=>{calls.push(['confirm',text]);return !cancel}},readOnly,()=>{calls.push(['save-old']);return saveOK},
-    (_,n)=>n===2026?{}:null,(_,n)=>!allClaimed&&n===7654321,true,false,
+    (_,n)=>n===2026?{}:null,(_,n)=>!allClaimed&&(n===7654321||unsafe.includes(n)),true,false,
     async(seed,opts)=>{calls.push(['admit',seed,opts.confirmed,opts.generator]);assert.equal(opts.storage,rawStorage);return {world:{seed:Number(seed)}};},
     raw=>{assert.equal(raw,rawStorage);return storage;},
     (scope)=>{assert.equal(scope,storage);calls.push(['save-new']);return {ok:writeOK,reason:'fixture write refused'};},
     (raw,active)=>{assert.equal(raw,rawStorage);assert.equal(active,true);calls.push(['activate']);},
-    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto,179,VEILREACH_GENERATOR);
+    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto,179,VEILREACH_GENERATOR,n=>!unsafe.includes(n));
   return {click:()=>newWorld.onclick(),calls,seedMessage};
 }
 test('NEW WORLD skips current and claimed seeds then uses verified Veilreach admission',async()=>{
@@ -79,4 +79,11 @@ test('new save refusal never enters candidate world',async()=>{
 test('bounded random search never creates claimed seed',async()=>{
   const f=fixture({allClaimed:true});await f.click();
   assert.deepEqual(f.calls,[]);assert.match(f.seedMessage.textContent,/unused seed/);
+});
+
+test('random NEW WORLD skips cave-refused seeds before any confirmation or write',async()=>{
+  const f=fixture({candidates:[1606283545,7654321],unsafe:[1606283545]});await f.click();
+  assert.equal(f.calls.filter(x=>x[0]==='confirm').length,1);
+  assert.match(f.calls[0][1],/7654321/);
+  assert.deepEqual(f.calls.find(x=>x[0]==='admit'),['admit','7654321',true,VEILREACH_GENERATOR]);
 });

@@ -66,6 +66,11 @@ try{
     page.on('pageerror',e=>errors.push(String(e.message)));
     page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
     try{
+      const witness=process.env.EGG_SEED_REJECTION_WITNESS==='1';
+      if(witness)await page.addInitScript(()=>{
+        const original=crypto.getRandomValues.bind(crypto),seeds=[1606283545,2026];
+        crypto.getRandomValues=a=>{if(a instanceof Int32Array&&a.length===1&&seeds.length){a[0]=seeds.shift();return a;}return original(a);};
+      });
       await page.goto('http://127.0.0.1:4174/?production-ui=1',{
         waitUntil:'networkidle',timeout:120000});
       await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,null,{timeout:120000});
@@ -73,6 +78,13 @@ try{
       await page.locator('#menu').click();
       assert.equal(await page.locator('#advancedMenu').evaluate(e=>e.open),false);
       stage='new-world';
+      if(witness){
+        assert.equal(originalSeed,2026,'Random startup did not skip actual refused seed');
+        await page.evaluate(()=>{
+          const original=crypto.getRandomValues.bind(crypto),seeds=[1606283545,180];
+          crypto.getRandomValues=a=>{if(a instanceof Int32Array&&a.length===1&&seeds.length){a[0]=seeds.shift();return a;}return original(a);};
+        });
+      }
       await page.locator('#newWorld').click();
       await page.waitForFunction(({generator,originalSeed})=>{
         const t=window.__mythwroughtTest;
@@ -82,6 +94,11 @@ try{
       const created=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),status:document.querySelector('#seedMessage')?.textContent,seed:window.__mythwroughtTest?.snapshot()?.seed}));
       assert.equal(created.profile?.generator,VEILREACH_GENERATOR,'NEW WORLD failed: '+JSON.stringify({created,dialogs}));
       assert.notEqual(created.seed,originalSeed,'NEW WORLD did not change seed: '+JSON.stringify({created,dialogs}));
+      if(witness){
+        assert.equal(created.seed,180,'Random NEW WORLD did not skip actual refused seed');
+        assert.ok(!dialogs.some(d=>d.message.includes('1606283545')),'Refused seed reached confirmation');
+        assert.equal(await page.evaluate(()=>Object.keys(localStorage).some(k=>k.includes('1606283545'))),false,'Refused seed claimed storage');
+      }
       console.log('REAL_CREATIVE_WORLD_READY',JSON.stringify({id:egg.id,created,dialogs}));
       stage='physical-setup';
       if(await page.locator('#closeHelp').isVisible())await page.locator('#closeHelp').click();

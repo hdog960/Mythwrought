@@ -13,7 +13,7 @@ const root=resolve('.');
 const oldHead='c1138b52bc8041c0db12be31b13fe9ab0fb276e0';
 assert.equal(execFileSync('git',['-C',oldRoot,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),oldHead);
 assert.notEqual(oldRoot,root);
-const release='20261127-unified-creative-navigation-v4',prior='20261125-shared-height-v1';
+const release='20261127-unified-veilreach-v1',prior='20261125-shared-height-v1';
 const oldCache='mythwrought-m5-shell-'+prior,newCache='mythwrought-m5-shell-'+release;
 const out=resolve('artifacts/mob-final-offline');
 await mkdir(out,{recursive:true});

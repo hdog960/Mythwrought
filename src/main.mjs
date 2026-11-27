@@ -39,7 +39,7 @@ import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,pack2IsHinged,
 import {recordWorldEditFeedback,sampleWorldEditFeedback} from './edit-feedback.mjs';
 import {naturalCaveCorridor,updateCaveDiscovery} from './exploration-cues.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,saveFingerprint,MAX_IMPORT_BYTES} from './persistence.mjs';
-import {FourRegionWorld,M2_FOUR_REGION_GENERATOR,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator} from './manual-biomes/profile-world.mjs';
+import {FourRegionWorld,M2_FOUR_REGION_GENERATOR,M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,isEnvironmentGenerator,canAdmitCombinedRandomSeed} from './manual-biomes/profile-world.mjs';
 import {ensureM5OfflineCache} from './manual-biomes/m5-offline-registration.mjs';
 import {isUnclaimedWorldSeed,readFourRegionProfile} from './manual-biomes/profile-storage.mjs';
 import {M2_WORLD_MODE,planM2WorldChoice,openM2World,saveM2World,
@@ -130,9 +130,9 @@ async function startLatestProductionWorld(){
       let seed=null;
       for(let i=0;i<32;i++){
         const n=crypto.getRandomValues(new Int32Array(1))[0];
-        if(n!==DEFAULT_WORLD_SEED&&isUnclaimedWorldSeed(raw,n)&&isUnclaimedWorldSeed(scope,n)){seed=n;break;}
+        if(n!==DEFAULT_WORLD_SEED&&isUnclaimedWorldSeed(raw,n)&&isUnclaimedWorldSeed(scope,n)&&canAdmitCombinedRandomSeed(n)){seed=n;break;}
       }
-      if(seed===null)throw Error('No unused world seed available');
+      if(seed===null)throw Error('No safe unused world seed available');
       const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
       const loaded=await createMountainV8IsolatedWorld(String(seed),{confirmed:true,generator:VEILREACH_GENERATOR,storage:raw});
       const stored=saveM2World(scope,loaded.world);
@@ -3357,10 +3357,10 @@ function start(nonblockStage=null){
       for(let attempt=0;attempt<32;attempt++){
         const candidate=crypto.getRandomValues(new Int32Array(1))[0];
         if(candidate===DEFAULT_WORLD_SEED||candidate===world.seed||readFourRegionProfile(localStorage,candidate)||
-           !isUnclaimedWorldSeed(localStorage,candidate))continue;
+           !isUnclaimedWorldSeed(localStorage,candidate)||!canAdmitCombinedRandomSeed(candidate))continue;
         next=candidate;break;
       }
-      if(next===null)throw Error('Could not find an unused seed. Try again.');
+      if(next===null)throw Error('Could not find a safe unused seed. Try again.');
       await createLatestMenuWorld(next);
     }catch(error){seedMessage.textContent='New world refused; original world retained: '+String(error.message||error);}
     finally{button.disabled=false;}
