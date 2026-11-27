@@ -24,7 +24,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node --check src/living-underworld/offset-socket-stair-research.mjs
           node --check scripts/underworld/phase48-offset-socket-native.mjs
-      - name: New raised offset geometry and actual source/controller gate
+      - name: Changed early-exit landing and actual source/controller gate
         run: node scripts/underworld/phase48-offset-socket-native.mjs
       - uses: actions/upload-artifact@v4
         if: always()
