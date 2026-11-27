@@ -41,6 +41,35 @@ function supportFace(plan,g,side,touched){
  }
  return true;
 }
+// A climb site must have one continuous full body-facing wall, not a
+// single solid voxel or a biome flag. Only canonical voxel support admitted.
+function climbFace(plan,g,touched){
+ const b=plan.bounds;
+ for(const axis of [0,2])for(const sign of [-1,1]){
+  const cross=axis===0?2:0,face=b[axis+(sign>0?3:0)];
+  const start=Math.floor(face+(sign<0?-CONTACT:-EPS));
+  const end=Math.floor(face+(sign<0?EPS:CONTACT));
+  let complete=true;
+  for(let u=Math.floor(b[cross]+EPS);u<=Math.floor(b[cross+3]-EPS)&&complete;u++)
+   for(let y=Math.floor(b[1]+EPS);y<=Math.floor(b[4]-EPS)&&complete;y++){
+    const [u0,u1]=intersect(b[cross],b[cross+3],u,u+1),[y0,y1]=intersect(b[1],b[4],y,y+1);
+    const rects=[];
+    for(let n=start;n<=end;n++){
+     const cell=axis===0?[n,y,u]:[u,y,n],owner=physicalRegionAt(...cell);
+     if(!owner||g.resident(owner)!==true){complete=false;break;}
+     touched.set(owner.key,owner);
+     const s=g.shapeAt(...cell);if(!validShape(s)){complete=false;break;}
+     for(const box of s.boxes){
+      const wall=n+box[axis+(sign<0?3:0)],gap=(wall-face)*sign;
+      if(gap>=-EPS&&gap<=CONTACT)rects.push([u+box[cross],y+box[1],u+box[cross+3],y+box[4]]);
+     }
+    }
+    if(!covers(rects,u0,u1,y0,y1))complete=false;
+   }
+  if(complete)return true;
+ }
+ return false;
+}
 function mediumFits(plan,g,kind){
  const [x0,y0,z0,x1,y1,z1]=plan.bounds;
  for(const cell of plan.cells){
@@ -58,12 +87,12 @@ function mediumFits(plan,g,kind){
 }
 export function expansionSupport(query,point,body,kind){
  const g=query?.expansionGeometry,plan=planBodyVolume(point,body);
- if(!g||!plan||!['ground','ceiling','water','air'].includes(kind))return false;
+ if(!g||!plan||!['ground','ceiling','water','air','climb-surface'].includes(kind))return false;
  try{
   const rev=g.revision(),before=[...point],bodyBefore=[body.radius,body.height,body.collision];
   const touched=new Map(plan.owners.map(o=>[o.key,o]));
   if(!Number.isSafeInteger(rev)||rev<0||inspectBodyVolume(point,body,g)!=='clear')return false;
-  const ok=kind==='ground'||kind==='ceiling'?supportFace(plan,g,kind,touched):mediumFits(plan,g,kind);
+  const ok=kind==='ground'||kind==='ceiling'?supportFace(plan,g,kind,touched):kind==='climb-surface'?climbFace(plan,g,touched):mediumFits(plan,g,kind);
   return ok&&[...touched.values()].every(o=>g.resident(o)===true)&&Object.is(g.revision(),rev)&&before.every((n,i)=>Object.is(n,point[i]))&&bodyBefore.every((n,i)=>Object.is(n,[body.radius,body.height,body.collision][i]));
  }catch{return false;}
 }

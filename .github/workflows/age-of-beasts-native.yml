@@ -1,0 +1,26 @@
+name: Age of Beasts focused native qualification
+on:
+  push:
+    branches: [dev/age-of-beasts-ab0-ab1-20261126]
+    paths:
+      - 'src/mobs/**'
+      - 'tests/mobs/age-of-beasts-*.test.mjs'
+      - 'nonblock-stage-assets.json'
+      - '.github/workflows/age-of-beasts-native.yml'
+permissions:
+  contents: read
+jobs:
+  beasts-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Exact candidate source and unchanged shell manifest
+        run: |
+          git rev-parse HEAD
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+      - name: Focused AB0 AB1 AB2 source and original roster parity
+        run: node --test tests/mobs/age-of-beasts-*.test.mjs tests/mobs/roster-persistence.test.mjs
