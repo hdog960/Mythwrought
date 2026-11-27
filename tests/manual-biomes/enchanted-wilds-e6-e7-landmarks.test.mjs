@@ -7,7 +7,7 @@ import {WildsFamilyResearchWorld,wildsRegionAt} from '../../src/manual-biomes/en
 import {WILDS_LANDMARKS,buildWildsLandmark} from '../../src/manual-biomes/enchanted-wilds-landmarks.mjs';
 import {planWildsScenery} from '../../src/manual-biomes/enchanted-wilds-scenery.mjs';
 import {physicalRegionAt,upperOccupancy} from '../../src/world-height.mjs';
-test('six physical designs and 24 rotations preserve walkable approaches',()=>{
+test('twelve physical designs and 48 rotations preserve walkable approaches',()=>{
  for(let id=0;id<WILDS_LANDMARKS.length;id++)for(let turn=0;turn<4;turn++){
   const p=buildWildsLandmark(id,-16,8,-32,turn);
   assert.deepEqual(p,buildWildsLandmark(id,-16,8,-32,turn));
@@ -19,7 +19,7 @@ test('six physical designs and 24 rotations preserve walkable approaches',()=>{
   assert.ok(p.cells.every(([x,y,z])=>Math.abs(x+16)<=4&&Math.abs(z+32)<=4&&y>=9&&y<=15));
   for(const [x,,z] of p.cells.filter(r=>r[1]===9))assert.ok(p.footprint.some(([a,b])=>x===a&&z===b));
  }
- console.log('WILDS E7 GEOMETRY',JSON.stringify({families:WILDS_LANDMARKS,rotations:24}));
+ console.log('WILDS E7 GEOMETRY',JSON.stringify({families:WILDS_LANDMARKS,rotations:48}));
 });
 test('natural landmarks preserve source, clearance, native mesh and editable physical cells',()=>{
  const found=new Map();let samples=0,upper=0;
@@ -43,12 +43,12 @@ test('natural landmarks preserve source, clearance, native mesh and editable phy
     assert.equal(w.naturalAndLandmarkBlock(a,b,c),p.cells[0][3]);
     assert.throws(()=>w.save(),/historical M8/);
     found.set(p.id,{seed,origin:p.origin,name:p.name,cells:p.cells.length});samples++;
-    if(found.size===6)break outer;
+    if(found.size===12)break outer;
   }
-  if(found.size===6)break;
+  if(found.size===12)break;
  }
  console.log('WILDS E7 NATURAL',JSON.stringify({samples,upper,found:[...found.values()]}));
- assert.equal(found.size,6,'all six natural landmark witnesses required');
+ assert.equal(found.size,12,'all twelve natural landmark witnesses required');
 });
 test('green cap mosaic changes only the intended biome cap; retains peat and other biomes',()=>{
  const seed=179,w=new WildsFamilyResearchWorld(seed),old=new FourRegionWorld(seed,fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR),{experimentalEnchantedWilds:true});
