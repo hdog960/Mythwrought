@@ -1,0 +1,54 @@
+name: Enchanted Wilds E5 physical floor and original renderer
+on:
+  push:
+    branches: [research/enchanted-wilds-e5-visual-20261127]
+    paths: [.github/workflows/enchanted-wilds-e5-visual.yml]
+permissions:
+  contents: read
+jobs:
+  native-delta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: 7b04720b4d8d68209e7e47837fbc71e1d26a9b51
+          path: original
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Actual current source parity and changed physical content
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git -C ../original rev-parse HEAD)" = 7b04720b4d8d68209e7e47837fbc71e1d26a9b51
+          for f in src/world-height.mjs src/world-height-stream.mjs src/world-height-budget.mjs src/world-height-natural-contract.mjs src/main.mjs src/voxel.mjs src/gpu-recovery.mjs src/depth.mjs src/pack2-world.mjs src/manual-biomes/mountain-v8-runtime-terrain.mjs src/manual-biomes/snowy-s17-fresh-source.mjs; do cmp "$f" "../original/$f"; done
+          for f in src/manual-biomes/enchanted-wilds-*.mjs; do node --check "$f"; done
+          WILDS_CURRENT_ROOT="$PWD/../original" node --test tests/manual-biomes/enchanted-wilds-e3-e4-families.test.mjs tests/manual-biomes/enchanted-wilds-e5-floor.test.mjs
+  actual-renderer-specimens:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authentic game renderer ten specimen captures
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/wilds-visual-server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          node scripts/ci/enchanted-wilds-original-family-visual.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wilds-family-original-renderer
+          path: artifacts/wilds-family-visual
