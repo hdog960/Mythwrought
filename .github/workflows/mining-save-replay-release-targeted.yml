@@ -1,0 +1,48 @@
+name: Mining save replay installed upgrade and source closure
+on:
+  push:
+    branches: [probe/iphone-mining-save-release-20261127]
+    paths: ['src/**','index.html','sw-m5.js','sw-nonblock-stage.js','nonblock-stage-assets.json','tests/**','perf/issue-291/**','.github/workflows/mining-save-replay-release-targeted.yml']
+permissions:
+  contents: read
+jobs:
+  installed-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 18d0ff83df918f72d6ffaff1755998e680ef149e
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Reuse authenticated 86 native results on exact save source
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin 87cda8c4d59187970fd865b3ed466e82142c8c5a
+          git diff --exit-code 87cda8c4d59187970fd865b3ed466e82142c8c5a HEAD -- src/voxel.mjs src/manual-biomes/profile-world.mjs src/manual-biomes/m2-runtime-bridge.mjs
+          git show 87cda8c4d59187970fd865b3ed466e82142c8c5a:tests/mining-save-replay-parity.test.mjs > /tmp/original-save-parity.mjs
+          cmp /tmp/original-save-parity.mjs perf/issue-291/mining-save-replay-parity.mjs
+          test "$(git -C prior-production rev-parse HEAD)" = '18d0ff83df918f72d6ffaff1755998e680ef149e'
+          node --check src/main.mjs
+          node --check perf/issue-291/mining-save-replay-upgrade-browser.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+      - name: New cache isolation and affected release contracts only
+        run: |
+          node --test tests/mining-save-replay-scope.test.mjs tests/compact-menu.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
+      - name: Actual prior installed app, remote mining, failed dependency rollback and new offline cold reload
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          DIAGNOSTIC_PREVIOUS_ROOT="$PWD/prior-production" node perf/issue-291/mining-save-replay-upgrade-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mining-save-replay-upgrade
+          path: artifacts/mining-save-replay-upgrade/
+          if-no-files-found: warn

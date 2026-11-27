@@ -2,7 +2,7 @@ name: Targeted iPhone mining save replay qualification
 on:
   push:
     branches: [probe/iphone-mining-save-replay-20261127]
-    paths: ['src/voxel.mjs','src/manual-biomes/profile-world.mjs','src/manual-biomes/m2-runtime-bridge.mjs','tests/mining-save-replay-parity.test.mjs','.github/workflows/mining-save-replay-targeted.yml']
+    paths: ['src/voxel.mjs','src/manual-biomes/profile-world.mjs','src/manual-biomes/m2-runtime-bridge.mjs','perf/issue-291/mining-save-replay-parity.mjs','.github/workflows/mining-save-replay-targeted.yml']
 permissions:
   contents: read
 jobs:
@@ -27,12 +27,12 @@ jobs:
           node --check src/voxel.mjs
           node --check src/manual-biomes/profile-world.mjs
           node --check src/manual-biomes/m2-runtime-bridge.mjs
-          node --check tests/mining-save-replay-parity.test.mjs
+          node --check perf/issue-291/mining-save-replay-parity.mjs
       - name: Exact byte and fault parity, real source save microbenchmark
         run: |
           mkdir -p artifacts/mining-save-replay
           set -o pipefail
-          MINING_SAVE_BASELINE="$PWD/prior-production" node --test tests/mining-save-replay-parity.test.mjs | tee artifacts/mining-save-replay/parity.txt
+          MINING_SAVE_BASELINE="$PWD/prior-production" node --test perf/issue-291/mining-save-replay-parity.mjs | tee artifacts/mining-save-replay/parity.txt
       - name: Affected native persistence, original terrain and physical height tests
         run: |
           set -o pipefail
