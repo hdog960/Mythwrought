@@ -24,7 +24,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node --check src/living-underworld/drifting-interlayer-stair.mjs
           node --check scripts/underworld/phase50-interlayer-native.mjs
-      - name: New drifting interlayer original geometry and continuous controller
+      - name: Corrected five below-hub approach geometries and continuous controller
         run: node scripts/underworld/phase50-interlayer-native.mjs
       - uses: actions/upload-artifact@v4
         if: always()
