@@ -2,6 +2,9 @@
 // No mock art, no teleports and no writes to canonical schema-1 saves.
 import assert from 'node:assert/strict';
 import {assertSkySaveIsolation} from './save-isolation.mjs';
+import {sampleS5Events,S5_EVENT_SCHEDULE} from '../../src/sky-events.mjs';
+import {sampleThreeMoons} from '../../src/sky-moons.mjs';
+import {SKY_DAY_MS} from '../../src/world-clock.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -189,7 +192,11 @@ async function selectDay(page){
 }
 let failure=null;
 try{
-  for(const viewport of [[667,375],[844,390],[932,430]]){
+  const sizes=[[667,375],[844,390],[932,430]];
+  const selected=process.env.S5_VIEWPORT;
+  const viewports=selected?sizes.filter(v=>v.join('x')===selected):sizes;
+  if(selected)assert.equal(viewports.length,1,'S5_VIEWPORT must be a supported landscape size');
+  for(const viewport of viewports){
     const [w,h]=viewport,ctx=await browser.newContext({
       viewport:{width:w,height:h},deviceScaleFactor:1,hasTouch:true,isMobile:true
     });
@@ -254,14 +261,40 @@ try{
       let repeat=null;
       if(w===932){
         const a=await activate(page,.055,11.25,1,false);
+        const anchors=()=>page.evaluate(()=>[
+          localStorage.getItem('mythwrought-sky-s1-clock-179'),
+          localStorage.getItem('mythwrought-sky-s3-lunar-179')]);
+        const priorAnchors=await anchors();
+        assert.ok(priorAnchors.every(Boolean));
         await page.reload({waitUntil:'networkidle',timeout:45000});
         await settle(page);
         await pose(page,false);
+        const frame=await page.evaluate(()=>+document.querySelector('#scene').dataset.renderedFrames);
+        await page.waitForFunction(n=>+document.querySelector('#scene').dataset.renderedFrames>=n+14,frame,{timeout:35000});
         const b=await state(page);
-        assert.equal(b.kind,1);
-        assert.ok(Math.abs(b.strength-a.strength)<.01);
-        repeat={sameKind:b.kind===a.kind,
-          strengthDelta:Math.abs(b.strength-a.strength)};
+        // A live event's strength is not constant during its finite window.
+        // The progress/daylight/lunar age witnesses are published together
+        // by the original renderer every 12 frames. Evaluate the original
+        // source at each witnessed phase, not at the earlier wall time.
+        const spec=S5_EVENT_SCHEDULE.find(e=>e.id==='ember-meteor');
+        const expected=sample=>{
+          const phase=(spec.phase-spec.halfWindow+sample.progress*2*spec.halfWindow)*SKY_DAY_MS;
+          const lunar=sampleThreeMoons(phase,sample.lunarAgeDays*SKY_DAY_MS,sample.daylight);
+          const event=sampleS5Events(phase,lunar,sample.daylight);
+          return {phase,kind:event.kind,id:event.id,strength:event.strength};
+        };
+        const ea=expected(a),eb=expected(b);
+        repeat={sameKind:b.kind===a.kind,a,b,ea,eb,
+          anchorsUnchanged:JSON.stringify(await anchors())===JSON.stringify(priorAnchors),
+          strengthDelta:Math.abs(b.strength-a.strength),
+          strengthResidual:Math.abs((b.strength-a.strength)-(eb.strength-ea.strength))};
+        console.log('SKY_S5_RELOAD_WITNESS',JSON.stringify(repeat));
+        assert.equal(b.kind,1);assert.equal(a.id,spec.id);assert.equal(b.id,spec.id);
+        assert.ok(repeat.anchorsUnchanged,'Reload rewrote celestial clock anchors');
+        assert.ok(b.progress>=a.progress&&b.lunarAgeDays>=a.lunarAgeDays,'Celestial clock moved backward');
+        assert.equal(ea.kind,1);assert.equal(eb.kind,1);
+        assert.ok(Math.abs(a.strength-ea.strength)<.01&&Math.abs(b.strength-eb.strength)<.01);
+        assert.ok(repeat.strengthResidual<.01,'Reload intensity drift differs from original time envelope');
         await screenshot(page,viewport,'meteor-reloaded-repeat',false);
         await screenshot(page,viewport,'meteor-reloaded-repeat',true);
       }

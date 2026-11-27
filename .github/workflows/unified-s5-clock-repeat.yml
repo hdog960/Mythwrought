@@ -1,0 +1,30 @@
+name: Unified S5 live-clock repeat qualification
+on:
+  push:
+    branches: [probe/unified-final-s5-clock-20261127]
+permissions:
+  contents: read
+jobs:
+  repeat:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Previously failed large landscape event and reload witness
+        env:
+          S5_VIEWPORT: '932x430'
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check tests/sky/s5-events-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-s5.log 2>&1 &
+          node tests/sky/s5-events-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-s5-clock-repeat
+          path: artifacts/sky-s5/
