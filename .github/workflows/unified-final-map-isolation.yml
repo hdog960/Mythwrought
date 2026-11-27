@@ -1,7 +1,7 @@
 name: Unified final map seed isolation witness
 on:
   push:
-    branches: [probe/unified-final-map-isolation-20261127]
+    branches: [probe/unified-final-map-remote-witness-20261127]
 permissions:
   contents: read
 jobs:

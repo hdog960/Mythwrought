@@ -88,7 +88,20 @@ try{
       await page.locator('#closeExploration').click();
       assert.equal(await page.locator('#explorationOverlay').isVisible(),false);
       assert.equal(await page.evaluate(()=>document.activeElement?.id),'scene','Close must restore world keyboard focus');
-      await page.evaluate(()=>window.__mythwroughtTest.teleport(120,120));
+      // Count growth can come from a pending spawn-area observation. Await
+      // the actual remote pose's canonical discovery before testing isolation.
+      const destination=await page.evaluate(()=>window.__mythwroughtTest.teleport(120,120));
+      const remoteCell=Math.floor(destination.x/4)+','+Math.floor(destination.z/4);
+      assert.ok(Math.hypot(destination.x,destination.z)>100);
+      console.log('MAP_REMOTE_DESTINATION',JSON.stringify({width,height,destination,remoteCell}));
+      await page.waitForFunction(cell=>{
+        const raw=localStorage.getItem('mythwrought-exploration-v1-179');
+        return raw&&JSON.parse(raw).cells.includes(cell);
+      },remoteCell,{timeout:60000}).catch(async error=>{
+        const actual=await page.evaluate(()=>({scene:{...document.querySelector('#scene').dataset},
+          fog:localStorage.getItem('mythwrought-exploration-v1-179'),summary:document.querySelector('#explorationSummary').textContent}));
+        throw Error('Remote discovery not witnessed '+JSON.stringify({destination,remoteCell,actual}),{cause:error});
+      });
       await page.waitForFunction(n=>Number(document.querySelector('#miniMap')?.dataset.discovered)>n,start);
       const explored=Number(await page.locator('#miniMap').getAttribute('data-discovered'));
       assert.ok(explored>start);
@@ -100,10 +113,10 @@ try{
       await page.locator('#miniMapButton').tap();
       assert.equal(await page.locator('#navMarkerList option').count(),2,'waypoint survives cold reload');
       await page.locator('#closeExploration').tap();
+      await page.locator('#menu').click(); // pause observations before exact-byte witness
       const oldFog=await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-179'));
-      assert.ok(JSON.parse(oldFog).cells.some(k=>{const [x,z]=k.split(',').map(Number);return Math.abs(x-30)<=3&&Math.abs(z-30)<=3;}),'Old seed must contain remote visited cells');
+      assert.ok(JSON.parse(oldFog).cells.includes(remoteCell),'Old seed must retain the actual remote visited cell after reload');
       assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-28629')),null,'New seed was not fresh');
-      await page.locator('#menu').click();
       await page.locator('#seedInput').fill('28629');
       page.once('dialog',dialog=>dialog.accept());
       await page.locator('#switchWorld').click();
@@ -127,6 +140,7 @@ try{
       assert.equal(fresh.seed,28629);assert.equal(fresh.cellSize,4);
       assert.equal(fresh.cells.length,witness.displayed);
       assert.ok(fresh.cells.length>0&&fresh.cells.length<=29);
+      assert.equal(new Set(fresh.cells).size,fresh.cells.length);
       const cx=Math.floor(witness.x/4),cz=Math.floor(witness.z/4);
       assert.ok(fresh.cells.every(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2<=9;}),'New seed contains cells beyond its actual spawn reveal radius');
       const remote=JSON.parse(oldFog).cells.filter(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2>9;});
