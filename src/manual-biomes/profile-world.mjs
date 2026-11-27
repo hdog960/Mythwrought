@@ -13,6 +13,7 @@ import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,planEnvironmentalColumn} from './environment-v7.mjs';
 import {createSnowS17SitePlanner,snowS17ColumnPlan} from './snowy-s17-fresh-source.mjs';
 import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
+import {rejectWildsLegacyTree} from './enchanted-wilds-identity.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
 import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
@@ -64,7 +65,7 @@ export function validateFourRegionProfile(input,seed){
  * All four biomes are deterministic; only bounded column plans are cached.
  */
 export class FourRegionWorld extends VoxelWorld{
-  constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS,experimentalEnchantedTrees=false}={}){
+  constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS,experimentalEnchantedTrees=false,experimentalEnchantedWilds=false}={}){
     super(seed);
     this.profile=validateFourRegionProfile(profile,seed);
     if(!Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
@@ -72,6 +73,8 @@ export class FourRegionWorld extends VoxelWorld{
     if(typeof experimentalEnchantedTrees!=='boolean'||
        experimentalEnchantedTrees&&this.profile.generator!==M7_ENVIRONMENT_GENERATOR)
       throw Error('Enchanted tree prototype requires explicit M7 opt-in');
+    if(typeof experimentalEnchantedWilds!=='boolean'||experimentalEnchantedWilds&&this.profile.generator!==M8_MOUNTAIN_GENERATOR)throw Error('Wilds requires explicit current M8 research context');
+    Object.defineProperty(this,'experimentalEnchantedWilds',{value:experimentalEnchantedWilds,enumerable:true});
     // Immutable per-world selection prevents a live cache/profile mismatch.
     Object.defineProperty(this,'experimentalEnchantedTrees',{value:experimentalEnchantedTrees,enumerable:true});
     Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR||this.profile.generator===SNOW_P1_GENERATOR,enumerable:true});
@@ -194,14 +197,14 @@ export class FourRegionWorld extends VoxelWorld{
       hidden=new Set();
       const district=this.liveDistrictCache.get(districtKey);
       for(const tree of district?.trees??[]){
-        if(keepLegacyGroveTree(this.seed,tree))continue;
+        if(keepLegacyGroveTree(this.seed,tree)&&!(this.experimentalEnchantedWilds&&rejectWildsLegacyTree(this.seed,tree,BLOCK.WOOD,BLOCK.LEAVES)))continue;
         for(const [tx,ty,tz] of tree.cells)hidden.add(worldKey(tx,ty,tz));
       }
       // Rare seeded tree landmarks use the same no-Desert footprint policy.
       // Do not suppress courts, rotundas, caves, or player-authored structures.
       for(const tree of [district?.twinwood,district?.canopyGate,
         district?.archwood,district?.fallenGiant]){
-        if(!tree?.cells||!naturalTreeTouchesDesert(this.seed,tree.cells,tree.origin))continue;
+        if(!tree?.cells||!(naturalTreeTouchesDesert(this.seed,tree.cells,tree.origin)||this.experimentalEnchantedWilds&&rejectWildsLegacyTree(this.seed,tree,BLOCK.WOOD,BLOCK.LEAVES)))continue;
         for(const [tx,ty,tz] of tree.cells)hidden.add(worldKey(tx,ty,tz));
       }
       this._environmentGroveMasks.set(districtKey,hidden);
@@ -219,6 +222,7 @@ export class FourRegionWorld extends VoxelWorld{
         (a,c)=>this._columnPlan(a,c),
         (a,b,c)=>this._columnPlan(a,c).get(b)??this._environmentBaseline(a,b,c),
         {experimentalEnchantedTrees:this.enchantedTreesEnabled,
+          experimentalEnchantedWilds:this.experimentalEnchantedWilds,
           candidateSiteBiomeCache:this._environmentCandidateSiteBiomes??null,
           ...(this._snowSource?{snowTreeAtSite:this._snowSource.site,snowNeedles:needles}:{})});
       this._environmentTreeChunks.set(key,cells);
@@ -322,6 +326,7 @@ export class FourRegionWorld extends VoxelWorld{
   }
   // No durable identity exists for this opt-in yet. Do not save or migrate it.
   save(){
+    if(this.experimentalEnchantedWilds)throw Error('Wilds research cannot save as historical M8');
     if(this.experimentalEnchantedTrees)
       throw Error('Experimental enchanted tree candidate cannot be saved as historical M7');
     return super.save();

@@ -12,6 +12,7 @@ import {EnchantedCandidateSourceCache,
   ENCHANTED_CANDIDATE_SOURCE_CACHE_DEFAULT_ENTRIES as DEFAULT_SOURCE_CACHE}
   from './enchanted-tree-source-cache.mjs';
 import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
+import {touchesEnchantedForest,wildsTreeStyleRoll} from './enchanted-wilds-identity.mjs';
 
 const smooth=value=>value*value*(3-2*value);
 const clamp=value=>Math.max(0,Math.min(1,value));
@@ -267,12 +268,13 @@ function historicalTreesForChunk(cx,cz,seed,readColumn,readCell){
 }
 
 function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
-  {experimentalEnchantedTrees=false,onCandidateCacheSummary=null,
+  {experimentalEnchantedTrees=false,experimentalEnchantedWilds=false,onCandidateCacheSummary=null,
     onCandidateSiteSummary=null,disableCandidateSiteCulling=false,
     disableCandidateDensityCulling=false,
     candidateSiteBiomeCache=null,
     snowTreeAtSite=null,snowNeedles=null,
     candidateSourceCacheCapacity=DEFAULT_SOURCE_CACHE}={}){
+  if(typeof experimentalEnchantedWilds!=='boolean'||experimentalEnchantedWilds&&!experimentalEnchantedTrees)throw Error('Wilds research requires explicit opt-in');
   if(snowTreeAtSite!==null&&(typeof snowTreeAtSite!=='function'||!(snowNeedles instanceof Set)||!experimentalEnchantedTrees))
     throw Error('Snow experimental source requires explicit Enchanted-P2 successor context');
   // This capacity parameter is for isolated source-memory experiments;
@@ -385,7 +387,8 @@ function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
         if(!tree)continue;
       }else if(candidate){
         // Deterministic species choice independent of the legacy density roll.
-        const shaped=buildEnchantedTreeCandidate(x,floor,z,treeRoll(tx,tz,seed+151));
+        const styleRoll=treeRoll(tx,tz,seed+151);
+        const shaped=buildEnchantedTreeCandidate(x,floor,z,experimentalEnchantedWilds?wildsTreeStyleRoll(styleRoll):styleRoll);
         if(!shaped)continue;
         // Historical one-root Starspire/Moonwillow checks stay untouched.
         // For the 2x2 Ancient Giant, every corner must be a genuine M7
@@ -404,6 +407,7 @@ function experimentalTreesForChunk(cx,cz,seed,readColumn,readCell,
       }
       if(naturalTreeTouchesDesert(seed,tree,[x,floor,z]))continue;
       if(tree.some(([a,b,c])=>b>WORLD_MAX_Y||readNatural(a,b,c)!==BLOCK.AIR))continue;
+      if(experimentalEnchantedWilds&&!candidate&&touchesEnchantedForest(seed,tree,[x,floor,z]))continue;
       // The game treats moonleaf/aetherleaf as true solid cubes. Real
       // player height is 1.78: leave both voxels immediately above nearby
       // M7 ground unobstructed, without changing mineable bark or terrain.
