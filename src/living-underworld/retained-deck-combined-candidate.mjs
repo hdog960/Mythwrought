@@ -93,10 +93,12 @@ export function captureRetainedDeckSource({extraOwners=[]}={}){
 // or certifying a one-voxel bore as a walkable corridor.
 function connectRetainedComponents(c,selectedAir){
  const open=new Set(selectedAir),extra=new Set(),paths=[];
- const available=c.revisedAir,root=key(-628,-30,-2162);
+ const root=key(-628,-30,-2162),originalParts=components(c.rawAir,around),rawId=originalParts.label.get(root);
+ const available=new Set([...c.revisedAir].filter(k=>originalParts.label.get(k)===rawId));
  for(let round=0;round<12;round++){
   const parts=components(open,around);
-  if(parts.sizes.length<=1)return {ok:true,extra,paths,components:parts.sizes.length};
+  const rootPieces=new Set([...parts.label].filter(([k])=>available.has(k)).map(([,id])=>id));
+  if(rootPieces.size<=1)return {ok:true,extra,paths,components:parts.sizes.length,rootPieces:rootPieces.size};
   const id=parts.label.get(root);if(id===undefined)throw Error('CONNECTOR_ROOT_MISSING');
   // Dijkstra in integer buckets: cost1 for open passage, cost8 for new
   // excavation, deterministic tie order. Cap path search and new cuts.
@@ -271,6 +273,13 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
   for(const row of counts){patches++;rawCrossings+=row.size;retainedCrossings+=row.kept;if(!row.kept){lostPatches++;if(lost.length<12)lost.push({plane,...row});}}
  }
  const peakCost=cost(peak,stage),selectedCost=cost(selected,stage),middleCost=cost(engineWantedSections(-40,-135,-5));
+ // Fixed earlier boundary patch remains measurable even when the expanded
+ // capture moves the owner-union boundary west. Require both actual cells.
+ const westPatch={originalPairs:0,actualOpenPairs:0,examples:[]};
+ if(c.owners.length>42)for(let z=-2157;z<=-2147;z++)for(let y=-67;y<=-64;y++){
+  if(!inDomain(-656,y,z)||!inDomain(-657,y,z)||!compactUpperHubResearchAirAt(original.seed,-656,y,z)||!compactUpperHubResearchAirAt(original.seed,-657,y,z))continue;
+  westPatch.originalPairs++;if(projectedAt(-656,y,z)===BLOCK.AIR&&projectedAt(-657,y,z)===BLOCK.AIR){westPatch.actualOpenPairs++;westPatch.examples.push([-656,y,z]);}
+ }
  const floorReadback=[...floorValues].every(([c,id])=>projectedAt(...xyz(c))===id);
  check(floorReadback,'RETAINED_DECK_READBACK_FAILED');
  check(JSON.stringify(original.save())===p.initial,'SOURCE_SAVE_MUTATED');
@@ -278,7 +287,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
   rawRequests:rows.reduce((n,r)=>n+r.requests,0),rawNewCuts:rows.reduce((n,r)=>n+r.newCuts,0),
   originalFloorConflicts:conflicts.size,remainingFloorConflicts:0,retainedFloorCells:floorValues.size,
   futureCuts:future.size,otherVetoes:otherVetoes.length,floorReadback,sourceCalls,maxOwnerReads,
-  peakCost,selectedCost,middleCost,baseOwnerCount:c.baseOwners.length,baseFloorConflicts:rows.filter(r=>c.baseOwners.includes(r.key)).reduce((n,r)=>n+r.retainedDeck,0),connector:connector?{...connector,extra:[...connector.extra]}:null,lowerRoutes,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
+  peakCost,selectedCost,middleCost,westPatch,baseOwnerCount:c.baseOwners.length,baseFloorConflicts:rows.filter(r=>c.baseOwners.includes(r.key)).reduce((n,r)=>n+r.retainedDeck,0),connector:connector?{...connector,extra:[...connector.extra]}:null,lowerRoutes,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
    splitComponents:split.length,splitExamples:split.slice(0,8),componentBounds:componentBounds.slice(0,16),disappearedComponents:before.sizes.length-mapped.size,
    boundaryRaw,boundaryRevised,removedBoundary},
   seams:{patches,lostPatches,rawCrossings,retainedCrossings,originalOutsideCrossings,lost,externalProposedGeometryNotSourceQualified:true},
