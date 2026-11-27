@@ -23,3 +23,20 @@ test('isolated combat commits once after actual windup, enforces cooldown and re
  for(let i=0;i<10;i++)stepPlainsActor(a,query,{target,commitDamage});
  assert.equal(hits.length,1);
 });
+
+test('target switch resets windup; dire hound flank and antelope leap use original movement',()=>{
+ const {query}=fixture(),wolf=createPlainsActor(plainsCandidate('werewolf'),[.5,-2,.5],query);
+ const one={position:[1.4,-1.7,.5]},two={position:[1.4,-1.7,.5]},hits=[];
+ const commitDamage=(victim)=>{hits.push(victim);return true;};
+ for(let i=0;i<12;i++)assert.ok(stepPlainsActor(wolf,query,{target:one,commitDamage}));
+ for(let i=0;i<12;i++)assert.ok(stepPlainsActor(wolf,query,{target:two,commitDamage}));
+ assert.equal(hits.length,0);
+ for(let i=0;i<8;i++)assert.ok(stepPlainsActor(wolf,query,{target:two,commitDamage}));
+ assert.deepEqual(hits,[two]);
+ const h=createPlainsActor(plainsCandidate('dire-hound'),[.5,-2,.5],query);
+ assert.ok(stepPlainsActor(h,query,{target:{position:[4,-.8,.5]},facts:{packNearby:true}}));
+ assert.ok(h.position[0]>.5&&h.position[2]>.5);
+ const a=createPlainsActor(plainsCandidate('golden-antelope'),[.5,-2,.5],query);
+ assert.ok(stepPlainsActor(a,query,{threat:{position:[3,-.8,.5]}}));
+ assert.ok(a.position[0]<.5&&a.position[1]>-2);
+});
