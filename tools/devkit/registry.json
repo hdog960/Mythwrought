@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "repository": "hdog960/Mythwrought",
+  "base": "main",
+  "rules": [492, 498, 501],
+  "protected": ["main", "all existing developer and release refs outside the operator's explicit assignment"],
+  "assignments": {
+    "unified": {"branch": "dev/unified-creative-navigation-performance-20261126", "pr": 503, "roadmap": "Unified Creative, Navigation and Performance", "roadmapVersion": "Creator consolidation of #292, #288/#500 and #291/#499", "milestone": "Creator release hold", "handoff": "docs/unified-development/SESSION_01_HANDOFF.md", "systems": ["world", "height", "render", "movement", "persistence", "offline", "interfaces"], "source": "pull/503"},
+    "beasts": {"branch": "dev/age-of-beasts-ab0-ab1-20261126", "pr": 502, "roadmap": "Age of Beasts AB0–AB18", "roadmapVersion": "AB0–AB18", "milestone": "Isolated development, merge embargo", "handoff": "docs/age-of-beasts/AB0_SESSION_01.md", "systems": ["world", "height", "creatures", "render", "persistence"], "source": "pull/502"},
+    "navigation": {"branch": "dev/navigation-height-final-20261125", "pr": 500, "roadmap": "Navigation and shared height", "roadmapVersion": "PR #500 session 4", "milestone": "Candidate in review", "handoff": "docs/navigation/SESSION_04_HANDOFF.md", "systems": ["height", "movement", "persistence", "offline", "interfaces"], "source": "pull/500"}
+  },
+  "automations": {
+    "00": {"identity": "automation :00", "assignmentSource": "existing automation instructions"},
+    "12": {"identity": "automation :12", "assignmentSource": "existing automation instructions"},
+    "24": {"identity": "automation :24", "assignmentSource": "existing automation instructions"},
+    "36": {"identity": "automation :36", "assignmentSource": "existing automation instructions"},
+    "48": {"identity": "automation :48", "assignmentSource": "existing automation instructions"}
+  },
+  "coordinationSource": "docs/INTEGRATION_CHECKPOINTS.md",
+  "historicalAutomationSource": "docs/AUTOMATION_SOURCE_INTAKE_20261116.md",
+  "qualification": {
+    "mining-native": {
+      "head": "87cda8c4d59187970fd865b3ed466e82142c8c5a",
+      "tree": "1f6b8d2c49c42da3ecf1026456c8ca3c4da12e0a",
+      "workflow": ".github/workflows/mining-save-replay-targeted.yml",
+      "workflowBlob": "7c3463431ad3bb03c4b28fc735e7502f8d048dfb",
+      "branch": "probe/iphone-mining-save-replay-20261127",
+      "run": 45931884263,
+      "attempt": 1,
+      "job": 140286143564,
+      "jobName": "save-replay",
+      "steps": ["Verify source-only candidate and exact original production", "Exact byte and fault parity, real source save microbenchmark", "Affected native persistence, original terrain and physical height tests"],
+      "environment": "ubuntu-24.04 / Node 22.23.5",
+      "fixture": "18d0ff83df918f72d6ffaff1755998e680ef149e",
+      "reuse": "toolkit-only",
+      "artifact": {"id": 15168043840, "name": "mining-save-replay-native", "digest": "sha256:ffc1092f5098e69bf11de1338132d68ef39075a7fc901f6021614f7cdba77427"}
+    },
+    "mining-installed": {
+      "head": "1879d59c88b971cdf892ba3edd965b6cd9965301",
+      "tree": "2789d37882977a16890376a33a6304d21f94d378",
+      "workflow": ".github/workflows/mining-save-replay-release-targeted.yml",
+      "workflowBlob": "0311bf78eb66471b2f3d7a05d5a5971f9b406283",
+      "branch": "probe/iphone-mining-save-release-20261127",
+      "run": 45932330549,
+      "attempt": 1,
+      "job": 140287539829,
+      "jobName": "installed-replay",
+      "steps": ["Reuse authenticated 86 native results on exact save source", "New cache isolation and affected release contracts only", "Actual prior installed app, remote mining, failed dependency rollback and new offline cold reload"],
+      "environment": "ubuntu-24.04 / Node 22.23.5 / Playwright 1.58.2 / Chromium",
+      "fixture": "18d0ff83df918f72d6ffaff1755998e680ef149e",
+      "reuse": "exact",
+      "artifact": {"id": 15168094461, "name": "mining-save-replay-upgrade", "digest": "sha256:25391d0c3792551d6d71b1f30426b2fde9e4659f6c96179612df1c00cd4f15a8"}
+    }
+  }
+}
