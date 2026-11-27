@@ -14,13 +14,14 @@ import {environmentalTreesForChunk,keepLegacyGroveTree,naturalTreeTouchesDesert,
 import {createSnowS17SitePlanner,snowS17ColumnPlan} from './snowy-s17-fresh-source.mjs';
 import {EnchantedSiteBiomeCache} from './enchanted-tree-site-biome-cache.mjs';
 import {OASIS_WATER,nearOasisSite,oasisSites,planOasis} from './environment-oasis.mjs';
-import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
+import {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,VEILREACH_GENERATOR,usesMountainV8Terrain,isEnvironmentGenerator as originalEnvironmentGenerator} from '../environment-ground.mjs';
 import {M8_MOUNTAIN_GENERATOR,planMountainV8RegisteredTerrain} from './mountain-v8-runtime-terrain.mjs';
 import {mountainV8ConifersForChunk,MOUNTAIN_V8_PINE} from './mountain-v8-runtime-conifers.mjs';
 import {MOUNTAIN_V8_MATERIAL as M,isMountainV8Material} from './mountain-v8-materials.mjs';
 import {mountainV8TileRoot} from './mountain-v8-source-adapter.mjs';
 import {MOUNTAIN_V8_PLANT_PATTERNS} from './mountain-v8-vegetation-cells.mjs';
 import {LIVE_DISTRICT_SIZE} from '../live-voxel-world.mjs';
+import {createVeilreachSource} from '../veilreach/source.mjs';
 import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 
 // NEVER change a legacy generation profile's physical natural baseline.
@@ -29,7 +30,7 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // Experimental v5 is opt-in via an EXPLICIT generated-world profile only.
 // The default new-world action and all historical saves stay on accepted v4.
 export {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR};
-export const isEnvironmentGenerator=generator=>originalEnvironmentGenerator(generator)||generator===M8_MOUNTAIN_GENERATOR;
+export const isEnvironmentGenerator=generator=>originalEnvironmentGenerator(generator)||usesMountainV8Terrain(generator);
 const environmentalProfile=isEnvironmentGenerator;
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';
@@ -37,7 +38,7 @@ export const FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v4';
 export const M3_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v3';
 export const M2_FOUR_REGION_GENERATOR='mythwrought-four-surface-regions-v2';
 const ACCEPTED_GENERATORS=new Set([
-  M8_MOUNTAIN_GENERATOR,SNOW_P1_GENERATOR,ENCHANTED_P2_GENERATOR,M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
+  VEILREACH_GENERATOR,M8_MOUNTAIN_GENERATOR,SNOW_P1_GENERATOR,ENCHANTED_P2_GENERATOR,M7_ENVIRONMENT_GENERATOR,M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,
   M3_FOUR_REGION_GENERATOR,M2_FOUR_REGION_GENERATOR
 ]);
 const MAX_EDIT_ROWS=300000;
@@ -64,9 +65,12 @@ export function validateFourRegionProfile(input,seed){
  * All four biomes are deterministic; only bounded column plans are cached.
  */
 export class FourRegionWorld extends VoxelWorld{
+  #upperSource;
   constructor(seed,profile=fourRegionProfile(seed),{maxCachedColumns=MAX_COLUMNS,experimentalEnchantedTrees=false}={}){
     super(seed);
-    this.profile=validateFourRegionProfile(profile,seed);
+    const identity=validateFourRegionProfile(profile,seed);
+    Object.defineProperty(this,'profile',{value:identity,enumerable:true});
+    if(identity.generator===VEILREACH_GENERATOR)this.#upperSource=createVeilreachSource(seed);
     if(!Number.isInteger(maxCachedColumns)||maxCachedColumns<1||
        maxCachedColumns>4096)throw Error('Invalid biome column budget');
     if(typeof experimentalEnchantedTrees!=='boolean'||
@@ -74,10 +78,10 @@ export class FourRegionWorld extends VoxelWorld{
       throw Error('Enchanted tree prototype requires explicit M7 opt-in');
     // Immutable per-world selection prevents a live cache/profile mismatch.
     Object.defineProperty(this,'experimentalEnchantedTrees',{value:experimentalEnchantedTrees,enumerable:true});
-    Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR||this.profile.generator===SNOW_P1_GENERATOR,enumerable:true});
+    Object.defineProperty(this,'enchantedTreesEnabled',{value:experimentalEnchantedTrees||this.profile.generator===ENCHANTED_P2_GENERATOR||usesMountainV8Terrain(this.profile.generator)||this.profile.generator===SNOW_P1_GENERATOR,enumerable:true});
     // Creator rule #492: unpublished Mountain V8 is the combined successor.
     // The shipped standalone Snow profile remains immutable for existing saves.
-    if(this.profile.generator===SNOW_P1_GENERATOR||this.profile.generator===M8_MOUNTAIN_GENERATOR){
+    if(this.profile.generator===SNOW_P1_GENERATOR||usesMountainV8Terrain(this.profile.generator)){
       const raw=(x,y,z)=>VoxelWorld.prototype.naturalAndLandmarkBlock.call(this,x,y,z);
       const cave=(x,y,z)=>this.environmentCaves.get(x,y,z);
       this._snowSource=Object.freeze({raw,cave,site:createSnowS17SitePlanner(seed,raw,cave)});
@@ -85,7 +89,7 @@ export class FourRegionWorld extends VoxelWorld{
     }
     this.maxCachedColumns=maxCachedColumns;
     this._biomeColumns=new Map();
-    if(this.profile.generator===M8_MOUNTAIN_GENERATOR)this._mountainV8ConiferChunks=new Map();
+    if(usesMountainV8Terrain(this.profile.generator))this._mountainV8ConiferChunks=new Map();
     if(environmentalProfile(this.profile.generator)){
       this.environmentCaves=combinedEnvironmentCaves(seed);
       this._environmentGroveMasks=new Map();
@@ -100,7 +104,7 @@ export class FourRegionWorld extends VoxelWorld{
     let lookup;
     if(environmentalProfile(this.profile.generator)){
       const region=v6BiomeAt(x,z,this.seed);
-      if(this.profile.generator===M8_MOUNTAIN_GENERATOR&&region?.name==='mountain'&&region.weight>=.82){
+      if(usesMountainV8Terrain(this.profile.generator)&&region?.name==='mountain'&&region.weight>=.82){
         const raw=(a,b,c)=>super.naturalAndLandmarkBlock(a,b,c);
         lookup=planMountainV8RegisteredTerrain(x,z,this.seed,raw,(a,b,c)=>
           this.environmentCaves.get(a,b,c)!==undefined||raw(a,b,c)!==baseBlock(a,b,c,this.seed),
@@ -255,9 +259,7 @@ export class FourRegionWorld extends VoxelWorld{
     return cells.get(worldKey(x,y,z))??BLOCK.AIR;
   }
   naturalAndLandmarkBlock(x,y,z){
-    // Existing profile natural sources remain limited to the historical envelope.
-    // Future upper generation requires its own versioned source admission.
-    if(y>WORLD_MAX_Y)return BLOCK.AIR;
+    if(y>WORLD_MAX_Y)return this.#upperSource?.get(x,y,z)??BLOCK.AIR;
     const cave=this.environmentCaves?.get(x,y,z);
     if(cave!==undefined)return cave;
     const base=super.naturalAndLandmarkBlock(x,y,z);
@@ -281,7 +283,7 @@ export class FourRegionWorld extends VoxelWorld{
     if(ground!==BLOCK.AIR||y<=terrainHeight(x,z,this.seed))return ground;
     const existing=this._environmentTreeAt(x,y,z);
     if(existing!==BLOCK.AIR)return existing;
-    if(this.profile.generator===M8_MOUNTAIN_GENERATOR){
+    if(usesMountainV8Terrain(this.profile.generator)){
       const region=v6BiomeAt(x,z,this.seed);
       if(region?.name==='mountain'&&region.weight>=.82)return this._mountainV8ConiferAt(x,y,z);
     }
@@ -292,7 +294,7 @@ export class FourRegionWorld extends VoxelWorld{
     // schema-1 delta format and rotation restrictions. The profile baseline
     // is virtual, so original setter's biomeCellCount can overcount on a
     // no-op that places the same biome ID as the natural surface.
-    if(isMountainV8Material(id)&&this.profile.generator!==M8_MOUNTAIN_GENERATOR)return false;
+    if(isMountainV8Material(id)&&!usesMountainV8Terrain(this.profile.generator))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     const count=this.biomeCellCount;
     const ok=super.set(x,y,z,id,rotation);
@@ -329,7 +331,7 @@ export class FourRegionWorld extends VoxelWorld{
   // Gameplay-only support query. Keep set()/restore() single-cell so saved
   // schema-1 AIR rows remain canonical and do not trigger a second tree fall.
   mountainV8SupportedTreeCells(x,y,z){
-    if(this.profile.generator!==M8_MOUNTAIN_GENERATOR||
+    if(!usesMountainV8Terrain(this.profile.generator)||
        ![x,y,z].every(Number.isSafeInteger))return [];
     const root=mountainV8TileRoot(Math.floor(x/8),Math.floor(z/8),this.seed);
     if(!root||root.rootX!==x||root.rootZ!==z)return [];
@@ -369,7 +371,14 @@ export class FourRegionWorld extends VoxelWorld{
     return cells.filter(({cell,id})=>!this.edits.has(worldKey(...cell))&&
       this.get(...cell)===id).map(({cell})=>cell);
   }
-  get hasNaturalNonCubeShapes(){return this.profile.generator===M8_MOUNTAIN_GENERATOR;}
+  upperSupportedCells(x,y,z){
+    if(y<=WORLD_MAX_Y||!this.#upperSource||this.edits.has(worldKey(x,y,z)))return [];
+    return this.#upperSource.supportedCells(x,y,z).filter(cell=>!this.edits.has(worldKey(...cell)));
+  }
+  get upperSourceProfile(){return this.#upperSource?.profile;}
+  get upperNaturalRevision(){return this.#upperSource?.revision()??0;}
+  upperNaturalOccupied(key){return this.#upperSource?.occupied(key)??false;}
+  get hasNaturalNonCubeShapes(){return usesMountainV8Terrain(this.profile.generator);}
   get cachedBiomeColumns(){return this._biomeColumns.size;}
   get generationProfile(){return this.profile;}
 }

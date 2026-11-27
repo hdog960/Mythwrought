@@ -1,3 +1,4 @@
+import {VEILREACH_GRASS_ID,veilreachGrass,veilreachGrassColor} from './veilreach/flora.mjs';
 import {markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {createSnowS14EdgePigment} from './manual-biomes/snowy-s14-edge-pigment.mjs';
 // MYTHWROUGHT v0.07: deterministic editable voxel terrain with world-coherent chunk edges.
@@ -8,7 +9,7 @@ import {isPack2LiveId,pack2WorldVertices,pack2ShapeOf,pack2RayHit,
   pack2BodyIntersects} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,biome130Color,isBiome130BlockId} from './biome130-registry.mjs';
 import {isMountainV8Material,isMountainV8Flora,mountainV8Material,mountainV8MaterialColor,mountainV8FoliageFaceCovered} from './manual-biomes/mountain-v8-materials.mjs';
-import {environmentGround,isEnvironmentGenerator,SNOW_P1_GENERATOR,SNOW_WIND_RENDER_TAG} from './environment-ground.mjs';
+import {environmentGround,isEnvironmentGenerator,usesMountainV8Terrain,VEILREACH_GENERATOR,SNOW_P1_GENERATOR,SNOW_WIND_RENDER_TAG} from './environment-ground.mjs';
 import {v6BiomeAt} from './manual-biomes/v6-balanced-biomes.mjs';
 import {desertSeamVertexTint,nearestNaturalScreeSquared,canBlendNaturalDesertSurface} from './manual-biomes/desert-seam-vertex-tint.mjs';
 import {canWarmSourceScree,canUseDesertHardpanCue,nearestDesertHardpanSquared,warmScreeVertexColor} from './manual-biomes/desert-bilateral-rgb.mjs';
@@ -39,14 +40,22 @@ const BIOME_GROUND_COLORS=new Map([
   const {palette}=biome130Block(id);
   return [id,palette[0].map((_,index)=>palette.reduce((sum,color)=>sum+color[index],0)/palette.length)];
 }));
-const isPhysicalShape=id=>isBiome130BlockId(id)||isMountainV8Flora(id);
-const physicalShape=(id,rotation=0)=>isMountainV8Flora(id)?mountainV8Material(id):biome130Block(id,rotation);
+const isPhysicalShape=id=>isBiome130BlockId(id)||isMountainV8Flora(id)||id===VEILREACH_GRASS_ID;
+const physicalShape=(id,rotation=0)=>id===VEILREACH_GRASS_ID?veilreachGrass:
+  isMountainV8Flora(id)?mountainV8Material(id):biome130Block(id,rotation);
 function terrainArtMaterial(id){
   if(isMountainV8Material(id))return mountainV8Material(id).materialTag;
   if(id<=264)return 40;
   if(id<=279)return 41;
   if(id>=400&&id<=402||id>=302&&id<=307)return 42;
   return 43;
+}
+// The distant Veilreach terrain uses the same base colors and material
+// artwork tags as the cubic physical terrain mesh.
+export function voxelTerrainAppearance(id){
+  const ground=environmentGround(id);
+  return {rgb:ground?.color??COLORS[id]??COLORS[BLOCK.STONE],
+    tag:ground?terrainArtMaterial(id):id===BLOCK.DEEPSTONE?19:id};
 }
 const FACE = [
   {d:[1,0,0],q:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],lit:.77},
@@ -113,10 +122,11 @@ let activeSaveReplay=null;
 export function withM8SaveReplay(owner,operation){
   const previous=activeSaveReplay;
   let scope=null;
-  if(!previous&&owner?.generationProfile?.generator==='mythwrought-five-surface-regions-mountain-v8'){
+  const generator=owner?.generationProfile?.generator;
+  if(!previous&&usesMountainV8Terrain(generator)){
     scope=saveReplayOwners.get(owner);
-    if(!scope||scope.seed!==owner.seed){
-      scope={seed:owner.seed,legacy:new Map(),profile:new Map()};
+    if(!scope||scope.seed!==owner.seed||scope.generator!==generator){
+      scope={seed:owner.seed,generator,legacy:new Map(),profile:new Map()};
       saveReplayOwners.set(owner,scope);
     }
   }
@@ -131,7 +141,7 @@ export function replayWithNaturalMemo(world,kind,operation){
   const scope=activeSaveReplay;
   if(!scope||scope.seed!==world.seed||
     (kind==='legacy'?Object.getPrototypeOf(world)!==VoxelWorld.prototype:
-      kind!=='profile'||world.generationProfile?.generator!=='mythwrought-five-surface-regions-mountain-v8'))
+      kind!=='profile'||world.generationProfile?.generator!==scope.generator))
     return operation();
   const memo=scope[kind],original=world.naturalAndLandmarkBlock;
   world.naturalAndLandmarkBlock=function(x,y,z){
@@ -206,7 +216,8 @@ export class VoxelWorld{
   set(x,y,z,id,rotation=0){
     if(![x,y,z,id,rotation].every(Number.isSafeInteger)||
        y<DEEP_WORLD_MIN_Y||y>PHYSICAL_MAX_Y||
-       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id)||isMountainV8Material(id))||
+       !(id>=0&&id<=8||isBiome130BlockId(id)||environmentGround(id)||isMountainV8Material(id)||id===VEILREACH_GRASS_ID&&
+         this.generationProfile?.generator===VEILREACH_GENERATOR&&this.naturalAndLandmarkBlock(x,y,z)===id)||
        rotation<0||rotation>3||rotation!==0&&!isBiome130BlockId(id))return false;
     const key=worldKey(x,y,z),previous=this.edits.get(key);
     markMobSourceMutation(this);
@@ -267,9 +278,10 @@ export function meshChunk(world,cx,cz,upperSection=0){
   cells.fill(65535); // 16-bit sentinel: old 255 remains reserved; biome130 uses 256..312.
   const extra=new Map();
   const profile=world.base?.generationProfile??world.generationProfile;
-  const v8Mountain=profile?.generator==='mythwrought-five-surface-regions-mountain-v8';
+  const upperVeilreach=upperSection>0&&profile?.generator===VEILREACH_GENERATOR;
+  const v8Mountain=!upperVeilreach&&usesMountainV8Terrain(profile?.generator);
   const originalDesertHalo=isEnvironmentGenerator(profile?.generator)||v8Mountain;
-  const unifiedTerrain=originalDesertHalo||v8Mountain;
+  const unifiedTerrain=originalDesertHalo||upperVeilreach;
   // Cached ONLY for this synchronous surface-mesh rebuild. No cross-chunk
   // mutable cache or per-frame source queries. Original plans decide whether
   // a surface is real and protected rather than cave-exposed subsoil.
@@ -432,7 +444,8 @@ export function meshChunk(world,cx,cz,upperSection=0){
             }
             const face=nx>0?0:nx<0?1:ny>0?2:ny<0?3:nz>0?4:5;
             const lit=[.77,.73,1,.48,.85,.67][face];
-            const color=snowS17Rgb??groundColor??(isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face));
+            const color=snowS17Rgb??groundColor??(id===VEILREACH_GRASS_ID?veilreachGrassColor(x,y,z,face):
+              isMountainV8Flora(id)?mountainV8MaterialColor(id,x,y,z,face):biome130Color(id,x,y,z,face));
             for(let u=t;u<t+3;u++){
               const i=surface.indices[u]*3,px=surface.positions[i],
                     py=surface.positions[i+1],pz=surface.positions[i+2];

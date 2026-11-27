@@ -16,7 +16,7 @@ import {WORLD_MAX_Y} from '../../src/depth.mjs';
 
 const root=process.cwd(),out=path.join(root,'artifacts/manual-v6-live');
 await mkdir(out,{recursive:true});
-const release='20261127-mining-save-replay-v1';
+const release='20261127-veilreach-v1';
 const expectedBank='mythwrought-m5-shell-'+release;
 const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
 const publicEntries=Object.entries(stagedManifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p));

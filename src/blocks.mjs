@@ -1,10 +1,11 @@
+import {VEILREACH_GRASS_ID,veilreachGrass} from './veilreach/flora.mjs';
 // MYTHWROUGHT v0.08 — predictable, reversible basic block interactions.
 // This prototype adds no new inventory or automated mining powers.
 import {BLOCK,BODY_RADIUS,BODY_HEIGHT,raycast} from './voxel.mjs';
 import {PHYSICAL_MAX_Y as WORLD_MAX_Y} from './world-height.mjs';
 import {MOUNTAIN_V8_MATERIAL_IDS,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {ENVIRONMENT_GROUND,environmentGround} from './environment-ground.mjs';
-import {WORLD_MIN_Y} from './depth.mjs';
+import {WORLD_MIN_Y,WORLD_MAX_Y as LEGACY_GENERATION_MAX_Y} from './depth.mjs';
 import {PACK2_LIVE_IDS,PACK2_LIVE_NAMES,isPack2LiveId,
   pack2BodyIntersects,pack2NormalizeState} from './pack2-integration.mjs';
 import {BIOME130_REGISTERED_IDS,biome130Block,isBiome130BlockId} from './biome130-registry.mjs';
@@ -19,6 +20,7 @@ export const BUILD_MATERIALS=Object.freeze([BLOCK.STONE,BLOCK.WOOD,BLOCK.CRYSTAL
 export const BLOCK_NAMES=Object.freeze({
   [BLOCK.AIR]:'air',[BLOCK.GRASS]:'grass',[BLOCK.DIRT]:'earth',
   [BLOCK.STONE]:'stone',[BLOCK.WOOD]:'timber',[BLOCK.CRYSTAL]:'crystal',
+  [VEILREACH_GRASS_ID]:veilreachGrass.name,
   [BLOCK.ORE]:'ore',[BLOCK.LEAVES]:'leaf canopy',[BLOCK.DEEPSTONE]:'deepstone',
   ...Object.fromEntries(Object.values(ENVIRONMENT_GROUND).map(id=>[id,environmentGround(id).name])),
   ...Object.fromEntries(BIOME130_REGISTERED_IDS.map(id=>[id,biome130Block(id).name])),
@@ -85,12 +87,13 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
         next=mode==='mine'?BLOCK.AIR:selected;
   if(previous===next&&(!isBiome130BlockId(next)||previousRotation===rotation))
     return {ok:false,reason:'Block is already in that state'};
-  // The V8 natural support action is one transaction, not repeated single
+  // The natural support action is one transaction, not repeated single
   // rebuilds. Only original unedited natural cells may fall. Never remove
   // Pack2/3/manual or player-authored replacements in the footprint.
   const base=world.base??world;
   const supported=mode==='mine'&&!previousPack2?
-    base.mountainV8SupportedTreeCells?.(...cell)??[]:[];
+    (cell[1]>LEGACY_GENERATION_MAX_Y?base.upperSupportedCells?.(...cell):
+      base.mountainV8SupportedTreeCells?.(...cell))??[]:[];
   if(supported.length){
     const same=(a,b)=>a.every((v,i)=>v===b[i]);
     const cells=[cell,...supported.filter(c=>!same(c,cell)&&
@@ -101,14 +104,14 @@ export function applyBlockAction(world,eye,direction,mode,selected,player,rebuil
     const written=[];
     try{
       for(const entry of before){
-        if(!world.set(...entry.cell,BLOCK.AIR))throw Error('V8 supported cell removal refused');
+        if(!world.set(...entry.cell,BLOCK.AIR))throw Error('Supported vegetation removal refused');
         written.push(entry);
       }
       if(typeof rebuild==='function')rebuild(cell[0],cell[2],cell[1],cells);
     }catch(error){
       for(const entry of written.reverse()){
         if(!world.set(...entry.cell,entry.id,entry.rotation))
-          throw Error('V8 supported tree rollback failed');
+          throw Error('Supported vegetation rollback failed');
       }
       return {ok:false,reason:'Supported tree update failed; original cells restored',error:String(error)};
     }

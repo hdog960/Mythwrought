@@ -1,3 +1,4 @@
+import {VEILREACH_GENERATOR} from '../src/environment-ground.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -29,7 +30,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261127-mining-save-replay-v1';
+  const release='20261127-veilreach-v1';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));
@@ -47,19 +48,19 @@ function fixture({candidates=[179,2026,7654321],cancel=false,saveOK=true,writeOK
   const crypto={getRandomValues:a=>{a[0]=candidates.shift()??179;return a}};
   const source=src.slice(begin,end),importLine="const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');";
   assert.ok(source.includes(importLine));
-  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto','DEFAULT_WORLD_SEED',source.replace(importLine,''))(
+  Function('world','localStorage','rawStorage','window','storageReadOnly','save','readFourRegionProfile','isUnclaimedWorldSeed','mountainEnabled','changed','createMountainV8IsolatedWorld','mountainV8Storage','saveM2World','setMountainV8Active','location','createEnchantedButton','seedInput','seedMessage','worldSeedFromText','document','crypto','DEFAULT_WORLD_SEED','VEILREACH_GENERATOR',source.replace(importLine,''))(
     world,storage,rawStorage,{confirm:text=>{calls.push(['confirm',text]);return !cancel}},readOnly,()=>{calls.push(['save-old']);return saveOK},
     (_,n)=>n===2026?{}:null,(_,n)=>!allClaimed&&n===7654321,true,false,
-    async(seed,opts)=>{calls.push(['admit',seed,opts.confirmed]);assert.equal(opts.storage,rawStorage);return {world:{seed:Number(seed)}};},
+    async(seed,opts)=>{calls.push(['admit',seed,opts.confirmed,opts.generator]);assert.equal(opts.storage,rawStorage);return {world:{seed:Number(seed)}};},
     raw=>{assert.equal(raw,rawStorage);return storage;},
     (scope)=>{assert.equal(scope,storage);calls.push(['save-new']);return {ok:writeOK,reason:'fixture write refused'};},
     (raw,active)=>{assert.equal(raw,rawStorage);assert.equal(active,true);calls.push(['activate']);},
-    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto,179);
+    {reload:()=>calls.push(['reload'])},createEnchantedButton,seedInput,seedMessage,Number,document,crypto,179,VEILREACH_GENERATOR);
   return {click:()=>newWorld.onclick(),calls,seedMessage};
 }
-test('NEW WORLD skips current and claimed seeds then uses verified isolated Mountain V8 admission',async()=>{
+test('NEW WORLD skips current and claimed seeds then uses verified Veilreach admission',async()=>{
   const f=fixture();await f.click();
-  assert.deepEqual(f.calls.find(x=>x[0]==='admit'),['admit','7654321',true]);
+  assert.deepEqual(f.calls.find(x=>x[0]==='admit'),['admit','7654321',true,VEILREACH_GENERATOR]);
   assert.deepEqual(f.calls.map(x=>x[0]),['confirm','save-old','admit','save-new','activate','reload']);
 });
 test('cancel NEW WORLD before creating or saving any new seed',async()=>{
