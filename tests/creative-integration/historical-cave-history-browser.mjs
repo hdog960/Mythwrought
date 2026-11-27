@@ -4,8 +4,9 @@ import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-import {BLOCK,collides,raycast} from '../../src/voxel.mjs';
-import {worldSlotKey} from '../../src/seeds.mjs';
+import {BLOCK,VoxelWorld,collides,raycast} from '../../src/voxel.mjs';
+import {worldSlotKey,DEFAULT_WORLD_SEED,SELECTED_SEED_KEY} from '../../src/seeds.mjs';
+import {saveWorldSafe} from '../../src/persistence.mjs';
 import {caveProfileStorageKey} from '../../src/manual-caves/profile-store.mjs';
 import {prepareExplicitCaveWorld,saveExplicitCaveWorld} from '../../src/manual-caves/game-startup-contract.mjs';
 import {descentRoute} from '../../src/underground-switchback-descent.mjs';
@@ -14,6 +15,15 @@ const OUT='artifacts/historical-cave-history';await mkdir(OUT,{recursive:true});
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const report={head:process.env.GITHUB_SHA??null,seed,complete:false,physicalIphone:false,errors:[],screenshots:[]};
 const records=new Map(),storage={getItem:k=>records.get(k)??null,setItem:(k,v)=>records.set(k,String(v)),removeItem:k=>records.delete(k),key:i=>[...records.keys()][i]??null,get length(){return records.size;}};
+// Pin an authentic existing ordinary world before the historical-load test.
+ // Otherwise production startup can create a random isolated V8 world, which
+ // intentionally prohibits historical Cave World selection in that session.
+const ordinaryKey=worldSlotKey(DEFAULT_WORLD_SEED),ordinaryWorld=new VoxelWorld(DEFAULT_WORLD_SEED);
+assert.ok(ordinaryWorld.set(0,17,0,BLOCK.STONE));
+const ordinarySaved=saveWorldSafe(storage,ordinaryWorld);
+assert.ok(ordinarySaved.ok,JSON.stringify(ordinarySaved));
+assert.equal(storage.getItem(SELECTED_SEED_KEY),String(DEFAULT_WORLD_SEED));
+const ordinaryRaw=storage.getItem(ordinaryKey);
 const chosen=prepareExplicitCaveWorld(storage,seed,{action:'create',approved:true}),world=chosen.world;
 const route=descentRoute();
 let fixture=null;
@@ -37,21 +47,28 @@ const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use
 const ctx=await browser.newContext({viewport:{width:956,height:440},hasTouch:true,isMobile:true,deviceScaleFactor:1,serviceWorkers:'block',storageState:{cookies:[],origins:[{origin,localStorage:[...records].map(([name,value])=>({name,value}))}]}});
 const page=await ctx.newPage();page.on('pageerror',e=>report.errors.push(String(e)));page.on('dialog',d=>d.accept());
 const btn=d=>page.locator('#creativeQuickbar [data-history="'+d+'"]');
-const read=()=>page.evaluate(({key,oldKey,target})=>{const raw=localStorage.getItem(key),journal=localStorage.getItem(key+'.journal');return {id:window.__mythwroughtTest.block(...target),raw,journal,ordinary:localStorage.getItem(oldKey),world:JSON.parse(JSON.parse(raw).raw).world};},{key,oldKey,target});
-const state=async(expected,id)=>{const s=await read();assert.equal(s.id,id);assert.deepEqual(s.world,expected);assert.equal(s.ordinary,null);assert.equal(s.journal,null);return s;};
+const read=()=>page.evaluate(({key,oldKey,ordinaryKey,target})=>{const raw=localStorage.getItem(key),journal=localStorage.getItem(key+'.journal');return {id:window.__mythwroughtTest.block(...target),raw,journal,ordinary:localStorage.getItem(oldKey),otherWorld:localStorage.getItem(ordinaryKey),world:JSON.parse(JSON.parse(raw).raw).world};},{key,oldKey,ordinaryKey,target});
+const state=async(expected,id)=>{const s=await read();assert.equal(s.id,id);assert.deepEqual(s.world,expected);assert.equal(s.ordinary,null);assert.equal(s.otherWorld,ordinaryRaw);assert.equal(s.journal,null);return s;};
 async function load(){
  await page.goto(origin+'/?production-ui=1',{waitUntil:'domcontentloaded',timeout:120000});
- await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene').dataset.loadedChunks)>=25&&document.querySelector('#notice').hidden,null,{timeout:180000});
+ report.stage='ordinary-startup';
+ await page.waitForFunction(seed=>window.__mythwroughtTest?.snapshot().seed===seed&&
+  !window.__mythwroughtTest.caveMode().enabled&&Number(document.querySelector('#scene').dataset.loadedChunks)>=25&&
+  document.querySelector('#notice').hidden,DEFAULT_WORLD_SEED,{timeout:90000});
+ assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeMode()),'legacy');
+ report.stage='historical-load';
  await page.locator('#menu').click();
  await page.evaluate(seed=>{document.getElementById('advancedMenu').open=true;const input=document.getElementById('seedInput');input.value=String(seed);document.getElementById('caveLoadWorld').click();},seed);
  await page.waitForFunction(seed=>window.__mythwroughtTest.caveMode().enabled&&window.__mythwroughtTest.caveMode().seed===seed,seed,{timeout:90000});
  await page.locator('#closeHelp').click();
+ report.stage='deep-region';
  await page.evaluate(({pos,target})=>{const t=window.__mythwroughtTest;t.teleportCave(...pos);t.aimAt(...target);},fixture);
  await page.waitForFunction(({pos})=>{const c=document.querySelector('#scene');return Number(c.dataset.pendingChunks)===0&&Number(c.dataset.loadedChunks)>10&&Math.abs(Number(c.dataset.playerFeet)-pos[1])<.2&&c.dataset.playerColliding==='false';},fixture,{timeout:120000});
 }
 async function shot(name){const b=await page.screenshot({path:OUT+'/'+name+'.png'});report.screenshots.push({name:name+'.png',sha256:sha(b),bytes:b.length});}
 try{
  await load();await state(initial,BLOCK.STONE);
+ report.stage='mine-undo-redo';
  await page.locator('#g2bFlightEnable').check();await page.waitForFunction(()=>!document.querySelector('#creativeQuickbar').hidden);
  await page.waitForFunction(t=>document.querySelector('#scene').dataset.targetBlock===t.join(','),target,{timeout:90000});
  await page.locator('#dig').tap();await state(mined,BLOCK.AIR);assert.equal(await btn('undo').isEnabled(),true);
@@ -76,9 +93,12 @@ try{
  // Reopening via the actual historical load selector must recover the
  // pending transaction without inventing an ordinary-world save.
  await load();const recovered=await read();assert.equal(recovered.id,BLOCK.STONE);
- assert.equal(recovered.raw,failed.raw);assert.equal(recovered.journal,failed.journal);assert.equal(recovered.ordinary,null);
+ assert.equal(recovered.raw,failed.raw);assert.equal(recovered.journal,failed.journal);assert.equal(recovered.ordinary,null);assert.equal(recovered.otherWorld,ordinaryRaw);
  assert.equal(await page.locator('#creativeQuickbar').isVisible(),false);
  report.complete=true;report.fixture=fixture;report.coldReload=true;report.primaryFaultRecovered=true;report.initialSHA256=sha(JSON.stringify(initial));report.minedSHA256=sha(JSON.stringify(mined));
  assert.deepEqual(report.errors,[]);
-}catch(e){report.errors.push(String(e.stack??e));report.complete=false;process.exitCode=1;}
+}catch(e){report.errors.push(String(e.stack??e));report.complete=false;process.exitCode=1;
+ report.failure=await page.evaluate(()=>({notice:document.querySelector('#notice')?.textContent,noticeHidden:document.querySelector('#notice')?.hidden,status:document.querySelector('#status')?.textContent,caveStatus:document.querySelector('#caveWorldStatus')?.textContent,scene:{...document.querySelector('#scene')?.dataset},cave:window.__mythwroughtTest?.caveMode(),seed:window.__mythwroughtTest?.snapshot().seed})).catch(()=>null);
+ await shot('failure').catch(()=>{});
+}
 finally{await writeFile(OUT+'/manifest.json',JSON.stringify(report,null,2)+'\n');console.log('HISTORICAL_CAVE_HISTORY '+JSON.stringify(report));await ctx.close();await browser.close();}
