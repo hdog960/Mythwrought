@@ -1,0 +1,37 @@
+name: Shattered Peaks connected range and real game
+on:
+  push:
+    branches: [dev/shattered-peaks-sp0-sp1-20261126]
+    paths:
+      - '.github/workflows/shattered-peaks-connected-game.yml'
+      - 'src/manual-biomes/shattered-peaks-range-connectivity.mjs'
+      - 'scripts/ci/shattered-peaks-range-connected.mjs'
+      - 'scripts/ci/shattered-peaks-real-game.mjs'
+permissions:
+  contents: read
+jobs:
+  range-and-original-game:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Expanded actual physical connectivity
+        run: |
+          git rev-parse HEAD
+          node --check src/manual-biomes/shattered-peaks-range-connectivity.mjs
+          node --check scripts/ci/shattered-peaks-real-game.mjs
+          node scripts/ci/shattered-peaks-range-connected.mjs
+      - name: Original main renderer read-only source witness
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node scripts/ci/shattered-peaks-real-game.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shattered-peaks-session6
+          path: artifacts/shattered-peaks-session6/
+          if-no-files-found: ignore
