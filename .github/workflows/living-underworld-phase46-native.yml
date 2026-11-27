@@ -1,0 +1,35 @@
+name: Living Underworld completion 7 - retained deck native candidate
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase46-retained-floor-20261127
+    paths:
+      - .github/workflows/living-underworld-phase46-native.yml
+permissions:
+  contents: read
+jobs:
+  retained-deck-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check src/living-underworld/retained-deck-combined-candidate.mjs
+          node --check scripts/underworld/phase46-retained-deck-native.mjs
+      - name: Actual original-source retained deck geometry, full halo and native controller
+        run: node scripts/underworld/phase46-retained-deck-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase46-retained-deck-native
+          path: ${{ runner.temp }}/phase46/
+          retention-days: 7
