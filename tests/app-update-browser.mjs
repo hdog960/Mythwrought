@@ -10,8 +10,8 @@ import {chromium} from 'playwright';
 const BASE_REC_LESS='474f6c2439865454f80b995af31120c024cdbc2d';
 const BASE_CACHE_FIRST='edc6ceae728840bfc361cd8a6437e8a1fa674c42';
 const OLD_CACHE='mythwrought-m5-shell-20261118-v5-recorder';
-const NEW_CACHE='mythwrought-m5-shell-20261126-unified-candidate-v2';
-const RELEASE='20261126-unified-candidate-v2';
+const NEW_CACHE='mythwrought-m5-shell-20261127-unified-creative-navigation-v4';
+const RELEASE='20261127-unified-creative-navigation-v4';
 const oldFiles={
  'index.html':execFileSync('git',['show',BASE_REC_LESS+':index.html'],{encoding:'utf8'}),
  'src/main.mjs':execFileSync('git',['show',BASE_REC_LESS+':src/main.mjs'],{encoding:'utf8'}),
@@ -30,6 +30,13 @@ function historical(relative){
  return oldFiles[relative]=execFileSync('git',['show',ref+':'+relative],{maxBuffer:16*1024*1024});
 }
 const root=process.cwd();
+const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
+const expectedPublicPaths=Object.keys(stagedManifest.assets)
+  .filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p))
+  .map(p=>p==='./'?'/':p.slice(1)).sort();
+assert.equal(new Set(expectedPublicPaths).size,expectedPublicPaths.length);
+assert.ok(expectedPublicPaths.includes('/src/mining-trace.mjs'));
+assert.ok(expectedPublicPaths.includes('/src/main.mjs')&&expectedPublicPaths.includes('/index.html'));
 let deploy='old',requests=0,serverEpoch='a';
 function mime(file){
  if(file.endsWith('.mjs')||file.endsWith('.js'))return 'text/javascript';
@@ -153,15 +160,15 @@ try{
     if(!reg)throw Error('Previous registration missing');
     await reg.update();
   });
-  // The cache name is created BEFORE the 364 real file fetches complete.
+  // The cache name is created BEFORE the complete exact public asset fetches finish.
   // A failed or in-flight installation must never count as an upgraded app.
-  await waitForAsyncCondition(page,async({cacheName,release})=>{
+  await waitForAsyncCondition(page,async({cacheName,release,expectedPaths})=>{
     const names=await caches.keys();
     if(!window.__mwControllerChanged)return false;
     if(!names.includes(cacheName))return false;
     const cache=await caches.open(cacheName);
     const files=await cache.keys();
-    if(files.length!==364)return false;
+    if(files.length!==expectedPaths.length||JSON.stringify(files.map(f=>new URL(f.url).pathname).sort())!==JSON.stringify(expectedPaths))return false;
     const registration=await navigator.serviceWorker.getRegistration('/');
     if(registration?.active?.state!=='activated'||navigator.serviceWorker.controller!==registration.active||registration.installing||registration.waiting)return false;
     const index=new URL('/index.html',location.href).href;
@@ -172,9 +179,9 @@ try{
     return html.includes('data-mw-release="'+release+'"')&&
       html.includes('id="captureToggle"')&&
       ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs'].every(p=>files.some(f=>f.url.endsWith('/'+p)));
-  },{cacheName:NEW_CACHE,release:RELEASE},{timeout:180000});
-  const installed=await page.evaluate(async()=>{
-    const cache=await caches.open('mythwrought-m5-shell-20261126-unified-candidate-v2');
+  },{cacheName:NEW_CACHE,release:RELEASE,expectedPaths:expectedPublicPaths},{timeout:180000});
+  const installed=await page.evaluate(async cacheName=>{
+    const cache=await caches.open(cacheName);
     const index=new URL('/index.html',location.href).href;
     const response=await cache.match(index);
     const rootResponse=await cache.match(new URL('/',location.href).href);
@@ -184,6 +191,7 @@ try{
       html:response?await response.text():null,
       rootOrigin:rootResponse?.headers.get('X-MW-Origin-Build'),
       cachedKeyCount:keys.length,
+      cachedPaths:keys.map(x=>new URL(x.url).pathname).sort(),
       sampleKeys:keys.slice(0,8).map(x=>x.url),
       indexFound:keys.some(x=>x.url===index),
       registration:{active:current?.active?.scriptURL,
@@ -191,9 +199,10 @@ try{
         waiting:current?.waiting?.scriptURL},
       cacheNames:await caches.keys(),
       oldCacheAssetCount:(await (await caches.open('mythwrought-m5-shell-20261118-v5-recorder')).keys()).length};
-  });
+  },NEW_CACHE);
   if(installed.origin!=='new')console.error('HOME SCREEN CACHE DIAGNOSTIC',JSON.stringify(installed));
-  assert.equal(installed.cachedKeyCount,364,'Full exact current offline shell required');
+  assert.equal(installed.cachedKeyCount,expectedPublicPaths.length,'Full exact current offline shell required');
+  assert.deepEqual(installed.cachedPaths,expectedPublicPaths);
   assert.equal(installed.origin,'new',
     'The worker installation copied an old cached index instead of fresh origin source');
   assert.ok(installed.cacheNames.includes(OLD_CACHE)&&

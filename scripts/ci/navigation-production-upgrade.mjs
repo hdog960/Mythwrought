@@ -6,7 +6,10 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
 const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
-const oldRelease='20261125-living-ecosystem-height-v1',release='20261126-unified-candidate-v2',profile='mythwrought-five-surface-regions-mountain-v8';
+const oldRelease='20261127-mining-save-replay-v1',release='20261127-unified-creative-navigation-v4',profile='mythwrought-five-surface-regions-mountain-v8';
+const assetPaths=async root=>Object.keys(JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8')).assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>p==='./'?prefix:prefix+p.slice(2)).sort();
+const [priorPaths,currentPaths]=await Promise.all([assetPaths(prior),assetPaths(current)]);
+assert.equal(new Set(priorPaths).size,priorPaths.length);assert.equal(new Set(currentPaths).size,currentPaths.length);
 const out=path.resolve('artifacts/navigation-upgrade');await mkdir(out,{recursive:true});
 const evidence={oldRelease,release,physicalIphone:false,checks:[]};
 function check(name,value,details={}){evidence.checks.push({name,ok:Boolean(value),...details});console.log('HEIGHT UPGRADE',name,JSON.stringify({ok:Boolean(value),...details}));assert.ok(value,name);}
@@ -51,9 +54,9 @@ try{
   const key='mythwrought-m5-shell-'+marker,exists=(await caches.keys()).includes(key);
   const c=exists?await caches.open(key):null;
   const html=c?await c.match(location.origin+prefix+'index.html'):null;
-  return {exists,count:c?(await c.keys()).length:0,exact:!!html&&(await html.text()).includes('data-mw-release="'+marker+'"'),controller:navigator.serviceWorker.controller?.state??null};
+  return {exists,count:c?(await c.keys()).length:0,paths:c?(await c.keys()).map(r=>new URL(r.url).pathname).sort():[],exact:!!html&&(await html.text()).includes('data-mw-release="'+marker+'"'),controller:navigator.serviceWorker.controller?.state??null};
  },{marker,prefix});
- const waitCache=marker=>poll('complete '+marker+' cache',()=>cacheState(marker),s=>s.exists&&s.count===(marker===release?364:336)&&s.exact&&s.controller==='activated');
+ const waitCache=marker=>poll('complete '+marker+' cache',()=>cacheState(marker),s=>s.exists&&s.count===(marker===release?currentPaths.length:priorPaths.length)&&JSON.stringify(s.paths)===JSON.stringify(marker===release?currentPaths:priorPaths)&&s.exact&&s.controller==='activated');
  const settled=()=>poll('settled surface owner window',()=>page.evaluate(()=>{
   const t=window.__mythwroughtTest,s=t.snapshot(),p=t.m5ObservedPose(),cx=Math.floor(p.x/16),cz=Math.floor(p.z/16),core=[];
   for(let dx=-1;dx<=1;dx++)for(let dz=-1;dz<=1;dz++)core.push((cx+dx)+','+(cz+dz));
@@ -126,7 +129,7 @@ try{
    const html=await response.text();
    return {cacheCount,controlledRelease:html.includes('data-mw-release="'+release+'"'),events:window.__heightWorkerEvents,controller:navigator.serviceWorker.controller?.state};
   },{prefix,release});
-  check('new worker controls canonical cached source',controlled.cacheCount===364&&controlled.controlledRelease&&controlled.controller==='activated'&&controlled.events.some(e=>e.changed===true),controlled);
+  check('new worker controls canonical cached source',controlled.cacheCount===currentPaths.length&&controlled.controlledRelease&&controlled.controller==='activated'&&controlled.events.some(e=>e.changed===true),controlled);
  }catch(error){
   evidence.upgradeWorker=await page.evaluate(async()=>{const sw=navigator.serviceWorker,r=await sw.getRegistration();return {controller:sw.controller?.state,changed:sw.controller!==window.__heightPriorController,active:r?.active?.state,installing:r?.installing?.state,waiting:r?.waiting?.state,events:window.__heightWorkerEvents,cacheNames:await caches.keys()};});
   console.error('HEIGHT WORKER DIAGNOSTICS',JSON.stringify(evidence.upgradeWorker));throw error;
