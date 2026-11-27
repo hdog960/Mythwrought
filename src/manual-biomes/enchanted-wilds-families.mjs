@@ -20,13 +20,17 @@ export function buildWildsFamily(id,x,floor,z,seed,variant=0){
    const k=key(a,b,c);if(struct.has(k)&&!solid)return;
    rows.set(k,[x+a,floor+b,z+c,mat]);if(solid){struct.add(k);if(b===1)footprint.add(key(a,0,c));}
  };
- const bark=G.aetherBark,moon=G.moonLeaves,amethyst=G.aetherLeaves;
+ // Restrained existing full-cube palette. Pale fungal stalk uses existing
+ // gneiss as a temporary ivory material; no registry IDs or shader claims.
+ const bark=id===6||id===8||id===9?G.gneiss:G.aetherBark,moon=G.moonLeaves,amethyst=G.aetherLeaves;
+ const accentRate=id===4?23:id>=5?53:67;
  const trunk=(a,b,c)=>put(a,b,c,bark,true);
  const disk=(cx,y,cz,r,mat,shape=0)=>{
    for(let a=-r;a<=r;a++)for(let c=-r;c<=r;c++){
      if(a*a+c*c>r*r+r)continue;
      if(shape===1&&Math.abs(a)+Math.abs(c)>r+2)continue;
-     const tint=hash(a+x,c+z,y+seed)%19===0?BLOCK.CRYSTAL:mat;
+     const roll=hash(a+x,c+z,y+seed);
+     const tint=roll%accentRate===0?BLOCK.CRYSTAL:mat;
      put(cx+a,y,cz+c,tint);
    }
  };
@@ -41,16 +45,19 @@ export function buildWildsFamily(id,x,floor,z,seed,variant=0){
  }
  if(id<5){
    for(const [dx,dz] of dirs){trunk(dx,1,dz);if(wide)trunk(dx*2,1,dz);trunk(dx,2,dz);}
-   if(id===0){for(const [i,r] of [[-9,3],[-5,4],[-1,3],[1,2],[2,1]]){for(const [dx,dz] of dirs)arm(dx,dz,h+i,Math.min(2,r));disk(0,h+i,0,r,i<0?amethyst:moon,1);}}
+   if(id===0){for(const [i,r] of [[-9,3],[-5,4],[-1,3],[1,2],[2,1]]){for(const [dx,dz] of dirs)arm(dx,dz,h+i,Math.min(2,r));disk(0,h+i,0,r,i<0?amethyst:moon,1);if(i<0)disk(0,h+i+1,0,Math.max(1,r-1),moon,1);}}
    if(id===1){for(const [dx,dz] of dirs){arm(dx,dz,h-3,3,1);disk(dx*3,h-2,dz*3,2,moon);for(let y=h-5;y<h-2;y++)put(dx*4,y,dz*4,moon);}disk(0,h,0,4,moon);disk(0,h+1,0,2,amethyst);}
-   if(id===2){for(const [dx,dz] of dirs){arm(dx,dz,h-6,4,1);disk(dx*4,h-5,dz*4,3,moon);disk(dx*4,h-4,dz*4,2,amethyst);}disk(0,h-1,0,5,amethyst);disk(0,h,0,4,moon);disk(0,h+1,0,3,moon);}
+   if(id===2){for(const [dx,dz] of dirs){arm(dx,dz,h-6,4,1);disk(dx*4,h-5,dz*4,3,moon);disk(dx*4,h-4,dz*4,2,amethyst);}disk(0,h-2,0,5,moon);disk(0,h-1,0,5,moon);disk(0,h,0,4,amethyst);disk(0,h+1,0,3,moon);}
    if(id===3){for(let i=0;i<4;i++){const [dx,dz]=dirs[(i+variant)%4];const y=h-7+i*2;arm(dx,dz,y,3,1);disk(dx*3,y+1,dz*3,3,amethyst,1);disk(dx*3,y+2,dz*3,2,amethyst);}disk(0,h+1,0,2,moon);}
    if(id===4){for(const [dx,dz] of dirs){arm(dx,dz,h-4,3,1);disk(dx*3,h-3,dz*3,2,moon);put(dx*3,h-2,dz*3,BLOCK.CRYSTAL);}disk(0,h-1,0,4,moon,1);disk(0,h,0,3,moon);disk(0,h+1,0,2,moon);put(0,h+2,0,BLOCK.CRYSTAL);}
  }else{
    // Fungal forms: physical block shelves and gills, not ordinary red spotted caps.
    const cap=(cx,y,cz,r,mat)=>{
      disk(cx,y,cz,r,mat);disk(cx,y+1,cz,Math.max(1,r-1),mat);
-     for(const [dx,dz] of dirs)for(let d=1;d<r;d++)put(cx+dx*d,y-1,cz+dz*d,moon);
+     // Connected radial ribs distinguish a fungal underside from leaf plates.
+     const rib=id===6||id===8||id===9?G.gneiss:moon;
+     for(const [dx,dz] of dirs)for(let d=1;d<r;d++)put(cx+dx*d,y-1,cz+dz*d,rib);
+     if(r>=5)for(const [dx,dz] of dirs)for(let d=2;d<r-1;d++)put(cx+dx*d,y-2,cz+dz*d,rib);
    };
    if(id===5){for(let i=0;i<3;i++){const [dx,dz]=dirs[(i+variant)%4],y=h-9+i*4;arm(dx,dz,y,2);cap(dx*2,y,dz*2,3,i===1?moon:amethyst);}cap(0,h,0,3,moon);}
    if(id===6){cap(0,h-1,0,6,amethyst);disk(0,h+1,0,4,amethyst);disk(0,h+2,0,2,moon);}
