@@ -163,6 +163,7 @@ function connectRetainedComponents(c,selectedAir){
 }
 export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=false,inspectProjection=null}={}){
  const c=capture??captureRetainedDeckSource();
+ if(profile?.exactStairways)check(c.socket&&c.interlayer,'HALL_REQUIRES_BOTH_STAIRWAYS');
  const {p,original,cuts,floors,owners,domain,inDomain,data,rawAir,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=c;
  const rows=c.rows.map(r=>({...r})),otherVetoes=[];
  const future=profile?new Set([...c.future].filter(k=>c.socketAir.has(k)||c.interlayerAir.has(k)||gradeHallInsideOriginalMask(original.seed,...xyz(k),profile))):new Set(c.future);

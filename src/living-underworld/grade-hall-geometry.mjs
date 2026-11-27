@@ -27,11 +27,15 @@ export const JOINED_CROWN_PROFILES=freeze([
 // Preserve actual middle hall grades and original gallery clearance; taper
 // the overly broad below-room transition into the original deep tube.
 // These are geometry profiles, never a cut-budget-based truncation.
+const taperedSocketHall=freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-tapered',middleWidth:1.15,middleTailRadius:1.35,crownHeight:3,collarRadius:1.5});
 export const SOCKET_UNION_PROFILES=freeze([
  freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-slender-baseline'}),
- freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-tapered',middleWidth:1.15,middleTailRadius:1.35,crownHeight:3,collarRadius:1.5}),
+ taperedSocketHall,
  freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-ribbed',middleWidth:1.35,middleTailRadius:1.7,crownHeight:4,collarRadius:1.5})
 ]);
+// The captured projection supplies both qualified stair volumes independently.
+// Keep the hall and portal geometry while dropping the duplicate round shafts.
+export const EXACT_STAIR_HALL_PROFILE=freeze({...taperedSocketHall,id:'socket-union-exact-stairs',exactStairways:true});
 function middleCross(x,y,z,r,p){
  const dx=x-r.x,dz=z-r.z;
  if(y<r.y||y>=r.y+p.crownHeight)return false;
@@ -84,7 +88,11 @@ export function gradeHallInsideOriginalMask(seed,x,y,z,p){
  for(let i=0;i<plan.capsules.length;i++){
   const t=plan.capsules[i];
   if(i<16){if(gradeBand(x,y,z,t,i>=8&&p.middleWidth?p.middleWidth:p.halfWidth))return true;}
-  else if(i===16||i===35){const radius=i===16&&p.collarRadius&&y>=plan.layers[0].hub.y-7?p.collarRadius:p.shaftRadius;if(shaft(x,y,z,t,radius))return true;}
+  else if(i===16||i===35){
+   if(p.exactStairways)continue;
+   const radius=i===16&&p.collarRadius&&y>=plan.layers[0].hub.y-7?p.collarRadius:p.shaftRadius;
+   if(shaft(x,y,z,t,radius))return true;
+  }
   else if(i===25&&p.middleTailRadius){const mix=clamp((-80-y)/10),radius=p.middleTailRadius+(t.radius-p.middleTailRadius)*mix;if(shaft(x,y,z,t,radius))return true;}
   else if(shaft(x,y,z,t,t.radius))return true;
  }
