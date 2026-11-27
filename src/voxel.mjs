@@ -104,6 +104,50 @@ export function baseBlock(x,y,z,seed=179){
   if(y<h-2 && y>0 && hash(x*3+y,z*7-y,seed+55)>.975)return BLOCK.ORE;
   return BLOCK.STONE;
 }
+// Save-time replay of immutable natural source cells, never cached save verdicts.
+// Only the M8 synchronous save bridge opens this scope. Each live owner has a
+// bounded primitive cache, not an extra retained terrain world or storage copy.
+const SAVE_REPLAY_LIMIT=2048;
+const saveReplayOwners=new WeakMap();
+let activeSaveReplay=null;
+export function withM8SaveReplay(owner,operation){
+  const previous=activeSaveReplay;
+  let scope=null;
+  if(!previous&&owner?.generationProfile?.generator==='mythwrought-five-surface-regions-mountain-v8'){
+    scope=saveReplayOwners.get(owner);
+    if(!scope||scope.seed!==owner.seed){
+      scope={seed:owner.seed,legacy:new Map(),profile:new Map()};
+      saveReplayOwners.set(owner,scope);
+    }
+  }
+  activeSaveReplay=scope;
+  try{return operation();}finally{activeSaveReplay=previous;}
+}
+// Invoke only on newly constructed restore instances; never a playable world.
+// Keep every original row/set/rotation validation and restore the original
+// method before exposing the resulting world. Cache only expensive historical
+// surface lookups (the deep/upper paths are already cheap and unchanged).
+export function replayWithNaturalMemo(world,kind,operation){
+  const scope=activeSaveReplay;
+  if(!scope||scope.seed!==world.seed||
+    (kind==='legacy'?Object.getPrototypeOf(world)!==VoxelWorld.prototype:
+      kind!=='profile'||world.generationProfile?.generator!=='mythwrought-five-surface-regions-mountain-v8'))
+    return operation();
+  const memo=scope[kind],original=world.naturalAndLandmarkBlock;
+  world.naturalAndLandmarkBlock=function(x,y,z){
+    if(![x,y,z].every(Number.isSafeInteger)||y<LEGACY_WORLD_MIN_Y||y>WORLD_MAX_Y)
+      return original.call(this,x,y,z);
+    const key=worldKey(x,y,z);
+    if(memo.has(key))return memo.get(key);
+    const value=original.call(this,x,y,z);
+    if(!Number.isSafeInteger(value))return value;
+    if(memo.size>=SAVE_REPLAY_LIMIT)memo.delete(memo.keys().next().value);
+    memo.set(key,value);
+    return value;
+  };
+  try{return operation();}finally{delete world.naturalAndLandmarkBlock;}
+}
+
 export class VoxelWorld{
   constructor(seed=179){
     this.seed=seed|0;
@@ -191,9 +235,11 @@ export class VoxelWorld{
   static restore(payload){
     if(!payload||payload.schema!==1||!Number.isInteger(payload.seed)||payload.seed!==(payload.seed|0)||!Array.isArray(payload.edits)||payload.edits.length>300000)throw Error('Unsupported or invalid Mythwrought save');
     const world=new VoxelWorld(payload.seed);
-    for(const row of payload.edits){
-      if(!Array.isArray(row)||row.length!==4||!world.set(...row))throw Error('Save contains invalid voxel edit');
-    }
+    replayWithNaturalMemo(world,'legacy',()=>{
+      for(const row of payload.edits){
+        if(!Array.isArray(row)||row.length!==4||!world.set(...row))throw Error('Save contains invalid voxel edit');
+      }
+    });
     if(payload.rotations!==undefined){
       if(!Array.isArray(payload.rotations)||payload.rotations.length>300000)throw Error('Invalid rotated block state');
       const seen=new Set();

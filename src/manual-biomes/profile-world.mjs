@@ -1,7 +1,7 @@
 // MANUAL M1: canonical, editable four-region world baseline for explicitly NEW profiles.
 // Not loaded by production src/main.mjs until the separately reviewed M2 integration.
 // Legacy VoxelWorld remains unchanged. Schema-1 edit deltas keep their original shape.
-import {VoxelWorld,BLOCK,baseBlock,chunkCoord,terrainHeight,worldKey} from '../voxel.mjs';
+import {VoxelWorld,BLOCK,baseBlock,chunkCoord,terrainHeight,worldKey,replayWithNaturalMemo} from '../voxel.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y,WORLD_MIN_Y} from '../depth.mjs';
 import {PHYSICAL_MAX_Y} from '../world-height.mjs';
 import {isBiome130BlockId} from '../biome130-registry.mjs';
@@ -384,15 +384,17 @@ export function restoreFourRegionWorld(payload,profile){
      !Array.isArray(payload.edits)||payload.edits.length>MAX_EDIT_ROWS)
     throw Error('Invalid saved four-region world');
   const world=new FourRegionWorld(canonical.seed,canonical),seen=new Set();
-  for(const row of payload.edits){
-    if(!Array.isArray(row)||row.length!==4||
-       !row.every(Number.isInteger))throw Error('Malformed biome edit');
-    const [x,y,z,id]=row,key=worldKey(x,y,z);
-    if(seen.has(key)||y<WORLD_MIN_Y||y>PHYSICAL_MAX_Y||
-       !world.set(x,y,z,id)||!world.edits.has(key))
-      throw Error('Duplicate, out-of-range or noncanonical biome edit');
-    seen.add(key);
-  }
+  replayWithNaturalMemo(world,'profile',()=>{
+    for(const row of payload.edits){
+      if(!Array.isArray(row)||row.length!==4||
+         !row.every(Number.isInteger))throw Error('Malformed biome edit');
+      const [x,y,z,id]=row,key=worldKey(x,y,z);
+      if(seen.has(key)||y<WORLD_MIN_Y||y>PHYSICAL_MAX_Y||
+         !world.set(x,y,z,id)||!world.edits.has(key))
+        throw Error('Duplicate, out-of-range or noncanonical biome edit');
+      seen.add(key);
+    }
+  });
   if(payload.rotations!==undefined){
     if(!Array.isArray(payload.rotations)||payload.rotations.length>MAX_EDIT_ROWS)
       throw Error('Malformed biome rotations');
