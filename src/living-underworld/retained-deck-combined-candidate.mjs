@@ -34,7 +34,7 @@ function components(cells,neighbors){
  return {label,sizes};
 }
 const around=k=>{const [x,y,z]=xyz(k);return dirs.map(([a,b,c])=>key(x+a,y+b,z+c));};
-export function inspectRetainedDeckCandidate(){
+export function captureRetainedDeckSource(){
  const p=createPeakGalleryProjection(),{original,cuts,floors}=p,legacy=new VoxelWorld(original.seed);
  const owners=[...new Set([...peak,...selected])],domain=new Set(owners);
  check(owners.length===42,'FROZEN_OWNER_SCOPE_CHANGED');
@@ -82,6 +82,11 @@ export function inspectRetainedDeckCandidate(){
  check(otherVetoes.length===0,'NON_DECK_VETO:'+JSON.stringify(otherVetoes.slice(0,8)));
  for(const c of conflicts)check(floorValues.has(c)&&!revisedAir.has(c),'DECK_GEOMETRY_LOST:'+c);
  for(const c of future){check(rawRequest.has(c)&&!floors.has(c)&&!cuts.has(c),'NEW_GEOMETRY_ESCAPED:'+c);revisedCuts.add(c);}
+ return {p,original,cuts,floors,owners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
+}
+export function inspectRetainedDeckCandidate(){
+ const {p,original,cuts,floors,owners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=captureRetainedDeckSource();
+ const otherVetoes=[],revisedCuts=future;
  const sourceAt=(x,y,z)=>{
   const c=key(x,y,z);if(!halo.has(c))throw Error('OUTSIDE_CAPTURED_ORIGINAL_HALO:'+c);return halo.get(c);
  };
