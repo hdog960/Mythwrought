@@ -1,0 +1,25 @@
+name: Enchanted Wilds E5 scenery owner delta
+on:
+  push:
+    branches: [research/enchanted-wilds-e5-scenery-20261127]
+    paths: [.github/workflows/enchanted-wilds-e5-scenery.yml]
+permissions:
+  contents: read
+jobs:
+  scenery-owner-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Authenticated original owner and focused new scenery contracts
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          for f in src/main.mjs src/voxel.mjs src/world-height.mjs src/nonblock/candidate-scene.mjs src/nonblock/candidate-families.mjs; do
+            test "$(git hash-object "$f")" = "$(git rev-parse HEAD:"$f")"
+          done
+          node --check src/manual-biomes/enchanted-wilds-scenery.mjs
+          node --test tests/manual-biomes/enchanted-wilds-e5-scenery.test.mjs
