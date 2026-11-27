@@ -24,6 +24,8 @@ See [release ledger](docs/RELEASE_LEDGER.md) for **actually verified** implement
 Free static GitHub Pages deployment; no paid services, no mandatory external APIs, no Codex/Work/Vercel dependencies. Offline-first where feasible; world saves and export/import belong to the client. The browser is not a server. Performance on a real iPhone is a release gate, **not a claim implied by desktop tests**.
 
 ## Local development
+Start an assigned development session with the [developer efficiency toolkit](docs/DEVELOPER_EFFICIENCY.md). The same procedure supports GitHub, scheduled lanes, and developers without terminal access.
+
 The initial prototype is intentionally dependency-free. Open `index.html` with a static HTTP server, e.g. `python3 -m http.server 8000`. Run `npm test` for the Node built-in test suite. Later milestones may change internal technology only if acceptance tests are preserved.
 
 **Versioning:** v0.01–v1.00; release numbers are planned targets, not automatically attained. The next release begins only after the current acceptance gate is met.
