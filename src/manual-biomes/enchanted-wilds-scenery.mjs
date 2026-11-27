@@ -48,6 +48,10 @@ export function planWildsScenery(world,cx,cz,regionAt){
   // Confine each source mesh to its disjoint reserved horizontal 4x4 slot.
   const sx=a*16+1+(i&1)*8,sz=b*16+1+(i>>1)*8;
   if(object.min[0]<sx||object.max[0]>sx+6||object.min[2]<sz||object.max[2]>sz+6||object.max[1]>20)continue;
+  // Keep original scene objects out of physical landmark walking approaches.
+  let reserved=false;
+  for(let a=Math.floor(object.min[0]+1e-6);a<Math.ceil(object.max[0]-1e-6);a++)for(let b=Math.floor(object.min[1]+1e-6);b<Math.ceil(object.max[1]-1e-6);b++)for(let c=Math.floor(object.min[2]+1e-6);c<Math.ceil(object.max[2]-1e-6);c++)if(world.wildsSource.reserved?.(a,b,c))reserved=true;
+  if(reserved)continue;
   // Original candidate owner checks exact mesh volume/supports, including
   // physical E5 floor voxels and tall trees. No placement on a cave roof.
   if(!createCandidateScene(world.seed,WILDS_SCENERY_WORLD_ID,[placement],{
