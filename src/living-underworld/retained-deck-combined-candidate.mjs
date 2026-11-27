@@ -129,6 +129,8 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
  // Compare surviving cell membership for each original raw-air component.
  const before=components(rawAir,around),after=components(revisedAir,around),mapped=new Map();
  for(const c of revisedAir){const a=before.label.get(c),b=after.label.get(c);check(a!==undefined,'AIR_CREATED_OUTSIDE_RAW_GEOMETRY');if(!mapped.has(a))mapped.set(a,new Set());mapped.get(a).add(b);}
+ const componentBounds=after.sizes.map(size=>({size,min:[Infinity,Infinity,Infinity],max:[-Infinity,-Infinity,-Infinity],example:null}));
+ for(const [k,id] of after.label){const p=xyz(k),b=componentBounds[id];b.example??=k;for(let i=0;i<3;i++){b.min[i]=Math.min(b.min[i],p[i]);b.max[i]=Math.max(b.max[i],p[i]);}}
  const split=[...mapped].filter(([,ids])=>ids.size>1).map(([id,ids])=>({rawSize:before.sizes[id],pieces:[...ids].map(i=>after.sizes[i])}));
  let boundaryRaw=0,boundaryRevised=0,removedBoundary=0;
  for(const c of rawAir){const [x,y,z]=xyz(c);if(dirs.some(([a,b,d])=>!inDomain(x+a,y+b,z+d))){boundaryRaw++;if(revisedAir.has(c))boundaryRevised++;else removedBoundary++;}}
@@ -171,7 +173,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
  const reachableNew=queue.filter(c=>future.has(c));
  reachableNew.sort((a,b)=>distance.get(b)-distance.get(a)||a.localeCompare(b));
  replay('gallery to new cavern supported floor',reachableNew.find(c=>distance.get(c)<=180));
- if(profile){replay('previous cavern endpoint',parent.has('-656,-32,-2171')?'-656,-32,-2171':null);replay('previous hub endpoint',parent.has('-625,-31,-2153')?'-625,-31,-2153':null);}
+ if(profile){replay('phase47 55-station endpoint',parent.has('-656,-31,-2170')?'-656,-31,-2170':null);replay('previous cavern endpoint',parent.has('-656,-32,-2171')?'-656,-32,-2171':null);replay('previous hub endpoint',parent.has('-625,-31,-2153')?'-625,-31,-2153':null);}
  const anchors=[];
  for(const [name,a] of [['upper hub',plan.layers[0].hub],...Object.entries(plan.layers[0].portals),['upper socket',plan.surfaceSocket]]){
   const inside=inDomain(a.x,a.y,a.z);
@@ -215,7 +217,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
   originalFloorConflicts:conflicts.size,remainingFloorConflicts:0,retainedFloorCells:floorValues.size,
   futureCuts:future.size,otherVetoes:otherVetoes.length,floorReadback,sourceCalls,maxOwnerReads,
   peakCost,selectedCost,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
-   splitComponents:split.length,splitExamples:split.slice(0,8),disappearedComponents:before.sizes.length-mapped.size,
+   splitComponents:split.length,splitExamples:split.slice(0,8),componentBounds:componentBounds.slice(0,16),disappearedComponents:before.sizes.length-mapped.size,
    boundaryRaw,boundaryRevised,removedBoundary},
   seams:{patches,lostPatches,rawCrossings,retainedCrossings,originalOutsideCrossings,lost,externalProposedGeometryNotSourceQualified:true},
   walking:{feet:feet.size,components:walk.sizes.length,reachableFeet:queue.length,reachableNewFeet:reachableNew.length,routes,anchors},
