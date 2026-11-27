@@ -139,17 +139,28 @@ try{
   await aim(crown.x-12,top+1,crown.z-14);
   await shot('04-surface.png');
 
-  const cell=[crown.x+2,terrain.topAt(crown.x+2,crown.z+1),crown.z+1];
-  await aim(...cell);
   const target=()=>page.evaluate(()=>window.__mythwroughtTest.heightTarget());
-  const before=await target();
-  assert.ok(before.canMine&&before.hit[1]>100);
+  const chooseTarget=async(placing,excluded=null)=>{
+    const {x,y,z}=(await flight()).position;
+    for(const [dx,dz] of [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]]){
+      const tx=Math.floor(x)+dx,tz=Math.floor(z)+dz;
+      const floor=terrain.topAt(tx,tz)??Math.floor(y)-1;
+      for(const ty of [floor,floor-1,floor+1]){
+        await aim(tx,ty,tz);
+        const result=await target();
+        if(placing&&result.canPlace&&result.adjacent[1]>100&&
+          result.adjacent.join(',')!==excluded.join(','))return result;
+        if(!placing&&result.canMine&&result.hit[1]>100&&
+          Math.hypot(result.hit[0]+.5-x,result.hit[2]+.5-z)>1.1)return result;
+      }
+    }
+    throw Error('No reachable '+(placing?'placement':'mining')+' target at current stance');
+  };
+  const before=await chooseTarget(false);
   await page.locator('#dig').tap();
   await wait(hit=>window.__mythwroughtTest.block(...hit)===0,before.hit);
-  await aim(crown.x+2,(cell[1]??top)-1,crown.z-1);
-  const placement=await target();
-  assert.ok(placement.canPlace&&placement.adjacent[1]>100);
-  assert.notDeepEqual(placement.adjacent,before.hit);
+  accept('mined',{cell:before.hit});
+  const placement=await chooseTarget(true,before.hit);
   await page.locator('#place').tap();
   await wait(hit=>window.__mythwroughtTest.block(...hit)===3,placement.adjacent);
   const edited=await snapshot();
