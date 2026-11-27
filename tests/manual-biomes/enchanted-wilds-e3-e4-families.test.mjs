@@ -28,7 +28,7 @@ test('ten distinct physical silhouettes, four deterministic variants each, bound
     const a=[x+dx,y+dy,z+dz],k=key(...a);if(cells.has(k)&&!seen.has(k)){seen.add(k);todo.push(a);}
    }}
    assert.equal(seen.size,cells.size,f.name+' disconnected physical cells');
-   assert.ok(p.cells.every(([,y,,id])=>y>10&&y<=PHYSICAL_MAX_Y&&[G.aetherBark,G.aetherLeaves,G.moonLeaves,BLOCK.CRYSTAL].includes(id)));
+   assert.ok(p.cells.every(([,y,,id])=>y>10&&y<=PHYSICAL_MAX_Y&&[G.aetherBark,G.aetherLeaves,G.moonLeaves,G.gneiss,BLOCK.CRYSTAL].includes(id)));
    if(v===0)summaries.push({family:f.name,height:p.height,cells:p.cells.length});
   }
  }
@@ -49,14 +49,14 @@ test('actual current source natural trees and fungi, versioned occupancy, origin
  }
  assert.ok(plans.size>=3&&upper>0);assert.ok([...plans.values()].some(p=>p.id<5));assert.ok([...plans.values()].some(p=>p.id>=5));
  const p=[...plans.values()][0],[x,floor,z]=p.origin;
- assert.ok(floor<19);assert.equal(w.get(x,20,z),G.aetherBark);
+ assert.ok(floor<19);const stem=p.cells.find(([a,b,c])=>a===x&&b===20&&c===z)?.[3];assert.ok([G.aetherBark,G.gneiss].includes(stem));assert.equal(w.get(x,20,z),stem);
  const cx=Math.floor(x/16),cz=Math.floor(z/16),before=meshChunk(w,cx,cz,1);
  assert.ok(before.length>0);validateUpperSectionGeometry(before,new Float32Array());
  assert.equal(collides(w,x+.5,20,z+.5),true);
  assert.deepEqual(raycast(w,[x+.5,20.5,z-2],[0,0,1],7)?.hit,[x,20,z]);
- assert.equal(w.set(x,20,z,BLOCK.AIR),true);assert.equal(w.get(x,20,z),BLOCK.AIR);assert.equal(w.naturalAndLandmarkBlock(x,20,z),G.aetherBark);
+ assert.equal(w.set(x,20,z,BLOCK.AIR),true);assert.equal(w.get(x,20,z),BLOCK.AIR);assert.equal(w.naturalAndLandmarkBlock(x,20,z),stem);
  const edited=meshChunk(w,cx,cz,1);assert.notDeepEqual(edited,before);
- const cold=new WildsFamilyResearchWorld(179);assert.equal(cold.get(x,20,z),G.aetherBark);assert.equal(cold.set(x,20,z,BLOCK.AIR),true);assert.deepEqual(meshChunk(cold,cx,cz,1),edited);
+ const cold=new WildsFamilyResearchWorld(179);assert.equal(cold.get(x,20,z),stem);assert.equal(cold.set(x,20,z,BLOCK.AIR),true);assert.deepEqual(meshChunk(cold,cx,cz,1),edited);
  assert.throws(()=>w.save(),/historical M8/);
  assert.ok(w.wildsSource.stats().sites<=128&&w.wildsSource.stats().chunks<=64);
  console.log('WILDS NATURAL FAMILY SOURCE',JSON.stringify({plans:plans.size,families:[...new Set([...plans.values()].map(p=>p.family))],regions:[...regions],count,upper,keys:keys.size,before:before.byteLength,edited:edited.byteLength}));
