@@ -140,7 +140,7 @@ function connectRetainedComponents(c,selectedAir){
  }
  return {ok:false,reason:'CONNECTOR_COMPONENT_CAP',extra,paths,components:components(open,around).sizes.length};
 }
-export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=false}={}){
+export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=false,inspectProjection=null}={}){
  const c=capture??captureRetainedDeckSource();
  const {p,original,cuts,floors,owners,domain,inDomain,data,rawAir,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=c;
  const rows=c.rows.map(r=>({...r})),otherVetoes=[];
@@ -302,6 +302,9 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
   if(!inDomain(-656,y,z)||!inDomain(-657,y,z)||!compactUpperHubResearchAirAt(original.seed,-656,y,z)||!compactUpperHubResearchAirAt(original.seed,-657,y,z))continue;
   westPatch.originalPairs++;if(projectedAt(-656,y,z)===BLOCK.AIR&&projectedAt(-657,y,z)===BLOCK.AIR){westPatch.actualOpenPairs++;westPatch.examples.push([-656,y,z]);}
  }
+ // Export the exact projection only to the detached native measurement
+ // callback, never a live generator or a writable source.
+ if(inspectProjection)inspectProjection({view,rows,future,owners,original,projectedAt});
  const floorReadback=[...floorValues].every(([c,id])=>projectedAt(...xyz(c))===id);
  check(floorReadback,'RETAINED_DECK_READBACK_FAILED');
  check(JSON.stringify(original.save())===p.initial,'SOURCE_SAVE_MUTATED');
