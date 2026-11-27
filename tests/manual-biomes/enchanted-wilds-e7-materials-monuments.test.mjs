@@ -55,7 +55,7 @@ test('largest fungal sanctuary on original native physical edit/mesh ABI, bounde
  for(const [x,y,z,id] of p.cells){assert.equal(w.get(x,y,z),BLOCK.AIR);assert.ok(w.set(x,y,z,id));const o=physicalRegionAt(x,y,z);owners.set(o.key,o);}
  let bytes=0;
  for(const o of owners.values()){
-   const mesh=meshChunk(w,o.cx,o.cz,o.section??(Number(o.key.split(',').at(-1))+1));
+   const mesh=meshChunk(w,o.cx,o.cz,o.section+1);
    assert.ok(mesh.length>0&&mesh.every(Number.isFinite));
    validateUpperSectionGeometry(mesh,new Float32Array());bytes+=mesh.byteLength;
  }
