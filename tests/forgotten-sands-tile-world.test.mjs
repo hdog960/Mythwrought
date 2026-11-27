@@ -7,13 +7,13 @@ const root=process.env.P0_CURRENT_SOURCE;if(!root)throw Error('Exact current sou
 const load=p=>import(pathToFileURL(resolve(root,p)).href);
 const [P,V,F,H,N,B,S,P2,I2]=await Promise.all(['src/manual-biomes/profile-world.mjs','src/voxel.mjs','src/physics.mjs','src/world-height.mjs','src/world-height-natural-contract.mjs','src/world-height-budget.mjs','src/world-height-stream.mjs','src/pack2-world.mjs','src/pack2-integration.mjs'].map(load));
 const make=seed=>new P.FourRegionWorld(seed,P.fourRegionProfile(seed,P.M8_MOUNTAIN_GENERATOR));
-function walk(world,s,turn){
+function walk(world,original,s,turn){
  const [dx,dz]=[[0,-1],[1,0],[0,1],[-1,0]][turn],r=(s.size-1)/2;
  for(let d=1;d<=8;d++){
   const x=s.x+dx*(r+d)+.5,z=s.z+dz*(r+d)+.5;
   for(let y=19;y>=2;y--){
-   if(!V.collides(world,x,y+.99,z)&&V.collides(world,x,y+.99-.065,z)){
-    const p={x,z,feet:y+.99,yaw:Math.atan2(-dx,-dz),vX:0,vZ:0,vY:0,onGround:true,coyote:.09,jumpBuffer:0},dist=r+d;
+   if(!V.collides(original,x,y,z)&&V.collides(original,x,y-.065,z)&&!V.collides(world,x,y,z)&&V.collides(world,x,y-.065,z)){
+    const p={x,z,feet:y,yaw:Math.atan2(-dx,-dz),vX:0,vZ:0,vY:0,onGround:true,coyote:.09,jumpBuffer:0},dist=r+d;
     const progress=()=>-(p.x-x)*dx-(p.z-z)*dz;
     let a=0,b=0,ok=true;while(progress()<dist&&a++<900){F.stepPlayer(world,p,{forward:1},1/60);if(V.collides(world,p.x,p.feet,p.z)){ok=false;break;}}
     if(!ok||progress()<dist)break;
@@ -30,7 +30,7 @@ test('three new ordinary seeds reconstruct actual composed natural source, curre
   const f=await openP0TileWorld(seed,[[1,0],[0,0]],opts),original=make(seed),w=f.world,wrapped=new P2.Pack2LiveWorld(w),before=JSON.stringify(original.save());
   assert.equal(f.identity.kind,P0_TILE_WORLD_KIND);assert.equal(f.identity.sites.length,1);assert.equal(f.identity.outcomes[0].reason,'not-desert-macrotile');assert.equal(f.placementAuthority,false);
   const q=f.witnesses[0],site=q.site;
-  assert.ok(q.lower&&q.upper);const route=walk(wrapped,site,q.turn);assert.ok(route,'Current composed physical route blocked');
+  assert.ok(q.lower&&q.upper);const route=walk(wrapped,original,site,q.turn);assert.ok(route,'Current composed physical route blocked');
   const upperKeys=new Set();let lower=0,upper=0,meshes=0,peakSection=0,peakCombined=0;
   const r=(site.size-1)/2+8;
   for(let x=site.x-r;x<=site.x+r;x++)for(let z=site.z-r;z<=site.z+r;z++)for(let y=0;y<=17+site.height;y++){
