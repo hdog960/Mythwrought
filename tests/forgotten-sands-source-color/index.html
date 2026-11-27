@@ -1,0 +1,104 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Forgotten Sands grounded moving vista</title></head><body style="margin:0"><canvas width="956" height="440" style="width:100vw;height:100vh"></canvas><script type="module">
+import {coalesceP0VisibleRanges} from '../../src/manual-biomes/forgotten-sands-fast-vista.mjs';
+import {P0_ORIGINAL_SHADERS as original} from '../../.current-source/src/manual-biomes/forgotten-sands-color-shaders.mjs';
+import {buildGpuPipeline} from '../../.current-source/src/gpu-pipeline.mjs';
+import {uploadChunkBuffer} from '../../.current-source/src/gpu-recovery.mjs';
+const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
+const check=(x,m)=>{if(!x)throw Error(m);};
+const req=(w,m)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>{clean();reject(Error('worker timeout'));},60000);const clean=()=>{clearTimeout(timer);w.removeEventListener('message',msg);w.removeEventListener('error',err);};const msg=e=>{clean();e.data.type==='fault'?reject(Error(e.data.error)):resolve(e.data);};const err=e=>{clean();reject(Error(e.message));};w.addEventListener('message',msg);w.addEventListener('error',err);w.postMessage(m);});
+const vertex=`#version 300 es
+precision highp float;
+in vec3 aPos;in vec3 aColor;in vec2 aUv;in float aMat;
+uniform vec3 uEye,uForward,uRight,uUp;uniform float uAspect,uTan;
+out vec3 vColor;out float vDistance;out vec2 vUv;flat out int vMat;out float vPack2Alpha;
+void main(){
+ int d=int(aPos.x)%5;int kind=int(aPos.x)/5;
+ int i=gl_VertexID%6;
+ bool right=i==1||i==2||i==4;bool high=i==2||i==4||i==5;
+ float a=right?aUv.y:aUv.x,r=high?aMat:aPos.z,p=aPos.y;
+ vec3 pos=d<2?vec3(p,r,a):d==2?vec3(a,p,r):vec3(a,r,p);
+ vec3 delta=pos-uEye;float x=dot(delta,uRight),y=dot(delta,uUp),z=dot(delta,uForward);
+ gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);
+ vColor=aColor;vDistance=length(delta);vUv=vec2(a,r);vMat=kind==0?3:40;vPack2Alpha=0.;
+}`;
+async function run(){
+ check(gl,'WebGL2 required');const index=Number(new URLSearchParams(location.search).get('group')??1);
+ const worker=new Worker('./worker.mjs',{type:'module'}),resident=new Map();let far=null,base,farPipe,uploads=0,retired=0,peak=0,peakBytes=0,frames=0,transitionFrames=0;
+ const snapshots=[],images={};let eye=null,originalColors=null,candidateColors=null,farRanges=[],farUploads=0,partialFrames=0,missingFarFrames=0,maxDrawCalls=0;
+ const count=()=>resident.size+(far?1:0),bytes=()=>[...resident.values()].reduce((n,r)=>n+r.bytes,0)+(far?.bytes??0);
+ const audit=()=>{peak=Math.max(peak,count());peakBytes=Math.max(peakBytes,bytes());check(count()<=19&&bytes()<=2610144,'shared resident budget');};
+ const retire=r=>{gl.deleteBuffer(r.buffer);retired++;};
+ const upload=v=>{const b=uploadChunkBuffer(gl,v);gl.bindBuffer(gl.ARRAY_BUFFER,b);check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===v.byteLength,'actual upload bytes');uploads++;return {buffer:b,bytes:v.byteLength,records:v.length/9};};
+ function bind(pipe,camera){
+  gl.useProgram(pipe.terrainProgram);const u=pipe.uniforms,pitch=.11;
+  gl.uniform3fv(u.uEye,camera);gl.uniform3fv(u.uForward,[Math.cos(pitch),Math.sin(pitch),0]);gl.uniform3fv(u.uRight,[0,0,1]);gl.uniform3fv(u.uUp,[-Math.sin(pitch),Math.cos(pitch),0]);
+  gl.uniform1f(u.uAspect,canvas.width/canvas.height);gl.uniform1f(u.uTan,Math.tan(72*Math.PI/360));gl.uniform3fv(u.uFog,[.69,.62,.49]);gl.uniform3fv(u.uSkyLight,[1,.95,.85]);gl.uniform1f(u.uCaveHaze,0);gl.uniform1f(u.uArtQuality,1);
+ }
+ function draw(pipe,r,instance,start=0,nRecords=r.records){
+  gl.bindBuffer(gl.ARRAY_BUFFER,r.buffer);
+  for(const [loc,n,offset] of [[pipe.atPos,3,0],[pipe.atColor,3,12],[pipe.atUv,2,24],[pipe.atMat,1,32]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,36,offset+start*36);gl.vertexAttribDivisor(loc,instance?1:0);}
+  if(instance)gl.drawArraysInstanced(gl.TRIANGLES,0,6,nRecords);else gl.drawArrays(gl.TRIANGLES,0,r.records);
+  if(instance)for(const loc of [pipe.atPos,pipe.atColor,pipe.atUv,pipe.atMat])gl.vertexAttribDivisor(loc,0);
+ }
+ function render(camera,mode='both',pixels=false){
+  gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.69,.62,.49,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const nearDraw=()=>{bind(base,camera);for(const r of resident.values())draw(base,r,false);};
+  const farDraw=()=>{if(far){bind(farPipe,camera);let calls=0;for(const r of coalesceP0VisibleRanges(farRanges,new Set(resident.keys()))){draw(farPipe,far,true,r.start,r.count);calls++;}maxDrawCalls=Math.max(maxDrawCalls,calls);}};
+  if(mode==='reverse'){farDraw();nearDraw();}else{if(mode!=='far')nearDraw();if(mode!=='near')farDraw();}
+  check(gl.getError()===gl.NO_ERROR,'draw error');
+  if(pixels){gl.finish();const p=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,p);return p;}
+ }
+ const raf=async()=>{await new Promise(requestAnimationFrame);frames++;};
+ try{
+  const prep=await req(worker,{type:'prepare',index});
+  base=buildGpuPipeline(gl,original);
+  const fs=original.terrainFragment.replace('mix(29.0,9.0,uCaveHaze)','mix(45.0,9.0,uCaveHaze)').replace('mix(68.0,27.0,uCaveHaze)','mix(155.0,27.0,uCaveHaze)');
+  check(fs!==original.terrainFragment,'far fog patch');
+  farPipe=buildGpuPipeline(gl,{...original,terrainVertex:vertex,terrainFragment:fs});
+  let epoch=0;
+  for(const distance of [48,25]){
+    epoch++;const w=await req(worker,{type:'window',epoch,distance});check(w.epoch===epoch,'window epoch');
+    if(eye){const prev=eye;for(let i=1;i<=4;i++){const camera=prev.map((v,j)=>v+(w.eye[j]-v)*i/5);await raf();render(camera);if(!far)missingFarFrames++;}}
+    eye=w.eye;
+    if(!far){const f=await req(worker,{type:'far',epoch});check(f.epoch===epoch,'far epoch');await raf();originalColors=f.original;candidateColors=f.vertices;far=upload(originalColors);farRanges=f.ranges;farUploads++;audit();}
+    const wanted=new Set(w.near.map(k=>k.key));
+    for(const [k,r] of resident)if(!wanted.has(k)){retire(r);resident.delete(k);}
+    for(const k of w.near)if(!resident.has(k.key)){
+      // Keep the old far buffer drawing while waiting for a single CPU mesh.
+      let done=false,result=null,error=null;req(worker,{type:'near',epoch,key:k.key}).then(v=>{result=v;done=true;},e=>{error=e;done=true;});
+      while(!done){await raf();render(eye);partialFrames++;if(!far)missingFarFrames++;}
+      if(error)throw error;check(result.epoch===epoch&&result.key===k.key,'mesh epoch');
+      await raf();resident.set(k.key,upload(result.vertices));audit();render(eye);transitionFrames++;if(!far)missingFarFrames++;
+    }
+    check(resident.size===18&&farUploads===1,'fixed far ownership');
+    function colors(v){gl.bindBuffer(gl.ARRAY_BUFFER,far.buffer);gl.bufferSubData(gl.ARRAY_BUFFER,0,v);check(gl.getError()===gl.NO_ERROR,'color subdata');check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===far.bytes,'unchanged allocation');}
+    colors(originalColors);
+    const near=render(eye,'near',true),before=render(eye,'both',true),beforeImage=canvas.toDataURL('image/png');
+    colors(candidateColors);
+    const after=render(eye,'both',true),afterImage=canvas.toDataURL('image/png'),reverse=render(eye,'reverse',true),nearAgain=render(eye,'near',true);
+    check(nearAgain.every((v,i)=>v===near[i]),'near pixels changed');
+    let changed=0,visible=0,orderDiff=0,nearChanged=0;
+    for(let i=0;i<after.length;i+=4){
+      const diff=(a,b)=>Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2]);
+      if(diff(after,before)>3)changed++;
+      if(diff(after,near)>15)visible++;
+      if(diff(after,reverse)>3)orderDiff++;
+    }
+    colors(originalColors);const restored=render(eye,'both',true);
+    check(restored.every((v,i)=>v===before[i]),'palette rollback pixel mismatch');
+    check(changed>1000&&visible>100&&orderDiff<100,'paired color visibility or depth gate');
+    images['d'+distance+'-baseline']=beforeImage;images['d'+distance+'-source']=afterImage;
+    snapshots.push({epoch,distance,changed,visible,orderDiff,nearPixelParity:true,rollbackPixelParity:true,farBytes:far.bytes,combinedBytes:bytes(),owners:count()});
+    console.log('P0 COLOR STEP',JSON.stringify(snapshots.at(-1)));
+    render(eye);
+  }
+  for(const r of resident.values())retire(r);resident.clear();if(far){retire(far);far=null;}
+  check(uploads===retired&&count()===0&&farUploads===1&&missingFarFrames===0&&maxDrawCalls<20,'retirement or continuity mismatch');
+  window.p0Images=images;return {diagnosticHistorical18Window:true,index,seed:prep.seed,frames,transitionFrames,partialFrames,missingFarFrames,farUploads,maxDrawCalls,cache:prep.stats,uploads,retired,peak,peakBytes,snapshots,viewport:[canvas.width,canvas.height],finalResident:0};
+ }finally{
+  for(const r of resident.values())gl.deleteBuffer(r.buffer);if(far)gl.deleteBuffer(far.buffer);
+  for(const p of [base,farPipe])if(p){gl.deleteBuffer(p.outlineBuffer);gl.deleteProgram(p.terrainProgram);gl.deleteProgram(p.skyProgram);}worker.terminate();
+ }
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script></body></html>
