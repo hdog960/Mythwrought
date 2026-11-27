@@ -25,9 +25,9 @@ jobs:
           test -z "$(git status --porcelain --untracked-files=all)"
           node --check src/living-underworld/grade-hall-geometry.mjs
           node --check src/living-underworld/retained-deck-combined-candidate.mjs
-          node --check scripts/underworld/phase47-crown-native.mjs
+          node --check scripts/underworld/phase48-crown-native.mjs
       - name: Changed cross-vault geometry budgets, native controller and seam crossings
-        run: node scripts/underworld/phase47-crown-native.mjs
+        run: node scripts/underworld/phase48-crown-native.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
