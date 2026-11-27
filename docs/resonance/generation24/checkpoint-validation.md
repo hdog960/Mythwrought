@@ -1,0 +1,2 @@
+# G4 chained checkpoint input hardening
+Candidate checkpoints now reject nonfinite, negative or unsafe micro-unit cumulative energy and fuel counts exceeding elapsed ticks. These checks are structural only; an external checkpoint can still be forged. Never use as authoritative fuel or network transfer. Run `node --test tests/resonance-generation24-checkpoint-validation.mjs`. Production, saves, inventory, and sibling lanes remain untouched.

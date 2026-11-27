@@ -1,0 +1,4 @@
+# G4 chained budget windows — candidate only
+Contract `resonance-generation-chained-budget-v1` composes the existing observed budget evaluator across consecutive, exact-tick windows. A caller supplies fuel reservations only for the first window; subsequent windows inherit remaining units and reject top-ups, replay, skipped ticks, or source substitutions. The returned checkpoint is an **untrusted candidate ledger**, not an inventory withdrawal receipt, and must not be treated as a tamper-proof save or network authority. The caller must retain checkpoints outside production saves; this module writes no files.
+
+Run `node --test tests/resonance-generation24-chained-budget.mjs`. Native and browser evidence is still required before any integration. No production API, device, network, storage, worldgen, or renderer is registered. :36/:48 must not infer delivered power from candidate output.
