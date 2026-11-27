@@ -3,7 +3,7 @@
 // No original terrain mutation, save, city approval, or production import.
 import {createPeakGalleryProjection} from './peak-gallery-acceptance-renderer.mjs';
 import {compactUpperHubResearchAirAt} from './compact-upper-hub-research.mjs';
-import {planUnderworldRegion} from './worldwide-network.mjs';
+import {planUnderworldRegion,networkAirAt} from './worldwide-network.mjs';
 import {GALLERY_CONSTRUCTION_LIMITS as limits} from './physical-gallery-construction.mjs';
 import {engineWantedSections} from './gallery-streaming-working-set.mjs';
 import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
@@ -35,13 +35,19 @@ function components(cells,neighbors){
  return {label,sizes};
 }
 const around=k=>{const [x,y,z]=xyz(k);return dirs.map(([a,b,c])=>key(x+a,y+b,z+c));};
-export function captureRetainedDeckSource({extraOwners=[]}={}){
+export function captureRetainedDeckSource({extraOwners=[],socket=null}={}){
  const p=createPeakGalleryProjection(),{original,cuts,floors}=p,legacy=new VoxelWorld(original.seed);
  const baseOwners=[...new Set([...peak,...selected])];
  check(baseOwners.length===42,'FROZEN_OWNER_SCOPE_CHANGED');
  check(Array.isArray(extraOwners)&&extraOwners.length<=16&&extraOwners.every(k=>typeof k==='string'&&/^-?\d+,-?\d+,-[45]$/.test(k)),'EXTRA_OWNER_SCOPE');
  const owners=[...new Set([...baseOwners,...extraOwners])],domain=new Set(owners);
  const inDomain=(x,y,z)=>domain.has(owner(x,y,z));
+ const socketAir=socket?.air??new Set(),socketSupports=socket?.support??new Set();
+ const socketConflicts={galleryFloor:0,galleryAir:0,compactSupport:0,addedCuts:0,outsideCompactCuts:0,checkedSupport:0,checkedAir:0};
+ for(const k of socketAir){check(inDomain(...xyz(k)),'SOCKET_AIR_OWNER_MISSING:'+k);if(floors.has(k))socketConflicts.galleryFloor++;check(networkAirAt(original.seed,...xyz(k)),'SOCKET_OUTSIDE_FROZEN_NETWORK:'+k);}
+ for(const k of socketSupports){check(inDomain(...xyz(k)),'SOCKET_SUPPORT_OWNER_MISSING:'+k);if(cuts.has(k))socketConflicts.galleryAir++;check(!socketAir.has(k),'SOCKET_SELF_CONFLICT:'+k);}
+ check(!socketConflicts.galleryFloor&&!socketConflicts.galleryAir,'SOCKET_GALLERY_MUTUAL_VETO');
+ const retainedSupports=new Set([...floors,...socketSupports]);
  const data=new Map(),rows=[],rawAir=new Set(),revisedAir=new Set(),future=new Set(),conflicts=new Set(),otherVetoes=[];
  const rawRequest=new Set(),revisedCuts=new Set(),floorValues=new Map(),halo=new Map();
  let sourceCalls=0,maxOwnerReads=0,checked=0;
@@ -57,18 +63,26 @@ export function captureRetainedDeckSource({extraOwners=[]}={}){
   for(let y=b.minY-1;y<=b.maxY+1;y++)for(let x=cx*16-1;x<=cx*16+16;x++)for(let z=cz*16-1;z<=cz*16+16;z++)get(x,y,z);
   for(let y=b.minY;y<=b.maxY;y++)for(let x=cx*16;x<cx*16+16;x++)for(let z=cz*16;z<cz*16+16;z++){
    const c=key(x,y,z),id=get(x,y,z);data.set(c,id);row.checked++;checked++;
-   const mask=compactUpperHubResearchAirAt(original.seed,x,y,z);
+   const compact=compactUpperHubResearchAirAt(original.seed,x,y,z),stairAir=socketAir.has(c),stairSupport=socketSupports.has(c),mask=compact||stairAir;
    const baseAir=id===BLOCK.AIR||cuts.has(c);
    if(mask)rawRequest.add(c);
    if(baseAir||mask)rawAir.add(c);
-   if(floors.has(c)){
+   if(stairAir||stairSupport){
+    const edited=read(()=>original.edits.has(c)),authored=read(()=>original.environmentCaves.get(x,y,z));
+    const protectedCell=read(()=>legacy.naturalAndLandmarkBlock(x,y,z))!==read(()=>baseBlock(x,y,z,original.seed));
+    const material=read(()=>original.naturalAndLandmarkBlock(x,y,z));
+    check(!edited&&!protectedCell&&(authored===undefined||stairAir&&authored===BLOCK.AIR)&&isCandidateGeologyMaterial(material),'SOCKET_SOURCE_VETO:'+c);
+    if(stairSupport){check(!baseAir&&id!==BLOCK.AIR,'SOCKET_SUPPORT_MISSING:'+c);socketConflicts.checkedSupport++;if(compact)socketConflicts.compactSupport++;}
+    if(stairAir){socketConflicts.checkedAir++;if(!baseAir){socketConflicts.addedCuts++;if(!compact)socketConflicts.outsideCompactCuts++;}}
+   }
+   if(retainedSupports.has(c)){
     check(!baseAir,'RETAINED_DECK_BASELINE_NOT_SOLID:'+c);
     floorValues.set(c,id);
    }
    if(baseAir){revisedAir.add(c);if(mask&&id!==BLOCK.AIR)row.requests++;continue;}
    if(!mask)continue;
    row.requests++;row.newCuts++;
-   if(floors.has(c)){conflicts.add(c);row.retainedDeck++;continue;}
+   if(retainedSupports.has(c)){if(floors.has(c)){conflicts.add(c);row.retainedDeck++;}continue;}
    let reason=null;
    if(original.edits.has(c))reason='PLAYER_EDIT';
    else if(read(()=>original.environmentCaves.get(x,y,z))!==undefined)reason='AUTHORED_SOURCE';
@@ -84,8 +98,8 @@ export function captureRetainedDeckSource({extraOwners=[]}={}){
  // connectivity and combined budget proof are independent mandatory gates.
  check(otherVetoes.length===0,'NON_DECK_VETO:'+JSON.stringify(otherVetoes.slice(0,8)));
  for(const c of conflicts)check(floorValues.has(c)&&!revisedAir.has(c),'DECK_GEOMETRY_LOST:'+c);
- for(const c of future){check(rawRequest.has(c)&&!floors.has(c)&&!cuts.has(c),'NEW_GEOMETRY_ESCAPED:'+c);revisedCuts.add(c);}
- return {p,original,cuts,floors,owners,baseOwners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
+ for(const c of future){check(rawRequest.has(c)&&!retainedSupports.has(c)&&!cuts.has(c),'NEW_GEOMETRY_ESCAPED:'+c);revisedCuts.add(c);}
+ return {p,original,cuts,floors:retainedSupports,galleryFloors:floors,socket,socketAir,socketSupports,socketConflicts,owners,baseOwners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
 }
 // Construct deterministic topology-only connector centerlines through the
 // complete source-qualified compact envelope. No pre-existing solid support
@@ -130,7 +144,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
  const c=capture??captureRetainedDeckSource();
  const {p,original,cuts,floors,owners,domain,inDomain,data,rawAir,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=c;
  const rows=c.rows.map(r=>({...r})),otherVetoes=[];
- const future=profile?new Set([...c.future].filter(k=>gradeHallInsideOriginalMask(original.seed,...xyz(k),profile))):c.future;
+ const future=profile?new Set([...c.future].filter(k=>c.socketAir.has(k)||gradeHallInsideOriginalMask(original.seed,...xyz(k),profile))):new Set(c.future);
  const revisedCuts=future,revisedAir=new Set([...c.revisedAir].filter(k=>!c.future.has(k)||future.has(k)));
  const connector=joinAir?connectRetainedComponents(c,revisedAir):null;
  if(connector)for(const k of connector.extra){future.add(k);revisedAir.add(k);}
@@ -140,7 +154,15 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
  const projectedAt=(x,y,z)=>{
   const c=key(x,y,z);return cuts.has(c)||revisedCuts.has(c)?BLOCK.AIR:sourceAt(x,y,z);
  };
- const view={get:projectedAt,edits:new Map(),rotationAt:()=>0};
+ const view=Object.create(original);
+ Object.defineProperty(view,'get',{value:projectedAt});
+ Object.defineProperty(view,'set',{value(){throw Error('READ_ONLY_COMBINED_PROJECTION');}});
+ const socketReplay=c.socket?{forward:traverseRetainedDescent(view,c.socket.joined),reverse:traverseRetainedDescent(view,[...c.socket.joined].reverse()),stations:c.socket.joined.length}:null;
+ if(socketReplay){
+  socketReplay.supportParity=[...c.socketSupports].every(k=>projectedAt(...xyz(k))===data.get(k)&&data.get(k)!==BLOCK.AIR);
+  socketReplay.airParity=[...c.socketAir].every(k=>projectedAt(...xyz(k))===BLOCK.AIR);
+  socketReplay.ok=socketReplay.forward.ok&&socketReplay.reverse.ok&&socketReplay.supportParity&&socketReplay.airParity;
+ }
  // Independent binary full-cube face census on complete owner interiors and
  // halo, not the sparse changed-face accumulator from previous sessions.
  for(const row of rows){
@@ -287,7 +309,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=
   rawRequests:rows.reduce((n,r)=>n+r.requests,0),rawNewCuts:rows.reduce((n,r)=>n+r.newCuts,0),
   originalFloorConflicts:conflicts.size,remainingFloorConflicts:0,retainedFloorCells:floorValues.size,
   futureCuts:future.size,otherVetoes:otherVetoes.length,floorReadback,sourceCalls,maxOwnerReads,
-  peakCost,selectedCost,middleCost,westPatch,baseOwnerCount:c.baseOwners.length,baseFloorConflicts:rows.filter(r=>c.baseOwners.includes(r.key)).reduce((n,r)=>n+r.retainedDeck,0),connector:connector?{...connector,extra:[...connector.extra]}:null,lowerRoutes,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
+  peakCost,selectedCost,middleCost,westPatch,socketReplay,socketSource:c.socketConflicts,baseOwnerCount:c.baseOwners.length,baseFloorConflicts:rows.filter(r=>c.baseOwners.includes(r.key)).reduce((n,r)=>n+r.retainedDeck,0),connector:connector?{...connector,extra:[...connector.extra]}:null,lowerRoutes,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
    splitComponents:split.length,splitExamples:split.slice(0,8),componentBounds:componentBounds.slice(0,16),disappearedComponents:before.sizes.length-mapped.size,
    boundaryRaw,boundaryRevised,removedBoundary},
   seams:{patches,lostPatches,rawCrossings,retainedCrossings,originalOutsideCrossings,lost,externalProposedGeometryNotSourceQualified:true},
