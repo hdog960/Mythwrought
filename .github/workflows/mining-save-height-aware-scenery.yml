@@ -1,0 +1,81 @@
+name: Mining save height-aware scenery fixture qualification
+on:
+  push:
+    branches: [probe/mining-save-height-aware-scenery-20261127]
+    paths: ['.github/workflows/mining-save-height-aware-scenery.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  remaining-scenery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Verify only test fixture and workflow differ from authorized runtime
+        run: |
+          git fetch --no-tags --depth=1 origin 1879d59c88b971cdf892ba3edd965b6cd9965301
+          git diff --exit-code 1879d59c88b971cdf892ba3edd965b6cd9965301 HEAD -- . ':(exclude)tests/nonblock-catalog-browser.mjs' ':(exclude).github/workflows/mining-save-height-aware-scenery.yml'
+          node --check tests/nonblock-catalog-browser.mjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: mythwrought-browser-smoke
+          run-id: 45933467421
+          github-token: ${{ github.token }}
+          path: prior-evidence
+      - name: Restore and authenticate successful groups against original test source
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          for group in nonblock-runtime nonblock-catalog nonblock-meadow-woodland; do
+            cp -a "prior-evidence/$group" artifacts/
+          done
+          cp tests/nonblock-catalog-browser.mjs /tmp/height-aware-catalog.mjs
+          git show 1879d59c88b971cdf892ba3edd965b6cd9965301:tests/nonblock-catalog-browser.mjs > tests/nonblock-catalog-browser.mjs
+          node --input-type=module -e "import {verifyStageEvidenceGroup} from './scripts/ci/verify-nonblock-evidence.mjs'; for (const g of ['nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland']) {const r=await verifyStageEvidenceGroup(process.cwd(),g); console.log('REUSED',g,r.screenshots.length,r.sourceFiles);}"
+          cp /tmp/height-aware-catalog.mjs tests/nonblock-catalog-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: Corrected exact terrain assertion and independent skipped gates
+        run: |
+          set -uo pipefail
+          python3 -m http.server 4173 >/tmp/mythwrought-nonblock-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          failed=0
+          run_gate() { echo "GATE $*"; "$@" || { echo "FAILED_GATE $*"; failed=1; }; }
+          run_gate env NONBLOCK_CATALOG_SET=enchanted-fungi node tests/nonblock-catalog-browser.mjs
+          run_gate node tests/nonblock-cave-browser.mjs
+          run_gate node tests/nonblock-inherited-extra-browser.mjs
+          run_gate env NONBLOCK_EXTRA_SET=world-props node tests/nonblock-inherited-extra-browser.mjs
+          run_gate node tests/nonblock-offline-browser.mjs
+          run_gate node tests/nonblock-physical-fittings-browser.mjs
+          run_gate node tests/nonblock-effects-browser.mjs
+          run_gate node tests/nonblock-cache-recovery-browser.mjs
+          run_gate node tests/nonblock-habitat-browser.mjs
+          run_gate env NONBLOCK_REVIEW_SET=forest-floor NONBLOCK_REVIEW_LABEL=after NONBLOCK_REVIEW_ORIGIN=http://127.0.0.1:4173 node tests/nonblock-foliage-review-browser.mjs
+          run_gate node tests/nonblock-lod-browser.mjs
+          run_gate env NONBLOCK_EXTRA_COMPARISON=after node tests/nonblock-inherited-extra-browser.mjs
+          run_gate node tests/nonblock-parity-browser.mjs
+          test "$failed" = 0
+      - name: Verify complete roster using original and corrected harness provenance
+        run: |
+          set -euo pipefail
+          # Reused groups fingerprint the original harness. Verify those under
+          # original bytes, then restore the actual corrected harness for fresh
+          # groups. The original verifier retains all roster/PNG/source checks.
+          git show 1879d59c88b971cdf892ba3edd965b6cd9965301:tests/nonblock-catalog-browser.mjs > tests/nonblock-catalog-browser.mjs
+          node --input-type=module -e "import {verifyStageEvidenceGroup} from './scripts/ci/verify-nonblock-evidence.mjs'; import {writeFile} from 'node:fs/promises'; const r=await Promise.all(['nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland'].map(g=>verifyStageEvidenceGroup(process.cwd(),g))); await writeFile('/tmp/reused-groups.json',JSON.stringify(r));"
+          cp /tmp/height-aware-catalog.mjs tests/nonblock-catalog-browser.mjs
+          node --input-type=module -e "import {stageEvidenceGroups,verifyStageEvidenceGroup,verifyStageCatalogCoverage} from './scripts/ci/verify-nonblock-evidence.mjs'; import {readFile,writeFile} from 'node:fs/promises'; const reused=JSON.parse(await readFile('/tmp/reused-groups.json','utf8')); const groups=[...reused,...await Promise.all(stageEvidenceGroups.filter(g=>!reused.some(r=>r.group===g)).map(g=>verifyStageEvidenceGroup(process.cwd(),g)))]; const catalog=verifyStageCatalogCoverage(groups); await writeFile('artifacts/nonblock-evidence-summary.json',JSON.stringify({revision:'1879d59c88b971cdf892ba3edd965b6cd9965301',harnessRevision:process.env.GITHUB_SHA,catalog,groups},null,2)); console.log('VERIFIED_96_SLOT_ROSTER',JSON.stringify(catalog),groups.reduce((n,g)=>n+g.screenshots.length,0));"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mining-save-height-aware-scenery
+          path: artifacts/
+          if-no-files-found: error

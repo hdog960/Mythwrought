@@ -3,7 +3,10 @@ import {createHash} from 'node:crypto';
 import {mkdir,readFile,readdir,writeFile} from 'node:fs/promises';
 import {chromium} from 'playwright';
 import {PNG} from 'pngjs';
-import {VoxelWorld,chunkCoord,raycast} from '../src/voxel.mjs';
+import {VoxelWorld,chunkCoord,chunkWindow,raycast} from '../src/voxel.mjs';
+import {sectionWindow,sectionChunkRadius,surfaceOpeningNearby} from '../src/depth.mjs';
+import {runtimeMeshKey,runtimeSectionForY,physicalBodyRegions,upperOccupancyRevision} from '../src/world-height.mjs';
+import {planHeightStream} from '../src/world-height-stream.mjs';
 import {findSafeSpawn} from '../src/physics.mjs';
 import {ENCHANTED_FUNGI_IDS} from '../src/nonblock-scene48/enchanted-fungi.mjs';
 import {MEADOW_WOODLAND_IDS} from '../src/nonblock-scene48/meadow-woodland.mjs';
@@ -126,10 +129,45 @@ try{
     window.__mythwroughtTest.aimAtStagedPoint(...point);
     return at;
   },aim);
-  const waitForTerrain=({x,z})=>page.waitForFunction(center=>{
-    const data=document.querySelector('#scene').dataset;
-    return data.chunkCenter===center&&Number(data.loadedChunks)===25&&Number(data.pendingChunks)===0;
-  },chunkCoord(x)+','+chunkCoord(z),{timeout:45000});
+  // The original horizontal-only assertion rejects the correct shared-height
+  // center at feet >=16, even if all 25 expected owners have settled. Derive
+  // both sides of the exact floor boundary from the real legacy fixture; do
+  // not alter camera position, gameplay, timeout or the 25-owner budget.
+  function expectedTerrain(pose){
+    const {x,feet,z}=pose, horizontal=chunkCoord(x)+','+chunkCoord(z);
+    const sections=sectionWindow(feet,feet<3&&surfaceOpeningNearby(world,x,z));
+    const base=sections.length===1&&sections[0]===0?horizontal:horizontal+'|'+sections.join(',');
+    const occupancy=upperOccupancyRevision(world);
+    const body=(physicalBodyRegions(pose)??[]).map(r=>r.key);
+    const active=runtimeSectionForY(feet)??0;
+    const center=base+(feet>=16||feet>=3&&occupancy!=='0:0:0:0:0:0'?
+      '|height:'+active+':'+Number(feet>=16)+':'+occupancy+':'+body.join(';')+':'+[x,feet,z].map(v=>Math.floor(v/2)).join(','):'');
+    const legacy=sections.flatMap(section=>chunkWindow(x,z,sectionChunkRadius(section,sections[0])).map(c=>({...c,section})));
+    const owners=planHeightStream(world,pose,legacy).map(c=>runtimeMeshKey(c.cx,c.cz,c.section)).sort();
+    assert.equal(owners.length,25,'Original catalog owner budget');
+    return {center,owners};
+  }
+  const waitForTerrain=async(pose)=>{
+    const {x,z,feet}=pose;
+    // Ground contact may settle a tiny fraction below the integer debug
+    // spawn height. Enumerate exact expected signatures on either side.
+    const options=[0,-.00001,-.001,.00001,.001].map(d=>expectedTerrain({x,z,feet:feet+d}));
+    const expected={pose,options};
+    try{
+      await page.waitForFunction(({pose,options})=>{
+        const d=document.querySelector('#scene').dataset,s=window.__mythwroughtTest.snapshot();
+        return Math.abs(Number(d.playerX)-pose.x)<.001&&Math.abs(Number(d.playerZ)-pose.z)<.001&&
+          Math.abs(Number(d.playerFeet)-pose.feet)<.01&&d.playerGrounded==='true'&&d.playerColliding==='false'&&
+          Number(d.loadedChunks)===25&&Number(d.pendingChunks)===0&&s.pending.length===0&&
+          options.some(o=>d.chunkCenter===o.center&&JSON.stringify([...s.chunks].sort())===JSON.stringify(o.owners));
+      },expected,{timeout:45000});
+    }catch(error){
+      const actual=await page.evaluate(()=>({dataset:{...document.querySelector('#scene').dataset},snapshot:window.__mythwroughtTest.snapshot()}));
+      await writeFile(directory+'/terrain-timeout.json',JSON.stringify({expected,actual,errors},null,2));
+      throw Error('Exact height-aware terrain readiness mismatch '+JSON.stringify({expected,actual,errors}),{cause:error});
+    }
+    if(feet>=16)console.log('HEIGHT_AWARE_CATALOG_TERRAIN',JSON.stringify(await page.evaluate(()=>({center:document.querySelector('#scene').dataset.chunkCenter,feet:document.querySelector('#scene').dataset.playerFeet,owners:window.__mythwroughtTest.snapshot().chunks}))));
+  };
   await waitForTerrain(await setView(benchmark));
   await page.waitForFunction(expected=>{
     const data=document.querySelector('#scene').dataset;
