@@ -29,3 +29,15 @@ The WebGL journey is reproducible with a local server on port 4211 and the proje
 ## Remaining release gates
 
 Visual review comes first. The latest screenshots cover one Verdant Crown. Signed generation and section budgets exercised all three families. A physical iPhone review is still open, including sustained traversal, prior installed Home Screen upgrade, and visual transitions under the mobile renderer. Keep this candidate isolated pending creator direction.
+
+## Production qualification
+
+Creator authorized publication through the existing Home Screen shortcut. The candidate shell is `20261127-veilreach-v1`. The release PR tracks the single normal New World flow, the shared physical height and owner budgets, and qualification scope under #492, #498 and #501. The preview native and flight evidence above applies to its recorded source. The service worker and release identifiers changed for this publication, so this gate verifies fresh install and upgrade bytes.
+
+The installation fixture serves two authentic source trees on one origin. It adds upper and underground edits to a real prior world, installs the previous shell, swaps the server to the release, checks the candidate's cached asset hashes, and reopens the same installation offline. It exercises ordinary New World, checks the distant geometry before any physical upper mesh loads, and verifies the historical save remains intact.
+
+```sh
+mkdir -p /tmp/mythwrought-prior
+git archive 7b04720b4d8d68209e7e47837fbc71e1d26a9b51 | tar -x -C /tmp/mythwrought-prior
+VEILREACH_PREVIOUS_ROOT=/tmp/mythwrought-prior node tests/veilreach-home-screen-browser.mjs
+```

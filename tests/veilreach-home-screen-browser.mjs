@@ -73,6 +73,7 @@ try{
     return game.editBiomeCell(450,-80,450,0)&&game.editBiomeCell(450,256,450,3);
   }),true);
   await page.locator('#menu').click();
+  await page.locator('#advancedMenu > summary').click();
   await page.locator('#save').click();
   await page.locator('#closeHelp').click();
   const saved=await oldSave();
@@ -88,12 +89,6 @@ try{
   // A normal launch boots the old shell first. The game's startup check
   // requests an update, then the next launch uses the activated worker.
   source=candidate;
-  await page.evaluate(()=>{
-    window.releaseControllerChanged=false;
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      window.releaseControllerChanged=true;
-    });
-  });
   await page.reload({waitUntil:'domcontentloaded'});
   // A new script byte starts the install while this launch can still render
   // the previous shell. Wait for the candidate cache, then cold-open it.
