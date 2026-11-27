@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          ref: 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
           path: prior-production
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -35,7 +35,7 @@ jobs:
         id: prepare
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C prior-production rev-parse HEAD)" = 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          test "$(git -C prior-production rev-parse HEAD)" = 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
           node scripts/ci/build-stage-cache-manifest.mjs --check
           node --test tests/creative-integration/creative-history.test.mjs tests/creative-integration/creative-pack5-history.test.mjs
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
@@ -45,13 +45,13 @@ jobs:
         run: |
           python3 -m http.server 4174 > /tmp/unified-http.log 2>&1 &
           node tests/creative-integration/phase5-building-controls-browser.mjs
-      - name: Actual previous-MOB installed cache and upper Pack5 UI
+      - name: Actual previous-production installed cache and upper Pack5 UI
         if: always() && steps.prepare.outcome == 'success'
         run: node scripts/ci/creative-shared-height-upgrade.mjs
-      - name: Actual previous-MOB map discovery and offline waypoints
+      - name: Actual previous-production map discovery and offline waypoints
         if: always() && steps.prepare.outcome == 'success'
         run: node scripts/ci/navigation-production-upgrade.mjs
-      - name: Exact prior MOB rollback and full installed source hash audit
+      - name: Exact prior production rollback and full installed source hash audit
         if: always() && steps.prepare.outcome == 'success'
         run: UNIFIED_PREVIOUS_ROOT=prior-production node tests/unified-mob-upgrade-browser.mjs
       - uses: actions/upload-artifact@v4

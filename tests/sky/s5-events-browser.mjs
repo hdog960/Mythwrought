@@ -1,6 +1,7 @@
 // S5 authentic original-game celestial event vs non-event visual acceptance.
 // No mock art, no teleports and no writes to canonical schema-1 saves.
 import assert from 'node:assert/strict';
+import {assertSkySaveIsolation} from './save-isolation.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -235,7 +236,7 @@ try{
           lunarAgeDays:live.lunarAgeDays,moonPhases:live.moonPhases,
           glError:live.glError,fullImage:full.item.sha256,
           sameTimeNoEventSha256:quiet.item.sha256});
-        assert.deepEqual(await nonSky(page),saved,
+        assertSkySaveIsolation(await nonSky(page),saved,
           entry.id+' changed canonical schema-1 world data');
       }
       // Daytime S1 button must extinguish all S5 effects and preserve S3 age.
@@ -264,7 +265,7 @@ try{
         await screenshot(page,viewport,'meteor-reloaded-repeat',false);
         await screenshot(page,viewport,'meteor-reloaded-repeat',true);
       }
-      assert.deepEqual(await nonSky(page),saved,
+      assertSkySaveIsolation(await nonSky(page),saved,
         'S5 did not protect original source world bytes');
       assert.deepEqual(errors,[],'JavaScript browser errors');
       assert.deepEqual(bad,[],'Missing original game resources');
