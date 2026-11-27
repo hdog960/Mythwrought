@@ -6,9 +6,11 @@ import {physicalRegionAt,PHYSICAL_MAX_Y,LEGACY_GENERATION_MAX_Y} from '../world-
 import {createUpperNaturalRegistry} from '../world-height-natural-contract.mjs';
 import {buildWildsFamily,WILDS_FAMILIES,WILDS_RADIUS} from './enchanted-wilds-families.mjs';
 import {wildsGroundCells} from './enchanted-wilds-ground.mjs';
+import {planWildsLandmark} from './enchanted-wilds-landmarks.mjs';
+import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 const GRID=32,MAX_SITES=128,MAX_CHUNKS=64;
 export const WILDS_UPPER_GENERATOR='mythwrought-upper-enchanted-wilds-e3-e4-research';
-export const WILDS_SOURCE_VERSION='wilds-physical-families-2';
+export const WILDS_SOURCE_VERSION='wilds-physical-families-3';
 export const WILDS_REGIONS=Object.freeze(['Ancientwood','Moonveil Groves','Sporewilds','Starlight Glades','Whispering Ruinwood']);
 const weights=[[0,0,2,2,3,4,5,9],[0,1,1,3,4,5,6],[0,5,5,6,7,8,9],[0,1,3,4,5,6],[0,2,3,3,4,7,8]];
 const hash=(a,b,c,d=0)=>{let n=Math.imul(a,0x7feb352d)^Math.imul(b,0x846ca68b)^Math.imul(c,0x9e3779b1)^Math.imul(d,0x85ebca6b);n=Math.imul(n^(n>>>16),0x45d9f3b);return (n^(n>>>16))>>>0;};
@@ -65,13 +67,19 @@ export function createWildsFamilySource(ground){
        }
        if(owns)plans.push(p);
      }
-   const flora=wildsGroundCells(ground,cx,cz,rows,wildsRegionAt);
-   return bounded(chunks,k,{rows,flora,occupied,plans},MAX_CHUNKS);
+   const landmark=planWildsLandmark(ground,cx,cz,rows,wildsRegionAt),landmarkRows=new Map(),reserved=new Set();
+   if(landmark){
+     for(const [x,y,z,id] of landmark.cells){const k=[x,y,z].join(',');landmarkRows.set(k,id);reserved.add(k);if(y>LEGACY_GENERATION_MAX_Y)occupied.add(physicalRegionAt(x,y,z).key);}
+     for(const p of landmark.approach)reserved.add(p.join(','));
+   }
+   const blocked=new Map(rows);for(const k of reserved)blocked.set(k,1);
+   const flora=wildsGroundCells(ground,cx,cz,blocked,wildsRegionAt);
+   return bounded(chunks,k,{rows,flora,occupied,plans,landmark,landmarkRows,reserved},MAX_CHUNKS);
  }
  const get=(x,y,z)=>{
    if(![x,y,z].every(Number.isSafeInteger)||y<1||y>75||Math.abs(x)>1e7||Math.abs(z)>1e7||v6BiomeAt(x,z,seed)?.name!=='enchanted')return BLOCK.AIR;
    const c=chunk(Math.floor(x/16),Math.floor(z/16)),k=[x,y,z].join(',');
-   return c.rows.get(k)??c.flora.get(k)??BLOCK.AIR;
+   return c.rows.get(k)??c.landmarkRows.get(k)??c.flora.get(k)??BLOCK.AIR;
  };
  const occupied=k=>{
    const m=/^sky:(-?\d+),(-?\d+),(?:[0-9]|1[0-4])$/.exec(k);
@@ -79,6 +87,8 @@ export function createWildsFamilySource(ground){
  };
  return Object.freeze({seed,generator:WILDS_UPPER_GENERATOR,sourceVersion:WILDS_SOURCE_VERSION,get,occupied,revision:()=>0,
    entries:(cx,cz)=>[...chunk(cx,cz).rows].sort(([a],[b])=>a.localeCompare(b)),plans:(cx,cz)=>[...chunk(cx,cz).plans],
+   landmark:(cx,cz)=>chunk(cx,cz).landmark,
+   reserved:(x,y,z)=>chunk(Math.floor(x/16),Math.floor(z/16)).reserved.has([x,y,z].join(',')),
    floraEntries:(cx,cz)=>[...chunk(cx,cz).flora].sort(([a],[b])=>a.localeCompare(b)),
    stats:()=>({sites:sites.size,chunks:chunks.size})});
 }
@@ -95,6 +105,13 @@ export class WildsFamilyResearchWorld extends FourRegionWorld{
  }
  naturalAndLandmarkBlock(x,y,z){
    const base=super.naturalAndLandmarkBlock(x,y,z);
+   // E6: restore living green ground in broad, coherent patches rather than
+   // purple peat everywhere. Only the actual natural cap is recolored with
+   // an existing full-cube material. Historical generators remain untouched.
+   if(this.wildsSource&&(base===G.woodlandLoam||base===G.woodlandPeat)&&y>=0&&y<=LEGACY_GENERATION_MAX_Y){
+     const r=wildsRegionAt(x,z,this.seed),patch=Math.sin(x/13+this.seed*.01)+Math.cos(z/17-this.seed*.015);
+     if(r!==null&&patch>[.05,-.35,.45,-.65,.1][r]){const col=this._columnPlan(x,z);if(col.size&&Math.max(...col.keys())===y&&col.get(y)===base)return G.woodlandMoss;}
+   }
    if(base!==BLOCK.AIR||!this.wildsSource||y<1||y>PHYSICAL_MAX_Y)return base;
    return y>LEGACY_GENERATION_MAX_Y?this.wildsUpper.get(x,y,z):this.wildsSource.get(x,y,z);
  }
