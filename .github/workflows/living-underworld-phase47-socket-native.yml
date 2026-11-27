@@ -1,0 +1,34 @@
+name: Living Underworld completion 8 - socket spiral
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase47-compact-geometry-20261127
+    paths:
+      - .github/workflows/living-underworld-phase47-socket-native.yml
+permissions:
+  contents: read
+jobs:
+  socket-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/living-underworld/upper-socket-spiral-research.mjs
+          node --check scripts/underworld/phase47-upper-socket-native.mjs
+      - name: Source preserving socket spiral geometry and native controller
+        run: node scripts/underworld/phase47-upper-socket-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase47-upper-socket-native
+          path: ${{ runner.temp }}/phase47-socket/
+          retention-days: 7
