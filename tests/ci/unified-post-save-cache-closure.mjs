@@ -22,7 +22,18 @@ const region=(s,a,b)=>{const i=s.indexOf(a),j=s.indexOf(b,i);assert.ok(i>=0&&j>i
 assert.equal(region(cm,'  function publishEditedChunkBatch(','  function refreshEditedMeshes('),region(pm,'  function publishEditedChunkBatch(','  function refreshEditedMeshes('),'Released atomic GPU publisher changed');
 assert.equal(cp.slice(cp.indexOf('export function restoreFourRegionWorld(')),pp.slice(pp.indexOf('export function restoreFourRegionWorld(')),'Released restore validation changed');
 assert.ok(cm.includes("traceMeasure('saveAndExistingReadback',saveOriginal)")&&cm.includes('saveM2World(localStorage,world)'));
-assert.ok(cm.includes('replayCreativeVoxelBatch')&&cm.includes('createObservedNavigator'));
+// Verify the real live import/call chain, rather than expecting a transitive
+// navigation constructor to be imported by main directly.
+const [em,na]=await Promise.all([read(root,'src/exploration-map.mjs'),read(root,'src/navigation00/navigation-adapter.mjs')]);
+assert.match(cm,/import\s*\{\s*replayCreativeVoxelBatch\s*\}\s*from\s*['"]\.\/creative-integration\/creative-voxel-batch\.mjs['"]/,'Creative replay import missing');
+assert.match(cm,/return\s+replayCreativeVoxelBatch\s*\(/,'Creative replay call missing');
+assert.match(cm,/import\s*\{\s*installExplorationMap\s*\}\s*from\s*['"]\.\/exploration-map\.mjs['"]/,'Live map import missing');
+assert.match(cm,/const\s+exploration\s*=\s*installExplorationMap\s*\(/,'Live map installation missing');
+assert.match(em,/import\s*\{\s*createNavigationAdapter\s*\}\s*from\s*['"]\.\/navigation00\/navigation-adapter\.mjs['"]/,'Map adapter import missing');
+assert.match(em,/\bnav\s*=\s*createNavigationAdapter\s*\(/,'Map adapter initialization missing');
+assert.match(na,/import\s*\{\s*createObservedNavigator\s*\}\s*from\s*['"]\.\/observed-navigation\.mjs['"]/,'Observed navigation import missing');
+assert.match(na,/const\s+navigator\s*=\s*createObservedNavigator\s*\(/,'Observed navigator construction missing');
+// Static linkage is not UI proof; the existing integrated browser gates still run.
 assert.ok(!cm.includes('ready=stageEditedChunkBuffers'));
 for(const p of Object.keys(current.assets).filter(p=>p.startsWith('./src/')&&p.endsWith('.mjs')&&(current.assets[p]!==qualified.assets[p]||current.assets[p]!==old.assets[p]))){
  const s=await read(root,p);
