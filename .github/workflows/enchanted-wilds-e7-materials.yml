@@ -1,0 +1,31 @@
+name: Enchanted Wilds E7 materials and monument delta
+on:
+  push:
+    branches: [research/enchanted-wilds-e7-materials-20261127]
+    paths: [.github/workflows/enchanted-wilds-e7-materials.yml]
+permissions:
+  contents: read
+jobs:
+  changed-content-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: candidate
+      - uses: actions/checkout@v4
+        with:
+          ref: 7b04720b4d8d68209e7e47837fbc71e1d26a9b51
+          path: original
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Affected geometry, source, scenery and physical monument/material contracts
+        working-directory: candidate
+        run: |
+          set -euo pipefail
+          git rev-parse HEAD
+          test "$(git -C ../original rev-parse HEAD)" = 7b04720b4d8d68209e7e47837fbc71e1d26a9b51
+          for f in src/main.mjs src/voxel.mjs src/environment-ground.mjs src/world-height.mjs src/world-height-stream.mjs src/world-height-budget.mjs src/nonblock/candidate-scene.mjs src/nonblock/candidate-families.mjs; do cmp "$f" "../original/$f"; done
+          for f in src/manual-biomes/enchanted-wilds-*.mjs; do node --check "$f"; done
+          WILDS_CURRENT_ROOT="$PWD/../original" node --test tests/manual-biomes/enchanted-wilds-e3-e4-families.test.mjs tests/manual-biomes/enchanted-wilds-e5-floor.test.mjs tests/manual-biomes/enchanted-wilds-e5-scenery.test.mjs tests/manual-biomes/enchanted-wilds-e6-e7-landmarks.test.mjs tests/manual-biomes/enchanted-wilds-e7-materials-monuments.test.mjs
