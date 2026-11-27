@@ -5,6 +5,9 @@ export const M7_ENVIRONMENT_GENERATOR='mythwrought-five-surface-regions-v7';
 export const ENCHANTED_P2_GENERATOR='mythwrought-five-surface-regions-v7-enchanted-p2';
 // Fresh-only successor; historical identities never alias it.
 export const SNOW_P1_GENERATOR='mythwrought-five-surface-regions-v7-snow-p1';
+export const M8_MOUNTAIN_GENERATOR='mythwrought-five-surface-regions-mountain-v8';
+export const VEILREACH_GENERATOR='mythwrought-upper-veilreach-v1';
+export const usesMountainV8Terrain=generator=>generator===M8_MOUNTAIN_GENERATOR||generator===VEILREACH_GENERATOR;
 export const SNOW_WIND_RENDER_TAG=44; // Render-only, never a block ID.
 export const isEnvironmentGenerator=generator=>generator===M7_ENVIRONMENT_GENERATOR||generator===ENCHANTED_P2_GENERATOR||generator===SNOW_P1_GENERATOR;
 export const ENVIRONMENT_GROUND=Object.freeze({

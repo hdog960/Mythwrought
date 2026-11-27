@@ -1,6 +1,6 @@
 // Same-install PWA refresh support. No world storage, cache deletion, or worker replacement.
 // Existing M5 registrations are checked across all world profiles; registration remains opt-in.
-export const GAME_RELEASE='20261127-mining-save-replay-v1';
+export const GAME_RELEASE='20261127-veilreach-v1-preview';
 export const GAME_REFRESH_PARAM='mw-refresh';
 export const ASSET_RELEASE_PARAM='mw-release';
 

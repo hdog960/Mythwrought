@@ -8,7 +8,7 @@ import {MOUNTAIN_V8_MATERIAL as M} from './mountain-v8-materials.mjs';
 import {v6BiomeAt} from './v6-balanced-biomes.mjs';
 import {surveyMountainV8Column} from './mountain-v8-source-adapter.mjs';
 import {planMountainV8PhysicalColumn} from './mountain-v8-physical-column.mjs';
-export const M8_MOUNTAIN_GENERATOR='mythwrought-five-surface-regions-mountain-v8';
+export {M8_MOUNTAIN_GENERATOR} from '../environment-ground.mjs';
 const existingTerrain=M;
 // Never consult player edits when generating natural baseline. Real get/set
 // owns their precedence; including edits here would make save restore nondeterministic.

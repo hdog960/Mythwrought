@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261127-mining-save-replay-v1';
+const RELEASE='20261127-veilreach-v1-preview';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261126-mining-diagnostic-v1';
+const PREVIOUS='mythwrought-m5-shell-20261127-mining-save-replay-v1';
 const ROOT='https://example.test/Mythwrought/';
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
@@ -94,7 +94,7 @@ test('complete unified original Home Screen shell installs source-exact and leav
   assert.ok(entries.has(ROOT+'src/manual-biomes/environment-v7.mjs'));
   assert.ok(entries.has(ROOT+'src/nonblock/staged-habitats.mjs'));
   assert.ok(entries.has(ROOT+'src/nonblock/candidate-scene.mjs'));
-  for(const source of ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/floating-islands/sky-source-mesh.mjs'])
+  for(const source of ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/floating-islands/sky-source-mesh.mjs','src/veilreach/source.mjs','src/veilreach/generation.mjs','src/veilreach/distance.mjs','src/veilreach/flora.mjs'])
     assert.ok(entries.has(ROOT+source),'Missing required shared-height source '+source);
   assert.ok(entries.has(ROOT+'index.html'));
   await candidate.activate();
