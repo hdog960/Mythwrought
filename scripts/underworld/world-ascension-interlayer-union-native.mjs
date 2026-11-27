@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { editAffectedChunks } from '../../src/chunks.mjs';
+import { depthMeshKey, verticalEditSections } from '../../src/depth.mjs';
 import { BLOCK } from '../../src/voxel.mjs';
 import { exactQualifiedInterlayer, exactQualifiedSocket } from '../../src/living-underworld/exact-qualified-socket.mjs';
 import { auditGalleryEngineWorkingSet } from '../../src/living-underworld/gallery-streaming-working-set.mjs';
@@ -121,10 +123,31 @@ const output = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'world-ascension-
 await mkdir(output, { recursive: true });
 const report = { ...result, workingSet, nativeBatch, editReuse, faceDelta, residentBudgetPassed, budgetPassed };
 if (process.argv.includes('--with-webgl2')) {
-  const { qualifyEditAppend } = await import('./world-ascension-edit-append-webgl2.mjs');
-  report.gpuEdit = await qualifyEditAppend({ projection, workingSet, owners, editedBatch, faceLimit: limits.faceGrowth });
+  const adjacentY = editY + 1;
+  assert.equal(view.get(editX, adjacentY, editZ), BLOCK.DEEPSTONE);
+  const wanted = new Set(workingSet.peak.wanted);
+  const adjacentOwners = verticalEditSections(adjacentY).flatMap(section => editAffectedChunks(editX, editZ)
+    .map(({ cx, cz }) => depthMeshKey(cx, cz, section))).filter(key => wanted.has(key));
+  assert.deepEqual(new Set(adjacentOwners), new Set(keys));
+  const replaceAdjacent = id => Object.create(edited, { get: { value(x, y, z) {
+    return x === editX && y === adjacentY && z === editZ ? id : edited.get(x, y, z);
+  } } });
+  const nativeSequence = [
+    ['mine', editedBatch],
+    ['mine-adjacent', meshReadOnlySharedBatch(replaceAdjacent(BLOCK.AIR), keys)],
+    ['place-stone', meshReadOnlySharedBatch(replaceAdjacent(BLOCK.STONE), keys)],
+    ['restore-original', batch],
+  ];
+  const edits = nativeSequence.map(([label, stage]) => {
+    assert.equal(stage.ok, true, label);
+    return { label, meshes: stage.meshes };
+  });
+  const { qualifyEditTransaction } = await import('./world-ascension-edit-transaction-webgl2.mjs');
+  report.gpuEdit = await qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit: limits.faceGrowth });
   assert.equal(report.gpuEdit.residentFaces, residentFaces);
-  assert.equal(report.gpuEdit.allocatedFaces, faceDelta.residentPlusChangedRecords);
+  assert.equal(report.gpuEdit.steps[0].uploads, faceDelta.changedFaceTotal);
+  assert.ok(report.gpuEdit.peakWithRollback <= limits.faceGrowth);
+  report.gpuEdit.directOriginalCalls = originalByCell.size;
 }
 await writeFile(resolve(output, 'report.json'), JSON.stringify(report, null, 2));
 console.log(JSON.stringify({
