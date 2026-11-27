@@ -1,0 +1,36 @@
+name: Living Underworld completion 11 - exact socket union
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase50-socket-union-20261127
+    paths:
+      - .github/workflows/living-underworld-phase50-native.yml
+permissions:
+  contents: read
+jobs:
+  socket-union-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/living-underworld/exact-qualified-socket.mjs
+          node --check src/living-underworld/grade-hall-geometry.mjs
+          node --check src/living-underworld/retained-deck-combined-candidate.mjs
+          node --check scripts/underworld/phase50-socket-union-native.mjs
+      - name: Exact socket union, tapered lower geometry and original native mesh
+        run: node scripts/underworld/phase50-socket-union-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase50-socket-union-native
+          path: ${{ runner.temp }}/phase50/
+          retention-days: 7
