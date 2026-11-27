@@ -35,10 +35,12 @@ function components(cells,neighbors){
  return {label,sizes};
 }
 const around=k=>{const [x,y,z]=xyz(k);return dirs.map(([a,b,c])=>key(x+a,y+b,z+c));};
-export function captureRetainedDeckSource(){
+export function captureRetainedDeckSource({extraOwners=[]}={}){
  const p=createPeakGalleryProjection(),{original,cuts,floors}=p,legacy=new VoxelWorld(original.seed);
- const owners=[...new Set([...peak,...selected])],domain=new Set(owners);
- check(owners.length===42,'FROZEN_OWNER_SCOPE_CHANGED');
+ const baseOwners=[...new Set([...peak,...selected])];
+ check(baseOwners.length===42,'FROZEN_OWNER_SCOPE_CHANGED');
+ check(Array.isArray(extraOwners)&&extraOwners.length<=16&&extraOwners.every(k=>typeof k==='string'&&/^-?\d+,-?\d+,-[45]$/.test(k)),'EXTRA_OWNER_SCOPE');
+ const owners=[...new Set([...baseOwners,...extraOwners])],domain=new Set(owners);
  const inDomain=(x,y,z)=>domain.has(owner(x,y,z));
  const data=new Map(),rows=[],rawAir=new Set(),revisedAir=new Set(),future=new Set(),conflicts=new Set(),otherVetoes=[];
  const rawRequest=new Set(),revisedCuts=new Set(),floorValues=new Map(),halo=new Map();
@@ -83,14 +85,53 @@ export function captureRetainedDeckSource(){
  check(otherVetoes.length===0,'NON_DECK_VETO:'+JSON.stringify(otherVetoes.slice(0,8)));
  for(const c of conflicts)check(floorValues.has(c)&&!revisedAir.has(c),'DECK_GEOMETRY_LOST:'+c);
  for(const c of future){check(rawRequest.has(c)&&!floors.has(c)&&!cuts.has(c),'NEW_GEOMETRY_ESCAPED:'+c);revisedCuts.add(c);}
- return {p,original,cuts,floors,owners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
+ return {p,original,cuts,floors,owners,baseOwners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
 }
-export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
+// Construct deterministic topology-only connector centerlines through the
+// complete source-qualified compact envelope. No pre-existing solid support
+// can be removed. This is explicit added geometry, not filtering a failure
+// or certifying a one-voxel bore as a walkable corridor.
+function connectRetainedComponents(c,selectedAir){
+ const open=new Set(selectedAir),extra=new Set(),paths=[];
+ const available=c.revisedAir,root=key(-628,-30,-2162);
+ for(let round=0;round<12;round++){
+  const parts=components(open,around);
+  if(parts.sizes.length<=1)return {ok:true,extra,paths,components:parts.sizes.length};
+  const id=parts.label.get(root);if(id===undefined)throw Error('CONNECTOR_ROOT_MISSING');
+  // Dijkstra in integer buckets: cost1 for open passage, cost8 for new
+  // excavation, deterministic tie order. Cap path search and new cuts.
+  const buckets=Array.from({length:2049},()=>[]),dist=new Map(),parent=new Map();
+  for(const [k,v] of parts.label)if(v===id){dist.set(k,0);parent.set(k,null);buckets[0].push(k);}
+  let found=null,visited=0;
+  outer:for(let d=0;d<buckets.length;d++)for(const k of buckets[d]){
+   if(dist.get(k)!==d)continue;
+   if(++visited>available.size)break outer;
+   if(open.has(k)&&parts.label.get(k)!==id){found=k;break outer;}
+   for(const n of around(k)){
+    if(!available.has(n))continue;
+    const nd=d+(open.has(n)?1:8);
+    if(nd>=buckets.length||nd>=(dist.get(n)??Infinity))continue;
+    dist.set(n,nd);parent.set(n,k);buckets[nd].push(n);
+   }
+  }
+  if(!found)return {ok:false,reason:'NO_SOURCE_SAFE_AIR_CONNECTOR',extra,paths,components:parts.sizes.length};
+  const path=[];for(let k=found;k!==null;k=parent.get(k))path.push(k);
+  path.reverse();
+  const additions=path.filter(k=>!open.has(k));
+  if(extra.size+additions.length>128||path.length>192)return {ok:false,reason:'CONNECTOR_GEOMETRY_CAP',extra,paths,components:parts.sizes.length};
+  for(const k of additions){check(c.future.has(k)&&!c.floors.has(k),'CONNECTOR_SOURCE_ESCAPE');extra.add(k);open.add(k);}
+  paths.push({from:path[0],to:path.at(-1),length:path.length,newCuts:additions.length,cells:additions});
+ }
+ return {ok:false,reason:'CONNECTOR_COMPONENT_CAP',extra,paths,components:components(open,around).sizes.length};
+}
+export function inspectRetainedDeckCandidate({capture=null,profile=null,joinAir=false}={}){
  const c=capture??captureRetainedDeckSource();
  const {p,original,cuts,floors,owners,domain,inDomain,data,rawAir,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=c;
  const rows=c.rows.map(r=>({...r})),otherVetoes=[];
  const future=profile?new Set([...c.future].filter(k=>gradeHallInsideOriginalMask(original.seed,...xyz(k),profile))):c.future;
  const revisedCuts=future,revisedAir=new Set([...c.revisedAir].filter(k=>!c.future.has(k)||future.has(k)));
+ const connector=joinAir?connectRetainedComponents(c,revisedAir):null;
+ if(connector)for(const k of connector.extra){future.add(k);revisedAir.add(k);}
  const sourceAt=(x,y,z)=>{
   const c=key(x,y,z);if(!halo.has(c))throw Error('OUTSIDE_CAPTURED_ORIGINAL_HALO:'+c);return halo.get(c);
  };
@@ -173,15 +214,36 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
  const reachableNew=queue.filter(c=>future.has(c));
  reachableNew.sort((a,b)=>distance.get(b)-distance.get(a)||a.localeCompare(b));
  replay('gallery to new cavern supported floor',reachableNew.find(c=>distance.get(c)<=180));
- if(profile){replay('phase47 55-station endpoint',parent.has('-656,-31,-2170')?'-656,-31,-2170':null);replay('previous cavern endpoint',parent.has('-656,-32,-2171')?'-656,-32,-2171':null);replay('previous hub endpoint',parent.has('-625,-31,-2153')?'-625,-31,-2153':null);}
+ if(profile){replay('phase48 52-station endpoint',parent.has('-653,-31,-2168')?'-653,-31,-2168':null);replay('phase47 55-station endpoint',parent.has('-656,-31,-2170')?'-656,-31,-2170':null);replay('previous cavern endpoint',parent.has('-656,-32,-2171')?'-656,-32,-2171':null);replay('previous hub endpoint',parent.has('-625,-31,-2153')?'-625,-31,-2153':null);}
  const anchors=[];
- for(const [name,a] of [['upper hub',plan.layers[0].hub],...Object.entries(plan.layers[0].portals),['upper socket',plan.surfaceSocket]]){
+ for(const [name,a] of [['upper hub',plan.layers[0].hub],['middle hub',plan.layers[1].hub],...Object.entries(plan.layers[0].portals),['upper socket',plan.surfaceSocket]]){
   const inside=inDomain(a.x,a.y,a.z);
   if(!inside){anchors.push({name,anchor:a,scope:'outside finite owner union',qualified:false});continue;}
   const options=queue.filter(c=>{const [x,y,z]=xyz(c);return Math.hypot(x-a.x,z-a.z)<=3&&Math.abs(y-a.y)<=10;})
    .sort((a,b)=>distance.get(a)-distance.get(b));
   anchors.push({name,anchor:a,scope:'inside',reachableSupportedFeet:options.length,qualified:false});
   replay(name,options[0]);
+ }
+ // Independently replay genuine lower chamber walking on the expanded
+ // owner snapshot. Do not imply upper/lower pedestrian continuity.
+ const middle=plan.layers[1].hub,lowerRoutes=[];
+ if(c.owners.length>42){
+  const lowerFeet=[...feet].filter(k=>{const [x,y,z]=xyz(k);return y>=middle.y-4&&y<=middle.y+5&&Math.abs(x-middle.x)<=32&&Math.abs(z-middle.z)<=32;});
+  const startLower=lowerFeet.filter(k=>{const [x,y,z]=xyz(k);return Math.abs(x-middle.x)+Math.abs(z-middle.z)<=3&&Math.abs(y-middle.y)<=2;}).sort((a,b)=>{
+   const score=k=>{const [x,y,z]=xyz(k);return Math.abs(x-middle.x)+Math.abs(y-middle.y)+Math.abs(z-middle.z);};return score(a)-score(b)||a.localeCompare(b);
+  })[0];
+  if(startLower){
+   const allowed=new Set(lowerFeet),parents=new Map([[startLower,null]]),q=[startLower];
+   for(let i=0;i<q.length;i++)for(const n of adjacent(q[i]))if(allowed.has(n)&&!parents.has(n)){parents.set(n,q[i]);q.push(n);}
+   for(const [label,predicate] of [['west lower opening',([x,y,z])=>x<=middle.x-24&&Math.abs(z-(middle.z+6))<=3],['north lower hall',([x,y,z])=>z<=middle.z-16],['east lower hall',([x,y,z])=>x>=middle.x+20]]){
+    const target=q.find(k=>predicate(xyz(k)));
+    if(!target){lowerRoutes.push({label,ok:false,reason:'NO_SUPPORTED_TARGET'});continue;}
+    const route=[];for(let k=target;k!==null;k=parents.get(k)){const [x,feet,z]=xyz(k);route.push({x,feet,z});}
+    route.reverse();let forward,reverse;
+    try{forward=traverseRetainedDescent(view,route);reverse=traverseRetainedDescent(view,[...route].reverse());}catch(e){lowerRoutes.push({label,ok:false,reason:String(e),stations:route.length});continue;}
+    lowerRoutes.push({label,target,stations:route.length,forward,reverse,ok:forward.ok&&reverse.ok});
+   }
+  }else lowerRoutes.push({label:'middle hub',ok:false,reason:'NO_SUPPORTED_MIDDLE_START'});
  }
  // Compare actual crossing pairs on every owner-union boundary plane.
  // External future AIR is hypothetical, not source-admitted. For each raw
@@ -208,7 +270,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
   for(const [k,id] of labels.label){const entry=cells.get(k);counts[id].kept+=Number(entry.survives);counts[id].example??=k;originalOutsideCrossings+=Number(entry.survives&&entry.originalOutsideAir);}
   for(const row of counts){patches++;rawCrossings+=row.size;retainedCrossings+=row.kept;if(!row.kept){lostPatches++;if(lost.length<12)lost.push({plane,...row});}}
  }
- const peakCost=cost(peak,stage),selectedCost=cost(selected,stage);
+ const peakCost=cost(peak,stage),selectedCost=cost(selected,stage),middleCost=cost(engineWantedSections(-40,-135,-5));
  const floorReadback=[...floorValues].every(([c,id])=>projectedAt(...xyz(c))===id);
  check(floorReadback,'RETAINED_DECK_READBACK_FAILED');
  check(JSON.stringify(original.save())===p.initial,'SOURCE_SAVE_MUTATED');
@@ -216,7 +278,7 @@ export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
   rawRequests:rows.reduce((n,r)=>n+r.requests,0),rawNewCuts:rows.reduce((n,r)=>n+r.newCuts,0),
   originalFloorConflicts:conflicts.size,remainingFloorConflicts:0,retainedFloorCells:floorValues.size,
   futureCuts:future.size,otherVetoes:otherVetoes.length,floorReadback,sourceCalls,maxOwnerReads,
-  peakCost,selectedCost,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
+  peakCost,selectedCost,middleCost,baseOwnerCount:c.baseOwners.length,baseFloorConflicts:rows.filter(r=>c.baseOwners.includes(r.key)).reduce((n,r)=>n+r.retainedDeck,0),connector:connector?{...connector,extra:[...connector.extra]}:null,lowerRoutes,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
    splitComponents:split.length,splitExamples:split.slice(0,8),componentBounds:componentBounds.slice(0,16),disappearedComponents:before.sizes.length-mapped.size,
    boundaryRaw,boundaryRevised,removedBoundary},
   seams:{patches,lostPatches,rawCrossings,retainedCrossings,originalOutsideCrossings,lost,externalProposedGeometryNotSourceQualified:true},
