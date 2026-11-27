@@ -17,10 +17,11 @@ export function buildWildsFamily(id,x,floor,z,seed,variant=0){
  if(floor+h+3>PHYSICAL_MAX_Y)return null;
  const rows=new Map(),struct=new Set(),footprint=new Set(),roles=new Map();
  const palette=wildsFamilyPalette(id);
+ const leafRole=mat=>[1,2,4].includes(id)?(mat===G.moonLeaves?'crown':'secondary'):(mat===G.moonLeaves?'secondary':'crown');
  const put=(a,b,c,mat,solid=false,role=null)=>{
    if(Math.abs(a)>WILDS_RADIUS||Math.abs(c)>WILDS_RADIUS||b<1||b>h+3)throw Error('Wilds geometry exceeded envelope');
    const k=key(a,b,c);if(struct.has(k)&&!solid)return;
-   rows.set(k,[x+a,floor+b,z+c,mat]);roles.set(k,role??(solid?'stem':mat===BLOCK.CRYSTAL?'accent':mat===G.moonLeaves?'secondary':'crown'));if(solid){struct.add(k);if(b===1)footprint.add(key(a,0,c));}
+   rows.set(k,[x+a,floor+b,z+c,mat]);roles.set(k,role??(solid?'stem':mat===BLOCK.CRYSTAL?'accent':leafRole(mat)));if(solid){struct.add(k);if(b===1)footprint.add(key(a,0,c));}
  };
  // Restrained existing full-cube palette. Pale fungal stalk uses existing
  // gneiss as a temporary ivory material; no registry IDs or shader claims.
@@ -33,7 +34,7 @@ export function buildWildsFamily(id,x,floor,z,seed,variant=0){
      if(shape===1&&Math.abs(a)+Math.abs(c)>r+2)continue;
      const roll=hash(a+x,c+z,y+seed);
      const tint=roll%accentRate===0?BLOCK.CRYSTAL:mat;
-     put(cx+a,y,cz+c,tint,false,tint===BLOCK.CRYSTAL?'accent':id>=5?'crown':mat===moon?'secondary':'crown');
+     put(cx+a,y,cz+c,tint,false,tint===BLOCK.CRYSTAL?'accent':id>=5?'crown':leafRole(mat));
    }
  };
  const dirs=[[1,0],[0,1],[-1,0],[0,-1]];
