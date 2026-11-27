@@ -49,42 +49,42 @@ function findOffsetApproach({hub,original,cuts,floors,spiral,fp}){
   // but this planning search intentionally selects known physical gallery feet).
   if(cuts.has(key(x,y,z))&&cuts.has(key(x,y+1,z)))startCandidates.add(key(x,y,z));
  }
- const stepSafe=(a,b)=>{
-  const dx=b.x-a.x,dz=b.z-a.z;
-  const offsets=dx?[[0,-1],[0,0],[0,1]]:[[-1,0],[0,0],[1,0]];
-  for(const p of [a,b])for(const [ox,oz] of offsets){
-   const x=p.x+ox,z=p.z+oz,solid=key(x,p.y-1,z);
-   if(cuts.has(solid)||fp.clearance.has(solid))return false;
-   for(let h=0;h<3;h++){
-    const y=p.y+h,k=key(x,y,z);
-    if(floors.has(k)||fp.support.has(k)||!networkAirAt(original.seed,x,y,z))return false;
-   }
-  }
-  return true;
- };
- // Search backwards from raised stair landing. Grade is monotonic upward
- // toward the shaft; lateral detour happens below the first spiral turn.
- const q=[finish],parent=new Map([[end,null]]),dist=new Map([[end,0]]);
- let tried=0;
- for(let i=0;i<q.length&&i<2800;i++){
-  const p=q[i],id=key(p.x,p.y,p.z);
-  if(startCandidates.has(id)&&dist.get(id)>=3){
-   const prefix=[];for(let k=id;k!==null;k=parent.get(k)){const [x,y,z]=xyz(k);prefix.push({x,y,z});}
-   const route=[...prefix,...spiral.slice(1)],proposal=proposalOf(route);
-   const combined=compileGalleryConstructionFootprint(proposal);
-   tried++;
-   if(combined.ok&&![...combined.support].some(k=>cuts.has(k))&&
-    ![...combined.clearance].some(k=>floors.has(k)||!networkAirAt(original.seed,...xyz(k))))return {route,proposal,footprint:combined,approachStations:prefix.length,searchNodes:q.length,tried};
-   if(tried>=12)break;
-  }
-  if(dist.get(id)>=24)continue;
+ // Exact incremental footprint: the existing compiler uses the arriving
+ // edge's cross-axis, not the union of incoming and outgoing widths.
+ // At a turn the current first station is provisional until prepended.
+ const cells=(p,dx)=>{const support=[],air=[];for(let w=-1;w<=1;w++){
+  const x=p.x+(dx?0:w),z=p.z+(dx?w:0);
+  support.push(key(x,p.y-1,z));for(let h=0;h<3;h++)air.push(key(x,p.y+h,z));
+ }return {support,air};};
+ const tailSupport=new Set(),tailAir=new Set();
+ for(let i=1;i<spiral.length;i++){const p=spiral[i],q=spiral[i-1],c=cells(p,p.x-q.x);for(const k of c.support)tailSupport.add(k);for(const k of c.air)tailAir.add(k);}
+ const safe=(c,s,a)=>c.support.every(k=>!cuts.has(k)&&!a.has(k))&&c.air.every(k=>!floors.has(k)&&!s.has(k)&&networkAirAt(original.seed,...xyz(k)));
+ const extend=(state,c)=>({s:new Set([...state.s,...c.support]),a:new Set([...state.a,...c.air])});
+ const q=[{route:[finish],s:tailSupport,a:tailAir}],visits=new Map();
+ let tried=0,pruned=0,searchNodes=0;
+ // Bounded path-aware search; retain up to three genuinely different
+ // arrival histories per location/heading instead of one shortest parent.
+ // Never weaken the final independent full-footprint or source gate.
+ for(let i=0;i<q.length&&i<4200;i++){
+  const st=q[i],p=st.route[0];searchNodes++;
+  if(st.route.length>=25)continue;
   for(const [dx,dz] of cardinal)for(const dy of [0,-1]){
    const n={x:p.x+dx,y:p.y+dy,z:p.z+dz},k=key(n.x,n.y,n.z);
-   if(parent.has(k)||Math.abs(n.x-hub.x)>12||Math.abs(n.z-hub.z)>12||n.y<hub.y-2||!stepSafe(n,p))continue;
-   parent.set(k,id);dist.set(k,dist.get(id)+1);q.push(n);
+   if(Math.abs(n.x-hub.x)>12||Math.abs(n.z-hub.z)>12||n.y<hub.y-2||st.route.some(v=>key(v.x,v.y,v.z)===k))continue;
+   const arriving=cells(p,dx),first=cells(n,dx);
+   if(!safe(arriving,st.s,st.a)){pruned++;continue;}
+   const next=extend(st,arriving),prefix=[n,...st.route];
+   if(startCandidates.has(k)&&prefix.length>=4&&safe(first,next.s,next.a)){
+    const route=[...prefix,...spiral.slice(1)],proposal=proposalOf(route),combined=compileGalleryConstructionFootprint(proposal);
+    tried++;
+    if(combined.ok&&![...combined.support].some(k=>cuts.has(k))&&![...combined.clearance].some(k=>floors.has(k)||!networkAirAt(original.seed,...xyz(k))))return {route,proposal,footprint:combined,approachStations:prefix.length,searchNodes,tried,pruned};
+   }
+   const id=k+':'+dx+','+dz,seen=visits.get(id)??0;
+   if(seen>=3||q.length>=4200)continue;
+   visits.set(id,seen+1);q.push({route:prefix,...next});
   }
  }
- return {route:null,searchNodes:q.length,tried,availableGalleryFeet:startCandidates.size};
+ return {route:null,searchNodes,tried,pruned,availableGalleryFeet:startCandidates.size};
 }
 export function inspectOffsetSocketSpiral(){
  const p=createPeakGalleryProjection(),{original,cuts,floors}=p,legacy=new VoxelWorld(original.seed);
@@ -125,7 +125,7 @@ export function inspectOffsetSocketSpiral(){
  // candidate begins at a raised landing with an independently offset ramp.
  // Geometric alternatives are bounded and exact original-scope proof retained.
  for(const lift of [4,5,6])for(const [ox,oz] of [[1,0],[-1,0],[0,1],[0,-1]])
-  for(const dir of [1,-1])for(const phase of [2,dir===1?3:1])for(const rot of [0,4,8,12])for(const landingAxis of [ox?'x':'z']){
+  for(const [dir,phase,rot] of (ox===1?[[1,2,12],[1,3,8],[-1,2,0],[-1,1,4]]:ox===-1?[[1,2,4],[1,3,0],[-1,2,8],[-1,1,12]]:oz===1?[[1,2,0],[1,3,12],[-1,2,4],[-1,1,8]]:[[1,2,8],[1,3,4],[-1,2,12],[-1,1,0]]))for(const landingAxis of [ox?'x':'z']){
   attempted++;
   const spiral=helix(hub,socket,dir,rot,phase,lift,ox,oz,landingAxis);
   const fp=compileGalleryConstructionFootprint(proposalOf(spiral));
@@ -138,11 +138,11 @@ export function inspectOffsetSocketSpiral(){
    candidates.push({...r,reason:'RAISED_SPIRAL_ORIGINAL_GEOMETRY',galleryFloorConflicts:galleryFloorConflicts.length,galleryAirConflicts:galleryAirConflicts.length,outside:outside.length});continue;
   }
   const a=findOffsetApproach({hub,original,cuts,floors,spiral,fp});
-  if(!a.route){candidates.push({...r,reason:'NO_THREE_WIDE_OFFSET_APPROACH',searchNodes:a.searchNodes,availableGalleryFeet:a.availableGalleryFeet,tried:a.tried});continue;}
+  if(!a.route){candidates.push({...r,reason:'NO_THREE_WIDE_OFFSET_APPROACH',searchNodes:a.searchNodes,availableGalleryFeet:a.availableGalleryFeet,tried:a.tried,pruned:a.pruned});continue;}
   geometryPasses++;
   if(sourceAttempts>=16){skippedAfterCap++;continue;}
   const {route,proposal,footprint:f}=a;
-  Object.assign(r,{stations:route.length,approachStations:a.approachStations,searchNodes:a.searchNodes});
+  Object.assign(r,{stations:route.length,approachStations:a.approachStations,searchNodes:a.searchNodes,pruned:a.pruned});
   sourceAttempts++;
   const audit=auditProtectedSubsurfaceStairs(proposal,{...source,maxCells:20000,minY:-210,maxY:-4,stopOnFirstUnsafe:true});
   if(!audit.ok){candidates.push({...r,reason:'ORIGINAL_SOURCE_VETO',counts:audit.counts,examples:audit.examples,firstRefusal:audit.firstRefusal});continue;}
