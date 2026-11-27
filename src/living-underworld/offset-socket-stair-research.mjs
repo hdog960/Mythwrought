@@ -18,12 +18,16 @@ for(let z=1;z>=-1;z--)ring.push([-2,z]);
 const proposalOf=route=>({ok:true,segments:route.slice(1).map((b,i)=>({a:route[i],b}))});
 function helix(hub,socket,dir,rot,phase,lift,ox,oz,landingAxis){
  const route=[];let y=hub.y+lift;
- const terminal=socket.y-2;
+ const terminal=socket.y-2,finishDelay=phase===2?1:2;
+ let firstTop=-1;
  for(let i=0;i<160;i++){
   const j=(rot+dir*i+16000)%16;
   if(i&&j%4===phase)y++;
   if(y>terminal)break;
   const [x,z]=ring[j];route.push({x:hub.x+ox+x,y,z:hub.z+oz+z});
+  // Leave the upper ring before another step's support enters the landing.
+  // Earlier full top plateau made all 480 inward landings overlap their own AIR.
+  if(y===terminal){if(firstTop<0)firstTop=i;if(i-firstTop===finishDelay)break;}
  }
  if(route.at(-1)?.y!==terminal)throw Error('SOCKET_STATION_CAP');
  // End on the original socket center, not simply somewhere nearby.
@@ -120,13 +124,13 @@ export function inspectOffsetSocketSpiral(){
  // Do not repeat the 128 failed same-axis ground-level shapes. Each new
  // candidate begins at a raised landing with an independently offset ramp.
  // Geometric alternatives are bounded and exact original-scope proof retained.
- for(const lift of [4,5,6])for(const [ox,oz] of [[0,0],[1,0],[-1,0],[0,1],[0,-1]])
-  for(const dir of [1,-1])for(const phase of [2,3])for(const rot of [0,4,8,12])for(const landingAxis of ['x','z']){
+ for(const lift of [4,5,6])for(const [ox,oz] of [[1,0],[-1,0],[0,1],[0,-1]])
+  for(const dir of [1,-1])for(const phase of [2,dir===1?3:1])for(const rot of [0,4,8,12])for(const landingAxis of [ox?'x':'z']){
   attempted++;
   const spiral=helix(hub,socket,dir,rot,phase,lift,ox,oz,landingAxis);
   const fp=compileGalleryConstructionFootprint(proposalOf(spiral));
   const r={dir,phase,rot,lift,offset:[ox,oz],landingAxis,stations:spiral.length};
-  if(!fp.ok){candidates.push({...r,reason:'RAISED_SPIRAL_GEOMETRY'});continue;}
+  if(!fp.ok){candidates.push({...r,reason:'RAISED_SPIRAL_GEOMETRY',failures:fp.failures??[],detail:fp.reason});continue;}
   const galleryFloorConflicts=[...fp.clearance].filter(k=>floors.has(k));
   const galleryAirConflicts=[...fp.support].filter(k=>cuts.has(k));
   const outside=[...fp.clearance].filter(k=>!networkAirAt(original.seed,...xyz(k)));
