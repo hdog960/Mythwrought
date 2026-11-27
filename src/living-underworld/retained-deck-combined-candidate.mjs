@@ -9,6 +9,7 @@ import {engineWantedSections} from './gallery-streaming-working-set.mjs';
 import {isCandidateGeologyMaterial} from './protected-entrance-envelope.mjs';
 import {VoxelWorld,BLOCK,baseBlock,chunkCoord,collides} from '../voxel.mjs';
 import {sectionForY,sectionBounds,depthMeshKey} from '../depth.mjs';
+import {gradeHallInsideOriginalMask} from './grade-hall-geometry.mjs';
 import {traverseRetainedDescent} from './retained-switchback-descent-route.mjs';
 const key=(x,y,z)=>x+','+y+','+z,xyz=k=>k.split(',').map(Number);
 const dirs=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
@@ -84,9 +85,12 @@ export function captureRetainedDeckSource(){
  for(const c of future){check(rawRequest.has(c)&&!floors.has(c)&&!cuts.has(c),'NEW_GEOMETRY_ESCAPED:'+c);revisedCuts.add(c);}
  return {p,original,cuts,floors,owners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked};
 }
-export function inspectRetainedDeckCandidate(){
- const {p,original,cuts,floors,owners,domain,inDomain,data,rows,rawAir,revisedAir,future,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=captureRetainedDeckSource();
- const otherVetoes=[],revisedCuts=future;
+export function inspectRetainedDeckCandidate({capture=null,profile=null}={}){
+ const c=capture??captureRetainedDeckSource();
+ const {p,original,cuts,floors,owners,domain,inDomain,data,rawAir,conflicts,rawRequest,floorValues,halo,sourceCalls,maxOwnerReads,checked}=c;
+ const rows=c.rows.map(r=>({...r})),otherVetoes=[];
+ const future=profile?new Set([...c.future].filter(k=>gradeHallInsideOriginalMask(original.seed,...xyz(k),profile))):c.future;
+ const revisedCuts=future,revisedAir=new Set([...c.revisedAir].filter(k=>!c.future.has(k)||future.has(k)));
  const sourceAt=(x,y,z)=>{
   const c=key(x,y,z);if(!halo.has(c))throw Error('OUTSIDE_CAPTURED_ORIGINAL_HALO:'+c);return halo.get(c);
  };
@@ -167,6 +171,7 @@ export function inspectRetainedDeckCandidate(){
  const reachableNew=queue.filter(c=>future.has(c));
  reachableNew.sort((a,b)=>distance.get(b)-distance.get(a)||a.localeCompare(b));
  replay('gallery to new cavern supported floor',reachableNew.find(c=>distance.get(c)<=180));
+ if(profile){replay('previous cavern endpoint',parent.has('-656,-32,-2171')?'-656,-32,-2171':null);replay('previous hub endpoint',parent.has('-625,-31,-2153')?'-625,-31,-2153':null);}
  const anchors=[];
  for(const [name,a] of [['upper hub',plan.layers[0].hub],...Object.entries(plan.layers[0].portals),['upper socket',plan.surfaceSocket]]){
   const inside=inDomain(a.x,a.y,a.z);
@@ -176,17 +181,43 @@ export function inspectRetainedDeckCandidate(){
   anchors.push({name,anchor:a,scope:'inside',reachableSupportedFeet:options.length,qualified:false});
   replay(name,options[0]);
  }
+ // Compare actual crossing pairs on every owner-union boundary plane.
+ // External future AIR is hypothetical, not source-admitted. For each raw
+ // connected opening patch require a surviving crossing in that same patch.
+ const seamGroups=new Map();
+ for(const k of rawAir){
+  const [x,y,z]=xyz(k);
+  for(const [dx,dy,dz] of dirs){
+   const a=x+dx,b=y+dy,d=z+dz;if(inDomain(a,b,d))continue;
+   const other=key(a,b,d),old=sourceAt(a,b,d)===BLOCK.AIR||cuts.has(other);
+   const proposed=compactUpperHubResearchAirAt(original.seed,a,b,d);
+   if(!old&&!proposed)continue;
+   const group=[dx,dy,dz,dx?x:dy?y:z].join(',');
+   if(!seamGroups.has(group))seamGroups.set(group,new Map());
+   const outside=old||proposed&&!floors.has(other)&&(!profile||gradeHallInsideOriginalMask(original.seed,a,b,d,profile));
+   seamGroups.get(group).set(k,{survives:revisedAir.has(k)&&outside,originalOutsideAir:old});
+  }
+ }
+ let patches=0,lostPatches=0,rawCrossings=0,retainedCrossings=0,originalOutsideCrossings=0;const lost=[];
+ for(const [plane,cells] of seamGroups){
+  const [dx,dy,dz]=xyz(plane),tangent=dirs.filter(([a,b,d])=>a*dx+b*dy+d*dz===0);
+  const labels=components(new Set(cells.keys()),k=>{const [x,y,z]=xyz(k);return tangent.map(([a,b,d])=>key(x+a,y+b,z+d));});
+  const counts=labels.sizes.map(size=>({size,kept:0,example:null}));
+  for(const [k,id] of labels.label){const entry=cells.get(k);counts[id].kept+=Number(entry.survives);counts[id].example??=k;originalOutsideCrossings+=Number(entry.survives&&entry.originalOutsideAir);}
+  for(const row of counts){patches++;rawCrossings+=row.size;retainedCrossings+=row.kept;if(!row.kept){lostPatches++;if(lost.length<12)lost.push({plane,...row});}}
+ }
  const peakCost=cost(peak,stage),selectedCost=cost(selected,stage);
  const floorReadback=[...floorValues].every(([c,id])=>projectedAt(...xyz(c))===id);
  check(floorReadback,'RETAINED_DECK_READBACK_FAILED');
  check(JSON.stringify(original.save())===p.initial,'SOURCE_SAVE_MUTATED');
- return {candidate:RETAINED_DECK_CANDIDATE,owners:owners.length,checked,originalGalleryCuts:cuts.size,
+ return {candidate:profile??RETAINED_DECK_CANDIDATE,owners:owners.length,checked,originalGalleryCuts:cuts.size,
   rawRequests:rows.reduce((n,r)=>n+r.requests,0),rawNewCuts:rows.reduce((n,r)=>n+r.newCuts,0),
   originalFloorConflicts:conflicts.size,remainingFloorConflicts:0,retainedFloorCells:floorValues.size,
   futureCuts:future.size,otherVetoes:otherVetoes.length,floorReadback,sourceCalls,maxOwnerReads,
   peakCost,selectedCost,rows,airConnectivity:{rawComponents:before.sizes.length,revisedComponents:after.sizes.length,
    splitComponents:split.length,splitExamples:split.slice(0,8),disappearedComponents:before.sizes.length-mapped.size,
    boundaryRaw,boundaryRevised,removedBoundary},
+  seams:{patches,lostPatches,rawCrossings,retainedCrossings,originalOutsideCrossings,lost,externalProposedGeometryNotSourceQualified:true},
   walking:{feet:feet.size,components:walk.sizes.length,reachableFeet:queue.length,reachableNewFeet:reachableNew.length,routes,anchors},
   finiteWindowOnly:true,fullRegionPortalConnectivityQualified:false,fullDescentUnchanged:true,cityVetoUnchanged:true,
   sourceCallsAreDirectEntries:true,sourceSaveUnchanged:true,worldWrites:0,constructionAdmission:false};
