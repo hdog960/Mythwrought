@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {buildCreativeCatalog} from '../../src/creative-integration/creative-catalog.mjs';
-import {M8_MOUNTAIN_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {VEILREACH_GENERATOR} from '../../src/environment-ground.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 const catalog=buildCreativeCatalog();
 const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
@@ -63,7 +63,7 @@ async function undoRedo(owner,key){
 }
 try{
   await page.goto('http://127.0.0.1:4174/?production-ui=1',{waitUntil:'domcontentloaded',timeout:120000});
-  await page.waitForFunction(profile=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===profile&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,M8_MOUNTAIN_GENERATOR,{timeout:180000});
+  await page.waitForFunction(profile=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===profile&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,VEILREACH_GENERATOR,{timeout:180000});
   await page.locator('#g2bFlightEnable').check();
   await choose('block:4');await advancedSelect(7);
   await prepare();await page.locator('#place').click();
@@ -96,7 +96,7 @@ try{
   await history('redo').click();const persisted=await read('manual14');assert.equal(persisted?.id,15);
   await page.screenshot({path:OUT+'/creative-controls.png'});
   await page.reload({waitUntil:'domcontentloaded',timeout:120000});
-  await page.waitForFunction(profile=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===profile,M8_MOUNTAIN_GENERATOR,{timeout:180000});
+  await page.waitForFunction(profile=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===profile,VEILREACH_GENERATOR,{timeout:180000});
   assert.deepEqual(await read('manual14'),persisted);
   assert.equal(await page.locator('#creativeQuickbar').isVisible(),false);
   assert.deepEqual(errors,[]);

@@ -1,7 +1,7 @@
 name: Unified post-save Creative Navigation focused qualification
 on:
   push:
-    branches: [probe/unified-post-save-20261127, dev/unified-creative-navigation-performance-20261126]
+    branches: [probe/unified-post-save-20261127, dev/unified-creative-navigation-performance-20261126, probe/unified-veilreach-reconcile-20261127]
     paths: ['src/**','index.html','sw*.js','nonblock-stage-assets.json','tests/**','scripts/ci/**','.github/workflows/unified-post-save-qualification.yml']
 permissions:
   contents: read
@@ -15,7 +15,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
           path: prior-production
           persist-credentials: false
       - uses: actions/checkout@v4
@@ -36,7 +36,7 @@ jobs:
           node tests/ci/unified-post-save-cache-closure.mjs
       - name: Affected Creative Navigation save and shell contracts only
         run: |
-          node --test tests/creative-integration/*.test.mjs tests/navigation00-*.test.mjs tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/m2-runtime-bridge.test.mjs tests/mining-save-replay-scope.test.mjs tests/physical-mining-trace.test.mjs tests/compact-menu.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs
+          node --test tests/creative-integration/*.test.mjs tests/navigation00-*.test.mjs tests/manual-biomes/profile-world.test.mjs tests/manual-biomes/m2-runtime-bridge.test.mjs tests/mining-save-replay-scope.test.mjs tests/physical-mining-trace.test.mjs tests/compact-menu.test.mjs tests/app-update.test.mjs tests/unified-offline-atomic-cache.test.mjs tests/ci/nonblock-cache-manifest.test.mjs tests/veilreach.test.mjs tests/shared-world-height*.test.mjs tests/gpu-edit-batch.test.mjs
   integrated-ui:
     needs: contracts
     runs-on: ubuntu-24.04
@@ -44,14 +44,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [creative, navigation, installed]
+        gate: [creative, navigation, installed, upper-creative, veilreach-install]
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
           path: prior-production
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -75,6 +75,12 @@ jobs:
       - name: Actual missing-helper rollback and installed source byte audit
         if: matrix.gate == 'installed'
         run: UNIFIED_PREVIOUS_ROOT=prior-production node tests/unified-history-upgrade-browser.mjs
+      - name: Current combined upper owner history and offline upgrade
+        if: matrix.gate == 'upper-creative'
+        run: node scripts/ci/creative-shared-height-upgrade.mjs
+      - name: Exact previous Veilreach save and normal New World same-install upgrade
+        if: matrix.gate == 'veilreach-install'
+        run: VEILREACH_PREVIOUS_ROOT=prior-production node tests/veilreach-home-screen-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

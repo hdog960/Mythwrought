@@ -13,6 +13,7 @@ const candidate=process.cwd();
 const marker=html=>html.match(/data-mw-release="([^"]+)"/)?.[1];
 const priorRelease=marker(await readFile(resolve(prior,'index.html'),'utf8'));
 assert.ok(priorRelease&&priorRelease!==GAME_RELEASE);
+const priorGenerator=priorRelease==='20261127-veilreach-v1'?VEILREACH_GENERATOR:M8_MOUNTAIN_GENERATOR;
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript',
   '.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json',
   '.svg':'image/svg+xml','.png':'image/png'};
@@ -67,7 +68,7 @@ try{
   });
   await page.goto(origin+'/?production-ui=1',{waitUntil:'domcontentloaded'});
   await settle();
-  assert.equal((await state()).generator,M8_MOUNTAIN_GENERATOR);
+  assert.equal((await state()).generator,priorGenerator);
   assert.equal(await page.evaluate(()=>{
     const game=window.__mythwroughtTest;
     return game.editBiomeCell(450,-80,450,0)&&game.editBiomeCell(450,256,450,3);
@@ -125,7 +126,7 @@ try{
   await reload();
   assert.equal(await page.locator('meta[data-mw-release]').getAttribute('data-mw-release'),GAME_RELEASE);
   assert.deepEqual(await oldSave(),saved);
-  assert.equal((await state()).generator,M8_MOUNTAIN_GENERATOR);
+  assert.equal((await state()).generator,priorGenerator);
   console.log('Upgraded same installation and preserved historical edit bytes offline',verified);
 
   await context.setOffline(false);

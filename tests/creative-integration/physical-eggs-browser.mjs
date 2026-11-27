@@ -10,7 +10,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {buildCreativeCatalog} from '../../src/creative-integration/creative-catalog.mjs';
 import {getSpecies} from '../../src/mobs/species.mjs';
-import {M8_MOUNTAIN_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
+import {VEILREACH_GENERATOR} from '../../src/environment-ground.mjs';
 import {V8_STORAGE_PREFIX} from '../../src/manual-biomes/mountain-v8-isolated-storage.mjs';
 const shard=Number(process.env.EGG_SHARD);
 if(!Number.isInteger(shard)||shard<0||shard>3)throw Error('EGG_SHARD must be 0..3');
@@ -30,7 +30,7 @@ await mkdir(OUT,{recursive:true});
 const sha=x=>createHash('sha256').update(x).digest('hex');
 const report={kind:'real-original-game-creative-egg-placement-and-reload',shard,
   head:process.env.GITHUB_SHA||null,offset,expectedSpecies:eggs.map(e=>e.id),sourceCatalog:catalog.revision,
-  worldGenerator:M8_MOUNTAIN_GENERATOR,realWebGL2:true,oldWorldOpened:false,
+  worldGenerator:VEILREACH_GENERATOR,realWebGL2:true,oldWorldOpened:false,
   realUIEggClick:true,realUIPlaceClick:true,noInjectedMobs:true,
   physicalIphone:false,species:[],errors:[],complete:false};
 const saveProof=()=>writeFile(OUT+'/manifest.json',JSON.stringify(report,null,2)+'\n');
@@ -78,9 +78,9 @@ try{
         const t=window.__mythwroughtTest;
         const status=document.querySelector('#seedMessage')?.textContent??'';
         return (t?.fourBiomeProfile()?.generator===generator&&t.snapshot().seed!==originalSeed)||status.includes('New world refused');
-      },{generator:M8_MOUNTAIN_GENERATOR,originalSeed},{timeout:180000});
+      },{generator:VEILREACH_GENERATOR,originalSeed},{timeout:180000});
       const created=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),status:document.querySelector('#seedMessage')?.textContent,seed:window.__mythwroughtTest?.snapshot()?.seed}));
-      assert.equal(created.profile?.generator,M8_MOUNTAIN_GENERATOR,'NEW WORLD failed: '+JSON.stringify({created,dialogs}));
+      assert.equal(created.profile?.generator,VEILREACH_GENERATOR,'NEW WORLD failed: '+JSON.stringify({created,dialogs}));
       assert.notEqual(created.seed,originalSeed,'NEW WORLD did not change seed: '+JSON.stringify({created,dialogs}));
       console.log('REAL_CREATIVE_WORLD_READY',JSON.stringify({id:egg.id,created,dialogs}));
       stage='physical-setup';
@@ -91,7 +91,7 @@ try{
       const seed=await page.evaluate(()=>window.__mythwroughtTest.snapshot().seed);
       assert.equal(await page.evaluate(()=>
         window.__mythwroughtTest.fourBiomeProfile()?.generator),
-        M8_MOUNTAIN_GENERATOR);
+        VEILREACH_GENERATOR);
       const worldKey=V8_STORAGE_PREFIX+'mythwrought-v002-world-'+seed;
       const mobKey=V8_STORAGE_PREFIX+'mythwrought-mobs-v1-seed-'+seed;
       // Platform is REAL source terrain geometry, setup only. A genuine
@@ -176,7 +176,7 @@ try{
           generator:t.fourBiomeProfile()?.generator,
           glError:c.getContext('webgl2').getError()};
       },{worldKey,mobKey});
-      assert.equal(post.generator,M8_MOUNTAIN_GENERATOR);
+      assert.equal(post.generator,VEILREACH_GENERATOR);
       assert.equal(post.world,canonical,'Creature action rewrote schema-1 terrain');
       assert.ok(post.mobs?.includes(egg.id)&&
         !post.status.readonly&&!post.status.damaged&&

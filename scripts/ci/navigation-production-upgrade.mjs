@@ -6,7 +6,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
 const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
-const oldRelease='20261127-mining-save-replay-v1',release='20261127-unified-creative-navigation-v4',profile='mythwrought-five-surface-regions-mountain-v8';
+const oldRelease='20261127-veilreach-v1',release='20261127-unified-veilreach-v1',profile='mythwrought-five-surface-regions-mountain-v8',latestProfile='mythwrought-upper-veilreach-v1';
 const assetPaths=async root=>Object.keys(JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8')).assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>p==='./'?prefix:prefix+p.slice(2)).sort();
 const [priorPaths,currentPaths]=await Promise.all([assetPaths(prior),assetPaths(current)]);
 assert.equal(new Set(priorPaths).size,priorPaths.length);assert.equal(new Set(currentPaths).size,currentPaths.length);
@@ -156,7 +156,7 @@ try{
  check('cancel does not replace old world',(await state()).seed===old.seed&&await historical()===old.raw);
  page.once('dialog',d=>d.accept());await page.locator('#newWorld').click();
  await page.waitForFunction(seed=>window.__mythwroughtTest?.snapshot().seed!==seed,old.seed,{timeout:180000});await waitGame();
- const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.release===release&&fresh.seed!==old.seed&&fresh.profile===profile&&fresh.raw&&await historical()===old.raw,fresh);
+ const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.release===release&&fresh.seed!==old.seed&&fresh.profile===latestProfile&&fresh.raw&&await historical()===old.raw,fresh);
  // Use localhost-only source-owned fixture actions, not a simulated mesh.
  // Full real player-controlled ceiling flight is already H7 accepted.
  const cells=await page.evaluate(()=>{
@@ -187,7 +187,7 @@ try{
  const saved=await state();check('upper canonical edit saved',JSON.parse(saved.raw).edits.some(row=>row[1]===36&&row[3]===3)&&await historical()===old.raw);
  await context.setOffline(true);await page.reload({waitUntil:'load',timeout:90000});await waitGame();
  await page.waitForFunction(()=>document.getElementById('pack5Status').textContent.includes('restored'),null,{timeout:60000});
- const cold=await state(),restored=await inspect();check('cold offline new-world and all original owners restored',cold.release===release&&cold.profile===profile&&cold.raw===saved.raw&&cold.glError===0&&JSON.stringify(restored.ids)===JSON.stringify(initial.ids)&&await historical()===old.raw,cold);
+ const cold=await state(),restored=await inspect();check('cold offline new-world and all original owners restored',cold.release===release&&cold.profile===latestProfile&&cold.raw===saved.raw&&cold.glError===0&&JSON.stringify(restored.ids)===JSON.stringify(initial.ids)&&await historical()===old.raw,cold);
  const afterFurniture=await exportPack5();check('actual cold Pack5 owner export byte-equivalent',JSON.stringify(afterFurniture)===JSON.stringify(beforeFurniture),{entries:afterFurniture.entries});
  check('settled offline ground owners',true,await settled());
  await page.screenshot({path:path.join(out,'offline-new-world-956x440.png')});check('zero page errors',errors.length===0,{errors});
@@ -207,7 +207,7 @@ try{
    const t=window.__mythwroughtTest,seed=t.snapshot().seed,p='mythwrought-mountain-v8-isolated-v1:',raw=localStorage.getItem(p+'mythwrought-v002-world-'+seed);
    return {seed,profile:t.fourBiomeProfile()?.generator,release:document.querySelector('meta[name="mythwrought-release"]').content,raw,active:localStorage.getItem('mythwrought-mountain-v8-active-v1'),ordinary:localStorage.getItem('mythwrought-v002-world-'+seed),newWorld:document.querySelectorAll('#newWorld').length,caveCreate:!!document.getElementById('caveCreateWorld'),glError:document.querySelector('#scene').getContext('webgl2').getError()};
   });
-  check('empty-storage production startup uses combined profile',firstState.profile===profile&&firstState.release===release&&Number.isInteger(firstState.seed)&&firstState.seed!==179&&firstState.active==='1'&&!!firstState.raw&&JSON.parse(firstState.raw).seed===firstState.seed&&firstState.ordinary===null&&firstState.newWorld===1&&!firstState.caveCreate&&firstState.glError===0&&firstErrors.length===0,{...firstState,firstErrors});
+  check('empty-storage production startup uses combined profile',firstState.profile===latestProfile&&firstState.release===release&&Number.isInteger(firstState.seed)&&firstState.seed!==179&&firstState.active==='1'&&!!firstState.raw&&JSON.parse(firstState.raw).seed===firstState.seed&&firstState.ordinary===null&&firstState.newWorld===1&&!firstState.caveCreate&&firstState.glError===0&&firstErrors.length===0,{...firstState,firstErrors});
   await first.screenshot({path:path.join(out,'fresh-startup-956x440.png')});
  }finally{await empty.close();}
  evidence.finished=true;

@@ -6,7 +6,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
 const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
-const oldRelease='20261127-mining-save-replay-v1',release='20261127-unified-creative-navigation-v4',profile='mythwrought-five-surface-regions-mountain-v8';
+const oldRelease='20261127-veilreach-v1',release='20261127-unified-veilreach-v1',profile='mythwrought-five-surface-regions-mountain-v8',latestProfile='mythwrought-upper-veilreach-v1';
 const assetPaths=async root=>Object.keys(JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8')).assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>p==='./'?prefix:prefix+p.slice(2)).sort();
 const [priorPaths,currentPaths]=await Promise.all([assetPaths(prior),assetPaths(current)]);
 assert.equal(new Set(priorPaths).size,priorPaths.length);assert.equal(new Set(currentPaths).size,currentPaths.length);
@@ -141,7 +141,7 @@ try{
  check('cancel does not replace old world',(await state()).seed===old.seed&&await historical()===old.raw);
  page.once('dialog',d=>d.accept());await page.locator('#newWorld').click();
  await page.waitForFunction(seed=>window.__mythwroughtTest?.snapshot().seed!==seed,old.seed,{timeout:180000});await waitGame();
- const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.release===release&&fresh.seed!==old.seed&&fresh.profile===profile&&fresh.raw&&await historical()===old.raw,fresh);
+ const fresh=await state();check('normal NEW WORLD uses current combined profile',fresh.release===release&&fresh.seed!==old.seed&&fresh.profile===latestProfile&&fresh.raw&&await historical()===old.raw,fresh);
  // Real original renderer and save owners; only the supporting blocks and
  // camera pose are fixture-assisted. Actual PLACE/MINE and undo/redo are UI actions.
  await settled();
@@ -194,7 +194,7 @@ try{
  const saved=await state();check('new upper supporting edits saved; old high/deep bytes intact',JSON.parse(saved.raw).edits.some(row=>row[1]===35&&row[3]===3)&&await historical()===old.raw);
  await context.setOffline(true);await page.reload({waitUntil:'load',timeout:90000});await waitGame();
  await page.waitForFunction(()=>document.getElementById('pack5Status').textContent.includes('restored'),null,{timeout:60000});
- const cold=await state();check('cold offline current world and old upper/deep edits preserved',cold.release===release&&cold.profile===profile&&cold.raw===saved.raw&&cold.glError===0&&await historical()===old.raw,cold);
+ const cold=await state();check('cold offline current world and old upper/deep edits preserved',cold.release===release&&cold.profile===latestProfile&&cold.raw===saved.raw&&cold.glError===0&&await historical()===old.raw,cold);
  check('cold offline exact Pack5 owner export',JSON.stringify(await exportPack5())===JSON.stringify(placed));
  check('session-only history does not leak across restart',!(await page.locator('#creativeQuickbar').isVisible()));
  await page.locator('#g2bFlightEnable').check();check('offline Creative inventory and empty history',await page.locator('#creativeInventoryToggle').isVisible()&&!(await history('undo').isEnabled())&&!(await history('redo').isEnabled()));

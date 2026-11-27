@@ -25,7 +25,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
           path: prior-production
           persist-credentials: false
       - uses: actions/setup-node@v4
@@ -35,7 +35,7 @@ jobs:
         id: prepare
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          test "$(git -C prior-production rev-parse HEAD)" = 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          test "$(git -C prior-production rev-parse HEAD)" = 222b0a8acd736a6502d85c5797f77f0d4f38a861
           node scripts/ci/build-stage-cache-manifest.mjs --check
           node --test tests/creative-integration/creative-history.test.mjs tests/creative-integration/creative-pack5-history.test.mjs
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
