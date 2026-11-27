@@ -81,7 +81,7 @@ function joinApproach(route,hub,prepend,clearance,support,seed){
   if(st.path.length>=25)continue;
   for(const [dx,dz] of dirs)for(const dy of prepend?[0,-1]:[0,1]){
    const n={x:p.x+dx,y:p.y+dy,z:p.z+dz},k=pk(n);
-   if(Math.abs(n.x-hub.x)>12||Math.abs(n.z-hub.z)>12||n.y<hub.y-2||n.y>hub.y+8||st.path.some(v=>pk(v)===k))continue;
+   if(Math.abs(n.x-hub.x)>12||Math.abs(n.z-hub.z)>12||n.y<(prepend?hub.y-2:Math.min(start.y,hub.y-2))||n.y>hub.y+8||st.path.some(v=>pk(v)===k))continue;
    const arriving=cells(prepend?p:n,dx);
    if(!safe(arriving,st)){pruned++;continue;}
    const next={path:prepend?[n,...st.path]:[...st.path,n],s:new Set([...st.s,...arriving.s]),a:new Set([...st.a,...arriving.a])};
@@ -96,7 +96,8 @@ function joinApproach(route,hub,prepend,clearance,support,seed){
  }
  return {route:null,nodes,pruned,goals:goals.size};
 }
-export function inspectDriftingInterlayer(){
+export function inspectDriftingInterlayer({indices=SPECS.map((_,i)=>i)}={}){
+ if(!Array.isArray(indices)||!indices.length||new Set(indices).size!==indices.length||indices.some(i=>!Number.isInteger(i)||i<0||i>=SPECS.length))throw Error('INVALID_INTERLAYER_COHORT');
  const p=createPeakGalleryProjection(),{original,cuts,floors}=p,legacy=new VoxelWorld(original.seed),socket=exactQualifiedSocket();
  const clearance=new Set([...cuts,...socket.air]),support=new Set([...floors,...socket.support]);
  const plan=planUnderworldRegion(original.seed,-3,-9),lo=plan.layers[1].hub,hi=plan.layers[0].hub;
@@ -110,7 +111,7 @@ export function inspectDriftingInterlayer(){
  };
  const get=(...v)=>read('get',key(...v),()=>original.get(...v));
  const candidates=[],qualified=[];let sourceTrials=0;
- for(const [index,spec] of SPECS.entries()){
+ for(const index of indices){const spec=SPECS[index];
   const r=body(lo,hi,spec),f=compileGalleryConstructionFootprint(proposal(r));
   if(!f.ok){candidates.push({index,reason:'STRICT_BODY_GEOMETRY',detail:f.reason});continue;}
   // First station width is provisional for the eventual lower approach.
