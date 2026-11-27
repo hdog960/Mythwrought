@@ -1,0 +1,35 @@
+name: Living Underworld completion 10 - joined crown and lower chamber
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase49-connected-collars-20261127
+    paths:
+      - .github/workflows/living-underworld-phase49-native.yml
+permissions:
+  contents: read
+jobs:
+  joined-crown-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/living-underworld/grade-hall-geometry.mjs
+          node --check src/living-underworld/retained-deck-combined-candidate.mjs
+          node --check scripts/underworld/phase49-joined-crown-native.mjs
+      - name: Changed joined crown and lower chamber actual source and physics
+        run: node scripts/underworld/phase49-joined-crown-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase49-joined-crown-native
+          path: ${{ runner.temp }}/phase49/
+          retention-days: 7
