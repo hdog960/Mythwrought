@@ -17,14 +17,14 @@ export function serializeRoster({engine,companions,animals}) {
   return text;
 }
 
-export function restoreRoster(text,world,objectAccess=null,combatOptions=undefined) {
+export function restoreRoster(text,world,objectAccess=null,combatOptions=undefined,engineOptions=undefined) {
   if (typeof text!=='string' || text.length>MAX_LENGTH) throw TypeError('Invalid mob snapshot size');
   const envelope=JSON.parse(text);
   if (envelope?.schema!==SCHEMA) throw TypeError('Unsupported mob snapshot schema');
   if (typeof envelope.payload!=='string' || envelope.checksum!==saveFingerprint(envelope.payload))
     throw TypeError('Invalid mob snapshot checksum');
   const snapshot=JSON.parse(envelope.payload);
-  const engine=MobEngine.fromCheckpoint(world,snapshot?.engine);
+  const engine=MobEngine.fromCheckpoint(world,snapshot?.engine,engineOptions);
   const behavior=new BehaviorController(engine,world);
   const combat=new MobCombat(engine,world,behavior,objectAccess,combatOptions);
   const companions=CompanionManager.fromCheckpoint(engine,world,combat,snapshot.companions);

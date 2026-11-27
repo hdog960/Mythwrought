@@ -26,14 +26,17 @@ function overlaps(body, cell, box) {
 }
 
 export function createWorldQuery(world, {
-  resident, revision = () => 0, observe = () => BLOCKED, overlayRayHit
+  resident, revision = () => 0, observe = () => BLOCKED, overlayRayHit, physical
 } = {}) {
   if (typeof world?.get !== 'function' || typeof resident !== 'function' ||
       typeof revision !== 'function' || typeof observe !== 'function')
     throw new TypeError('World queries require a voxel reader and explicit residency');
 
+  if(physical!==undefined&&(!physical||typeof physical.sectionAt!=='function'||
+      typeof physical.inspectVolume!=='function'||typeof physical.extraOverlayBlocked!=='function'))
+    throw new TypeError('Invalid opt-in physical query authority');
   function cellResident(x, y, z) {
-    const section = sectionForY(y);
+    const section = physical===undefined?sectionForY(y):physical.sectionAt(y);
     return section !== null && resident(chunkCoord(x), chunkCoord(z), section) === true;
   }
 
@@ -55,7 +58,39 @@ export function createWorldQuery(world, {
     return Number.isInteger(id) && id >= BLOCK.GRASS && id <= BLOCK.DEEPSTONE ? FULL_CUBE : null;
   }
 
+  // Share the original collision reader, including actual shaped blocks.
+  function expandedOverlayBlocked(bounds){
+    let blocked=false;
+    const pack3=world.pack3Runtime;
+    if(pack3){
+      const size=pack3.size?.();
+      if(!Number.isSafeInteger(size)||size<0)return undefined;
+      if(size>0){const fits=pack3.playerFits?.(bounds)?.fits;
+        if(typeof fits!=='boolean')return undefined;blocked=blocked||!fits;}
+    }
+    if(world.manual14Layer&&typeof world.manual14Collision!=='function')return undefined;
+    if(world.pack5Layer&&typeof world.pack5Collision!=='function')return undefined;
+    for(const key of ['manual14Collision','pack5Collision']){
+      if(world[key]===undefined)continue;
+      if(typeof world[key]!=='function')return undefined;
+      const hit=world[key](bounds);
+      if(typeof hit!=='boolean')return undefined;
+      blocked=blocked||hit;
+    }
+    const extra=physical.extraOverlayBlocked(bounds);
+    return typeof extra==='boolean'?blocked||extra:undefined;
+  }
+  function waterStateAt(x,y,z){
+    if(!cellResident(x,y,z))return undefined;
+    if(world.get(x,y,z)!==WATER_CANDIDATE_ID)return null;
+    return world.getPack2State?.(x,y,z)??undefined;
+  }
+  const geometry=physical===undefined?undefined:Object.freeze({
+    resident:owner=>resident(owner.cx,owner.cz,owner.kind==='upper'?owner.section+1:owner.section)===true,
+    shapeAt,overlayBlocked:expandedOverlayBlocked,revision,waterStateAt
+  });
   function volume(point, body) {
+    if(geometry)return physical.inspectVolume(point,body,geometry);
     if (!validPoint(point) || !validBody(body)) return 'unknown';
     const [x, y, z] = point;
     const { radius, height } = body;
@@ -130,5 +165,6 @@ export function createWorldQuery(world, {
   }
 
   return Object.freeze({ volume, grounded, lineOfSight, environment, medium, revision,
-    residentAt: point => validPoint(point) && cellResident(...point.map(Math.floor)) });
+    residentAt: point => validPoint(point) && cellResident(...point.map(Math.floor)),
+    ...(geometry?{expansionGeometry:geometry}:{}) });
 }
