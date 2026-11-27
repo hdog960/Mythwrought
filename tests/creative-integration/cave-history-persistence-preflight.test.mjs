@@ -51,6 +51,14 @@ test('historical cave entrance edit equal to pre-portal terrain must survive act
  const loaded=load(s);
  assert.equal(loaded.world.get(...cell),replacement,'Cave restore dropped edit against incomplete baseline');
  assert.deepEqual(loaded.world.save(),expected,'Cave restore changed schema-1 edits');
+ // Reverting the edit must return to the COMPLETE authored portal baseline,
+ // not create a redundant AIR edit against the pre-portal stone.
+ assert.equal(loaded.world.set(...cell,BLOCK.AIR),true);
+ assert.equal(loaded.world.base.edits.has(candidate[0]),false);
+ assert.equal(saveExplicitCaveWorld(s,loaded,approved).ok,true);
+ const reverted=load(s);
+ assert.equal(reverted.world.get(...cell),BLOCK.AIR);
+ assert.equal(reverted.world.base.edits.has(candidate[0]),false);
  assert.equal(s.getItem(old),null);
  assert.equal(s.getItem(other),'UNRELATED HISTORICAL SAVE');
 });

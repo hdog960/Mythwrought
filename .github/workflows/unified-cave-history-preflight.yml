@@ -19,4 +19,6 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node --check tests/creative-integration/cave-history-persistence-preflight.test.mjs
-          node --test tests/creative-integration/cave-history-persistence-preflight.test.mjs
+          node --check src/manual-caves/opt-in-runtime.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-integration/cave-history-persistence-preflight.test.mjs tests/cave-roadmap-runtime.test.mjs tests/cave-roadmap-profile-store.test.mjs tests/cave-roadmap-game-startup.test.mjs tests/cave-roadmap-world-profile.test.mjs

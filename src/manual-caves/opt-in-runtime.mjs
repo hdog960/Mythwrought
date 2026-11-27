@@ -53,8 +53,17 @@ export function createStagedCaveRuntime(seed,storage,{approved=false}={}){
 export function restoreStagedCaveRuntime(payload,{approved=false,profile}={}){
   if(approved!==true||profile!==CAVE_PROFILE_KIND)
     throw Error('Cave profile restore requires explicit matching new-world marker');
-  const base=CaveVoxelWorld.restore(payload,{approved:true});
-  return attachVerifiedEntrances(base);
+  // Validate the original schema-1 envelope first, but do not normalize
+  // edits against a cave baseline that is missing its portals and collar.
+  // Verify the natural entrance topology before applying player edits:
+  // the saved player is allowed to have modified that terrain.
+  const valid=VoxelWorld.restore(payload);
+  const base=new CaveVoxelWorld(valid.seed,{approved:true});
+  const runtime=attachVerifiedEntrances(base);
+  for(const row of payload.edits)
+    if(!base.set(...row))throw Error('Cave restore rejected a validated voxel edit');
+  base.rotations=new Map(valid.rotations);
+  return runtime;
 }
 
 const combinedCaves=new Map();

@@ -87,7 +87,7 @@
     "./src/manual-caves/entrance-preflight.mjs": "b24302799a29a5681bba3fda4306eb18d3f6ac9c3f4c3a8a4f05664ad929a468",
     "./src/manual-caves/game-startup-contract.mjs": "28f19ab019a0b071278e575d1112c7d185d4f518195594d6fee0dadebb08769c",
     "./src/manual-caves/named-destination-audit.mjs": "741d6f37d49fdd9ad42b1b3a0abeede1cf1d78ef93403098a0bcc1992e1630a9",
-    "./src/manual-caves/opt-in-runtime.mjs": "9a0f88dddd9399aeb119b5a1713e8db0b769c3e1b2baf74e3beb4b3a2179d294",
+    "./src/manual-caves/opt-in-runtime.mjs": "6a762bcd3d2766912a4855f7fb958a7d20fb95ab9f733f841722947495007cba",
     "./src/manual-caves/preview.mjs": "98756d9bed7d33142c7e63b45546459e804396ac5f7c837e3343953b78913c5a",
     "./src/manual-caves/profile-store.mjs": "c4de5081436c85b676ca474c966bfe6a8938d447d0b775b83f4881b4d6302a0d",
     "./src/manual-caves/source-composition.mjs": "06cfd945b1ec803d952d3d1a8b96250a73f4eb90bc53398c0f506223516e07a4",
