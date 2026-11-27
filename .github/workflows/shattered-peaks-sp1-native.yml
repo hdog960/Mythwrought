@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
 jobs:
-  sp2-vista-source:
+  sp2-physical-vista:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -17,9 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact source and changed-path vista qualification
+      - name: Exact source and physical vista correction
         run: |
           git rev-parse HEAD
           node --version
-          node --check src/manual-biomes/shattered-peaks-vista.mjs
-          node --test tests/shattered-peaks-vista.test.mjs
+          node --check src/manual-biomes/shattered-peaks-physical-vista.mjs
+          node --test tests/shattered-peaks-physical-vista.test.mjs
