@@ -133,8 +133,15 @@ try{
   await page.evaluate(()=>{globalThis.__releaseFixtureSeed=180;});
   await page.locator('#menu').click();
   await page.locator('#newWorld').click();
-  await page.waitForFunction(g=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===g,
-    VEILREACH_GENERATOR,{timeout:120000});
+  // The prior release already uses Veilreach. Generator equality alone
+  // can resolve against the OLD page while asynchronous admission runs.
+  // Require the exact new seed and the newly loaded source before continuing.
+  await page.waitForFunction(({generator,seed,release})=>{
+    const profile=window.__mythwroughtTest?.fourBiomeProfile();
+    return profile?.generator===generator&&profile.seed===seed&&
+      document.querySelector('meta[data-mw-release]')?.getAttribute('data-mw-release')===release&&
+      document.querySelector('#notice')?.hidden;
+  },{generator:VEILREACH_GENERATOR,seed:180,release:GAME_RELEASE},{timeout:120000});
   await settle();
   assert.equal((await state()).seed,180);
   const visible=await page.evaluate(()=>{
@@ -146,6 +153,8 @@ try{
   await context.setOffline(true);
   await reload();
   assert.equal((await state()).generator,VEILREACH_GENERATOR);
+  assert.equal((await state()).seed,180);
+  assert.equal(await page.locator('meta[data-mw-release]').getAttribute('data-mw-release'),GAME_RELEASE);
   assert.deepEqual(await oldSave(),saved);
   assert.deepEqual(errors,[]);
   console.log('PASS Veilreach from normal New World and offline Home Screen reload',visible);

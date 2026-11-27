@@ -1,0 +1,30 @@
+name: Unified Veilreach installed new-seed witness
+on:
+  push:
+    branches: [probe/unified-veilreach-install-final-20261127]
+permissions:
+  contents: read
+jobs:
+  same-install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Exact previous Veilreach installed upgrade, fresh seed and offline reload
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C prior-production rev-parse HEAD)" = 222b0a8acd736a6502d85c5797f77f0d4f38a861
+          node --check tests/veilreach-home-screen-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          VEILREACH_PREVIOUS_ROOT=prior-production node tests/veilreach-home-screen-browser.mjs
