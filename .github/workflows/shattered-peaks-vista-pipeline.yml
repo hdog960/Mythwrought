@@ -1,0 +1,41 @@
+name: Shattered Peaks isolated original-pipeline and summit survey
+on:
+  push:
+    branches: [dev/shattered-peaks-sp0-sp1-20261126]
+    paths:
+      - '.github/workflows/shattered-peaks-vista-pipeline.yml'
+      - 'scripts/ci/shattered-peaks-physical-vista-webgl.mjs'
+      - 'scripts/ci/shattered-peaks-range-survey.mjs'
+permissions:
+  contents: read
+jobs:
+  original-pipeline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node scripts/ci/shattered-peaks-physical-vista-webgl.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shattered-peaks-original-pipeline
+          path: artifacts/shattered-peaks-vista/
+          if-no-files-found: ignore
+  high-range-survey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node scripts/ci/shattered-peaks-range-survey.mjs
