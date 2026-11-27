@@ -1,0 +1,32 @@
+name: Frostbound S4 targeted visual qualification
+on:
+  push:
+    branches: [dev/frostbound-expanse-shared-height-20261127]
+    paths:
+      - '.github/workflows/frostbound-s4-visual.yml'
+      - 'scripts/frostbound/s4-visual.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-renderer:
+    if: github.ref == 'refs/heads/dev/frostbound-expanse-shared-height-20261127'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install isolated browser dependencies
+        run: |
+          npm install --no-save --package-lock=false playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Actual settled original renderer comparison, read-only candidate boot
+        run: node scripts/frostbound/s4-visual.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frostbound-s4-visual
+          path: artifacts/frostbound-s4/
+          if-no-files-found: error
