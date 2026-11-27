@@ -1,0 +1,36 @@
+name: Living Underworld completion 8 - compact grade hall
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase47-compact-geometry-20261127
+    paths:
+      - .github/workflows/living-underworld-phase47-native.yml
+permissions:
+  contents: read
+jobs:
+  grade-hall-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          node --check src/living-underworld/grade-hall-geometry.mjs
+          node --check src/living-underworld/retained-deck-combined-candidate.mjs
+          node --check scripts/underworld/phase47-grade-hall-native.mjs
+      - name: Changed grade geometry budgets, native controller and seam crossings
+        run: node scripts/underworld/phase47-grade-hall-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase47-grade-hall-native
+          path: ${{ runner.temp }}/phase47/
+          retention-days: 7
