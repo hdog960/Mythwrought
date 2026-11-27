@@ -16,7 +16,7 @@ if(!Object.hasOwn(layouts,selected))throw Error('Invalid M5 viewport');
 const [width,height]=layouts[selected],seed=179;
 const root=process.cwd(),out=path.join(root,'artifacts/m5-offline-'+selected);
 await mkdir(out,{recursive:true});
-const release='20261127-veilreach-v1-preview';
+const release='20261127-veilreach-v1';
 const expectedBank='mythwrought-m5-shell-'+release;
 const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
 const publicEntries=Object.entries(stagedManifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p));
