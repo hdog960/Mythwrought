@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
 jobs:
-  sp1-original-source:
+  sp2-original-source:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -17,9 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Exact source and focused native tests
+      - name: Exact source and changed-path native qualification
         run: |
           git rev-parse HEAD
           node --version
-          node --check src/manual-biomes/shattered-peaks-basal.mjs
-          node --test tests/shattered-peaks-sp1.test.mjs tests/shattered-peaks-basal.test.mjs
+          node --check src/manual-biomes/shattered-peaks-terrace.mjs
+          node --test tests/shattered-peaks-terrace.test.mjs
