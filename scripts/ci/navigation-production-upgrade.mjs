@@ -190,5 +190,25 @@ try{
  const cold=await state(),restored=await inspect();check('cold offline new-world and all original owners restored',cold.release===release&&cold.profile===profile&&cold.raw===saved.raw&&cold.glError===0&&JSON.stringify(restored.ids)===JSON.stringify(initial.ids)&&await historical()===old.raw,cold);
  const afterFurniture=await exportPack5();check('actual cold Pack5 owner export byte-equivalent',JSON.stringify(afterFurniture)===JSON.stringify(beforeFurniture),{entries:afterFurniture.entries});
  check('settled offline ground owners',true,await settled());
- await page.screenshot({path:path.join(out,'offline-new-world-956x440.png')});check('zero page errors',errors.length===0,{errors});evidence.finished=true;
+ await page.screenshot({path:path.join(out,'offline-new-world-956x440.png')});check('zero page errors',errors.length===0,{errors});
+// Fresh, empty browser storage must also enter the released combined
+ // generator through production startup, not a developer-only fixture.
+ const empty=await browser.newContext({viewport:{width:956,height:440},deviceScaleFactor:1,hasTouch:true,isMobile:true,serviceWorkers:'block'});
+ try{
+  const first=await empty.newPage(),firstErrors=[];first.on('pageerror',e=>firstErrors.push(String(e)));
+  await first.goto(origin+'?production-ui=1',{waitUntil:'domcontentloaded',timeout:90000});
+  try{
+   await first.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>0&&document.querySelector('#notice').hidden,null,{timeout:180000});
+  }catch(error){
+   evidence.freshStartupFailure=await first.evaluate(()=>({notice:document.querySelector('#notice')?.textContent,status:document.querySelector('#status')?.textContent,scene:{...document.querySelector('#scene')?.dataset},errors:document.body.innerText.slice(0,1000)}));
+   await first.screenshot({path:path.join(out,'fresh-startup-failure.png')}).catch(()=>{});throw error;
+  }
+  const firstState=await first.evaluate(()=>{
+   const t=window.__mythwroughtTest,seed=t.snapshot().seed,p='mythwrought-mountain-v8-isolated-v1:',raw=localStorage.getItem(p+'mythwrought-v002-world-'+seed);
+   return {seed,profile:t.fourBiomeProfile()?.generator,release:document.querySelector('meta[name="mythwrought-release"]').content,raw,active:localStorage.getItem('mythwrought-mountain-v8-active-v1'),ordinary:localStorage.getItem('mythwrought-v002-world-'+seed),newWorld:document.querySelectorAll('#newWorld').length,caveCreate:!!document.getElementById('caveCreateWorld'),glError:document.querySelector('#scene').getContext('webgl2').getError()};
+  });
+  check('empty-storage production startup uses combined profile',firstState.profile===profile&&firstState.release===release&&Number.isInteger(firstState.seed)&&firstState.seed!==179&&firstState.active==='1'&&!!firstState.raw&&JSON.parse(firstState.raw).seed===firstState.seed&&firstState.ordinary===null&&firstState.newWorld===1&&!firstState.caveCreate&&firstState.glError===0&&firstErrors.length===0,{...firstState,firstErrors});
+  await first.screenshot({path:path.join(out,'fresh-startup-956x440.png')});
+ }finally{await empty.close();}
+ evidence.finished=true;
 }finally{await writeFile(path.join(out,'manifest.json'),JSON.stringify(evidence,null,2));await context?.close();await browser?.close();await new Promise(r=>server.close(r));}

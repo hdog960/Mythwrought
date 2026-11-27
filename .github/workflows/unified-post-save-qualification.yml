@@ -1,7 +1,7 @@
 name: Unified post-save Creative Navigation focused qualification
 on:
   push:
-    branches: [probe/unified-post-save-20261127]
+    branches: [probe/unified-post-save-20261127, dev/unified-creative-navigation-performance-20261126]
     paths: ['src/**','index.html','sw*.js','nonblock-stage-assets.json','tests/**','scripts/ci/**','.github/workflows/unified-post-save-qualification.yml']
 permissions:
   contents: read

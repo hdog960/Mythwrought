@@ -1,0 +1,93 @@
+name: Developer toolkit report
+on:
+  push:
+    branches: [infra/developer-efficiency-20261127]
+  workflow_dispatch:
+    inputs:
+      operation:
+        type: choice
+        options: [continue, plan, evidence, runs, compatibility, blocker, release, registry]
+        default: continue
+      owner:
+        description: Registry identity or existing automation minute
+        type: string
+      branch:
+        description: Assigned branch when it is not in the registry
+        type: string
+      pr:
+        description: Existing pull request number, if applicable
+        type: string
+      base:
+        description: Previous exact main SHA for coordination
+        type: string
+      head:
+        description: Exact historical SHA for evidence or run lookup
+        type: string
+      gate:
+        description: Reviewed evidence gate names, separated by commas
+        type: string
+      run:
+        description: Existing pending run ID to check once
+        type: string
+      checkpoint:
+        description: Compact checkpoint JSON, with no secrets or private notes
+        type: string
+      publication:
+        description: Existing Pages workflow run ID for an optional publication check
+        type: string
+permissions:
+  contents: read
+  actions: read
+  pull-requests: read
+jobs:
+  report:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 80
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Produce read-only report
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KIT_OPERATION: ${{ inputs.operation }}
+          KIT_OWNER: ${{ inputs.owner }}
+          KIT_BRANCH: ${{ inputs.branch }}
+          KIT_PR: ${{ inputs.pr }}
+          KIT_BASE: ${{ inputs.base }}
+          KIT_HEAD: ${{ inputs.head }}
+          KIT_GATE: ${{ inputs.gate }}
+          KIT_RUN: ${{ inputs.run }}
+          KIT_CHECKPOINT: ${{ inputs.checkpoint }}
+          KIT_PUBLICATION: ${{ inputs.publication }}
+        run: node tools/devkit/actions-report.mjs
+  isolated-pilot:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/infra/developer-efficiency-20261127'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 80
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Qualify toolkit and unchanged offline manifest
+        run: |
+          node --test tests/devkit/devkit.test.mjs
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+      - name: Verify existing qualification via report surface
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          KIT_OPERATION: evidence
+          KIT_HEAD: 1879d59c88b971cdf892ba3edd965b6cd9965301
+          KIT_GATE: mining-installed
+        run: |
+          node tools/devkit/actions-report.mjs > "$RUNNER_TEMP/toolkit-pilot.json"
+          node -e 'if (require(process.argv[1]).evidence[0].status !== "qualified") process.exit(1)' "$RUNNER_TEMP/toolkit-pilot.json"
