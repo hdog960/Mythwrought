@@ -1179,14 +1179,26 @@ function start(nonblockStage=null){
   // Snow setter is single-cell; historical xeric and V8 cascades have their
   // separate full-footprint admission. Never admit experimental profiles.
   const historicalXericWorld=()=>world.base?.constructor===FourRegionWorld&&world.base.hasHistoricalXericCascade()===true;
-  const safeCreativeVoxelWorld=()=>!caveSession&&(world.base?.constructor===VoxelWorld||
+  // Historical explicit cave profiles have their own journaled save owner.
+  // Admit only the original selected wrapper and inherited single-cell setter.
+  // Combined normal worlds continue through their existing admission below.
+  const safeCaveHistoryWorld=()=>!!caveSession&&caveSession.world===world&&
+    caveSession.runtime?.world===world&&caveSession.profile==='mythwrought-new-caves-v1'&&
+    caveSession.runtime.profile===caveSession.profile&&typeof caveOps?.saveExplicitCaveWorld==='function'&&
+    world.constructor===Pack2LiveWorld&&world.base?.set===VoxelWorld.prototype.set&&
+    world.pack2Cells?.size===0;
+  const safeCaveHistoryState=s=>!!s&&!s.foreign&&!s.pack2&&s.rotation===0&&
+    Number.isInteger(s.id)&&s.id>=0&&s.id<=8;
+  const safeCreativeVoxelWorld=()=>caveSession?safeCaveHistoryWorld():(world.base?.constructor===VoxelWorld||
     world.base?.constructor===FourRegionWorld&&!world.base.experimentalEnchantedTrees&&
     ([M2_FOUR_REGION_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR]
       .includes(world.base.generationProfile?.generator)||historicalXericWorld()));
   function recordCreativeOwner(owner,cell,before){
-    if(!g2CreativeEnabled||caveSession)return;
+    if(!g2CreativeEnabled)return;
     try{
       const after=creativeOwnerState(owner,cell);
+      if(caveSession&&(!safeCaveHistoryWorld()||owner!=='voxel'||
+        !safeCaveHistoryState(before)||!safeCaveHistoryState(after)))throw Error('Unsupported historical cave owner');
       if(before?.foreign||after?.foreign)throw Error('Foreign owner');
       creativeHistory.record({worldToken:g2Token(),owner,target:cell,before,after});
     }catch(_){creativeHistory.reset(g2Token());}
@@ -1194,10 +1206,12 @@ function start(nonblockStage=null){
   }
   function replayCreativeOwner(direction){
     if(!g2CreativeEnabled||g2Active()||!help.hidden||exploration.isOpen()||
-       document.hidden||graphicsLost||storageReadOnly||caveSession)return;
+       document.hidden||graphicsLost||storageReadOnly||caveSession&&!safeCaveHistoryWorld())return;
     const adapter={worldToken:g2Token(),read:entry=>entry.owner==='voxel-batch'?
         entry.target.map(c=>creativeOwnerState('voxel',c)):creativeOwnerState(entry.owner,entry.target),
       apply:(entry,desired,expected)=>{
+        if(caveSession&&(entry.owner!=='voxel'||!safeCaveHistoryWorld()||
+           !safeCaveHistoryState(desired)||!safeCaveHistoryState(expected)))return false;
         if(entry.owner==='voxel-batch'){
           if(!safeCreativeVoxelWorld()||!historicalXericWorld()&&world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)return false;
           const cells=entry.target,keys=new Set(cells.map(c=>c.join(',')));
@@ -1460,6 +1474,9 @@ function start(nonblockStage=null){
     changed=true;
     const persisted=save();
     miningTrace?.mark(persisted?'voxelSaved':'voxelSaveFailed',{block:result.block??null,meshOwners:lastEditMeshKeys.slice()});
+    // A failed cave write may have a recoverable pending journal. Never
+    // append history or continue mutating it until the profile is reopened.
+    if(caveSession&&!persisted){storageReadOnly=true;clearCreativeHistory();}
     if(persisted&&historyBefore&&!historyBefore.foreign&&historyCell.join(',')===result.cell.join(',')){
       if(!result.affectedCells?.length)recordCreativeOwner('voxel',historyCell,historyBefore);
       else try{

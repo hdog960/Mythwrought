@@ -22,3 +22,28 @@ jobs:
           node --check src/manual-caves/opt-in-runtime.mjs
           node scripts/ci/build-stage-cache-manifest.mjs --check
           node --test tests/creative-integration/cave-history-persistence-preflight.test.mjs tests/cave-roadmap-runtime.test.mjs tests/cave-roadmap-profile-store.test.mjs tests/cave-roadmap-game-startup.test.mjs tests/cave-roadmap-world-profile.test.mjs
+  cave-history-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Original game historical cave history only
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node --check src/main.mjs
+          python3 -m http.server 4174 >/tmp/cave-history-http.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          node tests/creative-integration/historical-cave-history-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-historical-cave-history
+          path: artifacts/historical-cave-history/
+          if-no-files-found: warn

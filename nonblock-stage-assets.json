@@ -250,7 +250,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "63cd65642977c7e561ac14bf9d986b8075c3a344929f676738a5ea9977471189",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "6f54e23e5aa158e805d676519cd376abfb185b82590fa3a1a5c7f4642fa1c15b",
+    "./src/main.mjs": "9ce77a87305c3712022881029a8bc5d2ec9d1fed56f923d7af8b26af4b4ef387",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/desert-bilateral-rgb.mjs": "7819c6a5ada37da04267dd774e994649c874d891268fd80b71ecd4c7515b6b5e",
     "./src/manual-biomes/desert-seam-vertex-tint.mjs": "4eff1be29be0a18f87050f496d50fb07892b52bf4d69133160ba2a62e9e7ab0f",
