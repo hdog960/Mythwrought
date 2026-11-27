@@ -24,6 +24,14 @@ export const JOINED_CROWN_PROFILES=freeze([
  freeze({...CROWN_HALL_PROFILES[0],id:'joined-crown-slender',roomScale:.12,halfWidth:1.55,westSpoke:1,collarRadius:1.8}),
  freeze({...CROWN_HALL_PROFILES[0],id:'joined-crown-graded',roomScale:.14,halfWidth:1.55,westSpoke:1,collarRadius:2.2})
 ]);
+// Preserve actual middle hall grades and original gallery clearance; taper
+// the overly broad below-room transition into the original deep tube.
+// These are geometry profiles, never a cut-budget-based truncation.
+export const SOCKET_UNION_PROFILES=freeze([
+ freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-slender-baseline'}),
+ freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-tapered',middleWidth:1.15,middleTailRadius:1.35,crownHeight:3,collarRadius:1.5}),
+ freeze({...JOINED_CROWN_PROFILES[0],id:'socket-union-ribbed',middleWidth:1.35,middleTailRadius:1.7,crownHeight:4,collarRadius:1.5})
+]);
 function middleCross(x,y,z,r,p){
  const dx=x-r.x,dz=z-r.z;
  if(y<r.y||y>=r.y+p.crownHeight)return false;
@@ -53,13 +61,13 @@ function room(x,y,z,r,p){
  return a*a+b*b<=1&&y>=r.y-1&&y<r.y-1+p.roomHeight;
 }
 export function gradeHallAirAt(seed,x,y,z,profile){
- if(!COMPACT_DECK_PROFILES.includes(profile)&&!CROWN_HALL_PROFILES.includes(profile)&&!JOINED_CROWN_PROFILES.includes(profile))throw Error('UNKNOWN_FROZEN_COMPACT_PROFILE');
+ if(!COMPACT_DECK_PROFILES.includes(profile)&&!CROWN_HALL_PROFILES.includes(profile)&&!JOINED_CROWN_PROFILES.includes(profile)&&!SOCKET_UNION_PROFILES.includes(profile))throw Error('UNKNOWN_FROZEN_COMPACT_PROFILE');
  if(!compactUpperHubResearchAirAt(seed,x,y,z))return false;
  return gradeHallInsideOriginalMask(seed,x,y,z,profile);
 }
 // Call only with already authenticated membership in compact original mask.
 export function gradeHallInsideOriginalMask(seed,x,y,z,p){
- if(y<=-80)return true;
+ if(y<=-80&&(!p.middleTailRadius||y<=-90))return true;
  const plan=planUnderworldRegion(seed,Math.floor(x/UNDERWORLD_REGION_SIDE),Math.floor(z/UNDERWORLD_REGION_SIDE));
  if(plan.capsules.length!==36||plan.layers.length!==4)throw Error('FROZEN_NETWORK_TOPOLOGY_CHANGED');
  for(let i=0;i<plan.layers.length;i++){
@@ -75,8 +83,9 @@ export function gradeHallInsideOriginalMask(seed,x,y,z,p){
  }
  for(let i=0;i<plan.capsules.length;i++){
   const t=plan.capsules[i];
-  if(i<16){if(gradeBand(x,y,z,t,p.halfWidth))return true;}
+  if(i<16){if(gradeBand(x,y,z,t,i>=8&&p.middleWidth?p.middleWidth:p.halfWidth))return true;}
   else if(i===16||i===35){const radius=i===16&&p.collarRadius&&y>=plan.layers[0].hub.y-7?p.collarRadius:p.shaftRadius;if(shaft(x,y,z,t,radius))return true;}
+  else if(i===25&&p.middleTailRadius){const mix=clamp((-80-y)/10),radius=p.middleTailRadius+(t.radius-p.middleTailRadius)*mix;if(shaft(x,y,z,t,radius))return true;}
   else if(shaft(x,y,z,t,t.radius))return true;
  }
  return false;
