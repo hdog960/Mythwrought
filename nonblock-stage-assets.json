@@ -266,7 +266,7 @@
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
     "./src/manual-biomes/profile-storage.mjs": "c126533d02c041bdf04abcb8c77e9be319e3474225e29cf4acd363370b3db380",
-    "./src/manual-biomes/profile-world.mjs": "b83faedb842424b913bb540cf6568b72e2e75ef23f0b5bea27f9f42a88400896",
+    "./src/manual-biomes/profile-world.mjs": "0de7e77419e399d22504cb7ccdc47e1109506fdd09ac74291193bacb7a96aa5f",
     "./src/manual-biomes/snowy-s17-fresh-source.mjs": "de3db9032fd4250512ca9fe7fdbbab9f23e561319e804809c6fa91eb01874a49",
     "./src/manual-biomes/snowy-s12-natural-conifer-prototypes.mjs": "a4d442c69bffd32afae0a4d0260d553439827da00f091127f7d16c2dee05e1fa",
     "./src/manual-biomes/snowy-s14-edge-pigment.mjs": "847d5a269f51056f116f7822bafe8bbca22f4461df3efef344bcb88f20876630",

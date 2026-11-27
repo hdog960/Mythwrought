@@ -45,6 +45,18 @@ export function canAdmitCombinedRandomSeed(seed){
           'AUTHORED_SOURCE_COLLISION','PLAYER_EDIT_PROTECTION','PROTECTED_EXISTING_LANDMARK',
           'INTERNAL_PORTAL_CONFLICT','NO_SUPPORTED_SURFACE_MOUTH'].includes(reason))))return false;
     }
+    // The existing spiral planner also refuses a seed when its verified
+    // surface collar conflicts with an entrance support or authored source.
+    // Recognize only that structured topology refusal; never ignore a
+    // storage failure, malformed report or unexpected exception.
+    const prefix='Historical deep spiral surface seam is unsafe: ';
+    if(error instanceof Error&&error.message.startsWith(prefix)){
+      const conflicts=JSON.parse(error.message.slice(prefix.length));
+      if(Array.isArray(conflicts)&&conflicts.length>0&&conflicts.length<=3&&conflicts.every(c=>
+        typeof c.k==='string'&&/^-?\d+,-?\d+,-?\d+$/.test(c.k)&&
+        ((c.reason==='SURFACE_PORTAL_SUPPORT_COLLISION'||c.reason==='OTHER_CAVE_SOURCE_OVERLAP')&&Number.isInteger(c.existing)||
+         c.reason==='EXISTING_LIVE_CAVE_OR_LANDMARK'&&Number.isInteger(c.id))))return false;
+    }
     throw error;
   }
 }
