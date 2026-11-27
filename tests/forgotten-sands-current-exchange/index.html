@@ -1,0 +1,98 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Forgotten Sands grounded moving vista</title></head><body style="margin:0"><canvas width="956" height="440" style="width:100vw;height:100vh"></canvas><script type="module">
+import {coalesceP0VisibleRanges} from '../../src/manual-biomes/forgotten-sands-fast-vista.mjs';
+import {P0_ORIGINAL_SHADERS as original} from '../../.current-source/src/manual-biomes/forgotten-sands-color-shaders.mjs';
+import {buildGpuPipeline} from '../../.current-source/src/gpu-pipeline.mjs';
+import {uploadChunkBuffer} from '../../.current-source/src/gpu-recovery.mjs';
+const canvas=document.querySelector('canvas'),gl=canvas.getContext('webgl2',{alpha:false,antialias:false,depth:true,preserveDrawingBuffer:true});
+const check=(x,m)=>{if(!x)throw Error(m);};
+const req=(w,m)=>new Promise((resolve,reject)=>{const timer=setTimeout(()=>{clean();reject(Error('worker timeout'));},60000);const clean=()=>{clearTimeout(timer);w.removeEventListener('message',msg);w.removeEventListener('error',err);};const msg=e=>{clean();e.data.type==='fault'?reject(Error(e.data.error)):resolve(e.data);};const err=e=>{clean();reject(Error(e.message));};w.addEventListener('message',msg);w.addEventListener('error',err);w.postMessage(m);});
+const vertex=`#version 300 es
+precision highp float;
+in vec3 aPos;in vec3 aColor;in vec2 aUv;in float aMat;
+uniform vec3 uEye,uForward,uRight,uUp;uniform float uAspect,uTan;
+out vec3 vColor;out float vDistance;out vec2 vUv;flat out int vMat;out float vPack2Alpha;
+void main(){
+ int d=int(aPos.x)%5;int kind=int(aPos.x)/5;
+ int i=gl_VertexID%6;
+ bool right=i==1||i==2||i==4;bool high=i==2||i==4||i==5;
+ float a=right?aUv.y:aUv.x,r=high?aMat:aPos.z,p=aPos.y;
+ vec3 pos=d<2?vec3(p,r,a):d==2?vec3(a,p,r):vec3(a,r,p);
+ vec3 delta=pos-uEye;float x=dot(delta,uRight),y=dot(delta,uUp),z=dot(delta,uForward);
+ gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);
+ vColor=aColor;vDistance=length(delta);vUv=vec2(a,r);vMat=kind==0?3:40;vPack2Alpha=0.;
+}`;
+async function run(){
+ check(gl,'WebGL2 required');const index=Number(new URLSearchParams(location.search).get('group')??1);
+ const worker=new Worker('./worker.mjs',{type:'module'}),resident=new Map();let far=null,base,farPipe,uploads=0,retired=0,peakOwners=0,peakBytes=0,peakUpper=0,peakHandles=0,frames=0,maxDrawCalls=0,farUploads=0,farRetired=0;
+ const images={},snapshots=[];let eye=null,farRanges=[],epoch=0;
+ const {admitUpperGpuBatch,upperGpuStats}=await import('../../.current-source/src/world-height-budget.mjs');
+ const count=()=>resident.size+(far?1:0),bytes=()=>[...resident.values()].reduce((n,r)=>n+r.bytes,0)+(far?.bytes??0);
+ const audit=()=>{const u=upperGpuStats(resident),handles=[...resident.values()].reduce((n,r)=>n+Number(!!r.buffer)+Number(!!r.waterBuffer),0)+Number(!!far);peakOwners=Math.max(peakOwners,count());peakHandles=Math.max(peakHandles,handles);peakBytes=Math.max(peakBytes,bytes());peakUpper=Math.max(peakUpper,u.owners);check(count()<=25&&u.owners<=8&&u.bytes<=7077888,'shared owner budget');if(far)check(bytes()<=2610144,'far combined byte budget');};
+ const del=b=>{if(b){gl.deleteBuffer(b);retired++;}};
+ const retire=r=>{del(r.buffer);del(r.waterBuffer);};
+ const dropFar=()=>{if(far){retire(far);far=null;farRetired++;}};
+ const upload=v=>{const b=uploadChunkBuffer(gl,v);gl.bindBuffer(gl.ARRAY_BUFFER,b);check(gl.getBufferParameter(gl.ARRAY_BUFFER,gl.BUFFER_SIZE)===v.byteLength,'actual upload bytes');uploads++;return b;};
+ function bind(pipe,camera){
+  gl.useProgram(pipe.terrainProgram);const u=pipe.uniforms,pitch=.11;
+  gl.uniform3fv(u.uEye,camera);gl.uniform3fv(u.uForward,[Math.cos(pitch),Math.sin(pitch),0]);gl.uniform3fv(u.uRight,[0,0,1]);gl.uniform3fv(u.uUp,[-Math.sin(pitch),Math.cos(pitch),0]);
+  gl.uniform1f(u.uAspect,canvas.width/canvas.height);gl.uniform1f(u.uTan,Math.tan(72*Math.PI/360));gl.uniform3fv(u.uFog,[.69,.62,.49]);gl.uniform3fv(u.uSkyLight,[1,.95,.85]);gl.uniform1f(u.uCaveHaze,0);gl.uniform1f(u.uArtQuality,1);
+ }
+ function draw(pipe,b,records,instance,start=0){
+  if(!b||!records)return;
+  gl.bindBuffer(gl.ARRAY_BUFFER,b);
+  for(const [loc,n,offset] of [[pipe.atPos,3,0],[pipe.atColor,3,12],[pipe.atUv,2,24],[pipe.atMat,1,32]]){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,n,gl.FLOAT,false,36,offset+start*36);gl.vertexAttribDivisor(loc,instance?1:0);}
+  if(instance)gl.drawArraysInstanced(gl.TRIANGLES,0,6,records);else gl.drawArrays(gl.TRIANGLES,0,records);
+  if(instance)for(const loc of [pipe.atPos,pipe.atColor,pipe.atUv,pipe.atMat])gl.vertexAttribDivisor(loc,0);
+ }
+ function render(mode='both',pixels=false){
+  gl.viewport(0,0,canvas.width,canvas.height);gl.clearColor(.69,.62,.49,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const nearDraw=()=>{bind(base,eye);for(const r of resident.values())draw(base,r.buffer,r.count,false);};
+  const farDraw=()=>{if(far){bind(farPipe,eye);let calls=0;for(const r of coalesceP0VisibleRanges(farRanges,new Set(resident.keys()))){draw(farPipe,far.buffer,r.count,true,r.start);calls++;}maxDrawCalls=Math.max(maxDrawCalls,calls);}};
+  if(mode==='reverse'){farDraw();nearDraw();}else{nearDraw();if(mode==='both')farDraw();}
+  gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
+  bind(base,eye);for(const r of resident.values())draw(base,r.waterBuffer,r.waterCount,false);gl.depthMask(true);gl.disable(gl.BLEND);
+  check(gl.getError()===gl.NO_ERROR,'draw error');
+  if(pixels){gl.finish();const p=new Uint8Array(canvas.width*canvas.height*4);gl.readPixels(0,0,canvas.width,canvas.height,gl.RGBA,gl.UNSIGNED_BYTE,p);return p;}
+ }
+ const raf=async()=>{await new Promise(requestAnimationFrame);frames++;};
+ try{
+  const prep=await req(worker,{type:'prepare',index});base=buildGpuPipeline(gl,original);
+  const fs=original.terrainFragment.replace('mix(29.0,9.0,uCaveHaze)','mix(45.0,9.0,uCaveHaze)').replace('mix(68.0,27.0,uCaveHaze)','mix(155.0,27.0,uCaveHaze)');
+  check(fs!==original.terrainFragment,'far fog patch');farPipe=buildGpuPipeline(gl,{...original,terrainVertex:vertex,terrainFragment:fs});
+  for(const [distance,feet] of [[48,16],[32,18],[16,19],[48,15],[48,16]]){
+   epoch++;const w=await req(worker,{type:'window',epoch,distance,feet});check(w.epoch===epoch,'window epoch');
+   const {plan}=w;eye=w.eye;
+   if(!plan.allowed)dropFar();
+   const wanted=new Set(w.near.map(k=>k.key));for(const [k,r] of resident)if(!wanted.has(k)){retire(r);resident.delete(k);}
+   if(plan.allowed&&!far){const f=await req(worker,{type:'far',epoch});await raf();far={buffer:upload(f.vertices),bytes:f.vertices.byteLength};farRanges=f.ranges;farUploads++;audit();}
+   for(const k of w.near)if(!resident.has(k.key)){
+    const r=await req(worker,{type:'near',epoch,key:k.key});check(r.epoch===epoch&&r.key===k.key,'mesh epoch');
+    admitUpperGpuBatch(resident,[{key:k.key,section:r.section,vertices:r.vertices,water:r.water}]);
+    await raf();let buffer=null,waterBuffer=null;
+    try{if(r.section<=0||r.vertices.length)buffer=upload(r.vertices);if(r.water.length)waterBuffer=upload(r.water);}
+    catch(e){del(buffer);del(waterBuffer);throw e;}
+    resident.set(k.key,{section:r.section,buffer,waterBuffer,count:r.vertices.length/9,waterCount:r.water.length/9,bytes:r.vertices.byteLength+r.water.byteLength});audit();render();
+   }
+   check(w.body.every(k=>resident.has(k)),'required body owner removed');
+   check(count()===plan.owners,'actual owner accounting');if(plan.allowed)check(bytes()===plan.bytes,'actual combined bytes');
+   if(feet===15)check(!plan.allowed&&!far,'Y15 denial must retire far');
+   if(feet>=16)check(plan.allowed&&far&&plan.removed,'optional empty exchange expected');
+   const near=render('near',true),both=render('both',true),capture=canvas.toDataURL('image/png'),reverse=render('reverse',true),nearAgain=render('near',true);
+   check(nearAgain.every((v,i)=>v===near[i]),'near parity');
+   let visible=0,orderDiff=0;for(let i=0;i<both.length;i+=4){const diff=(a,b)=>Math.abs(a[i]-b[i])+Math.abs(a[i+1]-b[i+1])+Math.abs(a[i+2]-b[i+2]);if(diff(near,both)>15)visible++;if(diff(both,reverse)>3)orderDiff++;}
+   check(orderDiff<100,'depth order disagreement');if(!far)check(visible===0,'denied far visible');
+   if(far&&distance===48)check(visible>100,'wide far not visible');
+   images['step'+epoch+'-d'+distance+'-feet'+feet]=capture;
+   snapshots.push({epoch,distance,feet,...plan,actualOwners:count(),actualBytes:bytes(),upper:upperGpuStats(resident),visible,orderDiff,nearPixelParity:true});
+   console.log('P0 EXCHANGE STEP',JSON.stringify(snapshots.at(-1)));window.p0Partial={index,images,snapshots};
+  }
+  const bad=await req(worker,{type:'invalidate',epoch});check(bad.stale&&bad.occupied,'stale source not detected');dropFar();audit();
+  for(const r of resident.values())retire(r);resident.clear();check(uploads===retired&&count()===0&&farUploads===farRetired,'retirement mismatch');
+  window.p0Images=images;return {index,seed:prep.seed,peakOwners,peakUpper,peakHandles,peakBytes,frames,maxDrawCalls,farUploads,farRetired,uploads,retired,snapshots,staleSourceRetired:true,finalResident:0,placementAuthority:false};
+ }finally{
+  for(const r of resident.values())retire(r);dropFar();
+  for(const p of [base,farPipe])if(p){gl.deleteBuffer(p.outlineBuffer);gl.deleteProgram(p.terrainProgram);gl.deleteProgram(p.skyProgram);}worker.terminate();
+ }
+}
+run().then(r=>window.p0Result=r).catch(e=>window.p0Error=String(e.stack||e));
+</script></body></html>
