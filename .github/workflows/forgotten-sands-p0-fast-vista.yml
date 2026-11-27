@@ -1,0 +1,26 @@
+name: Forgotten Sands P0 fast cold source and coalesced draws
+on:
+  push:
+    branches: [research/forgotten-sands-p0-fast-vista-20261127]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-fast-vista.mjs'
+      - 'tests/forgotten-sands-fast-vista.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-fast-vista.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          node --version
+          node --check src/manual-biomes/forgotten-sands-fast-vista.mjs
+          node --test tests/forgotten-sands-fast-vista.test.mjs
