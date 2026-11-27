@@ -16,6 +16,14 @@ import {WORLD_MAX_Y} from '../../src/depth.mjs';
 
 const root=process.cwd(),out=path.join(root,'artifacts/manual-v6-live');
 await mkdir(out,{recursive:true});
+const release='20261126-mining-diagnostic-v1';
+const expectedBank='mythwrought-m5-shell-'+release;
+const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
+const publicEntries=Object.entries(stagedManifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p));
+const expectedPublicPaths=publicEntries.map(([p])=>p==='./'?'/':p.slice(1)).sort();
+if(new Set(expectedPublicPaths).size!==expectedPublicPaths.length||!expectedPublicPaths.includes('/src/mining-trace.mjs')||
+ !expectedPublicPaths.includes('/src/main.mjs')||!expectedPublicPaths.includes('/index.html'))throw Error('Invalid diagnostic public asset inventory');
+
 const seed=179,sourceWorld=new FourRegionWorld(seed,
   fourRegionProfile(seed,M6_BALANCED_GENERATOR));
 const registered={
@@ -169,7 +177,7 @@ try{
     // then cold reload with the actual Chromium network entirely disabled.
     // A cache name appears at install START, not after the verified contents
     // finish. Only proceed offline when the FULL V6/REC shell is active.
-    await waitForAsyncCondition(page,async name=>{
+    await waitForAsyncCondition(page,async ({name,expectedPaths})=>{
       const names=await caches.keys();
       if(!names.includes(name)||!navigator.serviceWorker.controller)
         return false;
@@ -178,15 +186,15 @@ try{
         return false;
       const cache=await caches.open(name);
       const urls=(await cache.keys()).map(request=>request.url);
-      return urls.length===336&&
+      return urls.length===expectedPaths.length&&
+        JSON.stringify(urls.map(u=>new URL(u).pathname).sort())===JSON.stringify(expectedPaths)&&
         ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs'].every(p=>urls.some(url=>url.endsWith('/'+p)))&&
         urls.some(url=>url.endsWith('/src/main.mjs'))&&
         urls.some(url=>url.endsWith('/src/manual-biomes/v6-balanced-biomes.mjs'))&&
         urls.some(url=>url.endsWith('/src/app-update.mjs'))&&
         urls.some(url=>url.endsWith('/src/gameplay-recorder.mjs'));
-    },'mythwrought-m5-shell-20261125-living-ecosystem-height-v1',{timeout:180000});
-    const before=await page.evaluate(async()=>{
-      const name='mythwrought-m5-shell-20261125-living-ecosystem-height-v1';
+    },{name:expectedBank,expectedPaths:expectedPublicPaths},{timeout:180000});
+    const before=await page.evaluate(async name=>{
       const cache=await caches.open(name);
       const files=(await cache.keys()).map(x=>x.url);
       return {assets:files.length,hasV6:files.some(x=>
@@ -194,8 +202,8 @@ try{
         hasMain:files.some(x=>x.endsWith('/src/main.mjs')),
         controlled:Boolean(navigator.serviceWorker.controller),
         save:localStorage.getItem('mythwrought-v002-world-179')};
-    });
-    if(!before.hasV6||!before.hasMain||before.assets!==336||
+    },expectedBank);
+    if(!before.hasV6||!before.hasMain||before.assets!==expectedPublicPaths.length||
        !before.controlled||!before.save)
       throw Error('V6 online atomic cache missing '+JSON.stringify(before));
     await context.setOffline(true);

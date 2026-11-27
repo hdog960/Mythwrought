@@ -8,7 +8,7 @@ const menu=html.slice(html.indexOf('<div id="help" hidden>'),html.indexOf('<scri
 const primary=menu.split('<details id="advancedMenu">')[0],advanced=menu.split('<div id="advancedTools">')[1];
 test('compact default menu retains requested controls without old generators or diagnostics',()=>{
   for(const id of ['closeHelp','skySetDay','skySetNight','newWorld','seedInput','switchWorld'])assert.ok(primary.includes('id="'+id+'"'),id);
-  for(const id of ['runAudit','caveCreateWorld','caveLoadWorld','pack2Materials','vaultBackup','mirrorSync','renderPreset','checkGameUpdate'])assert.ok(!primary.includes('id="'+id+'"')&&advanced.includes('id="'+id+'"'),id);
+  for(const id of ['startMiningTrace','runAudit','caveCreateWorld','caveLoadWorld','pack2Materials','vaultBackup','mirrorSync','renderPreset','checkGameUpdate'])assert.ok(!primary.includes('id="'+id+'"')&&advanced.includes('id="'+id+'"'),id);
   assert.ok(!html.includes('id="g2bFlightProfile"'));
   assert.ok(!html.includes('id="newSnowWorld"'));
   assert.ok(src.includes('if(seedRow&&developerWorldFixtures)'));
@@ -29,7 +29,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261125-living-ecosystem-height-v1';
+  const release='20261126-mining-diagnostic-v1';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));

@@ -16,6 +16,14 @@ if(!Object.hasOwn(layouts,selected))throw Error('Invalid M5 viewport');
 const [width,height]=layouts[selected],seed=179;
 const root=process.cwd(),out=path.join(root,'artifacts/m5-offline-'+selected);
 await mkdir(out,{recursive:true});
+const release='20261126-mining-diagnostic-v1';
+const expectedBank='mythwrought-m5-shell-'+release;
+const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
+const publicEntries=Object.entries(stagedManifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p));
+const expectedPublicPaths=publicEntries.map(([p])=>p==='./'?'/':p.slice(1)).sort();
+if(new Set(expectedPublicPaths).size!==expectedPublicPaths.length||!expectedPublicPaths.includes('/src/mining-trace.mjs')||
+ !expectedPublicPaths.includes('/src/main.mjs')||!expectedPublicPaths.includes('/index.html'))throw Error('Invalid diagnostic public asset inventory');
+
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const mime={'.html':'text/html','.css':'text/css','.js':'text/javascript',
  '.mjs':'text/javascript','.json':'application/json','.svg':'image/svg+xml',
@@ -56,7 +64,7 @@ const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
   sourceSchema:1,realChromium:true,offlineModeVerified:false,
-  physicalIphone:false,serviceWorkerVersion:'mythwrought-m5-shell-20261125-living-ecosystem-height-v1',
+  physicalIphone:false,serviceWorkerVersion:expectedBank,
   finished:false,screens:[],checks:[],errors:[]};
 const persist=()=>writeFile(path.join(out,'manifest.json'),JSON.stringify(report,null,2));
 const check=(name,ok,info={})=>{
@@ -178,17 +186,18 @@ try{
   }
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),null,
     {timeout:180000});
-  const online=await page.evaluate(async()=>{
+  const online=await page.evaluate(async expectedBank=>{
     const keys=await caches.keys();
-    const name=keys.find(x=>x==='mythwrought-m5-shell-20261125-living-ecosystem-height-v1');
+    const name=keys.find(x=>x===expectedBank);
     const cache=name?await caches.open(name):null;
     const urls=cache?await cache.keys():[];
     return {name,cacheCount:urls.length,controller:
       navigator.serviceWorker.controller?.scriptURL,urls:urls.map(x=>x.url),
       secure:window.isSecureContext};
-  });
+  },expectedBank);
   check('atomic-versioned-shell-install',online.secure&&
-    online.name===report.serviceWorkerVersion&&online.cacheCount===336&&
+    online.name===report.serviceWorkerVersion&&online.cacheCount===expectedPublicPaths.length&&
+    JSON.stringify(online.urls.map(u=>new URL(u).pathname).sort())===JSON.stringify(expectedPublicPaths)&&
     online.controller?.endsWith('/sw-m5.js')&&
     ['src/main.mjs','src/app-update.mjs','src/gameplay-recorder.mjs','src/world-height.mjs','src/world-height-mesh-pages.mjs','src/world-height-budget.mjs','src/pack5-integration/upper-sections.mjs','src/mobs/ecosystem-world-geometry.mjs','src/mobs/live-projectile-budget.mjs','src/mobs/cave-spawn-column.mjs','src/mobs/source-edit-epoch.mjs',
      'src/manual-biomes/profile-world.mjs',
