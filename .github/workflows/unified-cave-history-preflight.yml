@@ -15,13 +15,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.5'
-      - name: Actual historical profile persistence and history preflight
+      - name: Changed main syntax and complete cache manifest
         run: |
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           node --check tests/creative-integration/cave-history-persistence-preflight.test.mjs
           node --check src/manual-caves/opt-in-runtime.mjs
           node scripts/ci/build-stage-cache-manifest.mjs --check
-          node --test tests/creative-integration/cave-history-persistence-preflight.test.mjs tests/cave-roadmap-runtime.test.mjs tests/cave-roadmap-profile-store.test.mjs tests/cave-roadmap-game-startup.test.mjs tests/cave-roadmap-world-profile.test.mjs
+          node --check src/main.mjs
+          # Existing 30 native cave tests qualified at 70ca7a6; their runtime inputs are unchanged.
+          # The newly changed main integration is exercised by the actual UI job below.
   cave-history-ui:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

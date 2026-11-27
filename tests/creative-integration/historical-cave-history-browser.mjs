@@ -41,7 +41,7 @@ const read=()=>page.evaluate(({key,oldKey,target})=>{const raw=localStorage.getI
 const state=async(expected,id)=>{const s=await read();assert.equal(s.id,id);assert.deepEqual(s.world,expected);assert.equal(s.ordinary,null);assert.equal(s.journal,null);return s;};
 async function load(){
  await page.goto(origin+'/?production-ui=1',{waitUntil:'domcontentloaded',timeout:120000});
- await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene').dataset.loadedChunks)>=25,null,{timeout:180000});
+ await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene').dataset.loadedChunks)>=25&&document.querySelector('#notice').hidden,null,{timeout:180000});
  await page.locator('#menu').click();
  await page.evaluate(seed=>{document.getElementById('advancedMenu').open=true;const input=document.getElementById('seedInput');input.value=String(seed);document.getElementById('caveLoadWorld').click();},seed);
  await page.waitForFunction(seed=>window.__mythwroughtTest.caveMode().enabled&&window.__mythwroughtTest.caveMode().seed===seed,seed,{timeout:90000});
@@ -57,11 +57,28 @@ try{
  await page.locator('#dig').tap();await state(mined,BLOCK.AIR);assert.equal(await btn('undo').isEnabled(),true);
  await btn('undo').tap();await state(initial,BLOCK.STONE);
  await btn('redo').tap();await state(mined,BLOCK.AIR);await shot('cave-redone');
- // A cold page load must retain the durable edit, but not the session journal.
- await load();await state(mined,BLOCK.AIR);assert.equal(await page.locator('#creativeQuickbar').isVisible(),false);
- // Recreate history with a real UI placement/mine cycle from the durable
- // fixture, using the pre-existing prior-good bytes only via the saved owner.
- report.complete=true;report.fixture=fixture;report.coldReload=true;report.initialSHA256=sha(JSON.stringify(initial));report.minedSHA256=sha(JSON.stringify(mined));
+ // Cold load the successfully restored block; session history must reset.
+ await btn('undo').tap();await state(initial,BLOCK.STONE);
+ await load();await state(initial,BLOCK.STONE);assert.equal(await page.locator('#creativeQuickbar').isVisible(),false);
+ await page.locator('#g2bFlightEnable').check();await page.waitForFunction(()=>!document.querySelector('#creativeQuickbar').hidden);
+ assert.equal(await btn('undo').isEnabled(),false);
+ await page.waitForFunction(t=>document.querySelector('#scene').dataset.targetBlock===t.join(','),target,{timeout:90000});
+ await page.locator('#dig').tap();const beforeFault=await state(mined,BLOCK.AIR);
+ // Fault at the genuine primary write, after the cave owner commits its
+ // recoverable journal. The actual history button must fail closed.
+ await page.evaluate(key=>{const original=Storage.prototype.setItem;Storage.prototype.setItem=function(k,v){if(k===key)throw Error('Injected cave primary refusal');return original.call(this,k,v);};},key);
+ await btn('undo').tap();
+ const failed=await read();assert.equal(failed.raw,beforeFault.raw);assert.ok(failed.journal);
+ assert.deepEqual(JSON.parse(JSON.parse(failed.journal).raw).world,initial);
+ assert.equal(await btn('undo').isEnabled(),false);assert.equal(await btn('redo').isEnabled(),false);
+ await page.locator('#dig').tap();const protectedState=await read();
+ assert.equal(protectedState.raw,failed.raw);assert.equal(protectedState.journal,failed.journal);
+ // Reopening via the actual historical load selector must recover the
+ // pending transaction without inventing an ordinary-world save.
+ await load();const recovered=await read();assert.equal(recovered.id,BLOCK.STONE);
+ assert.equal(recovered.raw,failed.raw);assert.equal(recovered.journal,failed.journal);assert.equal(recovered.ordinary,null);
+ assert.equal(await page.locator('#creativeQuickbar').isVisible(),false);
+ report.complete=true;report.fixture=fixture;report.coldReload=true;report.primaryFaultRecovered=true;report.initialSHA256=sha(JSON.stringify(initial));report.minedSHA256=sha(JSON.stringify(mined));
  assert.deepEqual(report.errors,[]);
 }catch(e){report.errors.push(String(e.stack??e));report.complete=false;process.exitCode=1;}
 finally{await writeFile(OUT+'/manifest.json',JSON.stringify(report,null,2)+'\n');console.log('HISTORICAL_CAVE_HISTORY '+JSON.stringify(report));await ctx.close();await browser.close();}
