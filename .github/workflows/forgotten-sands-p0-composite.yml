@@ -1,0 +1,31 @@
+name: Forgotten Sands P0 current composite detached persistence
+on:
+  push:
+    branches: [research/forgotten-sands-p0-fast-vista-20261127]
+    paths:
+      - 'src/manual-biomes/forgotten-sands-composite-fixture.mjs'
+      - 'tests/forgotten-sands-composite-fixture.test.mjs'
+      - '.github/workflows/forgotten-sands-p0-composite.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 7b04720b4d8d68209e7e47837fbc71e1d26a9b51
+          path: .current-source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          git rev-parse HEAD
+          git -C .current-source rev-parse HEAD
+          node --version
+          P0_CURRENT_SOURCE="$PWD/.current-source" node --test tests/forgotten-sands-composite-fixture.test.mjs
