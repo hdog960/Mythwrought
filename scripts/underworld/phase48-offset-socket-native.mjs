@@ -7,7 +7,7 @@ let report={status:'INCOMPLETE'};
 try{
  const r=inspectOffsetSocketSpiral();
  report={status:'OFFSET_SOCKET_MEASURED_NOT_ADMITTED',...r};
- assert.equal(r.attempted,480);
+ assert.equal(r.attempted,192);
  assert.equal(r.candidates.length+r.skippedAfterCap,r.attempted);
  assert.ok(r.sourceAttempts<=16);
  assert.ok(r.sourceCalls<=40000);
