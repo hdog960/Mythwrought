@@ -5,7 +5,10 @@ import {chromium} from 'playwright';
 const browser=await chromium.launch({headless:true,args:[
   '--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 try{
-  for(const [width,height] of [[568,320],[667,375],[844,390],[932,430]]){
+  const sizes=[[568,320],[667,375],[844,390],[932,430]];
+  const only=process.env.MAP_VIEWPORTS?.split(',');
+  if(only)assert.ok(only.length&&only.every(v=>sizes.some(([w,h])=>v===w+'x'+h)));
+  for(const [width,height] of sizes.filter(([w,h])=>!only||only.includes(w+'x'+h))){
     const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:1,hasTouch:true,isMobile:true});
     const page=await context.newPage(),errors=[];
     page.on('pageerror',e=>errors.push(e.message));
@@ -112,9 +115,21 @@ try{
       await page.waitForFunction(n=>Number(document.querySelector('#miniMap')?.dataset.discovered)>=n,explored);
       await page.locator('#miniMapButton').tap();
       assert.equal(await page.locator('#navMarkerList option').count(),2,'waypoint survives cold reload');
-      await page.locator('#closeExploration').tap();
-      await page.locator('#menu').click(); // pause observations before exact-byte witness
-      const oldFog=await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-179'));
+      // Opening the map flushes and pauses observations. Close it and open
+      // the menu in the SAME JS task, so no animation frame can add spawn
+      // observations between the last flush and the paused old-world snapshot.
+      const oldFog=await page.evaluate(()=>{
+        const overlay=document.querySelector('#explorationOverlay');
+        const menu=document.querySelector('#help');
+        if(overlay.hidden||!menu.hidden)throw Error('Unexpected old-world UI state');
+        document.querySelector('#closeExploration').click();
+        document.querySelector('#menu').click();
+        if(!overlay.hidden||menu.hidden)throw Error('Failed to pause observations');
+        const raw=localStorage.getItem('mythwrought-exploration-v1-179');
+        const count=Number(document.querySelector('#miniMap').dataset.discovered);
+        if(JSON.parse(raw).cells.length!==count)throw Error('Old fog is not fully flushed');
+        return raw;
+      });
       assert.ok(JSON.parse(oldFog).cells.includes(remoteCell),'Old seed must retain the actual remote visited cell after reload');
       assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-28629')),null,'New seed was not fresh');
       await page.locator('#seedInput').fill('28629');

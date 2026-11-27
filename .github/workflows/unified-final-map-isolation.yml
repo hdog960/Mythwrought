@@ -1,7 +1,7 @@
 name: Unified final map seed isolation witness
 on:
   push:
-    branches: [probe/unified-final-map-remote-witness-20261127]
+    branches: [probe/unified-final-map-flush-20261127]
 permissions:
   contents: read
 jobs:
@@ -19,7 +19,7 @@ jobs:
           npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
           npx playwright install chromium
           python3 -m http.server 4173 >/tmp/map.log 2>&1 &
-          node tests/exploration-map-browser.mjs
+          MAP_VIEWPORTS=844x390,932x430 node tests/exploration-map-browser.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
