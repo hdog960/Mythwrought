@@ -1,0 +1,65 @@
+name: Mining save final targeted nonblock qualification
+on:
+  push:
+    branches: [probe/mining-save-final-nonblock-20261127]
+    paths: ['.github/workflows/mining-save-final-nonblock.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  remaining-nonblock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 1879d59c88b971cdf892ba3edd965b6cd9965301
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Recover already successful exact-candidate scenery evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: mythwrought-browser-smoke
+          run-id: 45933467421
+          github-token: ${{ github.token }}
+          path: prior-evidence
+      - name: Authenticate reused groups without replaying successful tests
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = '1879d59c88b971cdf892ba3edd965b6cd9965301'
+          mkdir -p artifacts
+          for group in nonblock-runtime nonblock-catalog nonblock-meadow-woodland; do
+            test -f "prior-evidence/$group/manifest.json"
+            cp -a "prior-evidence/$group" artifacts/
+          done
+          node --input-type=module -e "import {verifyStageEvidenceGroup} from './scripts/ci/verify-nonblock-evidence.mjs'; for (const g of ['nonblock-runtime','nonblock-catalog','nonblock-meadow-woodland']) {const r=await verifyStageEvidenceGroup(process.cwd(),g); console.log('REUSED',g,r.screenshots.length,r.sourceFiles);}"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+      - name: One unchanged enchanted-fungi retry and remaining previously skipped gates
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 >/tmp/mythwrought-nonblock-site.log 2>&1 &
+          site_server=$!
+          trap 'kill "$site_server" 2>/dev/null || true' EXIT
+          NONBLOCK_CATALOG_SET=enchanted-fungi node tests/nonblock-catalog-browser.mjs
+          node tests/nonblock-cave-browser.mjs
+          node tests/nonblock-inherited-extra-browser.mjs
+          NONBLOCK_EXTRA_SET=world-props node tests/nonblock-inherited-extra-browser.mjs
+          node tests/nonblock-offline-browser.mjs
+          node tests/nonblock-physical-fittings-browser.mjs
+          node tests/nonblock-effects-browser.mjs
+          node tests/nonblock-cache-recovery-browser.mjs
+          node tests/nonblock-habitat-browser.mjs
+          NONBLOCK_REVIEW_SET=forest-floor NONBLOCK_REVIEW_LABEL=after NONBLOCK_REVIEW_ORIGIN=http://127.0.0.1:4173 node tests/nonblock-foliage-review-browser.mjs
+          node tests/nonblock-lod-browser.mjs
+          NONBLOCK_EXTRA_COMPARISON=after node tests/nonblock-inherited-extra-browser.mjs
+          node tests/nonblock-parity-browser.mjs
+          node scripts/ci/verify-nonblock-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mining-save-final-nonblock
+          path: artifacts/
+          if-no-files-found: error
