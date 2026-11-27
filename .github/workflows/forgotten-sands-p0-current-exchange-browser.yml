@@ -1,7 +1,7 @@
 name: Forgotten Sands P0 current owner exchange browser
 on:
   push:
-    branches: [research/forgotten-sands-p0-current-exchange-20261127]
+    branches: [research/forgotten-sands-p0-fast-vista-20261127]
     paths:
       - 'tests/forgotten-sands-current-exchange/**'
       - '.github/workflows/forgotten-sands-p0-current-exchange-browser.yml'

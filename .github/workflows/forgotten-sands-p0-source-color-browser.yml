@@ -1,7 +1,7 @@
 name: Forgotten Sands P0 paired current material source colors
 on:
   push:
-    branches: [research/forgotten-sands-p0-source-color-20261127]
+    branches: [research/forgotten-sands-p0-fast-vista-20261127]
     paths:
       - 'tests/forgotten-sands-source-color/**'
       - '.github/workflows/forgotten-sands-p0-source-color-browser.yml'
