@@ -1,0 +1,34 @@
+name: Living Underworld completion 11 - drifting interlayer
+on:
+  push:
+    branches:
+      - dev/living-underworld-phase50-socket-union-20261127
+    paths:
+      - .github/workflows/living-underworld-phase50-interlayer-native.yml
+permissions:
+  contents: read
+jobs:
+  interlayer-native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact source and syntax
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check src/living-underworld/drifting-interlayer-stair.mjs
+          node --check scripts/underworld/phase50-interlayer-native.mjs
+      - name: New drifting interlayer original geometry and continuous controller
+        run: node scripts/underworld/phase50-interlayer-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase50-interlayer-native
+          path: ${{ runner.temp }}/phase50-interlayer/
+          retention-days: 7
