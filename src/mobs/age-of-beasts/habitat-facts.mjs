@@ -33,9 +33,34 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++)for(let dy=-1;dy<=1;dy++)out.push(read(x+dx,y+dy,z+dz));
    return out;
   })();
+  // A landing site must be reached by a continuous clear descent, then
+  // full footprint support. Bounded to 3 blocks/12 quarter-block steps.
+  let landing;
+  function findLanding(){
+   if(landing!==undefined)return landing;
+   landing=null;
+   for(let step=0;step<=12;step++){
+    const at=[p[0],p[1]-step*.25,p[2]];
+    if(q.volume(at,body)!=='clear')break;
+    if(expansionSupport(q,at,body,'ground')){landing=at;break;}
+   }
+   return landing;
+  }
+  // Require real grass under every footprint cell, not a biome label.
+  function grassAt(at){
+   const b=planBodyVolume(at,body)?.bounds;if(!b)return false;
+   const y=Math.floor(b[1]-.035);
+   for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)
+    for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)
+     if(read(x,y,z)!==BLOCK.GRASS)return false;
+   return true;
+  }
   for(const tag of needed){
    switch(tag){
     case 'ground':result[tag]=support('ground');break;
+    case 'landing-site':result[tag]=findLanding()!==null;break;
+    case 'open-grass':{const at=findLanding();result[tag]=at!==null&&grassAt(at);break;}
+    case 'large-clearance':result[tag]=q.volume(p,body)==='clear';break;
     case 'ceiling':result[tag]=support('ceiling');break;
     case 'submerged-space':result[tag]=support('water');break;
     case 'flight-clearance':result[tag]=support('air');break;

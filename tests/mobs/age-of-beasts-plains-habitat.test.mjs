@@ -1,0 +1,20 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {arena} from './fixture.mjs';
+import {BLOCK} from '../../src/voxel.mjs';
+import {createExpansionOwnerView} from '../../src/mobs/age-of-beasts/owner-view.mjs';
+import {readExpansionHabitatFacts} from '../../src/mobs/age-of-beasts/habitat-facts.mjs';
+import {APPROVED} from '../../src/mobs/age-of-beasts/roster-contract.mjs';
+import {normalizeExpansionCapabilities} from '../../src/mobs/age-of-beasts/catalog-index.mjs';
+test('grass and bounded landing are source-backed, reject replaced floor',()=>{
+ const w=arena({floor:-3});
+ for(let x=-2;x<=2;x++)for(let z=-2;z<=2;z++)assert.ok(w.set(x,-3,z,BLOCK.GRASS));
+ const view=createExpansionOwnerView(w,{hasOwner:()=>true,observe:()=>({biome:'meadow',hazard:false,dayPhase:'day',light:.8}),overlayEpoch:()=>0});
+ const spec=APPROVED.find(s=>s.id==='meadowlark');
+ const cap=normalizeExpansionCapabilities(spec.id,{body:{radius:.2,height:.4,collision:'aabb'},depth:[-3,100],movement:['walk','fly'],spawnSupport:['air','ground']});
+ const p=[.5,-1,.5];
+ const facts=()=>readExpansionHabitatFacts(view,p,cap,spec);
+ assert.equal(facts()['landing-site'],true);assert.equal(facts()['open-grass'],true);
+ assert.ok(w.set(0,-3,0,BLOCK.STONE));assert.equal(facts()['open-grass'],false);
+ assert.equal(readExpansionHabitatFacts(view,[.5,2,.5],cap,spec)['landing-site'],false);
+});
