@@ -100,6 +100,9 @@ try{
       await page.locator('#miniMapButton').tap();
       assert.equal(await page.locator('#navMarkerList option').count(),2,'waypoint survives cold reload');
       await page.locator('#closeExploration').tap();
+      const oldFog=await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-179'));
+      assert.ok(JSON.parse(oldFog).cells.some(k=>{const [x,z]=k.split(',').map(Number);return Math.abs(x-30)<=3&&Math.abs(z-30)<=3;}),'Old seed must contain remote visited cells');
+      assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-exploration-v1-28629')),null,'New seed was not fresh');
       await page.locator('#menu').click();
       await page.locator('#seedInput').fill('28629');
       page.once('dialog',dialog=>dialog.accept());
@@ -107,8 +110,31 @@ try{
       await page.locator('#closeHelp').click();
       await page.waitForFunction(()=>document.querySelector('#seed')?.textContent==='WORLD 28629');
       await page.waitForFunction(()=>document.querySelector('#miniMap')?.dataset.seed==='28629');
-      assert.ok(Number(await page.locator('#miniMap').getAttribute('data-discovered'))<explored,
-        'different seed must begin unexplored');
+      // Terrain visibility differs by seed and elapsed sampling. A total
+      // count comparison cannot prove isolation. Require the actual saved
+      // new-seed cells to lie in the original source's 3-cell reveal radius.
+      await page.waitForFunction(()=>Number(document.querySelector('#miniMap')?.dataset.discovered)>0,null,{timeout:30000});
+      await page.locator('#miniMapButton').tap();
+      assert.equal(await page.locator('#navMarkerList option').count(),1,'Old waypoint leaked into new seed');
+      const witness=await page.evaluate(()=>{
+        const c=document.querySelector('#scene'),m=document.querySelector('#miniMap');
+        return {x:Number(c.dataset.playerX),z:Number(c.dataset.playerZ),
+          displayed:Number(m.dataset.discovered),raw:localStorage.getItem('mythwrought-exploration-v1-28629'),
+          old:localStorage.getItem('mythwrought-exploration-v1-179')};
+      });
+      const fresh=JSON.parse(witness.raw);
+      assert.ok(Number.isFinite(witness.x)&&Number.isFinite(witness.z));
+      assert.equal(fresh.seed,28629);assert.equal(fresh.cellSize,4);
+      assert.equal(fresh.cells.length,witness.displayed);
+      assert.ok(fresh.cells.length>0&&fresh.cells.length<=29);
+      const cx=Math.floor(witness.x/4),cz=Math.floor(witness.z/4);
+      assert.ok(fresh.cells.every(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2<=9;}),'New seed contains cells beyond its actual spawn reveal radius');
+      const remote=JSON.parse(oldFog).cells.filter(k=>{const [x,z]=k.split(',').map(Number);return (x-cx)**2+(z-cz)**2>9;});
+      assert.ok(remote.length>0);
+      assert.ok(remote.every(k=>!fresh.cells.includes(k)),'Remote old-seed discovery leaked');
+      assert.equal(witness.old,oldFog,'Switch altered old seed fog bytes');
+      console.log('MAP_SEED_ISOLATION_WITNESS',JSON.stringify({width,height,oldCount:JSON.parse(oldFog).cells.length,newCount:fresh.cells.length,cx,cz,remoteExcluded:remote.length}));
+      await page.locator('#closeExploration').tap();
       assert.deepEqual(errors,[],'Map browser JavaScript errors at '+width+'x'+height);
       console.log('PASS exploration map',width+'x'+height,{start,explored,placement});
     }finally{await context.close();}

@@ -1,0 +1,27 @@
+name: Unified final map seed isolation witness
+on:
+  push:
+    branches: [probe/unified-final-map-isolation-20261127]
+permissions:
+  contents: read
+jobs:
+  map:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check tests/exploration-map-browser.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/map.log 2>&1 &
+          node tests/exploration-map-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-map-isolation
+          path: artifacts/
