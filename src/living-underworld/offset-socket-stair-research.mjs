@@ -58,9 +58,9 @@ function findOffsetApproach({hub,original,cuts,floors,spiral,fp}){
  }return {support,air};};
  const tailSupport=new Set(),tailAir=new Set();
  for(let i=1;i<spiral.length;i++){const p=spiral[i],q=spiral[i-1],c=cells(p,p.x-q.x);for(const k of c.support)tailSupport.add(k);for(const k of c.air)tailAir.add(k);}
- const safe=(c,s,a)=>c.support.every(k=>!cuts.has(k)&&!a.has(k))&&c.air.every(k=>!floors.has(k)&&!s.has(k)&&networkAirAt(original.seed,...xyz(k)));
+ const safe=(c,s,a)=>c.support.every(k=>!cuts.has(k)&&!a.has(k)&&!tailAir.has(k))&&c.air.every(k=>!floors.has(k)&&!s.has(k)&&!tailSupport.has(k)&&networkAirAt(original.seed,...xyz(k)));
  const extend=(state,c)=>({s:new Set([...state.s,...c.support]),a:new Set([...state.a,...c.air])});
- const q=[{route:[finish],s:tailSupport,a:tailAir}],visits=new Map();
+ const q=[{route:[finish],s:new Set(),a:new Set()}],visits=new Map();
  let tried=0,pruned=0,searchNodes=0;
  // Bounded path-aware search; retain up to three genuinely different
  // arrival histories per location/heading instead of one shortest parent.
