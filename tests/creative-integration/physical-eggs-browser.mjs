@@ -19,8 +19,11 @@ assert.equal(catalog.blocks.length,241);
 assert.equal(catalog.creatures.length,40);
 const offset=Number(process.env.EGG_OFFSET??0);
 assert.ok(Number.isInteger(offset)&&offset>=0&&offset<10,'EGG_OFFSET must be 0..9');
-const eggs=catalog.creatures.slice(shard*10+offset,shard*10+10);
-assert.equal(eggs.length,10-offset);
+const shardEggs=catalog.creatures.slice(shard*10+offset,shard*10+10);
+assert.equal(shardEggs.length,10-offset);
+const only=process.env.EGG_ONLY;
+const eggs=only?shardEggs.filter(e=>e.id===only):shardEggs;
+if(only)assert.equal(eggs.length,1,'EGG_ONLY must belong to selected shard and offset');
 assert.equal(new Set(catalog.creatures.map(e=>e.id)).size,40);
 const OUT='artifacts/creative-eggs/shard-'+shard;
 await mkdir(OUT,{recursive:true});
@@ -202,7 +205,9 @@ try{
       await saveProof();
     }catch(err){
       const diagnostics=await page.evaluate(()=>({profile:window.__mythwroughtTest?.fourBiomeProfile(),seed:window.__mythwroughtTest?.snapshot()?.seed,status:document.querySelector('#seedMessage')?.textContent,saveHealth:document.querySelector('#saveHealth')?.textContent,loadedChunks:document.querySelector('#scene')?.dataset.loadedChunks,targetPlace:document.querySelector('#scene')?.dataset.targetPlace,mobs:window.__mythwroughtTest?.mobStatus()})).catch(e=>({diagnosticError:String(e)}));
-      const failure={id:egg.id,stage,error:String(err?.stack||err),diagnostics,dialogs,pageErrors:errors,missing};
+      const startup=await page.evaluate(()=>({notice:document.querySelector('#notice')?.textContent,noticeHidden:document.querySelector('#notice')?.hidden,scene:{...document.querySelector('#scene')?.dataset},storageKeys:Object.keys(localStorage)})).catch(()=>null);
+      await page.screenshot({path:OUT+'/'+egg.id+'-failure.png'}).catch(()=>{});
+      const failure={id:egg.id,stage,startup,error:String(err?.stack||err),diagnostics,dialogs,pageErrors:errors,missing};
       report.errors.push(failure);
       console.error('REAL_CREATIVE_EGG_FAILURE',JSON.stringify(failure));
       await saveProof();

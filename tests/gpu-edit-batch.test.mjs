@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {stageEditedChunkBuffers,MAX_EDIT_UPLOAD_BUFFERS} from '../src/gpu-recovery.mjs';
+import {stageEditedChunkBuffers,MAX_EDIT_UPLOAD_BUFFERS,uploadChunkBuffer} from '../src/gpu-recovery.mjs';
 const v=()=>new Float32Array(9),empty=()=>new Float32Array();
 const batch=()=>[{key:'a',cx:0,cz:0,section:-1,vertices:v(),water:v()},
  {key:'b',cx:1,cz:0,section:1,vertices:v(),water:empty()}];
@@ -66,22 +66,29 @@ const source=readFileSync(new URL('../src/main.mjs',import.meta.url),'utf8');
 const start=source.indexOf('  function publishEditedChunkBatch(batch){');
 const end=source.indexOf('  function refreshEditedMeshes(',start);
 assert.ok(start>=0&&end>start);
-const publisher=Function('gl','chunks','world','admitUpperGpuBatch','stageEditedChunkBuffers','deleteChunkBuffers',
- source.slice(start,end)+'\nreturn publishEditedChunkBatch;');
-function ownerFixture(m,stage=stageEditedChunkBuffers){
+// Execute the exact released publisher and its original per-buffer upload
+// function together. The detached batch helper above remains independently tested.
+const uploadStart=source.indexOf('  function uploadPack2Chunk(vertices,water,section=0){');
+const uploadEnd=source.indexOf('  let editMeshBatches=',uploadStart);
+assert.ok(uploadStart>=0&&uploadEnd>uploadStart);
+const publisher=Function('gl','chunks','world','admitUpperGpuBatch','uploadChunkBuffer','deleteChunkBuffers','traceMeasure',
+ source.slice(uploadStart,uploadEnd)+source.slice(start,end)+'\nreturn publishEditedChunkBatch;');
+const ids=items=>items.map(b=>b.id).sort((a,b)=>a-b);
+function ownerFixture(m,{beforeRetire=()=>{},measure=null}={}){
  const old=[{buffer:{id:'old-a'}},{buffer:{id:'old-b'}}],chunks=new Map([['a',old[0]],['b',old[1]]]);
  const retired=[];
- const publish=publisher(m.gl,chunks,{},()=>{},stage,item=>{
+ const publish=publisher(m.gl,chunks,{},()=>{},uploadChunkBuffer,item=>{
+  beforeRetire(item,chunks,old);
   retired.push(item);if(item.buffer)m.gl.deleteBuffer(item.buffer);
   if(item.waterBuffer)m.gl.deleteBuffer(item.waterBuffer);
- });
+ },measure);
  return {old,chunks,retired,publish};
 }
 test('actual publisher retains both old owners on silent second upload fault',()=>{
  const m=mock({failUpload:2}),f=ownerFixture(m);
- assert.throws(()=>f.publish(batch()),/batch upload error/);
+ assert.throws(()=>f.publish(batch()),/buffer upload error 1285/);
  assert.equal(f.chunks.get('a'),f.old[0]);assert.equal(f.chunks.get('b'),f.old[1]);
- assert.equal(f.retired.length,0);assert.deepEqual(m.deleted,m.created);
+ assert.equal(f.retired.length,0);assert.deepEqual(ids(m.deleted),ids(m.created));
 });
 test('actual publisher retains old handles on context loss',()=>{
  const m=mock({lostAt:1}),f=ownerFixture(m);
@@ -90,16 +97,22 @@ test('actual publisher retains old handles on context loss',()=>{
  assert.equal(f.retired.length,0);
 });
 test('actual publisher retires old handles only after both replacements are visible',()=>{
- const m=mock(),old=[{buffer:{id:'old-a'}},{buffer:{id:'old-b'}}],chunks=new Map([['a',old[0]],['b',old[1]]]),retired=[];
- const publish=publisher(m.gl,chunks,{},()=>{},stageEditedChunkBuffers,item=>{
-  assert.notEqual(chunks.get('a'),old[0]);assert.notEqual(chunks.get('b'),old[1]);retired.push(item);
- });
- publish(batch());assert.deepEqual(retired,old);
+ const m=mock(),f=ownerFixture(m,{beforeRetire:(item,chunks,old)=>{
+  assert.notEqual(chunks.get('a'),old[0]);assert.notEqual(chunks.get('b'),old[1]);
+ }});
+ f.publish(batch());assert.deepEqual(f.retired,f.old);
 });
 test('actual publisher refuses owner identity change and retires staged buffers',()=>{
- const m=mock();let f;const replacement={buffer:{id:'external'}};
- f=ownerFixture(m,(gl,b)=>{const staged=stageEditedChunkBuffers(gl,b);f.chunks.set('b',replacement);return staged;});
+ const m=mock(),f=ownerFixture(m),replacement={buffer:{id:'external'}};
+ const bufferData=m.gl.bufferData;
+ m.gl.bufferData=(...args)=>{bufferData(...args);f.chunks.set('b',replacement);};
  assert.throws(()=>f.publish(batch()),/owner changed/);
  assert.equal(f.chunks.get('a'),f.old[0]);assert.equal(f.chunks.get('b'),replacement);
- assert.equal(f.retired.length,2);assert.deepEqual(m.deleted,m.created);
+ assert.equal(f.retired.length,2);assert.deepEqual(ids(m.deleted),ids(m.created));
+});
+test('enabled trace observes actual publisher and upload without replacing handles',()=>{
+ const m=mock(),labels=[],f=ownerFixture(m,{measure:(name,fn)=>{labels.push(name);return fn();}});
+ f.publish(batch());assert.equal(labels[0],'gpuBatchPublish');
+ assert.equal(labels.filter(n=>n==='glBufferData').length,3);
+ assert.deepEqual(f.retired,f.old);
 });
