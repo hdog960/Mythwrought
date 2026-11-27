@@ -6,11 +6,11 @@ import {openP0CompositeFixture} from '../src/manual-biomes/forgotten-sands-compo
 import {planP0EmptyOwnerExchange} from '../src/manual-biomes/forgotten-sands-empty-owner-exchange.mjs';
 const root=process.env.P0_CURRENT_SOURCE;if(!root)throw Error('Exact current checkout required');
 const load=p=>import(pathToFileURL(resolve(root,p)).href);
-const [P,H,N,S,V]=await Promise.all(['src/manual-biomes/profile-world.mjs','src/world-height.mjs','src/world-height-natural-contract.mjs','src/world-height-stream.mjs','src/voxel.mjs'].map(load));
+const [P,H,N,S,V,P2,I2]=await Promise.all(['src/manual-biomes/profile-world.mjs','src/world-height.mjs','src/world-height-natural-contract.mjs','src/world-height-stream.mjs','src/voxel.mjs','src/pack2-world.mjs','src/pack2-integration.mjs'].map(load));
 test('current detached composite source: actual native meshes and body-preserving empty owner exchange',async()=>{
  let admitted=0;
  for(const index of [1,3]){
-  const f=await openP0CompositeFixture(index,{P,H,N,reserved:()=>false,revision:()=>'detached-test-r1'}),w=f.world;
+  const f=await openP0CompositeFixture(index,{P,H,N,reserved:()=>false,revision:()=>'detached-test-r1'}),w=new P2.Pack2LiveWorld(f.world);
   const mid=index===1?{x:504,z:-122}:{x:-900,z:-2054},cache=new Map(),results=[];
   for(const feet of [15,16,18,19])for(const distance of [48,32,16]){
    const player={x:mid.x-distance,feet,z:mid.z},cx=Math.floor(player.x/16),cz=Math.floor(player.z/16),legacy=[];
@@ -22,12 +22,8 @@ test('current detached composite source: actual native meshes and body-preservin
    const inspect=(s,k)=>{
     if(cache.has(k))return cache.get(k);
     const v=V.meshChunk(w,s.cx,s.cz,s.section);
-    let water=0;
-    const bounds=H.runtimeSectionBounds(s.section);
-    for(let x=s.cx*16;x<s.cx*16+16;x++)for(let z=s.cz*16;z<s.cz*16+16;z++)
-     for(let y=bounds.minY;y<=bounds.maxY;y++)if(w.get(x,y,z)===V.BLOCK.WATER)water++;
-    // Do not estimate water bytes: refuse a fixture containing any water.
-    const r={complete:water===0,solidBytes:v.byteLength,waterBytes:0};cache.set(k,r);return r;
+    const water=I2.pack2WaterSectionVertices(w,s.cx,s.cz,s.section);
+    const r={complete:true,solidBytes:v.byteLength,waterBytes:water.byteLength};cache.set(k,r);return r;
    };
    const args={selected,player,H,world:w,inspect,farBytes:index===1?149868:159624,sourceCurrent:()=>true};
    const r=planP0EmptyOwnerExchange(args);assert.equal(JSON.stringify(selected),before);
@@ -39,12 +35,12 @@ test('current detached composite source: actual native meshes and body-preservin
      assert.equal(H.upperOccupancy(w,r.removed),false);
      assert.ok(!H.physicalBodyRegions(player).some(s=>s.key===r.removed));
     }
-    for(const s of selected)if(inspect(s,H.runtimeMeshKey(s.cx,s.cz,s.section)).solidBytes>0)
+    for(const s of selected)if(inspect(s,H.runtimeMeshKey(s.cx,s.cz,s.section)).solidBytes+inspect(s,H.runtimeMeshKey(s.cx,s.cz,s.section)).waterBytes>0)
      assert.ok(r.retained.includes(s));
    }
    results.push({feet,distance,selected:selected.length,allowed:r.allowed,reason:r.reason,removed:r.removed??null,owners:r.owners??null,bytes:r.bytes??null});
   }
-  assert.deepEqual(w.save().edits,[]);
+  assert.deepEqual(f.world.save().edits,[]);
   console.log('P0 EMPTY EXCHANGE',JSON.stringify({index,results,meshes:cache.size,placementAuthority:false}));
  }
  console.log('P0 EMPTY EXCHANGE TOTAL',admitted);
