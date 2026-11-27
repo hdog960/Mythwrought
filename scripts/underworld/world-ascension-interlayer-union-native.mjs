@@ -120,6 +120,12 @@ const budgetPassed = residentBudgetPassed && result.peakCost.withinLimits && res
 const output = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'world-ascension-interlayer-union');
 await mkdir(output, { recursive: true });
 const report = { ...result, workingSet, nativeBatch, editReuse, faceDelta, residentBudgetPassed, budgetPassed };
+if (process.argv.includes('--with-webgl2')) {
+  const { qualifyEditAppend } = await import('./world-ascension-edit-append-webgl2.mjs');
+  report.gpuEdit = await qualifyEditAppend({ projection, workingSet, owners, editedBatch, faceLimit: limits.faceGrowth });
+  assert.equal(report.gpuEdit.residentFaces, residentFaces);
+  assert.equal(report.gpuEdit.allocatedFaces, faceDelta.residentPlusChangedRecords);
+}
 await writeFile(resolve(output, 'report.json'), JSON.stringify(report, null, 2));
 console.log(JSON.stringify({
   socket: result.socketReplay, interlayer: result.interlayerReplay, joined: result.joinedReplay,
@@ -127,7 +133,7 @@ console.log(JSON.stringify({
   airComponents: result.airConnectivity.revisedComponents, lostBoundaryPatches: result.seams.lostPatches,
   stagedFaces: workingSet.maxEditStagedFaces, maxOwnerFaces: workingSet.maxOwnerFaces,
   residentFaces: workingSet.maxResidentFaces, residentBudgetPassed,
-  nativeBatch, editReuse, faceDelta, budgetPassed, constructionAdmission: result.constructionAdmission,
+  nativeBatch, editReuse, faceDelta, gpuEdit: report.gpuEdit, budgetPassed, constructionAdmission: result.constructionAdmission,
 }, null, 2));
 
 assert.equal(result.socketReplay.ok, true);
