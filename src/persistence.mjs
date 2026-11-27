@@ -1,3 +1,4 @@
+import {M8_MOUNTAIN_GENERATOR,VEILREACH_GENERATOR,usesMountainV8Terrain} from './environment-ground.mjs';
 // MYTHWROUGHT v0.09 — recoverable, backwards-compatible edit-delta persistence.
 // The original schema-1 JSON remains at the unchanged v0.02 per-seed key.
 // A verified sidecar journal and a previous-good backup protect those bytes.
@@ -80,16 +81,18 @@ export function loadWorldSafe(storage,seed){
 // Historical already-running code cannot be retroactively made to honor it.
 // This is not a cross-store lock or a stale edit-generation protocol.
 export function assertMountainV8WriteIdentity(storage,world){
-  const generator='mythwrought-five-surface-regions-mountain-v8';
   const actual=world?.base?.generationProfile??world?.generationProfile;
-  if(actual?.generator!==generator){
+  const generator=actual?.generator;
+  const scoped=usesMountainV8Terrain(generator);
+  if(!scoped){
     for(const id of world.edits?.values?.()??[])if(isMountainV8Material(id))
       throw Error('Dedicated Mountain V8 edits require V8 source identity');
   }
   const key=worldSlotKey(world.seed)+'-four-biomes-profile-v1';
   const raws=[storage.getItem(key),storage.getItem(key+'-journal')];
-  if(actual?.generator!==generator&&!raws.some(raw=>typeof raw==='string'&&raw.includes(generator)))return;
-  if(actual?.generator!==generator||actual.seed!==world.seed)
+  if(!scoped&&!raws.some(raw=>typeof raw==='string'&&
+    [M8_MOUNTAIN_GENERATOR,VEILREACH_GENERATOR].some(id=>raw.includes(id))))return;
+  if(!scoped||actual.seed!==world.seed)
     throw Error('V8 source identity mismatch; stale legacy writer refused');
   if(raws.some(raw=>raw===null))throw Error('V8 write requires both verified profile records');
   for(const raw of raws){

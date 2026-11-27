@@ -112,10 +112,10 @@ export class UpperIndexedMap extends Map{
     if(old!==0)this.#adjust(this.#key(k),-1);return result;}
   clear(){super.clear();if(this.#counts.size){this.#counts.clear();this.#revision++;}}
 }
-export function upperOccupancy(world,key){
+export function upperOccupancy(world,key,{natural=true}={}){
   return Boolean(world.edits?.upperOccupied?.(key)||world.pack2Cells?.upperOccupied?.(key)||
-    world.pack3Runtime?.upperOccupied?.(key)||world.manual14Layer?.upperOccupied?.(key)||world.pack5Layer?.upperOccupied?.(key)||(world.base??world).upperNaturalOccupied?.(key));
+    world.pack3Runtime?.upperOccupied?.(key)||world.manual14Layer?.upperOccupied?.(key)||world.pack5Layer?.upperOccupied?.(key)||(natural&&(world.base??world).upperNaturalOccupied?.(key)));
 }
-export function upperOccupancyRevision(world){
-  return [world.edits,world.pack2Cells,world.pack3Runtime,world.manual14Layer,world.pack5Layer].map(o=>o?.upperRevision??0).concat((world.base??world).upperNaturalRevision??0).join(':');
+export function upperOccupancyRevision(world,{natural=true}={}){
+  return [world.edits,world.pack2Cells,world.pack3Runtime,world.manual14Layer,world.pack5Layer].map(o=>o?.upperRevision??0).concat(natural?(world.base??world).upperNaturalRevision??0:0).join(':');
 }

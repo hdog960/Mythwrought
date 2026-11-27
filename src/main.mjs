@@ -1,3 +1,5 @@
+import {VEILREACH_GENERATOR,usesMountainV8Terrain} from './environment-ground.mjs';
+import {createVeilreachDistanceRenderer,VEILREACH_DISTANCE_OFFSET} from './veilreach/distance.mjs';
 import {createMiningTrace} from './mining-trace.mjs';
 import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
@@ -132,7 +134,7 @@ async function startLatestProductionWorld(){
       }
       if(seed===null)throw Error('No unused world seed available');
       const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
-      const loaded=await createMountainV8IsolatedWorld(String(seed),{confirmed:true,storage:raw});
+      const loaded=await createMountainV8IsolatedWorld(String(seed),{confirmed:true,generator:VEILREACH_GENERATOR,storage:raw});
       const stored=saveM2World(scope,loaded.world);
       if(!stored.ok)throw Error('Initial world save not verified: '+stored.reason);
       setMountainV8Active(raw,true);
@@ -166,7 +168,7 @@ function start(nonblockStage=null){
     // The old loader below remains EXACT for every ordinary legacy seed.
     const storedProfile=readFourRegionProfile(localStorage,seed)?.profile;
     if(storedProfile){
-      if((storedProfile.generator===M8_MOUNTAIN_GENERATOR)!==isolatedMountain)
+      if(usesMountainV8Terrain(storedProfile.generator)!==isolatedMountain)
         throw Error('Mountain V8 profile requires its isolated storage session');
       const result=openM2World(localStorage,planM2WorldChoice(String(seed)));
       if(result.recovered)recoveryNote=result.warning||
@@ -360,7 +362,7 @@ function start(nonblockStage=null){
     }).catch(error=>({supported:false,reason:String(error)}));
   }
   if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
+      [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,VEILREACH_GENERATOR].includes(
         world.base.generationProfile.generator)))
     void ensureWorldOfflineCache();
   seedLabel.textContent='WORLD '+world.seed;
@@ -440,20 +442,25 @@ function start(nonblockStage=null){
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
     'uniform float uAspect,uTan;',
-    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; out float vPack2Alpha;',
+    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; flat out int vVeilreachFar; out float vPack2Alpha;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
-    'gl_Position=vec4(x/(uAspect*uTan),y/uTan,1.0015*z-0.1501,z);',
-    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001)); vPack2Alpha=fract(aMat); }'
+    `vVeilreachFar=int(aMat>=${VEILREACH_DISTANCE_OFFSET}.0);`,
+    'float pz=vVeilreachFar==1&&z>68.0?z-0.0481:1.0015*z-0.1501;',
+    'gl_Position=vec4(x/(uAspect*uTan),y/uTan,pz,z);',
+    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001))-vVeilreachFar*'+VEILREACH_DISTANCE_OFFSET+'; vPack2Alpha=fract(aMat); }'
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
     .replace('uniform vec3 uFog;',
       'uniform vec3 uFog; uniform vec3 uSkyLight; uniform float uCaveHaze;'+
-      'float worldFog(float distanceToEye){ return smoothstep(mix(29.0,9.0,uCaveHaze),'+
+      'flat in int vVeilreachFar;'+
+      'float worldFog(float distanceToEye){ if(vVeilreachFar==1) return .08+.80*smoothstep(75.0,460.0,distanceToEye); return smoothstep(mix(29.0,9.0,uCaveHaze),'+
         'mix(68.0,27.0,uCaveHaze),distanceToEye); }')
     .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
     .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
+    .replace('1.0-smoothstep(10.0,38.0,vDistance)',
+      'vVeilreachFar==1?.65*(1.0-smoothstep(130.0,320.0,vDistance)):1.0-smoothstep(10.0,38.0,vDistance)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
@@ -489,6 +496,7 @@ function start(nonblockStage=null){
   // Cave-only outer-ring opaque meshes, never scheduled in normal save profiles.
   // Keep accepted M5/legacy module graph free of cave-only imports.
   const caveFarGpu=createCaveFarWallGpu(gl);
+  const veilreachDistance=createVeilreachDistanceRenderer(gl);
   const name=chunkKey;
   const player=newPlayer(world);
   let mobSession=null,mobRenderer=null,mobEnvironment=null,mobLastSave=0;
@@ -1191,8 +1199,14 @@ function start(nonblockStage=null){
     Number.isInteger(s.id)&&s.id>=0&&s.id<=8;
   const safeCreativeVoxelWorld=()=>caveSession?safeCaveHistoryWorld():(world.base?.constructor===VoxelWorld||
     world.base?.constructor===FourRegionWorld&&!world.base.experimentalEnchantedTrees&&
-    ([M2_FOUR_REGION_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR]
+    ([M2_FOUR_REGION_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,VEILREACH_GENERATOR]
       .includes(world.base.generationProfile?.generator)||historicalXericWorld()));
+  // The released Veilreach source owns natural upper support footprints.
+  // Share the exact physical support query with the normal history checks.
+  const creativeSupportCells=cell=>[
+    ...((cell[1]>WORLD_MAX_Y?world.base?.upperSupportedCells?.(...cell):
+      world.base?.mountainV8SupportedTreeCells?.(...cell))??[]),
+    ...(world.base?.historicalXericSupportedCells?.(...cell)??[])];
   function recordCreativeOwner(owner,cell,before){
     if(!g2CreativeEnabled)return;
     try{
@@ -1213,7 +1227,7 @@ function start(nonblockStage=null){
         if(caveSession&&(entry.owner!=='voxel'||!safeCaveHistoryWorld()||
            !safeCaveHistoryState(desired)||!safeCaveHistoryState(expected)))return false;
         if(entry.owner==='voxel-batch'){
-          if(!safeCreativeVoxelWorld()||!historicalXericWorld()&&world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)return false;
+          if(!safeCreativeVoxelWorld()||!historicalXericWorld()&&!usesMountainV8Terrain(world.base?.generationProfile?.generator))return false;
           const cells=entry.target,keys=new Set(cells.map(c=>c.join(',')));
           return replayCreativeVoxelBatch({cells,desired,expected,
             read:c=>creativeOwnerState('voxel',c),
@@ -1224,8 +1238,7 @@ function start(nonblockStage=null){
                  manual14.supportsLegacyCell(c)||pack5Builder?.supportsLegacyCell(c))return false;
               if(d.id!==BLOCK.AIR&&(intersectsPlayerBlock(player,c,d.id,d.rotation,null)||
                  hasLiveScenery()&&stagedScene()?.bodyIntersects([...c,...c.map(n=>n+1)])))return false;
-              if(d.id===BLOCK.AIR&&[...(world.base?.mountainV8SupportedTreeCells?.(...c)??[]),
-                ...(world.base?.historicalXericSupportedCells?.(...c)??[])].some(p=>!keys.has(p.join(','))))return false;
+              if(d.id===BLOCK.AIR&&creativeSupportCells(c).some(p=>!keys.has(p.join(','))))return false;
               return true;
             },
             write:(c,d)=>world.set(...c,d.id,d.rotation),
@@ -1243,8 +1256,7 @@ function start(nonblockStage=null){
           if(!safeCreativeVoxelWorld()||desired?.foreign||expected?.foreign)return false;
           if(manual14.supportsLegacyCell(cell)||pack5Builder?.supportsLegacyCell(cell))return false;
           if(desired.id!==BLOCK.AIR&&intersectsPlayerBlock(player,cell,desired.id,desired.rotation,desired.pack2))return false;
-          if(desired.id===BLOCK.AIR&&((world.base?.mountainV8SupportedTreeCells?.(...cell)??[]).length||
-            (world.base?.historicalXericSupportedCells?.(...cell)??[]).length))return false;
+          if(desired.id===BLOCK.AIR&&creativeSupportCells(cell).length)return false;
           const write=state=>{
             if(state.pack2){
               if(world.pack2Cells?.has(cell.join(',')))return world.updatePack2State(...cell,state.pack2);
@@ -1456,8 +1468,7 @@ function start(nonblockStage=null){
     // changes it. Only the authoritative returned affectedCells are journaled.
     let batchBefore=null;
     if(historyBefore&&!historyBefore.foreign&&mode==='mine'){
-      const support=[...(world.base?.mountainV8SupportedTreeCells?.(...historyCell)??[]),
-        ...(world.base?.historicalXericSupportedCells?.(...historyCell)??[])];
+      const support=creativeSupportCells(historyCell);
       if(support.length&&support.length<=511){
         batchBefore=new Map([historyCell,...support].map(c=>[c.join(','),creativeOwnerState('voxel',c)]));
       }
@@ -1502,7 +1513,7 @@ function start(nonblockStage=null){
     const baseCenter=visibleSections.length===1&&visibleSections[0]===0?
       horizontalCenter:horizontalCenter+'|'+visibleSections.join(',');
     const active=runtimeSectionForY(player.feet)??0;
-    const occupancy=upperOccupancyRevision(world);
+    const occupancy=upperOccupancyRevision(world,{natural:player.feet>=16});
     const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
     const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
     if(center!==lastStreamingCenter){
@@ -1810,6 +1821,9 @@ function start(nonblockStage=null){
       }
       // Original source-composed far-rock opaque pass: same terrain shader,
       // depth buffer and fog, before the existing transparent-water draw.
+      canvas.dataset.veilreachDistanceVertices=String(veilreachDistance.draw({
+        world:world.base,player,chunks,caveShade,atPos,atColor,atUv,atMat
+      }));
       canvas.dataset.c6FarDrawn=String(caveFarGpu?.draw({atPos,atColor,atUv,atMat})??0);
       // Pack 5 uses the EXISTING game terrain program and fog, exactly one
       // optional shaped-triangle draw, with bounded GPU memory and streaming.
@@ -3185,7 +3199,7 @@ function start(nonblockStage=null){
     reactivateSkyClock(); // S1/S3/S6 must rebind after an explicit profiled M5 world is committed.
     // Register *after* the explicit unused-seed v5 creation is safely saved.
     if(nonblockStage?.offline||(world.base instanceof FourRegionWorld&&
-        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR].includes(
+        [M5_EXPERIMENTAL_GENERATOR,M6_BALANCED_GENERATOR,M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR,VEILREACH_GENERATOR].includes(
           world.base.generationProfile.generator)))
       void ensureWorldOfflineCache();
     resetManual14ForWorld();resetPack5ForWorld();
@@ -3278,7 +3292,7 @@ function start(nonblockStage=null){
       seedRow.append(resume);
       resume.onclick=()=>{try{
         const seed=worldSeedFromText(scoped.getItem(SELECTED_SEED_KEY));
-        if(readFourRegionProfile(scoped,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+        if(!usesMountainV8Terrain(readFourRegionProfile(scoped,seed)?.profile.generator))
           throw Error('No verified isolated Mountain save');
         if(!storageReadOnly&&!save())throw Error('Save ordinary world first');
         setMountainV8Active(rawStorage,true);location.reload();
@@ -3323,7 +3337,7 @@ function start(nonblockStage=null){
     if(storageReadOnly||!save())throw Error('Save current world before creating a new seed');
     const former=world;
     const {createMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
-    const loaded=await createMountainV8IsolatedWorld(String(next),{confirmed:true,storage:rawStorage});
+    const loaded=await createMountainV8IsolatedWorld(String(next),{confirmed:true,generator:VEILREACH_GENERATOR,storage:rawStorage});
     if(world!==former||changed)throw Error('Current world changed; new world retained separately');
     const stored=saveM2World(mountainV8Storage(rawStorage),loaded.world);
     if(!stored.ok)throw Error('New world save not verified: '+stored.reason);
@@ -3364,9 +3378,9 @@ function start(nonblockStage=null){
         if(isUnclaimedWorldSeed(localStorage,next)){
           if(isUnclaimedWorldSeed(other,next)){await createLatestMenuWorld(next);return;}
           const profile=readFourRegionProfile(other,next)?.profile;
-          if(!isolatedMountain&&profile?.generator!==M8_MOUNTAIN_GENERATOR)
+          if(!isolatedMountain&&!usesMountainV8Terrain(profile?.generator))
             throw Error('No verified latest saved world for this seed');
-          if(isolatedMountain&&profile?.generator===M8_MOUNTAIN_GENERATOR)
+          if(isolatedMountain&&usesMountainV8Terrain(profile?.generator))
             throw Error('Unexpected ordinary world profile');
           if(isolatedMountain)rejectLegacyWorldWhereCaveExists(other,next);
           if(storageReadOnly||!save())throw Error('Save current world before loading another seed');
@@ -3441,13 +3455,13 @@ function start(nonblockStage=null){
       if(f.size>MAX_IMPORT_BYTES)throw Error('Backup file is too large');
       const rawImport=await f.text();
       const incoming=JSON.parse(rawImport);
-      if(isolatedMountain&&incoming?.profile?.generator!==M8_MOUNTAIN_GENERATOR)
+      if(isolatedMountain&&!usesMountainV8Terrain(incoming?.profile?.generator))
         throw Error('Return to the ordinary world to import a non-Mountain profile');
       if(incoming?.kind==='mythwrought-four-biomes-export'){
         // Never flatten a profiled world through the legacy importer.
         // New-seed-only restore; no destructive overwrite of a prior seed.
         const examined=inspectM2WorldExport(rawImport);
-        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR&&!mountainEnabled)
+        if(usesMountainV8Terrain(examined.world.base.generationProfile.generator)&&!mountainEnabled)
           throw Error('Mountain V8 import is not publicly enabled');
         if(storageReadOnly)throw Error('Read-only save protection is active');
         if(examined.seed===world.seed)
@@ -3455,13 +3469,13 @@ function start(nonblockStage=null){
         if(!window.confirm('IMPORT a verified FOUR-BIOME profile for UNUSED seed '+examined.seed+'? Existing worlds are never overwritten.'))
           return;
         if(!save())throw Error('Save your current world before importing');
-        if(examined.world.base.generationProfile.generator===M8_MOUNTAIN_GENERATOR){
+        if(usesMountainV8Terrain(examined.world.base.generationProfile.generator)){
           if(!mountainEnabled)throw Error('Mountain V8 import is not publicly enabled');
           const {importMountainV8IsolatedWorld}=await import('./manual-biomes/mountain-v8-new-world-admission.mjs');
           const former=world;
           const imported=await importMountainV8IsolatedWorld(rawImport,{confirmed:true,storage:rawStorage});
           if(world!==former||changed)throw Error('Current world changed; imported Mountain save retained separately');
-          if(imported.base.generationProfile.generator!==M8_MOUNTAIN_GENERATOR)throw Error('Mountain import profile mismatch');
+          if(imported.base.generationProfile.generator!==examined.world.base.generationProfile.generator)throw Error('Mountain import profile mismatch');
           setMountainV8Active(rawStorage,true);location.reload();return;
         }
         // Preserve EXACT imported generator identity, even for older v2/v3.
@@ -3529,6 +3543,7 @@ function start(nonblockStage=null){
     if(graphicsLost)return;
     graphicsLost=true;graphicsLossCount++;
     mobRenderer=null;
+    veilreachDistance.invalidate(true);
     caveFarGpu?.resetForLostContext();
     pack5Gpu?.invalidate();
     frameDriver.pause();cancelAllPointers();
@@ -3562,6 +3577,7 @@ function start(nonblockStage=null){
     }
   });
   window.addEventListener('pagehide',()=>{
+    veilreachDistance.invalidate(graphicsLost);
     mobSession?.save();
     if(graphicsLost)caveFarGpu?.resetForLostContext();
     else caveFarGpu?.invalidate();

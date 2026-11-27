@@ -1,3 +1,4 @@
+import {usesMountainV8Terrain} from '../environment-ground.mjs';
 // Candidate-only explicit V8 seed admission. Native browser APIs, no
 // creation/upgrade/deletion of optional Vault/Mirror databases. The Web Lock
 // serializes cooperating V8 callers only; legacy tabs do NOT honor it.
@@ -110,10 +111,11 @@ function assertLocalUnused(storage,seed){
  * writes leave verified/partial evidence in place, never delete or overwrite.
  */
 export async function createMountainV8CandidateWorld(seedText,{
-  confirmed=false,storage=globalThis.localStorage,factory=globalThis.indexedDB,
+  confirmed=false,generator=M8_MOUNTAIN_GENERATOR,storage=globalThis.localStorage,factory=globalThis.indexedDB,
   locks=globalThis.navigator?.locks
 }={}){
   if(confirmed!==true)throw Error('Explicit NEW Mountain V8 confirmation required');
+  if(!usesMountainV8Terrain(generator))throw Error('Invalid combined world generator');
   const seed=worldSeedFromText(seedText);checkSeed(seed);
   if(typeof locks?.request!=='function')throw Error('Web Locks unavailable; V8 admission refused');
   return locks.request(V8_ADMISSION_LOCK,{mode:'exclusive'},async lock=>{
@@ -123,7 +125,7 @@ export async function createMountainV8CandidateWorld(seedText,{
     const evidence=await inspectMountainV8OptionalSeed(seed,factory);
     if(evidence.claimed)throw Error('Existing Vault/Mirror snapshot claims this seed');
     assertLocalUnused(storage,seed);
-    const profile=fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR);
+    const profile=fourRegionProfile(seed,generator);
     const raw=JSON.stringify(profile),record=JSON.stringify({version:1,checksum:saveFingerprint(raw),raw});
     const key=worldSlotKey(seed)+BIOME_PROFILE_SUFFIX;
     const world=new FourRegionWorld(seed,profile);
@@ -133,12 +135,12 @@ export async function createMountainV8CandidateWorld(seedText,{
     if(storage.getItem(key+'-journal')!==record||storage.getItem(key)!==null)
       throw Error('V8 profile journal conflict; preserve existing bytes');
     storage.setItem(key,record);
-    if(storage.getItem(key)!==record||readFourRegionProfile(storage,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+    if(storage.getItem(key)!==record||readFourRegionProfile(storage,seed)?.profile.generator!==generator)
       throw Error('V8 profile readback failed');
     const saved=saveWorldSafe(storage,world,{select:false});
     if(!saved.ok)throw Error('V8 initial save failed; profile reservation retained: '+saved.detail);
     const opened=openM2World(storage,planM2WorldChoice(String(seed)));
-    if(opened.base.generationProfile.generator!==M8_MOUNTAIN_GENERATOR||
+    if(opened.base.generationProfile.generator!==generator||
        JSON.stringify(opened.world.save())!==JSON.stringify(world.save()))
       throw Error('V8 initial profile reload mismatch');
     return Object.freeze({...opened,created:true,admissionEvidence:evidence,
@@ -148,7 +150,7 @@ export async function createMountainV8CandidateWorld(seedText,{
 
 // Separate namespace for the real local candidate UI. Check old saves and optional
 // databases before claiming, but subsequent old writers cannot reach these keys.
-export async function createMountainV8IsolatedWorld(seedText,{confirmed=false,storage=globalThis.localStorage,factory=globalThis.indexedDB,locks=globalThis.navigator?.locks}={}){
+export async function createMountainV8IsolatedWorld(seedText,{confirmed=false,generator=M8_MOUNTAIN_GENERATOR,storage=globalThis.localStorage,factory=globalThis.indexedDB,locks=globalThis.navigator?.locks}={}){
  if(confirmed!==true)throw Error('Explicit NEW Mountain V8 confirmation required');
  const seed=worldSeedFromText(seedText);checkSeed(seed);
  assertLocalUnused(storage,seed);
@@ -156,7 +158,7 @@ export async function createMountainV8IsolatedWorld(seedText,{confirmed=false,st
  if(old.claimed)throw Error('Existing ordinary Vault/Mirror snapshot claims this seed');
  assertLocalUnused(storage,seed);
  const {mountainV8Storage,mountainV8DatabaseFactory}=await import('./mountain-v8-isolated-storage.mjs');
- return createMountainV8CandidateWorld(String(seed),{confirmed:true,storage:mountainV8Storage(storage),factory:mountainV8DatabaseFactory(factory),locks});
+ return createMountainV8CandidateWorld(String(seed),{confirmed:true,generator,storage:mountainV8Storage(storage),factory:mountainV8DatabaseFactory(factory),locks});
 }
 
 // Verified portable profile import into the separate Mountain namespace.
@@ -167,7 +169,8 @@ export async function importMountainV8IsolatedWorld(rawImport,{
 }={}){
  if(confirmed!==true)throw Error('Explicit Mountain V8 import confirmation required');
  const inspected=inspectM2WorldExport(rawImport);
- if(inspected.world.base?.generationProfile?.generator!==M8_MOUNTAIN_GENERATOR)
+ const generator=inspected.world.base?.generationProfile?.generator;
+ if(!usesMountainV8Terrain(generator))
   throw Error('Only a verified Mountain V8 profile can enter the Mountain namespace');
  const seed=inspected.seed;checkSeed(seed);
  if(typeof locks?.request!=='function')throw Error('Web Locks unavailable; V8 import refused');
@@ -184,7 +187,7 @@ export async function importMountainV8IsolatedWorld(rawImport,{
   scope.setItem(key+'-journal',record);
   if(scope.getItem(key+'-journal')!==record||scope.getItem(key)!==null)throw Error('Mountain import profile journal conflict');
   scope.setItem(key,record);
-  if(scope.getItem(key)!==record||readFourRegionProfile(scope,seed)?.profile.generator!==M8_MOUNTAIN_GENERATOR)
+  if(scope.getItem(key)!==record||readFourRegionProfile(scope,seed)?.profile.generator!==generator)
    throw Error('Mountain import profile readback failed');
   const saved=saveM2World(scope,inspected.world);
   if(!saved.ok)throw Error('Mountain import not verified; reservation retained: '+saved.reason);

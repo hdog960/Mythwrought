@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261127-unified-creative-navigation-v4';
+const RELEASE='20261127-unified-veilreach-v1';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261127-mining-save-replay-v1';
+const PREVIOUS='mythwrought-m5-shell-20261127-veilreach-v1';
 const ROOT='https://example.test/Mythwrought/';
 const staged=JSON.parse(readFileSync(new URL('../nonblock-stage-assets.json',import.meta.url),'utf8'));
 const expectedPublic=Object.keys(staged.assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>new URL(p,ROOT).href).sort();
@@ -97,7 +97,7 @@ test('complete unified original Home Screen shell installs source-exact and leav
   assert.ok(entries.has(ROOT+'src/manual-biomes/environment-v7.mjs'));
   assert.ok(entries.has(ROOT+'src/nonblock/staged-habitats.mjs'));
   assert.ok(entries.has(ROOT+'src/nonblock/candidate-scene.mjs'));
-  for(const source of ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/floating-islands/sky-source-mesh.mjs'])
+  for(const source of ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/floating-islands/sky-source-mesh.mjs','src/veilreach/source.mjs','src/veilreach/generation.mjs','src/veilreach/distance.mjs','src/veilreach/flora.mjs'])
     assert.ok(entries.has(ROOT+source),'Missing required shared-height source '+source);
   for(const required of ['src/creative-integration/creative-history.mjs','src/creative-integration/creative-inventory.mjs','src/navigation00/observed-navigation.mjs','src/navigation00/navigation-live-observation.mjs','src/mobs/source-edit-epoch.mjs'])assert.ok(entries.has(ROOT+required),'Missing combined source '+required);
   assert.ok(entries.has(ROOT+'index.html'));
