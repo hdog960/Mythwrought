@@ -34,7 +34,8 @@ export function normalizeExpansionCapabilities(id,input){
 }
 function buildIndex(records){
  const byId=new Map(records.map(r=>[r.id,r]));
- const biomeIndex=new Map(BIOMES.map(b=>[b,Object.freeze(records.filter(r=>r.habitat.biomes.includes(b)))]));
+ const indexedBiomes=[...new Set([...BIOMES,...records.flatMap(r=>r.habitat.biomes)])];
+ const biomeIndex=new Map(indexedBiomes.map(b=>[b,Object.freeze(records.filter(r=>r.habitat.biomes.includes(b)))]));
  return Object.freeze({size:records.length,records:Object.freeze([...records]),get:id=>byId.get(id),
  byBiome:b=>biomeIndex.get(b)??Object.freeze([])});
 }
