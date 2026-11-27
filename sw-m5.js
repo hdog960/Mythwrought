@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261126-mining-diagnostic-v1';
-const ASSET_RELEASE='20261126-mining-diagnostic-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261127-mining-save-replay-v1';
+const ASSET_RELEASE='20261127-mining-save-replay-v1';
 const SOURCE_ASSETS=[
   "./src/mining-trace.mjs",
   "./src/nonblock/staged-habitats.mjs",

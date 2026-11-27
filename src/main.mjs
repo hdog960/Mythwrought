@@ -2571,7 +2571,7 @@ function start(nonblockStage=null){
         save:saved,probe,quota
       });
       if(miningTrace){
-        auditReport.value+='\nMINING TRACE v1 (diagnostic only; CPU wall times, nested phases not additive; not GPU presentation)\n'+JSON.stringify({baselineSource:'2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0',release:document.querySelector('meta[name="mythwrought-release"]')?.content,moduleUrl:import.meta.url,startedAt:traceStartedAt,context:traceContext(),...miningTrace.report()});
+        auditReport.value+='\nMINING TRACE v1 (diagnostic only; CPU wall times, nested phases not additive; not GPU presentation)\n'+JSON.stringify({baselineSource:'18d0ff83df918f72d6ffaff1755998e680ef149e',release:document.querySelector('meta[name="mythwrought-release"]')?.content,moduleUrl:import.meta.url,startedAt:traceStartedAt,context:traceContext(),...miningTrace.report()});
         miningTrace=null;traceMeasure=null;traceStartedAt=null;
         traceStatus.textContent='Capture finished. COPY REPORT. Recording is off.';
       }

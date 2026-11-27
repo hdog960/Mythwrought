@@ -2,7 +2,7 @@
 // Never imported by production main.mjs. No implicit opt-in or migration.
 // One authoritative VoxelWorld base (legacy or profiled) under the SAME
 // Pack2LiveWorld adapter used by player mesh, raycast, collision and editing.
-import {VoxelWorld} from '../voxel.mjs';
+import {VoxelWorld,withM8SaveReplay} from '../voxel.mjs';
 import {worldSeedFromText} from '../seeds.mjs';
 import {loadWorldSafe,saveWorldSafe,importWorldData,parseWorldData,MAX_IMPORT_BYTES} from '../persistence.mjs';
 import {Pack2LiveWorld,loadPack2LiveWorld,savePack2LiveWorld,
@@ -100,6 +100,13 @@ export function openM2World(storage,choice){
  * result including whether a sidecar write may already have completed.
  */
 export function saveM2World(storage,world,{allowReplaceCorrupt=false}={}){
+  // Ordinary current-profile saves only. Explicit recovery/import and all
+  // historical generators keep the original cold validation path.
+  const operation=()=>saveM2WorldOriginal(storage,world,{allowReplaceCorrupt});
+  return !allowReplaceCorrupt&&Object.getPrototypeOf(world?.base??{})===FourRegionWorld.prototype?
+    withM8SaveReplay(world.base,operation):operation();
+}
+function saveM2WorldOriginal(storage,world,{allowReplaceCorrupt=false}={}){
   if(!(world instanceof Pack2LiveWorld)||
      !(world.base instanceof VoxelWorld)||world.seed!==world.base.seed)
     throw Error('Expected real Pack2LiveWorld with VoxelWorld base');

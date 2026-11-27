@@ -1,0 +1,45 @@
+name: Targeted iPhone mining save replay qualification
+on:
+  push:
+    branches: [probe/iphone-mining-save-replay-20261127]
+    paths: ['src/voxel.mjs','src/manual-biomes/profile-world.mjs','src/manual-biomes/m2-runtime-bridge.mjs','perf/issue-291/mining-save-replay-parity.mjs','.github/workflows/mining-save-replay-targeted.yml']
+permissions:
+  contents: read
+jobs:
+  save-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 18d0ff83df918f72d6ffaff1755998e680ef149e
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Verify source-only candidate and exact original production
+        run: |
+          test "$(git -C prior-production rev-parse HEAD)" = '18d0ff83df918f72d6ffaff1755998e680ef149e'
+          node --check src/voxel.mjs
+          node --check src/manual-biomes/profile-world.mjs
+          node --check src/manual-biomes/m2-runtime-bridge.mjs
+          node --check perf/issue-291/mining-save-replay-parity.mjs
+      - name: Exact byte and fault parity, real source save microbenchmark
+        run: |
+          mkdir -p artifacts/mining-save-replay
+          set -o pipefail
+          MINING_SAVE_BASELINE="$PWD/prior-production" node --test perf/issue-291/mining-save-replay-parity.mjs | tee artifacts/mining-save-replay/parity.txt
+      - name: Affected native persistence, original terrain and physical height tests
+        run: |
+          set -o pipefail
+          node --test tests/persistence.test.mjs tests/voxel.test.mjs tests/manual-biomes/m2-runtime-bridge.test.mjs tests/manual-biomes/profile-world.test.mjs tests/pack2-save-protection.test.mjs tests/pack2-biome130-compat.test.mjs tests/pack2-water-index.test.mjs tests/shared-world-height-h1-h2.test.mjs tests/shared-world-height-h4-sidecars.test.mjs tests/mountain-v8-release/mountain-v8-portable-profile.test.mjs tests/snow-p1-persistence.test.mjs | tee artifacts/mining-save-replay/native.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mining-save-replay-native
+          path: artifacts/mining-save-replay/
+          if-no-files-found: error
