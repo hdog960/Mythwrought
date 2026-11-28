@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { on } from 'node:events';
+import { Worker } from 'node:worker_threads';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { openP0TileWorld, P0_TILE_BASE } from '../../src/manual-biomes/forgotten-sands-tile-world.mjs';
@@ -128,4 +130,61 @@ test('a reservation revision during the second tile discards the pending source'
     },
   }), /Stale detached tile world/);
   assert.ok(firstTileSliced && secondTileInterrupted);
+});
+
+test('cold tile-worker construction transfers exact meshes and retires canceled builds', async () => {
+  const worker = new Worker(new URL('./source-worker.mjs', import.meta.url), { workerData: { root } });
+  const stream = on(worker, 'message', { signal: AbortSignal.timeout(30000) });
+  let hostTicks = 0;
+  const timer = setInterval(() => hostTicks++, 5);
+  const observed = [];
+  async function expect(type, id) {
+    for (;;) {
+      const { value: [message] } = await stream.next();
+      observed.push({ type: message.type, id: message.id });
+      if (message.type === 'failed') throw Error(message.message);
+      if (message.type === type && message.id === id) return message;
+    }
+  }
+  const seed = 10301, tiles = [[1, -1], [1, 0]], revision = 'two-tile-replay-v1';
+  try {
+    worker.postMessage({ type: 'build', id: 1, seed, tiles, revision });
+    assert.deepEqual((await expect('assembling', 1)).tile, tiles[0]);
+    worker.postMessage({ type: 'cancel', id: 1 });
+    await expect('canceled', 1);
+    worker.postMessage({ type: 'sample', id: 1, site: 0 });
+    await expect('refused', 1);
+
+    const before = hostTicks;
+    worker.postMessage({ type: 'build', id: 2, seed, tiles, revision });
+    const ready = await expect('ready', 2);
+    const ticksDuringBuild = hostTicks - before;
+    assert.ok(ticksDuringBuild > 0, 'An active cold build must permit callbacks on the host thread');
+    assert.ok(!observed.some(message => message.type === 'ready' && message.id === 1));
+
+    const ordinary = await openP0TileWorld(seed, tiles, { P, V, F, H, N, reserved: () => false, revision: () => revision });
+    assert.deepEqual(ready.identity, ordinary.identity);
+    assert.deepEqual(ready.counts, ordinary.counts);
+    const { manifestSha } = ready.identity;
+    worker.postMessage({ type: 'sample', id: 2, site: 0, manifestSha: 'wrong' });
+    await expect('refused', 2);
+    let transferred = 0;
+    for (const site of [0, 1]) {
+      worker.postMessage({ type: 'sample', id: 2, site, manifestSha });
+      const message = await expect('meshes', 2);
+      assert.equal(message.site, site);
+      assert.equal(message.manifestSha, manifestSha);
+      assert.equal(message.meshes.length, 2);
+      for (const { cx, cz, section, vertices } of message.meshes) {
+        assert.ok(vertices instanceof Float32Array && vertices.byteLength > 0);
+        assert.deepEqual(vertices, V.meshChunk(ordinary.world, cx, cz, section));
+        transferred += vertices.byteLength;
+      }
+    }
+    console.log('P0 TILE WORKER ' + JSON.stringify({ seed, manifestSha, transferred, ticksDuringBuild }));
+  } finally {
+    clearInterval(timer);
+    await stream.return();
+    await worker.terminate();
+  }
 });
