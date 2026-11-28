@@ -443,29 +443,36 @@ function start(nonblockStage=null){
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
     'uniform float uAspect,uTan,uVeilreachWorld;',
-    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; flat out int vVeilreachSky; out float vPack2Alpha;',
+    'out vec3 vColor; out float vDistance; out vec2 vTextureUv; flat out int vMat; flat out int vVeilreachSky,vVeilreachRepeat; out float vPack2Alpha;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
     `int farOwner=int(aMat>=${VEILREACH_DISTANCE_OFFSET}.0);`,
     'vVeilreachSky=int(farOwner==1||(uVeilreachWorld>.5&&aPos.y>=35.0));',
     'float pz=vVeilreachSky==1&&z>68.0?z-0.0481:1.0015*z-0.1501;',
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,pz,z);',
-    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001))-farOwner*'+VEILREACH_DISTANCE_OFFSET+'; vPack2Alpha=fract(aMat); }'
+    'vColor=aColor; vDistance=length(d); vTextureUv=aUv; vMat=int(floor(aMat+.001))-farOwner*'+VEILREACH_DISTANCE_OFFSET+';'+
+    'vVeilreachRepeat=int(farOwner==1&&vMat>0&&vMat<20); vPack2Alpha=fract(aMat); }'
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
     .replace('uniform vec3 uFog;',
       'uniform vec3 uFog; uniform vec3 uSkyLight; uniform float uCaveHaze;'+
-      'flat in int vVeilreachSky;'+
+      'flat in int vVeilreachSky,vVeilreachRepeat;'+
       'float worldFog(float distanceToEye){ if(vVeilreachSky==1) return .88*smoothstep(55.0,460.0,distanceToEye); return smoothstep(mix(29.0,9.0,uCaveHaze),'+
         'mix(68.0,27.0,uCaveHaze),distanceToEye); }')
     .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
     .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
+    .replace('in vec2 vUv;','in vec2 vTextureUv;')
     .replace('1.0-smoothstep(10.0,38.0,vDistance)',
-      'vVeilreachSky==1?1.0-smoothstep(25.0,105.0,vDistance):1.0-smoothstep(10.0,38.0,vDistance)')
+      'vVeilreachSky==1?(1.0-smoothstep(25.0,105.0,vDistance))*'+
+        '(1.0-smoothstep(.035,.11,max(fwidth(vTextureUv.x),fwidth(vTextureUv.y)))):1.0-smoothstep(10.0,38.0,vDistance)')
+    .replace('  float tile=hashCell',
+      '  if(vVeilreachSky==1&&near==0.0){ outColor=vec4(mix(vColor*uSkyLight,uFog,worldFog(vDistance)),1.0); return; }\n'+
+      '  float tile=hashCell')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
-      'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
+      'void main(){ vec2 vUv=vVeilreachRepeat==1?fract(vTextureUv):vTextureUv;'+
+      'if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
       'outColor=vec4(mix(vColor*uSkyLight,uFog,f),vPack2Alpha); return; }'+
       `if(vMat==${nonblockGeometry.NONBLOCK_SCENERY_MATERIAL}){ float f=smoothstep(29.0,68.0,vDistance);`+
       'outColor=vec4(mix(vColor,uFog,f),1.0); return; }'+

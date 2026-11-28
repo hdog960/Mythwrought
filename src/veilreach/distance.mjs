@@ -34,7 +34,12 @@ function pushFace(vertices,axis,positive,plane,[u0,v0,u1,v1],id){
     position[axis]=plane;
     position[u]=a;
     position[v]=b;
-    vertices.push(...position,...color,axis===0?b:a,axis===0?a:b,tag+VEILREACH_DISTANCE_OFFSET);
+    const [x,y,z]=position;
+    // World-space geology keeps its continuous grain. Legacy block artwork
+    // repeats the same local UV orientation as each physical cube face.
+    const uv=tag>=40?[axis===0?z:x,axis===1?z:y]:
+      axis===0?[positive?z:-z,y]:axis===1?[positive?-z:z,x]:[positive?-x:x,y];
+    vertices.push(...position,...color,...uv,tag+VEILREACH_DISTANCE_OFFSET);
   }
 }
 
