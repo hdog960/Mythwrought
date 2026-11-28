@@ -11,7 +11,7 @@ const actions={meadow:[createPlainsActor,stepPlainsActor],desert:[createDesertAc
 export function createBeastEngineFixture(view,seed=179){
  const q=view?.query,catalog=completeBeastCandidateCatalog();
  if(!q||typeof view.generatedMaterialAt!=='function'||typeof view.revision!=='function')throw TypeError('Explicit fixture source required');
- let pending=null,busy=false,lastTick=-1;
+ let pending=null,busy=false,lastTick=-1,batch=null,peerFrame=null;
  const targets=new Map();
  const navigator=new LocalNavigator({...q,grounded:(p,b)=>expansionSupport(q,p,b,'ground')});
  const engine=MobEngine.createExpansionFixture(q,seed,{
@@ -20,6 +20,7 @@ export function createBeastEngineFixture(view,seed=179){
   step:(mob,previous,command,roster,tick)=>{
    if(tick!==lastTick){
     navigator.beginTick();lastTick=tick;
+    peerFrame=Object.freeze({revision:view.revision(),tick,entities:Object.freeze(roster.map(e=>Object.freeze({...e,targetId:batch?.get(e.id)?.targetId??null})))});
     const alive=new Set(roster.filter(e=>['idle','active'].includes(e.state)).map(e=>e.id));
     for(const id of targets.keys())if(!alive.has(id))targets.delete(id);
     for(const e of roster)if(alive.has(e.id)){
@@ -36,7 +37,8 @@ export function createBeastEngineFixture(view,seed=179){
    const targetFor=id=>id!==mob.id?targets.get(id):undefined;
    const target=targetFor(command?.targetId),threat=targetFor(command?.threatId);
    let hit=null;
-   const ok=step(actor,q,{target,threat,goal:command?.goal,ownerView:view,navigator,controllerTick:tick,
+   const ok=step(actor,q,{target,threat,goal:command?.goal,flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
+    readPeers:()=>peerFrame,
     commitDamage:(victim,amount,revision,kind)=>{
      if(hit||!victim||(victim!==target&&victim!==threat))return false;
      hit=Object.freeze({targetId:victim.id,amount,revision,kind});return true;
@@ -46,6 +48,25 @@ export function createBeastEngineFixture(view,seed=179){
    return {motion:actor,state:actor,hit};
   }
  });
+ // A complete bounded command batch is copied before the engine clock runs.
+ // Every pack member observes the same identities/target choices that tick.
+ function advancePopulation(seconds,commands=[]){
+  if(busy||!Array.isArray(commands)||commands.length>32)return 0;
+  const ids=new Set(engine.all().map(e=>e.id)),next=new Map();
+  const validPoint=p=>Array.isArray(p)&&p.length===3&&p.every(Number.isFinite);
+  for(const c of commands){
+   if(!c||!ids.has(c.id)||next.has(c.id)||
+    (c.targetId!=null&&(!ids.has(c.targetId)||c.targetId===c.id))||
+    (c.threatId!=null&&(!ids.has(c.threatId)||c.threatId===c.id))||
+    (c.goal!=null&&!validPoint(c.goal))||
+    (c.flowerCell!=null&&(!validPoint(c.flowerCell)||!c.flowerCell.every(Number.isSafeInteger))))return 0;
+   next.set(c.id,Object.freeze({targetId:c.targetId??null,threatId:c.threatId??null,
+    goal:c.goal?Object.freeze([...c.goal]):undefined,flowerCell:c.flowerCell?Object.freeze([...c.flowerCell]):undefined}));
+  }
+  busy=true;batch=next;
+  try{return engine.advance(seconds,m=>batch.get(m.id));}
+  finally{batch=null;busy=false;}
+ }
  function selectAndSpawn({proposals,observer,homeChunk}){
   if(busy)return null;busy=true;
   try{
@@ -54,7 +75,7 @@ export function createBeastEngineFixture(view,seed=179){
    return engine.spawn(pending.id,pending.point,{homeChunk:pending.homeChunk,dormant:pending.dormant});
   }finally{pending=null;busy=false;}
  }
- return Object.freeze({selectAndSpawn,
+ return Object.freeze({selectAndSpawn,advancePopulation,
   spawnOriginal:(id,p,opts)=>!busy&&getSpecies(id)?engine.spawn(id,p,opts):null,
   get:id=>engine.get(id),all:()=>engine.all(),counts:()=>engine.counts(),
   advance:(seconds,controller)=>{if(busy)return 0;busy=true;try{return engine.advance(seconds,controller);}finally{busy=false;}},
