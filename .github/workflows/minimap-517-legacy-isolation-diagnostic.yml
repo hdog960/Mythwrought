@@ -1,0 +1,30 @@
+name: Minimap 517 exact-head legacy isolation diagnostic
+on:
+  push:
+    branches: [qa/minimap-517-legacy-isolation-20261127]
+permissions:
+  contents: read
+jobs:
+  legacy-isolation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - uses: actions/checkout@v4
+        with:
+          ref: 746cff5cbdd378ef701e8bcb74bcec1148d6dca8
+          path: candidate
+      - name: Exact approved candidate unchanged
+        run: |
+          test "$(git -C candidate rev-parse HEAD)" = "746cff5cbdd378ef701e8bcb74bcec1148d6dca8"
+          test "$(git -C candidate rev-parse HEAD^{tree})" = "2485f26809d8e2ce131b36c089d9d2367e27e841"
+      - name: Focused legacy seed switch, real walk and save isolation
+        env:
+          CANDIDATE_ROOT: candidate
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node tests/minimap-517-legacy-isolation-diagnostic.mjs
