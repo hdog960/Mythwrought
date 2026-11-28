@@ -22,6 +22,12 @@ export function frostwoodWeight(x, z, seed) {
   return edge * edge * (3 - 2 * edge);
 }
 
+export function isExposedFrostboundCap(world, x, y, z, block) {
+  const column = world._columnPlan(x, z);
+  return column.get(y) === block && y === Math.max(...column.keys()) &&
+    [y - 1, y, y + 1].every(height => world.environmentCaves.get(x, height, z) === undefined);
+}
+
 export class FrostwoodCandidate extends FrostboundSceneryCandidate {
   get forestSourceVersion() { return 's4-frostwood-v1'; }
 
@@ -36,11 +42,8 @@ export class FrostwoodCandidate extends FrostboundSceneryCandidate {
     if (block !== SNOW_CAP || y < 3 || y > 17) return block;
     const weight = frostwoodWeight(x, z, this.seed);
     if (!weight || unitHash(x, z, this.seed, 2693) >= .62 * weight) return block;
-    const column = this._columnPlan(x, z);
     // Swap only a verified natural full cap. Keep ice shelves, caves, terrain
     // heights, and other shape/collision parameters from S1–S3.
-    if (column.get(y) !== block || y !== Math.max(...column.keys())) return block;
-    if ([y - 1, y, y + 1].some(height => this.environmentCaves.get(x, height, z) !== undefined)) return block;
-    return RIME_STONE;
+    return isExposedFrostboundCap(this, x, y, z, block) ? RIME_STONE : block;
   }
 }
