@@ -23,7 +23,7 @@ Native isolated pursuit, hop, pincer, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; same-engine mounted control authored session26, native/live pending |
+| Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; same-engine mounted control native PASS session26; live player and persistence pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
 | Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; two-sided full-body shoreline search native PASS session20; live pending |
@@ -55,7 +55,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; physical clearing admission and same-engine mounted control authored session26, native/live pending |
+| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; physical clearing admission and same-engine mounted control native PASS session26; live player and persistence pending |
 | Faerie | flight, flower-visit | Physical blossom visit native PASS session19; live pending |
 | Sproutling | waddle, concealment, rest | Incomplete |
 | Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest native PASS session19; live pending |
@@ -71,7 +71,7 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Yak | herd, grazing, domestication | Original candidate taming native PASS session16; integrated original-engine taming and mount denial authored session26, native/live pending |
+| Yak | herd, grazing, domestication | Original candidate taming native PASS session16; integrated original-engine taming and mount denial native PASS session26; live pending |
 | Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge positive/flat negative cases passed session24; corrected unknown-source fixture native PASS session25; live pending |
 | Pika | gather, evasion, shelter | Incomplete |
 | Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation admitted Skyrays in session24; unknown-source negative PASS session25; autonomous air movement authored, live pending |
@@ -87,7 +87,7 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Cave Bat | flight, roost, colony | Isolated roost/departure qualified; colony/live integration pending |
+| Cave Bat | flight, roost, colony | Isolated roost/departure qualified; staggered actual engine colony sortie and roof return authored session27, native/live pending |
 | Crystal Snail | crawl, illumination, harvest-eligible | Incomplete |
 | Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement native PASS session25; natural spawn/live pending |
 | Lantern Beetle | crawl, illumination | Incomplete |
@@ -110,4 +110,6 @@ Session24: native84/86; independent ceiling-lurker3/3 natural admissions and exp
 
 Session25: corrected high-elevation unknown-cell test/provider and conservative non-air veto; original LocalNavigator distant sound staged approach; autonomous medium-specific movement goals for nine species with actual water/ceiling/air support. Three new native groups and two corrections native PASS session25, 89/89. No species declared fully complete.
 
-Session26: integrated original AnimalInteractions with actual MobEngine fixture snapshots and original moveBody inside its tick; camel/unicorn mount steering, rider pose proposals, safe dismount, yak tame-only and dormant retirement authored. Physical source-known forest clearing admission predicate added. Three native groups pending. No persistent tame/mount state or player writes.
+Session26: integrated original AnimalInteractions with actual MobEngine fixture snapshots and original moveBody inside its tick; camel/unicorn mount steering, rider pose proposals, safe dismount, yak tame-only and dormant retirement authored. Physical source-known forest clearing admission predicate added. Three native groups native PASS session26, 92/92. No persistent tame/mount state or player writes.
+
+Session27: physical colony bat sorties and return, original flight integration with exact destination control and full-air checks; independent actual forest unicorn and underground water census tests authored. No new admission counts until native log. Prior integrated mount native PASS. No species marked fully complete.

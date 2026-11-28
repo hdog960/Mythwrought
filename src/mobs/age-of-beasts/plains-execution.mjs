@@ -121,6 +121,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(intent.action==='perch-approach'&&landingGoal){const d=Math.hypot(landingGoal[0]-actor.position[0],landingGoal[2]-actor.position[2]);vertical=d>.3&&landingGoal[1]<actor.position[1]?0:Math.max(-.5,Math.min(.5,(landingGoal[1]-actor.position[1])*2));if(d<.16)heading=[0,0];}
  if(intent.action==='glide')vertical=-.32;
  if(biome==='cave'&&r.id==='cave-bat'&&obs.ceilingContact&&intent.action==='fly')vertical=-1;
+ if(r.id==='cave-bat'&&facts.colonyFlight===true&&intent.action==='fly'&&destination){const delta=destination.map((v,i)=>v-actor.position[i]),d=Math.hypot(...delta),scale=d>0?Math.min(1,d/(r.movement.speed*dt))/d:0;heading=[delta[0]*scale,delta[2]*scale];vertical=delta[1]*scale;}
  if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;const sign=pack?.flank??1;heading=[x*.55-z*.835*sign,z*.55+x*.835*sign];}
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
  if(intent.action==='fly'&&grounded&&vertical<=0)vertical=1;
@@ -132,7 +133,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
    if(intent.action==='ceiling-crawl'&&obs.ceilingContact){actor.dropState=null;actor.dropTarget=null;}
   }
   const ceilingOnly=r.id==='ceiling-lurker'&&!actor.dropState;
-  const support=waterOnly?'water':ceilingOnly||roost?'ceiling':null;
+  const support=waterOnly?'water':ceilingOnly||roost?'ceiling':r.id==='cave-bat'&&facts.colonyFlight===true?'air':null;
   if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
   if(!obs.ready&&biome==='cave'){Object.assign(actor,start);return false;}
   const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,ceilingOnly||roost?'ceiling':'ground'),

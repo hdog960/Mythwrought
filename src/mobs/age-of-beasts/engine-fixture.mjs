@@ -1,5 +1,6 @@
 // AB13 isolated original-engine integration, never imported by production.
 // No separate scheduler, identity, health, population, or persistent save.
+import {colonyFlight} from './colony-flight.mjs';
 import {createIntegratedMounts} from './integrated-mounts.mjs';
 import {refreshSpatialGoal} from './spatial-roam.mjs';
 import {refreshForageGoal} from './natural-forage.mjs';
@@ -56,8 +57,9 @@ export function createBeastEngineFixture(view,seed=179){
    const targetFor=id=>id!==mob.id?targets.get(id):undefined;
    const target=targetFor(command?.targetId),threat=targetFor(command?.threatId);
    let hit=null;
-   const goal=command?.goal??(batch&&!target&&!threat?(refreshForageGoal(actor,view,roster,tick)??refreshSpatialGoal(actor,view,roster,tick)):null);
-   const ok=step(actor,q,{target,threat,goal,flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
+   const colony=batch&&!target&&!threat&&!command?.goal?colonyFlight(actor,view,roster,tick):null;
+   const goal=command?.goal??colony?.goal??(batch&&!target&&!threat?(refreshForageGoal(actor,view,roster,tick)??refreshSpatialGoal(actor,view,roster,tick)):null);
+   const ok=step(actor,q,{target,threat,goal,facts:colony?{departRoost:colony.departRoost,colonyFlight:true}:{},flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
     readPeers:()=>peerFrame,
     readDisturbances:()=>({revision:disturbanceFrame.revision,events:disturbanceFrame.events.filter(e=>e.sourceId!==mob.id)}),
     commitDamage:(victim,amount,revision,kind)=>{
