@@ -23,7 +23,7 @@ Native isolated pursuit, hop, pincer, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; live pending |
+| Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; same-engine mounted control authored session26, native/live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
 | Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; two-sided full-body shoreline search native PASS session20; live pending |
@@ -42,7 +42,7 @@ Native isolated charge, heavy melee, night flight.
 | Woolly Mammoth | herd, defense, domestication, conditional-ground-mount | Incomplete |
 | Ptarmigan | forage, short-flight, evasion | Supported landing and threat takeoff native PASS session19; live pending |
 | Ermine | evasion, explore | Incomplete |
-| Aurora Wisp | float, illumination | Incomplete |
+| Aurora Wisp | float, illumination | Autonomous original-engine air movement native PASS session25; illumination/live pending |
 | Snowdrifter | walk, roll | Snow-supported bounded accelerated roll native PASS session20; live and rolling renderer animation pending |
 | Yeti | charge, heavy-melee, ice-projectile | Charge qualified; ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Ice Golem | heavy-melee | Incomplete |
@@ -55,7 +55,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; live pending |
+| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; physical clearing admission and same-engine mounted control authored session26, native/live pending |
 | Faerie | flight, flower-visit | Physical blossom visit native PASS session19; live pending |
 | Sproutling | waddle, concealment, rest | Incomplete |
 | Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest native PASS session19; live pending |
@@ -71,10 +71,10 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Yak | herd, grazing, domestication | Original candidate taming native PASS session16; live pending |
-| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge positive/flat negative cases passed session24; inconsistent unknown-source fixture corrected session25, native/live pending |
+| Yak | herd, grazing, domestication | Original candidate taming native PASS session16; integrated original-engine taming and mount denial authored session26, native/live pending |
+| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge positive/flat negative cases passed session24; corrected unknown-source fixture native PASS session25; live pending |
 | Pika | gather, evasion, shelter | Incomplete |
-| Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation admitted Skyrays in session24; unknown-source negative fixture corrected session25, autonomous air movement authored; native/live pending |
+| Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation admitted Skyrays in session24; unknown-source negative PASS session25; autonomous air movement authored, live pending |
 | Griffin | tame, flight, aerial-mount, defense | Aerial mounting still blocked pending movement owner; candidate tame interface authored |
 | Cyclops | club, rock-projectile | Ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
@@ -89,13 +89,13 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 |---|---|---|
 | Cave Bat | flight, roost, colony | Isolated roost/departure qualified; colony/live integration pending |
 | Crystal Snail | crawl, illumination, harvest-eligible | Incomplete |
-| Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement authored session25; natural spawn/live pending |
+| Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement native PASS session25; natural spawn/live pending |
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
 | Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
-| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; actual prior-tick engine ground-motion disturbance fixture session24 failed local navigator range; bounded supported approach authored session25, native/live pending |
-| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; independent baseline natural admission3/3 and30-tick ceiling attachment PASS session24; autonomous ceiling crawl authored session25; distant-wall navigation/live pending |
+| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; actual prior-tick engine ground-motion disturbance fixture session24 failed local navigator range; bounded supported approach native PASS session25; live pending |
+| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; independent baseline natural admission3/3 and30-tick ceiling attachment PASS session24; autonomous ceiling crawl native PASS session25; distant-wall navigation/live pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites native PASS session16; live pending |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.
@@ -108,4 +108,6 @@ Session23: bounded autonomous ground foraging goal search for nine species, scop
 
 Session24: native84/86; independent ceiling-lurker3/3 natural admissions and expanded mountain15 admissions PASS, cumulative16 distinct baseline species. Unknown-source elevation negative and integrated hearing failed. No final natural-provider claim.
 
-Session25: corrected high-elevation unknown-cell test/provider and conservative non-air veto; original LocalNavigator distant sound staged approach; autonomous medium-specific movement goals for nine species with actual water/ceiling/air support. Three new native groups authored, two corrections pending. No species declared fully complete.
+Session25: corrected high-elevation unknown-cell test/provider and conservative non-air veto; original LocalNavigator distant sound staged approach; autonomous medium-specific movement goals for nine species with actual water/ceiling/air support. Three new native groups and two corrections native PASS session25, 89/89. No species declared fully complete.
+
+Session26: integrated original AnimalInteractions with actual MobEngine fixture snapshots and original moveBody inside its tick; camel/unicorn mount steering, rider pose proposals, safe dismount, yak tame-only and dormant retirement authored. Physical source-known forest clearing admission predicate added. Three native groups pending. No persistent tame/mount state or player writes.

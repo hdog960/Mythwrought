@@ -161,6 +161,14 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
        return q.lineOfSight([at[0],at[1]+body.height*.6,at[2]],[side[0],side[1]+rider.height*.5,side[2]])===true;
       });break;
     }
+    case 'clearing':{
+     // Conservative forest clearing: real ground and a full body-height
+     // ring of clear air with source-known support; no tree deletion.
+     result[tag]=env.biome==='forest'&&support('ground')&&[[1,0],[-1,0],[0,1],[0,-1]].every(([dx,dz])=>{
+      for(let i=1;i<=4;i++){const at=[p[0]+dx*i*.25,p[1],p[2]+dz*i*.25];if(!knownVolume(at)||!knownFloor(at)||!expansionSupport(q,at,body,'ground')||!expansionSupport(q,at,body,'air'))return false;}
+      return true;
+     });break;
+    }
     case 'open-grass':{const at=findLanding();result[tag]=at!==null&&grassAt(at);break;}
     case 'large-clearance':result[tag]=q.volume(p,body)==='clear';break;
     case 'ceiling':result[tag]=support('ceiling');break;

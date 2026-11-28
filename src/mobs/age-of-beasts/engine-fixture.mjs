@@ -1,5 +1,6 @@
 // AB13 isolated original-engine integration, never imported by production.
 // No separate scheduler, identity, health, population, or persistent save.
+import {createIntegratedMounts} from './integrated-mounts.mjs';
 import {refreshSpatialGoal} from './spatial-roam.mjs';
 import {refreshForageGoal} from './natural-forage.mjs';
 import {MobEngine} from '../engine.mjs';
@@ -14,7 +15,7 @@ export function createBeastEngineFixture(view,seed=179){
  const q=view?.query,catalog=completeBeastCandidateCatalog();
  if(!q||typeof view.generatedMaterialAt!=='function'||typeof view.revision!=='function')throw TypeError('Explicit fixture source required');
  let pending=null,busy=false,lastTick=-1,batch=null,peerFrame=null,disturbanceFrame=null;
- const targets=new Map();
+ const targets=new Map();let mounts;
  const navigator=new LocalNavigator({...q,grounded:(p,b)=>expansionSupport(q,p,b,'ground')});
  const engine=MobEngine.createExpansionFixture(q,seed,{
   catalog:catalog.index,
@@ -50,6 +51,7 @@ export function createBeastEngineFixture(view,seed=179){
    const c=catalog.get(mob.species.id),[create,step]=actions[c.requirement.biome];
    const actor=previous?{...previous}:create(c,[...mob.origin],q);
    Object.assign(actor,{id:mob.id,state:mob.state,position:[...mob.position],velocity:[...mob.velocity],yaw:mob.yaw,grounded:mob.grounded,motionMode:mob.motionMode});
+   const mounted=mounts.step(actor,roster);if(mounted!==undefined)return mounted;
    // Stable tick snapshot; only awake actual engine entities can be targets.
    const targetFor=id=>id!==mob.id?targets.get(id):undefined;
    const target=targetFor(command?.targetId),threat=targetFor(command?.threatId);
@@ -67,6 +69,7 @@ export function createBeastEngineFixture(view,seed=179){
    return {motion:actor,state:actor,hit};
   }
  });
+ mounts=createIntegratedMounts(engine,q);
  // A complete bounded command batch is copied before the engine clock runs.
  // Every pack member observes the same identities/target choices that tick.
  function advancePopulation(seconds,commands=[]){
@@ -95,6 +98,9 @@ export function createBeastEngineFixture(view,seed=179){
   }finally{pending=null;busy=false;}
  }
  return Object.freeze({selectAndSpawn,advancePopulation,
+  tame:(id,o)=>!busy&&mounts.tame(id,o),mount:(id,o)=>!busy&&mounts.mount(id,o),
+  steerMount:(o,d,run=false)=>!busy&&mounts.steer(o,d,run),riderPose:o=>!busy?mounts.riderPose(o):null,
+  dismount:o=>!busy?mounts.dismount(o):null,isTamed:(id,o)=>!busy&&mounts.isTamed(id,o),
   spawnOriginal:(id,p,opts)=>!busy&&getSpecies(id)?engine.spawn(id,p,opts):null,
   get:id=>engine.get(id),all:()=>engine.all(),counts:()=>engine.counts(),
   advance:(seconds,controller)=>{if(busy)return 0;busy=true;try{return engine.advance(seconds,controller);}finally{busy=false;}},
