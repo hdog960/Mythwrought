@@ -57,6 +57,26 @@ export function canAdmitCombinedRandomSeed(seed){
         ((c.reason==='SURFACE_PORTAL_SUPPORT_COLLISION'||c.reason==='OTHER_CAVE_SOURCE_OVERLAP')&&Number.isInteger(c.existing)||
          c.reason==='EXISTING_LIVE_CAVE_OR_LANDMARK'&&Number.isInteger(c.id))))return false;
     }
+    // The original East Gallery can exhaust all candidate sites due to
+    // seed-specific protected natural landmarks. Do not relax its planner.
+    const eastPrefix='Historical East Gallery has no safe new-world site: ';
+    if(error instanceof Error&&error.message.startsWith(eastPrefix)){
+      const sites=JSON.parse(error.message.slice(eastPrefix.length));
+      if(Array.isArray(sites)&&sites.length===3&&sites.every(s=>
+        s&&s.origin&&['x','z','length','width'].every(k=>Number.isInteger(s.origin[k]))&&
+        Array.isArray(s.errors)&&s.errors.length>0&&
+        s.errors.every(e=>['EXISTING_SOURCE_LANDMARK_OR_PLAYER_EDIT_CONFLICT',
+          'COMPOSED_EAST_PATH_PHYSICALLY_BLOCKED'].includes(e))&&
+        Number.isInteger(s.conflictCount)&&s.conflictCount>=0&&
+        Array.isArray(s.examples)&&s.examples.length<=3&&
+        s.examples.every(c=>c&&c.reason==='PREEXISTING_LIVE_CAVE_OR_LANDMARK'&&
+          typeof c.key==='string'&&/^-?\d+,-?\d+,-?\d+$/.test(c.key)&&
+          Number.isInteger(c.original)&&Number.isInteger(c.id))&&
+        Array.isArray(s.badWalk)&&s.badWalk.length<=3&&
+        s.badWalk.every(c=>c&&['x','z','feet'].every(k=>Number.isFinite(c[k]))&&
+          ['supported','headroom','body'].every(k=>typeof c[k]==='boolean'))&&
+        (s.examples.length>0||s.badWalk.length>0)))return false;
+    }
     throw error;
   }
 }

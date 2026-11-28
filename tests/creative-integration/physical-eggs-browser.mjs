@@ -73,6 +73,11 @@ try{
         assert.ok(witness&&Number.isInteger(seed)&&seed===(seed|0));
         rejectedSeeds.push(seed);
       }
+      if(process.env.EGG_EAST_REJECTED_SEED!==undefined){
+        const seed=Number(process.env.EGG_EAST_REJECTED_SEED);
+        assert.ok(witness&&Number.isInteger(seed)&&seed===(seed|0));
+        rejectedSeeds.push(seed);
+      }
       if(witness)await page.addInitScript(bad=>{
         const original=crypto.getRandomValues.bind(crypto),seeds=[...bad,2026];
         crypto.getRandomValues=a=>{if(a instanceof Int32Array&&a.length===1&&seeds.length){a[0]=seeds.shift();return a;}return original(a);};

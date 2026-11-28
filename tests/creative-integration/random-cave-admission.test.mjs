@@ -31,3 +31,26 @@ test('actual spiral seam conflict refuses explicit admission and is skipped for 
  assert.equal(canAdmitCombinedRandomSeed(rejected),false);
  console.log('SEAM_REJECTED_SEED='+rejected);
 });
+
+test('actual East Gallery protected source refusal is skipped only during random admission',()=>{
+ let rejected=null,state=0x723ab193;
+ for(let i=0;i<1024;i++){
+  state^=state<<13;state^=state>>>17;state^=state<<5;
+  const seed=state|0;
+  try{combinedEnvironmentCaves(seed);}
+  catch(error){
+   if(error.message.startsWith('Historical East Gallery has no safe new-world site: ')&&
+      error.message.includes('PREEXISTING_LIVE_CAVE_OR_LANDMARK')){
+    const sites=JSON.parse(error.message.split('site: ')[1]);
+    if(Array.isArray(sites)&&sites.length===3&&sites.every(s=>s.errors.every(e=>
+       ['EXISTING_SOURCE_LANDMARK_OR_PLAYER_EDIT_CONFLICT','COMPOSED_EAST_PATH_PHYSICALLY_BLOCKED'].includes(e))&&
+       s.examples.every(c=>c.reason==='PREEXISTING_LIVE_CAVE_OR_LANDMARK')&&
+       (s.examples.length||s.badWalk.length))){rejected=seed;break;}
+   }
+  }
+ }
+ assert.notEqual(rejected,null,'Bounded deterministic survey must locate actual protected East Gallery refusal');
+ assert.throws(()=>new FourRegionWorld(rejected,fourRegionProfile(rejected,VEILREACH_GENERATOR)),/Historical East Gallery has no safe new-world site/);
+ assert.equal(canAdmitCombinedRandomSeed(rejected),false);
+ console.log('EAST_REJECTED_SEED='+rejected);
+});
