@@ -66,7 +66,9 @@ export function surveyElderCactus(world, stand, { height = 17, orientation = 0 }
           localShapes.get(key).boxes.push(clipped);
         }
   }
-  const mesh = candidateVertices([{ positions, materials: source.mesh.materials, palette }]);
+  const object = { positions, materials: source.mesh.materials, palette, sceneId: source.sceneId,
+    anchor: [x, y, z], instanceKey: 'elder:' + source.instanceKey + ':' + height + ':' + orientation };
+  const mesh = candidateVertices([object]);
   const witness = Object.create(world, {
     get: { value: (...point) => world.get(...point) },
     naturalAndLandmarkBlock: { value: (...point) => world.naturalAndLandmarkBlock(...point) },
@@ -77,6 +79,6 @@ export function surveyElderCactus(world, stand, { height = 17, orientation = 0 }
   function pick(origin, direction, reach) {
     return raycastShapes(origin, direction, (...point) => localShapes.get(worldKey(...point)) ?? null, reach);
   }
-  return { anchor: [x, y, z], height, orientation, mesh, positions, colliders,
+  return { anchor: [x, y, z], height, orientation, object, mesh, positions, colliders,
     collisionCells: [...localShapes.keys()], triangles: source.mesh.triangleCount, witness, pick };
 }
