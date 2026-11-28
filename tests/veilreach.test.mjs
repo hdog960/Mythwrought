@@ -1,6 +1,7 @@
 import {createVeilreachDistanceRenderer,farSkyMesh,veilreachDrawRanges,VEILREACH_DISTANCE_MAX_BYTES,VEILREACH_DISTANCE_OFFSET} from '../src/veilreach/distance.mjs';
 import {VEILREACH_GRASS_ID} from '../src/veilreach/flora.mjs';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import test from 'node:test';
 import {createVeilreachSource} from '../src/veilreach/source.mjs';
 import {createSkylands,SKY_FAMILIES} from '../src/veilreach/generation.mjs';
@@ -44,6 +45,26 @@ test('signed distant regions grow reproducible clusters and living surfaces',()=
   }
   for(const id of [BLOCK.WOOD,BLOCK.LEAVES,M.flower,M['flower-petal'],M.heather,287,VEILREACH_GRASS_ID])
     assert.ok(counts.get(id)>0,'missing flora '+id);
+});
+
+test('Veilreach v1 preserves released voxels across local and distant seeds',()=>{
+  // Samples from the released 8400d13 source before corrective changes.
+  const witnesses=[
+    [180,0,0,'7d252c24b99fca83ef158a81d8b2d3a7827d1352768eee101da5043dd89043cd'],
+    [180,-1,0,'bd44f7a0bf2abb6bf31cb0961b45d1e9cca3f965640f7580c3caec9f1df9e906'],
+    [-77,-31,28,'342bbab4f0e4f1adc1038ec805f868fd543b8e3777e34a6d78e7635a7ca96ba6'],
+    [2026,17,-15,'b7d2d2c3b4a34d38cfa4c014e9d54f4b3c762c9872976014751eb964acf24c3a']
+  ];
+  const offsets=[[-26,0],[-16,7],[-11,8],[-8,-8],[-4,2],[0,0],[2,1],[6,-5],[9,13],[17,-6],[27,5]];
+  for(const [seed,rx,rz,expected] of witnesses){
+    const terrain=createSkylands(seed);
+    const islands=terrain.region(rx,rz).slice(0,3).map(({id,x,y,z,family})=>{
+      const columns=offsets.map(([dx,dz])=>Array.from({length:203},(_,i)=>terrain.get(x+dx,i+30,z+dz)));
+      return {id,x,y,z,family,columns};
+    });
+    const actual=createHash('sha256').update(JSON.stringify(islands)).digest('hex');
+    assert.equal(actual,expected,`released source changed for seed ${seed} in region ${rx},${rz}`);
+  }
 });
 
 test('registered natural source is physical, seam aware and leaves historical terrain and edits intact',()=>{
