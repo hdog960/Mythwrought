@@ -1,0 +1,32 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
+import * as restore from '../src/age-of-valor/restore.mjs';
+import * as recovery from '../src/age-of-valor/recovery.mjs';
+import * as resources from '../src/age-of-valor/resources.mjs';
+import * as status from '../src/age-of-valor/status.mjs';
+import * as ability from '../src/age-of-valor/ability.mjs';
+import * as projectile from '../src/age-of-valor/projectile.mjs';
+import * as pool from '../src/age-of-valor/projectile-pool.mjs';
+import * as bound from '../src/age-of-valor/bound-restore.mjs';
+import {qualifyCombatStress} from '../src/age-of-valor/stress.mjs';
+async function tests(check,api,mods,sha){
+ const identity={worldId:'world:1',profileId:'profile:1',sourceId:'actor:1',fixture:false},config={resource:{max:1000},abilities:[{id:'skill:a',cooldown:200}]};
+ const options={maximum:{stamina:1000,mana:1000},initial:{stamina:800,mana:700},regeneration:{combat:{stamina:0,mana:0},exploration:{stamina:0,mana:0}},delayMs:{stamina:100,mana:100}};
+ const ledger=mods.resources.createResourceLedger(options),statusOptions={registry:mods.status.createStatusRegistry([]),worldEpoch:1,targetId:identity.sourceId,fixture:false},status=mods.status.createStatusSession(statusOptions),ctx={...identity,alive:true,playable:true,combatMode:true,creative:false,readOnly:false,mounted:false};
+ const abilityOptions={identity,registry:{get:()=>null},policies:{},readContext:()=>ctx,readSkills:()=>null,admit:()=>null,validateAim:()=>null,authorizePulse:()=>false},ability=mods.ability.createAbilityExecutor(abilityOptions);
+ const settings={holdMs:350,leftHanded:false};
+ check(await api.combatDefinitionDigest({b:1,a:2},sha)===await api.combatDefinitionDigest({a:2,b:1},sha),'canonical ordering');
+ const record=await api.bindCombatRestore({identity,revision:4,config,digest:sha,ledger,status,ability,settings,quiescent:true,makeEnvelope:mods.restore.makeCombatRestoreEnvelope});
+ check(record.balances.stamina===800&&record.balances.mana===700,'balance snapshot');
+ const req={record,identity,config,digest:sha,restoreParts:mods.restore.restoreCombatParts,options:{resourceOptions:{...options,initial:{stamina:1000,mana:1000}},statusOptions,abilityOptions,makeLedger:mods.resources.createResourceLedger,makeStatus:mods.status.createStatusSession,makeAbility:mods.ability.createAbilityExecutor}};
+ const restored=await api.restoreBoundCombat(req);check(restored.status==='restored'&&restored.ledger.snapshot().stamina===800,'saved balances override external initial');
+ check((await api.restoreBoundCombat({...req,config:{...config,extra:true}})).status==='blocked','changed definition');check((await api.restoreBoundCombat({...req,minimumRevision:5})).status==='blocked','rollback floor');
+ check((await api.restoreBoundCombat({...req,record:{...record,balances:{...record.balances,stamina:1001}}})).status==='blocked','overmax');check((await api.restoreBoundCombat({...req,identity:{...identity,profileId:'wrong'}})).status==='blocked','cross profile');
+ const v1=mods.recovery.encodeCombatSave({identity,revision:4,resources:record.balances,clock:0,cooldowns:{},settings});
+ let rejected=false;try{await api.migrateCombatV1({record:v1,identity,config,digest:sha,decode:mods.recovery.decodeCombatSave,makeEnvelope:mods.restore.makeCombatRestoreEnvelope})}catch{rejected=true}check(rejected,'migration requires owner approval');
+ const migrated=await api.migrateCombatV1({record:v1,identity,config,digest:sha,decode:mods.recovery.decodeCombatSave,makeEnvelope:mods.restore.makeCombatRestoreEnvelope,ownerApprovedFreshEpoch:true});
+ check(migrated.balances.stamina===800&&(await api.restoreBoundCombat({...req,record:migrated})).status==='restored','v1 migration');
+ const stress=api.qualifyCombatStress({makeProjectile:mods.projectile.createProjectile,makePool:mods.pool.createProjectilePool,cycles:20});check(stress.launched===640&&stress.peak===32&&stress.targetCalls===6400&&stress.candidateChecks===819200&&stress.impactCount===0,'full pool stress');return stress;
+}
+test('AV15 bound restore and AV16 bounded stress',async()=>{await tests((ok,name)=>assert.ok(ok,name),{...bound,qualifyCombatStress},{restore,recovery,resources,status,ability,projectile,pool},async raw=>'sha256:'+createHash('sha256').update(raw).digest('hex'))});
