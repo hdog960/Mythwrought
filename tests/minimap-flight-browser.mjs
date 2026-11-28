@@ -8,16 +8,22 @@ const context=await browser.newContext({viewport:{width:956,height:440},hasTouch
 const page=await context.newPage(),errors=[];
 const report={head:process.env.GITHUB_SHA??null,seed:-652801853,stages:[],errors};
 page.on('pageerror',e=>errors.push(e.message));
-const snapshot=()=>page.evaluate(()=>{
+const snapshot=()=>page.evaluate(async()=>{
  const t=window.__mythwroughtTest,m=document.querySelector('#miniMap');
+ const {mountainV8Storage,V8_ACTIVE_KEY}=await import('/src/manual-biomes/mountain-v8-isolated-storage.mjs');
+ const storage=localStorage.getItem(V8_ACTIVE_KEY)==='1'?mountainV8Storage(localStorage):localStorage;
  return {flight:t.flightInfo(),pose:t.m5ObservedPose(),chunks:t.snapshot().chunks,
   discovered:Number(m.dataset.discovered),sourceReads:Number(m.dataset.surveySourceReads||0),surveyKind:m.dataset.surveyKind,surveyMs:Number(m.dataset.surveyMs||0),surveyY:Number(m.dataset.surveyY),
-  saved:JSON.parse(localStorage.getItem('mythwrought-exploration-v1-'+m.dataset.seed)||'{"cells":[]}').cells,
-  observed:JSON.parse(localStorage.getItem('mythwrought-navigation00-observations-v1-'+m.dataset.seed)||'{"tiles":[]}').tiles};
+  saved:JSON.parse(storage.getItem('mythwrought-exploration-v1-'+m.dataset.seed)||'{"cells":[]}').cells,
+  observed:JSON.parse(storage.getItem('mythwrought-navigation00-observations-v1-'+m.dataset.seed)||'{"tiles":[]}').tiles};
 });
 async function holdUntil(key,predicate,arg){
+ await page.locator('#scene').focus();
  await page.keyboard.down(key);
- try{await page.waitForFunction(predicate,arg,{timeout:150000,polling:100});}
+ try{
+  await page.waitForFunction(code=>window.__mythwroughtTest.flightInfo().heldKeys.includes(code),'Key'+key.toUpperCase(),{timeout:5000});
+  await page.waitForFunction(predicate,arg,{timeout:150000,polling:100});
+ }
  finally{await page.keyboard.up(key);}
 }
 try{
@@ -35,13 +41,17 @@ try{
  let demonstratedEviction=false;
  for(const target of [21,100,200,254]){
   await holdUntil('e',y=>window.__mythwroughtTest.flightInfo().position.y>=y,target);
+  await page.locator('#miniMapButton').tap();
   const before=await snapshot();
+  assert.equal(before.saved.length,before.discovered,'pre-traversal map flush must use actual world namespace');
+  await page.locator('#closeExploration').tap();
   assert.ok(before.flight.active&&before.flight.position.y>=target);
   await holdUntil('w',({x,z,n})=>{
    const p=window.__mythwroughtTest.flightInfo().position;
    return Math.hypot(p.x-x,p.z-z)>=40&&Number(document.querySelector('#miniMap').dataset.discovered)>n;
   },{x:before.pose.x,z:before.pose.z,n:before.discovered});
   const after=await snapshot();
+  assert.ok(after.flight.position.y>=target,'horizontal flight lost target altitude');
   assert.ok(after.discovered>before.discovered,'discovery did not grow at Y'+target);
   assert.ok(after.sourceReads<=96,'nonresident survey exceeded source budget');
   assert.ok(after.flight.residentChunks<=25,'minimap must not expand GPU owners');

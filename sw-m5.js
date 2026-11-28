@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261128-unified-veilreach-v2';
-const ASSET_RELEASE='20261128-unified-veilreach-v2';
+const CACHE_NAME=CACHE_PREFIX+'20261128-minimap-flight-v1';
+const ASSET_RELEASE='20261128-minimap-flight-v1';
 const SOURCE_ASSETS=[
   "./src/veilreach/generation.mjs",
   "./src/veilreach/source.mjs",
