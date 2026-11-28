@@ -24,7 +24,7 @@ function findNaturalSightline(world, scene, object) {
   return null;
 }
 
-export function qualifyRetainedGalleryScenery({ projection, capture }) {
+export function qualifyRetainedGalleryScenery({ projection, capture, onWitness }) {
   const originalSave = JSON.stringify(projection.original.save());
   const anchors = [...new Set([...capture.cuts, ...projection.future])].map(key => key.split(',').map(Number));
   const originalAir = new Set(anchors.map(anchor => anchor.join(',')));
@@ -71,7 +71,9 @@ export function qualifyRetainedGalleryScenery({ projection, capture }) {
       const hit = scene.pick(eye, direction, 4);
       assert.equal(hit?.instanceKey, object.instanceKey);
       assert.ok(scene.breakHit(hit, eye, direction));
-      assert.ok(!open().visible().some(row => row.instanceKey === object.instanceKey));
+      const reopened = open().visible();
+      assert.ok(!reopened.some(row => row.instanceKey === object.instanceKey));
+      onWitness?.({ object, eye, direction, visible, reopened });
       witnesses.set(object.sceneId, { anchor: object.anchor, owner: [cx, cz, band], eye });
     }
     checked++;

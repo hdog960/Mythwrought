@@ -122,9 +122,20 @@ const budgetPassed = residentBudgetPassed && result.peakCost.withinLimits && res
 const output = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'world-ascension-interlayer-union');
 await mkdir(output, { recursive: true });
 const report = { ...result, workingSet, nativeBatch, editReuse, faceDelta, residentBudgetPassed, budgetPassed };
-if (process.argv.includes('--with-scenery-native')) {
+const withSceneryWebGL = process.argv.includes('--with-scenery-webgl2');
+if (withSceneryWebGL || process.argv.includes('--with-scenery-native')) {
   const { qualifyRetainedGalleryScenery } = await import('./world-ascension-gallery-scenery-native.mjs');
-  report.scenery = qualifyRetainedGalleryScenery({ projection, capture });
+  const witnesses = [];
+  report.scenery = qualifyRetainedGalleryScenery({ projection, capture,
+    onWitness: withSceneryWebGL ? witness => witnesses.push(witness) : undefined });
+  if (withSceneryWebGL) {
+    const { renderGalleryScenery } = await import('./world-ascension-gallery-scenery-webgl2.mjs');
+    const sceneryView = Object.create(projection.original, { get: { value(x, y, z) {
+      const key = [x, y, z].join(',');
+      return capture.cuts.has(key) || projection.future.has(key) ? BLOCK.AIR : projection.original.get(x, y, z);
+    } } });
+    report.scenery.webgl2 = await renderGalleryScenery({ view: sceneryView, witnesses, output });
+  }
 }
 if (process.argv.includes('--with-unified-webgl2')) {
   const { compareUnifiedCaveEdit } = await import('./world-ascension-unified-edit-webgl2.mjs');
