@@ -17,6 +17,8 @@ export function sampleSapRetention(cell,{isLoaded,isSolid}={}){
   if(!sap(cell)||isLoaded(cell.x,cell.y,cell.z)!==true)return null;
   const faces=[];
   for(const [dx,dy,dz,name] of [[0,-1,0,'bottom'],[1,0,0,'east'],[0,0,1,'south'],[-1,0,0,'west'],[0,0,-1,'north'],[0,1,0,'top']]){
+    // Positive fill touches bottom and side faces; only full fill reaches the ceiling.
+    if(dy===1&&cell.units<8)continue;
     const p=[cell.x+dx,cell.y+dy,cell.z+dz];
     if(point(...p)&&isLoaded(...p)===true&&isSolid(...p)===true)faces.push(name);
   }

@@ -2,10 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
-import {AMBER_SAP_DEFINITION as d,sampleSapContact,createSapSource} from '../../../src/liquids/amber-sap/physics/definition.mjs';
+import {AMBER_SAP_DEFINITION as d,sampleSapContact,sampleSapRetention,createSapSource} from '../../../src/liquids/amber-sap/physics/definition.mjs';
 if(!process.env.LIQUID_ENGINE_MODULE)throw Error('Set LIQUID_ENGINE_MODULE to the pinned Water A engine');
 const {createLiquidEngine}=await import(pathToFileURL(resolve(process.env.LIQUID_ENGINE_MODULE)).href);
 const world=(over={})=>createLiquidEngine({definitions:[d],isLoaded:()=>true,isOpen:(x,y,z)=>x===0&&z===0&&y>=-2&&y<=0,...over});
 test('actual core: gravity transfers one unit per visit, including conserved quantity',()=>{const e=world();e.insert(0,0,0,d.id,8,{trace:17});assert.equal(e.tick(1).moved,1);assert.equal(e.getCell(0,0,0).units,7);assert.equal(e.getCell(0,-1,0).units,1);for(let i=0;i<50;i++)e.tick(1);assert.equal(e.save().cells.reduce((n,c)=>n+c.units,0),8);assert.equal(e.save().cells.reduce((n,c)=>n+(c.quantities.trace??0),0),17);});
 test('actual core: lateral allowance is one and isolated thin film does not spread',()=>{const e=world({isOpen:(x,y,z)=>y===0&&z===0&&Math.abs(x)<=1});e.insert(0,0,0,d.id,8);assert.equal(e.tick(1).moved,1);assert.equal(e.getCell(1,0,0).units,1);const f=world({isOpen:(x,y,z)=>y===0&&z===0});f.insert(0,0,0,d.id,1);assert.equal(f.tick(1).moved,0);});
 test('actual core: unloaded tree source and contact stay inactive across restore',()=>{let loaded=true;const opts={isLoaded:()=>loaded},cfg={x:0,y:0,z:0,treeId:'existing-tree',stock:5,rate:2};let e=world(opts),s=createSapSource(cfg);assert.equal(s.collect(e,()=>true),2);assert.equal(sampleSapContact(e,.5,.1,.5).stickinessPermille,125);loaded=false;assert.equal(s.collect(e,()=>true),0);assert.equal(sampleSapContact(e,.5,.1,.5),null);const saved=JSON.parse(JSON.stringify({engine:e.save(),source:s.save()}));e=world({...opts,snapshot:saved.engine});s=createSapSource({...cfg,snapshot:saved.source});loaded=true;e.wake(0,0,0);for(let i=0;i<30;i++){s.collect(e,()=>true);e.tick(1);}assert.equal(e.save().cells.reduce((n,c)=>n+c.units,0)+s.save().remaining,5);assert.equal(s.save().remaining,0);});
+test('actual core: sap ceiling retention agrees with physical fill height',()=>{
+  for(const units of [1,4,8]){
+    const e=world();
+    assert.equal(e.insert(0,0,0,d.id,units),true);
+    const sample=e.samplePoint(.5,units/16,.5);
+    assert.equal(sample.surfaceY,units/8);
+    const r=sampleSapRetention(e.getCell(0,0,0),{
+      isLoaded:()=>true,isSolid:(x,y,z)=>x===0&&y===1&&z===0});
+    const touchesCeiling=sample.surfaceY===1;
+    assert.deepEqual(r.faces,touchesCeiling?['top']:[],`fill ${units}/8`);
+    assert.equal(r.retained,touchesCeiling);
+  }
+});
