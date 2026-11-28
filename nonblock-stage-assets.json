@@ -1,5 +1,5 @@
 {
-  "version": "20261127-v50",
+  "version": "20261128-v51",
   "assets": {
     "./src/veilreach/generation.mjs": "65de37bde920270b7b4dd995417909b40420d2f9692bf81c6f1c651e66049ae2",
     "./src/veilreach/source.mjs": "ea47bf4de4b7c1332f00cedcd17beea4ce2b1837524e2c270e95e8c548f6bcf6",
@@ -104,9 +104,9 @@
     "./src/sky-stars.mjs": "92c65df7f06b0fb94c6591c8b8a067271c42a88153e60a8437a6ce85df793438",
     "./src/world-clock.mjs": "de6848e90c98f598bfad13a9e4e0dea379d0f75f543c8cb30c5259e5e70370a4",
     "./src/sky-v6-adapter.mjs": "b0a44a8c103a11af026578e47484ecaf3fa19110638dd903b3d4398f853c25dd",
-    "./": "87c68b069eab5e76835f282f9dc09a007f9a7d0cfca21d3043eb7ed9174552c2",
+    "./": "b19daa24617f1a28e2a2acc6f489a62097b80399eb22f497f4ce46d6d5f28884",
     "./assets/icon.svg": "23db589fabc2394a9415cb553465524d3e1041e14363660f80e9fc91c3c4919f",
-    "./index.html": "87c68b069eab5e76835f282f9dc09a007f9a7d0cfca21d3043eb7ed9174552c2",
+    "./index.html": "b19daa24617f1a28e2a2acc6f489a62097b80399eb22f497f4ce46d6d5f28884",
     "./manifest.webmanifest": "0e9e0ab922ba9a1239982ae35b665503dc1f5772737e78e950c9baf0c82fc3b8",
     "./src/auto-block-catalog/biome130/ancient-ruin-details.mjs": "bc9f916c76bd32789ed2b482cf887528f4e519e20e8062592d2d4d0368d0359e",
     "./src/auto-block-catalog/biome130/ancient-ruin-foundations.mjs": "a0be2ccba487cd44db302d95773bbae2dd296efcab51e53b85b0a19837b6a0d5",
@@ -252,7 +252,7 @@
     "./src/interactions/shape-edit-transaction.mjs": "6e2605bbaa9894e3a130baff1622f7ee92b46a2e0a1eef47329b8892b859d6b1",
     "./src/layout.mjs": "237a5529c726300291cde7fbed0b7ecc98ae545748aff23e31528aecbc1beea0",
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
-    "./src/app-update.mjs": "40821c4bbf54ff7d98a4207ff0afc097a86936f58040516c14dc03f74dbf510f",
+    "./src/app-update.mjs": "7ca124bb84df22bd4902d4d96c7901e405c990f9bb0595014fcd5aaf89b50ea7",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
     "./src/main.mjs": "2ec4ad986e0f6bf37843d28ba1b2784a62034073568f137dc971e05f30437976",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
@@ -261,7 +261,7 @@
     "./src/manual-biomes/desert-seam-invalidation.mjs": "cd770029752082cdd1ea47d8d5d73d97859c5b9b8d9a5008c4d7cf178994607a",
     "./src/manual-biomes/exploration-ink.mjs": "9c16ec1277c762a328331e17d7aab61a55152dc601844473a8a7a85577dac5ed",
     "./src/manual-biomes/m2-runtime-bridge.mjs": "a1dd4d5e32c195c7aa4dfd3f57fa20cfff887195212cc1d30d8820673b8aedec",
-    "./src/manual-biomes/m5-offline-registration.mjs": "bee2e3a1c21036745a463536a105d4a07818fabfd2e816e9f37e2604c99dae4b",
+    "./src/manual-biomes/m5-offline-registration.mjs": "dd42b7b74444ce688a0246a7ae492f3ced66073ecdd32188a8636c050156e001",
     "./src/manual-biomes/mountain-pass-v5.mjs": "6202dd29472d126229fa5aec381c14a3947b5478efe8a08883d59ae5d566c147",
     "./src/manual-biomes/v6-balanced-biomes.mjs": "8ecae4258684b63148ca548af8f27771fa70fe6a0e84a55ac1ef75ff43f182cc",
     "./src/manual-biomes/overland-walk-m5.mjs": "aba7a6568996f431fd984c5f090a03ce14534aabd4792d69198ba99ddccba3d7",
@@ -341,7 +341,7 @@
     "./src/west-gallery-world.mjs": "916fcf64548e967102a2c57c5109b6629eb0cddd563fc1e0159fc5d781f9f8de",
     "./src/world-atmosphere/canopy-bridges.mjs": "bbe5465cccd8b5e70dbd9cc344f2ff71233df31d0f4ccc4abf14e6c949106dd2",
     "./styles.css": "326493a23e278ff7f3c38dcbfad7666bb9ef3a90c3a05e649c60a57007171898",
-    "./sw-m5.js": "10f44d9c7762f4022d8c1bdf3deb89e249ff4efdca6dfe88c4e9c8496831a53b",
+    "./sw-m5.js": "a23653a748cb49f83c0be0201ecda7e3b17de763d073c4c8b7e2c18c19bfe41a",
     "./src/creative-integration/creative-catalog.mjs": "72a76b50e101ae5bea974abc6777c8bb4f764721c77de043f093b66979bbe797",
     "./src/creative-integration/creative-history.mjs": "e37efc8732e8da68af46977db0e4f4b6ade09bd5fc4123b5e08a97d71ff43585",
     "./src/creative-integration/creative-voxel-batch.mjs": "4f917f319753bae1f90ab179d1a7b4829379fa874d2f7d7ec5f7da57081c0548",
@@ -372,6 +372,6 @@
     "./src/navigation00/observed-landmarks.mjs": "db1ebda10858507e499d970389fcdeb1cf1817b08691fbb4a0350d254b1948ba",
     "./src/navigation00/observed-navigation.mjs": "367f9eda050601e47c517c96cdd1b692ea1d90788120a5192cd7ec90645b258d",
     "./src/nonblock/stage-offline.mjs": "da998c5e067defd0d9c1b3678ed56bfeba00230e6358328fc095ce72de7597c5",
-    "./sw-nonblock-stage.js": "1011f0182d667e303a9233fd305125808cdb058a4b5d50a5a7cc4e5bee62c5dd"
+    "./sw-nonblock-stage.js": "526a7be6fa173a4b689cf76e6d6fb18d33caba753513a05841542ce06cf0cf25"
   }
 }

@@ -6,7 +6,7 @@ import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import path from 'node:path';
 import {chromium} from 'playwright';
 const prior=path.resolve('prior-production'),current=process.cwd(),prefix='/Mythwrought/';
-const oldRelease='20261127-veilreach-v1',release='20261127-unified-veilreach-v1',profile='mythwrought-five-surface-regions-mountain-v8',latestProfile='mythwrought-upper-veilreach-v1';
+const oldRelease='20261128-veilreach-launch-v2',release='20261128-unified-veilreach-v2',profile='mythwrought-five-surface-regions-mountain-v8',latestProfile='mythwrought-upper-veilreach-v1';
 const assetPaths=async root=>Object.keys(JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8')).assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>p==='./'?prefix:prefix+p.slice(2)).sort();
 const [priorPaths,currentPaths]=await Promise.all([assetPaths(prior),assetPaths(current)]);
 assert.equal(new Set(priorPaths).size,priorPaths.length);assert.equal(new Set(currentPaths).size,currentPaths.length);

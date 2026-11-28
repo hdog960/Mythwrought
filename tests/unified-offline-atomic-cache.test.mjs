@@ -8,9 +8,9 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261127-unified-veilreach-v1';
+const RELEASE='20261128-unified-veilreach-v2';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261127-veilreach-v1';
+const PREVIOUS='mythwrought-m5-shell-20261128-veilreach-launch-v2';
 const ROOT='https://example.test/Mythwrought/';
 const staged=JSON.parse(readFileSync(new URL('../nonblock-stage-assets.json',import.meta.url),'utf8'));
 const expectedPublic=Object.keys(staged.assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>new URL(p,ROOT).href).sort();

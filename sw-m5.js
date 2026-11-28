@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261127-unified-veilreach-v1';
-const ASSET_RELEASE='20261127-unified-veilreach-v1';
+const CACHE_NAME=CACHE_PREFIX+'20261128-unified-veilreach-v2';
+const ASSET_RELEASE='20261128-unified-veilreach-v2';
 const SOURCE_ASSETS=[
   "./src/veilreach/generation.mjs",
   "./src/veilreach/source.mjs",
@@ -495,12 +495,11 @@ self.addEventListener('fetch',event=>{
       return await cached();
     })());return;
   }
-  // Only exact release-pinned module/CSS URLs are mapped to cached source
+  // All release-pinned game modules and CSS map to the same cache bank
   // for offline use; other query requests bypass this worker.
   const pinned=url.searchParams.size===1&&
     url.searchParams.get('mw-release')===ASSET_RELEASE&&
-    (canonical.href===new URL('styles.css',root).href||
-      canonical.href===new URL('src/main.mjs',root).href);
+    (canonical.pathname.endsWith('.mjs')||canonical.href===new URL('styles.css',root).href);
   if(url.search&&!pinned)return;
   if(!allowed.has(canonical.href))return;
   event.respondWith((async()=>{

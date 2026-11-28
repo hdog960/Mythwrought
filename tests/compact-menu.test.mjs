@@ -30,7 +30,7 @@ test('runtime generated legacy and palette controls remain in Advanced',()=>{
   assert.ok(src.includes("document.getElementById('advancedMenu').open=false"));
 });
 test('release ID matches HTML, updater and existing worker cache',()=>{
-  const release='20261127-unified-veilreach-v1';
+  const release='20261128-unified-veilreach-v2';
   assert.ok(html.includes('data-mw-release="'+release+'"'));
   assert.ok(html.includes('styles.css?mw-release='+release));
   assert.ok(html.includes('src/main.mjs?mw-release='+release));

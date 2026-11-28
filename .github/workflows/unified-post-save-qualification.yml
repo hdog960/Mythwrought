@@ -15,7 +15,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
+          ref: 8400d13a6f5521901cbf0909a0c4f6e2e79c1629
           path: prior-production
           persist-credentials: false
       - uses: actions/checkout@v4
@@ -51,7 +51,7 @@ jobs:
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
-          ref: 222b0a8acd736a6502d85c5797f77f0d4f38a861
+          ref: 8400d13a6f5521901cbf0909a0c4f6e2e79c1629
           path: prior-production
           persist-credentials: false
       - uses: actions/setup-node@v4

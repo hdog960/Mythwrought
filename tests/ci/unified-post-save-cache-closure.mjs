@@ -5,14 +5,16 @@ import {resolve,posix} from 'node:path';
 import {buildStageCacheManifest} from '../../scripts/ci/build-stage-cache-manifest.mjs';
 const production=resolve('prior-production'),history=resolve('prior-history'),root=process.cwd();
 const read=(r,p)=>readFile(resolve(r,p),'utf8');
-for(const [dir,sha] of [[production,'222b0a8acd736a6502d85c5797f77f0d4f38a861'],[history,'f8b0dc6dbbc68f375c24dc7be7af044da08da4ee']])
+for(const [dir,sha] of [[production,'8400d13a6f5521901cbf0909a0c4f6e2e79c1629'],[history,'f8b0dc6dbbc68f375c24dc7be7af044da08da4ee']])
  assert.equal(execFileSync('git',['-C',dir,'rev-parse','HEAD'],{encoding:'utf8'}).trim(),sha);
 const manifests=await Promise.all([production,history,root].map(async r=>{
- const m=JSON.parse(await read(r,'nonblock-stage-assets.json'));assert.deepEqual(m,await buildStageCacheManifest(r));return m;
+ const m=JSON.parse(await read(r,'nonblock-stage-assets.json'));
+ const builder=r===root?buildStageCacheManifest:(await import(resolve(r,'scripts/ci/build-stage-cache-manifest.mjs'))).buildStageCacheManifest;
+ assert.deepEqual(m,await builder(r));return m;
 }));
 const [old,qualified,current]=manifests;
 const union=new Set([...Object.keys(old.assets),...Object.keys(qualified.assets)]);
-assert.equal(current.version,'20261127-v50');
+assert.equal(current.version,'20261128-v51');
 assert.deepEqual(Object.keys(current.assets).sort(),[...union].sort());
 assert.equal(current.assets['./'],current.assets['./index.html']);
 for(const p of ['src/voxel.mjs','src/manual-biomes/m2-runtime-bridge.mjs','src/mining-trace.mjs'])
