@@ -10,13 +10,13 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 | Bison | herd, grazing, defense | Peer-based herd and actual grass grazing native PASS session15; live integration pending |
 | Badger | forage, burrow | Incomplete |
 | Meadowlark | flight, forage, landing | Incomplete |
-| Honeybee | flight, pollination, hive | Incomplete |
+| Honeybee | flight, pollination, hive | Actual blossom approach/contact and owner-mediated pollen transfer authored; hive owner/native/live pending |
 | Golden Antelope | evasion, herd | Incomplete |
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
 | Dire Hound | pack, lunge, bite | Incomplete |
-| Gravehand | concealment, emergence, restraint | Incomplete |
+| Gravehand | concealment, emergence, restraint | Existing physical refuge and emergence traversal authored; native/live and restraint owner pending |
 
 ## desert
 Native isolated pursuit, hop, pincer, night gate.
@@ -26,7 +26,7 @@ Native isolated pursuit, hop, pincer, night gate.
 | Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
-| Oasis Ibis | wade, forage, flight | Incomplete |
+| Oasis Ibis | wade, forage, flight | Supported shallow-water movement authored; native/live pending |
 | Dunewalker | herd, six-legged-walk | Incomplete |
 | Mummy | pursuit, melee | Incomplete |
 | Giant Scorpion | pincers, tail, venom | Incomplete |
@@ -44,7 +44,7 @@ Native isolated charge, heavy melee, night flight.
 | Ermine | evasion, explore | Incomplete |
 | Aurora Wisp | float, illumination | Incomplete |
 | Snowdrifter | walk, roll | Incomplete |
-| Yeti | charge, heavy-melee, ice-projectile | Charge qualified; ranged windup/launch authored, actual AV pool fixture impact passed; native/live pending |
+| Yeti | charge, heavy-melee, ice-projectile | Charge qualified; ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Ice Golem | heavy-melee | Incomplete |
 | Rime Widow | crawl, concealment, freezing-venom | Incomplete |
 | Blizzard Drake | flight, swoop, freezing-breath | Incomplete |
@@ -72,14 +72,14 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Yak | herd, grazing, domestication | Original candidate taming native PASS session16; live pending |
-| Golden Eagle | soar, perch | Physical approach/perch/departure authored; native/live pending |
+| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; live pending |
 | Pika | gather, evasion, shelter | Incomplete |
-| Skyray | glide, flight | Original movement glide authored; native/live pending |
+| Skyray | glide, flight | Original movement glide native PASS session17; live pending |
 | Griffin | tame, flight, aerial-mount, defense | Aerial mounting still blocked pending movement owner; candidate tame interface authored |
-| Cyclops | club, rock-projectile | Ranged windup/launch authored, actual AV pool fixture impact passed; native/live pending |
+| Cyclops | club, rock-projectile | Ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
 | Avalanche Beast | charge | Isolated charge qualified; habitat/live integration pending |
-| Storm Elemental | float, electric-projectile | Ranged windup/launch authored, actual AV pool fixture impact passed; native/live pending |
+| Storm Elemental | float, electric-projectile | Ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Cliff Reaver | climb, leap | Isolated wall climb qualified; leap/live integration pending |
 
 ## cave

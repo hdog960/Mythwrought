@@ -16,7 +16,7 @@ export function createFixtureDamageOwner(world,checkpoint,{worldId,profileId,rec
   const target=engine.get(r.targetId),source=engine.get(r.sourceId);
   if(!target)return null;
   const before=target.health,beforeRevision=revision,expectedDelta=before-Math.max(0,before-r.amount);
-  const accepted=r.expectedRevision===revision&&source&&['active','idle'].includes(source.state)&&['active','idle'].includes(target.state)&&expectedDelta>0&&expectedDelta<=r.amount&&engine.damage(r.targetId,r.amount,{recoverable:recoverable.has(r.targetId)})===true;
+  const accepted=r.expectedRevision===revision&&source&&['active','idle'].includes(source.state)&&['active','idle'].includes(target.state)&&expectedDelta>0&&expectedDelta<=r.amount+4*Number.EPSILON*Math.max(1,before,r.amount)&&engine.damage(r.targetId,r.amount,{recoverable:recoverable.has(r.targetId)})===true;
   const afterEntity=engine.get(r.targetId),after=accepted?(afterEntity?.health??0):before;
   const terminal=accepted?(!afterEntity?'removed':afterEntity.state==='downed'?'downed':'none'):'none';
   if(accepted)revision++;

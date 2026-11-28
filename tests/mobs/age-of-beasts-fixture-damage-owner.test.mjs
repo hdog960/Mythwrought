@@ -15,3 +15,11 @@ test('fixture owner commits actual original engine HP with revision and exact tr
  const down=owner.commit({...req,transactionId:'tx3',targetId:other,amount:100000,expectedRevision:2});assert.equal(down.receipt.terminal,'downed');assert.equal(down.receipt.permanentDefeat,false);
  assert.deepEqual(e.checkpoint(),checkpoint);assert.equal(owner.revision(),3);
 });
+
+test('fractional committed delta matches exact original HP and bounded AV rounding',()=>{
+ const w={volume:()=> 'clear',grounded:()=>true,residentAt:()=>true,revision:()=>0},e=new MobEngine(w,42,{maxEntities:32,maxActive:8});
+ const source=e.spawn('wolf',[0,0,0]),target=e.spawn('cow',[2,0,0]),owner=createFixtureDamageOwner(w,e.checkpoint(),{worldId:'world',profileId:'profile'});
+ const r={version:1,worldId:'world',profileId:'profile',transactionId:'frac',actionId:'act',sourceId:source,targetId:target,definitionId:'av:claw',fixture:true,amount:.1,expectedRevision:0};
+ const a=owner.commit(r);assert.ok(a.committed&&a.receipt.accepted);assert.equal(a.receipt.applied,a.receipt.before-a.receipt.after);
+ assert.ok(Math.abs(a.receipt.applied-.1)<=4*Number.EPSILON*Math.max(1,a.receipt.before,.1));assert.equal(owner.commit(r),a);assert.equal(owner.revision(),1);
+});
