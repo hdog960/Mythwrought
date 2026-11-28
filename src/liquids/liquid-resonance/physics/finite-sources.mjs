@@ -11,7 +11,8 @@ export function createResonanceSources({engine,sources=[],authorize,
   if(!int(maxSources,1,4096)||!int(maxVisits,1,4096)||!int(maxUnitsPerStep,1,32768)||
     !Array.isArray(sources)||sources.length>maxSources) throw new RangeError('Invalid source budget');
   const ids=new Set(),anchors=new Set(),outlets=new Set();
-  const config=freeze(sources.map(d=>{
+  const config=freeze(Array.from({length:sources.length},(_,i)=>{
+    const d=sources[i];
     if(!d||!Array.isArray(d.point)||d.point.length!==3||!Number.isSafeInteger(d.point[0])||
       !int(d.point[1],-210,256)||!Number.isSafeInteger(d.point[2])||!int(d.rate,1,8)||!int(d.target,1,8))
       throw new TypeError('Invalid outlet descriptor');
@@ -22,7 +23,7 @@ export function createResonanceSources({engine,sources=[],authorize,
   }));
   const signature=JSON.stringify({maxSources,maxVisits,maxUnitsPerStep,config});
   const stores=config.map(d=>d.store);
-  let cursor=0,active=false;
+  let cursor=0,active=false,parked=null;
   if(snapshot!==null){
     if(snapshot?.version!==1||snapshot.signature!==signature||!int(snapshot.cursor,0,Math.max(0,config.length-1))||
       !Array.isArray(snapshot.stores)||snapshot.stores.length!==stores.length) throw new TypeError('Invalid reservoir snapshot');
@@ -40,6 +41,27 @@ export function createResonanceSources({engine,sources=[],authorize,
     if(active)throw new Error('Cannot save during source step');
     return {version:1,signature,cursor,stores:[...stores]};
   }
+  // A transient parking token prevents this scheduler from injecting into an
+  // obsolete engine during a host-owned streaming/adoption transaction.
+  // The host retains its exclusive lease and authenticates the next engine;
+  // this token is not durable provenance and must never be serialized.
+  function park(){
+    if(active)throw new Error('Cannot park during source step');
+    if(parked)return null;
+    const state=save();
+    parked=freeze({snapshot:freeze({...state,stores:freeze(state.stores)})});
+    // Drop obsolete bindings while parked, including authorization closures.
+    engine=null;authorize=null;
+    return parked;
+  }
+  function resume(token,{engine:nextEngine,authorize:nextAuthorize}={}){
+    if(active)throw new Error('Cannot resume during source step');
+    if(!parked||token!==parked)return false;
+    if(typeof nextEngine?.getCell!=='function'||typeof nextEngine?.insert!=='function'||
+      typeof nextAuthorize!=='function')throw new TypeError('Explicit replacement core and authorization required');
+    engine=nextEngine;authorize=nextAuthorize;parked=null;
+    return true;
+  }
   // Host must exclusively own these stores, persist the core and this snapshot
   // atomically, and supply pure stable authorization (source owner, load,
   // containment, outlet permission). Never mount a second scheduler for a store.
@@ -55,6 +77,7 @@ export function createResonanceSources({engine,sources=[],authorize,
   // dirty/accounting handoff once; never replay it as a set of new insertions.
   function step(){
     if(active)throw new Error('Reentrant source step');
+    if(parked)throw new Error('Source scheduler is parked');
     active=true;
     let visited=0,units=0,energy=0;
     const changed=[];
@@ -85,5 +108,5 @@ export function createResonanceSources({engine,sources=[],authorize,
       throw error;
     }finally{active=false;}
   }
-  return freeze({step,save});
+  return freeze({step,save,park,resume});
 }
