@@ -19,8 +19,10 @@ function cellShape(c){
     throw new TypeError('Invalid persisted quantities');
 }
 function snapshotShape(s,max){
-  shape(s,['version','cells','pending']);
+  const hasBlocked=s&&Object.hasOwn(s,'capacityBlocked');
+  shape(s,hasBlocked?['version','cells','pending','capacityBlocked']:['version','cells','pending']);
   list(s.cells,max).forEach(cellShape);list(s.pending,s.cells.length);
+  if(hasBlocked)list(s.capacityBlocked,s.cells.length-s.pending.length);
 }
 
 // Policy identity is supplied by the integration owner and must change when

@@ -7,7 +7,8 @@ const integer=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max;
 const point=c=>[c.x,c.y,c.z];
 const valid=(x,y,z)=>Number.isSafeInteger(x)&&integer(y,-210,256)&&Number.isSafeInteger(z);
 const immutableSnapshot=s=>Object.freeze({version:s.version,cells:Object.freeze(s.cells),
-  pending:Object.freeze(s.pending.map(p=>Object.freeze(p)))});
+  pending:Object.freeze(s.pending.map(p=>Object.freeze(p))),
+  ...(s.capacityBlocked?{capacityBlocked:Object.freeze(s.capacityBlocked.map(p=>Object.freeze(p)))}:{})});
 
 // Frozen entries are conserved water records, NOT another liquid identity or
 // a block ID. Only a host-confirmed, full cell may transition. The host owns

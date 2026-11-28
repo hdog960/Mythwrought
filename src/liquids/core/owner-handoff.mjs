@@ -7,8 +7,13 @@ export const LIQUID_OWNER_HANDOFF_VERSION=1;
 const int=(n,lo,hi)=>Number.isSafeInteger(n)&&n>=lo&&n<=hi;
 const point=c=>[c.x,c.y,c.z];
 const pointKey=p=>p.join(',');
-const snapshot=(cells,pending)=>Object.freeze({version:LIQUID_CONTRACT_VERSION,
-  cells:Object.freeze(cells),pending:Object.freeze(pending.map(p=>Object.freeze([...p])))});
+const freezeQueue=q=>Object.freeze(q.map(p=>Object.freeze([...p])));
+const snapshot=(cells,pending,capacityBlocked=[])=>Object.freeze({version:LIQUID_CONTRACT_VERSION,
+  cells:Object.freeze(cells),pending:freezeQueue(pending),
+  ...(capacityBlocked.length?{capacityBlocked:freezeQueue(capacityBlocked)}:{})});
+const validQueues=s=>Array.isArray(s.pending)&&
+  (!Object.hasOwn(s,'capacityBlocked')||Array.isArray(s.capacityBlocked))&&
+  s.pending.length+(s.capacityBlocked?.length??0)<=s.cells.length;
 function ownerDescriptor(owner){
   if(!owner||!Number.isSafeInteger(owner.cx)||!Number.isSafeInteger(owner.cz))
     throw new TypeError('Invalid liquid owner');
@@ -47,11 +52,11 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
   createLiquidEngine({...config,maxCells});
   function checked(s,limit){
     if(!s||!Array.isArray(s.cells)||s.cells.length>limit||
-       !Array.isArray(s.pending)||s.pending.length>s.cells.length)
+       !validQueues(s))
       throw new RangeError('Invalid or over-budget owner snapshot');
     const e=createLiquidEngine({...config,maxCells:Math.max(1,limit),snapshot:s});
     const canonical=e.save();
-    return snapshot(canonical.cells,canonical.pending);
+    return snapshot(canonical.cells,canonical.pending,canonical.capacityBlocked);
   }
   function validate(state){
     if(!state||state.version!==LIQUID_OWNER_HANDOFF_VERSION||
@@ -60,8 +65,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
     // Bound total raw work before reconstructing any dormant engine records.
     let total=0;
     for(const shard of state.parked){
-      if(!shard||!Array.isArray(shard.snapshot?.cells)||!Array.isArray(shard.snapshot?.pending)||
-         shard.snapshot.pending.length>shard.snapshot.cells.length)
+      if(!shard||!Array.isArray(shard.snapshot?.cells)||!validQueues(shard.snapshot))
         throw new TypeError('Malformed parked owner shard');
       total+=shard.snapshot.cells.length;
       if(total>maxParkedCells)throw new RangeError('Parked liquid budget exceeded');
@@ -91,14 +95,16 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       if(other!==k&&(isOwnerLoaded(shard.owner)!==false||
         shard.snapshot.cells.some(c=>isLoaded(...point(c))!==false)))return null;
     }
-    let cells,pending,moved;
+    let cells,pending,moved,blocked=resident.capacityBlocked??[];
     if(mode==='detach'){
       if(parked.has(k)||parked.size>=maxParkedOwners)return null;
       moved=resident.cells.filter(c=>belongs(c,b));
       if(total+moved.length>maxParkedCells||moved.some(c=>isLoaded(...point(c))!==false))return null;
       const keys=new Set(moved.map(c=>pointKey(point(c))));
       const parkedPending=resident.pending.filter(p=>keys.has(pointKey(p)));
-      parked.set(k,Object.freeze({owner:b.owner,snapshot:snapshot(moved,parkedPending)}));
+      const parkedBlocked=blocked.filter(p=>keys.has(pointKey(p)));
+      parked.set(k,Object.freeze({owner:b.owner,snapshot:snapshot(moved,parkedPending,parkedBlocked)}));
+      blocked=blocked.filter(p=>!keys.has(pointKey(p)));
       cells=resident.cells.filter(c=>!keys.has(pointKey(point(c))));
       pending=resident.pending.filter(p=>!keys.has(pointKey(p)));
     }else{
@@ -113,8 +119,10 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       pending=[...resident.pending,...shard.snapshot.pending];
       parked.delete(k);
     }
-    const queued=new Set(pending.map(pointKey));
-    function enqueue(c){const p=point(c),id=pointKey(p);if(!queued.has(id)){queued.add(id);pending.push(p);return true;}return false;}
+    const queued=new Set(pending.map(pointKey)),dormant=new Map(blocked.map(p=>[pointKey(p),p]));
+    function enqueue(c){const p=point(c),id=pointKey(p);if(!queued.has(id)){
+      dormant.delete(id);queued.add(id);pending.push(p);return true;
+    }return false;}
     if(mode==='attach')for(const c of moved)enqueue(c);
     // Wake retained cells on the exact six physical faces, even if an attached
     // owner contains no liquid. Do not enqueue diagonal/edge-only contacts.
@@ -122,7 +130,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
     for(const c of cells)if(faces(c,b)&&isLoaded(...point(c))===true&&isOpen(...point(c))===true){
       if(enqueue(c))boundaryWoken++;
     }
-    const next=Object.freeze({version:LIQUID_OWNER_HANDOFF_VERSION,resident:snapshot(cells,pending),
+    const next=Object.freeze({version:LIQUID_OWNER_HANDOFF_VERSION,resident:snapshot(cells,pending,[...dormant.values()]),
       parked:Object.freeze([...parked.values()])});
     return Object.freeze({state:next,owner:b.owner,mode,movedCells:moved.length,
       movedUnits:moved.reduce((sum,c)=>sum+c.units,0),boundaryWoken,

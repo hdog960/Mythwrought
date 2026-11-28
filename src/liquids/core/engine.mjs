@@ -10,7 +10,7 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   const requirePoint=(x,y,z)=>{if(!valid(x,y,z))throw new RangeError("Outside physical cell envelope");};
   const key=(x,y,z)=>`${x},${y},${z}`;
   const offsets=[[0,-1,0],[1,0,0],[0,0,1],[-1,0,0],[0,0,-1],[0,1,0]];
-  const defs=new Map(),rules=new Map(),cells=new Map(),pending=new Map();
+  const defs=new Map(),rules=new Map(),cells=new Map(),pending=new Map(),capacityBlocked=new Map();
   for(const d of definitions){
     if(!d||!LIQUID_IDS.includes(d.id)||defs.has(d.id)||!integer(d.gravityLimit,0,CELL_CAPACITY)||!integer(d.lateralLimit,0,CELL_CAPACITY))throw new TypeError("Invalid or duplicate liquid definition");
     defs.set(d.id,Object.freeze({id:d.id,gravityLimit:d.gravityLimit,lateralLimit:d.lateralLimit}));
@@ -50,7 +50,10 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   function enqueue(x,y,z){
     if(!valid(x,y,z))return;
     const k=key(x,y,z);
-    if(cells.has(k)&&!pending.has(k))pending.set(k,[x,y,z]);
+    if(cells.has(k)&&!pending.has(k)){
+      capacityBlocked.delete(k);
+      pending.set(k,[x,y,z]);
+    }
   }
   function wake(x,y,z){
     requirePoint(x,y,z);
@@ -60,7 +63,7 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   function write(x,y,z,c){
     const k=key(x,y,z);
     if(c)cells.set(k,c);
-    else {cells.delete(k);pending.delete(k);}
+    else {cells.delete(k);pending.delete(k);capacityBlocked.delete(k);}
     if(dirty)dirty.set(k,[x,y,z]);
     wake(x,y,z);
   }
@@ -90,7 +93,9 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
     if(!c||!limit||!open(nx,ny,nz)||d&&d.id!==c.id)return 0;
     const du=d?.units??0;
     const n=Math.min(c.units,CELL_CAPACITY-du,limit,lateral?Math.floor((c.units-du)/2):CELL_CAPACITY);
-    if(n<=0||!d&&cells.size>=maxCells&&n!==c.units)return 0;
+    if(n<=0)return 0;
+    // Negative sentinel: otherwise eligible split needs a resident slot.
+    if(!d&&cells.size>=maxCells&&n!==c.units)return -1;
     const [taken,left]=split(c,n),merged=combine(d?.quantities??{},taken);
     if(!merged)return 0;
     const nextOrigin=n===c.units?null:record(x,y,z,c.id,c.units-n,left);
@@ -170,27 +175,36 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
     if(dirty)throw new Error("Reentrant tick");
     dirty=new Map();
     let visited=0,moved=0;
-    const budget=Math.min(limit,pending.size);
+    const runnable=()=>pending.size+(cells.size<maxCells?capacityBlocked.size:0);
+    const budget=Math.min(limit,runnable());
     try{
-      while(visited<budget&&pending.size){
-        const [k,[x,y,z]]=pending.entries().next().value;
-        pending.delete(k);visited++;
+      while(visited<budget&&runnable()){
+        // Retry the oldest dormant cell when a slot is available. No scan,
+        // mass wake or visits to dormant cells while the cap is still full.
+        const queue=cells.size<maxCells&&capacityBlocked.size?capacityBlocked:pending;
+        const [k,[x,y,z]]=queue.entries().next().value;
+        queue.delete(k);visited++;
         let c=getCell(x,y,z);
         if(!c||!open(x,y,z))continue;
         const d=defs.get(c.id);
-        moved+=transfer(x,y,z,x,y-1,z,d.gravityLimit,false);
+        const gravity=transfer(x,y,z,x,y-1,z,d.gravityLimit,false);
+        let blocked=gravity<0;
+        if(gravity>0)moved+=gravity;
         c=getCell(x,y,z);
         if(!c)continue;
         const below=getCell(x,y-1,z);
-        if(d.gravityLimit>0&&open(x,y-1,z)&&(!below||below.id===c.id&&below.units<CELL_CAPACITY))continue;
-        let lateralRemaining=d.lateralLimit;
-        for(const [dx,,dz] of offsets.slice(1,5)){
-          if(!lateralRemaining||!getCell(x,y,z))break;
-          const n=transfer(x,y,z,x+dx,y,z+dz,lateralRemaining,true);
-          lateralRemaining-=n;moved+=n;
+        if(!(d.gravityLimit>0&&open(x,y-1,z)&&(!below||below.id===c.id&&below.units<CELL_CAPACITY))){
+          let lateralRemaining=d.lateralLimit;
+          for(const [dx,,dz] of offsets.slice(1,5)){
+            if(!lateralRemaining||!getCell(x,y,z))break;
+            const n=transfer(x,y,z,x+dx,y,z+dz,lateralRemaining,true);
+            if(n<0)blocked=true;
+            else {lateralRemaining-=n;moved+=n;}
+          }
         }
+        if(blocked&&cells.has(k)&&!pending.has(k))capacityBlocked.set(k,[x,y,z]);
       }
-      return Object.freeze({visited,moved,changed:Object.freeze([...dirty.values()].map(p=>Object.freeze(p))),pending:pending.size});
+      return Object.freeze({visited,moved,changed:Object.freeze([...dirty.values()].map(p=>Object.freeze(p))),pending:runnable()});
     }finally{dirty=null;}
   }
   function samplePoint(x,y,z){
@@ -272,7 +286,9 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
     return receipt;
   }
   function save(){
-    return {version:LIQUID_CONTRACT_VERSION,cells:[...cells.values()],pending:[...pending.values()].map(p=>[...p])};
+    const state={version:LIQUID_CONTRACT_VERSION,cells:[...cells.values()],pending:[...pending.values()].map(p=>[...p])};
+    if(capacityBlocked.size)state.capacityBlocked=[...capacityBlocked.values()].map(p=>[...p]);
+    return state;
   }
   if(snapshot!==null){
     if(!snapshot||snapshot.version!==LIQUID_CONTRACT_VERSION||!Array.isArray(snapshot.cells)||!Array.isArray(snapshot.pending)||snapshot.cells.length>maxCells||snapshot.pending.length>snapshot.cells.length)throw new TypeError("Invalid liquid snapshot");
@@ -282,11 +298,19 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
       if(cells.has(k))throw new TypeError("Duplicate liquid cell");
       cells.set(k,row);
     }
+    const dormant=Object.hasOwn(snapshot,"capacityBlocked")?snapshot.capacityBlocked:[];
+    if(!Array.isArray(dormant)||snapshot.pending.length+dormant.length>snapshot.cells.length)throw new TypeError("Invalid capacity retry queue");
     for(const p of snapshot.pending){
       if(!Array.isArray(p)||p.length!==3||!valid(...p))throw new TypeError("Invalid pending cell");
       const k=key(...p);
       if(!cells.has(k)||pending.has(k))throw new TypeError("Invalid pending queue");
       pending.set(k,[...p]);
+    }
+    for(const p of dormant){
+      if(!Array.isArray(p)||p.length!==3||!valid(...p))throw new TypeError("Invalid capacity retry cell");
+      const k=key(...p);
+      if(!cells.has(k)||pending.has(k)||capacityBlocked.has(k))throw new TypeError("Invalid capacity retry queue");
+      capacityBlocked.set(k,[...p]);
     }
   }
   return Object.freeze({insert,extract,getCell,wake,tick,samplePoint,proposeReaction,planDisplacement,commitDisplacement,planReaction,commitReaction,save});

@@ -22,12 +22,17 @@ function run(name,count,maxCells,idAt,openAt=()=>true){
   globalThis.gc?.();const retainedHeap=process.memoryUsage().heapUsed;samples.sort((a,b)=>a-b);
   return {name,count,maxCells,steps:samples.length,visited,moved,peakChanged,peakCalls,p50ms:ms(samples[159]),p95ms:ms(samples[303]),maxMs:ms(samples.at(-1)),sampledHeapGrowthBytes:peakHeap-startHeap,postGcHeapDeltaBytes:retainedHeap-startHeap,resident:snap.cells.length,pending:snap.pending.length,snapshotChars:JSON.stringify(snap).length,volume:initial[0],trace:initial[1]};
 }
-// Demonstrate the exact current cap-stall behavior, without calling it a pass gate.
+// Acceptance probe for the previously observed cap-stall defect.
 function capProbe(){
-  const e=createLiquidEngine({definitions,maxCells:2,isLoaded:()=>true,isOpen:()=>true});
-  e.insert(0,0,0,'lava',8);e.insert(100,0,0,'lava',8);e.tick();const pendingAtCap=e.save().pending.length;
-  e.extract(100,0,0,8);const r=e.tick();const stalled=e.getCell(0,0,0)?.units===8&&r.moved===0;
-  e.wake(0,0,0);const afterWake=e.tick();return {pendingAtCap,stalledAfterDistantCapacityRelease:stalled,movedAfterExplicitWake:afterWake.moved};
+  let callbacks=0;
+  const e=createLiquidEngine({definitions,maxCells:2,isLoaded:()=>true,isOpen:()=>{callbacks++;return true;}});
+  e.insert(0,0,0,'lava',8);e.insert(100,0,0,'lava',8);e.tick();
+  const blockedAtCap=e.save().capacityBlocked?.length??0;
+  assert.equal(blockedAtCap,2);callbacks=0;
+  const idle=e.tick();assert.equal(idle.visited,0);assert.equal(callbacks,0);
+  e.extract(100,0,0,8);const resumed=e.tick(1);
+  assert.equal(resumed.moved,2);assert.equal(totals(e)[0],8);
+  return {blockedAtCap,idleVisitsAtCap:idle.visited,movedAfterDistantCapacityRelease:resumed.moved};
 }
 console.log(JSON.stringify({node:process.version,platform:process.platform,arch:process.arch,gcExposed:typeof globalThis.gc==='function',
   scenarios:[run('mixed-sparse',1024,8192,i=>LIQUID_IDS[i%5]),run('water-at-resident-cap',8192,8192,()=> 'water'),run('sealed-floor',1024,8192,()=> 'water',(x,y,z)=>y===256-(z/3)%16&&x%3===0&&z%3===0)],capProbe:capProbe()},null,2));
