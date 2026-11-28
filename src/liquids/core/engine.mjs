@@ -2,15 +2,16 @@
 export const LIQUID_IDS=Object.freeze(["water","lava","acid","amber-sap","liquid-resonance"]);
 export const CELL_CAPACITY=8;
 export const LIQUID_CONTRACT_VERSION=1;
-export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules=[],maxCells=8192,maxVisits=256,snapshot=null}={}){
+export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules=[],maxCells=8192,maxVisits=256,lateralOrder="fixed",snapshot=null}={}){
   const integer=(v,min,max)=>Number.isSafeInteger(v)&&v>=min&&v<=max;
   if(typeof isLoaded!=="function"||typeof isOpen!=="function")throw new TypeError("Explicit loaded and passable cell callbacks required");
   if(!integer(maxCells,1,1000000)||!integer(maxVisits,1,4096))throw new RangeError("Invalid liquid budget");
+  if(!["fixed","rotating"].includes(lateralOrder))throw new TypeError("Invalid lateral order");
   const valid=(x,y,z)=>Number.isSafeInteger(x)&&Number.isSafeInteger(z)&&integer(y,-210,256);
   const requirePoint=(x,y,z)=>{if(!valid(x,y,z))throw new RangeError("Outside physical cell envelope");};
   const key=(x,y,z)=>`${x},${y},${z}`;
   const offsets=[[0,-1,0],[1,0,0],[0,0,1],[-1,0,0],[0,0,-1],[0,1,0]];
-  const defs=new Map(),rules=new Map(),cells=new Map(),pending=new Map(),capacityBlocked=new Map();
+  const defs=new Map(),rules=new Map(),cells=new Map(),pending=new Map(),capacityBlocked=new Map(),lateralPhases=new Map();
   for(const d of definitions){
     if(!d||!LIQUID_IDS.includes(d.id)||defs.has(d.id)||!integer(d.gravityLimit,0,CELL_CAPACITY)||!integer(d.lateralLimit,0,CELL_CAPACITY))throw new TypeError("Invalid or duplicate liquid definition");
     defs.set(d.id,Object.freeze({id:d.id,gravityLimit:d.gravityLimit,lateralLimit:d.lateralLimit}));
@@ -63,7 +64,7 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   function write(x,y,z,c){
     const k=key(x,y,z);
     if(c)cells.set(k,c);
-    else {cells.delete(k);pending.delete(k);capacityBlocked.delete(k);}
+    else {cells.delete(k);pending.delete(k);capacityBlocked.delete(k);lateralPhases.delete(k);}
     if(dirty)dirty.set(k,[x,y,z]);
     wake(x,y,z);
   }
@@ -195,11 +196,24 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
         const below=getCell(x,y-1,z);
         if(!(d.gravityLimit>0&&open(x,y-1,z)&&(!below||below.id===c.id&&below.units<CELL_CAPACITY))){
           let lateralRemaining=d.lateralLimit;
-          for(const [dx,,dz] of offsets.slice(1,5)){
+          const start=lateralOrder==="rotating"?(lateralPhases.get(k)?.[3]??0):0;
+          let served=false;
+          for(let i=0;i<4;i++){
             if(!lateralRemaining||!getCell(x,y,z))break;
+            const face=(start+i)%4,[dx,,dz]=offsets[face+1];
             const n=transfer(x,y,z,x+dx,y,z+dz,lateralRemaining,true);
             if(n<0)blocked=true;
-            else {lateralRemaining-=n;moved+=n;}
+            else {
+              lateralRemaining-=n;moved+=n;
+              // Rotate after the first successful face, not after idle visits.
+              // A lateral half-difference transfer cannot empty its origin.
+              if(n>0&&!served&&lateralOrder==="rotating"){
+                served=true;
+                const phase=(face+1)%4;
+                if(phase)lateralPhases.set(k,[x,y,z,phase]);
+                else lateralPhases.delete(k);
+              }
+            }
           }
         }
         if(blocked&&cells.has(k)&&!pending.has(k))capacityBlocked.set(k,[x,y,z]);
@@ -288,6 +302,7 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   function save(){
     const state={version:LIQUID_CONTRACT_VERSION,cells:[...cells.values()],pending:[...pending.values()].map(p=>[...p])};
     if(capacityBlocked.size)state.capacityBlocked=[...capacityBlocked.values()].map(p=>[...p]);
+    if(lateralPhases.size)state.lateralPhases=[...lateralPhases.values()].map(p=>[...p]);
     return state;
   }
   if(snapshot!==null){
@@ -297,6 +312,15 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
       const row=record(c.x,c.y,c.z,c.id,c.units,c.quantities),k=key(c.x,c.y,c.z);
       if(cells.has(k))throw new TypeError("Duplicate liquid cell");
       cells.set(k,row);
+    }
+    const phases=Object.hasOwn(snapshot,"lateralPhases")?snapshot.lateralPhases:[];
+    if(!Array.isArray(phases)||phases.length>snapshot.cells.length)throw new TypeError("Invalid lateral phases");
+    for(const p of phases){
+      if(!Array.isArray(p)||p.length!==4||!valid(p[0],p[1],p[2])||!integer(p[3],1,3))
+        throw new TypeError("Invalid lateral phase");
+      const k=key(p[0],p[1],p[2]);
+      if(!cells.has(k)||lateralPhases.has(k))throw new TypeError("Invalid lateral phase reference");
+      lateralPhases.set(k,[...p]);
     }
     const dormant=Object.hasOwn(snapshot,"capacityBlocked")?snapshot.capacityBlocked:[];
     if(!Array.isArray(dormant)||snapshot.pending.length+dormant.length>snapshot.cells.length)throw new TypeError("Invalid capacity retry queue");

@@ -8,12 +8,14 @@ const int=(n,lo,hi)=>Number.isSafeInteger(n)&&n>=lo&&n<=hi;
 const point=c=>[c.x,c.y,c.z];
 const pointKey=p=>p.join(',');
 const freezeQueue=q=>Object.freeze(q.map(p=>Object.freeze([...p])));
-const snapshot=(cells,pending,capacityBlocked=[])=>Object.freeze({version:LIQUID_CONTRACT_VERSION,
+const snapshot=(cells,pending,capacityBlocked=[],lateralPhases=[])=>Object.freeze({version:LIQUID_CONTRACT_VERSION,
   cells:Object.freeze(cells),pending:freezeQueue(pending),
-  ...(capacityBlocked.length?{capacityBlocked:freezeQueue(capacityBlocked)}:{})});
+  ...(capacityBlocked.length?{capacityBlocked:freezeQueue(capacityBlocked)}:{}),
+  ...(lateralPhases.length?{lateralPhases:freezeQueue(lateralPhases)}:{})});
 const validQueues=s=>Array.isArray(s.pending)&&
   (!Object.hasOwn(s,'capacityBlocked')||Array.isArray(s.capacityBlocked))&&
-  s.pending.length+(s.capacityBlocked?.length??0)<=s.cells.length;
+  s.pending.length+(s.capacityBlocked?.length??0)<=s.cells.length&&
+  (!Object.hasOwn(s,'lateralPhases')||Array.isArray(s.lateralPhases)&&s.lateralPhases.length<=s.cells.length);
 function ownerDescriptor(owner){
   if(!owner||!Number.isSafeInteger(owner.cx)||!Number.isSafeInteger(owner.cz))
     throw new TypeError('Invalid liquid owner');
@@ -56,7 +58,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       throw new RangeError('Invalid or over-budget owner snapshot');
     const e=createLiquidEngine({...config,maxCells:Math.max(1,limit),snapshot:s});
     const canonical=e.save();
-    return snapshot(canonical.cells,canonical.pending,canonical.capacityBlocked);
+    return snapshot(canonical.cells,canonical.pending,canonical.capacityBlocked,canonical.lateralPhases);
   }
   function validate(state){
     if(!state||state.version!==LIQUID_OWNER_HANDOFF_VERSION||
@@ -95,7 +97,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       if(other!==k&&(isOwnerLoaded(shard.owner)!==false||
         shard.snapshot.cells.some(c=>isLoaded(...point(c))!==false)))return null;
     }
-    let cells,pending,moved,blocked=resident.capacityBlocked??[];
+    let cells,pending,moved,blocked=resident.capacityBlocked??[],phases=resident.lateralPhases??[];
     if(mode==='detach'){
       if(parked.has(k)||parked.size>=maxParkedOwners)return null;
       moved=resident.cells.filter(c=>belongs(c,b));
@@ -103,7 +105,9 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       const keys=new Set(moved.map(c=>pointKey(point(c))));
       const parkedPending=resident.pending.filter(p=>keys.has(pointKey(p)));
       const parkedBlocked=blocked.filter(p=>keys.has(pointKey(p)));
-      parked.set(k,Object.freeze({owner:b.owner,snapshot:snapshot(moved,parkedPending,parkedBlocked)}));
+      const parkedPhases=phases.filter(p=>keys.has(pointKey(p.slice(0,3))));
+      phases=phases.filter(p=>!keys.has(pointKey(p.slice(0,3))));
+      parked.set(k,Object.freeze({owner:b.owner,snapshot:snapshot(moved,parkedPending,parkedBlocked,parkedPhases)}));
       blocked=blocked.filter(p=>!keys.has(pointKey(p)));
       cells=resident.cells.filter(c=>!keys.has(pointKey(point(c))));
       pending=resident.pending.filter(p=>!keys.has(pointKey(p)));
@@ -117,6 +121,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
          moved.some(c=>isLoaded(...point(c))!==true||isOpen(...point(c))!==true))return null;
       cells=[...resident.cells,...moved];
       pending=[...resident.pending,...shard.snapshot.pending];
+      phases=[...phases,...(shard.snapshot.lateralPhases??[])];
       parked.delete(k);
     }
     const queued=new Set(pending.map(pointKey)),dormant=new Map(blocked.map(p=>[pointKey(p),p]));
@@ -130,7 +135,7 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
     for(const c of cells)if(faces(c,b)&&isLoaded(...point(c))===true&&isOpen(...point(c))===true){
       if(enqueue(c))boundaryWoken++;
     }
-    const next=Object.freeze({version:LIQUID_OWNER_HANDOFF_VERSION,resident:snapshot(cells,pending,[...dormant.values()]),
+    const next=Object.freeze({version:LIQUID_OWNER_HANDOFF_VERSION,resident:snapshot(cells,pending,[...dormant.values()],phases),
       parked:Object.freeze([...parked.values()])});
     return Object.freeze({state:next,owner:b.owner,mode,movedCells:moved.length,
       movedUnits:moved.reduce((sum,c)=>sum+c.units,0),boundaryWoken,
