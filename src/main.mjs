@@ -2010,6 +2010,7 @@ function start(nonblockStage=null){
       canvas.dataset.playerColliding=String(collides(world,player.x,player.feet,player.z));
       canvas.dataset.lookMode=lookMode;
       canvas.dataset.precision=String(precisionHeld||keys.has('ShiftLeft')||keys.has('ShiftRight'));
+      veilreachDistance.finishFrame();
     }
   }
   const frameDriver=new ForegroundFrameDriver(

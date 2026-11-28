@@ -343,13 +343,36 @@ export function createVeilreachDistanceRenderer(gl){
   const retry=new GpuUploadRetry();
   let identity=null,terrain=null,readRevision=null,buffer=null,owners=[],drawKey='',job=null;
   let center=null,atlasBytes=0,rebuilds=0,preparedTiles=0,lastPreparationMs=0,lastUploadMs=0;
+  let fence=null,gpuDeferredFrames=0;
   let uploadPhases={};
   function measureUpload(name,action){
     const started=performance.now();
     try{return action();}
     finally{uploadPhases[name]=(uploadPhases[name]??0)+performance.now()-started;}
   }
+  function releaseFence(lost=false){
+    if(fence&&!lost)gl.deleteSync(fence);
+    fence=null;
+  }
+  function rendererReady(){
+    if(!fence)return true;
+    const status=measureUpload('fencePoll',()=>gl.clientWaitSync(fence,0,0));
+    if(status===gl.TIMEOUT_EXPIRED){gpuDeferredFrames++;return false;}
+    releaseFence(gl.isContextLost());
+    if(status!==gl.ALREADY_SIGNALED&&status!==gl.CONDITION_SATISFIED)
+      throw Error('Veilreach GPU readiness check failed');
+    return true;
+  }
+  function finishFrame(){
+    // The fence follows every draw in the current frame. A busy renderer can
+    // keep drawing the visible bank while the next staged transfer waits.
+    if(job?.ready&&!fence&&!gl.isContextLost()&&typeof gl.fenceSync==='function'){
+      fence=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
+      if(fence)gl.flush();
+    }
+  }
   function invalidate(lost=false){
+    releaseFence(lost);
     if(buffer&&!lost)gl.deleteBuffer(buffer);
     buffer=null;
     job?.upload?.dispose(lost);
@@ -384,6 +407,7 @@ export function createVeilreachDistanceRenderer(gl){
       center={x:Math.floor(player.x/32)*32+16,z:Math.floor(player.z/32)*32+16};
     const key=[center.x,center.z,readRevision()].join('|');
     if(key!==drawKey){
+      releaseFence();
       job?.upload?.dispose(false);
       drawKey=key;
       job={prep:prepareAtlas(terrain,center.x,center.z,world),ready:null,upload:null,done:false};
@@ -401,7 +425,7 @@ export function createVeilreachDistanceRenderer(gl){
           else if(!result.value){preparedTiles++;work++;}
         }
         lastPreparationMs=performance.now()-begin;
-        if(job.ready){
+        if(job.ready&&rendererReady()){
           const beginUpload=performance.now();
           if(!job.upload)job.upload=measureUpload('pack',()=>stageUpload(gl,pack(job.ready)));
           if(job.upload.slice(measureUpload)){
@@ -420,7 +444,7 @@ export function createVeilreachDistanceRenderer(gl){
     }
   }
 
-  return Object.freeze({invalidate,prepare,hasVisual:key=>owners.some(owner=>owner.key===key),
+  return Object.freeze({invalidate,prepare,finishFrame,hasVisual:key=>owners.some(owner=>owner.key===key),
     draw({world,chunks,caveShade,atPos,atColor,atUv,atMat}){
     if(!terrain||caveShade>.35||gl.isContextLost())return 0;
     const detailed=new Set();
@@ -430,7 +454,7 @@ export function createVeilreachDistanceRenderer(gl){
     const ranges=veilreachDrawRanges(owners,detailed);
     if(gl.canvas?.dataset){
       gl.canvas.dataset.veilreachAtlas=JSON.stringify({bytes:atlasBytes,rebuilds,preparedTiles,
-        pending:Boolean(job),drawCalls:ranges.length,prepareMs:lastPreparationMs,uploadMs:lastUploadMs,uploadPhases});
+        pending:Boolean(job),drawCalls:ranges.length,prepareMs:lastPreparationMs,uploadMs:lastUploadMs,uploadPhases,gpuDeferredFrames});
     }
     if(!buffer||!ranges.length)return 0;
     gl.bindBuffer(gl.ARRAY_BUFFER,buffer);

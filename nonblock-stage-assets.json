@@ -3,7 +3,7 @@
   "assets": {
     "./src/veilreach/generation.mjs": "28ca8f7fbb60fdda4756a65e335e1caea5dacd23c772b350a304513655505a53",
     "./src/veilreach/source.mjs": "ea47bf4de4b7c1332f00cedcd17beea4ce2b1837524e2c270e95e8c548f6bcf6",
-    "./src/veilreach/distance.mjs": "38af9c68a38199d9c7ee0ab59d0fef97ef7649fc7958ce56f33c104015e40e77",
+    "./src/veilreach/distance.mjs": "5a9a76430271203396c64e869eb4cc929f4664e87713a584fa84ba81888eb804",
     "./src/veilreach/flight-stream.mjs": "dc62ea537305cd4754d13bbcf77262e180a46f889fd5c6ed58423f4dcc6e472a",
     "./src/veilreach/flora.mjs": "5a7ff3ac514d0f179890f7eeef454a4361bdaa07dd915af817d8188f20ba7e24",
     "./src/mining-trace.mjs": "c8c186674a362042f791047f5e2ccff2e47844579dfbeec4e24cdadf5c638397",
@@ -255,7 +255,7 @@
     "./src/live-voxel-world.mjs": "1c48475c9584a66648d34c7b3fce9ac1849a8bf0aaa86aeca50501e8c4f17085",
     "./src/app-update.mjs": "8e5d77546898c7b31ba0921293ce44c32672b15605074a0abf2f3e325ac62376",
     "./src/gameplay-recorder.mjs": "1c8e3dbc676a18f2f6d9c15f12016592b86f955839cdd6c88ebce9e7d6788656",
-    "./src/main.mjs": "e60a115339a44de50e4305c41d92717616a07b1876bb5b0fb2b4b6226bef6020",
+    "./src/main.mjs": "3bf3e41781928881191c0121112c6c82bdac4d220310af2c64b2d3a5aa1e5d63",
     "./src/manual-biomes/desert-m3.mjs": "7fada685d2887a495ee9d097c2d62909408d4cddee764260066d9952eeab518e",
     "./src/manual-biomes/desert-bilateral-rgb.mjs": "7819c6a5ada37da04267dd774e994649c874d891268fd80b71ecd4c7515b6b5e",
     "./src/manual-biomes/desert-seam-vertex-tint.mjs": "4eff1be29be0a18f87050f496d50fb07892b52bf4d69133160ba2a62e9e7ab0f",
