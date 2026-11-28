@@ -46,6 +46,17 @@ export async function openFixtureStorage({indexedDB, scope, producer, verify, re
       if(typeof skill!=='string'||!/^pm:[a-z-]{1,64}$/.test(skill))throw Error('Invalid skill');
       const key='specialization|'+skill;
       return Object.freeze({read:()=>transact('readonly',({get,done})=>get(key,v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');done(v??null);})),
+        compareExchangeWithLedger(expected,next,expectedLedger){
+          if(!(expected===null||validBytes(expected))||!validBytes(next)||!(expectedLedger===null||validBytes(expectedLedger)))return Promise.reject(Error('Invalid guarded CAS bytes'));
+          return transact('readwrite',({get,put,done})=>get('ledger',ledger=>{
+            if(ledger!==undefined&&!validBytes(ledger))throw Error('Corrupt ledger');
+            if((ledger??null)!==expectedLedger){done(false);return;}
+            get(key,v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');
+              const c=readContext();if((v??null)!==expected||c?.scope!==scope||c.mode!=='survival'||c.writable!==true||c.inCombat!==false||c.hostileEngagement!==false){done(false);return;}
+              put(key,next);done(true);
+            });
+          }));
+        },
         compareExchange(expected,next){
           if(!(expected===null||validBytes(expected))||!validBytes(next))return Promise.reject(Error('Invalid CAS bytes'));
           return transact('readwrite',({get,put,done})=>get(key,v=>{

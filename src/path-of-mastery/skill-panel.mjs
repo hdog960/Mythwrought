@@ -2,6 +2,7 @@
 import {SKILL_CATEGORIES} from './registry.mjs';
 import {layoutSkillTree,progressionFeedback} from './skill-view.mjs';
 import {getCandidateTree} from './candidate-trees.mjs';
+import {masteryDisplay} from './mastery-display.mjs';
 import {skillStatistics} from './skill-actions.mjs';
 const glyphs={combat:'⚔',gathering:'◆',exploration:'✦',specialized:'✧'};
 export function mountSkillPanel({root,view,actions=null,onClose=()=>{}}={}){
@@ -19,6 +20,7 @@ export function mountSkillPanel({root,view,actions=null,onClose=()=>{}}={}){
     list.replaceChildren(...state.entries.map(s=>{const b=button(s.name+' · '+s.level,()=>{selected=s.id;zoom=1;refresh();});b.setAttribute('aria-pressed',String(s.id===selected));return b;}));
     const s=state.skill,stats=skillStatistics(state),title=make('h3','',s.name+' · Level '+s.level+'/99'),desc=make('p','',s.description),meter=make('progress','pm-xp');meter.max=1;meter.value=s.fraction;meter.setAttribute('aria-label',s.name+' level progress');
     detail.replaceChildren(title,desc,meter,make('p','pm-meta',s.xp.toLocaleString()+' XP · '+(s.maxed?'Mastered':s.xpToNext.toLocaleString()+' to next level')),make('p','pm-deferred','Development preview · gameplay progression deferred'),make('p','pm-meta',stats?'Total level '+stats.totalLevel+' · '+stats.totalXp.toLocaleString()+' XP · '+stats.maxed+' maxed':''));
+    const mastery=masteryDisplay(state);if(mastery){const milestones=make('div','pm-tree-tools');milestones.setAttribute('aria-label',s.name+' mastery milestones');for(const m of mastery.levels){const mark=make('span','pm-meta',(m.earned?'◆ ':'◇ ')+m.level);mark.setAttribute('aria-label','Level '+m.level+' '+(m.earned?'earned':'not earned'));milestones.append(mark);}detail.append(make('p','pm-meta','Mastery · '+mastery.earned+'/'+mastery.maximum+' milestones'),milestones);}
     if(state.tree&&state.allocation){const layout=layoutSkillTree(state.tree),tools=make('div','pm-tree-tools'),viewport=make('div','pm-tree-viewport'),surface=make('div','pm-tree-surface'),graph=make('div','pm-tree-graph'),info=make('p','pm-meta','Select a node to inspect prerequisites');viewport.tabIndex=0;viewport.setAttribute('aria-label','Skill tree; scroll to explore');
       graph.style.width=layout.width+'px';graph.style.height=layout.height+'px';const setZoom=z=>{zoom=Math.max(1,Math.min(1.6,z));surface.style.width=layout.width*zoom+'px';surface.style.height=layout.height*zoom+'px';graph.style.transform='scale('+zoom+')';};
       tools.append(make('span','',state.allocation.remaining+' points available'),button('−',()=>setZoom(zoom-.15)),button('+',()=>setZoom(zoom+.15)),button('Reset view',()=>{setZoom(1);viewport.scrollTo(0,0);}));
