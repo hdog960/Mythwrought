@@ -240,14 +240,22 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       let arrival = null;
       function beginArrival(target) {
         check(target.size <= capacity, 'Stream window capacity refused');
-        // Retire departures before reusing their slots. Until all arrivals
-        // are uploaded, only the surviving owners have published ranges.
-        const retained = slots.map(entry => entry && target.has(entry.key) ? entry : null);
+        // Retain an owner only when every requested face is already published.
+        const live = new Set(slots.filter(Boolean).map(entry => entry.key));
+        const moving = new Set([...target.values()].filter(entry => !live.has(entry.key)).map(entry => entry.owner));
+        const retained = slots.map(entry => entry && target.has(entry.key) && !moving.has(entry.owner) ? entry : null);
         slots = retained;
         const { next, writes } = prepare(target);
         check(writes.every(write => !write.previous), 'Stream upload would overwrite a retained face');
         check(retained.every((entry, index) => !entry || entry === next[index]), 'Retained face would move');
-        arrival = { target, next, writes, offset: 0 };
+        const owners = new Map();
+        for (const write of writes) {
+          const owner = write.entry.owner;
+          if (!owners.has(owner)) owners.set(owner, { indices: [], uploaded: 0 });
+          owners.get(owner).indices.push(write.index);
+        }
+        arrival = { target, next, writes, owners, offset: 0, publishedFaces: 0, publishedOwners: 0,
+          keptFaces: target.size - writes.length };
         return arrival;
       }
       function arrivalFrame(plan, failAfter = 0) {
@@ -261,16 +269,31 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
           throw error;
         }
         check(writeCalls - before === uploaded.uploads && uploaded.uploads <= uploadCallsPerFrame, 'Frame upload budget exceeded');
-        plan.offset += uploaded.uploadedFaces;
-        if (plan.offset === plan.writes.length) {
-          slots = plan.next;
-          arrival = null;
+        // Commit whole owners after all uploads in this frame have succeeded.
+        const end = plan.offset + uploaded.uploadedFaces;
+        for (const { entry } of plan.writes.slice(plan.offset, end)) {
+          const owner = plan.owners.get(entry.owner);
+          owner.uploaded++;
+          if (owner.uploaded !== owner.indices.length) continue;
+          for (const index of owner.indices) slots[index] = plan.next[index];
+          plan.publishedFaces += owner.uploaded;
+          plan.publishedOwners++;
         }
+        plan.offset += uploaded.uploadedFaces;
+        if (plan.offset === plan.writes.length) arrival = null;
         return uploaded;
       }
       const nextFrame = () => new Promise(requestAnimationFrame);
-      async function finishArrival(plan, retained) {
+      function drawPublished(plan) {
+        const visibleOwners = new Set(slots.filter(Boolean).map(entry => entry.owner));
+        const expected = new Map([...plan.target].filter(([, entry]) => visibleOwners.has(entry.owner)));
+        check(expected.size === plan.keptFaces + plan.publishedFaces, 'Published owner count disagrees with arrived faces');
+        check(matchesNative(expected), 'Published owner differs from its complete native mesh');
+        return draw(expected.size);
+      }
+      async function finishArrival(plan) {
         let frames = 0, uploads = 0, maxUploadFaces = 0, maxCallsInFrame = 0, maxFacesInFrame = 0;
+        let firstOwnerFrame = null, intermediateOwnerFrames = 0, ranges = 0;
         while (arrival === plan) {
           await nextFrame();
           const frame = arrivalFrame(plan);
@@ -280,14 +303,16 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
           maxUploadFaces = Math.max(maxUploadFaces, frame.maxUploadFaces);
           maxCallsInFrame = Math.max(maxCallsInFrame, frame.uploads);
           maxFacesInFrame = Math.max(maxFacesInFrame, frame.uploadedFaces);
-          if (arrival === plan) {
-            check(matchesNative(retained), 'An unfinished arrival changed the published GPU ranges');
-            draw(retained.size);
+          ranges = drawPublished(plan);
+          if (plan.publishedOwners) {
+            firstOwnerFrame ??= frames;
+            if (arrival === plan) intermediateOwnerFrames++;
           }
         }
         check(matchesNative(plan.target), 'Streamed GPU ranges differ from the full native mesh');
-        return { residentFaces: plan.target.size, keptFaces: retained.size, uploadedFaces: plan.offset,
-          frames, uploads, maxUploadFaces, maxCallsInFrame, maxFacesInFrame, ranges: draw(plan.target.size) };
+        return { residentFaces: plan.target.size, keptFaces: plan.keptFaces, uploadedFaces: plan.offset,
+          frames, uploads, maxUploadFaces, maxCallsInFrame, maxFacesInFrame, ranges, firstOwnerFrame,
+          intermediateOwnerFrames, publishedOwners: plan.publishedOwners };
       }
       const union = new Map([...initialTarget, ...deeperTarget]);
       const writesBeforeCapacity = writeCalls;
@@ -303,20 +328,24 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       const keptRangesAfterFailure = draw(kept.size);
 
       const abandoned = beginArrival(deeperTarget);
-      for (let frame = 0; frame < 2; frame++) {
+      let framesBeforeReversal = 0;
+      while (arrival === abandoned && (!abandoned.publishedOwners || abandoned.offset === abandoned.publishedFaces)) {
         await nextFrame();
         check(arrivalFrame(abandoned).uploads === uploadCallsPerFrame, 'Expected full upload frames before reversing');
-        check(arrival === abandoned && matchesNative(kept), 'Pending descent changed retained faces');
-        draw(kept.size);
+        framesBeforeReversal++;
+        drawPublished(abandoned);
       }
+      check(arrival === abandoned && abandoned.publishedOwners && abandoned.offset > abandoned.publishedFaces,
+        'Expected completed owners and an incomplete owner at reversal');
       const pendingFrame = nextFrame().then(() => arrivalFrame(abandoned));
       const reversing = beginArrival(initialTarget);
       const writesBeforeStale = writeCalls;
       check(await pendingFrame === null && writeCalls === writesBeforeStale, 'Superseded arrival submitted GPU writes');
       check(matchesNative(kept), 'Retargeting changed live geometry before publication');
-      const reversal = { canceledFaces: abandoned.offset, staleFrameRefused: true,
-        returned: await finishArrival(reversing, kept) };
-      const descent = await finishArrival(beginArrival(deeperTarget), kept);
+      const reversal = { framesBeforeReversal, retiredPublishedFaces: abandoned.publishedFaces,
+        canceledFaces: abandoned.offset - abandoned.publishedFaces, staleFrameRefused: true,
+        returned: await finishArrival(reversing) };
+      const descent = await finishArrival(beginArrival(deeperTarget));
 
       async function recoverContext(target) {
         const extension = gl.getExtension('WEBGL_lose_context');
@@ -352,22 +381,41 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         await expectEvent('webglcontextrestored', () => setTimeout(() => extension.restoreContext(), 0));
         check(!gl.isBuffer(previousGpu.buffer), 'Old pool survived context loss');
         gpu = createGpuResources();
-        const restored = uploadLiveSlots();
+        slots.fill(null);
+        const restored = await finishArrival(beginArrival(target));
+        check(restored.intermediateOwnerFrames > 0, 'Context recovery must draw owners before the whole window settles');
         check(matchesNative(target), 'Recovered GPU ranges differ from the published native mesh');
         const ranges = draw(target.size);
         check(readFrame().every((value, index) => value === originalFrame[index]), 'Recovered cave pixels changed');
         return { residentFaces: target.size, ...restored, ranges, oldBufferInvalidated: true, pixelParity: true };
       }
       const contextRecovery = await recoverContext(deeperTarget);
-      const ascent = await finishArrival(beginArrival(initialTarget), kept);
+      const ascent = await finishArrival(beginArrival(initialTarget));
       check(descent.uploadedFaces && ascent.uploadedFaces, 'Stream fixture must upload native arrivals in both directions');
+      check(descent.intermediateOwnerFrames > 0 && ascent.intermediateOwnerFrames > 0, 'Both directions must draw arriving owners before settling');
+
+      const retryable = beginArrival(deeperTarget);
+      for (let frame = 0; frame < framesBeforeReversal; frame++) {
+        await nextFrame();
+        arrivalFrame(retryable);
+        drawPublished(retryable);
+      }
+      const beforeFailure = writeCalls;
+      await nextFrame();
+      try { arrivalFrame(retryable, 2); throw Error('Expected arrival retry failure'); }
+      catch (error) { check(error.message === 'Injected arrival upload failure', error.message); }
+      check(arrival === null && writeCalls === beforeFailure + 2, 'Late failure must stop the active arrival');
+      drawPublished(retryable);
+      const retry = await finishArrival(beginArrival(deeperTarget));
+      check(retry.keptFaces === retryable.keptFaces + retryable.publishedFaces, 'Retry must retain fully published owners');
+
       check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'GPU allocation changed');
       gl.deleteBuffer(gpu.buffer);
       gl.deleteProgram(gpu.program);
       checkGl();
       return { residentFaces: initial.length, allocatedFaces: capacity, stagingReserve, initialRanges,
         peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: liveOwners.length, steps,
-        streaming: { deeperOwners: deeper.length, uploadCallsPerFrame, descent, ascent, reversal,
+        streaming: { deeperOwners: deeper.length, uploadCallsPerFrame, descent, ascent, reversal, retry,
           unionRefusedFaces: union.size, failedArrivalUploads: 2, keptRangesAfterFailure },
         contextRecovery, rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true,
         buffersReallocatedDuringEditsOrStreaming: false };
