@@ -100,4 +100,25 @@ export function runQuenchPersistenceFixtures({createLiquidEngine,createLiquidPer
     const r=f.adapter.stage({...f,pairs:[pairA],receiptIds:['q1'],batch:{state:{resident:{cells:[]}}}});
     assert.equal(units(r.state.shared.resident,'acid'),2);
   });
+  test('quench and codec retain unrelated dormant FIFO and resume after capacity release',()=>{
+    const f=fixture();
+    // Use a valid shared v1 dormant FIFO representing a previously cap-blocked
+    // unrelated acid cell. Quench elsewhere must not silently discard it.
+    const p=[8,0,0];
+    f.shared.resident.pending=f.shared.resident.pending.filter(q=>q.join(',')!==p.join(','));
+    f.shared.resident.capacityBlocked=[p];
+    const before=copy({shared:f.shared,lava:f.lava});
+    const r=f.adapter.stage({...f,pairs:[pairB],receiptIds:['q1']});
+    assert.equal(r.status,'staged');
+    assert.deepEqual(r.state.shared.resident.capacityBlocked,[p]);
+    assert.deepEqual(f.codec.decode(r.encoded).resident.capacityBlocked,[p]);
+    assert.deepEqual({shared:f.shared,lava:f.lava},before);
+    const e=createLiquidEngine({definitions:[WATER_DEFINITION,LAVA_DEFINITION,{id:'acid',gravityLimit:1,lateralLimit:1}],isLoaded:x=>x<16,isOpen:()=>true,snapshot:r.state.shared.resident});
+    const t=e.tick(1);
+    assert.equal(t.visited,1);
+    assert.equal(e.getCell(8,-1,0).id,'acid');
+    assert.equal(e.getCell(8,-1,0).units,1);
+    assert.equal(units(e.save(),'acid'),2);
+    assert.equal(e.save().cells.filter(c=>c.id==='acid').reduce((n,c)=>n+(c.quantities.solute??0),0),9);
+  });
 }

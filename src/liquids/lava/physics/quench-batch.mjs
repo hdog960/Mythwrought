@@ -14,7 +14,11 @@ function copyReceipt(r){
   }))),changed:Object.freeze(r.changed.map(freezePoint))});
 }
 function freezeSnapshot(s){
-  return Object.freeze({version:s.version,cells:Object.freeze([...s.cells]),pending:Object.freeze(s.pending.map(freezePoint))});
+  // Preserve the shared v1 optional dormant FIFO, including its exact order.
+  // A quench can release capacity and make unrelated dormant work runnable.
+  return Object.freeze({version:s.version,cells:Object.freeze([...s.cells]),
+    pending:Object.freeze(s.pending.map(freezePoint)),
+    ...(s.capacityBlocked===undefined?{}:{capacityBlocked:Object.freeze(s.capacityBlocked.map(freezePoint))})});
 }
 function freezeThermal(s){return Object.freeze({...s,pending:Object.freeze(s.pending.map(freezePoint))});}
 
