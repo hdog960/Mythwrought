@@ -7,6 +7,7 @@ import {nextDesertIntent} from './desert-intents.mjs';
 import {nextSnowIntent} from './snow-intents.mjs';
 import {nextForestIntent} from './forest-intents.mjs';
 import {nextAlpineIntent,nextCaveIntent} from './alpine-cave-intents.mjs';
+import {beastProjectilePolicy,proposeBeastProjectile} from './ranged-abilities.mjs';
 import {multiHitProfile} from './multi-hit.mjs';
 import {observeExpansionSocial} from './social-behavior.mjs';
 import {hearExpansionDisturbance} from './sound-perception.mjs';
@@ -23,7 +24,7 @@ function createActor(candidate,position,query,biome){
  }
  return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,combo:null,visual:'idle',state:'idle',action:'idle'};
 }
-function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator}={},biome,decide){
+function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator,launchProjectile}={},biome,decide){
  if(actor?.candidate?.requirement?.biome!==biome)return false;
  const r=actor.species,rev=query.revision();
  if(!Number.isSafeInteger(rev)||query.volume(actor.position,r.body)!=='clear')return false;
@@ -38,14 +39,19 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  const reattachWall=r.id==='ceiling-lurker'&&actor.dropState==='recovering'&&expansionSupport(query,actor.position,r.body,'climb-surface')?
   [[1,0],[-1,0],[0,1],[0,-1]].find(([x,z])=>query.volume([actor.position[0]+x*.18,actor.position[1],actor.position[2]+z*.18],r.body)==='solid'):null;
  const social=typeof readPeers==='function'?observeExpansionSocial(actor,query,ownerView,readPeers,rev):null;
- const obs={...facts,...(social?{herdSeparated:social.herdSeparated}:{}),heard,reattachWall:Boolean(reattachWall),
+ const landingGoal=r.id==='golden-eagle'&&point(goal)&&expansionSupport(query,goal,r.body,'ground')&&query.revision()===rev?goal:null;
+ const perchReady=Boolean(landingGoal&&grounded&&distance(landingGoal)<=.18);
+ const glideReady=r.id==='skyray'&&point(goal)&&goal[1]<actor.position[1]-.25&&Math.hypot(goal[0]-actor.position[0],goal[2]-actor.position[2])>.25&&expansionSupport(query,actor.position,r.body,'air');
+ const obs={...facts,perchReady,landingSite:r.id==='golden-eagle'?Boolean(landingGoal):facts.landingSite,glideReady,...(social?{herdSeparated:social.herdSeparated}:{}),heard,reattachWall:Boolean(reattachWall),
   climbContact:r.id==='cliff-reaver'&&expansionSupport(query,actor.position,r.body,'climb-surface'),
   climbGoal:point(goal)&&goal[1]>actor.position[1]+.1,
   dropState:actor.dropState,dropTargetMatches:actor.dropTarget===target,
   targetBelow:visible&&target.position[1]<actor.position[1]-.5&&Math.hypot(target.position[0]-actor.position[0],target.position[2]-actor.position[2])<=.8,
   ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
- const profile=multiHitProfile(r);
+ const profile=multiHitProfile(r),ranged=beastProjectilePolicy(r);
  let intent=decide(actor.candidate,obs);
+ const rangedCandidate=typeof launchProjectile==='function'&&ranged&&obs.ready&&visible&&target?.alive===true&&obs.targetDistance>r.combat.reach&&obs.targetDistance<=ranged.range&&proposeBeastProjectile(actor,target,query,rev);
+ if(rangedCandidate)intent=obs.cooldownRemaining>0?{action:'recover',visual:'idle'}:obs.windupElapsed<r.combat.windup?{action:'prepare-attack',visual:'idle'}:{action:'launch-projectile',visual:'attack'};
  if(actor.combo){
   if(!profile||!obs.ready||!visible||target!==actor.combo.target||target?.alive===false||distance(target.position)>r.combat.reach)actor.combo=null;
   else if(actor.combo.ticks>1){
@@ -61,7 +67,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
- if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl','climb'].includes(intent.action)&&point(goal))destination=goal;
+ if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl','climb','glide','perch-approach'].includes(intent.action)&&point(goal))destination=goal;
  if(intent.action==='investigate'&&heard)destination=heard;
  if(intent.action==='herd'&&social)destination=social.goal;
  let heading=[0,0],vertical=0;
@@ -71,8 +77,10 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(destination&&!away&&grounded&&r.movement.capabilities.includes('walk')&&typeof actor.id==='string'&&typeof navigator?.steer==='function'&&['herd','investigate','pursue','forage'].includes(intent.action)){
   const steer=navigator.steer(actor,destination);if(Array.isArray(steer)&&steer.length===2&&steer.every(Number.isFinite))heading=steer;
  }
- const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit'].includes(intent.action));
+ const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit','glide','perch-approach'].includes(intent.action));
  if(intent.action==='land')vertical=-1;
+ if(intent.action==='perch-approach'&&landingGoal){const d=Math.hypot(landingGoal[0]-actor.position[0],landingGoal[2]-actor.position[2]);vertical=d>.3&&landingGoal[1]<actor.position[1]?0:Math.max(-.5,Math.min(.5,(landingGoal[1]-actor.position[1])*2));if(d<.16)heading=[0,0];}
+ if(intent.action==='glide')vertical=-.32;
  if(biome==='cave'&&r.id==='cave-bat'&&obs.ceilingContact&&intent.action==='fly')vertical=-1;
  if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;heading=[x*.55-z*.835,z*.55+x*.835];}
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
@@ -91,13 +99,21 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
   const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,ceilingOnly||roost?'ceiling':'ground'),
    volume:(p,b)=>{const state=query.volume(p,b);return state==='clear'&&support&&!expansionSupport(query,p,b,support)?'solid':state;},
    environment:p=>({...query.environment(p),climbable:climbing&&expansionSupport(query,p,r.body,'climb-surface')})};
-  if(roost){actor.velocity=[0,0,0];actor.motionMode='roost';actor.grounded=false;}
+  if(intent.action==='perch'&&perchReady){actor.velocity=[0,0,0];actor.motionMode='perch';actor.grounded=true;}
+  else if(roost){actor.velocity=[0,0,0];actor.motionMode='roost';actor.grounded=false;}
   else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,climb:climbing,pace:intent.action==='charge'?1.5:away?1.2:1});
   if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
   if(climbing&&(!expansionSupport(query,actor.position,r.body,'climb-surface')||actor.motionMode!=='climb')){Object.assign(actor,start);return false;}
+  if(intent.action==='glide'&&!expansionSupport(query,actor.position,r.body,'air')){Object.assign(actor,start);return false;}
+  if(intent.action==='glide')actor.motionMode='glide';
   if(waterOnly&&actor.motionMode!=='swim'){Object.assign(actor,start);return false;}
   if(ceilingOnly||intent.action==='reattach-climb'&&expansionSupport(query,actor.position,r.body,'ceiling')){actor.dropState=null;actor.dropTarget=null;actor.motionMode='ceiling-crawl';actor.velocity=[0,0,0];actor.grounded=false;}
   if(query.revision()!==rev||query.volume(actor.position,r.body)!=='clear'||query.revision()!==rev){Object.assign(actor,start);return false;}
+  if(intent.action==='launch-projectile'){
+   const proposal=proposeBeastProjectile(actor,target,query,rev);
+   if(!proposal||launchProjectile(proposal)!==true){Object.assign(actor,start);return false;}
+   actor.cooldown=r.combat.cooldown;
+  }
   if(attackActions.has(intent.action)){
    const victim=intent.action==='defend'?threat:target;
    if(!victim||!sight(victim.position)||distance(victim.position)>r.combat.reach||query.revision()!==rev||typeof commitDamage!=='function'){Object.assign(actor,start);return false;}

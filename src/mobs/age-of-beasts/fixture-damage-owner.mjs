@@ -21,7 +21,8 @@ export function createFixtureDamageOwner(world,checkpoint,{worldId,profileId,rec
   const terminal=accepted?(!afterEntity?'removed':afterEntity.state==='downed'?'downed':'none'):'none';
   if(accepted)revision++;
   const receipt=Object.freeze({version:1,...Object.fromEntries(keys.map(k=>[k,r[k]])),accepted:!!accepted,before,after,applied:before-after,terminal,permanentDefeat:false});
-  const result=Object.freeze({requestAmount:r.amount,beforeRevision,afterRevision:revision,receipt});
+  // Stale rejection is diagnostic only, never an AV committed record.
+  const result=Object.freeze({version:1,committed:r.expectedRevision===beforeRevision,requestAmount:r.amount,beforeRevision,afterRevision:revision,receipt});
   history.set(r.transactionId,{key:requestKey,result});return result;
  }
  return Object.freeze({commit,revision:()=>revision,get:id=>engine.get(id),checkpoint:()=>engine.checkpoint()});

@@ -6,9 +6,9 @@ export function nextAlpineIntent(c,o){
  const attack=k=>o.cooldownRemaining>0?out('recover'):o.windupElapsed<r.combat.windup?out('prepare-attack'):out(k,'attack');
  switch(r.id){
  case 'yak':return danger?out('flee'):o.herdSeparated?out('herd'):out('graze');
- case 'golden-eagle':return danger?out('fly'):o.landingSite===true&&!o.grounded?out('land'):out('fly');
+ case 'golden-eagle':return danger?out('fly'):o.perchReady?out('perch'):o.landingSite===true?out('perch-approach'):out('fly');
  case 'pika':return danger?out('evade'):out('forage');
- case 'skyray':return out('fly');
+ case 'skyray':return o.glideReady?out('glide'):out('fly');
  case 'griffin':return danger&&o.threatDistance<=r.combat.reach?attack('defend'):danger?out('evade'):out('fly');
  case 'cyclops':return close?attack('heavy-melee'):o.targetVisible?out('pursue'):out('idle');
  case 'wyvern':return close?attack('melee'):o.targetVisible?out('pursue'):out('fly');
