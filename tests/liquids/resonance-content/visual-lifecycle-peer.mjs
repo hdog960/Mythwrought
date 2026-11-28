@@ -17,19 +17,19 @@ const root=process.env.LIQUID_PRESENTATION_ROOT??'';
 pin(root,'mesh.mjs','6eec04c065623b7046750e28fdb34cfc4908ec9a');
 const {createLiquidMeshCache}=await import(pin(root,'mesh-cache.mjs','32656e651fbdd7b5e3201a39763477a615510335'));
 const {invalidateLiquidChanges}=await import(pin(root,'dirty-bridge.mjs','aadb734e572c1bbc35ca866d7bbeb259bae8764b'));
-const {createLiquidEngine}=await import(pin(process.env.LIQUID_CORE_ROOT??'','engine.mjs','ac9dfb9e85e99cce81ffc6a4aabe8b2f6f2b764b'));
+const {createLiquidEngine}=await import(pin(process.env.LIQUID_CORE_ROOT??'','engine.mjs','48269883882fd04020bf3856ac1350a607f842a7'));
 const physics=await import(pin(process.env.RESONANCE_PHYSICS_ROOT??'','definition.mjs','9bc356d7335ec65a64786876e8b8094643a26fcb'));
 const {RESONANCE_ID:id,ENERGY_KEY:energyKey}=physics;
 const a=[15,20,0],b=[16,20,0],coords={a,b};
 const totals=e=>e.save().cells.reduce(([u,q],c)=>[u+c.units,q+(c.quantities[energyKey]??0)],[0,0]);
 
 // Explicit two-batch fixture host, not a production owner registry or host transaction.
-function fixture({left=4,right=4,leftEnergy=4096,rightEnergy=0,maxFaces=2560}={}){
+function fixture({left=4,right=4,leftEnergy=4096,rightEnergy=0,maxFaces=2560,maxCells=8192,distant=false}={}){
   let epoch=1,loadedB=true,mapping=true,side=false,retry=null;
   const ready=new Map(),owner=x=>x<16?'a':'b';
   const isLoaded=x=>x<16||loadedB;
-  const isOpen=(x,y,z)=>(x===15||x===16)&&((z===0&&(y===20||y===21))||(side&&x===15&&y===20&&z===1));
-  const options={isLoaded,isOpen,definitions:[physics.RESONANCE_DEFINITION]};
+  const isOpen=(x,y,z)=>((x===15||x===16)&&((z===0&&(y===20||y===21))||(side&&x===15&&y===20&&z===1)))||(distant&&x===30&&y===20&&z===0);
+  const options={isLoaded,isOpen,maxCells,definitions:[physics.RESONANCE_DEFINITION]};
   const engine=createLiquidEngine(options);
   if(left)assert.equal(engine.insert(...a,id,left,physics.resonanceQuantities(left,leftEnergy)),true);
   if(right)assert.equal(engine.insert(...b,id,right,physics.resonanceQuantities(right,rightEnergy)),true);
@@ -41,7 +41,7 @@ function fixture({left=4,right=4,leftEnergy=4096,rightEnergy=0,maxFaces=2560}={}
   function dirty(changed){
     epoch++;
     const r=invalidateLiquidChanges({cache,changed,maxBatchIds:2,
-      batchesForCell:x=>mapping?(owner(x)==='b'&&!loadedB?[]:[owner(x)]):null});
+      batchesForCell:x=>mapping?(x>=29||owner(x)==='b'&&!loadedB?[]:[owner(x)]):null});
     if(r.accepted){retry=null;for(const key of r.ids)ready.delete(key);}
     else retry=changed;
     return r;
@@ -135,4 +135,27 @@ test('actual mesh face-budget rejection retains prior-good but cannot publish st
   f.setSide(true);const failed=f.publish();assert.ok(failed.deferred.some(r=>r.id==='a'&&r.reason==='build-rejected'));
   assert.equal(f.cache.get('a'),prior);assert.equal(f.presentation.isCurrent(old),false);assert.equal(f.build(),null);
   f.setSide(false);f.publish();assert.ok(f.build());assert.notEqual(f.cache.get('a'),prior);
+});
+
+test('capacity-blocked cross-owner flow resumes after distant extraction and invalidates both visual batches',()=>{
+  const f=fixture({left:8,right:0,leftEnergy:8192,maxCells:2,distant:true}),d=[30,20,0];
+  assert.equal(f.engine.insert(...d,id,1,physics.resonanceQuantities(1,19)),true);
+  assert.equal(f.dirty([d]).accepted,true);const old=f.build(),batch=f.cache.get('a');
+  assert.equal(old.effects.cells,1);assert.equal(f.cache.get('b'),null);
+  const stalled=f.engine.tick(2);assert.equal(stalled.moved,0);assert.deepEqual(stalled.changed,[]);
+  assert.equal(stalled.pending,0);assert.deepEqual(f.engine.save().capacityBlocked,[a]);
+  assert.equal(f.engine.tick(1).visited,0);assert.equal(f.cache.get('a'),batch);
+  const taken=f.engine.extract(...d,1);assert.equal(taken.units,1);assert.equal(taken.quantities[energyKey],19);
+  assert.deepEqual(f.engine.save().pending,[]);assert.deepEqual(f.engine.save().capacityBlocked,[a]);
+  const release=f.dirty([d]);assert.equal(release.accepted,true);assert.deepEqual(release.ids,[]);
+  const beforeRetry=f.build();assert.equal(beforeRetry.effects.cells,1);
+  // An earlier zero pending count is not authority to skip a step after capacity release.
+  const resumed=f.engine.tick(1);assert.equal(resumed.moved,4);assert.deepEqual(resumed.changed,[a,b]);
+  assert.equal(f.dirty(resumed.changed).accepted,true);assert.equal(f.presentation.isCurrent(beforeRetry),false);
+  assert.equal(f.build(),null);assert.equal(f.cache.get('a'),batch);
+  assert.equal(f.publish().published.length,2);const next=f.build();
+  assert.equal(next.effects.cells,2);assert.equal(next.effects.segmentCount,16);assert.equal(next.effects.particleCount,4);
+  assert.equal(next.allocatedBytes,25344);assert.equal(f.presentation.isCurrent(old),false);
+  assert.ok(f.presentation.isCurrent(next));assert.deepEqual(totals(f.engine),[8,8192]);
+  assert.deepEqual([totals(f.engine)[0]+taken.units,totals(f.engine)[1]+taken.quantities[energyKey]],[9,8211]);
 });
