@@ -8,25 +8,36 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { WildsFamilyResearchWorld } from '../../src/manual-biomes/enchanted-wilds-family-source.mjs';
 import { inspectWildsLandmarkWalk } from '../../src/manual-biomes/enchanted-wilds-landmark-walk.mjs';
+import { surveyWildsMonumentSite } from '../../src/manual-biomes/enchanted-wilds-monument-site.mjs';
 
 const root = process.cwd(), out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'wilds-original-landmark-walk');
-const seed = 179, source = new WildsFamilyResearchWorld(seed);
+const observatory = process.argv.includes('--observatory');
+const seed = observatory ? 42 : 179, source = new WildsFamilyResearchWorld(seed);
+const monumentSite = { id: 12, x: -204, z: -580, turn: 0 };
 const directions = [[0, 1], [-1, 0], [0, -1], [1, 0]];
-const sites = [
-  [-25, -778], [-135, -726], [-136, -697], [-139, -584], [-10, -583], [154, -570]
-].map(([x, z]) => {
-  const landmark = source.wildsSource.landmark(Math.floor(x / 16), Math.floor(z / 16));
-  const route = inspectWildsLandmarkWalk(source, landmark);
+function walkSite(world, landmark) {
+  const route = inspectWildsLandmarkWalk(world, landmark);
   assert.ok(route);
   return { name: landmark.name, origin: landmark.origin, route,
     direction: directions[landmark.turn], cell: landmark.cells[0] };
-});
+}
+const sites = observatory ? [] : [
+  [-25, -778], [-135, -726], [-136, -697], [-139, -584], [-10, -583], [154, -570]
+].map(([x, z]) => walkSite(source, source.wildsSource.landmark(Math.floor(x / 16), Math.floor(z / 16))));
+if (observatory) {
+  const entry = surveyWildsMonumentSite(source, monumentSite);
+  assert.ok(entry);
+  sites.push(walkSite(entry.witness, entry.plan));
+}
 const game = await readFile(resolve(root, 'src/main.mjs'), 'utf8');
 const marker = '  function loadWorld(seed){';
 assert.equal(game.split(marker).length, 2);
 const injected = "import { WildsFamilyResearchWorld } from './manual-biomes/enchanted-wilds-family-source.mjs';\n" +
+  "import { surveyWildsMonumentSite } from './manual-biomes/enchanted-wilds-monument-site.mjs';\n" +
   game.replace(marker, marker + `\n    if(developerWorldFixtures&&new URLSearchParams(location.search).has('wilds-walk-fixture')){
-      storageReadOnly=true;return new Pack2LiveWorld(new WildsFamilyResearchWorld(${seed}));
+      storageReadOnly=true;
+      const fixture=new WildsFamilyResearchWorld(${seed});
+      return new Pack2LiveWorld(${observatory} ? surveyWildsMonumentSite(fixture,${JSON.stringify(monumentSite)}).witness : fixture);
     }`);
 const mime = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
