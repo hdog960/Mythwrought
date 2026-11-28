@@ -1,4 +1,4 @@
-// Real keyboard and renderer check for one source-protected gallery portal.
+// Real keyboard and renderer checks for source-protected underground routes.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -10,24 +10,31 @@ import { pathToFileURL } from 'node:url';
 import { baseBlock, VoxelWorld } from '../../src/voxel.mjs';
 import { FourRegionWorld, fourRegionProfile, M7_ENVIRONMENT_GENERATOR } from '../../src/manual-biomes/profile-world.mjs';
 import { surveyCrossRegionGallery } from '../../src/living-underworld/cross-region-gallery.mjs';
+import { surveySupportedNetworkChamber } from '../../src/living-underworld/supported-network-chamber.mjs';
 
 const release = 'aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7';
 const root = resolve(process.env.UNIFIED_GAME_SOURCE ?? '');
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), release);
-const seed = 179, source = new FourRegionWorld(seed, fourRegionProfile(seed, M7_ENVIRONMENT_GENERATOR));
+const chamberMode = process.argv.includes('--chamber');
+const seed = chamberMode ? 42 : 179;
+const source = new FourRegionWorld(seed, fourRegionProfile(seed, M7_ENVIRONMENT_GENERATOR));
 const legacy = new VoxelWorld(seed);
-const proposal = surveyCrossRegionGallery(source, { rx: -3, rz: -9, level: 0, axis: 'x', reach: 16,
-  originalProtected: (x, y, z) => legacy.naturalAndLandmarkBlock(x, y, z) !== baseBlock(x, y, z, seed) });
-assert.equal(proposal?.cuts.size, 297);
+const originalProtected = (x, y, z) => legacy.naturalAndLandmarkBlock(x, y, z) !== baseBlock(x, y, z, seed);
+const proposal = chamberMode ? surveySupportedNetworkChamber(source, { rx: -1, rz: -1, layer: 3, originalProtected }) :
+  surveyCrossRegionGallery(source, { rx: -3, rz: -9, level: 0, axis: 'x', reach: 16, originalProtected });
+assert.equal(proposal?.cuts.size, chamberMode ? 2642 : 297);
 const load = file => import(pathToFileURL(resolve(root, 'src', file)).href);
 const [P, { VEILREACH_GENERATOR }] = await Promise.all(['manual-biomes/profile-world.mjs', 'environment-ground.mjs'].map(load));
 const current = new P.FourRegionWorld(seed, P.fourRegionProfile(seed, VEILREACH_GENERATOR));
-const checked = [...proposal.support, ...proposal.clearance];
-for (const key of checked) {
-  const point = key.split(',').map(Number);
-  assert.equal(current.get(...point), source.get(...point), key);
+const checked = chamberMode ? [...proposal.clearance, ...proposal.deck.flatMap(({ x, feet, z, headroom }) =>
+  [[x, feet - 1, z], [x, feet + headroom, z]])] :
+  [...proposal.support, ...proposal.clearance].map(key => key.split(',').map(Number));
+for (const point of checked) {
+  assert.equal(current.get(...point), source.get(...point), point.join(','));
 }
-const { x, feet, z } = proposal.route[0], start = [x, feet, z];
+const route = chamberMode ? proposal.routes[0] : proposal.route;
+const { x, feet, z } = route[0], start = [x, feet, z];
+const landmark = chamberMode ? proposal.hub : proposal.portal;
 const cuts = JSON.stringify([...proposal.cuts]);
 const game = await readFile(resolve(root, 'src/main.mjs'), 'utf8'), marker = '  function loadWorld(seed){';
 assert.equal(game.split(marker).length, 2);
@@ -63,7 +70,7 @@ const server = createServer(async (req, res) => {
     res.end();
   }
 });
-const out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'underworld-region-portal');
+const out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', chamberMode ? 'underworld-network-chamber' : 'underworld-region-portal');
 await mkdir(out, { recursive: true });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -123,14 +130,14 @@ try {
     return pose();
   }
   await capture('start.png');
-  const far = await walk('w', before.x + 31.4);
+  const far = await walk('w', before.x + route.length - 1.6);
   await capture('across.png');
   const returned = await walk('s', before.x + .45);
   await capture('returned.png');
-  assert.ok(far.x > proposal.portal.x && returned.x < proposal.portal.x);
+  assert.ok(far.x > landmark.x && returned.x < landmark.x);
   assert.ok(Math.abs(far.feet - before.feet) < .12 && Math.abs(returned.feet - before.feet) < .12);
   assert.deepEqual(errors, []);
-  const report = { release, seed, chromium: browser.version(), portal: proposal.portal,
+  const report = { release, seed, chromium: browser.version(), ...(chamberMode ? { chamber: landmark } : { portal: landmark }),
     verifiedSourceCells: checked.length, cuts: proposal.cuts.size, diagnostics: [...diagnostics],
     originalSha256: digest(game), injectedSha256: digest(injected), cutsSha256: digest(cuts), shots };
   await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
