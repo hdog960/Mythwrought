@@ -37,6 +37,19 @@ export async function openFixtureStorage({indexedDB, scope, producer, verify, re
         put('ledger',next);done(true);
       }));
     },
+    specializationPort(skill){
+      if(typeof skill!=='string'||!/^pm:[a-z-]{1,64}$/.test(skill))throw Error('Invalid skill');
+      const key='specialization|'+skill;
+      return Object.freeze({read:()=>transact('readonly',({get,done})=>get(key,v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');done(v??null);})),
+        compareExchange(expected,next){
+          if(!(expected===null||validBytes(expected))||!validBytes(next))return Promise.reject(Error('Invalid CAS bytes'));
+          return transact('readwrite',({get,put,done})=>get(key,v=>{
+            if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');
+            if((v??null)!==expected||!context()||readContext()?.inCombat!==false){done(false);return;}
+            put(key,next);done(true);
+          }));
+        }});
+    },
     // Owner verifier must return canonical semantic identity for a committed action.
     // Sequence allocation and semantic uniqueness are committed in ONE transaction.
     record(evidence){return transact('readwrite',({get,put,done})=>{
@@ -56,7 +69,9 @@ export async function openFixtureStorage({indexedDB, scope, producer, verify, re
     event(seq){if(!sequence(seq)||seq>MAX_EVENTS)return Promise.reject(Error('Invalid sequence'));
       return transact('readonly',({get,done})=>get(prefix+'event|'+seq,semantic=>{
         if(semantic!==undefined&&!id(semantic))throw Error('Corrupt event');
-        done(semantic===undefined?null:Object.freeze({producer,sequence:seq,semantic}));
+        if(semantic===undefined){get(prefix+'cursor',cursor=>{if(cursor!==undefined&&(!Number.isSafeInteger(cursor)||cursor<0||cursor>MAX_EVENTS||seq<=cursor))throw Error('Missing committed event');done(null);});return;}
+        get(prefix+'semantic|'+semantic,reverse=>{if(reverse!==seq)throw Error('Corrupt reverse index');
+          get(prefix+'cursor',cursor=>{if(!Number.isSafeInteger(cursor)||cursor<seq||cursor>MAX_EVENTS)throw Error('Corrupt producer cursor');done(Object.freeze({producer,sequence:seq,semantic}));});});
       }));},
   });
 }
