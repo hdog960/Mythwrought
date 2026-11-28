@@ -4,6 +4,7 @@
 import {moveBody} from '../movement.mjs';
 import {nextPlainsIntent} from './plains-intents.mjs';
 import {nextDesertIntent} from './desert-intents.mjs';
+import {nextSnowIntent} from './snow-intents.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
 const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike']);
@@ -23,7 +24,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  const env=query.environment(actor.position);
  const visible=sight(target?.position),threatVisible=sight(threat?.position);
  const grounded=expansionSupport(query,actor.position,r.body,'ground');
- const attackTarget=['bison','dunewalker'].includes(r.id)?threat:target;
+ const attackTarget=['bison','dunewalker','woolly-mammoth'].includes(r.id)?threat:target;
  const obs={...facts,ready:env?.hazard===false&&env.biome===biome,dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
  const intent=decide(actor.candidate,obs);
  actor.cooldown=obs.cooldownRemaining;
@@ -31,7 +32,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  actor.windupTarget=intent.action==='prepare-attack'?attackTarget:null;
  actor.action=intent.action;actor.visual=intent.visual;
  let destination=null,away=false;
- if(['pursue','pack-flank'].includes(intent.action)&&visible)destination=target.position;
+ if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
  if(['herd','forage','fly','land','return-hive'].includes(intent.action)&&point(goal))destination=goal;
  let heading=[0,0],vertical=0;
@@ -43,7 +44,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  if(intent.action==='fly'&&grounded&&vertical<=0)vertical=1;
  try{
   const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,'ground')};
-  moveBody(movementQuery,actor,heading,dt,{mode:flying?'fly':'walk',vertical,jump,pace:away?1.2:1});
+  moveBody(movementQuery,actor,heading,dt,{mode:flying?'fly':'walk',vertical,jump,pace:intent.action==='charge'?1.5:away?1.2:1});
   if(query.revision()!==rev||query.volume(actor.position,r.body)!=='clear'||query.revision()!==rev){Object.assign(actor,start);return false;}
   if(attackActions.has(intent.action)){
    const victim=intent.action==='defend'?threat:target;
@@ -60,3 +61,6 @@ export const createPlainsActor=(c,p,q)=>createActor(c,p,q,'meadow');
 export const stepPlainsActor=(a,q,o)=>stepActor(a,q,o,'meadow',nextPlainsIntent);
 export const createDesertActor=(c,p,q)=>createActor(c,p,q,'desert');
 export const stepDesertActor=(a,q,o)=>stepActor(a,q,o,'desert',nextDesertIntent);
+
+export const createSnowActor=(c,p,q)=>createActor(c,p,q,'snow');
+export const stepSnowActor=(a,q,o)=>stepActor(a,q,o,'snow',nextSnowIntent);

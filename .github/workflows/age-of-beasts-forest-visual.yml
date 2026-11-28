@@ -1,0 +1,30 @@
+name: Age of Beasts Forest original-renderer visual evidence
+on:
+  push:
+    branches: [dev/age-of-beasts-ab0-ab1-20261126]
+    paths:
+      - 'src/mobs/age-of-beasts/forest-models.mjs'
+      - 'src/mobs/age-of-beasts/mesh-contract.mjs'
+      - 'src/mobs/live-render.mjs'
+      - 'tests/mobs/age-of-beasts-forest-browser.mjs'
+      - '.github/workflows/age-of-beasts-forest-visual.yml'
+permissions:
+  contents: read
+jobs:
+  forest-render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - run: npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+      - run: npx playwright install chromium
+      - run: node tests/mobs/age-of-beasts-forest-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: age-of-beasts-forest-renderer-evidence
+          path: artifacts/age-of-beasts-forest/
+          if-no-files-found: warn
