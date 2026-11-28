@@ -1,0 +1,53 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createTargetLock} from '../src/age-of-valor/target-lock.mjs';
+import {createProjectilePool} from '../src/age-of-valor/projectile-pool.mjs';
+import {createCombatSimulation} from '../src/age-of-valor/simulation.mjs';
+import {createProjectile} from '../src/age-of-valor/projectile.mjs';
+import {createActionController} from '../src/age-of-valor/controller.mjs';
+import {createCombatScheduler} from '../src/age-of-valor/scheduler.mjs';
+import {createResourceLedger} from '../src/age-of-valor/resources.mjs';
+import {createGuardDrain} from '../src/age-of-valor/guard-drain.mjs';
+import {createPoiseTracker} from '../src/age-of-valor/poise.mjs';
+import {createStatusRegistry,createStatusSession} from '../src/age-of-valor/status.mjs';
+import {createAbilityExecutor} from '../src/age-of-valor/ability.mjs';
+function cases(check,lock,pool,simulation,makeParts){
+ const scope={worldId:'world:1',profileId:'profile:1',sourceId:'player:1',fixture:true};
+ const t=(id,center,extra={})=>({id,center,alive:true,resident:true,attackable:true,friendly:false,...extra});
+ let f={...scope,at:0,alive:true,playable:true,combatMode:true,eye:[0,1,0],forward:[1,0,0],targets:[t('mob:b',[2,1,0]),t('mob:a',[2,1,0]),t('mob:c',[-2,1,0]),t('mob:d',[1,1,0],{friendly:true})]},visible=true;
+ const l=lock({identity:scope,maxRange:10,minimumDot:.2,graceMs:100,readFrame:()=>f,lineOfSight:()=>visible});
+ check(l.update('refresh').targetId===null,'optional lock');check(l.update('acquire').targetId==='mob:a','stable acquisition');check(l.update('next').targetId==='mob:b','switch');check(l.update('previous').targetId==='mob:a','switch back');
+ visible=false;f.at=50;check(!l.update().visible&&l.snapshot().targetId==='mob:a','occlusion grace');f.at=150;check(l.update().targetId===null,'grace expires');
+ visible=true;l.update('acquire');f.targets=f.targets.map(x=>x.id==='mob:a'?{...x,alive:false}:x);check(l.update().targetId===null,'dead clears without auto retarget');l.update('acquire');check(l.update('clear').targetId===null,'clear');
+ f={...f,worldId:'world:2'};check(l.update('acquire').closed,'retire');
+ const pp=pool({capacity:1,makeProjectile:makeParts.projectile,authorizeLaunch:()=>true});
+ const options={identity:{...scope,projectileId:'proj:1',actionId:'action:1',definitionId:'fixture:bolt'},origin:[0,1,0],velocity:[100,0,0],radius:.05,range:10,lifeMs:100,readAuthority:()=>({...scope,projectileId:'proj:1',actionId:'action:1',definitionId:'fixture:bolt',active:true}),traceTerrain:()=>({complete:true,fraction:.5}),readTargets:()=>[]};
+ check(pp.launch({sequence:1,options}),'launch');check(!pp.launch({sequence:2,options}),'capacity');check(pp.advance(10).events.length===1&&pp.snapshot().count===0,'terminal remove');check(!pp.launch({sequence:1,options}),'sequence replay');check(pp.advance(10).events.length===0,'no repeat impact');
+ const a=makeParts.combined(scope),s=simulation(a.options);
+ check(s.request('block').ok,'block start');check(s.applyStatus(a.effect).ok,'status applied');
+ check(s.advance(100).ok&&s.snapshot().clock===100,'first boundary');
+ check(s.snapshot().controller.resources.stamina===400,'held guard debit');
+ check(a.events.length===1&&a.events[0].type==='tick-proposal','status tick committed fixture');
+ check(s.advance(100).ok&&s.snapshot().controller.resources.stamina===100,'second drain');
+ check(s.advance(100).events.some(e=>e.type==='guard-broken')&&s.snapshot().controller.scheduler.state==='stagger','hold break');
+ check(s.snapshot().status.effects.length===0,'status expiry');
+ check(s.impact({...a.impact,at:300}).reason==='stagger-proposal','poise proposal');
+ check(s.advance(100).ok,'recovery advances');
+ check(s.startAbility({definitionId:'fixture:self',sequence:1}).ok,'ability start');
+ check(s.advance(100).ok&&a.events.some(e=>e.type==='ability-execution-proposal'),'ability boundary');
+ check(s.snapshot().controller.scheduler.clock===s.snapshot().ability.clock,'paired clocks');
+ a.ctx.playable=false;check(!s.advance(100).ok&&s.snapshot().clock===500,'pause');
+ a.ctx.playable=true;a.ctx.alive=false;check(!s.advance(100).ok&&s.snapshot().closed,'death retire');
+}
+function actualParts(scope){
+ const ctx={...scope,worldEpoch:1,alive:true,playable:true,combatMode:true,creative:false,mounted:false,readOnly:false},events=[];
+ const controller=createActionController({makeScheduler:createCombatScheduler,makeLedger:createResourceLedger,resourceOptions:{maximum:{stamina:1000,mana:1000},initial:{stamina:700,mana:700},regeneration:{combat:{stamina:0,mana:0},exploration:{stamina:0,mana:0}},delayMs:{stamina:0,mana:0}},definitions:{block:{cost:{stamina:0,mana:0}}},readContext:()=>ctx,authorize:()=>true,worldEpoch:1});
+ const guard=createGuardDrain({intervalMs:100,cost:300,breakMs:100,readState:()=>controller.state().scheduler,charge:controller.guardCharge});
+ const poise=createPoiseTracker({worldEpoch:1,maximum:1000,regenPerSecond:0,regenDelayMs:0,staggerMs:100,immunityMs:100,criticalMultiplier:2});
+ const registry=createStatusRegistry([{id:'fixture:burn',version:1,scope:'fixture',kind:'burning',durationMs:300,stacking:'refresh',maxStacks:1,resistanceFamily:'fire',tickKind:'damage',tickAmount:1,tickMs:100,resource:null,modifiers:[]}]);
+ const status=createStatusSession({registry,worldEpoch:1,targetId:scope.sourceId,fixture:true});
+ const d={id:'fixture:self',scope:'fixture',type:'ability',delivery:'self',timing:{cooldownMs:100},cost:{stamina:0,mana:0},requirements:[]};
+ const ability=createAbilityExecutor({registry:{get:()=>d},identity:scope,policies:{[d.id]:{mode:'instant',windupMs:100,minChargeMs:0,maxChargeMs:0,pulseMs:0,pulses:1}},readContext:()=>ctx,readSkills:()=>({...scope,verified:true,unlocked:true,levels:{}}),admit:q=>({...q,accepted:true,actionId:'action:'+q.sequence}),validateAim:()=>null,authorizePulse:()=>true});
+ return {ctx,events,effect:{worldEpoch:1,targetId:scope.sourceId,sourceId:'mob:1',effectId:'fixture:burn',at:0,verified:true,sequence:1,resistance:0},impact:{worldEpoch:1,sequence:1,accepted:true,force:1000,critical:false,resistance:0},options:{controller,guard,poise,status,ability,worldEpoch:1,readContext:()=>ctx,consumeProposal:e=>{events.push(e);return {confirmed:true,accepted:true}}}};
+}
+test('AV13 targeting and combined simulation',()=>cases((ok,name)=>assert.ok(ok,name),createTargetLock,createProjectilePool,createCombatSimulation,{combined:actualParts,projectile:createProjectile}));
