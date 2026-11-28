@@ -4,11 +4,13 @@ import { MOUNTAIN_V8_MATERIAL as material } from './mountain-v8-materials.mjs';
 import { mountainV8TileRoot } from './mountain-v8-source-adapter.mjs';
 import { MOUNTAIN_V8_PLANT_PATTERNS } from './mountain-v8-vegetation-cells.mjs';
 import { planMountainSubregionAt } from './shattered-peaks-subregions.mjs';
-export { openShatteredVegetationWitness as openShatteredAlpinePlantWitness } from './shattered-peaks-conifers.mjs';
+import { openShatteredNaturalShapeWitness } from './shattered-peaks-conifers.mjs';
 
 const meadowRegions = new Set(['emerald-highlands', 'skywater-basins']);
 const cardinal = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 const kinds = ['alpine-flower', 'low-heather'];
+
+export const openShatteredAlpinePlantWitness = (world, plant) => openShatteredNaturalShapeWitness(world, plant, 'vegetation');
 
 export function surveyShatteredAlpinePlant(world, tx, tz, { reservedAt = () => false } = {}) {
   const root = mountainV8TileRoot(tx, tz, world.seed);

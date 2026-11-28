@@ -32,9 +32,9 @@ export function surveyShatteredPine(world, tx, tz, kind) {
   return { kind, region, support: [x, floor, z], cells };
 }
 
-export const openShatteredPineWitness = (world, tree) => openShatteredVegetationWitness(world, tree, 'pine');
+export const openShatteredPineWitness = (world, tree) => openShatteredNaturalShapeWitness(world, tree, 'pine');
 
-export function openShatteredVegetationWitness(world, placement, label = 'vegetation') {
+export function openShatteredNaturalShapeWitness(world, placement, label) {
   const cells = new Map(), upper = new Set();
   for (const [x, y, z, id] of placement.cells) {
     cells.set(worldKey(x, y, z), id);
