@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {evaluateChainedBudget, CHAINED_BUDGET} from '../src/resonance/generation24/chained-budget.mjs';
+import {describeGenerator, CONTRACT} from '../src/resonance/generation24/index.mjs';
+const generators = [describeGenerator({id:'a',model:'heat',seed:1,anchor:[0,0,0]}),describeGenerator({id:'b',model:'heat',seed:1,anchor:[1,0,0]})];
+const keys=generators.map(g=>g.instanceKey).sort();
+const checkpoint={signature:CHAINED_BUDGET,sourceContract:CONTRACT.id,nextTick:3,keys,generatedCandidate:0,fuelRequiredCandidate:5,remainingReservations:keys.map(instanceKey=>({instanceKey,units:0}))};
+test('multi-heat checkpoint can count five fuel units across three elapsed ticks',()=>{assert.throws(()=>evaluateChainedBudget(generators,()=>{throw Error('provider reached')},3,1,checkpoint),/provider reached/);});
+test('multi-heat checkpoint rejects more fuel than generator-tick upper bound',()=>{assert.throws(()=>evaluateChainedBudget(generators,()=>{throw Error('provider reached')},3,1,{...checkpoint,fuelRequiredCandidate:7}),/checkpoint/);});
+test('nonheat checkpoint cannot claim any fuel',()=>{const crystal=describeGenerator({id:'c',model:'crystal',seed:1,anchor:[0,0,0]});assert.throws(()=>evaluateChainedBudget([crystal],()=>{throw Error('provider reached')},3,1,{...checkpoint,keys:[crystal.instanceKey],fuelRequiredCandidate:1,remainingReservations:[{instanceKey:crystal.instanceKey,units:0}]}),/checkpoint/);});
