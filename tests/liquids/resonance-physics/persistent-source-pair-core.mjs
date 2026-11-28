@@ -8,13 +8,13 @@ import {createResonanceSourcePersistence} from '../../../src/liquids/liquid-reso
 import {createResonanceSources} from '../../../src/liquids/liquid-resonance/physics/finite-sources.mjs';
 import {RESONANCE_ID,RESONANCE_DEFINITION,resonanceQuantities} from '../../../src/liquids/liquid-resonance/physics/definition.mjs';
 
-// Exact Water A 9e04fb8d2db70ea352d7c3c301822bbe4eefb8c6 dependency closure.
+// Exact Water A 6e462fb2a00a6d6c585a5edaab6f7a8741efcd1d dependency closure.
 const root=process.env.LIQUID_CORE_ROOT;
 if(!root)throw new Error('Set LIQUID_CORE_ROOT to the pinned Water A checkout');
 const pins={
-  'src/liquids/core/engine.mjs':'ac9dfb9e85e99cce81ffc6a4aabe8b2f6f2b764b',
-  'src/liquids/core/persistence.mjs':'fd91bc58ba68998e5275c163ae68cd27343f466a',
-  'src/liquids/core/owner-handoff.mjs':'cfcea29c203faeb99bfbf94dc1ea9a71b1cb8c50',
+  'src/liquids/core/engine.mjs':'b0ce6f804c111cc2a0a9cf6c835fc75fde45eaa5',
+  'src/liquids/core/persistence.mjs':'8b2118d8a915497f3688093122afa3ea94aa79d1',
+  'src/liquids/core/owner-handoff.mjs':'7e710dcaaec7e60236d0330be0c73310e152ce57',
   'src/liquids/water/physics/sources.mjs':'61b63656d80ea30071f75423ad69b48a1000784a',
   'src/world-height.mjs':'1f5fe4411967223bbfcb7e85a804ce34f91fbb90',
   'src/depth.mjs':'b54b7fd8c422699a328b60135178f97508e277c8',
