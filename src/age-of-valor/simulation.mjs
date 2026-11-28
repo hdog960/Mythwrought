@@ -12,7 +12,8 @@ export function createCombatSimulation({controller,guard,poise,status,ability,re
    if(context())return false;
    if(event.type==='tick-proposal'||event.type==='ability-execution-proposal'){
     const receipt=consumeProposal(event);
-    if(!receipt||receipt.confirmed!==true||typeof receipt.accepted!=='boolean')throw Error('uncertain proposal');
+    if(!receipt||receipt.confirmed!==true||typeof receipt.accepted!=='boolean'||(receipt.interrupt!==undefined&&typeof receipt.interrupt!=='boolean'))throw Error('uncertain proposal');
+    if(receipt.accepted&&receipt.interrupt===true){ability.cancel();controller.cancel();}
    }
    delivered.push(event);
    if(context())return false;
@@ -36,12 +37,13 @@ export function createCombatSimulation({controller,guard,poise,status,ability,re
     const s=status.advance(dt,{epoch:worldEpoch});if(!s.ok)throw Error('status fault');
     clock=next;
     const drain=guard.synchronize();if(!drain.ok&&drain.reason!=='guard-broken')throw Error('guard drain fault');
-    const b=ability.advance(dt);
-    // Ability cancellation is allowed to finish its clock step; uncertain or divergent state is not.
-    if(!clocks()||b.reason==='authority-uncertain'||b.snapshot.closed)throw Error('ability fault');
     delivered.push(...c.events);
     if(drain.reason==='guard-broken'){delivered.push(Object.freeze({type:'guard-broken',at:clock}));ability.cancel();}
-    if(!publish(s.events,delivered)||!publish(b.events,delivered))return out(false,closed?'retired':'paused',delivered);
+    // Status outcomes take precedence over a due ability pulse. A confirmed host interruption cancels it before authorization.
+    if(!publish(s.events,delivered)){if(!closed){retire();}return out(false,'retired',delivered);}
+    const b=ability.advance(dt);
+    if(!clocks()||b.reason==='authority-uncertain'||b.snapshot.closed)throw Error('ability fault');
+    if(!publish(b.events,delivered))return out(false,closed?'retired':'paused',delivered);
     gate=context();if(gate)return out(false,gate,delivered);
    }
    return out(true,'advanced',delivered);

@@ -58,5 +58,15 @@ export function createActionController({makeScheduler,makeLedger,resourceOptions
   const broken=scheduler.interrupt('stagger',breakMs);
   return result(false,'guard-broken',broken.events);
  });}
- return Object.freeze({state,request,advance,guardCharge,releaseBlock:id=>exclusive(()=>{const g=gate();if(g)return result(false,g);const x=scheduler.releaseBlock(id);return result(x.ok,x.reason,x.events);}),cancel:()=>exclusive(()=>{const x=scheduler.abortForLifecycle();return result(x.ok,x.reason,x.events);})});
+ function requestAbility({definitionId,durationMs,cost}={}){return exclusive(()=>{
+  const denied=gate();if(denied)return result(false,denied);
+  if(scheduler.snapshot().state!=='idle'||typeof definitionId!=='string'||!/^[a-z][a-z0-9_-]{0,31}:[a-z0-9][a-z0-9._-]{0,63}$/.test(definitionId)||!integer(durationMs,1,60000)||!integer(cost?.stamina,0,100000000)||!integer(cost?.mana,0,100000000))return result(false,'invalid-or-busy');
+  const d=Object.freeze({definitionId,timing:Object.freeze({kind:'cast',durationMs}),cost:Object.freeze({stamina:cost.stamina,mana:cost.mana})});
+  let permitted=false;try{permitted=authorize(d,scheduler.snapshot())===true;}catch{}if(!permitted)return result(false,'not-authorized');
+  const second=gate();if(second)return result(false,second);
+  const started=scheduler.begin(d.timing);if(!started.ok)return result(false,started.reason);
+  const charged=debit(d.cost);if(!charged.ok){scheduler.abortForLifecycle();return result(false,charged.reason);}
+  return result(true,'admitted',started.events);
+ });}
+ return Object.freeze({state,request,requestAbility,advance,guardCharge,releaseBlock:id=>exclusive(()=>{const g=gate();if(g)return result(false,g);const x=scheduler.releaseBlock(id);return result(x.ok,x.reason,x.events);}),cancel:()=>exclusive(()=>{const x=scheduler.abortForLifecycle();return result(x.ok,x.reason,x.events);})});
 }
