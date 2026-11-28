@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><canvas width="64" height="64"></canvas><pre id="result">PENDING</pre>
+<script type="module">
+import {planLiquidDraws} from '../../../src/liquids/presentation/draw-plan.mjs';
+const result=document.querySelector('#result');
+try {
+  const gl=document.querySelector('canvas').getContext('webgl2',{antialias:false,preserveDrawingBuffer:true});
+  if(!gl)throw Error('WebGL2 unavailable');
+  const shader=(type,source)=>{const s=gl.createShader(type);gl.shaderSource(s,source);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
+  const p=gl.createProgram();gl.attachShader(p,shader(gl.VERTEX_SHADER,'#version 300 es\nlayout(location=0) in vec3 pos; void main(){gl_Position=vec4(pos*2.0-1.0,1.0);}'));gl.attachShader(p,shader(gl.FRAGMENT_SHADER,'#version 300 es\nprecision highp float; uniform vec4 color; out vec4 frag; void main(){frag=color;}'));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));gl.useProgram(p);
+  const mat=(id,pass,color)=>({id,pass,color,depthTest:true,depthWrite:pass==='opaque',cull:false,blend:'straight-alpha'});
+  const materials={water:mat('water','transparent',[1,0,0,.5]),acid:mat('acid','transparent',[0,0,1,.5]),lava:mat('lava','opaque',[0,1,0,1])};
+  function batch(id,liquid,z,xmax=1){const positions=new Float32Array([0,0,z,xmax,0,z,xmax,1,z,0,1,z]);return {id,revision:1,mesh:{version:1,origin:[0,0,0],faceCount:1,groups:[{id:liquid,positions,normals:new Float32Array(12),indices:new Uint32Array([0,1,2,0,2,3])}]}};}
+  const batches=[batch('near','water',.2),batch('occluder','lava',.5,.5),batch('far','acid',.8)];
+  const plan=planLiquidDraws({batches,materials,camera:[0,0,0],forward:[0,0,1]});
+  const vaos=new Map();for(const b of batches){const g=b.mesh.groups[0],vao=gl.createVertexArray();gl.bindVertexArray(vao);const vb=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,vb);gl.bufferData(gl.ARRAY_BUFFER,g.positions,gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);const ib=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ib);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,g.indices,gl.STATIC_DRAW);vaos.set(b.id,vao);}
+  gl.viewport(0,0,64,64);gl.clearColor(0,0,0,1);gl.clearDepth(1);gl.enable(gl.DEPTH_TEST);gl.disable(gl.CULL_FACE);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const draw=cmd=>{gl.bindVertexArray(vaos.get(cmd.batchId));gl.uniform4fv(gl.getUniformLocation(p,'color'),materials[cmd.liquid].color);gl.drawElements(gl.TRIANGLES,cmd.indexCount,gl.UNSIGNED_INT,cmd.firstIndex*4);};
+  gl.disable(gl.BLEND);gl.depthMask(true);plan.opaque.forEach(draw);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);plan.transparent.forEach(draw);gl.depthMask(true);gl.disable(gl.BLEND);
+  const pixel=(x,y)=>{const a=new Uint8Array(4);gl.readPixels(x,y,1,1,gl.RGBA,gl.UNSIGNED_BYTE,a);return [...a];};
+  const left=pixel(16,32),right=pixel(48,32);const matches=(a,b)=>b.every((n,i)=>Math.abs(a[i]-n)<=2);
+  if(!matches(left,[128,128,0])||!matches(right,[128,0,64])||gl.getError()!==gl.NO_ERROR)throw Error('Pixel or GL error '+JSON.stringify({left,right}));
+  result.textContent='PASS '+JSON.stringify({left,right,renderer:gl.getParameter(gl.RENDERER)});
+} catch(e){result.textContent='FAIL '+e.message;}
+</script>
