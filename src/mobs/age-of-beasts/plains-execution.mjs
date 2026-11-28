@@ -16,7 +16,7 @@ import {observeExpansionSocial} from './social-behavior.mjs';
 import {hearExpansionDisturbance} from './sound-perception.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
-const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike','drop-attack','combo-strike']);
+const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike','root-strike','drop-attack','combo-strike']);
 const point=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Math.abs(n)<2**26);
 function createActor(candidate,position,query,biome){
  if(candidate?.requirement?.biome!==biome)throw TypeError('Wrong candidate biome');
@@ -58,6 +58,26 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(typeof readPeers==='function'&&r.id==='dire-hound')obs.packNearby=!!pack;
  const rolling=r.id==='snowdrifter'&&obs.ready&&threatVisible&&obs.threatDistance<5&&actor.rollCooldown<=0&&snowRollSurface(query,ownerView,actor.position,r.body,rev);
  let intent=decide(actor.candidate,obs);
+ // A Scarefiend must physically awaken before its normal attack windup.
+ // Lost visibility or daylight resets an unfinished awakening.
+ if(r.id==='scarefiend'){
+  if(!obs.ready||!matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness)||!visible||obs.targetDistance>5){
+   actor.awakeTicks=0;actor.awakeTarget=null;
+  }else{
+   if(actor.awakeTarget!==target){actor.awakeTarget=target;actor.awakeTicks=0;}
+   if((actor.awakeTicks??0)<12){actor.awakeTicks=(actor.awakeTicks??0)+1;intent={action:'awaken',visual:'idle'};}
+  }
+ }
+ // Bind the physical attack choice to its own windup; changing range
+ // mid-windup must start a new windup instead of switching strikes instantly.
+ const variant=r.id==='giant-scorpion'?(obs.targetDistance<r.combat.reach*.6?'pincer':'tail-strike'):
+   r.id==='corrupted-treant'?(obs.targetDistance<r.combat.reach*.55?'root-strike':'branch-strike'):null;
+ if(variant){
+  if(!obs.ready||!visible||obs.targetDistance>r.combat.reach||obs.cooldownRemaining>0)actor.windupVariant=null;
+  else if(actor.windupVariant!==variant){
+   actor.windupVariant=variant;obs.windupElapsed=0;intent=decide(actor.candidate,obs);
+  }
+ }
  const activity=obs.ready&&matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness)?observeWildlife(actor,query,ownerView,{goal,flowerCell,threatVisible,targetVisible:visible,target,revision:rev}):null;
  if(activity)intent={action:activity.action,visual:activity.action};
  else if(landingBird&&r.id!=='golden-eagle'&&landingGoal&&!threatVisible&&obs.ready&&matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness))intent=perchReady?{action:'perch',visual:'idle'}:{action:'perch-approach',visual:'fly'};
@@ -156,6 +176,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
   }
   if(activity&&!settleWildlife(actor,query,ownerView,activity,rev,commitPollination)){Object.assign(actor,start);return false;}
   if(wading)actor.motionMode='wade';
+  if(r.id==='scarefiend'&&['disguise','awaken'].includes(intent.action)&&expansionSupport(query,actor.position,r.body,'ground'))actor.motionMode=intent.action;
   if(intent.action==='launch-projectile'){
    const proposal=proposeBeastProjectile(actor,target,query,rev);
    if(!proposal||launchProjectile(proposal)!==true){Object.assign(actor,start);return false;}
@@ -171,6 +192,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
    const kind=strike===null?intent.action:profile.prefix+'-'+(strike+1);
    if(commitDamage(victim,amount,rev,kind)!==true){Object.assign(actor,start);return false;}
    if(!follow)actor.cooldown=r.combat.cooldown;
+   if(variant)actor.windupVariant=null;
    if(strike!==null)actor.combo=strike===2?null:Object.freeze({target:victim,index:strike+1,ticks:profile.interval});
    if(intent.action==='drop-attack'){actor.dropState='recovering';actor.dropTarget=null;}
   }

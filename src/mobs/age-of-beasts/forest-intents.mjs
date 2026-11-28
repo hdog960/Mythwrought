@@ -10,7 +10,7 @@ export function nextForestIntent(c,o){
  case 'faerie':case 'prismwing':return danger?out('fly'):o.flowerNearby?out('flower-visit'):out('fly');
  case 'sproutling':return danger?out('conceal'):out('forage');
  case 'glimmerstag':return danger?out('evade'):o.herdSeparated?out('herd'):out('graze');
- case 'corrupted-treant':return close?attack('branch-strike'):o.targetVisible?out('pursue'):out('idle');
+ case 'corrupted-treant':return close?attack(o.targetDistance<r.combat.reach*.55?'root-strike':'branch-strike'):o.targetVisible?out('pursue'):out('idle');
  case 'nightshade-witch':return close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
  case 'sporebeast':return close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
  case 'chimera':return close?attack('heavy-melee'):o.targetVisible?out('charge'):out('idle');

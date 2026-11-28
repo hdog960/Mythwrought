@@ -161,6 +161,19 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
        return q.lineOfSight([at[0],at[1]+body.height*.6,at[2]],[side[0],side[1]+rider.height*.5,side[2]])===true;
       });break;
     }
+    case 'dense-forest':{
+     // Conservative bounded stand of actual woody columns, outside the
+     // creature footprint. Do not treat biome identity as tree coverage.
+     const trunks=new Set([BLOCK.WOOD,ENVIRONMENT_GROUND.aetherBark,M['conifer-trunk']]);
+     const [x,y,z]=p.map(Math.floor),directions=new Set();let known=true;
+     for(let dx=-4;dx<=4;dx++)for(let dz=-4;dz<=4;dz++){
+      if(Math.max(Math.abs(dx),Math.abs(dz))<Math.ceil(body.radius+1))continue;
+      const low=read(x+dx,y,z+dz),high=read(x+dx,y+1,z+dz);
+      if(low===undefined||high===undefined)known=false;
+      if(trunks.has(low)&&trunks.has(high))directions.add(Math.abs(dx)>=Math.abs(dz)?(dx<0?'west':'east'):(dz<0?'north':'south'));
+     }
+     result[tag]=env.biome==='forest'&&support('ground')&&known&&directions.size>=2;break;
+    }
     case 'clearing':{
      // Conservative forest clearing: real ground and a full body-height
      // ring of clear air with source-known support; no tree deletion.

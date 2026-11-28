@@ -13,7 +13,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 | Honeybee | flight, pollination, hive | Physical blossom contact and pollen transfer native PASS session19; hive/live pending |
 | Golden Antelope | evasion, herd | Incomplete |
 | Werewolf | pursuit, claw | Incomplete |
-| Scarefiend | disguise, awakening, ambush | Incomplete |
+| Scarefiend | disguise, awakening, ambush | Original-engine physical disguise and 12-tick target-bound awakening before ambush authored session28; native/live and visual pose pending |
 | Headless Knight | sword, heavy-melee | Incomplete |
 | Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; same-engine isolated damage PASS session21; integrated pack batch session22 admission rejected overlapping bodies; corrected fixture separation and integrated same-engine pack damage native PASS session23; live pending |
 | Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate native PASS session19; live and restraint owner pending |
@@ -29,7 +29,7 @@ Native isolated pursuit, hop, pincer, night gate.
 | Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; two-sided full-body shoreline search native PASS session20; live pending |
 | Dunewalker | herd, six-legged-walk | Incomplete |
 | Mummy | pursuit, melee | Incomplete |
-| Giant Scorpion | pincers, tail, venom | Incomplete |
+| Giant Scorpion | pincers, tail, venom | Prior pincer native qualified; range-specific windup reset and tail strike authored session28; native/live and venom owner pending |
 | Dune Serpent | serpentine, ambush, emergence | Incomplete |
 | Mirage Djinn | float, illusion, magic | Incomplete |
 | Sand Colossus | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
@@ -55,12 +55,12 @@ Native isolated jump, flower approach, branch strike, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; physical clearing admission and same-engine mounted control native PASS session26; live player and persistence pending |
+| Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; physical clearing admission and same-engine mounted control native PASS session26; 10 actual baseline natural admissions PASS session27; live player and persistence pending |
 | Faerie | flight, flower-visit | Physical blossom visit native PASS session19; live pending |
 | Sproutling | waddle, concealment, rest | Incomplete |
 | Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest native PASS session19; live pending |
 | Glimmerstag | walk, illumination | Incomplete |
-| Corrupted Treant | branch-attack, root-attack | Incomplete |
+| Corrupted Treant | branch-attack, root-attack | Prior branch strike native qualified; distinct physical root strike and dense forest gate authored session28; native/live, root animation/effect pending |
 | Nightshade Witch | poison-spell, slow-spell | Incomplete |
 | Sporebeast | spore-cloud | Incomplete |
 | Chimera | territory, multi-attack | Three guarded timed strikes native PASS session16; home radius/return native PASS session20; live pending |
@@ -87,9 +87,9 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Cave Bat | flight, roost, colony | Isolated roost/departure qualified; staggered actual engine colony sortie and roof return authored session27, native/live pending |
+| Cave Bat | flight, roost, colony | Isolated roost/departure qualified; staggered actual engine colony sortie and roof return native PASS session27; live pending |
 | Crystal Snail | crawl, illumination, harvest-eligible | Incomplete |
-| Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement native PASS session25; natural spawn/live pending |
+| Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement native PASS session25; 8400 actual baseline cave cells sampled session27, zero natural water; cave provider/live pending |
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
@@ -112,4 +112,6 @@ Session25: corrected high-elevation unknown-cell test/provider and conservative 
 
 Session26: integrated original AnimalInteractions with actual MobEngine fixture snapshots and original moveBody inside its tick; camel/unicorn mount steering, rider pose proposals, safe dismount, yak tame-only and dormant retirement authored. Physical source-known forest clearing admission predicate added. Three native groups native PASS session26, 92/92. No persistent tame/mount state or player writes.
 
-Session27: physical colony bat sorties and return, original flight integration with exact destination control and full-air checks; independent actual forest unicorn and underground water census tests authored. No new admission counts until native log. Prior integrated mount native PASS. No species marked fully complete.
+Session27: physical colony bat sorties and return, original flight integration with exact destination control and full-air checks; independent actual forest unicorn and underground water census tests authored. Native PASS session27 95/95; 10 Unicorn admissions across75 columns, zero natural water across8400 cave cells. Prior integrated mount native PASS. No species marked fully complete.
+
+Session28: Scarefiend awakening, physical strike variant windup and dense forest qualification authored, three new native groups pending. Cumulative17 distinct natural baseline species; no full gameplay completion claim.
