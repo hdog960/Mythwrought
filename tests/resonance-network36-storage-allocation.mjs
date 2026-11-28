@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allocateResonance} from '../src/resonance/network36/storage-allocation.mjs';
+const store=(charge=0)=>({id:'battery',capacity:20,charge,inputRate:3,outputRate:4});
+test('surplus charges with rate and capacity',()=>{const r=allocateResonance({generation:10,stores:[store(19)]});assert.equal(r.charged,1);assert.equal(r.unused,9);});
+test('storage discharges only for admitted complete demand',()=>{const r=allocateResonance({generation:2,devices:[{id:'safety',priority:0,demand:6}],stores:[store(8)]});assert.deepEqual(r.enabled,['safety']);assert.equal(r.drawn,4);assert.equal(r.stores[0].charge,4);});
+test('shortage sheds lower priority and automatically restores',()=>{const devices=[{id:'factory',priority:10,demand:5},{id:'lamp',priority:0,demand:3}];assert.deepEqual(allocateResonance({generation:4,devices}).stopped,['factory']);assert.deepEqual(allocateResonance({generation:8,devices}).enabled,['lamp','factory']);});
+test('no energy creation and no caller mutation',()=>{const s=store(5),d={id:'machine',priority:1,demand:7};const r=allocateResonance({generation:3,devices:[d],stores:[s]});assert.equal(r.generation+r.drawn,r.spent+r.charged+r.unused);assert.equal(s.charge,5);assert.equal(d.demand,7);});
+test('rejects malformed or duplicate inputs',()=>{for(const x of [{generation:-1},{generation:0,stores:[{...store(),charge:21}]},{generation:0,devices:[{id:'x',priority:0,demand:1},{id:'x',priority:0,demand:1}]},{generation:Number.MAX_SAFE_INTEGER+1}])assert.throws(()=>allocateResonance(x));});
+test('stable identifier tie breaks independent of input order',()=>{const a={id:'a',priority:1,demand:2},b={id:'b',priority:1,demand:2};assert.deepEqual(allocateResonance({generation:2,devices:[b,a]}).enabled,['a']);});
+test('output rate cannot be spent twice across devices',()=>{const r=allocateResonance({generation:0,devices:[{id:'a',priority:0,demand:3},{id:'b',priority:1,demand:3}],stores:[store(10)]});assert.deepEqual(r.enabled,['a']);assert.deepEqual(r.stopped,['b']);assert.equal(r.drawn,3);});
