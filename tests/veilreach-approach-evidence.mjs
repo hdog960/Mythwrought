@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {chromium} from 'playwright';
+import {createSkylands} from '../src/veilreach/generation.mjs';
 
 const origin=process.env.VEILREACH_ORIGIN??'http://127.0.0.1:4211/';
 const out=process.env.VEILREACH_EVIDENCE??'artifacts/veilreach-approach';
@@ -9,6 +10,8 @@ const revision=process.env.VEILREACH_SOURCE;
 assert.match(revision??'',/^[a-f0-9]{40}$/);
 const recordVideo=process.env.VEILREACH_EVIDENCE_NO_VIDEO!=='1';
 const boundaryRoute=process.env.VEILREACH_BOUNDARY_ROUTE==='1';
+const regionRoute=process.env.VEILREACH_REGION_ROUTE==='1';
+assert.ok(!(boundaryRoute&&regionRoute));
 const viewport={width:844,height:390};
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({args:['--enable-webgl','--use-gl=angle',
@@ -24,7 +27,7 @@ const hold=async(key,fn,arg)=>{
   await page.keyboard.down(key);
   try{await wait(fn,arg);}finally{await page.keyboard.up(key);}
 };
-const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',recordVideo,boundaryRoute,errors};
+const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',recordVideo,boundaryRoute,regionRoute,errors};
 try{
   await page.addInitScript(()=>{
     const random=crypto.getRandomValues.bind(crypto);
@@ -74,51 +77,80 @@ try{
   await doubleTap();
   await wait(()=>window.__mythwroughtTest.flightInfo().active);
   await page.locator('#scene').focus();
-  await hold('e',y=>window.__mythwroughtTest.flightInfo().position.y>=y,127);
-  if(boundaryRoute){
-    await tag('outbound');
-    await aim(-34,127,7);
-    await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x<-33);
-    report.outbound=await pose();
-    await tag('inbound');
-    await aim(0,127,0);
-    await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x>=-.7);
-    report.inbound=await pose();
+  await hold('e',y=>window.__mythwroughtTest.flightInfo().position.y>=y,regionRoute?244:127);
+  if(regionRoute){
+    const terrain=createSkylands(180);
+    const targets=[terrain.region(0,0)[0],terrain.region(0,-1)[0],terrain.region(0,-1)[1]];
+    report.waypoints=[];
+    for(const {id,x,y,z} of targets){
+      const start=(await pose()).position,target={x:x+.5,z:z+.5};
+      await tag('island '+id);
+      await aim(x,y,z);
+      await hold('w',({start,target})=>{
+        const p=window.__mythwroughtTest.flightInfo().position;
+        const dx=p.x-target.x,dz=p.z-target.z;
+        return Math.hypot(dx,dz)<.72||dx*(target.x-start.x)+dz*(target.z-start.z)>=0;
+      },{start,target});
+      const reached=await pose();
+      assert.ok(reached.resident&&reached.active&&reached.bodyClear);
+      assert.ok(Math.hypot(reached.position.x-target.x,reached.position.z-target.z)<3);
+      report.waypoints.push({id,target,reached});
+    }
+  }else{
+    if(boundaryRoute){
+      await tag('outbound');
+      await aim(-34,127,7);
+      await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x<-33);
+      report.outbound=await pose();
+      await tag('inbound');
+      await aim(0,127,0);
+      await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x>=-.7);
+      report.inbound=await pose();
+    }
+    await tag('approach');
+    await aim(57,116,39);
+    await hold('w',()=>{
+      const p=window.__mythwroughtTest.flightInfo().position;
+      return Math.hypot(p.x-57.5,p.z-39.5)<.72;
+    });
+    report.approach=await pose();
+    await tag('landing');
+    await doubleTap();
+    await wait(()=>!window.__mythwroughtTest.flightInfo().active&&window.__mythwroughtTest.m5ObservedPose().onGround);
+    report.landed=await pose();
+    assert.ok(report.landed.position.y>100);
+    await page.locator('#scene').focus();
+    await tag('walk');
+    await aim(62,118,40);
+    await hold('w',p=>{
+      const n=window.__mythwroughtTest.flightInfo().position;
+      return Math.hypot(p.x-n.x,p.z-n.z)>.65;
+    },report.landed.position);
+    report.walked=await pose();
   }
-  await tag('approach');
-  await aim(57,116,39);
-  await hold('w',()=>{
-    const p=window.__mythwroughtTest.flightInfo().position;
-    return Math.hypot(p.x-57.5,p.z-39.5)<.72;
-  });
-  report.approach=await pose();
-  await tag('landing');
-  await doubleTap();
-  await wait(()=>!window.__mythwroughtTest.flightInfo().active&&window.__mythwroughtTest.m5ObservedPose().onGround);
-  report.landed=await pose();
-  assert.ok(report.landed.position.y>100);
-  await page.locator('#scene').focus();
-  await tag('walk');
-  await aim(62,118,40);
-  await hold('w',p=>{
-    const n=window.__mythwroughtTest.flightInfo().position;
-    return Math.hypot(p.x-n.x,p.z-n.z)>.65;
-  },report.landed.position);
-  report.walked=await pose();
   assert.deepEqual(errors,[]);
-  if(boundaryRoute){
-    assert.ok(report.outbound.resident&&report.inbound.resident);
-    assert.ok(report.outbound.position.x<-33&&report.inbound.position.x>=-.7);
+  if(boundaryRoute||regionRoute){
     const trace=await page.evaluate(()=>window.approachFrames);
-    assert.ok(trace.some(f=>f.physical?.served>0),'the prediction reached the production mesh queue');
     assert.ok(trace.every(f=>f.owners<=25&&f.upper<=8&&f.upperBytes<=7077888));
+    if(boundaryRoute){
+      assert.ok(report.outbound.resident&&report.inbound.resident);
+      assert.ok(report.outbound.position.x<-33&&report.inbound.position.x>=-.7);
+      assert.ok(trace.some(f=>f.physical?.served>0),'the prediction reached the production mesh queue');
+    }else{
+      assert.ok(report.waypoints.every(w=>trace.some(f=>f.segment==='island '+w.id&&f.far>0)));
+    }
   }
   report.pass=true;
 }finally{
   report.trace=await page.evaluate(()=>window.approachFrames).catch(()=>[]);
-  const times=report.trace.filter(f=>f.segment==='approach'&&f.dt!==null).map(f=>f.dt).sort((a,b)=>a-b);
-  const percentile=p=>times[Math.max(0,Math.ceil(p*times.length)-1)]??null;
-  report.approachFrameMs={median:percentile(.5),p95:percentile(.95),p99:percentile(.99)};
+  function timing(segment){
+    const times=report.trace.filter(f=>f.segment===segment&&f.dt!==null).map(f=>f.dt).sort((a,b)=>a-b);
+    const percentile=p=>times[Math.max(0,Math.ceil(p*times.length)-1)]??null;
+    return {median:percentile(.5),p95:percentile(.95),p99:percentile(.99)};
+  }
+  report.approachFrameMs=timing('approach');
+  if(regionRoute)report.regionFrameMs=Object.fromEntries((report.waypoints??[])
+    .map(({id})=>[id,timing('island '+id)]));
   await writeFile(join(out,'report.json'),JSON.stringify(report,null,2)+'\n');
   const clip=page.video();
   await context.close();
