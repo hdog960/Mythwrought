@@ -10,6 +10,8 @@ import {execFileSync} from 'node:child_process';
 import {chromium} from 'playwright';
 import pngjs from 'pngjs';
 import {CAVE_MODEL_IDS} from '../../src/mobs/age-of-beasts/cave-models.mjs';
+const selected=process.env.BEAST_VISUAL_IDS?process.env.BEAST_VISUAL_IDS.split(','):CAVE_MODEL_IDS;
+assert.ok(selected.length>0&&new Set(selected).size===selected.length&&selected.every(id=>CAVE_MODEL_IDS.includes(id)));
 const {PNG}=pngjs,root=resolve('.'),out=resolve('artifacts/age-of-beasts-cave');
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const original=await readFile('src/mobs/live-render.mjs','utf8');
@@ -53,7 +55,7 @@ try{
    };
    window.disposeBeasts=()=>{renderer.dispose();return renderer.stats();};
   },{width,height});
-  for(const id of CAVE_MODEL_IDS){
+  for(const id of selected){
    const hashes=[];
    for(let pose=0;pose<2;pose++){
     const s=await page.evaluate(({id,pose})=>window.drawBeast(id,pose),{id,pose});

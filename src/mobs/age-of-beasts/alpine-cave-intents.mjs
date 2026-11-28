@@ -30,10 +30,11 @@ export function nextCaveIntent(c,o){
  case 'geodeback':return danger&&o.threatDistance<=r.combat.reach?attack('defend'):danger?out('flee'):out('forage');
  case 'burrowing-horror':return close?attack('ambush'):o.targetVisible?out('pursue'):out('conceal');
  case 'abyssal-sentinel':case 'abyssal-hydra':return close?attack('heavy-melee'):o.targetVisible?out('pursue'):out('idle');
- case 'echo-stalker':return close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
+ case 'echo-stalker':return close?attack('melee'):o.targetVisible?out('pursue'):o.heard?out('investigate'):out('idle');
  case 'ceiling-lurker':
   if(o.dropState==='descending')return o.grounded?(o.dropTargetMatches&&close?out('drop-attack','attack'):out('drop-recover')):out('drop-fall');
-  if(o.dropState==='recovering'&&!o.ceilingContact)return out('idle');
+  if(o.dropState==='recovering'&&!o.ceilingContact)return o.reattachWall?out('reattach-climb'):out('idle');
+  if(o.dropState==='recovering'&&o.ceilingContact)return out('ceiling-crawl');
   if(o.ceilingContact&&o.targetBelow&&o.cooldownRemaining<=0)return o.windupElapsed<r.combat.windup?out('prepare-attack'):out('drop-fall');
   return out('ceiling-crawl');
  default:return out('idle');

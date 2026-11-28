@@ -22,6 +22,8 @@ jobs:
       - run: npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
       - run: npx playwright install chromium
       - run: node tests/mobs/age-of-beasts-cave-browser.mjs
+        env:
+          BEAST_VISUAL_IDS: burrowing-horror,abyssal-hydra
       - uses: actions/upload-artifact@v4
         if: always()
         with:
