@@ -12,7 +12,9 @@ import { inspectWildsLandmarkWalk } from '../../src/manual-biomes/enchanted-wild
 const root = process.cwd(), out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'wilds-original-landmark-walk');
 const seed = 179, source = new WildsFamilyResearchWorld(seed);
 const directions = [[0, 1], [-1, 0], [0, -1], [1, 0]];
-const sites = [[-135, -726], [-139, -584]].map(([x, z]) => {
+const sites = [
+  [-25, -778], [-135, -726], [-136, -697], [-139, -584], [-10, -583], [154, -570]
+].map(([x, z]) => {
   const landmark = source.wildsSource.landmark(Math.floor(x / 16), Math.floor(z / 16));
   const route = inspectWildsLandmarkWalk(source, landmark);
   assert.ok(route);
