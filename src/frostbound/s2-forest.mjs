@@ -35,10 +35,12 @@ export function winterTreeMaterials(family,cells,x,z){
 }
 export class FrostboundForest extends FrostboundS1Refined{
  constructor(seed,options){super(seed,options);this._forest=new Map();this._forestLimit=64;
-  const registry=createUpperNaturalRegistry(),generator='mythwrought-upper-frostbound-forest-research',sourceVersion='s2-lattice-v2';
+  const registry=createUpperNaturalRegistry(),generator='mythwrought-upper-frostbound-forest-research',sourceVersion=this.forestSourceVersion;
   registry.register(generator,sourceVersion,p=>({...p,get:(x,y,z)=>this._forestCell(x,y,z),occupied:k=>this._forestOwner(k),revision:()=>0}));
   this._upperForest=registry.open({kind:'mythwrought-upper-source-profile',version:1,seed,generator,sourceVersion});
  }
+ get forestSourceVersion(){return 's2-lattice-v2';}
+ _forestFamilyRoll(x,z,value){return value;}
  _sourceBlock(x,y,z){return super.naturalAndLandmarkBlock(x,y,z);}
  forestChunk(cx,cz){
   const k=`${cx},${cz}`;if(this._forest.has(k))return this._forest.get(k);
@@ -46,7 +48,7 @@ export class FrostboundForest extends FrostboundS1Refined{
   const x=cx*16+8,z=cz*16+8,r=v6BiomeAt(x,z,this.seed),reservation=forestReservation(cx,cz,this.seed);
   if(r?.name==='snow'&&r.weight>=.65&&roll(cx,cz,this.seed,81)<.88){
    const p=this._columnPlan(x,z),floor=p.size?Math.max(...p.keys()):terrainHeight(x,z,this.seed);
-   const f=roll(cx,cz,this.seed,38),h=roll(cx,cz,this.seed,97);
+   const f=this._forestFamilyRoll(x,z,roll(cx,cz,this.seed,38)),h=roll(cx,cz,this.seed,97);
    const upperFamily=reservation==='ancient'?'frostfather':normal[Math.floor(f*normal.length)];
    const [lo,hi]=FAMILIES[upperFamily];
    const choice=reservation==='surface'?surfaceTreeChoice(floor,f,h):{family:upperFamily,height:lo+Math.floor(h*(hi-lo+1))};
