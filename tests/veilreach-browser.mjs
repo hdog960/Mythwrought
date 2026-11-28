@@ -21,7 +21,7 @@ await mkdir(out,{recursive:true});
 const context=await browser.newContext({viewport,hasTouch:true,isMobile:true,deviceScaleFactor:1});
 const page=await context.newPage();
 page.setDefaultTimeout(20000);
-const report={revision:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
+const report={revision:process.env.VEILREACH_SOURCE??execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
   seed,crown,viewport,checks:{},errors:[]};
 const accept=(name,value)=>{report.checks[name]=value;console.log(name,JSON.stringify(value));};
 const wait=(fn,arg,timeout=120000)=>page.waitForFunction(fn,arg,{timeout,polling:80});
@@ -100,11 +100,16 @@ try{
   await wait(()=>window.__mythwroughtTest.flightInfo().active);
   await page.locator('#scene').focus();
   const flyTo=async(x,z,y)=>{
+    const start=(await flight()).position;
+    const target={x:x+.5,z:z+.5};
     await aim(x,y,z);
-    await hold('w',([x,z])=>{
+    await hold('w',({start,target})=>{
       const p=window.__mythwroughtTest.flightInfo().position;
-      return Math.hypot(p.x-x,p.z-z)<.72;
-    },[x+.5,z+.5]);
+      const dx=p.x-target.x,dz=p.z-target.z;
+      return Math.hypot(dx,dz)<.72||dx*(target.x-start.x)+dz*(target.z-start.z)>=0;
+    },{start,target});
+    const p=(await flight()).position;
+    assert.ok(Math.hypot(p.x-target.x,p.z-target.z)<3,'flight passed the target at an unexpected offset');
   };
   await hold('e',height=>window.__mythwroughtTest.flightInfo().position.y>=height,77);
   await flyTo(42,28,77);
@@ -197,7 +202,7 @@ try{
     const cache=await caches.open('mythwrought-m5-shell-'+release);
     return (await cache.keys()).map(r=>new URL(r.url).pathname);
   },GAME_RELEASE);
-  for(const name of ['distance','source','generation','flora'])assert.ok(cached.includes('/src/veilreach/'+name+'.mjs'));
+  for(const name of ['distance','source','generation','flora','flight-stream'])assert.ok(cached.includes('/src/veilreach/'+name+'.mjs'));
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});
   await start();
