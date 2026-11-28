@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { WildsFamilyResearchWorld } from '../../src/manual-biomes/enchanted-wilds-family-source.mjs';
 import { inspectWildsLandmarkWalk } from '../../src/manual-biomes/enchanted-wilds-landmark-walk.mjs';
-import { surveyWildsMonumentSite } from '../../src/manual-biomes/enchanted-wilds-monument-site.mjs';
+import { composeWildsMonumentSurveys, surveyWildsMonumentSite } from '../../src/manual-biomes/enchanted-wilds-monument-site.mjs';
 import { BLOCK, chunkWindow, meshChunk, raycast } from '../../src/voxel.mjs';
 import { physicalRegionAt, runtimeMeshKey } from '../../src/world-height.mjs';
 import { UPPER_GPU_OWNERS, UPPER_RESIDENT_BYTES, validateUpperSectionGeometry } from '../../src/world-height-budget.mjs';
@@ -59,4 +59,33 @@ test('the Observatory proposal fits original supported ground and native owner b
     seed: world.seed, site, cells: plan.cells.length, support, route,
     structureOwners: [...structureOwners].sort(), owners: owners.length, usedUpper, upperBytes
   }));
+});
+
+test('two supported Wilds monuments share one read-only world without claiming overlapping footprints', () => {
+  const world = new WildsFamilyResearchWorld(42);
+  const sites = [{ id: 12, x: -204, z: -580, turn: 0 }, { id: 15, x: 1628, z: -205, turn: 0 }];
+  const original = composeWildsMonumentSurveys(world, sites);
+  const reversed = composeWildsMonumentSurveys(world, [...sites].reverse());
+  assert.ok(original && reversed);
+  assert.deepEqual(original.plans, reversed.plans);
+  assert.equal(original.cells, 266);
+  assert.equal(composeWildsMonumentSurveys(world, [sites[0], sites[0]]), null);
+  assert.equal(composeWildsMonumentSurveys(world, [sites[0], { ...sites[1], x: 0, z: 0 }]), null);
+  const results = [];
+  for (const plan of original.plans) {
+    for (const [x, y, z, id] of plan.cells) {
+      assert.equal(original.witness.get(x, y, z), id);
+      assert.equal(reversed.witness.naturalAndLandmarkBlock(x, y, z), id);
+      assert.equal(world.get(x, y, z), BLOCK.AIR);
+    }
+    const route = inspectWildsLandmarkWalk(original.witness, plan);
+    assert.ok(route && route.distance === 11);
+    const [x, y, z] = plan.origin, owner = [Math.floor(x / 16), Math.floor(z / 16), 0];
+    const sample = meshChunk(original.witness, ...owner);
+    assert.notDeepEqual(sample, meshChunk(world, ...owner));
+    assert.deepEqual(sample, meshChunk(reversed.witness, ...owner));
+    results.push({ name: plan.name, origin: plan.origin, route, owner, bytes: sample.byteLength });
+  }
+  assert.equal(world.edits.size, 0);
+  console.log('WILDS MONUMENT INVENTORY ' + JSON.stringify({ cells: original.cells, plans: results }));
 });

@@ -8,6 +8,17 @@ import { buildWildsMonument } from './enchanted-wilds-monuments.mjs';
 
 const soil = new Set([ground.woodlandLoam, ground.woodlandPeat, ground.woodlandMoss]);
 
+function openMonumentWitness(world, cells, upper) {
+  return Object.create(world, {
+    get: { value: (a, b, c) => cells.get([a, b, c].join(',')) ?? world.get(a, b, c) },
+    naturalAndLandmarkBlock: { value: (a, b, c) =>
+      cells.get([a, b, c].join(',')) ?? world.naturalAndLandmarkBlock(a, b, c) },
+    upperNaturalOccupied: { value: key => upper.has(key) || world.upperNaturalOccupied(key) },
+    set: { value() { throw Error('Read-only Wilds monument witness'); } },
+    save: { value() { throw Error('Wilds monument research requires a separate save profile'); } }
+  });
+}
+
 export function surveyWildsMonumentSite(world, { id, x, z, turn }) {
   const biome = v6BiomeAt(x, z, world.seed);
   if (biome?.name !== 'enchanted' || biome.weight < .90) return null;
@@ -35,11 +46,25 @@ export function surveyWildsMonumentSite(world, { id, x, z, turn }) {
     const owner = physicalRegionAt(a, b, c);
     if (owner.kind === 'upper') upper.add(owner.key);
   }
-  const witness = Object.create(world, {
-    get: { value: (a, b, c) => cells.get([a, b, c].join(',')) ?? world.get(a, b, c) },
-    upperNaturalOccupied: { value: key => upper.has(key) || world.upperNaturalOccupied(key) },
-    set: { value() { throw Error('Read-only Wilds monument witness'); } },
-    save: { value() { throw Error('Wilds monument research requires a separate save profile'); } }
-  });
-  return { plan, witness, upperOwners: [...upper].sort(), support: feet.size };
+  return { plan, witness: openMonumentWitness(world, cells, upper), upperOwners: [...upper].sort(), support: feet.size };
+}
+
+// All sites must pass against the same unchanged terrain. Footings, body
+// clearance and reserved entrances count towards the horizontal claim.
+export function composeWildsMonumentSurveys(world, sites) {
+  if (!Array.isArray(sites) || sites.length < 1 || sites.length > 8) return null;
+  const entries = [], occupied = new Set(), cells = new Map(), upper = new Set();
+  for (const site of [...sites].sort((a, b) => a.x - b.x || a.z - b.z || a.id - b.id || a.turn - b.turn)) {
+    const entry = surveyWildsMonumentSite(world, site);
+    if (!entry) return null;
+    const { plan } = entry;
+    const footprint = new Set([...plan.footprint.map(point => point.join(',')),
+      ...[...plan.cells, ...plan.approach].map(([x, , z]) => x + ',' + z)]);
+    if ([...footprint].some(point => occupied.has(point))) return null;
+    for (const point of footprint) occupied.add(point);
+    for (const [x, y, z, id] of plan.cells) cells.set([x, y, z].join(','), id);
+    for (const key of entry.upperOwners) upper.add(key);
+    entries.push(plan);
+  }
+  return { plans: entries, witness: openMonumentWitness(world, cells, upper), cells: cells.size };
 }
