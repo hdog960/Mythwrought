@@ -17,11 +17,12 @@ export function createStatusRegistry(definitions){
  }
  return Object.freeze({get:id=>map.get(id)??null,list:()=>Object.freeze([...map.values()])});
 }
-export function createStatusSession({registry,worldEpoch,targetId,fixture}){
+export function createStatusSession({registry,worldEpoch,targetId,fixture,restored=null}){
  const int=(x,a,b)=>Number.isSafeInteger(x)&&x>=a&&x<=b;
  const id=x=>typeof x==='string'&&/^[A-Za-z0-9:._-]{1,128}$/.test(x);
  if(!registry||typeof registry.get!=='function'||!int(worldEpoch,0,Number.MAX_SAFE_INTEGER)||!id(targetId)||typeof fixture!=='boolean')throw Error('invalid status session');
  let clock=0,highest=0,serial=0,closed=false;const effects=new Map();
+ if(restored!==null){if(restored.version!==1||restored.targetId!==targetId||restored.fixture!==fixture||!int(restored.highest,0,Number.MAX_SAFE_INTEGER-1)||!int(restored.serial,0,Number.MAX_SAFE_INTEGER-1)||!Array.isArray(restored.effects)||restored.effects.length>32)throw Error('invalid restored status');highest=restored.highest;serial=restored.serial;const instances=new Set();for(const e of restored.effects){const d=registry.get(e.id),key=e.id+'|'+e.sourceId;if(!d||(d.scope==='fixture')!==fixture||!id(e.sourceId)||effects.has(key)||!int(e.instance,1,serial)||instances.has(e.instance)||!int(e.stacks,1,d.maxStacks)||!int(e.remainingMs,1,d.durationMs)||!int(e.tickIndex,0,Number.MAX_SAFE_INTEGER-6000)||(d.tickMs===0?e.nextMs!==null:!int(e.nextMs,1,d.tickMs)))throw Error('invalid restored effect');instances.add(e.instance);effects.set(key,{key,d,sourceId:e.sourceId,instance:e.instance,stacks:e.stacks,expires:e.remainingMs,next:e.nextMs,tickIndex:e.tickIndex});}}
  const ordered=()=>[...effects.values()].sort((a,b)=>a.key<b.key?-1:a.key>b.key?1:0);
  const snapshot=()=>Object.freeze({clock,highest,closed,effects:Object.freeze(ordered().map(e=>Object.freeze({id:e.d.id,sourceId:e.sourceId,instance:e.instance,stacks:e.stacks,expires:e.expires,next:e.next})))});
  const out=(ok,reason,events=[])=>Object.freeze({ok,reason,events:Object.freeze(events),snapshot:snapshot()});
@@ -58,8 +59,9 @@ export function createStatusSession({registry,worldEpoch,targetId,fixture}){
   events.sort((a,b)=>a.at-b.at||Number(a.type==='expired')-Number(b.type==='expired')||a.instance-b.instance);
   clock=end;return out(true,'advanced',events);
  }
+ function checkpoint(){if(closed)throw Error('closed status');return Object.freeze({version:1,targetId,fixture,highest,serial,effects:Object.freeze(ordered().map(e=>Object.freeze({id:e.d.id,sourceId:e.sourceId,instance:e.instance,stacks:e.stacks,remainingMs:e.expires-clock,nextMs:e.next===null?null:e.next-clock,tickIndex:e.tickIndex})))});}
  function modifiers(){
   return Object.freeze(ordered().flatMap(e=>e.d.modifiers.map((m,i)=>Object.freeze({id:'status:'+e.instance+':'+i,stat:m.stat,delta:m.delta*e.stacks}))));
  }
- return Object.freeze({snapshot,apply,advance,modifiers,close:()=>{closed=true;effects.clear();return snapshot()}});
+ return Object.freeze({snapshot,checkpoint,apply,advance,modifiers,close:()=>{closed=true;effects.clear();return snapshot()}});
 }

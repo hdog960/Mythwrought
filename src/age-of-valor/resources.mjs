@@ -1,5 +1,5 @@
 // AV6 fixed-point session-local stamina/mana ledger; no persistence or health.
-export function createResourceLedger({maximum,initial,regeneration,delayMs}){
+export function createResourceLedger({maximum,initial,regeneration,delayMs,restored=null}){
  // Fixed-point thousandths; all rates expressed in thousandths/second.
  const int=(x,min,max)=>Number.isSafeInteger(x)&&x>=min&&x<=max;
  const pair=(p,min,max)=>p&&int(p.stamina,min,max)&&int(p.mana,min,max);
@@ -7,6 +7,8 @@ export function createResourceLedger({maximum,initial,regeneration,delayMs}){
  const max={...maximum},rates={combat:{...regeneration.combat},exploration:{...regeneration.exploration}},delay={...delayMs};
  const keys=['stamina','mana'],balance={...initial},remainder={stamina:0,mana:0},ready={stamina:0,mana:0};
  let clock=0,highest=0,revision=0,closed=false;
+ if(restored!==null){if(restored.version!==1||!pair(restored.remainingDelay,0,600000)||!pair(restored.remainder,0,999)||!int(restored.highest,0,Number.MAX_SAFE_INTEGER-1)||!int(restored.revision,0,Number.MAX_SAFE_INTEGER-1)||keys.some(k=>restored.remainingDelay[k]>delay[k]||initial[k]===max[k]&&restored.remainder[k]!==0))throw Error('invalid restored resources');for(const k of keys){ready[k]=restored.remainingDelay[k];remainder[k]=restored.remainder[k];}highest=restored.highest;revision=restored.revision;}
+ const checkpoint=()=>{if(closed)throw Error('closed ledger');return Object.freeze({version:1,highest,revision,remainingDelay:Object.freeze(Object.fromEntries(keys.map(k=>[k,Math.max(0,ready[k]-clock)]))),remainder:Object.freeze({...remainder})});};
  const snapshot=()=>Object.freeze({version:1,clock,revision,highest,closed,stamina:balance.stamina,mana:balance.mana,maxStamina:max.stamina,maxMana:max.mana});
  const result=(ok,reason)=>Object.freeze({ok,reason,snapshot:snapshot()});
  function consume({sequence,cost,expectedRevision}={}){
@@ -29,5 +31,5 @@ export function createResourceLedger({maximum,initial,regeneration,delayMs}){
   }
   clock=end;revision++;return result(true,'advanced');
  }
- return Object.freeze({snapshot,consume,advance,close:()=>{closed=true;return snapshot()}});
+ return Object.freeze({snapshot,checkpoint,consume,advance,close:()=>{closed=true;return snapshot()}});
 }

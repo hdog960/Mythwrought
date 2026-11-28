@@ -1,5 +1,5 @@
 // AV12 generic execution proposals; resource and skill authority injected.
-export function createAbilityExecutor({registry,identity,policies,readContext,readSkills,admit,validateAim,authorizePulse}){
+export function createAbilityExecutor({registry,identity,policies,readContext,readSkills,admit,validateAim,authorizePulse,restored=null}){
  const int=(x,a,b)=>Number.isSafeInteger(x)&&x>=a&&x<=b,id=x=>typeof x==='string'&&/^[A-Za-z0-9:._-]{1,128}$/.test(x),keys=['worldId','profileId','sourceId'];
  if(!registry||typeof registry.get!=='function'||!identity||!keys.every(k=>id(identity[k]))||typeof identity.fixture!=='boolean'||!policies||![readContext,readSkills,admit,validateAim,authorizePulse].every(f=>typeof f==='function'))throw Error('invalid executor');
  const scope=Object.freeze({...Object.fromEntries(keys.map(k=>[k,identity[k]])),fixture:identity.fixture}),catalog=new Map(),cooldowns=new Map();
@@ -12,6 +12,8 @@ export function createAbilityExecutor({registry,identity,policies,readContext,re
  }
  if(catalog.size>128)throw Error('capacity');
  let clock=0,highest=0,active=null,closed=false,busy=false;
+ if(restored!==null){if(restored.version!==1||!int(restored.highest,0,Number.MAX_SAFE_INTEGER-1)||!Array.isArray(restored.cooldowns)||restored.cooldowns.length>128)throw Error('invalid restored cooldowns');highest=restored.highest;for(const e of restored.cooldowns){const entry=catalog.get(e.id);if(!entry||cooldowns.has(e.id)||!int(e.remainingMs,1,entry.d.timing.cooldownMs))throw Error('invalid restored cooldown');cooldowns.set(e.id,e.remainingMs);}}
+ const checkpoint=()=>{if(closed||active)throw Error('cannot checkpoint active ability');return Object.freeze({version:1,highest,cooldowns:Object.freeze([...cooldowns].filter(([,t])=>t>clock).sort(([a],[b])=>a<b?-1:a>b?1:0).map(([id,t])=>Object.freeze({id,remainingMs:t-clock})))});};
  const snapshot=()=>Object.freeze({clock,highest,closed,active:active?Object.freeze({id:active.d.id,actionId:active.actionId,next:active.next,count:active.count}):null,cooldowns:Object.freeze(Object.fromEntries(cooldowns))});
  const out=(ok,reason,events=[])=>Object.freeze({ok,reason,events:Object.freeze(events),snapshot:snapshot()});
  const same=x=>x&&keys.every(k=>x[k]===scope[k])&&x.fixture===scope.fixture;
@@ -55,5 +57,5 @@ export function createAbilityExecutor({registry,identity,policies,readContext,re
   clock=end;return active&&active.next===clock?emit():out(true,'advanced');
  });}
  function release(){return exclusive(()=>{if(!context()||active?.p.mode!=='charged')return out(false,'no-charge');const held=clock-active.started;if(held<active.p.minChargeMs||held>active.p.maxChargeMs){active=null;return out(false,'invalid-charge');}active.fraction=held/active.p.maxChargeMs;return emit();});}
- return Object.freeze({start,advance,release,snapshot,cancel:()=>exclusive(()=>{active=null;return out(true,'cancelled');}),close:()=>{closed=true;active=null;return snapshot();}});
+ return Object.freeze({start,advance,release,snapshot,checkpoint,cancel:()=>exclusive(()=>{active=null;return out(true,'cancelled');}),close:()=>{closed=true;active=null;return snapshot();}});
 }
