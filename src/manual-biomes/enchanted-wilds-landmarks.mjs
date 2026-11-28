@@ -40,6 +40,7 @@ export function buildWildsLandmark(id,x,floor,z,turn=0){
 export function planWildsLandmark(ground,cx,cz,treeRows,regionAt){
  const roll=hash(cx,cz,ground.seed+84017);
  const x0=cx*16,z0=cz*16;
+ const caveAt=(x,y,z)=>ground.environmentCaves.get(x,y,z)!==undefined;
  for(let i=0;i<6;i++){
   const r=hash(cx*7+i,cz*11-i,roll|0),x=x0+5+r%6,z=z0+5+(r>>>5)%6;
   const region=regionAt(x,z,ground.seed);
@@ -52,10 +53,10 @@ export function planWildsLandmark(ground,cx,cz,treeRows,regionAt){
   // have their own six IDs and a deterministic one-in-three proposal.
   const id=(r>>>18)%3===0?6+(r>>>10)%6:(r>>>10)%6;
   const p=buildWildsLandmark(id,x,floor,z,(r>>>22)%4);
-  const support=(a,c)=>{const q=ground._columnPlan(a,c);return q.size&&Math.max(...q.keys())===floor&&soil.has(q.get(floor))&&ground.get(a,floor,c)===q.get(floor)&&ground.get(a,floor-1,c)!==BLOCK.AIR&&v6BiomeAt(a,c,ground.seed)?.name==='enchanted';};
+  const support=(a,c)=>{const q=ground._columnPlan(a,c);return q.size&&Math.max(...q.keys())===floor&&soil.has(q.get(floor))&&ground.get(a,floor,c)===q.get(floor)&&ground.get(a,floor-1,c)!==BLOCK.AIR&&v6BiomeAt(a,c,ground.seed)?.name==='enchanted'&&!caveAt(a,floor,c)&&!caveAt(a,floor-1,c);};
   if(!p.footprint.every(([a,c])=>support(a,c)))continue;
   if(!p.approach.filter(([,b])=>b===floor+1).every(([a,,c])=>support(a,c)))continue;
-  if([...p.cells,...p.approach].some(([a,b,c])=>a<x0||a>=x0+16||c<z0||c>=z0+16||v6BiomeAt(a,c,ground.seed)?.name!=='enchanted'||treeRows.has(key(a,b,c))||ground.get(a,b,c)!==BLOCK.AIR))continue;
+  if([...p.cells,...p.approach].some(([a,b,c])=>a<x0||a>=x0+16||c<z0||c>=z0+16||v6BiomeAt(a,c,ground.seed)?.name!=='enchanted'||treeRows.has(key(a,b,c))||caveAt(a,b,c)||ground.get(a,b,c)!==BLOCK.AIR))continue;
   return p;
  }
  return null;

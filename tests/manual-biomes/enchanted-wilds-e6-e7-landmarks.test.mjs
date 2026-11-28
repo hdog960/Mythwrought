@@ -4,7 +4,7 @@ import {BLOCK,meshChunk,collides} from '../../src/voxel.mjs';
 import {ENVIRONMENT_GROUND as G} from '../../src/environment-ground.mjs';
 import {FourRegionWorld,fourRegionProfile,M8_MOUNTAIN_GENERATOR} from '../../src/manual-biomes/profile-world.mjs';
 import {WildsFamilyResearchWorld,wildsRegionAt} from '../../src/manual-biomes/enchanted-wilds-family-source.mjs';
-import {WILDS_LANDMARKS,buildWildsLandmark} from '../../src/manual-biomes/enchanted-wilds-landmarks.mjs';
+import {WILDS_LANDMARKS,buildWildsLandmark,planWildsLandmark} from '../../src/manual-biomes/enchanted-wilds-landmarks.mjs';
 import {planWildsScenery} from '../../src/manual-biomes/enchanted-wilds-scenery.mjs';
 import {physicalRegionAt,upperOccupancy} from '../../src/world-height.mjs';
 test('twelve physical designs and 48 rotations preserve walkable approaches',()=>{
@@ -29,8 +29,8 @@ test('natural landmarks preserve source, clearance, native mesh and editable phy
     if(wildsRegionAt(cx*16+8,cz*16+8,seed)===null)continue;
     const p=w.wildsSource.landmark(cx,cz);if(!p||found.has(p.id))continue;
     const [x,floor,z]=p.origin;
-    for(const [a,b,c,id] of p.cells){assert.equal(w.get(a,b,c),id);assert.equal(old.get(a,b,c),BLOCK.AIR);if(b>19){assert.ok(upperOccupancy(w,physicalRegionAt(a,b,c).key));upper++;}}
-    for(const [a,b,c] of p.approach){assert.equal(w.get(a,b,c),BLOCK.AIR);assert.equal(w.wildsSource.reserved(a,b,c),true);}
+    for(const [a,b,c,id] of p.cells){assert.equal(w.get(a,b,c),id);assert.equal(old.get(a,b,c),BLOCK.AIR);assert.equal(old.environmentCaves.get(a,b,c),undefined);if(b>19){assert.ok(upperOccupancy(w,physicalRegionAt(a,b,c).key));upper++;}}
+    for(const [a,b,c] of p.approach){assert.equal(w.get(a,b,c),BLOCK.AIR);assert.equal(old.environmentCaves.get(a,b,c),undefined);assert.equal(w.wildsSource.reserved(a,b,c),true);}
     for(const [a,b,c] of p.approach.filter(r=>r[1]===floor+1)){
       assert.equal(collides(w,a+.5,b+.01,c+.5),false);
       assert.notEqual(w.get(a,b-1,c),BLOCK.AIR);
@@ -49,6 +49,33 @@ test('natural landmarks preserve source, clearance, native mesh and editable phy
  }
  console.log('WILDS E7 NATURAL',JSON.stringify({samples,upper,found:[...found.values()]}));
  assert.equal(found.size,12,'all twelve natural landmark witnesses required');
+});
+test('a natural landmark yields to explicit cave AIR and protected supports',()=>{
+ const seed=179,world=new WildsFamilyResearchWorld(seed);
+ const ground=new FourRegionWorld(seed,fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR),{experimentalEnchantedWilds:true});
+ let witness;
+ outer:for(let cz=-37;cz<=-25;cz++)for(let cx=-11;cx<=11;cx++){
+  const landmark=world.wildsSource.landmark(cx,cz);
+  if(landmark){witness={cx,cz,landmark};break outer;}
+ }
+ assert.ok(witness);
+ const {cx,cz,landmark}=witness,trees=new Map(world.wildsSource.entries(cx,cz));
+ assert.deepEqual(planWildsLandmark(ground,cx,cz,trees,wildsRegionAt),landmark);
+ const [,floor]=landmark.origin;
+ const protectedCells=[landmark.cells[0].slice(0,3),landmark.approach[0],
+  [landmark.footprint[0][0],floor,landmark.footprint[0][1]]];
+ for(const [px,py,pz] of protectedCells){
+  const source={seed,
+   _columnPlan:(...point)=>ground._columnPlan(...point),get:(...point)=>ground.get(...point),
+   environmentCaves:{get:(x,y,z)=>x===px&&y===py&&z===pz?BLOCK.AIR:ground.environmentCaves.get(x,y,z)}};
+  const next=planWildsLandmark(source,cx,cz,trees,wildsRegionAt);
+  assert.notDeepEqual(next,landmark);
+  if(next){
+   assert.ok([...next.cells,...next.approach].every(([x,y,z])=>x!==px||y!==py||z!==pz));
+   if(py===next.origin[1])assert.ok(next.footprint.every(([x,z])=>x!==px||z!==pz));
+  }
+ }
+ console.log('WILDS CAVE VETO '+JSON.stringify({seed,landmark:landmark.name,origin:landmark.origin,protectedCells}));
 });
 test('green cap mosaic changes only the intended biome cap; retains peat and other biomes',()=>{
  const seed=179,w=new WildsFamilyResearchWorld(seed),old=new FourRegionWorld(seed,fourRegionProfile(seed,M8_MOUNTAIN_GENERATOR),{experimentalEnchantedWilds:true});

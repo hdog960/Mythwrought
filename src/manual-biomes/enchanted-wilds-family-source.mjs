@@ -10,7 +10,7 @@ import {planWildsLandmark} from './enchanted-wilds-landmarks.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 const GRID=32,MAX_SITES=128,MAX_CHUNKS=64;
 export const WILDS_UPPER_GENERATOR='mythwrought-upper-enchanted-wilds-e3-e4-research';
-export const WILDS_SOURCE_VERSION='wilds-physical-families-4';
+export const WILDS_SOURCE_VERSION='wilds-physical-families-5';
 export const WILDS_REGIONS=Object.freeze(['Ancientwood','Moonveil Groves','Sporewilds','Starlight Glades','Whispering Ruinwood']);
 const weights=[[0,0,2,2,3,4,5,9],[0,1,1,3,4,5,6],[0,5,5,6,7,8,9],[0,1,3,4,5,6],[0,2,3,3,4,7,8]];
 const hash=(a,b,c,d=0)=>{let n=Math.imul(a,0x7feb352d)^Math.imul(b,0x846ca68b)^Math.imul(c,0x9e3779b1)^Math.imul(d,0x85ebca6b);n=Math.imul(n^(n>>>16),0x45d9f3b);return (n^(n>>>16))>>>0;};
