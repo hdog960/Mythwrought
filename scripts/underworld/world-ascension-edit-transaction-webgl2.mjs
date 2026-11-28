@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { meshDepthSection } from '../../src/depth-mesh.mjs';
+import { engineWantedSections } from '../../src/living-underworld/gallery-streaming-working-set.mjs';
 
 const floatsPerFace = 6 * 9;
 const encode = vertices => Buffer.from(vertices.buffer, vertices.byteOffset, vertices.byteLength).toString('base64');
@@ -10,13 +11,18 @@ const encode = vertices => Buffer.from(vertices.buffer, vertices.byteOffset, ver
 export async function qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit }) {
   const { peak, peakEdit } = workingSet;
   for (const field of ['cx', 'cz', 'active', 'shaft']) assert.equal(peak[field], peakEdit[field]);
-  const fixture = peak.wanted.map(key => {
+  const deeper = engineWantedSections(peak.cx, peak.cz, peak.active - 1, peak.shaft);
+  const peakKeys = new Set(peak.wanted);
+  const fixture = [...new Set([...peak.wanted, ...deeper])].map(key => {
     const [cx, cz, section] = key.split(',').map(Number);
+    assert.ok(owners.has(key), `Stream owner must be inside the native capture: ${key}`);
     const before = meshDepthSection(projection.view, cx, cz, section);
     assert.equal(owners.get(key).oldFaces, 0, 'The entire allocation counts against the face cap');
     assert.equal(before.length / floatsPerFace, owners.get(key).combinedFaces);
     const updates = edits.map(({ meshes }) => meshes.find(mesh => mesh.key === key)?.vertices ?? null);
-    return { key, before: encode(before), updates: updates.map(vertices => vertices && encode(vertices)) };
+    const live = peakKeys.has(key);
+    assert.ok(live || updates.every(vertices => vertices === null));
+    return { key, live, before: encode(before), updates: updates.map(vertices => vertices && encode(vertices)) };
   });
 
   const { chromium } = createRequire(import.meta.url)('playwright');
@@ -27,7 +33,7 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
   });
   try {
     const page = await browser.newPage();
-    const result = await page.evaluate(({ fixture, faceBytes, faceLimit, cases }) => {
+    const result = await page.evaluate(({ fixture, deeper, faceBytes, faceLimit, cases }) => {
       const check = (ok, message) => { if (!ok) throw Error(message); };
       const canvas = document.createElement('canvas');
       canvas.width = 128;
@@ -47,11 +53,9 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         }
         return faces;
       }
-      const native = fixture.map(({ key, before, updates }) => {
-        const initial = decode(key, before);
-        return { initial, targets: updates.map(update => update === null ? initial : decode(key, update)) };
-      });
-      const initial = native.flatMap(owner => [...owner.initial.values()]);
+      const native = new Map(fixture.map(({ key, before }) => [key, decode(key, before)]));
+      const liveOwners = fixture.filter(owner => owner.live);
+      const initial = liveOwners.flatMap(({ key }) => [...native.get(key).values()]);
       // One binary opaque-cell edit changes at most six incident face
       // records. Reserve those staging records before allocating any slots.
       const stagingReserve = 6;
@@ -176,7 +180,8 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       let previous = initialTarget;
       const steps = [];
       for (const [step, { label, refusal }] of cases.entries()) {
-        const target = new Map(native.flatMap(owner => [...owner.targets[step]]));
+        const target = new Map(liveOwners.flatMap(({ key, updates }) =>
+          [...(updates[step] === null ? native.get(key) : decode(key, updates[step]))]));
         if (refusal) {
           const before = writeCalls;
           try { prepare(target); throw Error('Expected shared allocation refusal'); }
@@ -201,6 +206,53 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         check(matchesNative(target), 'Published GPU ranges differ from the full native remesh');
         previous = target;
       }
+
+      const deeperTarget = new Map(deeper.flatMap(key => [...native.get(key)]));
+      const streamStaging = new Uint8Array(stagingReserve * faceBytes);
+      function streamWindow(target, failAfter = 0) {
+        check(target.size <= capacity, 'Stream window capacity refused');
+        // Retire departures before reusing their slots. Until all arrivals
+        // are uploaded, only the surviving owners have published ranges.
+        const retained = slots.map(entry => entry && target.has(entry.key) ? entry : null);
+        slots = retained;
+        const { next, writes } = prepare(target);
+        check(writes.every(write => !write.previous), 'Stream upload would overwrite a retained face');
+        let uploads = 0, maxUploadFaces = 0;
+        for (let offset = 0; offset < writes.length;) {
+          const { index: start } = writes[offset];
+          let count = 0;
+          while (count < stagingReserve && writes[offset + count]?.index === start + count) {
+            streamStaging.set(writes[offset + count].entry.record, count * faceBytes);
+            count++;
+          }
+          gl.bufferSubData(gl.ARRAY_BUFFER, start * faceBytes, streamStaging, 0, count * faceBytes);
+          checkGl();
+          maxUploadFaces = Math.max(maxUploadFaces, count);
+          uploads++;
+          writeCalls++;
+          offset += count;
+          if (uploads === failAfter) throw Error('Injected arrival upload failure');
+        }
+        check(retained.every((entry, index) => !entry || entry === next[index]), 'Retained face moved');
+        slots = next;
+        check(matchesNative(target), 'Streamed GPU ranges differ from the full native mesh');
+        return { residentFaces: target.size, keptFaces: target.size - writes.length,
+          uploadedFaces: writes.length, uploads, maxUploadFaces, ranges: draw(target.size) };
+      }
+      const union = new Map([...initialTarget, ...deeperTarget]);
+      const writesBeforeCapacity = writeCalls;
+      try { streamWindow(union); throw Error('Expected stream capacity refusal'); }
+      catch (error) { check(error.message === 'Stream window capacity refused', error.message); }
+      check(writeCalls === writesBeforeCapacity && matchesNative(initialTarget), 'Over-capacity stream retired or wrote live faces');
+
+      const kept = new Map([...initialTarget].filter(([key]) => deeperTarget.has(key)));
+      try { streamWindow(deeperTarget, 2); throw Error('Expected arrival failure'); }
+      catch (error) { check(error.message === 'Injected arrival upload failure', error.message); }
+      check(writeCalls === writesBeforeCapacity + 2 && matchesNative(kept), 'Failed arrival exposed partial uploads or lost retained faces');
+      const keptRangesAfterFailure = draw(kept.size);
+      const descent = streamWindow(deeperTarget);
+      const ascent = streamWindow(initialTarget);
+      check(descent.uploadedFaces && ascent.uploadedFaces, 'Stream fixture must upload native arrivals in both directions');
       check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'GPU allocation changed');
       gl.deleteBuffer(buffer);
       gl.deleteProgram(program);
@@ -208,9 +260,11 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       gl.deleteShader(fs);
       checkGl();
       return { residentFaces: initial.length, allocatedFaces: capacity, stagingReserve, initialRanges,
-        peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: native.length, steps,
+        peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: liveOwners.length, steps,
+        streaming: { deeperOwners: deeper.length, descent, ascent,
+          unionRefusedFaces: union.size, failedArrivalUploads: 2, keptRangesAfterFailure },
         rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true, buffersReallocated: false };
-    }, { fixture, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
+    }, { fixture, deeper, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
       cases: edits.map(({ label, refusal }) => ({ label, refusal })) });
     return { ...result, chromium: browser.version(), edit: peakEdit.edit,
       scope: 'detached-shared-opaque-buffer-owner-ranges' };
