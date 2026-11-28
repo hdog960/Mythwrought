@@ -85,7 +85,7 @@ export function planVeilreachRetirement(chunks,wanted,player,incoming,hasVisual)
   outgoing.sort((a,b)=>Number(b.safe)-Number(a.safe)||b.distance-a.distance||a.key.localeCompare(b.key));
   const retiring=[];
   for(const candidate of outgoing){
-    if(!candidate.upperBytes&&(owners>UPPER_GPU_OWNERS||bytes>UPPER_RESIDENT_BYTES)&&total<=maxOwners)continue;
+    if(!candidate.upperBytes&&(owners>UPPER_GPU_OWNERS||bytes>UPPER_RESIDENT_BYTES))continue;
     retiring.push(candidate.key);
     total--;
     owners-=Number(candidate.upperBytes>0);

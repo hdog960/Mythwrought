@@ -215,6 +215,21 @@ function* prepareAtlas(terrain,x,z,world){
     .sort((a,b)=>a.distance-b.distance).slice(0,14);
   const rows=[],claimed=new Set();
   let count=0;
+  // Include nearby authored voxel construction outside natural silhouettes.
+  // Leave most of the bank available for the islands themselves.
+  const authored=[...edits.keys()].map(key=>{
+    const [cx,cz]=key.split(',').map(Number);
+    return {key,cx,cz,distance:Math.hypot(cx*16+8-x,cz*16+8-z)};
+  }).filter(tile=>tile.distance<radius).sort((a,b)=>a.distance-b.distance||a.key.localeCompare(b.key)).slice(0,24);
+  for(const {key,cx,cz} of authored){
+    const tile=chunkMesh(terrain,cx,cz,1,edits);
+    const vertices=tile.reduce((sum,row)=>sum+row.values.length/9,0);
+    yield;
+    if(count+vertices>maxVertices/3)continue;
+    count+=vertices;
+    rows.push(...tile);
+    claimed.add(key);
+  }
   for(const {island,distance} of islands){
     if(count>=maxVertices)break;
     const tiles=islandChunks(island,x,z).filter(({cx,cz})=>!claimed.has(cx+','+cz));

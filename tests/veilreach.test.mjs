@@ -216,6 +216,9 @@ test('signed distant terrain keeps mined and placed blocks authoritative after e
   assert.equal(terrain.topAt(x+1,z),y);
   assert.ok(world.set(x,y,z,BLOCK.AIR));
   assert.ok(world.set(x,y+4,z,BLOCK.STONE));
+  const standalone=[x-106,y,z-80];
+  assert.equal(terrain.topAt(standalone[0],standalone[2]),null);
+  assert.ok(world.set(...standalone,BLOCK.STONE));
   const restored=inspectM2WorldExport(exportM2World(world)).world;
   const mesh=farSkyMesh(terrain,x,z,[],restored);
   const hasTop=(px,py,pz)=>{
@@ -234,6 +237,7 @@ test('signed distant terrain keeps mined and placed blocks authoritative after e
   assert.ok(hasTop(x+.5,y,z+.5),'the block below the mined surface is exposed');
   assert.ok(hasTop(x+.5,y+5,z+.5),'the placed block remains visible');
   assert.ok(hasTop(x+1.5,y+1,z+.5),'the adjacent natural surface remains visible');
+  assert.ok(hasTop(standalone[0]+.5,y+1,standalone[2]+.5),'construction in open sky remains visible');
   assert.ok(mesh.byteLength<=VEILREACH_DISTANCE_MAX_BYTES);
 });
 

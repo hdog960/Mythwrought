@@ -1,0 +1,52 @@
+# Veilreach corrective engineering
+
+Branch `dev/codex/veilreach-corrective`. Current base `aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7`. The initial released comparison uses `8400d13a6f5521901cbf0909a0c4f6e2e79c1629`. Personal Codex retains the existing Veilreach assignment from #508. The creator's revision supersedes the earlier release approval for this work. The record follows #492, #498, #501 and #509. No release slot is held. [Scope record](https://github.com/hdog960/Mythwrought/pull/508#issuecomment-7231284405)
+
+## Source investigation
+
+The 10.012-second creator recording is 798×538. Frames around 3–5 seconds show the approaching islands as bare layers. Around 6 seconds the foreground island acquires visible trees together with changes to purple, green and gray terrain. Close frames also show shallow platforms and some long straight edges. The captured area excludes the world seed and pose, so the paired reproduction uses the established seed 180 Verdant Crown route. The creator footage remains the minimum visual target. The frame comparison cannot assign a generator coordinate to every edge in the creator's clip.
+
+- The released `src/veilreach/distance.mjs` takes one continuous shape sample per 4-, 8- or 16-block horizontal cell and rounds its top and bottom. It fills an unbroken column and chooses only three painted bands. The shared seed and shape function reproduce the broad position. This bypasses resolved physical rock in overlaps and cutouts, foliage, and authored deltas. It exaggerates rectangular boundaries and independently changes elevations and exposed surface colors. At the vertex limit it retries an entire island at coarser detail.
+- `generation.mjs` resolves real terrain by querying all candidate columns and querying per-voxel geology. Its foliage path calculates deterministic trunks and canopies, rejects occupied rock cells, and resolves duplicate cells across signed chunk seams. The released distance mesh never used those cells. Forests can therefore first become visible at physical mesh admission, several trees at a time.
+- `main.mjs` and `world-height-stream.mjs` choose an upper residency window from current pose. Mandatory body owners rank first. The physical renderer evicts old owners on the next desired-set change before replacement upload, and uploads one pending mesh using bounded cadence. Creative supplies lookahead requests through the existing wanted set. Requests outside that set do not prepare new owners. The planner does not fully account for 3D movement velocity or retain hysteresis across boundaries.
+- The released distance renderer rebuilt its clipped, single GPU buffer when nearby upper owner keys or horizontal chunks changed. On failure it drew the old buffer beside the new physical ownership set. Partial box clipping also left boundary planes and approximate ledges visible at seams. The physical and distance shader paths apply different fog and material-detail curves. Changing visibility ownership can therefore change apparent color even when their material IDs agree.
+- Place/mining edits are canonical in the world and versioned profile storage. Existing physical mesh publication already stages edited owners before swapping them. The released distance code never read edits and can show an old source after physical eviction. The v1 natural source and historical seeds must remain immutable. The present depth formula, radial taper and mild height relief are also real causes of shallow repetitive islands. Correcting them requires a new versioned source after visual and streaming foundations are qualified.
+
+## Corrective roadmap
+
+| Phase | Status and gate |
+| --- | --- |
+| 1. Establish released and creator evidence | Source audit and creator contact sheet captured. Paired browser flights use ordinary New World, the same seed, the same altitude and normal Creative controls. |
+| 2. Source-derived visual ownership | Initial implementation at `3590d032b6538540734ceb5cfbbbaa6753c22463`, since rebased. Sampled columns retain real occupied Y positions and materials. Distant tree bodies use resolved native cells. Section-aligned buffer ranges switch visual ownership when the committed physical owner appears or leaves, without a key-triggered geometry reupload. The last GPU bank is retired only after the new upload succeeds. Same-material coplanar faces merge, adjacent canopy volumes suppress internal faces, and signed-region voxel edits are tested after export and import. |
+| 3. Flight-aware physical preparation and continuity | The isolated implementation uses existing Creative lookahead, a bounded selection of full 3D player-body regions, limited neighbor retention, and upload-before-retirement. Near and far sky geometry share fog and material-detail curves. Browser boundary qualification and long-run performance still need evidence. Finish testing distant edits under tight budgets and reduce residual coarse footprint and canopy seams. |
+| 4. Shape and geological diversity | After continuity passes, add a new immutable source version for terrain families, ridges, asymmetric depths, fractured volumes and rare large landmasses. Preserve v1 coordinates and deltas. |
+| 5. Original-game and mobile qualification | Complete the creator's twelve continuous scenarios and physical interaction matrix. Test the installed candidate and historical saves. Qualify actual iPhone Safari and Home Screen performance before requesting release review. |
+
+## Measurement gates
+
+Before a final release candidate, use paired clips at ordinary flight speeds. Human review must find no whole-tree or island disappearance during handoff, holes, flicker, major hue swaps or new rectangular terrain discontinuities. The trace must show zero ownership overlap by section and zero whole-atlas rebuilds attributable to a physical owner key change alone. Preserve visible prior geometry through a failed replacement upload. Test edited AIR and construction from both representations within the declared supported scope, across positive and negative seams and after reload.
+
+Keep physical owners at most 25 total and eight nonempty upper owners, within 884,736 bytes per physical section, 2,097,152 staged bytes and 7,077,888 resident upper bytes. The visual bank separately retains the released 24,576-vertex limit. Its intended steady draw count is at most one plus the number of hidden owner ranges. Target measurable startup, preparation, upload, eviction and readiness timings alongside p50/p95/p99 frame time and frames over 50 ms. Compare matched desktop samples for regressions and report their absolute numbers. On the physical phone, compare the same route and settings against the live build and approach 60 FPS without sustained control delays. Visual review and numeric limits both apply.
+
+## Production-renderer evidence
+
+The released, source-derived, and shared-shading clips use seed 180. They capture cold launch, ascent with original controls, travel across several physical regions, landing on the Crown at Y 118, and walking. The renderer trace recorded physical owner changes during approach and zero distant atlas rebuilds on those changes. Trees are visible before the approach reaches nearby physical owners. The most recent contact sheet still shows coarse steps and thin platforms elsewhere in the cluster.
+
+| Exact source | Scope | Desktop approach p50 / p95 / p99 | Slowest visual upload call |
+| --- | --- | --- | --- |
+| `8400d13a6f5521901cbf0909a0c4f6e2e79c1629` | Released comparison | 217 / 1450 / 1917 ms | Uninstrumented |
+| `3590d032b6538540734ceb5cfbbbaa6753c22463` | Source-derived terrain and trees | 267 / 850 / 1217 ms | 1187.2 ms |
+| `6dffc704e23297ce50851359afc43232c65402d8` | Merged voxel faces and per-call timing | 200 / 883 / 1083 ms | 626.6 ms |
+| `9f4e036579b14f6695db600796ed86ac6e403ebb` | Shared sky shading and earlier upload | 283 / 817 / 1000 ms | 299.3 ms |
+
+All four recordings use desktop Chromium with SwiftShader and video enabled. These absolute frame times are exploratory. The early clips shared a runner. The latest matched-route samples expose visible slowdown and are insufficient for an iPhone or relative FPS claim. In the last two runs, WebGL error checking accounted for essentially the entire longest visual upload call while the data transfer rounded to zero. The renderer still checks each slice before making its staged buffer visible.
+
+The native suite exercises physical terrain, signed seams, authored edits, source reload, high-altitude owner limits, lookahead selection, retirement and GPU failure. The latest affected native run passed 14 cases. The source-listed staged cache has 373 verified paths. An installed-device upgrade and physical cold-offline test are separate gates.
+
+[Renderer coordination](https://github.com/hdog960/Mythwrought/pull/500#issuecomment-7239556374) · [Current shared source scope](https://github.com/hdog960/Mythwrought/pull/508#issuecomment-7239565855) · [Cache packaging scope](https://github.com/hdog960/Mythwrought/pull/508#issuecomment-7239616081)
+
+## Limits of this checkpoint
+
+Horizontal footprints remain coarsened and canopy bands simplify native silhouettes. The current candidate rebuilds affected in-range voxel edit regions at unit width. A budget-limited visual bank can omit a group. Browser return visibility, authored overlays, edit saturation, long-run eviction, source versioning, terrain diversity and physical iPhone qualification remain open. The branch changes only the coordinated shared renderer integration and generated cache entries. The original release IDs require replacement at a separately approved release gate.
+
+Estimated remaining substantial sessions after this evidence pass is 4–6. The estimate covers shared integration, terrain/source version and diversity, traversal and edit qualification, and physical device review. It depends on visual defects and the owner coordination outcome. No release approval is requested at this stage.
