@@ -20,8 +20,8 @@ export function readAcidStrength(c){
   const s=Object.hasOwn(c.quantities,ACID_SOLUTE)?c.quantities[ACID_SOLUTE]:0;
   return int(s,0,1000*c.units)?Math.floor(s/c.units):null;
 }
-// Pure owner-specific plan. Only plain water is accepted until a shared
-// executor can account for other water payloads. Never discard quantities.
+// Pure owner-specific plan. Only plain water is accepted; other water payloads
+// require an explicitly approved chemistry policy. Never discard quantities.
 export function planAcidDilution(acid,water,{maxWaterUnits=2}={}){
   if(!int(maxWaterUnits,1,8))throw new RangeError('Invalid dilution limit');
   if(readAcidStrength(acid)===null||!validCell(water,'water')||Object.keys(water.quantities).length!==0||
@@ -32,14 +32,21 @@ export function planAcidDilution(acid,water,{maxWaterUnits=2}={}){
   const waterAfter=n===water.units?null:Object.freeze({...water,units:water.units-n,quantities:Object.freeze({})});
   return Object.freeze({acidBefore:acid,waterBefore:water,acidAfter,waterAfter,waterUnits:n});
 }
-// The shared dispatcher only retains consumeA/B and product. This is a
-// routing token, NOT permission to consume water without increasing acid volume.
-export function createAcidWaterRule({maxWaterUnits=2}={}){
+// Proposal-only by default. Opt in to the shared neutral transaction API
+// only on an isolated engine or under an approved host adoption contract.
+export function createAcidWaterRule({maxWaterUnits=2,allowSettlement=false}={}){
   if(!int(maxWaterUnits,1,8))throw new RangeError('Invalid dilution limit');
-  return Object.freeze({a:'acid',b:'water',propose:(a,b)=>{
+  if(typeof allowSettlement!=='boolean')throw new TypeError('Explicit settlement policy required');
+  const rule={a:'acid',b:'water',propose:(a,b)=>{
     const p=planAcidDilution(a,b,{maxWaterUnits});
     return p?Object.freeze({consumeA:0,consumeB:p.waterUnits,product:'acid-dilution'}):null;
-  }});
+  }};
+  if(allowSettlement)rule.settle=proposal=>{
+    const p=planAcidDilution(proposal?.a,proposal?.b,{maxWaterUnits});
+    if(!p||proposal.consumeA!==0||proposal.consumeB!==p.waterUnits||proposal.product!=='acid-dilution')return null;
+    return Object.freeze({routeA:null,routeB:'a'});
+  };
+  return Object.freeze(rule);
 }
 // Explicit bounded point sampling; output is a signal, not damage or movement.
 export function sampleAcidExposure(engine,points,{maxPoints=8}={}){

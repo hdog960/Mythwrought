@@ -58,6 +58,41 @@ export function createAcidCorrosion({engine,isLoaded,isOpen,readMaterial,canDama
     if(!contacts.length)return null;
     return {material:m.id,revision:m.revision,rule,peak,contacts};
   }
+  // Explicit host dirty handoff, never a world scan. Refresh eligibility at
+  // each committed change boundary, but accumulate only inside step().
+  function trackChanges(changed,{maxChanged=256}={}){
+    idle();
+    if(!int(maxChanged,1,4096)||!Array.isArray(changed)||changed.length>maxChanged)
+      throw new RangeError('Corrosion dirty input budget');
+    const candidates=new Map();
+    for(const p of changed){
+      if(!Array.isArray(p)||p.length!==3||!point(...p))throw new TypeError('Invalid corrosion dirty point');
+      if(!enabled)continue;
+      for(const [dx,dy,dz] of [[0,0,0],...offsets]){
+        const n=[p[0]+dx,p[1]+dy,p[2]+dz];
+        if(point(...n)&&!candidates.has(key(n)))candidates.set(key(n),n);
+      }
+    }
+    const updates=[];let admitted=0,retired=0,reset=0;
+    busy=true;
+    try{
+      for(const [k,p] of candidates){
+        const prior=queue.get(k),o=observe(p);
+        if(o?.defer)continue; // retain existing unloaded entries, do not admit new ones
+        if(!o){if(prior){updates.push([k,null]);retired++;}continue;}
+        if(!prior){updates.push([k,blank(p)]);admitted++;}
+        else if(prior.progress>0&&(prior.material!==o.material||prior.revision!==o.revision)){
+          updates.push([k,blank(p)]);reset++;
+        }
+      }
+      // Net cap permits retiring dry entries and admitting new ones together.
+      // A rejected/throwing batch changes neither entries nor FIFO order.
+      if(queue.size+admitted-retired>maxTracked)return null;
+      for(const [k,e] of updates)if(!e)queue.delete(k);
+      for(const [k,e] of updates)if(e)queue.set(k,e); // existing keys retain position
+      return Object.freeze({candidates:candidates.size,admitted,retired,reset,pending:queue.size});
+    }finally{busy=false;}
+  }
   function step(limit=maxVisits){
     idle();if(!int(limit,1,maxVisits))throw new RangeError('Corrosion visit budget');
     const changes=[],proposals=[];let visited=0,deferred=0,retired=0;
@@ -80,5 +115,5 @@ export function createAcidCorrosion({engine,isLoaded,isOpen,readMaterial,canDama
       return Object.freeze({visited,deferred,retired,pending:queue.size,proposals:Object.freeze(proposals)});
     }finally{busy=false;}
   }
-  return Object.freeze({track,step,save});
+  return Object.freeze({track,trackChanges,step,save});
 }
