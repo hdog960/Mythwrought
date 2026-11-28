@@ -50,6 +50,7 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
  }
  get terraceSourceVersion(){return SP2_SOURCE_VERSION;}
  _shapeSummit(rawTop){return rawTop;}
+ _surfaceMaterial(p){return p.topY>=140?M.snow:p.topY>=80?M.scree:M['alpine-grass'];}
  get generationProfile(){return this.#profile;}
  get hasNaturalNonCubeShapes(){return true;}
  get cachedTerraceTiles(){return this.#tiles.size;}
@@ -91,10 +92,10 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
  #upperCell(x,y,z){
   const p=this.terraceColumn(x,z);
   if(!p||y>p.topY||y<20)return BLOCK.AIR;
-  return this.#fill(p,y);
+  return this.#fill(p,y,x,z);
  }
- #fill(p,y){
-  if(y===p.topY)return y>=140?M.snow:y>=80?M.scree:M['alpine-grass'];
+ #fill(p,y,x,z){
+  if(y===p.topY)return this._surfaceMaterial(p,x,z);
   if(y>=p.topY-2)return p.topY>=80?M.stone:M.dirt;
   return Math.floor(y/9)%5===0?M.gneiss:M.stone;
  }
@@ -112,7 +113,7 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
   if(y>=20)return this.#provider.get(x,y,z);
   if(y>=3){
    const p=this.terraceColumn(x,z);
-   if(p&&y>p.cap&&y<=p.topY)return this.#fill(p,y);
+   if(p&&y>p.cap&&y<=p.topY)return this.#fill(p,y,x,z);
   }
   return this.originalNatural(x,y,z);
  }
