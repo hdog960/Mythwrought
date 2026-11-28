@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
-import {stageAmberContentPlacement} from '../../../src/liquids/amber-sap/content/solid-placement.mjs';
+import {stageAmberContentPlacement,prepareAmberSolidHandoff} from '../../../src/liquids/amber-sap/content/solid-placement.mjs';
 
 // Exact peer modules must be supplied outside this branch, in a flat directory.
 const root=process.env.AMBER_SOLID_PEER_ROOT;
@@ -15,9 +15,9 @@ async function load(name,sha){
   assert.equal(hash,sha,name+' Git blob mismatch');
   return import(pathToFileURL(path).href);
 }
-const {createLiquidEngine}=await load('engine.mjs','ac9dfb9e85e99cce81ffc6a4aabe8b2f6f2b764b');
+const {createLiquidEngine}=await load('engine.mjs','b0ce6f804c111cc2a0a9cf6c835fc75fde45eaa5');
 const {createSapCuring}=await load('curing.mjs','691079552ccc3718fbfda5e2510c9d18c788eea9');
-const {createSapSolidification}=await load('solidification.mjs','57a3112004b00dc159c81b46656226a18e02e2b0');
+const {createSapSolidification}=await load('solidification.mjs','cdcfa805959a138f4bc668596c0b921ed689ee51');
 // Fixture definitions: no flow tick, no duplicate physics policy.
 const definitions=[{id:'amber-sap',gravityLimit:1,lateralLimit:1},{id:'water',gravityLimit:8,lateralLimit:4}];
 function fixture({position=[15,20,0],enabled=true}={}){
@@ -82,4 +82,67 @@ test('physical edge, stale token and reconstructed successor preserve ledger own
   assert.equal(out.staged.solid.cells[0].units,8);
   f.args.curing.invalidate(...f.position);
   assert.equal(stageAmberContentPlacement(f.args),null);
+});
+
+test('solid handoff preserves dormant and rotating metadata and requests a step after adoption',()=>{
+  const position=[15,20,0],water=[99,0,0];
+  let placed=false;
+  const isLoaded=()=>true;
+  const isOpen=(x,y,z)=>x===15&&y===20&&z===0?!placed:
+    y===0&&((x===99&&(z===0||z===1))||(x===100&&z===0));
+  const config={definitions,isLoaded,isOpen,maxCells:2,lateralOrder:'rotating'};
+  const seed=createLiquidEngine(config);
+  assert.equal(seed.insert(...position,'amber-sap',8),true);
+  assert.equal(seed.insert(...water,'water',8,{trace:13}),true);
+  const snapshot={...seed.save(),pending:[],capacityBlocked:[water],lateralPhases:[[...water,1]]};
+  const engine=createLiquidEngine({...config,snapshot});
+  assert.deepEqual(engine.tick(1),{visited:0,moved:0,changed:[],pending:0});
+  const curing=createSapCuring({engine,isLoaded,isOpen,canCure:()=>true,enabled:true,dwellVisits:1});
+  curing.track(...position);
+  const proposal=curing.step().proposals[0];
+  const solidification=createSapSolidification({createLiquidEngine,definitions,isLoaded,isOpen,
+    maxCells:2,canPlaceAmber:()=>true,enabled:true});
+  const before=JSON.stringify([engine.save(),curing.save()]);
+  const handoff=prepareAmberSolidHandoff({engine,curing,proposal,solidification,solid:{version:1,cells:[]},
+    revision:7,isLoaded,isOpen,canPlaceAmber:()=>true,canUseMaterial:()=>true});
+  const {staged}=handoff.plan;
+  assert.deepEqual(staged.resident.capacityBlocked,[water]);
+  assert.deepEqual(staged.resident.lateralPhases,[[...water,1]]);
+  assert.equal(JSON.stringify([engine.save(),curing.save()]),before);
+  // Simulated host adoption: actual successor core, but no production world write.
+  const successor=createLiquidEngine({...config,snapshot:JSON.parse(JSON.stringify(staged.resident))});
+  const getSolidCell=()=>staged.solid.cells[0];
+  const host={committed:true,revision:8,engine:successor,isLoaded,isOpen,
+    hasMaterial:(id,p)=>placed&&id==='amber'&&p.join(',')===position.join(','),getSolidCell};
+  assert.equal(handoff.confirm(host),null);
+  placed=true;
+  const signal=handoff.confirm(host);
+  assert.deepEqual(signal,{changed:[position],requestStep:true,capacityReleased:true});
+  assert.ok(Object.isFrozen(signal)&&Object.isFrozen(signal.changed)&&Object.isFrozen(signal.changed[0]));
+  assert.equal(handoff.confirm(host),signal);
+  const result=successor.tick(1);
+  assert.equal(result.moved,4);
+  assert.equal(successor.getCell(99,0,1).units,4);
+  assert.equal(successor.getCell(100,0,0),null);
+  assert.deepEqual(successor.save().lateralPhases,[[...water,2]]);
+  assert.equal(successor.save().cells.reduce((n,c)=>n+c.units,0)+getSolidCell().units,16);
+  assert.equal(successor.save().cells.reduce((n,c)=>n+(c.quantities.trace??0),0),13);
+});
+
+test('solid handoff rejects uncommitted, stale, unloaded, missing material and wrong ledger results',()=>{
+  const f=fixture(),handoff=prepareAmberSolidHandoff(f.args),{staged}=handoff.plan;
+  const engine=createLiquidEngine({definitions,isLoaded:()=>true,isOpen:()=>true,snapshot:staged.resident});
+  const getSolidCell=()=>staged.solid.cells[0];
+  const host={committed:true,revision:8,engine,isLoaded:()=>true,isOpen:()=>false,
+    hasMaterial:()=>true,getSolidCell};
+  for(const bad of [{committed:false},{revision:7},{revision:9},{engine:f.args.engine},
+    {isLoaded:()=>false},{isOpen:()=>true},{hasMaterial:()=>1},{getSolidCell:()=>null},
+    {getSolidCell:()=>({...getSolidCell(),units:7})},
+    {getSolidCell:()=>({...getSolidCell(),x:99})},
+    {getSolidCell:()=>({...getSolidCell(),quantities:{trace:1}})}])
+    assert.equal(handoff.confirm({...host,...bad}),null);
+  assert.throws(()=>handoff.confirm({...host,getSolidCell:null}),TypeError);
+  assert.equal(handoff.confirm(host).requestStep,true);
+  assert.equal(prepareAmberSolidHandoff({...f.args,canUseMaterial:()=>false}),null);
+  assert.throws(()=>prepareAmberSolidHandoff({...f.args,solidification:{stage:()=>({...staged,solid:{version:1,cells:[]}})}}),TypeError);
 });

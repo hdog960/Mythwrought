@@ -23,3 +23,37 @@ export function stageAmberContentPlacement({engine,curing,proposal,solidificatio
   return Object.freeze({kind:'amber-solid-placement',material:content.material,
     expectedRevision:revision,position:content.position,staged});
 }
+
+function matchesSolid(c,position){
+  return !!c&&c.x===position[0]&&c.y===position[1]&&c.z===position[2]&&
+    c.id==='amber-sap'&&c.units===8&&c.quantities&&typeof c.quantities==='object'&&
+    !Array.isArray(c.quantities)&&Object.keys(c.quantities).length===0;
+}
+
+// Host must authenticate and atomically adopt the complete owner stage with
+// physical terrain, then confirm under the same edit/streaming lease, before
+// a tick or any other edit. Matching reads do not themselves prove adoption.
+export function prepareAmberSolidHandoff(request){
+  const plan=stageAmberContentPlacement(request);
+  if(!plan)return null;
+  const {position,material,staged}=plan;
+  // Owner appends the conserved solid record, never a separate item reward.
+  if(staged.solid?.version!==1||!Array.isArray(staged.solid.cells)||
+    !matchesSolid(staged.solid.cells.at(-1),position))
+    throw new TypeError('Missing staged amber ledger record');
+  const nextRevision=staged.nextRevision;
+  const signal=Object.freeze({changed:Object.freeze([position]),requestStep:true,capacityReleased:true});
+  function confirm({committed,revision,engine,isLoaded,isOpen,hasMaterial,getSolidCell}={}){
+    if(committed!==true||revision!==nextRevision)return null;
+    if([engine?.getCell,isLoaded,isOpen,hasMaterial,getSolidCell].some(f=>typeof f!=='function'))
+      throw new TypeError('Explicit adopted solid state required');
+    if(isLoaded(...position)!==true||isOpen(...position)!==false||
+      hasMaterial(material,position)!==true||engine.getCell(...position)!==null||
+      !matchesSolid(getSolidCell(...position),position))return null;
+    // Render the external voxel change separately from tick.changed. Request a
+    // budget-admitted step even when the old queue was idle. Retain the signal
+    // on downstream deferral; never replay solidification or grant inventory.
+    return signal;
+  }
+  return Object.freeze({plan,confirm});
+}
