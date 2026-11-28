@@ -1,9 +1,2 @@
-# Age of Artifice — Crafting & Production
-
-Assignment #524; program and contract #521. Personal lane cp; initial exact base aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7.
-
-Status: isolated onboarding, zero automation-authored deliverables. The prior work is preserved under the manual successor handoffs; never change those refs. No live registration or merge/deploy authority.
-
-Next concrete engineering action: Implement revision-checked atomic crafting transaction reducer and focused negative tests; author recipes only against verified item IDs.
-
-Use exact-head lease, owned paths, original art, source-backed references, actual focused tests and explicit pending evidence. See assignment and charter for all gates. Update this file in a coherent implementation commit only when the state materially advances. Distinguish setup from automation-authored changes.
+# CP0–CP1 inline first-batch checkpoint
+Assignment #524, contract #521, prior HEAD da0d565df43ffc043ccf8ca9ecac4f83a6d8a655; pinned candidates {"rm":"efec9ec8b9d5c307a4334bd1cacbebac39a04105","wa":"58e41e8ff7ddda54975b9a964020af7f7b765ab1","tc":"008dc24b279bb72ba2059d11689ce1229f8261ff"}. Four recipes reference only pinned committed material, equipment and tool candidates. Actual inventory, stations, unlocks, skill mapping and queue authority remain held. 11 exact function assertions executed in V8 isolate precommit; native Node test execution and original-game qualification pending. No live integration. Next: exact focused tests and source-backed independent next batch. Inline run-now not independent scheduler proof.
