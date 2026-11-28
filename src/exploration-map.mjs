@@ -361,12 +361,16 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
       const player=pose(),world=getWorld();
       if(overlay.hidden&&canOpen()&&now-lastSample>=MAP_SAMPLE_INTERVAL_MS){
         lastSample=now;
+        const highFlight=player.y>WORLD_MAX_Y+1&&player.y<=PHYSICAL_MAX_Y+1;
+        // At altitude the existing streamer may spend all 25 owners on sky.
+        // Survey real composed source only near the live pose, with an explicit
+        // CPU read cap; never allocate or pin ground GPU owners for a map.
+        const survey=highFlight?{x:player.x,z:player.z,radius:36,maxReads:96}:null;
         const reader=createPhysicalNavigationReader({
           legacyMin:LEGACY_WORLD_MIN_Y,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,
           sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,occupied:upperOccupiedAt,
-          resident:upperResidentAt,legacyResident:residentAt,read:readUpper});
+          resident:upperResidentAt,legacyResident:residentAt,read:readUpper,survey});
         observation=observePhysicalNavigationSurface({player,reader,minY:LEGACY_WORLD_MIN_Y,maxY:PHYSICAL_MAX_Y});
-        const highFlight=player.y>WORLD_MAX_Y+1;
         const eligible=eligibleSurfaceDiscovery(observation,player);
         // A missing owner underneath a flying player cannot disable discovery
         // of OTHER witnessed columns. Covered/underground players remain fog-safe.
@@ -403,6 +407,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
             }
           }
         }
+        mini.dataset.surveySourceReads=String(reader.sourceReads);
         needsPaint=true;
       }
       // Repaint position/heading independently of expensive terrain sampling.

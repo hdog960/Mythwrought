@@ -90,3 +90,24 @@ test('old version-one observations reopen with more than 8192 detailed tiles and
  assert.ok(c.flush());const reopened=createObservationCatalog({seed:12,discovery:d,storage:s});
  assert.equal(reopened.tileCount,8200);assert.equal(reopened.ink(0,0),'#abcdef');assert.equal(reopened.ink(8199,0),'#123456');
 });
+
+test('bounded live aerial survey maps actual ground when renderer has no ground mesh',()=>{
+ let reads=0;const survey={x:.5,z:.5,radius:36,maxReads:96};
+ const reader=physicalReader({legacyResident:()=>false,survey,read:(x,y,z)=>{reads++;return y===6?3:0;}});
+ assert.equal(observePhysicalNavigationSurface({player:{x:.5,y:150,z:.5},reader,minY:-3,maxY:256}).surfaceY,7);
+ assert.equal(reader.sourceReads,14);assert.equal(reads,14);
+ assert.equal(reader.surfaceAt(0,0).surfaceY,7);assert.equal(reads,14,'duplicate reads reuse the batch cache');
+ assert.equal(reader.surfaceAt(100,100),null);assert.equal(reads,14);
+ for(let x=1;x<20;x++)reader.surfaceAt(x,0);
+ assert.ok(reader.sourceReads<=96);assert.equal(reads,96);
+ assert.equal(reader.surfaceAt(24,0),null,'exhausted survey fails closed');
+});
+test('aerial survey is opt-in, and cannot read unknown terrain outside the live footprint',()=>{
+ let reads=0;
+ const options={legacyResident:()=>false,occupied:()=>true,resident:()=>false,read:()=>{reads++;return 0;}};
+ assert.equal(physicalReader(options).surfaceAt(0,0),null);assert.equal(reads,0);
+ const reader=physicalReader({...options,survey:{x:.5,z:.5,radius:36,maxReads:20}});
+ assert.equal(reader.read(100,140,0),undefined);assert.equal(reads,0);
+ assert.equal(reader.surfaceAt(0,0),null);assert.equal(reads,20);
+ assert.equal(reader.read(1,256,0),undefined);assert.equal(reads,20);
+});
