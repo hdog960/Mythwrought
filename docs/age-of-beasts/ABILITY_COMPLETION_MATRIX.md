@@ -72,9 +72,9 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Yak | herd, grazing, domestication | Original candidate taming native PASS session16; live pending |
-| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge predicate authored session24; native/live pending |
+| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge positive/flat negative cases passed session24; inconsistent unknown-source fixture corrected session25, native/live pending |
 | Pika | gather, evasion, shelter | Incomplete |
-| Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation predicate authored session24; native/live pending |
+| Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation admitted Skyrays in session24; unknown-source negative fixture corrected session25, autonomous air movement authored; native/live pending |
 | Griffin | tame, flight, aerial-mount, defense | Aerial mounting still blocked pending movement owner; candidate tame interface authored |
 | Cyclops | club, rock-projectile | Ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
@@ -89,13 +89,13 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 |---|---|---|
 | Cave Bat | flight, roost, colony | Isolated roost/departure qualified; colony/live integration pending |
 | Crystal Snail | crawl, illumination, harvest-eligible | Incomplete |
-| Blind Cavefish | swim | Isolated swim qualified; natural spawn/live integration pending |
+| Blind Cavefish | swim | Isolated swim qualified; autonomous full-water original-engine movement authored session25; natural spawn/live pending |
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
 | Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
-| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; actual prior-tick engine ground-motion disturbance fixture authored session24; native/live pending |
-| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
+| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; actual prior-tick engine ground-motion disturbance fixture session24 failed local navigator range; bounded supported approach authored session25, native/live pending |
+| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; independent baseline natural admission3/3 and30-tick ceiling attachment PASS session24; autonomous ceiling crawl authored session25; distant-wall navigation/live pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites native PASS session16; live pending |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.
@@ -106,4 +106,6 @@ Session22: actual generated baseline surface/cave population admission and fixed
 
 Session23: bounded autonomous ground foraging goal search for nine species, scoped collision source ID read reuse with revision invalidation and unchanged residency/shape/overlay checks, corrected Dire Hound separation regression. Native PASS session23, 82/82, same39 generated admissions; autonomous Ermine and safe source-cache regression passed. No species declared fully complete.
 
-Session24: actual high-elevation and ledge facts, independent ceiling-lurker baseline admission, expanded mountain survey, observed engine ground-motion hearing integration authored; native pending. No final natural-provider claim.
+Session24: native84/86; independent ceiling-lurker3/3 natural admissions and expanded mountain15 admissions PASS, cumulative16 distinct baseline species. Unknown-source elevation negative and integrated hearing failed. No final natural-provider claim.
+
+Session25: corrected high-elevation unknown-cell test/provider and conservative non-air veto; original LocalNavigator distant sound staged approach; autonomous medium-specific movement goals for nine species with actual water/ceiling/air support. Three new native groups authored, two corrections pending. No species declared fully complete.

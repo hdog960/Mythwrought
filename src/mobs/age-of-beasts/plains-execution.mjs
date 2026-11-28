@@ -87,7 +87,22 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
  if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl','climb','glide','perch-approach'].includes(intent.action)&&point(goal))destination=goal;
- if(intent.action==='investigate'&&heard)destination=heard;
+ if(intent.action==='investigate'&&heard){
+  destination=heard;
+  // A distant sound is not a target within the bounded original navigator's
+  // radius. Approach it via a physically supported local stage.
+  if(typeof navigator?.steer==='function'){
+   const d=Math.hypot(heard[0]-actor.position[0],heard[2]-actor.position[2]);
+   if(d>4){
+    const dx=(heard[0]-actor.position[0])/d,dz=(heard[2]-actor.position[2])/d;
+    destination=null;
+    for(let n=16;n>=3;n--){
+     const p=[actor.position[0]+dx*n*.25,actor.position[1],actor.position[2]+dz*n*.25];
+     if(query.environment(p)?.hazard===false&&query.environment(p)?.biome===biome&&expansionSupport(query,p,r.body,'ground')){destination=p;break;}
+    }
+   }
+  }
+ }
  if(intent.action==='herd'&&social)destination=social.goal;
  if(activity)destination=activity.destination;
  if(territory)destination=territory.destination;

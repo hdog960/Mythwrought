@@ -83,7 +83,7 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
   const highElevation=()=>env.biome==='alpine'&&p[1]>=14&&knownVolume(p)&&support('air')&&(()=>{
    // Actual nearby alpine terrain, below the actor, not a floating coordinate.
    const [x,y,z]=p.map(Math.floor);
-   for(let dy=1;dy<=6;dy++){const id=read(x,y-dy,z);if(id===undefined)return false;if(highTerrain.has(id))return y-dy>=10;}
+   for(let dy=1;dy<=6;dy++){const id=read(x,y-dy,z);if(id===undefined)return false;if(highTerrain.has(id))return y-dy>=10;if(id!==BLOCK.AIR)return false;}
    return false;
   })();
   let refuge,shore;

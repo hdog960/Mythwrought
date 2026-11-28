@@ -26,7 +26,7 @@ test('physical mountain elevation requires actual high source terrain and ledges
  const at=[.5,14,.5],facts=readExpansionHabitatFacts(ledge,at,bird.capability,bird.requirement);
  assert.equal(facts['cliff-ledge'],true);assert.equal(facts['perch-site'],true);
  assert.equal(readExpansionHabitatFacts(high,at,bird.capability,bird.requirement)['cliff-ledge'],false);
- assert.equal(readExpansionHabitatFacts({...high,materialAt:(x,y,z)=>y===12?undefined:M.stone},p,c.capability,c.requirement)['high-elevation'],false);
+ assert.equal(readExpansionHabitatFacts({...high,materialAt:(x,y,z)=>y===12?undefined:high.materialAt(x,y,z)},p,c.capability,c.requirement)['high-elevation'],false);
 });
 test('independent generated cave ceiling-lurker admits without competing bat and stays attached',()=>{
  const rows=[];
@@ -78,6 +78,6 @@ test('echo stalker investigates actual completed engine footsteps without assign
  const id=f.selectAndSpawn({proposals:[{id:'echo-stalker',point:p,rarityRoll:0}],observer:[8,-9,.5],homeChunk:'0,0,-1'});assert.ok(id);
  const cow=f.spawnOriginal('cow',[12,-9,.5]);assert.ok(cow);
  for(let i=0;i<20;i++)assert.equal(f.advance(FIXED_STEP,e=>e.id===cow?[1,0]:undefined),1);
- assert.ok(f.get(id).position[0]>.5);assert.ok(f.get(cow).position[0]>12);
+ assert.ok(f.get(cow).position[0]>12);assert.ok(f.get(id).position[0]>.5,'heard remote source must produce local movement');
  assert.ok(!f.drainEvents().some(e=>e.type==='hurt'));f.dispose();
 });
