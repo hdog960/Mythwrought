@@ -99,6 +99,72 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
     write(nx,ny,nz,nextDest);
     return n;
   }
+  // One-cell, liquid-only displacement. Plans are transient capabilities.
+  // Host owns the terrain transaction and must hold its edit/streaming lease.
+  const displacementPlans=new WeakSet();
+  function planDisplacement(x,y,z){
+    requirePoint(x,y,z);
+    if(dirty)throw new Error("Displacement during tick");
+    if(!open(x,y,z))return null;
+    const origin=getCell(x,y,z);
+    if(!origin)return null;
+    let remaining=origin,slots=maxCells-cells.size+1;
+    const moves=[];
+    // Prefer occupied compatible cells when the resident cap is tight.
+    // No traversal beyond face neighbors or implicit liquid sinks.
+    const candidates=[];
+    for(const [dx,dy,dz] of offsets){
+      const nx=x+dx,ny=y+dy,nz=z+dz;
+      if(!open(nx,ny,nz))continue;
+      const before=getCell(nx,ny,nz);
+      if(before&&before.id!==origin.id)continue;
+      candidates.push({nx,ny,nz,before});
+    }
+    if(slots<candidates.filter(c=>!c.before).length){
+      candidates.sort((a,b)=>Number(!a.before)-Number(!b.before));
+    }
+    for(const {nx,ny,nz,before} of candidates){
+      if(!remaining)break;
+      if(!before&&slots===0)continue;
+      let n=Math.min(remaining.units,CELL_CAPACITY-(before?.units??0));
+      for(;n>0;n--){
+        const [taken,left]=split(remaining,n),merged=combine(before?.quantities??{},taken);
+        if(!merged)continue;
+        const after=record(nx,ny,nz,origin.id,(before?.units??0)+n,merged);
+        moves.push(Object.freeze({before,after,units:n}));
+        if(!before)slots--;
+        remaining=n===remaining.units?null:record(x,y,z,origin.id,remaining.units-n,left);
+        break;
+      }
+    }
+    // Conservative rejection is valid even if a more expensive search could fit.
+    if(remaining)return null;
+    const plan=Object.freeze({origin,moves:Object.freeze(moves)});
+    displacementPlans.add(plan);
+    return plan;
+  }
+  function commitDisplacement(plan){
+    if(dirty)throw new Error("Displacement during tick");
+    if(!displacementPlans.has(plan))return null;
+    displacementPlans.delete(plan);
+    const {origin,moves}=plan;
+    if(!open(origin.x,origin.y,origin.z))return null;
+    for(const {after} of moves)if(!open(after.x,after.y,after.z))return null;
+    if(getCell(origin.x,origin.y,origin.z)!==origin)return null;
+    let net=-1;
+    for(const {before,after} of moves){
+      if(getCell(after.x,after.y,after.z)!==before)return null;
+      if(!before)net++;
+    }
+    if(cells.size+net>maxCells)return null;
+    // All validation and allocation of cell records precede writes. No host
+    // callbacks in this phase. Source removal releases its resident slot.
+    const changed=Object.freeze([origin,...moves.map(m=>m.after)].map(c=>Object.freeze([c.x,c.y,c.z])));
+    const result=Object.freeze({moved:origin.units,changed});
+    write(origin.x,origin.y,origin.z,null);
+    for(const {after} of moves)write(after.x,after.y,after.z,after);
+    return result;
+  }
   function tick(limit=maxVisits){
     if(!integer(limit,1,maxVisits))throw new RangeError("Tick exceeds configured visit budget");
     if(dirty)throw new Error("Reentrant tick");
@@ -165,5 +231,5 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
       pending.set(k,[...p]);
     }
   }
-  return Object.freeze({insert,extract,getCell,wake,tick,samplePoint,proposeReaction,save});
+  return Object.freeze({insert,extract,getCell,wake,tick,samplePoint,proposeReaction,planDisplacement,commitDisplacement,save});
 }

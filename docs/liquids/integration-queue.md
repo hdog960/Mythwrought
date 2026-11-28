@@ -1,5 +1,5 @@
 # Liquid integration queue — Water A coordination
-Status 2026-11-27: source-only isolated development. Current observed main 222b0a8acd736a6502d85c5797f77f0d4f38a861 (Veilreach #508). Unified release PR #503 and all existing Personal assignments remain protected; no production integration slot reserved.
+Status 2026-11-27: source-only isolated development. Current observed main 8400d13a6f5521901cbf0909a0c4f6e2e79c1629 (release loading #516); liquid branch development base remains 222b0a8acd736a6502d85c5797f77f0d4f38a861. Unified release PR #503 and all existing Personal assignments remain protected; no production integration slot reserved.
 
 | Candidate owner | Branch | Exclusive proposed source |
 |---|---|---|
@@ -7,7 +7,7 @@ Status 2026-11-27: source-only isolated development. Current observed main 222b0
 | Lava A | business/liquids/lava-physics | src/liquids/lava/physics/** |
 | Acid A | business/liquids/acid-physics | src/liquids/acid/physics/** |
 | Amber Sap A | business/liquids/amber-sap-physics | src/liquids/amber-sap/physics/** |
-| Liquid Resonance A | business/liquids/resonance-physics | src/liquids/resonance/physics/** |
+| Liquid Resonance A | business/liquids/resonance-physics | src/liquids/liquid-resonance/physics/** |
 | Water B | business/liquids/water-content | shared presentation; water content |
 | Lava B | business/liquids/lava-content | lava content/presentation |
 | Acid B | business/liquids/acid-content | acid content/presentation |
