@@ -72,7 +72,7 @@ try {
       require(!messages.some(row => row.type === 'ready' && row.id === 1), 'Canceled build published');
       const gl = document.querySelector('canvas').getContext('webgl2');
       require(gl, 'WebGL2 required');
-      const meshes = [];
+      const meshes = [], resident = [];
       for (const site of [0, 1]) {
         worker.postMessage({ type: 'sample', id: 2, manifestSha: identity.manifestSha, site });
         const query = 'meshes-' + site;
@@ -90,13 +90,58 @@ try {
           gl.getBufferSubData(gl.ARRAY_BUFFER, 0, bytes);
           const expected = new Uint8Array(vertices.buffer, vertices.byteOffset, vertices.byteLength);
           require(bytes.every((value, i) => value === expected[i]), 'GPU source bytes differ from worker bytes');
-          gl.deleteBuffer(buffer);
-          require(gl.getError() === gl.NO_ERROR, 'Browser GPU upload or retirement failed');
+          resident.push({ buffer, count: vertices.length / 9 });
+          require(gl.getError() === gl.NO_ERROR, 'Browser GPU upload failed');
           const digest = await crypto.subtle.digest('SHA-256', bytes);
           meshes.push({ cx, cz, section, bytes: bytes.length, sha256: Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('') });
         }
       }
-      return { manifest: identity.manifestSha, counts, animationFrames, canceledBuildPublished: false, meshes };
+
+      function compile(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        require(gl.getShaderParameter(shader, gl.COMPILE_STATUS), gl.getShaderInfoLog(shader));
+        return shader;
+      }
+      const program = gl.createProgram();
+      const vs = compile(gl.VERTEX_SHADER, '#version 300 es\nlayout(location=0) in vec3 p; void main(){gl_Position=vec4((p.x-632.0)/12.0,(p.y-16.0)/20.0,0.0,1.0);}');
+      const fs = compile(gl.FRAGMENT_SHADER, '#version 300 es\nprecision mediump float; out vec4 c; void main(){c=vec4(.9,.7,.4,1.0);}');
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      require(gl.getProgramParameter(program, gl.LINK_STATUS), gl.getProgramInfoLog(program));
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
+      gl.useProgram(program);
+      gl.enableVertexAttribArray(0);
+      function frame() {
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        for (const { buffer, count } of resident) {
+          gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+          gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 36, 0);
+          gl.drawArrays(gl.TRIANGLES, 0, count);
+        }
+        const pixels = new Uint8Array(64 * 64 * 4);
+        gl.readPixels(0, 0, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+        require(gl.getError() === gl.NO_ERROR, 'Active worker geometry draw failed');
+        return pixels;
+      }
+      const beforeReplacement = frame();
+      require(beforeReplacement.some(value => value > 0), 'Missing published terrain pixels');
+      worker.postMessage({ ...build, id: 3, seed: 42, tiles: [[1, 0]], revision: 'same-scene-replacement' });
+      await expect('assembling', 3);
+      worker.postMessage({ type: 'cancel', id: 3 });
+      await expect('canceled', 3);
+      worker.postMessage({ type: 'sample', id: 3, manifestSha: identity.manifestSha, site: 0 });
+      await expect('refused', 3);
+      require(!messages.some(row => row.type === 'ready' && row.id === 3), 'Canceled replacement published');
+      require(frame().every((byte, i) => byte === beforeReplacement[i]), 'Canceled replacement changed published pixels');
+      for (const { buffer } of resident) gl.deleteBuffer(buffer);
+      gl.deleteProgram(program);
+      require(gl.getError() === gl.NO_ERROR, 'Browser GPU retirement failed');
+      return { manifest: identity.manifestSha, counts, animationFrames, canceledBuildPublished: false, meshes,
+        activeFramePreserved: true };
     } finally {
       cancelAnimationFrame(frameId);
       worker.terminate();
