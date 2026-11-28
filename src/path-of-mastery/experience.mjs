@@ -2,7 +2,7 @@
 import { SKILL_MAX_LEVEL } from './registry.mjs';
 export function makeExperienceCurve(thresholds) {
   if (!Array.isArray(thresholds) || thresholds.length !== SKILL_MAX_LEVEL ||
-      thresholds[0] !== 0 || thresholds.some((xp, i) =>
+      thresholds[0] !== 0 || Array.from(thresholds).some((xp, i) =>
         !Number.isSafeInteger(xp) || xp < 0 || (i > 0 && xp <= thresholds[i - 1]))) {
     throw new RangeError('Invalid experience curve');
   }

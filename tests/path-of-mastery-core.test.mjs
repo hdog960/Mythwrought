@@ -51,6 +51,6 @@ test('configurable curves validated, cloned and immutable', () => {
   assert.equal(experienceProgress(49, curve).level, 5);
   assert.equal(experienceProgress(49, curve).xpToNext, 1);
   assert.ok(Object.isFrozen(curve));
-  for (const invalid of [[], null, linear, Array(99).fill(0)])
+  for (const invalid of [[], null, linear, Array(99).fill(0), [0, ...Array(97), 100]])
     assert.throws(() => makeExperienceCurve(invalid), RangeError);
 });
