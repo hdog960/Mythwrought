@@ -7,10 +7,10 @@ import {createNavigationAdapter} from './navigation00/navigation-adapter.mjs';
 import {createNavigationGestures} from './navigation00/navigation-gestures.mjs';
 import {paintNavigationFrame} from './navigation00/navigation-paint.mjs';
 import {createNavigationLocationReadout} from './navigation00/navigation-location-readout.mjs';
-import {navigationPose,observeNavigationSurface,eligibleSurfaceDiscovery} from './navigation00/navigation-live-observation.mjs';
+import {navigationPose,eligibleSurfaceDiscovery} from './navigation00/navigation-live-observation.mjs';
 import {createObservationCatalog,sampleNearbyObservations} from './navigation00/navigation-observation-catalog.mjs';
 import {surfaceWitness,nearestVisibleMarker} from './navigation00/navigation-surface-witness.mjs';
-import {classifyHeightObservation,inspectUpperCover} from './navigation00/navigation-height-observation.mjs';
+import {createPhysicalNavigationReader,observePhysicalNavigationSurface,flightDiscoveryRadius} from './navigation00/navigation-height-observation.mjs';
 import {MOUNTAIN_V8_MATERIAL,mountainV8Material} from './manual-biomes/mountain-v8-materials.mjs';
 import {LEGACY_WORLD_MIN_Y,WORLD_MAX_Y} from './depth.mjs';
 import {PHYSICAL_MAX_Y,UPPER_SECTION_COUNT,runtimeSectionBounds} from './world-height.mjs';
@@ -18,6 +18,8 @@ import {PHYSICAL_MAX_Y,UPPER_SECTION_COUNT,runtimeSectionBounds} from './world-h
 export const MAP_CELL_SIZE=4;
 export const MAP_REVEAL_RADIUS=3;
 export const MAP_MAX_CELLS=120000;
+export const MAP_PAINT_INTERVAL_MS=50;
+export const MAP_SAMPLE_INTERVAL_MS=200;
 export function mapStorageKey(seed){return 'mythwrought-exploration-v1-'+seed;}
 export function mapCell(x,z){
   if(!Number.isFinite(x)||!Number.isFinite(z))throw Error('Invalid map position');
@@ -56,6 +58,13 @@ export function loadExploration(storage,seed){
     get readOnly(){return readOnly;},
     get warning(){return warning;},
     has(x,z){return seen.has(mapCell(x,z));},
+    admitCell(cx,cz){
+      if(readOnly||![cx,cz].every(n=>Number.isSafeInteger(n)&&Math.abs(n)<=10000000))return false;
+      const cell=cx+','+cz;
+      if(seen.has(cell))return true;
+      if(seen.size>=MAP_MAX_CELLS){warning='Exploration record full; older discoveries remain preserved';return false;}
+      seen.add(cell);dirty=true;return true;
+    },
     reveal(x,z,eligible=()=>true){
       if(!Number.isFinite(x)||!Number.isFinite(z)||typeof eligible!=='function')return 0;
       const cx=Math.floor(x/MAP_CELL_SIZE),cz=Math.floor(z/MAP_CELL_SIZE);
@@ -112,7 +121,9 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
   const w=canvas.width,h=canvas.height,px=expanded?zoom:5;
   ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#122126';ctx.fillRect(0,0,w,h);
-  const mx=Math.floor((player.x+panX)/MAP_CELL_SIZE),mz=Math.floor((player.z+panZ)/MAP_CELL_SIZE);
+  const centerX=(player.x+panX)/MAP_CELL_SIZE,centerZ=(player.z+panZ)/MAP_CELL_SIZE;
+  const mx=Math.floor(centerX),mz=Math.floor(centerZ);
+  const offsetX=(centerX-mx-.5)*px,offsetZ=(centerZ-mz-.5)*px;
   const reachX=Math.ceil(w/(2*px))+1,reachZ=Math.ceil(h/(2*px))+1;
   for(let dz=-reachZ;dz<=reachZ;dz++){
     for(let dx=-reachX;dx<=reachX;dx++){
@@ -124,11 +135,11 @@ export function paintExploration(canvas,map,world,player,{expanded=false,panX=0,
       // preserve the old source-exact color path on every legacy seed.
       ctx.fillStyle=observedInk?observedInk(cx,cz):(profiledDiscoveredCellInk(world,cx,cz,MAP_CELL_SIZE)||
         surfaceInk(world,cx,cz));
-      ctx.fillRect(Math.floor(w/2+dx*px-px/2),Math.floor(h/2+dz*px-px/2),px,px);
+      ctx.fillRect(Math.floor(w/2+dx*px-px/2-offsetX),Math.floor(h/2+dz*px-px/2-offsetZ),px,px);
     }
   }
-  const rx=w/2+(Math.floor(player.x/MAP_CELL_SIZE)-mx)*px;
-  const rz=h/2+(Math.floor(player.z/MAP_CELL_SIZE)-mz)*px;
+  const rx=w/2-panX/MAP_CELL_SIZE*px;
+  const rz=h/2-panZ/MAP_CELL_SIZE*px;
   if(rx>=-12&&rx<=w+12&&rz>=-12&&rz<=h+12){
     const a=player.yaw;
     const dx=Math.sin(a),dz=Math.cos(a),sx=Math.cos(a),sz=-Math.sin(a);
@@ -153,7 +164,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
   const coordinates=document.getElementById('explorationCoordinates');
   const summary=document.getElementById('explorationSummary');
   let map=loadExploration(storage,getWorld().seed);
-  let lastPaint=-Infinity,lastSave=-Infinity,nav,gestures,catalog,paintRequest=null,observation=null,selected=null,tap=null,sampleIndex=0;
+  let lastPaint=-Infinity,lastSample=-Infinity,lastSave=-Infinity,lastPoseKey='',needsPaint=true,nav,gestures,catalog,paintRequest=null,observation=null,selected=null,tap=null,sampleIndex=0;
   const markerList=document.getElementById('navMarkerList'),markerName=document.getElementById('navMarkerName');
   const markerStatus=document.getElementById('navMarkerStatus');
   const addMarker=document.getElementById('navMarkerAdd'),renameMarker=document.getElementById('navMarkerRename');
@@ -210,6 +221,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     nav=createNavigationAdapter({seed:map.seed,discovery:map,storage,
       width:large.width,height:large.height,player:pose(),exact:true});
     catalog=createObservationCatalog({seed:map.seed,discovery:map,storage});sampleIndex=0;
+    lastPaint=lastSample=-Infinity;lastPoseKey='';needsPaint=true;
     selected=null;observation=null;
     gestures=createNavigationGestures({viewport:nav.viewport});
     if(!overlay.hidden)gestures.open();
@@ -228,7 +240,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     const currentObservation=observation?.x===Math.floor(player.x)&&observation?.z===Math.floor(player.z)?observation:null;
     const location=createNavigationLocationReadout({...player,yaw:-player.yaw},{headingOffset:180,decimals:1,surfaceY:currentObservation?.surfaceY??null});
     coordinates.textContent=location.coordinateLabel+' · '+location.direction+' '+Math.round(location.bearingDegrees)%360+'° · Seed '+world.seed;
-    summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='upper'?'Upper world · surface not sampled':currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':'Cover '+location.depth.toFixed(1)+' blocks above feet'):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
+    summary.textContent=map.warning||catalog.warning||map.seen.size+' discovered cells · '+(currentObservation?.kind==='underground'?'Underground · surface unknown':currentObservation?.kind==='covered'?'Below cover · '+(currentObservation.surfaceY===null?'height unknown':'Cover '+location.depth.toFixed(1)+' blocks above feet'):currentObservation?.kind==='surface'?'Surface / open sky':'Surface status unknown');
     if(!map.warning&&!catalog.warning&&currentObservation?.kind==='underground'){
       const priorTop=catalog.height(Math.floor(player.x/4),Math.floor(player.z/4));
       if(priorTop!==null)summary.textContent=map.seen.size+' discovered cells · Underground · '+Math.max(0,priorTop-player.y).toFixed(1)+' below last observed tile top (approx.)';
@@ -346,42 +358,58 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
     isOpen:()=>!overlay.hidden,
     tick(now){
       syncSeed();
-      if(now-lastPaint>320){
-        if(overlay.hidden&&canOpen()){
-          const player=pose(),world=getWorld();
-          const upperCover=player.y>=LEGACY_WORLD_MIN_Y&&player.y<=WORLD_MAX_Y+1?inspectUpperCover({player,sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,
-            occupied:upperOccupiedAt,resident:upperResidentAt,read:readUpper}):null;
-          const physicalRead={get:readUpper};
-          const legacy=upperCover===false?observeNavigationSurface({world:physicalRead,player,residentAt,minSurfaceY:LEGACY_WORLD_MIN_Y,maxY:WORLD_MAX_Y}):null;
-          observation=classifyHeightObservation({player,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,legacyObservation:legacy,upperCover});
-          if(eligibleSurfaceDiscovery(observation,player)){
+      const player=pose(),world=getWorld();
+      if(overlay.hidden&&canOpen()&&now-lastSample>=MAP_SAMPLE_INTERVAL_MS){
+        lastSample=now;
+        const reader=createPhysicalNavigationReader({
+          legacyMin:LEGACY_WORLD_MIN_Y,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,
+          sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,occupied:upperOccupiedAt,
+          resident:upperResidentAt,legacyResident:residentAt,read:readUpper});
+        observation=observePhysicalNavigationSurface({player,reader,minY:LEGACY_WORLD_MIN_Y,maxY:PHYSICAL_MAX_Y});
+        const highFlight=player.y>WORLD_MAX_Y+1;
+        const eligible=eligibleSurfaceDiscovery(observation,player);
+        // A missing owner underneath a flying player cannot disable discovery
+        // of OTHER witnessed columns. Covered/underground players remain fog-safe.
+        if(!map.readOnly&&(eligible||(highFlight&&observation.kind==='unknown'))){
+          const radius=flightDiscoveryRadius(player.y,observation.surfaceY,WORLD_MAX_Y);
+          const airSurvey=highFlight||radius>3;
+          const eye=[player.x,player.y+1.55,player.z];
+          function witnessed(top,x,z){
+            if(!top||top.surfaceY>eye[1])return null;
+            if(!surfaceWitness({eye,target:[x,top.surfaceY+.01,z],
+              resident:reader.resident,read:reader.read,
+              maxSteps:airSurvey?384:64,maxDistance:airSurvey?320:24}))return null;
+            const id=top.id,y=top.y;
+            const material=mountainV8Material(id);
+            const ink=material?material.palette[0].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''):null;
+            const color=ink?'#'+ink:({1:'#6f9a6d',2:'#8b7b62',3:'#a49d8d',4:'#806747',7:'#477a69',76:'#468ca8',256:'#d5b276',257:'#bd765c',258:'#aa8a63',259:'#dfd4ae',272:'#e0edf0',277:'#a7d5df',278:'#b7c3c4',279:'#d2ddde',286:'#8e6ca8',293:'#a184bf',294:'#9278ac',302:'#858995',303:'#676d7c',305:'#686c7a',307:'#a87866'}[id]||'#8b9081');
+            return {ink:color,y:y+1};
+          }
+          if(eligible){
+            const here=witnessed(observation,player.x,player.z);
             const cx=Math.floor(player.x/4),cz=Math.floor(player.z/4);
-            if(!map.readOnly)map.reveal(player.x,player.z,(x,z)=>Math.floor(x/4)===cx&&Math.floor(z/4)===cz);
-            sampleNearbyObservations({catalog,discovery:map,player,refreshIndex:sampleIndex++,
-              residentAt:(x,z)=>!map.readOnly&&residentAt(x,WORLD_MAX_Y,z),
-              admit:(x,z)=>{map.reveal(player.x,player.z,(a,b)=>Math.floor(a/4)===x&&Math.floor(b/4)===z);return map.seen.has(x+','+z);},
-              sample:(x,z)=>{
-                for(let y=WORLD_MAX_Y;y>=LEGACY_WORLD_MIN_Y;y--){
-                  const id=readUpper(x,y,z);if(id===BLOCK.AIR)continue;
-                  if(!surfaceWitness({eye:[player.x,player.y+1.55,player.z],target:[x+.5,y+1.01,z+.5],
-                    resident:(a,b,c)=>b<=PHYSICAL_MAX_Y&&(b>WORLD_MAX_Y?(upperResidentAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))||!upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))):residentAt(a,b,c)),
-                    read:(a,b,c)=>b>WORLD_MAX_Y?(upperOccupiedAt(a,c,Math.ceil((b-WORLD_MAX_Y)/16))?readUpper(a,b,c):0):readUpper(a,b,c)}))return null;
-                  const material=mountainV8Material(id);
-                  const ink=material?material.palette[0].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join(''):null;
-                  const color=ink?'#'+ink:({1:'#6f9a6d',2:'#8b7b62',3:'#a49d8d',4:'#806747',7:'#477a69',76:'#468ca8',256:'#d5b276',257:'#bd765c',258:'#aa8a63',259:'#dfd4ae',272:'#e0edf0',277:'#a7d5df',278:'#b7c3c4',279:'#d2ddde',286:'#8e6ca8',293:'#a184bf',294:'#9278ac',302:'#858995',303:'#676d7c',305:'#686c7a',307:'#a87866'}[id]||'#8b9081');
-                  return {ink:color,y:y+1};
-                }
-                return null;
-              }});
-            const x=Math.floor(player.x),z=Math.floor(player.z),y=observation.surfaceY-1;
-            const id=world.get(x,y,z),base=world.base??world;
+            if(here&&map.admitCell(cx,cz))catalog.observeTile(cx,cz,here.ink,here.y,{witnessed:true});
+          }
+          sampleNearbyObservations({catalog,discovery:map,player,refreshIndex:sampleIndex++,radius,
+            sampleLimit:airSurvey?3:6,
+            residentAt:(x,z)=>!map.readOnly,
+            admit:(x,z)=>map.admitCell(x,z),
+            sample:(x,z)=>witnessed(reader.surfaceAt(x,z),x+.5,z+.5)});
+          if(eligible){
+            const {x,z,y,id}=observation,base=world.base??world;
             if(player.y>=y+1&&player.y<=y+3&&[MOUNTAIN_V8_MATERIAL.stone,MOUNTAIN_V8_MATERIAL.slate,MOUNTAIN_V8_MATERIAL.gneiss].includes(id)&&
                 typeof base.naturalAndLandmarkBlock==='function'&&base.naturalAndLandmarkBlock(x,y,z)===id&&!base.edits?.has(x+','+y+','+z)){
               catalog.observeLandmark({id:'alpine-'+Math.floor(x/16)+'-'+Math.floor(z/16),kind:'alpine',x:player.x,y:player.y,z:player.z},{witnessed:true});
             }
           }
         }
-        render();lastPaint=now;
+        needsPaint=true;
+      }
+      // Repaint position/heading independently of expensive terrain sampling.
+      const poseKey=[Math.round(player.x*10),Math.round(player.z*10),Math.round(player.yaw*100),Math.round(player.y*10)].join(',');
+      if(poseKey!==lastPoseKey)needsPaint=true;
+      if(needsPaint&&now-lastPaint>=MAP_PAINT_INTERVAL_MS){
+        render();lastPaint=now;lastPoseKey=poseKey;needsPaint=false;
       }
       if(now-lastSave>5000){flushAll();lastSave=now;}
     },
