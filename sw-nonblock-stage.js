@@ -3,9 +3,9 @@ const workerUrl=new URL(self.location.href);
 const staging=['localhost','127.0.0.1'].includes(workerUrl.hostname)&&
   workerUrl.searchParams.get('nonblock-staging')==='1';
 const CACHE_PREFIX='mythwrought-nonblock-stage-shell-';
-const STAGE_VERSION='20261127-v49';
-const STAGE_PREVIOUS_VERSION='20261127-v48';
-const SITE_RELEASE='20261127-veilreach-v1';
+const STAGE_VERSION='20261128-v50';
+const STAGE_PREVIOUS_VERSION='20261127-v49';
+const SITE_RELEASE='20261128-veilreach-launch-v2';
 const CACHE_NAME=CACHE_PREFIX+STAGE_VERSION;
 const scopeUrl=new URL(self.registration.scope);
 const manifestUrl=new URL('./nonblock-stage-assets.json',scopeUrl).href;
@@ -79,7 +79,7 @@ self.addEventListener('fetch',event=>{
   const stageNavigation=request.mode==='navigate'&&canonical.href===scopeUrl.href&&
     url.searchParams.has('nonblock-stage')&&url.searchParams.get('nonblock-offline')==='1';
   const pinned=url.searchParams.size===1&&url.searchParams.get('mw-release')===SITE_RELEASE&&
-    ['styles.css','src/main.mjs'].some(path=>canonical.href===new URL(path,scopeUrl).href);
+    (canonical.pathname.endsWith('.mjs')||canonical.href===new URL('styles.css',scopeUrl).href);
   if(url.search&&!stageNavigation&&!pinned)return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE_NAME);
