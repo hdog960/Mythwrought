@@ -425,15 +425,20 @@ export function createVeilreachDistanceRenderer(gl){
           else if(!result.value){preparedTiles++;work++;}
         }
         lastPreparationMs=performance.now()-begin;
-        if(job.ready&&rendererReady()){
+        if(job.ready){
           const beginUpload=performance.now();
-          if(!job.upload)job.upload=measureUpload('pack',()=>stageUpload(gl,pack(job.ready)));
-          if(job.upload.slice(measureUpload)){
-            publish(job.upload.finish());
-            job.upload=null;job.ready=null;
-            retry.success(retryKey);
+          try{
+            if(rendererReady()){
+              if(!job.upload)job.upload=measureUpload('pack',()=>stageUpload(gl,pack(job.ready)));
+              if(job.upload.slice(measureUpload)){
+                publish(job.upload.finish());
+                job.upload=null;job.ready=null;
+                retry.success(retryKey);
+              }
+            }
+          }finally{
+            lastUploadMs=performance.now()-beginUpload;
           }
-          lastUploadMs=performance.now()-beginUpload;
         }
         if(job.done&&!job.ready)job=null;
       }catch(error){
