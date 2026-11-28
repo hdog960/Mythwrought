@@ -61,6 +61,13 @@ test('dry river cuts preserve source rock, native mesh and two-way canyon floor 
       assert.notDeepEqual(V.meshChunk(witness, ...region), V.meshChunk(source, ...region));
     }
     assert.deepEqual(V.meshChunk(witness, 0, 0), V.meshChunk(source, 0, 0));
+    const original = source.get(x, feet, z);
+    assert.notEqual(original, V.BLOCK.AIR);
+    assert.equal(source.set(x, feet, z, V.BLOCK.WOOD), true);
+    assert.equal(witness.get(x, feet, z), V.BLOCK.WOOD);
+    assert.equal(witness.naturalAndLandmarkBlock(x, feet, z), V.BLOCK.AIR);
+    assert.equal(source.set(x, feet, z, original), true);
+    assert.equal(witness.get(x, feet, z), V.BLOCK.AIR);
     assert.equal(source.edits.size, 0);
     assert.throws(() => witness.save(), /separate world profile/);
     rows.push({ seed, origin: canyon.origin, stations: canyon.stations.length, deep: canyon.deep,

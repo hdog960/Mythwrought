@@ -52,10 +52,13 @@ export function surveyDesertCanyon(world, { x, z, axis, reservedAt = () => false
 
 export function openDesertCanyonWitness(world, canyon) {
   const cuts = new Set(canyon.cells.map(point => worldKey(...point)));
-  const read = (x, y, z) => cuts.has(worldKey(x, y, z)) ? BLOCK.AIR : world.get(x, y, z);
   return Object.create(world, {
-    get: { value: read },
-    naturalAndLandmarkBlock: { value: read },
+    get: { value: (x, y, z) => {
+      const key = worldKey(x, y, z);
+      return cuts.has(key) && !world.edits.has(key) ? BLOCK.AIR : world.get(x, y, z);
+    } },
+    naturalAndLandmarkBlock: { value: (x, y, z) =>
+      cuts.has(worldKey(x, y, z)) ? BLOCK.AIR : world.naturalAndLandmarkBlock(x, y, z) },
     set: { value() { throw Error('Read-only Desert canyon witness'); } },
     save: { value() { throw Error('Desert canyon research requires a separate world profile'); } }
   });
