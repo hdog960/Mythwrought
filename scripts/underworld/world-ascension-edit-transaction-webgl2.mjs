@@ -33,11 +33,12 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
   });
   try {
     const page = await browser.newPage();
-    const result = await page.evaluate(({ fixture, deeper, faceBytes, faceLimit, cases }) => {
+    const result = await page.evaluate(async ({ fixture, deeper, faceBytes, faceLimit, cases }) => {
       const check = (ok, message) => { if (!ok) throw Error(message); };
       const canvas = document.createElement('canvas');
       canvas.width = 128;
       canvas.height = 128;
+      document.body.append(canvas);
       const gl = canvas.getContext('webgl2');
       check(gl, 'WebGL2 context required');
       const checkGl = () => check(gl.getError() === gl.NO_ERROR && !gl.isContextLost(), 'WebGL2 buffer operation failed');
@@ -63,14 +64,6 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       check(initial.length <= capacity, 'Resident geometry exceeds shared allocation');
       let slots = [...initial, ...Array(capacity - initial.length).fill(null)];
 
-      const buffer = gl.createBuffer();
-      check(buffer, 'Buffer allocation failed');
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      gl.bufferData(gl.ARRAY_BUFFER, capacity * faceBytes, gl.DYNAMIC_DRAW);
-      const initialBytes = new Uint8Array(initial.length * faceBytes);
-      initial.forEach(({ record }, index) => initialBytes.set(record, index * faceBytes));
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, initialBytes);
-      checkGl();
       function shader(type, source) {
         const compiled = gl.createShader(type);
         gl.shaderSource(compiled, source);
@@ -78,18 +71,29 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         check(gl.getShaderParameter(compiled, gl.COMPILE_STATUS), gl.getShaderInfoLog(compiled));
         return compiled;
       }
-      const vs = shader(gl.VERTEX_SHADER,
-        '#version 300 es\nlayout(location=0) in vec3 p; void main(){gl_Position=vec4((p.x+632.0)/24.0,(p.z+2152.0)/24.0,(p.y+40.0)/50.0,1.0);}');
-      const fs = shader(gl.FRAGMENT_SHADER,
-        '#version 300 es\nprecision mediump float; out vec4 color; void main(){color=vec4(0.6,0.5,0.4,1.0);}');
-      const program = gl.createProgram();
-      gl.attachShader(program, vs);
-      gl.attachShader(program, fs);
-      gl.linkProgram(program);
-      check(gl.getProgramParameter(program, gl.LINK_STATUS), gl.getProgramInfoLog(program));
-      gl.useProgram(program);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 0);
+      function createGpuResources() {
+        const buffer = gl.createBuffer();
+        check(buffer, 'Buffer allocation failed');
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, capacity * faceBytes, gl.DYNAMIC_DRAW);
+        const vs = shader(gl.VERTEX_SHADER,
+          '#version 300 es\nlayout(location=0) in vec3 p; void main(){gl_Position=vec4((p.x+632.0)/24.0,(p.z+2152.0)/24.0,(p.y+40.0)/50.0,1.0);}');
+        const fs = shader(gl.FRAGMENT_SHADER,
+          '#version 300 es\nprecision mediump float; out vec4 color; void main(){color=vec4(0.6,0.5,0.4,1.0);}');
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        check(gl.getProgramParameter(program, gl.LINK_STATUS), gl.getProgramInfoLog(program));
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+        gl.useProgram(program);
+        gl.enableVertexAttribArray(0);
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 0);
+        checkGl();
+        return { buffer, program };
+      }
+      let gpu = createGpuResources();
       let writeCalls = 0;
       function upload(index, entry) {
         check(index < capacity, 'Write outside shared allocation');
@@ -97,6 +101,29 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         checkGl();
         writeCalls++;
       }
+      function uploadBatches(writes, failAfter = 0) {
+        const scratch = new Uint8Array(stagingReserve * faceBytes);
+        let uploads = 0, maxUploadFaces = 0;
+        for (let offset = 0; offset < writes.length;) {
+          const { index: start } = writes[offset];
+          let count = 0;
+          while (count < stagingReserve && writes[offset + count]?.index === start + count) {
+            scratch.set(writes[offset + count].entry.record, count * faceBytes);
+            count++;
+          }
+          check(start + count <= capacity, 'Batch upload outside shared allocation');
+          gl.bufferSubData(gl.ARRAY_BUFFER, start * faceBytes, scratch, 0, count * faceBytes);
+          checkGl();
+          maxUploadFaces = Math.max(maxUploadFaces, count);
+          uploads++;
+          writeCalls++;
+          offset += count;
+          if (uploads === failAfter) throw Error('Injected arrival upload failure');
+        }
+        return { uploads, maxUploadFaces };
+      }
+      const uploadLiveSlots = () => uploadBatches(slots.flatMap((entry, index) => entry ? [{ entry, index }] : []));
+      uploadLiveSlots();
       function prepare(target) {
         check(target.size <= capacity, 'Shared slots refused');
         const pending = new Map(target);
@@ -208,7 +235,6 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       }
 
       const deeperTarget = new Map(deeper.flatMap(key => [...native.get(key)]));
-      const streamStaging = new Uint8Array(stagingReserve * faceBytes);
       function streamWindow(target, failAfter = 0) {
         check(target.size <= capacity, 'Stream window capacity refused');
         // Retire departures before reusing their slots. Until all arrivals
@@ -217,27 +243,12 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         slots = retained;
         const { next, writes } = prepare(target);
         check(writes.every(write => !write.previous), 'Stream upload would overwrite a retained face');
-        let uploads = 0, maxUploadFaces = 0;
-        for (let offset = 0; offset < writes.length;) {
-          const { index: start } = writes[offset];
-          let count = 0;
-          while (count < stagingReserve && writes[offset + count]?.index === start + count) {
-            streamStaging.set(writes[offset + count].entry.record, count * faceBytes);
-            count++;
-          }
-          gl.bufferSubData(gl.ARRAY_BUFFER, start * faceBytes, streamStaging, 0, count * faceBytes);
-          checkGl();
-          maxUploadFaces = Math.max(maxUploadFaces, count);
-          uploads++;
-          writeCalls++;
-          offset += count;
-          if (uploads === failAfter) throw Error('Injected arrival upload failure');
-        }
+        const uploaded = uploadBatches(writes, failAfter);
         check(retained.every((entry, index) => !entry || entry === next[index]), 'Retained face moved');
         slots = next;
         check(matchesNative(target), 'Streamed GPU ranges differ from the full native mesh');
         return { residentFaces: target.size, keptFaces: target.size - writes.length,
-          uploadedFaces: writes.length, uploads, maxUploadFaces, ranges: draw(target.size) };
+          uploadedFaces: writes.length, ...uploaded, ranges: draw(target.size) };
       }
       const union = new Map([...initialTarget, ...deeperTarget]);
       const writesBeforeCapacity = writeCalls;
@@ -251,19 +262,60 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       check(writeCalls === writesBeforeCapacity + 2 && matchesNative(kept), 'Failed arrival exposed partial uploads or lost retained faces');
       const keptRangesAfterFailure = draw(kept.size);
       const descent = streamWindow(deeperTarget);
+
+      async function recoverContext(target) {
+        const extension = gl.getExtension('WEBGL_lose_context');
+        check(extension, 'Context-loss extension required');
+        function readFrame() {
+          const pixels = new Uint8Array(canvas.width * canvas.height * 4);
+          gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+          checkGl();
+          return pixels;
+        }
+        function expectEvent(type, request) {
+          return new Promise((resolve, reject) => {
+            const listener = event => {
+              event.preventDefault();
+              clearTimeout(timer);
+              resolve();
+            };
+            const timer = setTimeout(() => {
+              canvas.removeEventListener(type, listener);
+              reject(Error(`Missing ${type} event`));
+            }, 5000);
+            canvas.addEventListener(type, listener, { once: true });
+            request();
+          });
+        }
+        check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'Allocation changed before context loss');
+        const originalFrame = readFrame();
+        check(originalFrame.some(value => value !== 0), 'Missing cave pixels before context loss');
+        const previousGpu = gpu;
+        await expectEvent('webglcontextlost', () => extension.loseContext());
+        check(gl.isContextLost(), 'Context loss event did not invalidate the context');
+        // Let the browser finish dispatching the cancelable loss event.
+        await expectEvent('webglcontextrestored', () => setTimeout(() => extension.restoreContext(), 0));
+        check(!gl.isBuffer(previousGpu.buffer), 'Old pool survived context loss');
+        gpu = createGpuResources();
+        const restored = uploadLiveSlots();
+        check(matchesNative(target), 'Recovered GPU ranges differ from the published native mesh');
+        const ranges = draw(target.size);
+        check(readFrame().every((value, index) => value === originalFrame[index]), 'Recovered cave pixels changed');
+        return { residentFaces: target.size, ...restored, ranges, oldBufferInvalidated: true, pixelParity: true };
+      }
+      const contextRecovery = await recoverContext(deeperTarget);
       const ascent = streamWindow(initialTarget);
       check(descent.uploadedFaces && ascent.uploadedFaces, 'Stream fixture must upload native arrivals in both directions');
       check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'GPU allocation changed');
-      gl.deleteBuffer(buffer);
-      gl.deleteProgram(program);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
+      gl.deleteBuffer(gpu.buffer);
+      gl.deleteProgram(gpu.program);
       checkGl();
       return { residentFaces: initial.length, allocatedFaces: capacity, stagingReserve, initialRanges,
         peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: liveOwners.length, steps,
         streaming: { deeperOwners: deeper.length, descent, ascent,
           unionRefusedFaces: union.size, failedArrivalUploads: 2, keptRangesAfterFailure },
-        rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true, buffersReallocated: false };
+        contextRecovery, rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true,
+        buffersReallocatedDuringEditsOrStreaming: false };
     }, { fixture, deeper, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
       cases: edits.map(({ label, refusal }) => ({ label, refusal })) });
     return { ...result, chromium: browser.version(), edit: peakEdit.edit,
