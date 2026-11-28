@@ -392,7 +392,8 @@ export function createVeilreachDistanceRenderer(gl){
     }
   }
 
-  return Object.freeze({invalidate,prepare,draw({world,chunks,caveShade,atPos,atColor,atUv,atMat}){
+  return Object.freeze({invalidate,prepare,hasVisual:key=>owners.some(owner=>owner.key===key),
+    draw({world,chunks,caveShade,atPos,atColor,atUv,atMat}){
     if(!terrain||caveShade>.35||gl.isContextLost())return 0;
     const detailed=new Set();
     for(const [key,c] of chunks){

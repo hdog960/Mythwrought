@@ -15,6 +15,7 @@ import {planHeightStream} from '../src/world-height-stream.mjs';
 import {runtimeSectionForY,runtimeMeshKey,upperOccupancy,runtimeSectionBounds} from '../src/world-height.mjs';
 import {validateUpperSectionGeometry} from '../src/world-height-budget.mjs';
 import {MOUNTAIN_V8_MATERIAL as M} from '../src/manual-biomes/mountain-v8-materials.mjs';
+import {planVeilreachFlightStream,planVeilreachRetirement,veilreachFlightLookahead} from '../src/veilreach/flight-stream.mjs';
 
 test('signed distant regions grow reproducible clusters and living surfaces',()=>{
   const families=new Set();
@@ -94,6 +95,39 @@ test('natural island meshes are deferred on the ground and bounded in flight',()
   assert.ok(high.length<=25);
   assert.ok(high.filter(c=>c.occupied).length<=8);
   assert.ok(high.some(c=>c.occupied));
+});
+
+test('flight lookahead reserves signed three dimensional body owners within residency limits',()=>{
+  const seed=180,world=new FourRegionWorld(seed,fourRegionProfile(seed,VEILREACH_GENERATOR));
+  const player={x:-20,feet:100,z:4};
+  const section=runtimeSectionForY(100),{maxY}=runtimeSectionBounds(section);
+  const point={x:-16.04,y:maxY-.15,z:-.04};
+  const ahead=veilreachFlightLookahead([{point}],player);
+  assert.equal(ahead.size,6);
+  assert.deepEqual(new Set([...ahead.values()].map(owner=>owner.section)),new Set([section,section+1]));
+  assert.ok([...ahead.values()].some(owner=>owner.cx===-2&&owner.cz===-1));
+  const base=planHeightStream(world,player,[]);
+  const body=runtimeMeshKey(-2,0,section);
+  const selected=planVeilreachFlightStream(world,player,base,new Set([body]),ahead,new Map());
+  const keys=selected.map(owner=>runtimeMeshKey(owner.cx,owner.cz,owner.section));
+  assert.equal(keys[0],body);
+  assert.ok(keys.length<=25&&keys.length===new Set(keys).size);
+  assert.ok([...ahead.keys()].every(key=>keys.includes(key)));
+  assert.ok(selected.filter(c=>c.section>0&&world.upperNaturalOccupied(runtimeMeshKey(c.cx,c.cz,c.section))).length<=8);
+  const retained=planVeilreachFlightStream(world,player,base,new Set([body]),null,new Map());
+  assert.ok(retained.length<=25);
+});
+
+test('flight retirement keeps required owners and prefers owners with published distant coverage',()=>{
+  const player={x:8,feet:104,z:8},section=runtimeSectionForY(player.feet);
+  const owners=Array.from({length:8},(_,x)=>({x,z:0,section,count:192,waterCount:0}));
+  const chunks=new Map(owners.map(owner=>[runtimeMeshKey(owner.x,owner.z,section),owner]));
+  const keys=[...chunks.keys()],wanted=new Set(keys.slice(0,6));
+  const before=[...chunks];
+  const incoming={section,bytes:6912};
+  assert.deepEqual(planVeilreachRetirement(chunks,wanted,player,incoming,key=>key===keys[6]),[keys[6]]);
+  assert.deepEqual([...chunks],before,'the retirement plan leaves visible owners untouched during staging');
+  assert.throws(()=>planVeilreachRetirement(chunks,new Set(keys),player,incoming,()=>true),/residency budgets/);
 });
 
 test('natural trunks and foliage remove transactionally without overwriting player edits',()=>{

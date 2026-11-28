@@ -9,6 +9,7 @@ const SOURCE_ASSETS=[
   "./src/veilreach/generation.mjs",
   "./src/veilreach/source.mjs",
   "./src/veilreach/distance.mjs",
+  "./src/veilreach/flight-stream.mjs",
   "./src/veilreach/flora.mjs",
   "./src/mining-trace.mjs",
   "./src/nonblock/staged-habitats.mjs",

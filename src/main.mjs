@@ -1,5 +1,6 @@
 import {VEILREACH_GENERATOR,usesMountainV8Terrain} from './environment-ground.mjs';
 import {createVeilreachDistanceRenderer,VEILREACH_DISTANCE_OFFSET} from './veilreach/distance.mjs';
+import {planVeilreachFlightStream,planVeilreachRetirement,veilreachFlightLookahead} from './veilreach/flight-stream.mjs';
 import {createMiningTrace} from './mining-trace.mjs';
 import {createMobSourceRevision,markMobSourceMutation} from './mobs/source-edit-epoch.mjs';
 import {buildCreativeCatalog} from './creative-integration/creative-catalog.mjs';
@@ -1507,6 +1508,7 @@ function start(nonblockStage=null){
   }
   let lastStreamingCenter='';
   let wanted=new Set();
+  let veilreachStreamStats=null;
   function stream(){return traceMeasure?traceMeasure('stream',streamOriginal):streamOriginal();}
   function streamOriginal(){
     const horizontalCenter=name(chunkCoord(player.x),chunkCoord(player.z));
@@ -1517,20 +1519,29 @@ function start(nonblockStage=null){
     const active=runtimeSectionForY(player.feet)??0;
     const occupancy=upperOccupancyRevision(world,{natural:player.feet>=16});
     const bodyKeys=new Set((physicalBodyRegions(player)??[]).map(r=>r.key));
-    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'');
+    const skySource=world.base?.upperSourceProfile;
+    if(veilreachStreamStats?.source!==skySource)
+      veilreachStreamStats=skySource?{source:skySource,predicted:0,served:0,swapped:0,uncovered:0,bodyWaiting:0}:null;
+    const bufferedSky=Boolean(skySource&&player.feet>=32);
+    const lookahead=bufferedSky&&g2Active()?veilreachFlightLookahead(g2Flight.prefetch.pending,player):null;
+    const center=baseCenter+(player.feet>=16||player.feet>=3&&occupancy!=='0:0:0:0:0:0'?'|height:'+active+':'+Number(player.feet>=16)+':'+occupancy+':'+[...bodyKeys].join(';')+':'+[player.x,player.feet,player.z].map(v=>Math.floor(v/2)).join(','):'')+
+      (lookahead?.size?'|flight:'+Array.from(lookahead.keys()).sort().join(';'):'');
     if(center!==lastStreamingCenter){
       lastStreamingCenter=center;
       meshCadence.resetCooldown();
       const legacy=visibleSections.flatMap(section=>
         chunkWindow(player.x,player.z,sectionChunkRadius(section,visibleSections[0]))
           .map(c=>({...c,section})));
-      const desired=planHeightStream(world,player,legacy);
+      const basePlan=planHeightStream(world,player,legacy);
+      const desired=bufferedSky?planVeilreachFlightStream(world,player,basePlan,bodyKeys,lookahead,chunks):basePlan;
       wanted=new Set(desired.map(c=>runtimeMeshKey(c.cx,c.cz,c.section)));
       gpuRetry.keepOnly(wanted);
       // Keep only the immediate bounded vertical section neighborhood.
       // At normal surface height this remains the original 25 GPU chunks.
       for(const [k,c] of chunks){
-        if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
+        if(!wanted.has(k)&&(!bufferedSky||c.section<=0||!(c.count+c.waterCount))){
+          deleteChunkBuffers(c);chunks.delete(k);
+        }
       }
       for(const c of desired){
         const k=runtimeMeshKey(c.cx,c.cz,c.section);
@@ -1544,8 +1555,13 @@ function start(nonblockStage=null){
     const weight=([x,z,section])=>
       (x-cx)**2+(z-cz)**2+(section-activeSection)**2*12;
     const queue=[...pending.entries()].sort((a,b)=>
-      Number(bodyKeys.has(b[0]))-Number(bodyKeys.has(a[0]))||weight(a[1])-weight(b[1])||
+      Number(bodyKeys.has(b[0]))-Number(bodyKeys.has(a[0]))||
+      Number(lookahead?.has(b[0])??false)-Number(lookahead?.has(a[0])??false)||weight(a[1])-weight(b[1])||
       a[1][2]-b[1][2]||a[1][1]-b[1][1]||a[1][0]-b[1][0]);
+    if(bufferedSky){
+      veilreachStreamStats.predicted=Math.max(veilreachStreamStats.predicted,lookahead?.size??0);
+      if([...bodyKeys].some(key=>!chunks.has(key)))veilreachStreamStats.bodyWaiting++;
+    }
     const now=performance.now();
     const next=queue.find(([k])=>gpuRetry.ready(k,now));
     if(next&&meshCadence.ready()){
@@ -1554,9 +1570,22 @@ function start(nonblockStage=null){
       try{
         const data=meshPlayableChunk(x,z,section);
         const water=meshPlayableWater(x,z,section);
-        admitUpperGpuBatch(chunks,[{key:k,section,vertices:data,water}]);
+        const retiring=bufferedSky?planVeilreachRetirement(chunks,wanted,player,
+          {section,bytes:data.byteLength+water.byteLength},veilreachDistance.hasVisual):[];
+        const finalResidents=retiring.length?new Map(chunks):chunks;
+        for(const key of retiring)finalResidents.delete(key);
+        admitUpperGpuBatch(finalResidents,[{key:k,section,vertices:data,water}]);
         const buffers=uploadPack2Chunk(data,water,section);
         if(gl.isContextLost())throw Error('Context lost before chunk publication');
+        for(const key of retiring){
+          const old=chunks.get(key);
+          if(old.count&&!veilreachDistance.hasVisual(key))veilreachStreamStats.uncovered++;
+          deleteChunkBuffers(old);chunks.delete(key);
+        }
+        if(bufferedSky){
+          if(lookahead?.has(k))veilreachStreamStats.served++;
+          veilreachStreamStats.swapped+=retiring.length;
+        }
         pending.delete(k);gpuRetry.success(k);
         const old=chunks.get(k);
         chunks.set(k,{x,z,section,...buffers});
@@ -1568,8 +1597,11 @@ function start(nonblockStage=null){
         meshCadence.finished(performance.now()-begin);
       }
     }
-    if(frame%45===0)for(const [k,c] of chunks){
-      if(!wanted.has(k)){deleteChunkBuffers(c);chunks.delete(k);}
+    if(frame%45===0&&(!bufferedSky||!pending.size))for(const [k,c] of chunks){
+      if(!wanted.has(k)){
+        if(bufferedSky&&c.count&&!veilreachDistance.hasVisual(k))veilreachStreamStats.uncovered++;
+        deleteChunkBuffers(c);chunks.delete(k);
+      }
     }
   }
   function respawnPrototype(){
@@ -1793,6 +1825,10 @@ function start(nonblockStage=null){
       canvas.dataset.meshCadenceSkipped=String(meshCadence.skipped);
       canvas.dataset.loadedChunks=String(chunks.size);
       canvas.dataset.pendingChunks=String(pending.size);
+      if(veilreachStreamStats){
+        const {predicted,served,swapped,uncovered,bodyWaiting}=veilreachStreamStats;
+        canvas.dataset.veilreachPhysicalStream=JSON.stringify({predicted,served,swapped,uncovered,bodyWaiting});
+      }else if(canvas.dataset.veilreachPhysicalStream)delete canvas.dataset.veilreachPhysicalStream;
       canvas.dataset.chunkCenter=lastStreamingCenter;
       canvas.dataset.meshEditBatches=String(editMeshBatches);
       canvas.dataset.lastEditedChunks=lastEditMeshKeys.join(';');

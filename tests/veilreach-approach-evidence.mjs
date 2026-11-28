@@ -8,6 +8,7 @@ const out=process.env.VEILREACH_EVIDENCE??'artifacts/veilreach-approach';
 const revision=process.env.VEILREACH_SOURCE;
 assert.match(revision??'',/^[a-f0-9]{40}$/);
 const recordVideo=process.env.VEILREACH_EVIDENCE_NO_VIDEO!=='1';
+const boundaryRoute=process.env.VEILREACH_BOUNDARY_ROUTE==='1';
 const viewport={width:844,height:390};
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({args:['--enable-webgl','--use-gl=angle',
@@ -23,7 +24,7 @@ const hold=async(key,fn,arg)=>{
   await page.keyboard.down(key);
   try{await wait(fn,arg);}finally{await page.keyboard.up(key);}
 };
-const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',recordVideo,errors};
+const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',recordVideo,boundaryRoute,errors};
 try{
   await page.addInitScript(()=>{
     const random=crypto.getRandomValues.bind(crypto);
@@ -40,7 +41,8 @@ try{
         window.approachFrames.push({
           t:now,dt:prior?now-prior:null,segment:window.approachSegment,
           x:+d.playerX,y:+d.playerFeet,z:+d.playerZ,far:+d.veilreachDistanceVertices,
-          upper:+d.upperGpuOwners,upperBytes:+d.upperGpuBytes,queued:+d.pendingChunks,
+          owners:+d.loadedChunks,upper:+d.upperGpuOwners,upperBytes:+d.upperGpuBytes,queued:+d.pendingChunks,
+          physical:d.veilreachPhysicalStream?JSON.parse(d.veilreachPhysicalStream):null,
           atlas:d.veilreachAtlas?JSON.parse(d.veilreachAtlas):null
         });
         last=d.renderedFrames;
@@ -73,6 +75,16 @@ try{
   await wait(()=>window.__mythwroughtTest.flightInfo().active);
   await page.locator('#scene').focus();
   await hold('e',y=>window.__mythwroughtTest.flightInfo().position.y>=y,127);
+  if(boundaryRoute){
+    await tag('outbound');
+    await aim(-34,127,7);
+    await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x<-33);
+    report.outbound=await pose();
+    await tag('inbound');
+    await aim(0,127,0);
+    await hold('w',()=>window.__mythwroughtTest.flightInfo().position.x>=-.7);
+    report.inbound=await pose();
+  }
   await tag('approach');
   await aim(57,116,39);
   await hold('w',()=>{
@@ -94,6 +106,13 @@ try{
   },report.landed.position);
   report.walked=await pose();
   assert.deepEqual(errors,[]);
+  if(boundaryRoute){
+    assert.ok(report.outbound.resident&&report.inbound.resident);
+    assert.ok(report.outbound.position.x<-33&&report.inbound.position.x>=-.7);
+    const trace=await page.evaluate(()=>window.approachFrames);
+    assert.ok(trace.some(f=>f.physical?.served>0),'the prediction reached the production mesh queue');
+    assert.ok(trace.every(f=>f.owners<=25&&f.upper<=8&&f.upperBytes<=7077888));
+  }
   report.pass=true;
 }finally{
   report.trace=await page.evaluate(()=>window.approachFrames).catch(()=>[]);
