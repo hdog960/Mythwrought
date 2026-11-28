@@ -2,13 +2,14 @@ import {createSkylands} from './generation.mjs';
 import {BLOCK,voxelTerrainAppearance} from '../voxel.mjs';
 import {ENVIRONMENT_GROUND as G} from '../environment-ground.mjs';
 import {runtimeMeshKey,runtimeSectionBounds,runtimeSectionForY} from '../world-height.mjs';
-import {GpuUploadRetry,uploadChunkBuffer} from '../gpu-recovery.mjs';
+import {GpuUploadRetry,validateChunkUploadBytes} from '../gpu-recovery.mjs';
 import {createMobSourceRevision} from '../mobs/source-edit-epoch.mjs';
 
 export const VEILREACH_DISTANCE_OFFSET=512;
 export const VEILREACH_DISTANCE_MAX_BYTES=24_576*36;
 const maxVertices=VEILREACH_DISTANCE_MAX_BYTES/36;
 const radius=420;
+const uploadFloats=16_384;
 const light=[[.73,.77],[.48,1],[.67,.85]];
 const planes=[
   {axis:0,axes:[1,2]}, {axis:1,axes:[0,2]}, {axis:2,axes:[0,1]}
@@ -230,6 +231,40 @@ export function farSkyMesh(terrain,x,z,detail=[]){
   return pack(rows).data;
 }
 
+// The staging buffer is private until all bounded writes have succeeded.
+// The 864 KiB visual cap leaves room for both old and new visual allocations.
+function stageUpload(gl,{data,owners}){
+  const bytes=validateChunkUploadBytes(data,VEILREACH_DISTANCE_MAX_BYTES);
+  let buffer=null,offset=0;
+  const check=()=>{
+    const error=gl.getError();
+    if(error!==gl.NO_ERROR)throw Error('Veilreach visual upload error '+error);
+  };
+  function slice(){
+    if(!bytes)return true;
+    if(!buffer){
+      for(let i=0;i<8;i++){
+        if(gl.getError()===gl.NO_ERROR)break;
+        if(i===7)throw Error('Veilreach upload error queue did not clear');
+      }
+      buffer=gl.createBuffer();
+      if(!buffer)throw Error('Veilreach visual buffer unavailable');
+      gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+      gl.bufferData(gl.ARRAY_BUFFER,bytes,gl.STATIC_DRAW);
+      check();
+      return false;
+    }
+    const end=Math.min(offset+uploadFloats,data.length);
+    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    gl.bufferSubData(gl.ARRAY_BUFFER,offset*4,data.subarray(offset,end));
+    check();
+    offset=end;
+    return offset===data.length;
+  }
+  return {slice,finish:()=>({buffer,owners,bytes}),
+    dispose(lost){if(buffer&&!lost)gl.deleteBuffer(buffer);}};
+}
+
 export function createVeilreachDistanceRenderer(gl){
   const retry=new GpuUploadRetry();
   let identity=null,terrain=null,readRevision=null,buffer=null,owners=[],drawKey='',job=null;
@@ -237,21 +272,18 @@ export function createVeilreachDistanceRenderer(gl){
   function invalidate(lost=false){
     if(buffer&&!lost)gl.deleteBuffer(buffer);
     buffer=null;
+    job?.upload?.dispose(lost);
     owners=[];
     atlasBytes=0;
     drawKey='';
     job=null;
     retry.clear();
   }
-  function publish(rows){
-    const {data,owners:next}=pack(rows);
-    const begin=performance.now();
-    const replacement=data.length?uploadChunkBuffer(gl,data):null;
-    lastUploadMs=performance.now()-begin;
+  function publish(next){
     if(buffer)gl.deleteBuffer(buffer);
-    buffer=replacement;
-    owners=next;
-    atlasBytes=data.byteLength;
+    buffer=next.buffer;
+    owners=next.owners;
+    atlasBytes=next.bytes;
     rebuilds++;
   }
 
@@ -269,8 +301,9 @@ export function createVeilreachDistanceRenderer(gl){
       center={x:Math.floor(player.x/32)*32+16,z:Math.floor(player.z/32)*32+16};
     const key=[center.x,center.z,readRevision()].join('|');
     if(key!==drawKey){
+      job?.upload?.dispose(false);
       drawKey=key;
-      job={prep:prepareAtlas(terrain,center.x,center.z,world),ready:null,done:false};
+      job={prep:prepareAtlas(terrain,center.x,center.z,world),ready:null,upload:null,done:false};
     }
     const retryKey='veilreach-distance';
     const now=performance.now();
@@ -285,9 +318,22 @@ export function createVeilreachDistanceRenderer(gl){
           else if(!result.value){preparedTiles++;work++;}
         }
         lastPreparationMs=performance.now()-begin;
-        if(job.ready){publish(job.ready);job.ready=null;retry.success(retryKey);}
-        if(job.done)job=null;
-      }catch(error){retry.fail(retryKey,performance.now(),error.message);}
+        if(job.ready){
+          const beginUpload=performance.now();
+          if(!job.upload)job.upload=stageUpload(gl,pack(job.ready));
+          if(job.upload.slice()){
+            publish(job.upload.finish());
+            job.upload=null;job.ready=null;
+            retry.success(retryKey);
+          }
+          lastUploadMs=performance.now()-beginUpload;
+        }
+        if(job.done&&!job.ready)job=null;
+      }catch(error){
+        job.upload?.dispose(gl.isContextLost());
+        job.upload=null;
+        retry.fail(retryKey,performance.now(),error.message);
+      }
     }
     const detailed=new Set();
     for(const [key,c] of chunks){

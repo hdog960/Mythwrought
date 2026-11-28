@@ -1,4 +1,4 @@
-import {farSkyMesh,veilreachDrawRanges,VEILREACH_DISTANCE_MAX_BYTES,VEILREACH_DISTANCE_OFFSET} from '../src/veilreach/distance.mjs';
+import {createVeilreachDistanceRenderer,farSkyMesh,veilreachDrawRanges,VEILREACH_DISTANCE_MAX_BYTES,VEILREACH_DISTANCE_OFFSET} from '../src/veilreach/distance.mjs';
 import {VEILREACH_GRASS_ID} from '../src/veilreach/flora.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -181,4 +181,46 @@ test('visual ownership changes only change draw ranges, retaining the staged sec
   assert.deepEqual(veilreachDrawRanges(owners,new Set(['a','b'])),[{first:24,count:6}]);
   assert.deepEqual(veilreachDrawRanges(owners,new Set(['a','b','c'])),[]);
   assert.deepEqual(veilreachDrawRanges(owners,new Set()),[{first:0,count:30}]);
+});
+
+test('distance publication keeps the previous buffer if a replacement upload fails',()=>{
+  let current=null,error=0,reject=false,failures=0,largestTransfer=0;
+  const deleted=new Set(),drawn=[];
+  const gl={
+    canvas:{dataset:{}},ARRAY_BUFFER:1,STATIC_DRAW:2,TRIANGLES:3,FLOAT:4,NO_ERROR:0,
+    isContextLost:()=>false,createBuffer:()=>({}),
+    bindBuffer:(_target,buffer)=>{current=buffer;},
+    bufferData:(_target,size)=>assert.equal(typeof size,'number'),
+    bufferSubData:(_target,_offset,piece)=>{
+      largestTransfer=Math.max(largestTransfer,piece.byteLength);
+      if(reject){error=1285;failures++;}
+    },
+    getError:()=>{const result=error;error=0;return result;},
+    deleteBuffer:buffer=>deleted.add(buffer),vertexAttribPointer:()=>{},
+    drawArrays:()=>drawn.push(current)
+  };
+  const world=new FourRegionWorld(180,fourRegionProfile(180,VEILREACH_GENERATOR));
+  const renderer=createVeilreachDistanceRenderer(gl);
+  const player={x:.5,feet:100,z:.5};
+  const draw=()=>renderer.draw({world,player,chunks:new Map(),caveShade:0,
+    atPos:0,atColor:1,atUv:2,atMat:3});
+  for(let i=0;i<800;i++){
+    draw();
+    if(JSON.parse(gl.canvas.dataset.veilreachAtlas).pending===false)break;
+  }
+  const before=JSON.parse(gl.canvas.dataset.veilreachAtlas);
+  assert.equal(before.pending,false);
+  assert.ok(before.bytes>0&&before.bytes<=VEILREACH_DISTANCE_MAX_BYTES);
+  const visible=drawn.at(-1);
+  assert.ok(visible&&!deleted.has(visible));
+  player.x=90;
+  reject=true;
+  for(let i=0;i<800&&!failures;i++)draw();
+  assert.equal(failures,1);
+  assert.equal(largestTransfer,65536);
+  assert.equal(drawn.at(-1),visible);
+  assert.equal(deleted.has(visible),false);
+  assert.equal(JSON.parse(gl.canvas.dataset.veilreachAtlas).rebuilds,before.rebuilds);
+  renderer.invalidate();
+  assert.equal(deleted.has(visible),true);
 });
