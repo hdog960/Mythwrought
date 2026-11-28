@@ -5,8 +5,8 @@ import { meshDepthSection } from '../../src/depth-mesh.mjs';
 const floatsPerFace = 6 * 9;
 const encode = vertices => Buffer.from(vertices.buffer, vertices.byteOffset, vertices.byteLength).toString('base64');
 
-// Fixed-capacity, per-owner buffers for one exact edit sequence. All reference
-// meshes are produced by the native mesher before the browser runs.
+// Detached shared allocation for one view of opaque native cube faces.
+// Owner labels and draw ranges stay separate inside the single GPU buffer.
 export async function qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit }) {
   const { peak, peakEdit } = workingSet;
   for (const field of ['cx', 'cz', 'active', 'shaft']) assert.equal(peak[field], peakEdit[field]);
@@ -15,9 +15,8 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
     const before = meshDepthSection(projection.view, cx, cz, section);
     assert.equal(owners.get(key).oldFaces, 0, 'The entire allocation counts against the face cap');
     assert.equal(before.length / floatsPerFace, owners.get(key).combinedFaces);
-    const updates = edits.map(({ meshes }) => meshes.find(mesh => mesh.key === key)?.vertices ?? before);
-    const capacity = Math.max(before.length, ...updates.map(vertices => vertices.length)) / floatsPerFace;
-    return { key, before: encode(before), updates: updates.map(vertices => vertices === before ? null : encode(vertices)), capacity };
+    const updates = edits.map(({ meshes }) => meshes.find(mesh => mesh.key === key)?.vertices ?? null);
+    return { key, before: encode(before), updates: updates.map(vertices => vertices && encode(vertices)) };
   });
 
   const { chromium } = createRequire(import.meta.url)('playwright');
@@ -28,142 +27,193 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
   });
   try {
     const page = await browser.newPage();
-    const result = await page.evaluate(({ fixture, faceBytes, faceLimit, labels }) => {
+    const result = await page.evaluate(({ fixture, faceBytes, faceLimit, cases }) => {
       const check = (ok, message) => { if (!ok) throw Error(message); };
-      const gl = document.createElement('canvas').getContext('webgl2');
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const gl = canvas.getContext('webgl2');
       check(gl, 'WebGL2 context required');
-      const bind = owner => gl.bindBuffer(gl.ARRAY_BUFFER, owner.handle);
       const checkGl = () => check(gl.getError() === gl.NO_ERROR && !gl.isContextLost(), 'WebGL2 buffer operation failed');
-      function decode(encoded) {
+      function decode(owner, encoded) {
         const bytes = Uint8Array.from(atob(encoded), value => value.charCodeAt(0));
         check(bytes.length % faceBytes === 0, 'Incomplete native face record');
         const faces = new Map();
         for (let offset = 0; offset < bytes.length; offset += faceBytes) {
           const record = bytes.subarray(offset, offset + faceBytes);
-          const key = String.fromCharCode(...record);
+          const key = owner + ':' + String.fromCharCode(...record);
           check(!faces.has(key), 'Expected unique opaque native faces');
-          faces.set(key, record);
+          faces.set(key, { owner, key, record });
         }
         return faces;
       }
-      const owners = fixture.map(({ key, before, updates, capacity }) => {
-        const initial = decode(before);
-        const targets = updates.map(update => update === null ? initial : decode(update));
-        return { key, initial, targets, capacity, slots: [...initial.keys()] };
+      const native = fixture.map(({ key, before, updates }) => {
+        const initial = decode(key, before);
+        return { initial, targets: updates.map(update => update === null ? initial : decode(key, update)) };
       });
-      const residentFaces = owners.reduce((total, owner) => total + owner.slots.length, 0);
-      const allocatedFaces = owners.reduce((total, owner) => total + owner.capacity, 0);
-      check(allocatedFaces <= faceLimit, 'Fixed owner allocations exceed the face cap');
-      const live = owners.filter(owner => owner.capacity);
+      const initial = native.flatMap(owner => [...owner.initial.values()]);
+      // One binary opaque-cell edit changes at most six incident face
+      // records. Reserve those staging records before allocating any slots.
+      const stagingReserve = 6;
+      const capacity = faceLimit - stagingReserve;
+      check(initial.length <= capacity, 'Resident geometry exceeds shared allocation');
+      let slots = [...initial, ...Array(capacity - initial.length).fill(null)];
+
+      const buffer = gl.createBuffer();
+      check(buffer, 'Buffer allocation failed');
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, capacity * faceBytes, gl.DYNAMIC_DRAW);
+      const initialBytes = new Uint8Array(initial.length * faceBytes);
+      initial.forEach(({ record }, index) => initialBytes.set(record, index * faceBytes));
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, initialBytes);
+      checkGl();
+      function shader(type, source) {
+        const compiled = gl.createShader(type);
+        gl.shaderSource(compiled, source);
+        gl.compileShader(compiled);
+        check(gl.getShaderParameter(compiled, gl.COMPILE_STATUS), gl.getShaderInfoLog(compiled));
+        return compiled;
+      }
+      const vs = shader(gl.VERTEX_SHADER,
+        '#version 300 es\nlayout(location=0) in vec3 p; void main(){gl_Position=vec4((p.x+632.0)/24.0,(p.z+2152.0)/24.0,(p.y+40.0)/50.0,1.0);}');
+      const fs = shader(gl.FRAGMENT_SHADER,
+        '#version 300 es\nprecision mediump float; out vec4 color; void main(){color=vec4(0.6,0.5,0.4,1.0);}');
+      const program = gl.createProgram();
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      check(gl.getProgramParameter(program, gl.LINK_STATUS), gl.getProgramInfoLog(program));
+      gl.useProgram(program);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 9 * Float32Array.BYTES_PER_ELEMENT, 0);
       let writeCalls = 0;
-      function upload(owner, slot, record) {
-        check(slot < owner.capacity, 'Write outside owner allocation');
-        bind(owner);
-        gl.bufferSubData(gl.ARRAY_BUFFER, slot * faceBytes, record);
+      function upload(index, entry) {
+        check(index < capacity, 'Write outside shared allocation');
+        gl.bufferSubData(gl.ARRAY_BUFFER, index * faceBytes, entry.record);
         checkGl();
         writeCalls++;
       }
-      for (const owner of live) {
-        owner.handle = gl.createBuffer();
-        check(owner.handle, 'Buffer allocation failed');
-        bind(owner);
-        gl.bufferData(gl.ARRAY_BUFFER, owner.capacity * faceBytes, gl.DYNAMIC_DRAW);
-        const bytes = new Uint8Array(owner.slots.length * faceBytes);
-        for (const [index, key] of owner.slots.entries()) bytes.set(owner.initial.get(key), index * faceBytes);
-        if (bytes.length) gl.bufferSubData(gl.ARRAY_BUFFER, 0, bytes);
-        checkGl();
-        owner.published = owner.initial;
-      }
-      // Keep unchanged faces in their slots where possible. Fill holes with
-      // moved or new faces and journal overwritten live slots for rollback.
-      function prepare(owner, target) {
-        check(target.size <= owner.capacity, 'Owner capacity refused');
+      function prepare(target) {
+        check(target.size <= capacity, 'Shared slots refused');
         const pending = new Map(target);
-        const slots = Array.from({ length: target.size }, (_, i) => {
-          const face = owner.slots[i];
-          return pending.delete(face) ? face : null;
-        });
-        const holes = pending.keys();
-        const writes = [];
-        for (let i = 0; i < slots.length; i++) {
-          if (slots[i] !== null) continue;
-          const key = holes.next().value;
-          slots[i] = key;
-          writes.push({ owner, index: i, next: target.get(key), previous: owner.published.get(owner.slots[i]) });
+        const next = slots.map(entry => entry && pending.delete(entry.key) ? entry : null);
+        const free = [];
+        const freedByOwner = new Map();
+        for (let index = 0; index < capacity; index++) {
+          if (next[index]) continue;
+          free.push(index);
+          const previous = slots[index];
+          if (previous) freedByOwner.set(previous.owner, [...(freedByOwner.get(previous.owner) ?? []), index]);
         }
-        return { owner, target, slots, writes };
+        let fallback = 0;
+        const writes = [];
+        for (const entry of pending.values()) {
+          let index = freedByOwner.get(entry.owner)?.shift();
+          if (index === undefined || next[index]) {
+            while (next[free[fallback]]) fallback++;
+            index = free[fallback++];
+          }
+          check(index !== undefined, 'Shared slots exhausted during planning');
+          next[index] = entry;
+          writes.push({ index, entry, previous: slots[index] });
+        }
+        return { next, writes };
       }
-      function transact(step, failAfter = 0, limit = faceLimit) {
-        // Check every owner and both allocations before touching any buffer.
-        const plans = live.map(owner => prepare(owner, owner.targets[step]));
-        const writes = plans.flatMap(plan => plan.writes);
+      function transact(plan, failAfter = 0, limit = faceLimit) {
+        const { next, writes } = plan;
         const rollbackFaces = writes.filter(write => write.previous).length;
-        check(allocatedFaces + rollbackFaces <= limit, 'Edit staging capacity refused');
+        const stagedFaces = capacity + writes.length + rollbackFaces;
+        check(stagedFaces <= limit, 'Edit staging capacity refused');
         const attempted = [];
         try {
           for (const write of writes) {
             attempted.push(write);
-            upload(write.owner, write.index, write.next);
+            upload(write.index, write.entry);
             if (attempted.length === failAfter) throw Error('Injected publication failure');
           }
         } catch (error) {
           for (const write of attempted.reverse()) {
-            if (write.previous) upload(write.owner, write.index, write.previous);
+            if (write.previous) upload(write.index, write.previous);
           }
           throw error;
         }
-        for (const { owner, target, slots } of plans) {
-          owner.published = target;
-          owner.slots = slots;
+        slots = next;
+        return { uploads: writes.length, rollbackFaces, stagedFaces };
+      }
+      function matchesNative(target) {
+        const bytes = new Uint8Array(capacity * faceBytes);
+        gl.getBufferSubData(gl.ARRAY_BUFFER, 0, bytes);
+        checkGl();
+        const remaining = new Map(target);
+        return slots.every((entry, index) => {
+          if (!entry) return true;
+          const expected = remaining.get(entry.key);
+          remaining.delete(entry.key);
+          return expected && expected.record.every((value, j) => value === bytes[index * faceBytes + j]);
+        }) && remaining.size === 0;
+      }
+      function ranges() {
+        const result = [];
+        for (const [start, entry] of slots.entries()) {
+          if (!entry) continue;
+          const last = result.at(-1);
+          if (last?.owner === entry.owner && last.start+last.count === start) last.count++;
+          else result.push({ owner: entry.owner, start, count: 1 });
         }
-        return { uploads: writes.length, rollbackFaces, allocatedWithRollback: allocatedFaces + rollbackFaces };
+        return result;
       }
-      function matchesNative(step) {
-        return live.every(owner => {
-          const target = step < 0 ? owner.initial : owner.targets[step];
-          if (target.size !== owner.slots.length) return false;
-          const bytes = new Uint8Array(target.size * faceBytes);
-          if (bytes.length) {
-            bind(owner);
-            gl.getBufferSubData(gl.ARRAY_BUFFER, 0, bytes);
-            checkGl();
-          }
-          return owner.slots.every((key, i) => {
-            const expected = target.get(key);
-            return expected && expected.every((value, j) => value === bytes[i * faceBytes + j]);
-          });
-        }) && owners.every(owner => owner.capacity || (step < 0 ? owner.initial : owner.targets[step]).size === 0);
+      function draw(targetFaceCount) {
+        const draws = ranges();
+        check(draws.reduce((total, draw) => total + draw.count, 0) === targetFaceCount, 'Owner draw ranges omit native faces');
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        for (const { start, count } of draws) gl.drawArrays(gl.TRIANGLES, start * 6, count * 6);
+        checkGl();
+        return draws.length;
       }
-      check(matchesNative(-1), 'Initial GPU buffer bytes differ from native');
+      const initialTarget = new Map(initial.map(entry => [entry.key, entry]));
+      check(matchesNative(initialTarget), 'Initial GPU bytes differ from native');
+      const initialRanges = draw(initialTarget.size);
+      let previous = initialTarget;
       const steps = [];
-      for (const [step, label] of labels.entries()) {
+      for (const [step, { label, refusal }] of cases.entries()) {
+        const target = new Map(native.flatMap(owner => [...owner.targets[step]]));
+        if (refusal) {
+          const before = writeCalls;
+          try { prepare(target); throw Error('Expected shared allocation refusal'); }
+          catch (error) { check(error.message === refusal, error.message); }
+          check(writeCalls === before && matchesNative(previous), 'Over-capacity edit changed GPU data');
+          steps.push({ label, refused: true, requestedFaces: target.size });
+          continue;
+        }
+        const plan = prepare(target);
         if (label === 'mine-adjacent') {
           const before = writeCalls;
-          try { transact(step, 0, allocatedFaces); throw Error('Expected capacity refusal'); }
+          try { transact(plan, 0, capacity); throw Error('Expected staging refusal'); }
           catch (error) { check(error.message === 'Edit staging capacity refused', error.message); }
-          check(writeCalls === before && matchesNative(step - 1), 'Capacity refusal wrote to the GPU');
-          const writes = live.flatMap(owner => prepare(owner, owner.targets[step]).writes);
-          const overwrite = writes.findIndex(write => write.previous);
-          check(overwrite >= 0, 'Missing mixed edit with an overwritten live face');
-          try { transact(step, overwrite + 1); throw Error('Missing failure injection'); }
+          check(writeCalls === before && matchesNative(previous), 'Capacity refusal wrote to the GPU');
+          const overwritten = plan.writes.findIndex(write => write.previous);
+          check(overwritten >= 0, 'Missing mixed edit with an overwritten face');
+          try { transact(plan, overwritten + 1); throw Error('Missing failure injection'); }
           catch (error) { check(error.message === 'Injected publication failure', error.message); }
-          check(matchesNative(step - 1), 'Rollback failed after overwriting a live face');
+          check(matchesNative(previous), 'Rollback failed after overwriting a live face');
         }
-        steps.push({ label, ...transact(step) });
-        check(matchesNative(step), 'Published face records differ from the full native remesh');
+        steps.push({ label, ...transact(plan), liveFaces: target.size, ranges: draw(target.size) });
+        check(matchesNative(target), 'Published GPU ranges differ from the full native remesh');
+        previous = target;
       }
-      for (const owner of live) {
-        bind(owner);
-        check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === owner.capacity * faceBytes, 'GPU capacity changed');
-        gl.deleteBuffer(owner.handle);
-      }
+      check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'GPU allocation changed');
+      gl.deleteBuffer(buffer);
+      gl.deleteProgram(program);
+      gl.deleteShader(vs);
+      gl.deleteShader(fs);
       checkGl();
-      return { residentFaces, allocatedFaces, peakWithRollback: Math.max(...steps.map(step => step.allocatedWithRollback)),
-        wantedOwners: owners.length, bufferHandles: live.length, steps,
+      return { residentFaces: initial.length, allocatedFaces: capacity, stagingReserve, initialRanges,
+        peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: native.length, steps,
         rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true, buffersReallocated: false };
-    }, { fixture, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit, labels: edits.map(edit => edit.label) });
+    }, { fixture, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
+      cases: edits.map(({ label, refusal }) => ({ label, refusal })) });
     return { ...result, chromium: browser.version(), edit: peakEdit.edit,
-      scope: 'detached-fixed-owner-capacity-edit-sequence' };
+      scope: 'detached-shared-opaque-buffer-owner-ranges' };
   } finally {
     await browser.close();
   }

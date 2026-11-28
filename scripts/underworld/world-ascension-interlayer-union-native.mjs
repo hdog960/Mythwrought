@@ -132,21 +132,41 @@ if (process.argv.includes('--with-webgl2')) {
   const replaceAdjacent = id => Object.create(edited, { get: { value(x, y, z) {
     return x === editX && y === adjacentY && z === editZ ? id : edited.get(x, y, z);
   } } });
+  const [otherX, otherY, otherZ] = [-655, -30, -2170];
+  assert.equal(projection.projectedAt(otherX, otherY, otherZ), BLOCK.STONE);
+  assert.equal(capture.floors.has([otherX, otherY, otherZ].join(',')), false);
+  const otherKeys = verticalEditSections(otherY).flatMap(section => editAffectedChunks(otherX, otherZ)
+    .map(({ cx, cz }) => depthMeshKey(cx, cz, section))).filter(key => wanted.has(key));
+  assert.deepEqual(otherKeys, ['-41,-136,-2']);
+  assert.ok(!keys.includes(otherKeys[0]));
+  const otherView = Object.create(projection.view, { get: { value(x, y, z) {
+    return x === otherX && y === otherY && z === otherZ ? BLOCK.AIR : projection.projectedAt(x, y, z);
+  } } });
+  const otherMined = meshReadOnlySharedBatch(otherView, otherKeys);
+  const otherRestored = meshReadOnlySharedBatch(projection.view, otherKeys);
+  const bothMined = meshReadOnlySharedBatch(replaceAdjacent(BLOCK.AIR), keys);
+  assert.ok(bothMined.ok && otherMined.ok && otherRestored.ok);
   const nativeSequence = [
     ['mine', editedBatch],
-    ['mine-adjacent', meshReadOnlySharedBatch(replaceAdjacent(BLOCK.AIR), keys)],
+    ['mine-adjacent', bothMined],
+    ['refuse-third-mine', { ok: true, meshes: [...bothMined.meshes, ...otherMined.meshes] }, 'Shared slots refused'],
     ['place-stone', meshReadOnlySharedBatch(replaceAdjacent(BLOCK.STONE), keys)],
     ['restore-original', batch],
+    ['mine-other-owner', otherMined],
+    ['restore-other-owner', otherRestored],
   ];
-  const edits = nativeSequence.map(([label, stage]) => {
+  const edits = nativeSequence.map(([label, stage, refusal]) => {
     assert.equal(stage.ok, true, label);
-    return { label, meshes: stage.meshes };
+    return { label, meshes: stage.meshes, refusal };
   });
   const { qualifyEditTransaction } = await import('./world-ascension-edit-transaction-webgl2.mjs');
   report.gpuEdit = await qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit: limits.faceGrowth });
   assert.equal(report.gpuEdit.residentFaces, residentFaces);
   assert.equal(report.gpuEdit.steps[0].uploads, faceDelta.changedFaceTotal);
-  assert.ok(report.gpuEdit.peakWithRollback <= limits.faceGrowth);
+  assert.ok(report.gpuEdit.peakStagedFaces <= limits.faceGrowth);
+  assert.equal(report.gpuEdit.steps.at(-2).label, 'mine-other-owner');
+  assert.ok(report.gpuEdit.steps.at(-2).uploads > 0);
+  report.gpuEdit.otherEdit = { at: [otherX, otherY, otherZ], keys: otherKeys, sourceReads: otherMined.calls };
   report.gpuEdit.directOriginalCalls = originalByCell.size;
 }
 await writeFile(resolve(output, 'report.json'), JSON.stringify(report, null, 2));
