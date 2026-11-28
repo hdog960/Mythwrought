@@ -50,9 +50,9 @@ export function surveyGlacierArch(world, x, z, axis) {
   return { origin: [x, trackY, z], axis, cells, footings, route };
 }
 
-export function openGlacierArchWitness(world, arch) {
+export function openFrostboundIceFormationWitness(world, formation) {
   const cells = new Map(), upper = new Set();
-  for (const [x, y, z, id] of arch.cells) {
+  for (const [x, y, z, id] of formation.cells) {
     cells.set(worldKey(x, y, z), id);
     const owner = physicalRegionAt(x, y, z);
     if (owner.kind === 'upper') upper.add(owner.key);
@@ -63,7 +63,9 @@ export function openGlacierArchWitness(world, arch) {
       cells.get(worldKey(x, y, z)) ?? world.naturalAndLandmarkBlock(x, y, z) },
     upperNaturalOccupied: { value: key => upper.has(key) || Boolean(world.upperNaturalOccupied?.(key)) },
     upperNaturalRevision: { value: world.upperNaturalRevision ?? 0 },
-    save: { value() { throw Error('Glacier arch research requires a separate save profile'); } },
-    set: { value() { throw Error('Read-only glacier arch witness'); } }
+    save: { value() { throw Error('Frostbound ice research requires a separate save profile'); } },
+    set: { value() { throw Error('Read-only ice formation witness'); } }
   });
 }
+
+export const openGlacierArchWitness = openFrostboundIceFormationWitness;
