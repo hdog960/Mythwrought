@@ -2,7 +2,26 @@
 // Uses WORLD voxel coordinates; no isolated physics dimension or save-schema changes.
 // An accessible, responsive first-person controller; not a Souls-style stamina system.
 import {BLOCK,BODY_RADIUS,BODY_HEIGHT,WORLD_MAX_Y,WORLD_MIN_Y,collides} from './voxel.mjs';
+import {WATER_CANDIDATE_ID,parseWaterCell,waterSurfaceHeight} from './block-packs/pack-2/water.mjs';
 export const WALK_SPEED=4.25;
+export const SWIM_SPEED=2.6;
+const SWIM_THRESHOLD=.35, SWIM_ASCENT=2.4, SWIM_DESCENT=-1.8;
+// Center-column immersion, measured against the actual sloped fluid surface.
+// No fluid propagation, save mutation or invented state for missing cells.
+// Only the existing owner reader is consulted; dry legacy worlds cost no queries.
+export function waterImmersion(world,p){
+  if(typeof world?.getPack2State!=='function')return 0;
+  const x=Math.floor(p.x),z=Math.floor(p.z),top=p.feet+BODY_HEIGHT;
+  let submerged=0;
+  for(let y=Math.floor(p.feet);y<top;y++){
+    const raw=world.getPack2State(x,y,z);
+    if(raw?.id!==WATER_CANDIDATE_ID)continue;
+    const cell=parseWaterCell(raw);
+    const surface=y+waterSurfaceHeight(cell,p.x-x,p.z-z);
+    submerged+=Math.max(0,Math.min(top,surface)-Math.max(p.feet,y));
+  }
+  return Math.max(0,Math.min(1,submerged/BODY_HEIGHT));
+}
 export const GRAVITY=19.6;
 export const JUMP_VELOCITY=7.2;
 export const STEP_HEIGHT=1.01;
@@ -102,7 +121,8 @@ export function stepPlayer(world,p,input,dt){
   const out={stepped:false,landed:false,jumped:false,hitWall:false,ceiling:false};
   if(!dt)return out;
   const elapsed=Math.min(MAX_FRAME_DT,dt);
-  if(input.jump)p.jumpBuffer=JUMP_BUFFER;
+  const climbing=world?.stagedNonblockClimb?.(p)===true;
+  if(input.jump&&!climbing)p.jumpBuffer=JUMP_BUFFER;
   // dt subdivision limits every physics step: never tunnel through a cube on a slow frame.
   const count=Math.max(1,Math.ceil(elapsed/MAX_PHYSICS_DT));
   const h=elapsed/count;
@@ -111,16 +131,22 @@ export function stepPlayer(world,p,input,dt){
   const magnitude=Math.hypot(side,front);
   if(magnitude>1){side/=magnitude;front/=magnitude;}
   const yaw=Number.isFinite(p.yaw)?p.yaw:0;
-  const targetX=(Math.sin(yaw)*front+Math.cos(yaw)*side)*WALK_SPEED;
-  const targetZ=(Math.cos(yaw)*front-Math.sin(yaw)*side)*WALK_SPEED;
+  const travel=climbing?0:front;
+  const directionX=Math.sin(yaw)*travel+Math.cos(yaw)*side;
+  const directionZ=Math.cos(yaw)*travel-Math.sin(yaw)*side;
   for(let i=0;i<count;i++){
+    const immersion=climbing?0:waterImmersion(world,p);
+    const swimming=immersion>=SWIM_THRESHOLD;
+    const targetX=directionX*(swimming?SWIM_SPEED:WALK_SPEED);
+    const targetZ=directionZ*(swimming?SWIM_SPEED:WALK_SPEED);
     // A support probe helps with step checks, but it must NOT freeze a falling
     // player several centimeters above the floor. Ground contact is near-exact.
     const touchingFloor=collides(world,p.x,p.feet-.002,p.z);
     if(touchingFloor&&p.vY<=0){p.onGround=true;p.coyote=COYOTE_TIME;}
     else if(!touchingFloor){p.onGround=false;p.coyote=Math.max(0,(p.coyote||0)-h);}
     p.jumpBuffer=Math.max(0,(p.jumpBuffer||0)-h);
-    if(p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
+    if(swimming){p.jumpBuffer=0;p.coyote=0;}
+    if(!climbing&&!swimming&&p.jumpBuffer>0&&(p.onGround||p.coyote>0)){
       p.vY=JUMP_VELOCITY;p.onGround=false;p.coyote=0;p.jumpBuffer=0;out.jumped=true;
     }
     // Two-thumb release must stop promptly; gradual build-up is pleasant but
@@ -140,7 +166,18 @@ export function stepPlayer(world,p,input,dt){
     // stale grounded state before gravity, without consuming coyote time twice.
     if(p.onGround && !collides(world,p.x,p.feet-.002,p.z))p.onGround=false;
     // Don't repeatedly accelerate downward when standing on a stable surface.
-    if(p.onGround&&p.vY<=0)p.vY=0;
+    if(climbing){
+      p.vY=front*2.0;
+      p.jumpBuffer=0;p.coyote=0;
+    }else if(swimming){
+      // Jump becomes sustained ascent; optional descent is a host intent,
+      // not a new touch control. Neutral input settles toward half immersion.
+      const target=input.jump&&!input.swimDown?SWIM_ASCENT:
+        input.swimDown&&!input.jump?SWIM_DESCENT:(immersion-.5)*4;
+      p.vY=Math.max(-4,Math.min(3,p.vY));
+      p.vY+=(target-p.vY)*Math.min(1,8*h);
+      if(p.onGround&&p.vY<0)p.vY=0;
+    }else if(p.onGround&&p.vY<=0)p.vY=0;
     else p.vY=Math.max(-28,p.vY-GRAVITY*h);
     if(p.vY!==0){
       const vertical=resolveY(world,p,h);
