@@ -39,15 +39,17 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
   if(!Number.isInteger(seed)||seed!==(seed|0))throw TypeError('Invalid signed seed');
   super(seed);
   this.#baseline=new ShatteredPeaksResearchWorld(seed);
-  this.#profile=Object.freeze({kind:'mythwrought-upper-source-profile',version:1,seed,generator:SP2_GENERATOR,sourceVersion:SP2_SOURCE_VERSION});
+  this.#profile=Object.freeze({kind:'mythwrought-upper-source-profile',version:1,seed,generator:SP2_GENERATOR,sourceVersion:this.terraceSourceVersion});
   const registry=createUpperNaturalRegistry();
-  registry.register(SP2_GENERATOR,SP2_SOURCE_VERSION,({seed,generator,sourceVersion})=>({
+  registry.register(SP2_GENERATOR,this.#profile.sourceVersion,({seed,generator,sourceVersion})=>({
    seed,generator,sourceVersion,revision:()=>0,
    get:(x,y,z)=>this.#upperCell(x,y,z),
    occupied:key=>this.#occupied(key)
   }));
   this.#provider=registry.open(this.#profile);
  }
+ get terraceSourceVersion(){return SP2_SOURCE_VERSION;}
+ _shapeSummit(rawTop){return rawTop;}
  get generationProfile(){return this.#profile;}
  get hasNaturalNonCubeShapes(){return true;}
  get cachedTerraceTiles(){return this.#tiles.size;}
@@ -73,7 +75,7 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
    const i=(z+SP2_HALO)*side+x+SP2_HALO,k=z*16+x;
    if(!mask[i])continue;
    caps[k]=base[i];rawTops[k]=peak[i];clearance[k]=Math.min(SP2_HALO+1,distances[i]);
-   tops[k]=Math.min(peak[i],base[i]+Math.max(0,distances[i]-1)*SP2_SLOPE);
+   tops[k]=Math.min(this._shapeSummit(peak[i]),base[i]+Math.max(0,distances[i]-1)*SP2_SLOPE);
    max=Math.max(max,tops[k]);
   }
   const row={caps,tops,rawTops,clearance,max};this.#tiles.set(key,row);
