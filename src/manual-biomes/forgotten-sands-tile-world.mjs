@@ -2,6 +2,7 @@
 // from ordinary seed and tile coordinates, never an opt-in player mode.
 // No registration with production profile selectors or storage.
 import {researchP0TileSite,P0_SITE_POLICY} from './forgotten-sands-tile-site-policy.mjs';
+import {P0_MAX_COLUMNS_PER_STEP} from './forgotten-sands-grounded-probe.mjs';
 export const P0_TILE_WORLD_KIND='mythwrought-forgotten-sands-tile-world-research-v1';
 export const P0_TILE_BASE='7b04720b4d8d68209e7e47837fbc71e1d26a9b51';
 const key=(x,y,z)=>[x,y,z].join(',');
@@ -13,8 +14,9 @@ function tilesOf(tiles){
  if(new Set(sorted.map(t=>t.join(','))).size!==sorted.length)throw Error('Duplicate research tile');
  return sorted;
 }
-export async function openP0TileWorld(seed,tiles,{P,V,F,H,N,reserved,revision}={}){
+export async function openP0TileWorld(seed,tiles,{P,V,F,H,N,reserved,revision,yieldControl}={}){
  if(!Number.isSafeInteger(seed)||seed!==(seed|0)||!P||!V||!F||!H||!N||typeof reserved!=='function'||typeof revision!=='function')throw Error('Invalid detached tile world inputs');
+ if(yieldControl!==undefined&&typeof yieldControl!=='function')throw TypeError('Expected a source scheduler callback');
  const epoch=revision();if(typeof epoch!=='string'||!epoch||epoch.length>256)throw Error('Invalid reservation epoch');
  const profile=P.fourRegionProfile(seed,P.M8_MOUNTAIN_GENERATOR),base=new P.FourRegionWorld(seed,profile),ordered=tilesOf(tiles);
  const lower=new Map(),upper=new Map(),occupied=new Set(),sites=[],outcomes=[],witnesses=[];
@@ -22,17 +24,22 @@ export async function openP0TileWorld(seed,tiles,{P,V,F,H,N,reserved,revision}={
  const assertCurrent=()=>{if(!current())throw Error('Stale detached tile world');};
  for(const [tx,tz] of ordered){
   assertCurrent();
-  const p=await researchP0TileSite(base,tx,tz,{P,V,F,H,reserved,revision});
+  const p=await researchP0TileSite(base,tx,tz,{P,V,F,H,reserved,revision,yieldControl});
   assertCurrent();
   if(!p.accepted){outcomes.push({tx,tz,reason:p.reason});continue;}
   const s=p.identity.site,r=(s.size-1)/2+8,rows=[];
-  for(let x=s.x-r;x<=s.x+r;x++)for(let z=s.z-r;z<=s.z+r;z++)for(let y=0;y<=17+s.height;y++){
-   const old=base.get(x,y,z),id=p.get(x,y,z);if(old===id)continue;
-   const k=key(x,y,z);
-   if(old!==0||id===0||base.environmentCaves.get(x,y,z)!==undefined||reserved(x,z)!==false||lower.has(k)||upper.has(k))throw Error('Tile source collision or reservation veto');
-   rows.push([x,y,z,id]);(y<20?lower:upper).set(k,id);
-   if(y>=20)occupied.add(H.physicalRegionAt(x,y,z).key);
-   if(lower.size+upper.size>100000)throw Error('Detached total cell cap');
+  let columns=0;
+  for(let x=s.x-r;x<=s.x+r;x++)for(let z=s.z-r;z<=s.z+r;z++){
+   if(yieldControl&&columns===P0_MAX_COLUMNS_PER_STEP){await yieldControl({stage:'assemble',tile:[tx,tz],columns});assertCurrent();columns=0;}
+   columns++;
+   for(let y=0;y<=17+s.height;y++){
+    const old=base.get(x,y,z),id=p.get(x,y,z);if(old===id)continue;
+    const k=key(x,y,z);
+    if(old!==0||id===0||base.environmentCaves.get(x,y,z)!==undefined||reserved(x,z)!==false||lower.has(k)||upper.has(k))throw Error('Tile source collision or reservation veto');
+    rows.push([x,y,z,id]);(y<20?lower:upper).set(k,id);
+    if(y>=20)occupied.add(H.physicalRegionAt(x,y,z).key);
+    if(lower.size+upper.size>100000)throw Error('Detached total cell cap');
+   }
   }
   if(rows.length!==p.identity.cells||await digest(rows)!==p.identity.geometrySha)throw Error('Tile geometry digest mismatch');
   sites.push(p.identity);outcomes.push({tx,tz,reason:'admitted'});

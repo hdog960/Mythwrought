@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { openP0TileWorld, P0_TILE_BASE } from '../../src/manual-biomes/forgotten-sands-tile-world.mjs';
+import { P0_MAX_COLUMNS_PER_STEP } from '../../src/manual-biomes/forgotten-sands-grounded-probe.mjs';
 
 const root = process.env.P0_CURRENT_SOURCE;
 assert.ok(root, 'P0_CURRENT_SOURCE must point to the pinned game source checkout');
@@ -21,7 +22,17 @@ test('two admitted desert sites preserve their native meshes, local budgets and 
   const options = { P, V, F, H, N, reserved: () => false, revision: () => epoch };
   const baseline = new P.FourRegionWorld(seed, P.fourRegionProfile(seed, P.M8_MOUNTAIN_GENERATOR));
   const baselineSave = JSON.stringify(baseline.save());
-  const combined = await openP0TileWorld(seed, tiles, options);
+  const slices = {}, peakGapMs = {};
+  let afterSlice = performance.now();
+  const combined = await openP0TileWorld(seed, tiles, { ...options, async yieldControl({ stage, columns, frames }) {
+    peakGapMs[stage] = Math.max(peakGapMs[stage] ?? 0, Math.round(performance.now() - afterSlice));
+    slices[stage] = (slices[stage] ?? 0) + 1;
+    if (columns !== undefined) assert.ok(columns >= 0 && columns <= P0_MAX_COLUMNS_PER_STEP);
+    if (frames !== undefined) assert.ok(frames > 0 && frames <= 120);
+    await new Promise(resolve => setImmediate(resolve));
+    afterSlice = performance.now();
+  } });
+  assert.deepEqual(Object.keys(slices).sort(), ['approach', 'assemble', 'native-scan', 'survey', 'walk']);
   const world = new pack2.Pack2LiveWorld(combined.world);
   assert.deepEqual(combined.identity.outcomes.map(row => row.reason), ['admitted', 'admitted']);
   assert.equal(combined.placementAuthority, false);
@@ -99,5 +110,22 @@ test('two admitted desert sites preserve their native meshes, local budgets and 
   epoch = 'two-tile-replay-v2';
   assert.throws(() => cold.restore(payload), /Stale/);
   console.log('P0 TWO TILES ' + JSON.stringify({ seed, tiles, manifest: combined.identity.manifestSha,
-    counts: combined.counts, sites, portableEdits: edits.length }));
+    counts: combined.counts, sites, portableEdits: edits.length, slices, peakGapMs }));
+});
+
+test('a reservation revision during the second tile discards the pending source', async () => {
+  let epoch = 'build-r1', firstTileSliced = false, secondTileInterrupted = false;
+  await assert.rejects(openP0TileWorld(10301, [[1, -1], [1, 0]], {
+    P, V, F, H, N, reserved: () => false, revision: () => epoch,
+    async yieldControl({ stage, tile }) {
+      await new Promise(resolve => setImmediate(resolve));
+      if (stage !== 'assemble') return;
+      if (tile[1] === -1) firstTileSliced = true;
+      if (tile[1] === 0) {
+        secondTileInterrupted = true;
+        epoch = 'build-r2';
+      }
+    },
+  }), /Stale detached tile world/);
+  assert.ok(firstTileSliced && secondTileInterrupted);
 });
