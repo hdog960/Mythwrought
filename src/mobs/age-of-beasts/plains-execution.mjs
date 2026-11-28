@@ -6,6 +6,7 @@ import {nextPlainsIntent} from './plains-intents.mjs';
 import {nextDesertIntent} from './desert-intents.mjs';
 import {nextSnowIntent} from './snow-intents.mjs';
 import {nextForestIntent} from './forest-intents.mjs';
+import {nextAlpineIntent,nextCaveIntent} from './alpine-cave-intents.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
 const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike']);
@@ -13,6 +14,10 @@ const point=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Ma
 function createActor(candidate,position,query,biome){
  if(candidate?.requirement?.biome!==biome)throw TypeError('Wrong candidate biome');
  if(!candidate?.record||!point(position)||query.volume(position,candidate.record.body)!=='clear')throw TypeError('Invalid actor spawn');
+ if(biome==='cave'){
+  const {record:r,capability:c}=candidate,env=query.environment(position);
+  if(env?.biome!=='cave'||env.hazard!==false||position[1]<c.depth[0]||position[1]>c.depth[1]||!c.spawnSupport.some(k=>expansionSupport(query,position,r.body,k)))throw TypeError('Invalid cave habitat');
+ }
  return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,visual:'idle',state:'idle',action:'idle'};
 }
 function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},biome,decide){
@@ -25,8 +30,8 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  const env=query.environment(actor.position);
  const visible=sight(target?.position),threatVisible=sight(threat?.position);
  const grounded=expansionSupport(query,actor.position,r.body,'ground');
- const attackTarget=['bison','dunewalker','woolly-mammoth'].includes(r.id)?threat:target;
- const obs={...facts,ready:env?.hazard===false&&env.biome===biome,dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
+ const attackTarget=['bison','dunewalker','woolly-mammoth','griffin','geodeback'].includes(r.id)?threat:target;
+ const obs={...facts,ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
  const intent=decide(actor.candidate,obs);
  actor.cooldown=obs.cooldownRemaining;
  actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
@@ -35,17 +40,27 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
- if(['herd','forage','fly','land','return-hive','flower-visit'].includes(intent.action)&&point(goal))destination=goal;
+ if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl'].includes(intent.action)&&point(goal))destination=goal;
  let heading=[0,0],vertical=0;
  if(destination){let dx=destination[0]-actor.position[0],dz=destination[2]-actor.position[2],n=Math.hypot(dx,dz);if(n>1e-5)heading=[dx/n*(away?-1:1),dz/n*(away?-1:1)];vertical=Math.sign(destination[1]-actor.position[1]);}
  const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit'].includes(intent.action));
  if(intent.action==='land')vertical=-1;
+ if(biome==='cave'&&r.id==='cave-bat'&&obs.ceilingContact&&intent.action==='fly')vertical=-1;
  if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;heading=[x*.55-z*.835,z*.55+x*.835];}
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
  if(intent.action==='fly'&&grounded&&vertical<=0)vertical=1;
  try{
-  const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,'ground')};
-  moveBody(movementQuery,actor,heading,dt,{mode:flying?'fly':'walk',vertical,jump,pace:intent.action==='charge'?1.5:away?1.2:1});
+  const waterOnly=r.id==='blind-cavefish', ceilingOnly=r.id==='ceiling-lurker', roost=intent.action==='roost';
+  const support=waterOnly?'water':ceilingOnly||roost?'ceiling':null;
+  if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
+  if(!obs.ready&&biome==='cave'){Object.assign(actor,start);return false;}
+  const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,ceilingOnly||roost?'ceiling':'ground'),
+   volume:(p,b)=>{const state=query.volume(p,b);return state==='clear'&&support&&!expansionSupport(query,p,b,support)?'solid':state;}};
+  if(roost){actor.velocity=[0,0,0];actor.motionMode='roost';actor.grounded=false;}
+  else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,pace:intent.action==='charge'?1.5:away?1.2:1});
+  if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
+  if(waterOnly&&actor.motionMode!=='swim'){Object.assign(actor,start);return false;}
+  if(ceilingOnly){actor.motionMode='ceiling-crawl';actor.grounded=false;}
   if(query.revision()!==rev||query.volume(actor.position,r.body)!=='clear'||query.revision()!==rev){Object.assign(actor,start);return false;}
   if(attackActions.has(intent.action)){
    const victim=intent.action==='defend'?threat:target;
@@ -68,3 +83,8 @@ export const stepSnowActor=(a,q,o)=>stepActor(a,q,o,'snow',nextSnowIntent);
 
 export const createForestActor=(c,p,q)=>createActor(c,p,q,'forest');
 export const stepForestActor=(a,q,o)=>stepActor(a,q,o,'forest',nextForestIntent);
+
+export const createAlpineActor=(c,p,q)=>createActor(c,p,q,'alpine');
+export const stepAlpineActor=(a,q,o)=>stepActor(a,q,o,'alpine',nextAlpineIntent);
+export const createCaveActor=(c,p,q)=>createActor(c,p,q,'cave');
+export const stepCaveActor=(a,q,o)=>stepActor(a,q,o,'cave',nextCaveIntent);
