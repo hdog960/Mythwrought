@@ -1,5 +1,6 @@
 // The roadmap's Glacier Bridge, surveyed as a walkable natural ice span.
-import { BLOCK, worldKey } from '../voxel.mjs';
+import { BLOCK, collides, worldKey } from '../voxel.mjs';
+import { stepPlayer } from '../physics.mjs';
 import { glacierlandsWeight } from './s4-glacierlands.mjs';
 import { openFrostboundIceFormationWitness } from './s5-glacier-arch.mjs';
 
@@ -57,3 +58,25 @@ export function surveyGlacierBridge(world, { x, z, axis, span }) {
 }
 
 export const openGlacierBridgeWitness = openFrostboundIceFormationWitness;
+
+export function inspectGlacierBridgeWalk(source, bridge) {
+  const world = openGlacierBridgeWitness(source, bridge), xAxis = bridge.axis === 'x';
+  function walk(route) {
+    const [x, feet, z] = route[0], end = route.at(-1), component = xAxis ? 0 : 2;
+    const direction = Math.sign(end[component] - route[0][component]);
+    const yaw = xAxis ? direction * Math.PI / 2 : direction === 1 ? 0 : Math.PI;
+    const player = { x: x + .5, z: z + .5, feet, yaw, vX: 0, vY: 0, vZ: 0, onGround: true, coyote: 0, jumpBuffer: 0 };
+    const along = () => xAxis ? player.x : player.z;
+    let frames = 0;
+    while ((end[component] + .5 - along()) * direction > .1 && frames < 300) {
+      const step = stepPlayer(world, player, { forward: 1 }, 1 / 60);
+      if (step.hitWall || collides(world, player.x, player.feet, player.z)) return 0;
+      frames++;
+    }
+    for (let tick = 0; tick < 25; tick++) stepPlayer(world, player, {}, 1 / 60);
+    return frames < 300 && player.onGround && Math.abs(player.feet - end[1]) < .16 &&
+      Math.abs(end[component] + .5 - along()) < .5 ? frames : 0;
+  }
+  const forward = walk(bridge.route), reverse = walk([...bridge.route].reverse());
+  return forward && reverse ? { forward, reverse } : null;
+}
