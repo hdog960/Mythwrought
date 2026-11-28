@@ -3,7 +3,8 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import test from 'node:test';
-import { openDesertCactusWitness, surveyDesertCactusStand } from '../../src/manual-biomes/forgotten-sands-cactus-stand.mjs';
+import { openDesertCactusWitness, surveyDesertCactusGrove, surveyDesertCactusStand }
+  from '../../src/manual-biomes/forgotten-sands-cactus-stand.mjs';
 import { createRestoredDesertResearchWorld } from '../../src/manual-biomes/forgotten-sands-restored-ground.mjs';
 import { P0_TILE_BASE } from '../../src/manual-biomes/forgotten-sands-tile-world.mjs';
 
@@ -55,4 +56,43 @@ test('three rooted cactus ages use existing partial collision and native section
   assert.equal(source.edits.size, 0);
   assert.throws(() => candidate.save(), /separate save profile/);
   console.log('FORGOTTEN SANDS CACTUS STANDS ' + JSON.stringify(results));
+});
+
+test('seeded Desert groves keep rooted stems spaced apart with a native upper witness', () => {
+  const Host = createRestoredDesertResearchWorld(P.FourRegionWorld, V.terrainHeight), results = [];
+  for (const [seed, tx, tz] of [[42, 5, -3], [10301, 5, -1]]) {
+    const source = new Host(seed, P.fourRegionProfile(seed, P.M8_MOUNTAIN_GENERATOR));
+    let yielded = 0;
+    for (let z = -3; z <= 3; z++) for (let x = 5; x <= 11; x++) {
+      if (surveyDesertCactusGrove(source, x, z)) yielded++;
+    }
+    assert.equal(yielded, 9);
+    const grove = surveyDesertCactusGrove(source, tx, tz);
+    assert.equal(grove.length, 4);
+    assert.deepEqual(grove, surveyDesertCactusGrove(source, tx, tz));
+    const witness = openDesertCactusWitness(source, grove, H.physicalRegionAt);
+    for (const [index, stand] of grove.entries()) {
+      const [x, y, z] = stand.support;
+      assert.equal(witness.get(x, y, z), source.get(x, y, z));
+      assert.ok(grove.slice(0, index).every(other =>
+        Math.hypot(x - other.support[0], z - other.support[2]) >= 4));
+      assert.equal(V.collides(witness, x + .5, y + 1.01, z + .5), true);
+    }
+    const upper = grove.flatMap(stand => stand.cells).filter(([, y]) => y >= 20);
+    if (seed === 10301) assert.ok(upper.length > 0);
+    const owners = new Map(upper.map(([x, y, z]) => {
+      const coordinates = [Math.floor(x / 16), Math.floor(z / 16), H.runtimeSectionForY(y)];
+      return [H.runtimeMeshKey(...coordinates), coordinates];
+    }));
+    let bytes = 0;
+    for (const coordinates of owners.values()) {
+      const vertices = V.meshChunk(witness, ...coordinates);
+      assert.notDeepEqual(vertices, V.meshChunk(source, ...coordinates));
+      bytes += geometry.validateUpperSectionGeometry(vertices, new Float32Array());
+    }
+    assert.equal(source.edits.size, 0);
+    results.push({ seed, sampledTiles: 49, groves: yielded, witnesses: grove.map(stand => stand.support),
+      upperCells: upper.length, upperOwners: owners.size, upperBytes: bytes });
+  }
+  console.log('FORGOTTEN SANDS CACTUS GROVES ' + JSON.stringify(results));
 });

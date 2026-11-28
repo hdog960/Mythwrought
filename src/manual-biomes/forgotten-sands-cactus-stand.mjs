@@ -7,6 +7,7 @@ const dryCaps = new Set([256, 257, 258, 260, 261, 262]);
 const ages = Object.freeze({ juvenile: [2, 3], mature: [5, 10], ancient: [12, 18] });
 const keyOf = (x, y, z) => [x, y, z].join(',');
 const tileWidth = 64;
+const validTile = (tx, tz) => [tx, tz].every(Number.isSafeInteger) && Math.max(Math.abs(tx), Math.abs(tz)) <= 33_000_000;
 
 function rank(x, z, seed, salt) {
   let value = Math.imul(x ^ salt, 0x7feb352d) ^ Math.imul(z ^ seed, 0x846ca68b);
@@ -14,10 +15,24 @@ function rank(x, z, seed, salt) {
   return (value ^ (value >>> 16)) >>> 0;
 }
 
-export function surveyDesertCactusStand(world, tx, tz, age) {
-  if (![tx, tz].every(Number.isSafeInteger) || Math.max(Math.abs(tx), Math.abs(tz)) > 33_000_000) {
-    throw new TypeError('Invalid cactus tile');
+function surveyStandAt(world, x, z, age, height) {
+  const biome = v6BiomeAt(x, z, world.seed);
+  if (biome?.name !== 'desert' || biome.weight < .86 || world._oasisNear(x, z, 2, biome)) return null;
+  const column = world._columnPlan(x, z);
+  const y = Math.max(...column.keys());
+  if (!dryCaps.has(column.get(y)) || world.get(x, y, z) !== column.get(y) ||
+      world.get(x, y - 1, z) === BLOCK.AIR) return null;
+  const first = y + 1, last = y + height, cells = [];
+  for (let at = y - 1; at <= last + 1; at++) {
+    if (world.environmentCaves.get(x, at, z) !== undefined || world.edits.has(keyOf(x, at, z)) ||
+        (at >= first && world.get(x, at, z) !== BLOCK.AIR)) return null;
+    if (at >= first && at <= last) cells.push([x, at, z]);
   }
+  return { age, height, support: [x, y, z], cells };
+}
+
+export function surveyDesertCactusStand(world, tx, tz, age) {
+  if (!validTile(tx, tz)) throw new TypeError('Invalid cactus tile');
   const { seed } = world, selected = rank(tx, tz, seed, 823);
   const ageClass = age ?? ['juvenile', 'juvenile', 'mature', 'mature', 'mature', 'ancient'][selected % 6];
   if (!Object.hasOwn(ages, ageClass)) throw new TypeError('Invalid cactus age');
@@ -27,22 +42,26 @@ export function surveyDesertCactusStand(world, tx, tz, age) {
     const roll = rank(tx, tz, seed, 1247 + attempt * 13);
     const x = tx * tileWidth + 10 + roll % 44;
     const z = tz * tileWidth + 10 + (roll >>> 13) % 44;
-    const biome = v6BiomeAt(x, z, seed);
-    if (biome?.name !== 'desert' || biome.weight < .86 || world._oasisNear(x, z, 2, biome)) continue;
-    const column = world._columnPlan(x, z);
-    const y = Math.max(...column.keys());
-    if (!dryCaps.has(column.get(y)) || world.get(x, y, z) !== column.get(y) ||
-        world.get(x, y - 1, z) === BLOCK.AIR) continue;
-    const first = y + 1, last = y + height;
-    const cells = [];
-    for (let at = y - 1; at <= last + 1; at++) {
-      if (world.environmentCaves.get(x, at, z) !== undefined || world.edits.has(keyOf(x, at, z)) ||
-          (at >= first && world.get(x, at, z) !== BLOCK.AIR)) break;
-      if (at >= first && at <= last) cells.push([x, at, z]);
-      if (at === last + 1) return { age: ageClass, height, support: [x, y, z], cells };
-    }
+    const stand = surveyStandAt(world, x, z, ageClass, height);
+    if (stand) return stand;
   }
   return null;
+}
+
+export function surveyDesertCactusGrove(world, tx, tz) {
+  if (!validTile(tx, tz)) throw new TypeError('Invalid cactus tile');
+  if (rank(tx, tz, world.seed, 1609) % 5 !== 0) return null;
+  const center = surveyDesertCactusStand(world, tx, tz, 'mature');
+  if (!center) return null;
+  const [x, y, z] = center.support, stands = [center];
+  for (const [dx, dz, age] of [[-5, 3, 'juvenile'], [4, 5, 'mature'], [3, -6, 'juvenile'], [-5, -4, 'mature']]) {
+    const [min, max] = ages[age], height = min + rank(x + dx, z + dz, world.seed, 1741) % (max - min + 1);
+    const stand = surveyStandAt(world, x + dx, z + dz, age, height);
+    if (!stand || Math.abs(stand.support[1] - y) > 2) continue;
+    stands.push(stand);
+    if (stands.length === 4) break;
+  }
+  return stands.length >= 3 ? stands : null;
 }
 
 export function openDesertCactusWitness(world, stands, physicalRegionAt) {
