@@ -122,6 +122,12 @@ const budgetPassed = residentBudgetPassed && result.peakCost.withinLimits && res
 const output = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'world-ascension-interlayer-union');
 await mkdir(output, { recursive: true });
 const report = { ...result, workingSet, nativeBatch, editReuse, faceDelta, residentBudgetPassed, budgetPassed };
+if (process.argv.includes('--with-unified-webgl2')) {
+  const { compareUnifiedCaveEdit } = await import('./world-ascension-unified-edit-webgl2.mjs');
+  report.unifiedEdit = await compareUnifiedCaveEdit({ projection, workingSet, meshes: editedBatch.meshes, faceLimit: limits.faceGrowth });
+  assert.equal(report.unifiedEdit.residentFaces, residentFaces);
+  assert.equal(report.unifiedEdit.meetsGalleryFaceLimit, false);
+}
 if (process.argv.includes('--with-webgl2')) {
   const adjacentY = editY + 1;
   assert.equal(view.get(editX, adjacentY, editZ), BLOCK.DEEPSTONE);
@@ -192,7 +198,7 @@ console.log(JSON.stringify({
   airComponents: result.airConnectivity.revisedComponents, lostBoundaryPatches: result.seams.lostPatches,
   stagedFaces: workingSet.maxEditStagedFaces, maxOwnerFaces: workingSet.maxOwnerFaces,
   residentFaces: workingSet.maxResidentFaces, residentBudgetPassed,
-  nativeBatch, editReuse, faceDelta, gpuEdit: report.gpuEdit, budgetPassed, constructionAdmission: result.constructionAdmission,
+  nativeBatch, editReuse, faceDelta, unifiedEdit: report.unifiedEdit, gpuEdit: report.gpuEdit, budgetPassed, constructionAdmission: result.constructionAdmission,
 }, null, 2));
 
 assert.equal(result.socketReplay.ok, true);
