@@ -122,6 +122,10 @@ const budgetPassed = residentBudgetPassed && result.peakCost.withinLimits && res
 const output = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'world-ascension-interlayer-union');
 await mkdir(output, { recursive: true });
 const report = { ...result, workingSet, nativeBatch, editReuse, faceDelta, residentBudgetPassed, budgetPassed };
+if (process.argv.includes('--with-geology-native')) {
+  const { qualifyGalleryWallGeology } = await import('./world-ascension-gallery-geology-native.mjs');
+  report.geology = qualifyGalleryWallGeology({ capture, projection, owners });
+}
 const withSceneryWebGL = process.argv.includes('--with-scenery-webgl2');
 if (withSceneryWebGL || process.argv.includes('--with-scenery-native')) {
   const { qualifyRetainedGalleryScenery } = await import('./world-ascension-gallery-scenery-native.mjs');
@@ -213,7 +217,8 @@ console.log(JSON.stringify({
   airComponents: result.airConnectivity.revisedComponents, lostBoundaryPatches: result.seams.lostPatches,
   stagedFaces: workingSet.maxEditStagedFaces, maxOwnerFaces: workingSet.maxOwnerFaces,
   residentFaces: workingSet.maxResidentFaces, residentBudgetPassed,
-  nativeBatch, editReuse, faceDelta, scenery: report.scenery, unifiedEdit: report.unifiedEdit, gpuEdit: report.gpuEdit,
+  nativeBatch, editReuse, faceDelta, geology: report.geology, scenery: report.scenery,
+  unifiedEdit: report.unifiedEdit, gpuEdit: report.gpuEdit,
   budgetPassed, constructionAdmission: result.constructionAdmission,
 }, null, 2));
 
