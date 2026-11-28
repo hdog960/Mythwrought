@@ -58,34 +58,45 @@ export function createPhysicalNavigationReader({legacyMin,legacyMax,physicalMax,
   const id=read(x,y,z);
   return Number.isInteger(id)&&id>=0?id:undefined;
  }
- function surfaceAt(x,z){
+ function surfaceAt(x,z,ceiling=physicalMax){
+  if(!Number.isFinite(ceiling))return null;
+  const limit=Math.min(physicalMax,Math.floor(ceiling));
   for(let s=sections;s>=1;s--){
    const {minY,maxY}=ranges[s-1];
-   const status=owner(x,maxY,z);
+   if(minY>limit)continue;
+   const top=Math.min(maxY,limit);
+   const status=owner(x,top,z);
    if(status===0)return null;
    if(status===1)continue;
-   for(let y=maxY;y>=minY;y--){
+   for(let y=top;y>=minY;y--){
     const id=cell(x,y,z);
     if(id===undefined)return null;
     if(id!==0)return {id,y,surfaceY:y+1};
    }
   }
-  if(!owner(x,legacyMax,z))return null;
-  for(let y=legacyMax;y>=legacyMin;y--){
+  const groundTop=Math.min(legacyMax,limit);
+  if(!owner(x,groundTop,z))return null;
+  for(let y=groundTop;y>=legacyMin;y--){
    const id=cell(x,y,z);
    if(id===undefined)return null;
    if(id!==0)return {id,y,surfaceY:y+1};
   }
   return null;
  }
- return Object.freeze({surfaceAt,resident:(x,y,z)=>owner(x,y,z)!==0,read:cell,get sourceReads(){return sourceReads;}});
+ return Object.freeze({legacyMax,surfaceAt,resident:(x,y,z)=>owner(x,y,z)!==0,read:cell,get sourceReads(){return sourceReads;}});
 }
 export function observePhysicalNavigationSurface({player,reader,minY,maxY}){
  const x=Math.floor(player.x),z=Math.floor(player.z);
  const result=kind=>({kind,surfaceY:null,x,z});
  if(![player.x,player.y,player.z].every(Number.isFinite)||player.y>maxY+1)return result('unknown');
  if(player.y<minY)return result('underground');
- const top=reader.surfaceAt(x,z);
+ // Preserve legacy cave protection: do not look down into a cave to
+ // manufacture surface discovery. Sky islands above the eye, however,
+ // are not a roof over the entire ground map. Airborne survey chooses
+ // the highest surface at/below the eye and still requires a real ray.
+ const legacyMax=reader.legacyMax;
+ const limit=player.y<=legacyMax+1?legacyMax:Math.floor(player.y+1.55)-1;
+ const top=reader.surfaceAt(x,z,limit);
  if(!top)return result('unknown');
  return {...top,x,z,kind:top.surfaceY>player.y+1.55?'covered':'surface'};
 }

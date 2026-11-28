@@ -6,12 +6,12 @@ await mkdir(out,{recursive:true});
 const browser=await chromium.launch({headless:true,args:['--enable-webgl','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
 const context=await browser.newContext({viewport:{width:956,height:440},hasTouch:true,isMobile:true,deviceScaleFactor:1,serviceWorkers:'block'});
 const page=await context.newPage(),errors=[];
-const report={head:process.env.GITHUB_SHA??null,stages:[],errors};
+const report={head:process.env.GITHUB_SHA??null,seed:-652801853,stages:[],errors};
 page.on('pageerror',e=>errors.push(e.message));
 const snapshot=()=>page.evaluate(()=>{
  const t=window.__mythwroughtTest,m=document.querySelector('#miniMap');
  return {flight:t.flightInfo(),pose:t.m5ObservedPose(),chunks:t.snapshot().chunks,
-  discovered:Number(m.dataset.discovered),sourceReads:Number(m.dataset.surveySourceReads||0),
+  discovered:Number(m.dataset.discovered),sourceReads:Number(m.dataset.surveySourceReads||0),surveyKind:m.dataset.surveyKind,surveyMs:Number(m.dataset.surveyMs||0),surveyY:Number(m.dataset.surveyY),
   saved:JSON.parse(localStorage.getItem('mythwrought-exploration-v1-'+m.dataset.seed)||'{"cells":[]}').cells,
   observed:JSON.parse(localStorage.getItem('mythwrought-navigation00-observations-v1-'+m.dataset.seed)||'{"tiles":[]}').tiles};
 });
@@ -21,8 +21,12 @@ async function holdUntil(key,predicate,arg){
  finally{await page.keyboard.up(key);}
 }
 try{
+ await page.addInitScript(()=>{const old=crypto.getRandomValues.bind(crypto);crypto.getRandomValues=a=>{if(a instanceof Int32Array&&a.length===1){a[0]=-652801853;return a;}return old(a);};});
  await page.goto('http://127.0.0.1:4173/?production-ui=1',{waitUntil:'domcontentloaded',timeout:120000});
- await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#miniMap')?.dataset.discovered)>0&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>=25,null,{timeout:180000});
+ await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.querySelector('#scene')?.dataset.loadedChunks)>=18,null,{timeout:120000});
+ report.startup=await snapshot();assert.equal(report.startup.pose.seed,report.seed);
+ await page.waitForFunction(()=>Number(document.querySelector('#miniMap')?.dataset.discovered)>0,null,{timeout:30000});
+ report.ground=await snapshot();await page.screenshot({path:out+'/ground.png'});
  await page.locator('#g2bFlightEnable').check();
  if(await page.locator('#closeHelp').isVisible())await page.locator('#closeHelp').click();
  await page.locator('#jump').tap();await page.locator('#jump').tap();
@@ -60,7 +64,7 @@ try{
    const s=ms.slice(1).sort((a,b)=>a-b);
    return {p50:s[Math.floor(s.length*.5)],p95:s[Math.floor(s.length*.95)]};
   });
-  report.stages.push({target,position:after.flight.position,before:before.discovered,after:after.discovered,sourceReads:after.sourceReads,centerGround,owners:after.flight.residentChunks,frame});
+  report.stages.push({target,position:after.flight.position,before:before.discovered,after:after.discovered,sourceReads:after.sourceReads,surveyMs:after.surveyMs,surveyKind:after.surveyKind,centerGround,owners:after.flight.residentChunks,frame});
   console.log('MINIMAP_FLIGHT',JSON.stringify(report.stages.at(-1)));
  }
  assert.ok(demonstratedEviction,'no high-altitude nonresident source survey exercised');
@@ -82,6 +86,8 @@ try{
  assert.ok(beforeReload.saved.every(k=>saved.has(k)),'flight discovery lost on reload');
  assert.deepEqual(errors,[]);report.persisted=beforeReload.saved.length;report.pass=true;
 }finally{
+ report.lastState=await snapshot().catch(e=>({error:String(e)}));
+ console.log('MINIMAP_FINAL_STATE',JSON.stringify(report.lastState).slice(0,10000));
  await writeFile(out+'/report.json',JSON.stringify(report,null,2));
  await page.screenshot({path:out+'/last.png'}).catch(()=>{});
  await context.close();await browser.close();

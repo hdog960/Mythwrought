@@ -61,7 +61,7 @@ test('physical map samples upper terrain but never reads unresident occupied sec
  const reader=physicalReader({occupied:(x,z,s)=>s===8,resident:()=>true,
  read:(x,y,z)=>{reads++;return y===139||y===6?3:0;}});
  assert.equal(reader.surfaceAt(0,0).surfaceY,140);
- assert.equal(observePhysicalNavigationSurface({player:{x:0,y:100,z:0},reader,minY:-3,maxY:256}).kind,'covered');
+ assert.equal(observePhysicalNavigationSurface({player:{x:0,y:100,z:0},reader,minY:-3,maxY:256}).surfaceY,7);
  assert.equal(observePhysicalNavigationSurface({player:{x:0,y:141,z:0},reader,minY:-3,maxY:256}).kind,'surface');
  assert.ok(reads>0);
  const unknown=physicalReader({occupied:(x,z,s)=>s===8,read:()=>{throw Error('unknown read');}});
@@ -110,4 +110,32 @@ test('aerial survey is opt-in, and cannot read unknown terrain outside the live 
  assert.equal(reader.read(100,140,0),undefined);assert.equal(reads,0);
  assert.equal(reader.surfaceAt(0,0),null);assert.equal(reads,20);
  assert.equal(reader.read(1,256,0),undefined);assert.equal(reads,20);
+});
+
+test('ground below unknown sky island owners is mapped without touching those owners, caves remain covered',()=>{
+ let upper=0;
+ const reader=physicalReader({occupied:()=>true,resident:()=>false,read:(x,y,z)=>{
+   if(y>19){upper++;throw Error('overhead owner read');}
+   return y===6?3:0;
+ }});
+ const ground=observePhysicalNavigationSurface({player:{x:.5,y:7,z:.5},reader,minY:-3,maxY:256});
+ assert.equal(ground.kind,'surface');assert.equal(ground.surfaceY,7);assert.equal(upper,0);
+ assert.equal(observePhysicalNavigationSurface({player:{x:.5,y:2,z:.5},reader,minY:-3,maxY:256}).kind,'covered');
+ assert.equal(observePhysicalNavigationSurface({player:{x:.5,y:-10,z:.5},reader,minY:-3,maxY:256}).kind,'underground');
+ assert.equal(upper,0);
+});
+test('higher-than-eye upper sections do not spend survey budget; unknown lower sections remain unknown',()=>{
+ const reader=physicalReader({occupied:(x,z,s)=>s===8,resident:()=>false,read:(x,y,z)=>y===6?3:0});
+ assert.equal(reader.surfaceAt(0,0,100).surfaceY,7);
+ assert.equal(reader.surfaceAt(0,0,150),null);
+ assert.equal(observePhysicalNavigationSurface({player:{x:0,y:100,z:0},reader,minY:-3,maxY:256}).kind,'surface');
+});
+test('quota refusal preserves the previous verified observation record and retries without losing in-memory discoveries',()=>{
+ const d=discovery(),m=new Map();let reject=false;
+ const storage={getItem:k=>m.get(k)??null,setItem(k,v){if(reject)throw Error('QuotaExceededError');m.set(k,v);}};
+ const c=createObservationCatalog({seed:1,discovery:d,storage});
+ assert.ok(c.observeTile(0,0,'#abcdef',7,{witnessed:true}));assert.ok(c.flush());const prior=storage.getItem(c.key);
+ assert.ok(c.observeTile(1,0,'#123456',8,{witnessed:true}));reject=true;
+ assert.equal(c.flush(),false);assert.equal(storage.getItem(c.key),prior);assert.equal(c.ink(1,0),'#123456');assert.ok(c.warning.includes('QuotaExceededError'));
+ reject=false;assert.ok(c.flush());const next=createObservationCatalog({seed:1,discovery:d,storage});assert.equal(next.tileCount,2);
 });

@@ -366,6 +366,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
         // Survey real composed source only near the live pose, with an explicit
         // CPU read cap; never allocate or pin ground GPU owners for a map.
         const survey=highFlight?{x:player.x,z:player.z,radius:36,maxReads:96}:null;
+        const sampleStarted=performance.now();
         const reader=createPhysicalNavigationReader({
           legacyMin:LEGACY_WORLD_MIN_Y,legacyMax:WORLD_MAX_Y,physicalMax:PHYSICAL_MAX_Y,
           sections:UPPER_SECTION_COUNT,bounds:runtimeSectionBounds,occupied:upperOccupiedAt,
@@ -378,6 +379,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
           const radius=flightDiscoveryRadius(player.y,observation.surfaceY,WORLD_MAX_Y);
           const airSurvey=highFlight||radius>3;
           const eye=[player.x,player.y+1.55,player.z];
+          const ceiling=highFlight?Math.floor(eye[1])-1:WORLD_MAX_Y;
           function witnessed(top,x,z){
             if(!top||top.surfaceY>eye[1])return null;
             if(!surfaceWitness({eye,target:[x,top.surfaceY+.01,z],
@@ -398,7 +400,7 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
             sampleLimit:airSurvey?3:6,
             residentAt:(x,z)=>!map.readOnly,
             admit:(x,z)=>map.admitCell(x,z),
-            sample:(x,z)=>witnessed(reader.surfaceAt(x,z),x+.5,z+.5)});
+            sample:(x,z)=>witnessed(reader.surfaceAt(x,z,ceiling),x+.5,z+.5)});
           if(eligible){
             const {x,z,y,id}=observation,base=world.base??world;
             if(player.y>=y+1&&player.y<=y+3&&[MOUNTAIN_V8_MATERIAL.stone,MOUNTAIN_V8_MATERIAL.slate,MOUNTAIN_V8_MATERIAL.gneiss].includes(id)&&
@@ -408,13 +410,17 @@ export function installExplorationMap({storage,getWorld,getPlayer,onOpen,canOpen
           }
         }
         mini.dataset.surveySourceReads=String(reader.sourceReads);
+        mini.dataset.surveyKind=observation.kind;
+        mini.dataset.surveyMs=(performance.now()-sampleStarted).toFixed(3);
+        mini.dataset.surveyY=player.y.toFixed(2);
         needsPaint=true;
       }
       // Repaint position/heading independently of expensive terrain sampling.
-      const poseKey=[Math.round(player.x*10),Math.round(player.z*10),Math.round(player.yaw*100),Math.round(player.y*10)].join(',');
-      if(poseKey!==lastPoseKey)needsPaint=true;
-      if(needsPaint&&now-lastPaint>=MAP_PAINT_INTERVAL_MS){
-        render();lastPaint=now;lastPoseKey=poseKey;needsPaint=false;
+      if(now-lastPaint>=MAP_PAINT_INTERVAL_MS){
+        const poseKey=[Math.round(player.x*10),Math.round(player.z*10),Math.round(player.yaw*100),Math.round(player.y*10)].join(',');
+        if(poseKey!==lastPoseKey)needsPaint=true;
+        if(needsPaint){render();lastPoseKey=poseKey;needsPaint=false;}
+        lastPaint=now;
       }
       if(now-lastSave>5000){flushAll();lastSave=now;}
     },

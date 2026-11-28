@@ -1611,7 +1611,8 @@ function start(nonblockStage=null){
     if(!document.hidden&&!graphicsLost){
       paintSkyClock(now);
       frame++;if(help.hidden&&!exploration.isOpen())move(dt);
-      if(frame%16===0)exploration.tick(now);
+      // Map owns its independent bounded paint, survey and save clocks.
+      exploration.tick(now);
       // Low-frequency real-cave check: no synthetic map markers or geometry.
       if(help.hidden&&!exploration.isOpen()&&frame%24===0){
         caveDiscovery=updateCaveDiscovery(caveDiscovery,naturalCaveCorridor(world,player),now);
