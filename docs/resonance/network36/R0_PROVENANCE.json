@@ -1,0 +1,1346 @@
+{
+  "base": "aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7",
+  "baseTree": "2485f26809d8e2ce131b36c089d9d2367e27e841",
+  "origins": [
+    "13596c26b88ac2e8cb1378b55f75461af9f806d1",
+    "4a83ff51c838a02858dd9fceae980dd3268a573e",
+    "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+  ],
+  "files": [
+    {
+      "path": "docs/resonance/generation24/budgeted-sequence.md",
+      "blob": "03a9988416bd06cc4e352a08aef39816e16bdfe4",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/chained-budget.md",
+      "blob": "a0da76b3ebb0cd697b84952d8e5f366ae56e484b",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/checkpoint-validation.md",
+      "blob": "6d5c2637e1700bc80c585f3ef8002cfe9c8adc8d",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/contract.md",
+      "blob": "1102767603bf7ff84ae64ea7762b675db2fe5c95",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/network36-integer.md",
+      "blob": "76bfd19f569aa6f856526eae46764d718b4ed139",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/network36-precision.md",
+      "blob": "d3b3b25fe5ae4758b74ecfb0d5aab253f9191923",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/observation-sequence.md",
+      "blob": "96af70ed6347215aa9bf22c628fcc3eb36d8eeca",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/generation24/output-handoff.md",
+      "blob": "71c152644d777ff3a518bdd50b5b525b49741104",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/aggregate.mjs",
+      "blob": "b43583b082aa449d4720250bea4f012b71f39ffd",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/budgeted-sequence.mjs",
+      "blob": "a0b4e8644940ac8c4402ecd96dcd128c1c21ca23",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/chained-budget.mjs",
+      "blob": "9653469c187059318e4b42074e366604a207fffc",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/environment-bridge.mjs",
+      "blob": "d753e70cdbfb1e40d1a63d3384092f94666efe8f",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/fuel-continuity.mjs",
+      "blob": "66fe150d694117d4681d41219544cf44cac40992",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/fuel-window.mjs",
+      "blob": "5f4294af9358fca76a25179bc7d5c4d0ad574c5d",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/index.mjs",
+      "blob": "1baf8e038f8c7206772bbdf00480ad7b732bc101",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/network36-integer.mjs",
+      "blob": "b75f55fbb57b350a297a927295c3c90a3ddbe7e5",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/observation-sequence.mjs",
+      "blob": "277178f27da4ecc98819f4af8dad40a65b2b6c16",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/output-handoff.mjs",
+      "blob": "5ce29869c12d3cbbb1842a110fdbad61b0a08513",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "src/resonance/generation24/resume.mjs",
+      "blob": "f08222e6b6a277c5ff3ef0803d54d1bdbd66f0d2",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-aggregate.mjs",
+      "blob": "24d4215030999ece3b5bba6ce3842b9b4ad9144f",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-budgeted-sequence.mjs",
+      "blob": "c3ebaa11eddad84fe00f01134349ec17392c728f",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-chained-budget.mjs",
+      "blob": "909e6b614df9a45c09686fa0439812f2de26fc3a",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-checkpoint-validation.mjs",
+      "blob": "84e0ec706d1cf8d95152c212534b3c4949560f47",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-core.mjs",
+      "blob": "95fb92b2f409cad9ec7fdc39cc4993c36c96763d",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-descriptor-integrity.mjs",
+      "blob": "2d6d7844874e5d358ecc69b020276f912d90c3c6",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-descriptor-safety.mjs",
+      "blob": "c89e83c454dd46e26ca45f87f98248fd71e5264f",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-environment-bridge.mjs",
+      "blob": "64c41b8fa1b73795dd970fd5d485691f244d145f",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-fuel-boundary.mjs",
+      "blob": "3ddbd41dbe6f125f424bf0ffaeeba9f1ea1c4d9d",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-fuel-continuity.mjs",
+      "blob": "ad8eed4906aa27ec52eb5fcd10f908a7d2ca8785",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-fuel-window.mjs",
+      "blob": "0aacea67bac0277aea44c3edb7a53bdd268f85d8",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-g4-accounting.mjs",
+      "blob": "5af75684c0e3229fefe5daef6479b54c63322778",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-g4-invariants.mjs",
+      "blob": "abbce8a9664026fc08bf153132033a1d2ba18e9c",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-multiheat-checkpoint.mjs",
+      "blob": "5e7fb7cbd9897f072b1e3d362bad0ff7914083cf",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-network36-integer.mjs",
+      "blob": "5ed9008219741224f3f3e52a3ce8259977bb84cc",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-network36-precision.mjs",
+      "blob": "ebe1716083b1bfe15c99c9da76960a453b411acf",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-observation-sequence.mjs",
+      "blob": "4558e515366587bfded2a43e7d11030b81dca544",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-output-handoff.mjs",
+      "blob": "ad47eccceafdfbcfbdd3d34f79645ed327627a27",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-real-descriptor-handoff.mjs",
+      "blob": "b604818923ec3240c53b7db66ea1c7a22ba4fb51",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "tests/resonance-generation24-resume.mjs",
+      "blob": "ba1cf072ac0af5eaf17433f88b16446f9f886465",
+      "origin": "13596c26b88ac2e8cb1378b55f75461af9f806d1"
+    },
+    {
+      "path": "docs/resonance/network36/N1_CHANNEL_TOPOLOGY_20261123.md",
+      "blob": "d16a79be9f66257b618db15eccd67834668435f2",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N1_CHUNK_GRAPH_ADMISSION_20261123.md",
+      "blob": "dbe4a8b462194e203bb3a64089d75026daa5eaca",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N1_CHUNK_INVALIDATION_20261123.md",
+      "blob": "2abca9c07bc650570a579ac93c642df769e1ed62",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N1_GRAPH_ALLOCATION_20261123.md",
+      "blob": "852dc1efd418d4bcb8cc6e4a359829e0468ea3a4",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N2_SPATIAL_ADMISSION_20261123.md",
+      "blob": "5eb32c9dfcac09f42fc0adcdd1d5ebd70f7bd7d8",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N2_WIRELESS_ADMISSION_20261123.md",
+      "blob": "2f3a6c555d1a0e5748d3139e2ff3f31ef99f6234",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N2_WIRELESS_SPATIAL_BUDGET_20261123.md",
+      "blob": "0a459a07564c2403d8002a4b5dc6c9d5bc20bd84",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N3_SCOPED_ALLOCATION_20261123.md",
+      "blob": "937f6ec9727207783ee30f919f10bb04a69df415",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/network36/N3_STORAGE_ALLOCATION_20261123.md",
+      "blob": "cd93d01eee1b059bf2b7ceb1076600d5e1ed3504",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/channel-graph.mjs",
+      "blob": "3fd294f8d7a0505b04b321f8b7bb9e35fc258fad",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/chunk-graph-admission.mjs",
+      "blob": "9115f4116b6ce568d092fa91cdd1939466e7212b",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/chunk-invalidation.mjs",
+      "blob": "dcf6bf70965cd12321ef3761db8e1de01c522f6f",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/graph-allocation.mjs",
+      "blob": "4ea7410a6ed04a32647200b2964aba4aa1cf5f0f",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/network-allocation.mjs",
+      "blob": "a03dabc01d87be581f8130b2e472efd8314f7d75",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/storage-allocation.mjs",
+      "blob": "ed7bfb767837682ab7d55db64d7dffa751969ffd",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/wireless-links.mjs",
+      "blob": "b890a198ac5dfab1ce2e7ec2a76725606e0420a1",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/wireless-spatial-admission.mjs",
+      "blob": "6c6d29ff34352ea9f50316d64158add82eacdce6",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "src/resonance/network36/wireless-spatial.mjs",
+      "blob": "adc099cd2b6a998291310eb01b44ef8a68058fd9",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-channel-graph.mjs",
+      "blob": "c7fba6cfe033beb0044da852f109f6331a991239",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-chunk-graph-admission.mjs",
+      "blob": "df6567ec31de0756ef8eb504b5c735caa48fa4c3",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-chunk-invalidation.mjs",
+      "blob": "8698ea702cd59783fbd23c3becace89a692ad928",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-graph-allocation.mjs",
+      "blob": "6bb4c0e89c49710129ff49b84679be318ceb184c",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-scoped-allocation.mjs",
+      "blob": "5cc22981083a0fdb7d24045e91709c3547aa65e1",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-storage-allocation.mjs",
+      "blob": "17f24b39a3a84dca2939b1ce087830406f25706e",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-wireless-links.mjs",
+      "blob": "63ff0fdaa534ac8d28732bf5f922a2156427d7bf",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-wireless-spatial-admission.mjs",
+      "blob": "170837426acf72f3d0a40b0c216c1df0ba8a74d9",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "tests/resonance-network36-wireless-spatial.mjs",
+      "blob": "c1dae03e6f53637f233377dedc2092b5651f6729",
+      "origin": "4a83ff51c838a02858dd9fceae980dd3268a573e"
+    },
+    {
+      "path": "docs/resonance/devices48/D2_INTERTICK_CORRIDOR_V1.md",
+      "blob": "c1ea00084a73dd8765a31d3ff9e27ef4b7896a99",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D3_ASSEMBLY_ENVELOPE_V1.md",
+      "blob": "8b2e391782c3754367877ece57c62ea57e72150c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D3_CONTINUOUS_SWEEP_V2.md",
+      "blob": "f98381684c48d4cf2a5f331fb14379e929d97ea7",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D3_OBSTRUCTION_OVERLAY_V1.md",
+      "blob": "2b657d7c1172e57621d68fdfc2ab3f23ac8ad6bf",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D4_PROCESSOR_COMMIT_FENCE_V1.md",
+      "blob": "f9ba108a984b4a5b1446445d29add7e9804bc057",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D4_PROCESSOR_PREVIEW_V1.md",
+      "blob": "343a4ab4008b7020747729106a5022eb5958b468",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D4_PROTECTED_COLLECTOR_V1.md",
+      "blob": "e00728e9a022bb6c3f81e84d6e01e1c541603e97",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D5_HUD_PREVIEW_V1.md",
+      "blob": "e02fea70028a1928d4b40fdb4587e565055a52a8",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D5_PULSE_TIMELINE_V1.md",
+      "blob": "ee5ce74322e04cd30fe5a6922014fab2968c7722",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D5_STATUS_OBSERVATION_SEQUENCE_V1.md",
+      "blob": "3567572c52a3693350a4b1548abdab109e504c49",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D5_STATUS_TRANSITION_PULSES_V1.md",
+      "blob": "7870311c67a8b67f6deb4736e74a02f663acd1f5",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_ADMISSION_EVIDENCE_BRIDGE_V1.md",
+      "blob": "0ecd7c60b62e26f38d479a1b2abce9d53f59e3f7",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_ADMISSION_HISTORY_V1.md",
+      "blob": "1e346e0c38ace4b9cf86d98ab86a6006cbed55c3",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_GRANT_CONTINUITY_ADMISSION_V1.md",
+      "blob": "cd156ddeaa8cd8e9696ad7db920fdbe5bd9f815e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_GRANT_DROPOUT_INTERLOCK_V1.md",
+      "blob": "a109768d3c2f728d98c6bb12727de56d4ff97ad2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_ADMISSION_SEQUENCE_V1.md",
+      "blob": "6bc16726824063b6862095a396c1342fe20711bd",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_ADMISSION_STREAM_V1.md",
+      "blob": "b4b4936b70fc2d1df1aa50e7fe1928c3d0ed7059",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_EVIDENCE_SEQUENCE_V1.md",
+      "blob": "14076c955e9ef7e06fdae344523f9560ad941c79",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_MULTIVIEW_AUDIT_V1.md",
+      "blob": "aafb900eff4e2f2c391dad8cd7a3f65684c3db41",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_SNAPSHOT_PAIR_V1.md",
+      "blob": "0acfc12c503c0de3ebcf8cefded1428c39f542cc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_HUD_STREAM_INTEGRITY_V1.md",
+      "blob": "79447b90e9b8cdb5faf3a2cf2b205764c2c52613",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_RECEIPT_EPOCH_GUARD_V1.md",
+      "blob": "639eba8ae36907c1ddfa4b4af6dc6a2b717a0904",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/D6_VIEWPORT_ADMISSION_V1.md",
+      "blob": "bc6fa06f9ea09d322243fa571e97929801c4f6ad",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/button-edge-v1.md",
+      "blob": "8dcaec180eb534bcbee3560f7b808402e6067a34",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/button-lamp-bank-v1.md",
+      "blob": "fc77ba2d1e68ff37a9f41b30d2846a544e84918c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/button-lamp-preview-v1.md",
+      "blob": "6a1cc615abc0a16ce4fe4459ffb40d7f1c21600d",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/compact-status-v1.md",
+      "blob": "3ca0ad41f445107d0d12bd8617e6d1b66e22ea35",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/corridor-reservation-v1.md",
+      "blob": "91d2766a0853c90787c60a61201f98d466828704",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/d1-candidate-gates-v1.md",
+      "blob": "5f8ed33b9e07a69f98b2065027eff02597a260b8",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/d1-controls-v1.md",
+      "blob": "1e7a271ae6e3b049cae0435eba78c79e7fd96f63",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/d1-roster-guard-v1.md",
+      "blob": "871d9dfebd70cde449f9d685081c40e479cb03da",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/deficit-window-v1.md",
+      "blob": "12d3f6be549105b99f27163bc548b715d97ff69a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/delivery-preview-v1.md",
+      "blob": "f090a702d1bd7ad2ac5077ca5124b910368692c1",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/delivery-receipt-v1.md",
+      "blob": "9db9758d7e0656ddf859f571cad642220ea32d69",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/gate-actor-sweep-v1.md",
+      "blob": "03f75a4b446085c83eab34f1013b519352ea036a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/gate-clearance-preflight-v1.md",
+      "blob": "22407c5623ce903eba945f41c61d5c696d5f8e4b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/gate-dynamic-occupancy-v1.md",
+      "blob": "631a5f2f12787b1470fe886efcf857c612d396d0",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/gate-motion-continuity-v1.md",
+      "blob": "c48b39cd0102af3aa7ea1aa68b72f7b668dfd495",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lamp-bank-budget-v1.md",
+      "blob": "2845a784014fb2bb793a3be35ae4f16881d83ad7",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lamp-grant-continuity-v1.md",
+      "blob": "1c5d51e692864a742f245919d52fa256e71cd942",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lift-intertick-occupancy-v1.md",
+      "blob": "7bb6775c97b6bbd1a19fb0b53070974be1ad2e48",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lift-reset-readiness-v1.md",
+      "blob": "dcf05cc0f11516f96c0a634ad204a3f86bef8b7f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lift-stop-history-v1.md",
+      "blob": "fe95714e6b9dd09fdf7440c17e760b83a4f348b4",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/lift-stop-preflight-v1.md",
+      "blob": "95b6fc9d308f8bb2f7c4b2f6e3e8dc5bc15548d2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/mobile-pulse-budget-v1.md",
+      "blob": "5e29acc2ac2e2695a6e9747e2e7190123be65119",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/network36-candidate-v1.md",
+      "blob": "5d3004dc6bdd28bbd69fb2c5d43068be7f903d31",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/proximity-sensor-v1.md",
+      "blob": "cdf641bb7c16bd65d434f2cc65cf49d30a761aa2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/pulse-continuity-v1.md",
+      "blob": "91effe93fff0577d0a6732a04925b73176770317",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/pulse-cooldown-v1.md",
+      "blob": "f080ce7ea6a269de6ac03552b48696e4478f3ddc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/pulse-descriptor-v1.md",
+      "blob": "e43fb9cb8f3684a378cefe04ab56dab386d30f43",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/pulse-descriptors-v1.md",
+      "blob": "5422812ef0b17225ce4a5d93bf09b6955d683055",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/sensor-timer-interlock-v1.md",
+      "blob": "5e9a0c78ba7403d0210bb23b4b76c0fc8a018811",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/status-descriptor-v1.md",
+      "blob": "7f6b555548abf310e7a25e233808ba5258a05eb8",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/status-panel-v1.md",
+      "blob": "250e1b719453ca2f7d040cda8747fdc7bb8034c0",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/status-preview-v1.md",
+      "blob": "b098800eae3514b7ed9bdd1f3d34e6e2999b579a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "docs/resonance/devices48/timed-control-v1.md",
+      "blob": "78723f15d855d88bf477489c6c56457449328ef2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/assembly-envelope-v1.mjs",
+      "blob": "f31f855c5513c3e087349105dbd81e17f9df590f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/assembly-obstruction-preview-v1.mjs",
+      "blob": "677158e25805a79c66b3cc59449efc3f7342d406",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/assembly-v1.mjs",
+      "blob": "6d4ae7ba86b9021e68fbc486dd3e4f11d29b763e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/button-edge-v1.mjs",
+      "blob": "09837ef5fae55100f15282f8751a4e0bfc8a6475",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/button-lamp-bank-v1.mjs",
+      "blob": "29c4a274ec5f77b3ba8358919de043a231ed6c05",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/button-lamp-preview-v1.mjs",
+      "blob": "1d3553835f94c6f0794b00b305f2b4b2beea47c9",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/candidate-gates-v1.mjs",
+      "blob": "1b05571217530202a26abc718706e5406f280f78",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/compact-status-v1.mjs",
+      "blob": "c13d123c4c5d0012234117a53d6b1c834aa61033",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/consumer-v1.mjs",
+      "blob": "e77598afe3367d0b664d68d1c01f77dca70e8e37",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/continuous-assembly-sweep-v2.mjs",
+      "blob": "2af81e64243eb95bd4dbe542f85a6cf22bcc8c88",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/controls-v1.mjs",
+      "blob": "44ec0b6e3c81e1b8cd3ba394d9cf6b8c8c19314b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/corridor-reservation-v1.mjs",
+      "blob": "0120c0471d3d93a9289fdce2d54ad333246e705d",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/d1-roster-guard-v1.mjs",
+      "blob": "02b61298bf9483e96ccce8765419b4fd10c24f71",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/deficit-window-v1.mjs",
+      "blob": "306ffccb4637480fce268ea212b26f86434a4d3e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/delivery-preview-v1.mjs",
+      "blob": "ec566c632d9d15c8597c60a05a9ba4e29c899b4a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/delivery-receipt-v1.mjs",
+      "blob": "473fb74c66dbe4c6b837c79002a7ec61c40d54f5",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/device-controls-v1.mjs",
+      "blob": "fa07fc208a1143b915df90a870a07052ec456677",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/gate-actor-sweep-v1.mjs",
+      "blob": "f236a88935ea41b50d89cec636b6ff261df6e9f6",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/gate-clearance-preflight-v1.mjs",
+      "blob": "16f988406e0c72d875aba6faa602e104d20914d0",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/gate-dynamic-occupancy-v1.mjs",
+      "blob": "3d14c756f7f49894ad88a06b8760688825ca8712",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/gate-motion-continuity-v1.mjs",
+      "blob": "22dfbeb1659cb11e6c1ea89fd8683d9cd12537bc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/gated-consumer-v1.mjs",
+      "blob": "b942c8ab9e179108b67da959e801d0454727ab96",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/grant-continuity-admission-v1.mjs",
+      "blob": "2921d94a5a8cc23c36cff4891d069eb21afdcc96",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/grant-dropout-interlock-v1.mjs",
+      "blob": "22228dbfa3358f10d16fc35918d04397781a8f14",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-admission-evidence-bridge-v1.mjs",
+      "blob": "6640a893ccba7a2d2b0d6fa99ee33eeeda4eacbd",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-admission-history-v1.mjs",
+      "blob": "6fbf04d1f1b2f76e4e28839735d5de349bc625f3",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-admission-sequence-v1.mjs",
+      "blob": "cf217a4aa5ec839d226f42ef354b07d23bb78547",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-admission-stream-v1.mjs",
+      "blob": "ad42d62838da1d49e862be37c356f13785fce4eb",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-evidence-sequence-v1.mjs",
+      "blob": "f1e711f674a7d911d992b5f432d4005a05471919",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-multiview-audit-v1.mjs",
+      "blob": "bdc01767804a952befd5cc53cd993bca5a860197",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-snapshot-pair-v1.mjs",
+      "blob": "5d1c73efd8f785d65e32e7322a917c76297ae216",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/hud-stream-integrity-v1.mjs",
+      "blob": "a5e5e4a4b9b9394e5ba3c4db9a6217df501c0e76",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/intertick-corridor-v1.mjs",
+      "blob": "3b0690883b82ddc15ebee9a38348608b988848e2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lamp-bank-budget-v1.mjs",
+      "blob": "d150cfe6033cd564621e7fd0f5953aa383d261a5",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lamp-grant-continuity-v1.mjs",
+      "blob": "c1b27d69e4b1f8fa81b582ab70a433be36623dd2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lift-intertick-occupancy-v1.mjs",
+      "blob": "f431d42070463b3d65d15734caca77556cc7ddbb",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lift-reset-readiness-v1.mjs",
+      "blob": "6f89da2ec1b9d4806e270f9047c14a62d01f6b50",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lift-stop-history-v1.mjs",
+      "blob": "11349f7b231607a81c11e15d5ce5e9a018332048",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/lift-stop-preflight-v1.mjs",
+      "blob": "56a5f0ae26ae538461eedd78dcb65762c9da05e1",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/mobile-pulse-budget-v1.mjs",
+      "blob": "c3f7b5a9e7a1b4ddfd88fe7f76f72dd940dffc22",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/motion-guard-v1.mjs",
+      "blob": "d71aceb2a93181b22788ad473c8e597288a67a5c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/motion-v1.mjs",
+      "blob": "79baea5cc4a70873ed024c030ac5b65dd67c0a5b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/network36-candidate-v1.mjs",
+      "blob": "3ba499bf41c66d6218faf2772285abc77844d40f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/preview-frame-v1.mjs",
+      "blob": "9fa65a0049588fa8180d32333f51aae167c77867",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/priority-pulse-v1.mjs",
+      "blob": "99fbf4d9d23cd31540502e313ae396f994e21349",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/processor-commit-fence-v1.mjs",
+      "blob": "d48e054adac28114fbc7fa65122b0374eba0a960",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/processor-preview-v1.mjs",
+      "blob": "a6371282cd9fd48931d85282568ce5ac9c7a66f3",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/protected-collector-v1.mjs",
+      "blob": "9b3fe554df51d9837190cce2b43be7f702ceb016",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/proximity-sensor-v1.mjs",
+      "blob": "beade25e5adba0bf9a6e51676b00ae950d545e85",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-continuity-v1.mjs",
+      "blob": "03dfb18b649eab4aaa171e9636e1181a65f1e98e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-cooldown-v1.mjs",
+      "blob": "4e48db95108c515a6d52f075a49aadf995957050",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-descriptor-v1.mjs",
+      "blob": "305283d840013465cb5812b86cb0f43108b0250c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-descriptors-v1.mjs",
+      "blob": "4b4b51cade5276bd0ebeb9ed256fc62cf87ceb33",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-timeline-v1.mjs",
+      "blob": "ed05e04276de597243081ae13f16e0c85abc8f4e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/pulse-visual-v1.mjs",
+      "blob": "b526f7e257a35d7419411ade28b5f4e3aeda4d25",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/receipt-epoch-guard-v1.mjs",
+      "blob": "70e41ad2b69cbdf930ae4656ef1847fa15a1d89c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/receipt-ledger-v1.mjs",
+      "blob": "48ccad17d8156ace38d5115e87601afe5913cb6c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/receipt-status-v1.mjs",
+      "blob": "27f38dca538888d7640e93e2329e282badbfe916",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/resource-batch-v1.mjs",
+      "blob": "c9730d189802cab44ae044aa501112e9a8c45c6f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/resource-fixture-v1.mjs",
+      "blob": "c71a7cf904288e964782964bf8a9d6895e42582d",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/sensor-timer-interlock-v1.mjs",
+      "blob": "3b39709d810e0561476f7e157a5d59210e150931",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-delta-v1.mjs",
+      "blob": "343743250a6d8bb6951abbc95455c698868bd3bc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-descriptor-v1.mjs",
+      "blob": "0b3ae9f4aa4ca3eb336e01b238a08d10bee7ed7b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-hud-v1.mjs",
+      "blob": "b646a742e03163042f719c1260babb50f79a2afb",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-observation-sequence-v1.mjs",
+      "blob": "8031aace9b4f2ac8183517f4c957d366a25fb6bd",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-panel-v1.mjs",
+      "blob": "b834db8ad50861827e61d128efaaddcdfd6b4248",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-preview-v1.mjs",
+      "blob": "014461d1c39d413ee90a9999df94f5cf286b7c31",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-transition-pulses-v1.mjs",
+      "blob": "0a5b68f2f812c6e375348d0b9eb9068c9a7ce7dc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-transition-v1.mjs",
+      "blob": "c4659442b4a5e0b2b4449b3b1be7320327f05f88",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/status-v1.mjs",
+      "blob": "9892b15989d7ca149608dc4ca1fce6fffa42c923",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/timed-control-v1.mjs",
+      "blob": "caea8dcbd5d344aef90cc85ef32714b43ba3e5b9",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "src/resonance/devices48/viewport-admission-v1.mjs",
+      "blob": "13618856c89965105d5934552733dc07b30f6912",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-assembly-envelope-v1.mjs",
+      "blob": "bbec6bc3e33be966149a74a4213a255db8459253",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-assembly-obstruction-preview-v1.mjs",
+      "blob": "a741ccef8bb893facb702790e12f22732d364320",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-assembly.test.mjs",
+      "blob": "c6d02311d9c54bd03c5a19ddbe41caf0c3a471fb",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-button-edge-v1.test.mjs",
+      "blob": "50e98b56804b87ba96fd47eb2ac9d0838a0315cd",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-button-lamp-bank.test.mjs",
+      "blob": "b7062bc75989968fc79fd504b9bf5a173fbbb54f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-button-lamp-preview.test.mjs",
+      "blob": "4569f44be99b58030610c349d89655f3e86106e2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-compact-status-v1.mjs",
+      "blob": "9e355a11ba19f4a70b9e91a6c8705235b2741d33",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-consumer-v1.test.mjs",
+      "blob": "17b22dc6231593f3de7cdb7b1836cbf922185e8c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-continuous-assembly-sweep-v2.mjs",
+      "blob": "810126b835c8562352266908692cf1f1cb3eb637",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-controls-v1.mjs",
+      "blob": "5782f2eaeac873eb9bb4eb8bfd29cc29cd501444",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-controls-v1.test.mjs",
+      "blob": "9d50871d793c0e7b878e978f8d79cbbc7baa4bc0",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-corridor-reservation.test.mjs",
+      "blob": "52a901409fbb40ff3deb74a3867acecdee0ab43f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-d1-candidate-gates.test.mjs",
+      "blob": "5dbc4b11ee54311f1e0dda48e2e859a2fa562f7f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-d1-roster-guard.test.mjs",
+      "blob": "ec648801b66c9e128aa50bd6ea11c7144ca3e184",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-deficit-window.test.mjs",
+      "blob": "4b3611cec1aa83d148141bd7edbc91c1c3545222",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-delivery-preview.test.mjs",
+      "blob": "de81928eed86f23f9c8a8732bb67ed86315f850f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-delivery-receipt.test.mjs",
+      "blob": "94e71c337bed5a470e53213f7b21cd65e8d16ffd",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gate-actor-sweep.test.mjs",
+      "blob": "e882e339cba08c04e7ef4d12eec7ed2343f10ad4",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gate-clearance-preflight.test.mjs",
+      "blob": "7cd5b3aeeed2c06b2e2ba742aec68bfd5f66dcc6",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gate-dynamic-occupancy.test.mjs",
+      "blob": "3de84254be22310edd4ba3bdd30f1e5593ad3256",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gate-motion-continuity.test.mjs",
+      "blob": "567e7e3d1e6f14c398a2850662b4675811ec7270",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gated-consumer-v1.test.mjs",
+      "blob": "b84296cf76eed5954240c668dae843caefbd7b15",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-gated-safety.test.mjs",
+      "blob": "e70cbb30112be84bb8bee5f5a3901c950994db72",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-grant-continuity-admission-v1.mjs",
+      "blob": "a829e446e48c2adcddebbafa468d8bfa85fc06cc",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-grant-dropout-interlock-v1.mjs",
+      "blob": "6ce134056ba3e4ee9cebd5801fe5d37dac83a48a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-admission-evidence-bridge.test.mjs",
+      "blob": "c65540a790c1b6de60ab0b64ed741d9076bdd03a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-admission-history.test.mjs",
+      "blob": "23b727a1698d677b65c1d89b8e92549742bf9c70",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-admission-sequence-v1.test.mjs",
+      "blob": "212e12cb3152f09a3582cd5be2b666e42710028f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-admission-stream.test.mjs",
+      "blob": "65004ea263232f6c22357dfc0c1a86de1688755b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-evidence-sequence-v1.test.mjs",
+      "blob": "a51d26855479a0e0446e14e5977d663bf2c0b425",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-multiview-audit-v1.test.mjs",
+      "blob": "9d3f7c04be23671b4bd67df83cb42524ff23df57",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-snapshot-pair-v1.test.mjs",
+      "blob": "be1e0afee2ec739abc7d0cdb8a3bf664c476900c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-hud-stream-integrity.test.mjs",
+      "blob": "670a67a8a6f1f271b47ccbf4abb070a339695120",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-intertick-corridor.test.mjs",
+      "blob": "933182e6e7c83a9a3d50226cf095d0bd191ba357",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lamp-bank-budget.test.mjs",
+      "blob": "cf367adf104bf66888810cda3ee8f079a2039ebe",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lamp-grant-continuity-v1.mjs",
+      "blob": "6a35f689de700c20a9239b12b01518249102343a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lift-intertick-occupancy.test.mjs",
+      "blob": "c630b180d343fbbb8970763976fcec152f8d1302",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lift-reset-readiness.test.mjs",
+      "blob": "411047ddf50cc37df67b154768d5ef43532a5cf6",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lift-stop-history.test.mjs",
+      "blob": "ed2c8a4fe9be171bc1224d7dcf3947a7f778bb43",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-lift-stop-preflight.test.mjs",
+      "blob": "c4c31f7895f97d329db9c6db05066e2e99516d59",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-mobile-pulse-budget.test.mjs",
+      "blob": "14dae86c01d7c2096f01b67e92f872587dc3b9c1",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-motion-guard.test.mjs",
+      "blob": "ce68efd18d52cd9e5af4bf9b5be2f6c578ce7355",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-motion.test.mjs",
+      "blob": "359812774977762ded29df46f928ac71da51ac48",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-network36-candidate.test.mjs",
+      "blob": "6a1fe3964964cfb08d2d77d28af6fc00421faf9a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-preview-frame.test.mjs",
+      "blob": "2f5e84dd9ae7abf5fa7800bb59be8701bacad9a9",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-priority-pulse.test.mjs",
+      "blob": "a7e49457641ac26e4e7cc829ebd10c82b3bd93cf",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-processor-commit-fence-v1.test.mjs",
+      "blob": "93888ad8a1b02db29d29a1287ca40e860e458473",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-processor-preview-v1.test.mjs",
+      "blob": "93ff9936d3bb7cd009b429a3701b3e102196f2f7",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-protected-collector-v1.test.mjs",
+      "blob": "728cee745d73b39725fdf8b9dbe9ebdb4b4294a2",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-proximity-sensor.test.mjs",
+      "blob": "ad4e5ff80788d9cecd23f392b62ae2c3bfa5576e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-continuity.test.mjs",
+      "blob": "8b73a6b54cddf7af7c2782e504a5606d0feadf8c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-cooldown.test.mjs",
+      "blob": "f37c911a6de6ea8bed0589de3655d29e1486e2e7",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-descriptor.test.mjs",
+      "blob": "79507eec9ef747018b7606072b43cbf86e9b235e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-descriptors-v1.test.mjs",
+      "blob": "86e22cf1c7b3d7c8cece918ad4b358011f2c3acf",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-timeline.test.mjs",
+      "blob": "8292f1063997906ace621bbd0113ad96e120158b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-pulse-visual.test.mjs",
+      "blob": "b70d0a0776a4cba24be8aeb382bea12514557626",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-receipt-epoch-guard-v1.mjs",
+      "blob": "0a704115ec620710a26654765b53ddea2a8ab66b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-receipt-ledger.test.mjs",
+      "blob": "f84c1b3626b7879840a345da5355daa5d30e2d39",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-receipt-status.test.mjs",
+      "blob": "6b811ae6cf673e1d232b79861d8a1acc675be05b",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-resource-batch.test.mjs",
+      "blob": "804d82ed0fa368a5540b402250720e4c2290c4f6",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-resource-fixture.test.mjs",
+      "blob": "c772e67304afb6b12994c186112a17b502da3437",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-sensor-timer-interlock.test.mjs",
+      "blob": "cbb0d3686fa9a534130711bc4b6142408f07a023",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-delta.test.mjs",
+      "blob": "4266cf386edd1a54cdceb73ea0478f86b0739d03",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-descriptor.test.mjs",
+      "blob": "9fec786eb80ee35f1daaedbff1acebea834a590e",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-hud-v1.test.mjs",
+      "blob": "d72731eb18109e46a64b865b0e1628cb67fe61cf",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-observation-sequence-v1.test.mjs",
+      "blob": "5135d4143300f6bb012962ebba49edcb24cac97d",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-panel.test.mjs",
+      "blob": "c0f4adbac07e5ffd107b41d78f5d74b1b53208e1",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-preview-v1.test.mjs",
+      "blob": "29972248055cd3075310d400dd7f7264e7f18a3a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-transition-pulses-v1.test.mjs",
+      "blob": "da76836935c13eed435a031ae32472ebb81bc30f",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status-transition.test.mjs",
+      "blob": "c880d9b366d87a9daa83a55c5bf3beeb69c192fa",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-status.test.mjs",
+      "blob": "a91825b64c5e4779bbe09b526e6e6df6a216025a",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-timed-control-v1.test.mjs",
+      "blob": "84ecf9d4bb979fcd546ceade9f3bd269e447aa34",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    },
+    {
+      "path": "tests/resonance-devices48-viewport-admission-v1.test.mjs",
+      "blob": "4a76925f1f83ccb1f6ef87426736bbece251364c",
+      "origin": "75b1fddbe04c3710d43f20a9aa9299d550c6f424"
+    }
+  ]
+}

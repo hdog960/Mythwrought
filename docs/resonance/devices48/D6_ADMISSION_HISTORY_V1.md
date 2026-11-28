@@ -1,0 +1,5 @@
+# D6 multi-frame admission history v1 — source-only
+
+New :48-owned opt-in contract `auditHudAdmissionHistory48({world,layout,frames})`. Each frame contains exactly `tick`, `revision`, and three original `admitResonanceHud48` reports. The module reuses the existing original :48 bridge and evidence sequence, requires strictly increasing ticks and revisions, limits history to 32 frames, rejects malformed/forged/duplicate viewport reports, and canonically orders evidence. One blocked viewport at any frame fails the aggregate. No input mutation.
+
+**Authority:** `display-only`; **provenance:** `caller-supplied-unverified`. Neither screenshots nor live HUD measurements nor actual :36 delivery are established. No renderer, physics, inventory, saves, production, settlements, or other owners modified. Native focused command: `node --test tests/resonance-devices48-hud-admission-history.test.mjs`. Genuine original checkout, three-size real WebGL2, offline PWA and :36 exact-SHA authentication remain required before integration.

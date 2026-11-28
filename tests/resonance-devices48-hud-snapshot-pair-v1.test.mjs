@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditHudSnapshotPair48} from '../src/resonance/devices48/hud-snapshot-pair-v1.mjs';
+const make=()=>({tick:8,revision:3,worldId:'fixture-world',layoutId:'fixture-layout',fixtures:[667,844,932].map((width,i)=>({viewport:{width,height:[375,390,430][i]},panel:{x:220,y:8,width:180,height:30},reservedRects:[]}))});
+const run=(before=make(),after=make())=>auditHudSnapshotPair48({before,after});
+test('identical fixture snapshots source-only admitted',()=>{const r=run();assert.equal(r.admitted,true);assert.equal(r.authority,'display-only');assert.equal(r.stable,true);});
+test('changed panel geometry rejected',()=>{const b=make();b.fixtures[0].panel.x++;assert.equal(run(make(),b).reason,'geometry-changed');});
+test('changed reservation rejected',()=>{const b=make();b.fixtures[0].reservedRects.push({x:220,y:8,width:180,height:30});assert.equal(run(make(),b).admitted,false);});
+test('cross-world rejected',()=>{const b=make();b.worldId='other';assert.throws(()=>run(make(),b),/identity-drift/);});
+test('changed layout revision rejected',()=>{const b=make();b.revision++;assert.throws(()=>run(make(),b),/identity-drift/);});
+test('changed tick rejected',()=>{const b=make();b.tick++;assert.throws(()=>run(make(),b),/identity-drift/);});
+test('accessor rejected without executing getter',()=>{const b=make();Object.defineProperty(b.fixtures[0].panel,'x',{get(){throw Error('getter executed')}});assert.throws(()=>run(make(),b),/snapshot-accessor/);});
+test('nonplain geometry rejected',()=>{const b=make();b.fixtures[0].panel=new Date();assert.throws(()=>run(make(),b),/nonplain/);});
+test('cycle rejected',()=>{const b=make();b.fixtures[0].panel.loop=b.fixtures[0].panel;assert.throws(()=>run(make(),b),/invalid-snapshot-value/);});
+test('invalid numeric geometry rejected',()=>{const b=make();b.fixtures[0].panel.x=Infinity;assert.throws(()=>run(make(),b));});
+test('permuted fixtures stable',()=>{const b=make();b.fixtures.reverse();assert.equal(run(make(),b).stable,true);});
+test('frozen result',()=>{const r=run();assert.ok(Object.isFrozen(r));assert.ok(Object.isFrozen(r.before));});
+test('inputs not mutated',()=>{const a=make(),b=make(),s=JSON.stringify([a,b]);run(a,b);assert.equal(JSON.stringify([a,b]),s);});
