@@ -1,0 +1,5 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {catalog,validateCandidates,materialRefsAtCheckpoint as materialIds} from '../src/age-of-artifice/wa/catalog.mjs';
+const type="equipment";
+test('candidate catalog and validation',()=>{assert.equal(validateCandidates(catalog,type,materialIds).length,4);assert.equal(catalog.every(x=>x.stackMax===1),true);assert.throws(()=>validateCandidates([...catalog,catalog[0]],type,materialIds));assert.throws(()=>validateCandidates([{...catalog[0],materialRefs:["artifice:material:missing"]}],type,materialIds));assert.throws(()=>validateCandidates([{...catalog[0],candidateStats:{...catalog[0].candidateStats,power:Infinity}}],type,materialIds));assert.throws(()=>validateCandidates([{...catalog[0],stackMax:2}],type,materialIds));assert.throws(()=>validateCandidates([{...catalog[0],requirements:{status:"approved"}}],type,materialIds));assert.throws(()=>validateCandidates([{...catalog[0],icon:"../bad.svg"}],type,materialIds));});
