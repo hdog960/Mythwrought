@@ -441,26 +441,27 @@ function start(nonblockStage=null){
     '#version 300 es','precision highp float;',
     'in vec3 aPos; in vec3 aColor; in vec2 aUv; in float aMat;',
     'uniform vec3 uEye,uForward,uRight,uUp;',
-    'uniform float uAspect,uTan;',
-    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; flat out int vVeilreachFar; out float vPack2Alpha;',
+    'uniform float uAspect,uTan,uVeilreachWorld;',
+    'out vec3 vColor; out float vDistance; out vec2 vUv; flat out int vMat; flat out int vVeilreachSky; out float vPack2Alpha;',
     'void main(){ vec3 d=aPos-uEye;',
     'float x=dot(d,uRight); float y=dot(d,uUp); float z=dot(d,uForward);',
-    `vVeilreachFar=int(aMat>=${VEILREACH_DISTANCE_OFFSET}.0);`,
-    'float pz=vVeilreachFar==1&&z>68.0?z-0.0481:1.0015*z-0.1501;',
+    `int farOwner=int(aMat>=${VEILREACH_DISTANCE_OFFSET}.0);`,
+    'vVeilreachSky=int(farOwner==1||(uVeilreachWorld>.5&&aPos.y>=35.0));',
+    'float pz=vVeilreachSky==1&&z>68.0?z-0.0481:1.0015*z-0.1501;',
     'gl_Position=vec4(x/(uAspect*uTan),y/uTan,pz,z);',
-    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001))-vVeilreachFar*'+VEILREACH_DISTANCE_OFFSET+'; vPack2Alpha=fract(aMat); }'
+    'vColor=aColor; vDistance=length(d); vUv=aUv; vMat=int(floor(aMat+.001))-farOwner*'+VEILREACH_DISTANCE_OFFSET+'; vPack2Alpha=fract(aMat); }'
   ].join('\n');
   // Reserved transparent-water material 20; legacy materials stay unchanged.
   const FS=STORYBOOK_MATERIAL_FRAGMENT_SHADER
     .replace('uniform vec3 uFog;',
       'uniform vec3 uFog; uniform vec3 uSkyLight; uniform float uCaveHaze;'+
-      'flat in int vVeilreachFar;'+
-      'float worldFog(float distanceToEye){ if(vVeilreachFar==1) return .08+.80*smoothstep(75.0,460.0,distanceToEye); return smoothstep(mix(29.0,9.0,uCaveHaze),'+
+      'flat in int vVeilreachSky;'+
+      'float worldFog(float distanceToEye){ if(vVeilreachSky==1) return .88*smoothstep(55.0,460.0,distanceToEye); return smoothstep(mix(29.0,9.0,uCaveHaze),'+
         'mix(68.0,27.0,uCaveHaze),distanceToEye); }')
     .replace('mix(vColor,uFog,distant)','mix(vColor*uSkyLight,uFog,distant)')
     .replace('mix(colored,uFog,fog)','mix(colored*uSkyLight,uFog,fog)')
     .replace('1.0-smoothstep(10.0,38.0,vDistance)',
-      'vVeilreachFar==1?.65*(1.0-smoothstep(130.0,320.0,vDistance)):1.0-smoothstep(10.0,38.0,vDistance)')
+      'vVeilreachSky==1?1.0-smoothstep(25.0,105.0,vDistance):1.0-smoothstep(10.0,38.0,vDistance)')
     .replace('in float vDistance;','in float vDistance; in float vPack2Alpha;')
     .replace('void main(){',
       'void main(){ if(vMat==20){ float f=smoothstep(29.0,68.0,vDistance);'+
@@ -480,6 +481,7 @@ function start(nonblockStage=null){
     atPos=resources.atPos;atColor=resources.atColor;
     atUv=resources.atUv;atMat=resources.atMat;
     U=resources.uniforms;skyU=resources.skyUniforms;
+    U.uVeilreachWorld=gl.getUniformLocation(program,'uVeilreachWorld');
     outlineBuffer=resources.outlineBuffer;
     gl.viewport(0,0,canvas.width,canvas.height);
   }
@@ -1646,6 +1648,8 @@ function start(nonblockStage=null){
       // Deep cave visibility falls into a dark atmosphere beyond the real
       // near and far rock meshes. Surface entrances keep their outdoor sky.
       const caveShade=combinedWorld()?Math.max(0,Math.min(1,(-player.feet-10)/10)):0;
+      // Submit bounded visual uploads before this frame's terrain draws.
+      veilreachDistance.prepare({world:world.base,player,caveShade});
       const caveFog=[.053,.068,.088];
       const fadeCave=(color,target=caveFog)=>caveShade===0?color:
         color.map((value,i)=>value+(target[i]-value)*caveShade);
@@ -1707,6 +1711,7 @@ function start(nonblockStage=null){
         if(s6Biome)gl.uniform3fv(U.uFog,s6Mood.fog);
       }
       gl.uniform1f(U.uCaveHaze,caveShade);
+      gl.uniform1f(U.uVeilreachWorld,world.base?.upperSourceProfile?1:0);
       // Preserve S2's exact live ambient uniform path, then layer only the
       // bounded S3 lunar contribution if at least one moon illuminates night.
       gl.uniform3fv(U.uSkyLight,atmosphere.light);

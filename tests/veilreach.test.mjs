@@ -231,8 +231,10 @@ test('distance publication keeps the previous buffer if a replacement upload fai
   const world=new FourRegionWorld(180,fourRegionProfile(180,VEILREACH_GENERATOR));
   const renderer=createVeilreachDistanceRenderer(gl);
   const player={x:.5,feet:100,z:.5};
-  const draw=()=>renderer.draw({world,player,chunks:new Map(),caveShade:0,
-    atPos:0,atColor:1,atUv:2,atMat:3});
+  const draw=()=>{
+    renderer.prepare({world,player,caveShade:0});
+    return renderer.draw({world,chunks:new Map(),caveShade:0,atPos:0,atColor:1,atUv:2,atMat:3});
+  };
   for(let i=0;i<800;i++){
     draw();
     if(JSON.parse(gl.canvas.dataset.veilreachAtlas).pending===false)break;

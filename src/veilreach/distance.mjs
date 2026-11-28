@@ -339,7 +339,7 @@ export function createVeilreachDistanceRenderer(gl){
     rebuilds++;
   }
 
-  return Object.freeze({invalidate,draw({world,player,chunks,caveShade,atPos,atColor,atUv,atMat}){
+  function prepare({world,player,caveShade}){
     const source=world?.upperSourceProfile;
     if(source!==identity){
       invalidate();
@@ -348,7 +348,7 @@ export function createVeilreachDistanceRenderer(gl){
       readRevision=source?createMobSourceRevision(world):null;
       center=null;
     }
-    if(!terrain||caveShade>.35||gl.isContextLost())return 0;
+    if(!terrain||caveShade>.35||gl.isContextLost())return;
     lastPreparationMs=0;
     lastUploadMs=0;
     uploadPhases={};
@@ -390,6 +390,10 @@ export function createVeilreachDistanceRenderer(gl){
         retry.fail(retryKey,performance.now(),error.message);
       }
     }
+  }
+
+  return Object.freeze({invalidate,prepare,draw({world,chunks,caveShade,atPos,atColor,atUv,atMat}){
+    if(!terrain||caveShade>.35||gl.isContextLost())return 0;
     const detailed=new Set();
     for(const [key,c] of chunks){
       if(c.section>0&&(c.buffer&&c.count||world.upperNaturalOccupied(key)))detailed.add(key);
