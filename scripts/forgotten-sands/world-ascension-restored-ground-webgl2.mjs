@@ -1,4 +1,4 @@
-// Pair the original game and the detached D1 surface plan on the same seed.
+// Pair the original game and detached desert surface plans on the same seed.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -9,15 +9,21 @@ import { extname, resolve, sep } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { P0_TILE_BASE } from '../../src/manual-biomes/forgotten-sands-tile-world.mjs';
 import { createRestoredDesertResearchWorld } from '../../src/manual-biomes/forgotten-sands-restored-ground.mjs';
+import { openDesertDuneWitness, surveyDesertDuneRelief } from '../../src/manual-biomes/forgotten-sands-dune-relief.mjs';
 
 const root = resolve(process.env.P0_CURRENT_SOURCE ?? '');
 assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), P0_TILE_BASE);
-const researchPath = '/src/manual-biomes/forgotten-sands-restored-ground.mjs';
+const dunes = process.argv.includes('--dunes');
+const researchPaths = new Set(['/src/manual-biomes/forgotten-sands-restored-ground.mjs',
+  '/src/manual-biomes/forgotten-sands-dune-relief.mjs']);
 const [P, V] = await Promise.all(['src/manual-biomes/profile-world.mjs', 'src/voxel.mjs']
   .map(file => import(pathToFileURL(resolve(root, file)).href)));
 const seed = 10301, profile = P.fourRegionProfile(seed, P.M8_MOUNTAIN_GENERATOR);
 const Restored = createRestoredDesertResearchWorld(P.FourRegionWorld, V.terrainHeight);
-const baseline = new P.FourRegionWorld(seed, profile), candidate = new Restored(seed, profile);
+const restored = new Restored(seed, profile);
+const baseline = dunes ? restored : new P.FourRegionWorld(seed, profile);
+const relief = dunes ? surveyDesertDuneRelief(restored, 510, -75) : null;
+const candidate = dunes ? openDesertDuneWitness(restored, relief) : restored;
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 
 function cameraFor(cell) {
@@ -37,7 +43,26 @@ function cameraFor(cell) {
   return null;
 }
 const scenes = [];
-for (const [name, before, after, bounds] of [
+if (dunes) {
+  for (const [x, z, bottom, top] of relief.columns) {
+    if (top - bottom < 5) continue;
+    const cell = [x, top, z];
+    for (const [dx, dz] of [[-10, -7], [10, 7], [-7, 10], [7, -10], [0, -8], [8, 0]]) {
+      const a = x + dx, b = z + dz, feet = Math.max(...baseline._columnPlan(a, b).keys()) + 1;
+      if (![baseline, candidate].every(world => !V.collides(world, a + .5, feet + .01, b + .5) &&
+          V.collides(world, a + .5, feet - .02, b + .5))) continue;
+      const pitch = Math.atan2(top + .9 - feet - 1.55, Math.hypot(dx, dz));
+      const hit = V.raycast(candidate, [a + .5, feet + 1.55, b + .5], [-dx, top + .9 - feet - 1.55, -dz], 24);
+      if (!hit?.hit.every((value, axis) => value === cell[axis])) continue;
+      scenes.push({ name: 'dune-relief', cell, camera: [a, feet, b], angles: [Math.atan2(-dx, -dz), pitch],
+        before: baseline.get(...cell), after: candidate.get(...cell) });
+      break;
+    }
+    if (scenes.length) break;
+  }
+  assert.equal(scenes.length, 1, 'No supported original camera can see an added dune crest');
+}
+for (const [name, before, after, bounds] of dunes ? [] : [
   ['golden-sandstone', 256, 261, [680, 710, -235, -205]],
   ['red-dune', 259, 257, [447, 569, -110, 110]],
   ['dry-pan', 259, 258, [447, 569, -110, 110]]
@@ -57,16 +82,18 @@ for (const [name, before, after, bounds] of [
 }
 
 const game = await readFile(resolve(root, 'src/main.mjs'), 'utf8');
-const research = await readFile(resolve('.', '.' + researchPath), 'utf8');
 const marker = '  function loadWorld(seed){';
 assert.equal(game.split(marker).length, 2);
 const injected = "import { createRestoredDesertResearchWorld } from './manual-biomes/forgotten-sands-restored-ground.mjs';\n" +
+  "import { openDesertDuneWitness, surveyDesertDuneRelief } from './manual-biomes/forgotten-sands-dune-relief.mjs';\n" +
   "import { fourRegionProfile as sandsProfile } from './manual-biomes/profile-world.mjs';\n" +
   "import { terrainHeight as sandsTerrainHeight } from './voxel.mjs';\n" +
   game.replace(marker, marker + `\n    const sandsMode=developerWorldFixtures&&new URLSearchParams(location.search).get('sands-ground');
     if(sandsMode){
-      const World=sandsMode==='candidate'?createRestoredDesertResearchWorld(FourRegionWorld,sandsTerrainHeight):FourRegionWorld;
-      storageReadOnly=true;return new Pack2LiveWorld(new World(${seed},sandsProfile(${seed},M8_MOUNTAIN_GENERATOR)));
+      const World=${dunes}||sandsMode==='candidate'?createRestoredDesertResearchWorld(FourRegionWorld,sandsTerrainHeight):FourRegionWorld;
+      const world=new World(${seed},sandsProfile(${seed},M8_MOUNTAIN_GENERATOR));
+      const witness=${dunes}&&sandsMode==='candidate'?openDesertDuneWitness(world,surveyDesertDuneRelief(world,510,-75)):world;
+      storageReadOnly=true;return new Pack2LiveWorld(witness);
     }`);
 const mime = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
@@ -75,7 +102,7 @@ const server = createServer(async (req, res) => {
     const path = decodeURIComponent(new URL(req.url, 'http://127.0.0.1').pathname);
     const file = resolve(root, '.' + (path === '/' ? '/index.html' : path));
     if (!file.startsWith(root + sep)) throw Error('Outside fixture checkout');
-    const bytes = path === '/src/main.mjs' ? injected : path === researchPath ? research : await readFile(file);
+    const bytes = path === '/src/main.mjs' ? injected : await readFile(researchPaths.has(path) ? resolve('.', '.' + path) : file);
     res.writeHead(200, { 'Content-Type': mime[extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(bytes);
   } catch {
@@ -83,7 +110,7 @@ const server = createServer(async (req, res) => {
     res.end();
   }
 });
-const out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'forgotten-sands-restored-ground');
+const out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', dunes ? 'forgotten-sands-dune-relief' : 'forgotten-sands-restored-ground');
 await mkdir(out, { recursive: true });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -119,11 +146,13 @@ try {
       await settled.dispose();
       const state = await page.evaluate(cell => {
         const canvas = document.querySelector('#scene'), gl = canvas.getContext('webgl2');
-        return { id: window.__mythwroughtTest.block(...cell), target: document.querySelector('#targetInfo').textContent,
+        return { id: window.__mythwroughtTest.block(...cell), pose: window.__mythwroughtTest.m5ObservedPose(),
+          target: document.querySelector('#targetInfo').textContent,
           error: gl.getError(), owners: Number(canvas.dataset.loadedChunks),
           worldKeys: Object.keys(localStorage).filter(key => key.includes('-world-')) };
       }, scene.cell);
       assert.equal(state.id, mode === 'baseline' ? scene.before : scene.after);
+      assert.ok(state.pose.onGround && Math.abs(state.pose.feet - scene.camera[1]) < .12);
       assert.equal(state.error, 0);
       assert.deepEqual(state.worldKeys, []);
       const file = mode + '-' + scene.name + '.png';
