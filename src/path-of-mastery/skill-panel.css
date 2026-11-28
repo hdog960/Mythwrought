@@ -4,3 +4,5 @@
 @media(prefers-reduced-motion:reduce){.pm-panel *{scroll-behavior:auto}}
 
 .pm-tree-graph{position:absolute;left:0;top:0;transform-origin:top left}.pm-links{position:absolute;left:0;top:0;pointer-events:none}.pm-links line{stroke:#bb98ec;stroke-width:2}.pm-panel .pm-node{width:140px;height:48px;min-height:44px;max-width:140px;overflow:hidden;padding:6px 8px;background:#38234e;color:#ffdf8c}.pm-panel .pm-node[data-purchased=true]{border-color:#69f7d1;background:#22544f}
+
+.pm-panel input,.pm-panel select{min-height:44px;min-width:100px;max-width:100%;border:1px solid #866caa;border-radius:8px;color:inherit;background:#25253e;padding:6px 10px;font:inherit}.pm-panel button:disabled{opacity:.55;cursor:default}
