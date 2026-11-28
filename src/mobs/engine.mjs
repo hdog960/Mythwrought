@@ -51,6 +51,8 @@ export class MobEngine {
   #maxEntities;
   #maxActive;
   #disposed = false;
+  #expansionFixture = null;
+  #fixtureTick = 0;
 
   constructor(world, seed = 179, { maxEntities = 64, maxActive = DEFAULT_ACTIVE_MOBS, catalog } = {}) {
     if (typeof world?.volume !== 'function' || typeof world?.grounded !== 'function' ||
@@ -63,6 +65,23 @@ export class MobEngine {
     this.#maxActive = Math.min(maxActive, maxEntities);
   }
 
+  // Explicit engineering fixture only. Default constructor and all historical
+  // checkpoint restoration still use the original 40-species resolver.
+  static createExpansionFixture(world, seed, {catalog, admit, step} = {}) {
+    if (catalog?.size!==100 || !Array.isArray(catalog.records) ||
+        catalog.records.length!==100 || typeof catalog.get!=='function' ||
+        typeof admit!=='function' || typeof step!=='function' ||
+        speciesRegistry.some((s,i)=>catalog.records[i]!==s||catalog.get(s.id)!==s) ||
+        new Set(catalog.records.map(s=>s?.id)).size!==100 ||
+        catalog.records.some(s=>!Object.isFrozen(s)||s.implementation!=='preview'||catalog.get(s.id)!==s))
+      throw new TypeError('Invalid expansion fixture catalog');
+    const engine=new MobEngine(world,seed,{maxEntities:32,maxActive:8});
+    const records=new Map(catalog.records.map(s=>[s.id,s]));
+    engine.#resolveSpecies=id=>records.get(id);
+    engine.#expansionFixture=Object.freeze({admit,step});
+    return engine;
+  }
+
   #emit(event) {
     if (this.#events.length === MAX_EVENTS) this.#events.shift();
     this.#events.push(Object.freeze(event));
@@ -73,6 +92,8 @@ export class MobEngine {
         this.#next >= Number.MAX_SAFE_INTEGER-1 || !validPoint(point)) return null;
     const species = this.#resolveSpecies(speciesId);
     if (!species || species.implementation !== 'preview') return null;
+    if (this.#expansionFixture && !getSpecies(speciesId) &&
+        this.#expansionFixture.admit(speciesId,point,homeChunk)!==true) return null;
     // Admission is read-only until every physical-world supplier completes.
     // Do not reserve an identity, awake slot or event for a stale sample.
     const originalPoint = [...point];
@@ -193,6 +214,8 @@ export class MobEngine {
       this.#time = Math.max(0, this.#time - FIXED_STEP);
       // An event or controller may alter admission. Snapshot the bounded roster
       // so entities created by a controller do not receive a same-tick step.
+      const fixtureRoster=this.#expansionFixture?Object.freeze(this.all()):null;
+      const fixtureTick=this.#expansionFixture?++this.#fixtureTick:0;
       for (const mob of [...this.#entities.values()]) {
         if (this.#entities.get(mob.id) !== mob) continue;
         if (mob.state === 'downed') {
@@ -210,6 +233,32 @@ export class MobEngine {
           continue;
         }
         const command = controller?.(snapshot(mob), FIXED_STEP);
+        if(this.#expansionFixture&&!getSpecies(mob.species.id)){
+          if(!awake.has(mob.state)||this.#entities.get(mob.id)!==mob)continue;
+          const rev=this.#world.revision?.();
+          const before=snapshot(mob);
+          let result;
+          try{result=this.#expansionFixture.step(before,mob.fixtureMotion,command,fixtureRoster,fixtureTick);}catch{continue;}
+          const m=result?.motion,h=result?.hit;
+          if(!m||!validPoint(m.position)||!validPoint(m.velocity)||m.velocity.some(v=>Math.abs(v)>16)||
+             !Number.isFinite(m.yaw)||Math.abs(m.yaw)>Math.PI||typeof m.grounded!=='boolean'||
+             typeof m.motionMode!=='string'||m.motionMode.length>32||
+             Math.hypot(...m.position.map((v,i)=>v-before.position[i]))>.6||
+             this.#world.volume(m.position,mob.species.body)!=='clear'||this.#world.revision?.()!==rev||
+             !awake.has(mob.state)||this.#entities.get(mob.id)!==mob)continue;
+          // Damage stays in this same engine, only after all motion checks.
+          // The fixture has no durable receipt or production authority.
+          const victim=h&&this.#entities.get(h.targetId);
+          if(h&&(!victim||victim===mob||!awake.has(victim.state)||!Number.isFinite(h.amount)||h.amount<=0||
+             h.amount>mob.species.combat.damage||h.revision!==rev))continue;
+          if(h&&!this.damage(h.targetId,h.amount))continue;
+          mob.position=[...m.position];mob.velocity=[...m.velocity];mob.yaw=m.yaw;
+          mob.grounded=m.grounded;mob.motionMode=m.motionMode;mob.fixtureMotion=result.state;
+          const moving=mob.velocity.some(v=>Math.abs(v)>1e-5);
+          const state=moving?'active':'idle';
+          if(state!==mob.state)this.transition(mob.id,state);
+          continue;
+        }
         const direction = Array.isArray(command) ? command : command?.direction;
         const heading = Array.isArray(direction) && direction.length === 2 &&
           direction.every(Number.isFinite) ? direction : NO_MOVEMENT;
@@ -226,6 +275,7 @@ export class MobEngine {
   }
 
   checkpoint() {
+    if (this.#expansionFixture) throw TypeError('Expansion fixture cannot create a persistent checkpoint');
     if (this.#disposed) throw TypeError('Cannot snapshot a disposed mob engine');
     return {
       seed: this.#seed, next: this.#next, maxEntities: this.#maxEntities, maxActive: this.#maxActive,

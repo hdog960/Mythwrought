@@ -15,7 +15,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
-| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots authored; native/live pending |
+| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; live pending |
 | Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate native PASS session19; live and restraint owner pending |
 
 ## desert
@@ -26,13 +26,13 @@ Native isolated pursuit, hop, pincer, night gate.
 | Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
-| Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; shoreline native failed on straddling footprint; corrected two-sided full-body search session20, native/live pending |
+| Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; two-sided full-body shoreline search native PASS session20; live pending |
 | Dunewalker | herd, six-legged-walk | Incomplete |
 | Mummy | pursuit, melee | Incomplete |
 | Giant Scorpion | pincers, tail, venom | Incomplete |
 | Dune Serpent | serpentine, ambush, emergence | Incomplete |
 | Mirage Djinn | float, illusion, magic | Incomplete |
-| Sand Colossus | territory, heavy-melee | Home radius and return behavior authored; native/live pending |
+| Sand Colossus | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
 
 ## snow
 Native isolated charge, heavy melee, night flight.
@@ -43,7 +43,7 @@ Native isolated charge, heavy melee, night flight.
 | Ptarmigan | forage, short-flight, evasion | Supported landing and threat takeoff native PASS session19; live pending |
 | Ermine | evasion, explore | Incomplete |
 | Aurora Wisp | float, illumination | Incomplete |
-| Snowdrifter | walk, roll | Snow-supported bounded accelerated roll authored; native/live and rolling renderer animation pending |
+| Snowdrifter | walk, roll | Snow-supported bounded accelerated roll native PASS session20; live and rolling renderer animation pending |
 | Yeti | charge, heavy-melee, ice-projectile | Charge qualified; ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Ice Golem | heavy-melee | Incomplete |
 | Rime Widow | crawl, concealment, freezing-venom | Incomplete |
@@ -63,7 +63,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 | Corrupted Treant | branch-attack, root-attack | Incomplete |
 | Nightshade Witch | poison-spell, slow-spell | Incomplete |
 | Sporebeast | spore-cloud | Incomplete |
-| Chimera | territory, multi-attack | Three guarded timed strikes native PASS session16; home radius/return authored session20, native/live pending |
+| Chimera | territory, multi-attack | Three guarded timed strikes native PASS session16; home radius/return native PASS session20; live pending |
 | Dreamweaver | float, magic, vision-distortion | Incomplete |
 
 ## alpine
@@ -93,9 +93,11 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
-| Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior authored; native/live pending |
+| Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
 | Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; live sound producer pending |
 | Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites native PASS session16; live pending |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.
+
+Session21: original MobEngine explicitly gated fixture admission + six-region behavior dispatch and same-engine health/identity/capacity authored; native integration pending. No persistent checkpoint or default roster activation. No species marked complete.
