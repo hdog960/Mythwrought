@@ -1,4 +1,4 @@
-import { getSpecies } from './species.mjs';
+import { getSpecies, speciesRegistry } from './species.mjs';
 import { moveBody } from './movement.mjs';
 import { validPoint } from './world-query.mjs';
 
@@ -28,7 +28,19 @@ function limits(value, min, max) {
   return Number.isInteger(value) && value >= min && value <= max;
 }
 
+// The explicit engine catalog is still restricted to the admitted original 40.
+// Do not mistake a structural 100-entry candidate for implemented gameplay.
+function engineSpeciesResolver(catalog) {
+  if(catalog===undefined)return getSpecies;
+  if(!catalog||catalog.size!==40||!Array.isArray(catalog.records)||
+     catalog.records.length!==40||typeof catalog.get!=='function'||
+     speciesRegistry.some((s,i)=>catalog.records[i]!==s||catalog.get(s.id)!==s))
+    throw new TypeError('Unsupported or incomplete engine catalog');
+  const admitted=new Map(speciesRegistry.map(s=>[s.id,s]));
+  return id=>admitted.get(id);
+}
 export class MobEngine {
+  #resolveSpecies;
   #world;
   #seed;
   #next = 0;
@@ -40,10 +52,11 @@ export class MobEngine {
   #maxActive;
   #disposed = false;
 
-  constructor(world, seed = 179, { maxEntities = 64, maxActive = DEFAULT_ACTIVE_MOBS } = {}) {
+  constructor(world, seed = 179, { maxEntities = 64, maxActive = DEFAULT_ACTIVE_MOBS, catalog } = {}) {
     if (typeof world?.volume !== 'function' || typeof world?.grounded !== 'function' ||
         !Number.isSafeInteger(seed) || !limits(maxEntities, 1, 128) ||
         !limits(maxActive, 1, 32)) throw new TypeError('Invalid mob engine options');
+    this.#resolveSpecies = engineSpeciesResolver(catalog);
     this.#world = world;
     this.#seed = seed | 0;
     this.#maxEntities = maxEntities;
@@ -58,7 +71,7 @@ export class MobEngine {
   spawn(speciesId, point, { dormant = false, homeChunk = null, juvenile = false } = {}) {
     if (this.#disposed || this.#entities.size >= this.#maxEntities ||
         this.#next >= Number.MAX_SAFE_INTEGER-1 || !validPoint(point)) return null;
-    const species = getSpecies(speciesId);
+    const species = this.#resolveSpecies(speciesId);
     if (!species || species.implementation !== 'preview') return null;
     // Admission is read-only until every physical-world supplier completes.
     // Do not reserve an identity, awake slot or event for a stale sample.
@@ -224,11 +237,11 @@ export class MobEngine {
     };
   }
 
-  static fromCheckpoint(world, state) {
+  static fromCheckpoint(world, state, {catalog} = {}) {
     if (!state || !limits(state.seed,-2147483648,2147483647) ||
         !limits(state.next,0,Number.MAX_SAFE_INTEGER-1) || !Array.isArray(state.entities) ||
         state.entities.length > state.maxEntities) throw TypeError('Invalid mob engine checkpoint');
-    const engine=new MobEngine(world,state.seed,{maxEntities:state.maxEntities,maxActive:state.maxActive});
+    const engine=new MobEngine(world,state.seed,{maxEntities:state.maxEntities,maxActive:state.maxActive,catalog});
     const identityPrefix='mob-'+(state.seed>>>0).toString(36)+'-';
     engine.#next=state.next;
     for (const row of state.entities) {
@@ -237,7 +250,7 @@ export class MobEngine {
       const serial=Number.parseInt(key,36);
       if (!limits(serial,1,state.next) || serial.toString(36)!==key || engine.#entities.has(row.id))
         throw TypeError('Invalid or duplicate mob identity');
-      const species=getSpecies(row.species);
+      const species=engine.#resolveSpecies(row.species);
       if (species?.implementation!=='preview' || !Object.hasOwn(transitions,row.state) ||
           !validPoint(row.origin) || !validPoint(row.position) || !validPoint(row.velocity) ||
           row.velocity.some(value=>Math.abs(value)>16) || !Number.isFinite(row.yaw) ||
