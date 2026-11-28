@@ -1,9 +1,2 @@
-# Age of Artifice — Weapons & Armor
-
-Assignment #523; program and contract #521. Personal lane wa; initial exact base aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7.
-
-Status: isolated onboarding, zero automation-authored deliverables. The prior work is preserved under the manual successor handoffs; never change those refs. No live registration or merge/deploy authority.
-
-Next concrete engineering action: Author first 4–6 distinct starter melee items, icons and candidate equipment descriptor validation/tests.
-
-Use exact-head lease, owned paths, original art, source-backed references, actual focused tests and explicit pending evidence. See assignment and charter for all gates. Update this file in a coherent implementation commit only when the state materially advances. Distinguish setup from automation-authored changes.
+# WA0–WA1 inline first-batch checkpoint
+Assignment #523; contract #521; prior HEAD 9c2375216f9c4efa115e09b0dc971e0aa1ac744e; verified material candidate IDs at RM efec9ec8b9d5c307a4334bd1cacbebac39a04105. Four original equipment candidates and distinct SVG icons; candidate stats, stack and requirements validation, tests. 8 exact function assertions executed in isolated V8 before commit. Node tests, original art visual review, owner mappings and live/mobile qualification pending. No actual damage, gathering or skill authority. Next: exact focused Node tests and another coherent candidate batch; verify current RM IDs and owner constraints. Inline run-now is not proof independent scheduler execution.
