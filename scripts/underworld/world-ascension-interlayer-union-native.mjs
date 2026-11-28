@@ -6,7 +6,7 @@ import { editAffectedChunks } from '../../src/chunks.mjs';
 import { depthMeshKey, verticalEditSections } from '../../src/depth.mjs';
 import { BLOCK } from '../../src/voxel.mjs';
 import { exactQualifiedInterlayer, exactQualifiedSocket } from '../../src/living-underworld/exact-qualified-socket.mjs';
-import { auditGalleryEngineWorkingSet } from '../../src/living-underworld/gallery-streaming-working-set.mjs';
+import { auditGalleryEngineWorkingSet, engineWantedSections } from '../../src/living-underworld/gallery-streaming-working-set.mjs';
 import { EXACT_STAIR_HALL_PROFILE } from '../../src/living-underworld/grade-hall-geometry.mjs';
 import { GALLERY_CONSTRUCTION_LIMITS as limits } from '../../src/living-underworld/physical-gallery-construction.mjs';
 import { captureRetainedDeckSource, inspectRetainedDeckCandidate } from '../../src/living-underworld/retained-deck-combined-candidate.mjs';
@@ -160,7 +160,23 @@ if (process.argv.includes('--with-webgl2')) {
     return { label, meshes: stage.meshes, refusal };
   });
   const { qualifyEditTransaction } = await import('./world-ascension-edit-transaction-webgl2.mjs');
-  report.gpuEdit = await qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit: limits.faceGrowth });
+  const { cx, cz, active, shaft } = workingSet.peak;
+  const lateralWanted = engineWantedSections(cx, cz - 1, active, shaft);
+  const outsideCapture = lateralWanted.filter(key => !owners.has(key));
+  assert.equal(outsideCapture.length, 3);
+  let externalReads = 0;
+  const lateralView = Object.create(projection.original, { get: { value(x, y, z) {
+    if (capture.halo.has([x, y, z].join(','))) return projection.projectedAt(x, y, z);
+    // New halo cells are original world reads only. The carve scope stays fixed.
+    externalReads++;
+    return projection.original.get(x, y, z);
+  } } });
+  const lateralBatch = meshReadOnlySharedBatch(lateralView, outsideCapture);
+  assert.equal(lateralBatch.ok, true);
+  assert.ok(externalReads <= lateralBatch.calls && lateralBatch.calls <= limits.originalNaturalReads);
+  const lateral = { wanted: lateralWanted, meshes: new Map(lateralBatch.meshes.map(row => [row.key, row.vertices])) };
+  report.gpuEdit = await qualifyEditTransaction({ projection, workingSet, owners, edits, lateral, faceLimit: limits.faceGrowth });
+  report.gpuEdit.lateralSource = { outsideCapture, calls: lateralBatch.calls, sharedHalo: lateralBatch.theoretical, externalReads };
   assert.equal(report.gpuEdit.residentFaces, residentFaces);
   assert.equal(report.gpuEdit.steps[0].uploads, faceDelta.changedFaceTotal);
   assert.ok(report.gpuEdit.peakStagedFaces <= limits.faceGrowth);

@@ -8,17 +8,18 @@ const encode = vertices => Buffer.from(vertices.buffer, vertices.byteOffset, ver
 
 // Detached shared allocation for one view of opaque native cube faces.
 // Owner labels and draw ranges stay separate inside the single GPU buffer.
-export async function qualifyEditTransaction({ projection, workingSet, owners, edits, faceLimit }) {
+export async function qualifyEditTransaction({ projection, workingSet, owners, edits, lateral, faceLimit }) {
   const { peak, peakEdit } = workingSet;
   for (const field of ['cx', 'cz', 'active', 'shaft']) assert.equal(peak[field], peakEdit[field]);
   const deeper = engineWantedSections(peak.cx, peak.cz, peak.active - 1, peak.shaft);
   const peakKeys = new Set(peak.wanted);
-  const fixture = [...new Set([...peak.wanted, ...deeper])].map(key => {
+  const fixture = [...new Set([...peak.wanted, ...deeper, ...lateral.wanted])].map(key => {
     const [cx, cz, section] = key.split(',').map(Number);
-    assert.ok(owners.has(key), `Stream owner must be inside the native capture: ${key}`);
-    const before = meshDepthSection(projection.view, cx, cz, section);
-    assert.equal(owners.get(key).oldFaces, 0, 'The entire allocation counts against the face cap');
-    assert.equal(before.length / floatsPerFace, owners.get(key).combinedFaces);
+    const before = lateral.meshes.get(key) ?? meshDepthSection(projection.view, cx, cz, section);
+    if (owners.has(key)) {
+      assert.equal(owners.get(key).oldFaces, 0, 'The entire allocation counts against the face cap');
+      assert.equal(before.length / floatsPerFace, owners.get(key).combinedFaces);
+    } else assert.ok(lateral.meshes.has(key), `Missing native lateral readback: ${key}`);
     const updates = edits.map(({ meshes }) => meshes.find(mesh => mesh.key === key)?.vertices ?? null);
     const live = peakKeys.has(key);
     assert.ok(live || updates.every(vertices => vertices === null));
@@ -33,7 +34,7 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
   });
   try {
     const page = await browser.newPage();
-    const result = await page.evaluate(async ({ fixture, deeper, faceBytes, faceLimit, cases }) => {
+    const result = await page.evaluate(async ({ fixture, deeper, lateral, faceBytes, faceLimit, cases }) => {
       const check = (ok, message) => { if (!ok) throw Error(message); };
       const canvas = document.createElement('canvas');
       canvas.width = 128;
@@ -347,7 +348,7 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         returned: await finishArrival(reversing) };
       const descent = await finishArrival(beginArrival(deeperTarget));
 
-      async function recoverContext(target) {
+      async function recoverContext(target, interruptTo = null) {
         const extension = gl.getExtension('WEBGL_lose_context');
         check(extension, 'Context-loss extension required');
         function readFrame() {
@@ -382,12 +383,32 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
         check(!gl.isBuffer(previousGpu.buffer), 'Old pool survived context loss');
         gpu = createGpuResources();
         slots.fill(null);
-        const restored = await finishArrival(beginArrival(target));
+        const restoring = beginArrival(target);
+        let interruption;
+        if (interruptTo) {
+          let frames = 0;
+          while (arrival === restoring && !restoring.publishedOwners) {
+            await nextFrame();
+            arrivalFrame(restoring);
+            drawPublished(restoring);
+            frames++;
+          }
+          check(arrival === restoring && restoring.publishedOwners > 0, 'Expected active recovery with some complete owners');
+          const pending = nextFrame().then(() => arrivalFrame(restoring));
+          const switched = beginArrival(interruptTo);
+          check(switched.keptFaces > 0, 'New target must reuse an already restored owner');
+          drawPublished(switched);
+          const writes = writeCalls;
+          check(await pending === null && writes === writeCalls, 'Interrupted recovery wrote through a stale callback');
+          interruption = { frames, recoveredFaces: restoring.publishedFaces,
+            canceledFaces: restoring.offset - restoring.publishedFaces, switched: await finishArrival(switched) };
+        }
+        const restored = await finishArrival(interruption ? beginArrival(target) : restoring);
         check(restored.intermediateOwnerFrames > 0, 'Context recovery must draw owners before the whole window settles');
         check(matchesNative(target), 'Recovered GPU ranges differ from the published native mesh');
         const ranges = draw(target.size);
         check(readFrame().every((value, index) => value === originalFrame[index]), 'Recovered cave pixels changed');
-        return { residentFaces: target.size, ...restored, ranges, oldBufferInvalidated: true, pixelParity: true };
+        return { residentFaces: target.size, ...restored, ranges, oldBufferInvalidated: true, pixelParity: true, interruption };
       }
       const contextRecovery = await recoverContext(deeperTarget);
       const ascent = await finishArrival(beginArrival(initialTarget));
@@ -408,6 +429,13 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       drawPublished(retryable);
       const retry = await finishArrival(beginArrival(deeperTarget));
       check(retry.keptFaces === retryable.keptFaces + retryable.publishedFaces, 'Retry must retain fully published owners');
+      const contextReversal = await recoverContext(deeperTarget, initialTarget);
+
+      await finishArrival(beginArrival(initialTarget));
+      const lateralTarget = new Map(lateral.flatMap(key => [...native.get(key)]));
+      const outbound = await finishArrival(beginArrival(lateralTarget));
+      const returnFromLateral = await finishArrival(beginArrival(initialTarget));
+      check(outbound.uploadedFaces > 0 && returnFromLateral.uploadedFaces > 0, 'Lateral fixture must stream in both directions');
 
       check(gl.getBufferParameter(gl.ARRAY_BUFFER, gl.BUFFER_SIZE) === capacity * faceBytes, 'GPU allocation changed');
       gl.deleteBuffer(gpu.buffer);
@@ -416,10 +444,11 @@ export async function qualifyEditTransaction({ projection, workingSet, owners, e
       return { residentFaces: initial.length, allocatedFaces: capacity, stagingReserve, initialRanges,
         peakStagedFaces: Math.max(...steps.filter(step => !step.refused).map(step => step.stagedFaces)), wantedOwners: liveOwners.length, steps,
         streaming: { deeperOwners: deeper.length, uploadCallsPerFrame, descent, ascent, reversal, retry,
+          lateral: { outbound, returned: returnFromLateral },
           unionRefusedFaces: union.size, failedArrivalUploads: 2, keptRangesAfterFailure },
-        contextRecovery, rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true,
+        contextRecovery, contextReversal, rollbackPreserved: true, stagedCapacityRefused: true, fullNativeFaceParity: true,
         buffersReallocatedDuringEditsOrStreaming: false };
-    }, { fixture, deeper, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
+    }, { fixture, deeper, lateral: lateral.wanted, faceBytes: floatsPerFace * Float32Array.BYTES_PER_ELEMENT, faceLimit,
       cases: edits.map(({ label, refusal }) => ({ label, refusal })) });
     return { ...result, chromium: browser.version(), edit: peakEdit.edit,
       scope: 'detached-shared-opaque-buffer-owner-ranges' };
