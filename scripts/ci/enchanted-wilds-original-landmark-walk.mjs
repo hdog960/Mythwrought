@@ -12,7 +12,8 @@ import { composeWildsMonumentSurveys } from '../../src/manual-biomes/enchanted-w
 import { surveyWildsMonumentTile } from '../../src/manual-biomes/enchanted-wilds-monument-tiles.mjs';
 
 const root = process.cwd(), out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'wilds-original-landmark-walk');
-const procedural = process.argv.includes('--monuments');
+const workerMode = process.argv.includes('--worker');
+const procedural = workerMode || process.argv.includes('--monuments');
 const monuments = procedural || process.argv.includes('--observatory');
 const seed = monuments ? 42 : 179, source = new WildsFamilyResearchWorld(seed);
 function findSite(tx, tz, id) {
@@ -85,6 +86,43 @@ try {
   await page.goto('http://127.0.0.1:' + server.address().port + '/?wilds-walk-fixture=1', { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => window.__mythwroughtTest?.snapshot()?.graphics?.shaderReady, null, { timeout: 30000 });
   if (await page.locator('#closeHelp').isVisible()) await page.locator('#closeHelp').click();
+  const workerReport = workerMode ? await page.evaluate(async seed => {
+    const worker = new Worker('/src/manual-biomes/enchanted-wilds-monument-worker.mjs', { type: 'module' });
+    const canvas = document.querySelector('#scene'), before = Number(canvas.dataset.renderedFrames), started = performance.now();
+    let frames = 0, animation;
+    const pulse = () => { frames++; animation = requestAnimationFrame(pulse); };
+    animation = requestAnimationFrame(pulse);
+    const messages = [];
+    let timeout;
+    try {
+      const plan = await new Promise((resolve, reject) => {
+        timeout = setTimeout(() => reject(Error('Wilds worker timed out')), 30000);
+        worker.addEventListener('error', event => reject(Error(event.message)), { once: true });
+        worker.addEventListener('message', ({ data }) => {
+          messages.push({ requestId: data.requestId, state: data.state });
+          if (data.state === 'error') return reject(Error(data.message));
+          if (data.requestId === 'retired' && data.state !== 'cancelled') return reject(Error('Retired worker published a result'));
+          if (data.requestId === 'altar' && data.state === 'admitted') resolve(data);
+        });
+        worker.postMessage({ type: 'scan', requestId: 'retired', seed, tx: 12, tz: -2, ids: [15] });
+        worker.postMessage({ type: 'cancel', requestId: 'retired' });
+        worker.postMessage({ type: 'scan', requestId: 'altar', seed, tx: 12, tz: -2, ids: [15] });
+      });
+      return { messages, probes: plan.probes, origin: plan.plan.origin, route: plan.route.distance,
+        elapsedMs: performance.now() - started, frames, renderedFrames: Number(canvas.dataset.renderedFrames) - before };
+    } finally {
+      clearTimeout(timeout);
+      cancelAnimationFrame(animation);
+      worker.terminate();
+    }
+  }, seed) : undefined;
+  if (workerReport) {
+    assert.deepEqual(workerReport.messages, [{ requestId: 'retired', state: 'cancelled' }, { requestId: 'altar', state: 'admitted' }]);
+    assert.deepEqual(workerReport.origin, [1628, 11, -205]);
+    assert.equal(workerReport.probes, 17096);
+    assert.equal(workerReport.route, 11);
+    assert.ok(workerReport.frames > 2 && workerReport.renderedFrames > 2);
+  }
 
   const pose = () => page.evaluate(() => window.__mythwroughtTest.m5ObservedPose());
   async function walk(key, from, direction, distance, returning = false) {
@@ -130,7 +168,7 @@ try {
     results.push({ name: site.name, from, end, returned, file, sha256: createHash('sha256').update(image).digest('hex'), ...settled });
   }
   assert.deepEqual(errors, []);
-  const report = { seed, chromium: browser.version(), procedural, monumentSites, diagnostics, results };
+  const report = { seed, chromium: browser.version(), procedural, monumentSites, worker: workerReport, diagnostics, results };
   await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {
