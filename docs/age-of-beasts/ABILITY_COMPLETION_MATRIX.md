@@ -67,7 +67,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 | Dreamweaver | float, magic, vision-distortion | Incomplete |
 
 ## alpine
-Authored physical intents and charge/aerial tests pending.
+Native isolated charge/aerial pursuit PASS (session12); cliff climb authored in session13, new native pending.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
@@ -77,25 +77,25 @@ Authored physical intents and charge/aerial tests pending.
 | Skyray | glide, flight | Incomplete |
 | Griffin | tame, flight, aerial-mount, defense | Incomplete |
 | Cyclops | club, rock-projectile | Incomplete |
-| Wyvern | flight, pursuit, venom | Incomplete |
-| Avalanche Beast | charge | Incomplete |
+| Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
+| Avalanche Beast | charge | Isolated charge qualified; habitat/live integration pending |
 | Storm Elemental | float, electric-projectile | Incomplete |
 | Cliff Reaver | climb, leap | Incomplete |
 
 ## cave
-Authored swim, ceiling crawl, bat roost and ground intents; tests pending.
+Native isolated water-only swimming, ceiling traversal and bat roost/departure PASS (session12); guarded ceiling drop/impact authored session13, native pending.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Cave Bat | flight, roost, colony | Incomplete |
+| Cave Bat | flight, roost, colony | Isolated roost/departure qualified; colony/live integration pending |
 | Crystal Snail | crawl, illumination, harvest-eligible | Incomplete |
-| Blind Cavefish | swim | Incomplete |
+| Blind Cavefish | swim | Isolated swim qualified; natural spawn/live integration pending |
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
 | Abyssal Sentinel | territory, heavy-melee | Incomplete |
 | Echo Stalker | sound-perception, pursuit | Incomplete |
-| Ceiling Lurker | ceiling-attachment, drop-attack | Incomplete |
+| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop test pending; reattachment/live integration pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Incomplete |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.

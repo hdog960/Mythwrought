@@ -14,7 +14,7 @@ export function nextAlpineIntent(c,o){
  case 'wyvern':return close?attack('melee'):o.targetVisible?out('pursue'):out('fly');
  case 'avalanche-beast':return close?attack('heavy-melee'):o.targetVisible?out('charge'):out('idle');
  case 'storm-elemental':return o.targetVisible?out('pursue'):out('fly');
- case 'cliff-reaver':return close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
+ case 'cliff-reaver':return o.climbContact&&o.climbGoal?out('climb'):close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
  default:return out('idle');
  }
 }
@@ -31,7 +31,11 @@ export function nextCaveIntent(c,o){
  case 'burrowing-horror':return close?attack('ambush'):o.targetVisible?out('pursue'):out('conceal');
  case 'abyssal-sentinel':case 'abyssal-hydra':return close?attack('heavy-melee'):o.targetVisible?out('pursue'):out('idle');
  case 'echo-stalker':return close?attack('melee'):o.targetVisible?out('pursue'):out('idle');
- case 'ceiling-lurker':return out('ceiling-crawl');
+ case 'ceiling-lurker':
+  if(o.dropState==='descending')return o.grounded?(o.dropTargetMatches&&close?out('drop-attack','attack'):out('drop-recover')):out('drop-fall');
+  if(o.dropState==='recovering'&&!o.ceilingContact)return out('idle');
+  if(o.ceilingContact&&o.targetBelow&&o.cooldownRemaining<=0)return o.windupElapsed<r.combat.windup?out('prepare-attack'):out('drop-fall');
+  return out('ceiling-crawl');
  default:return out('idle');
  }
 }

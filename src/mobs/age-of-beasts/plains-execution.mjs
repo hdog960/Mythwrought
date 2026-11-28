@@ -9,7 +9,7 @@ import {nextForestIntent} from './forest-intents.mjs';
 import {nextAlpineIntent,nextCaveIntent} from './alpine-cave-intents.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
-const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike']);
+const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike','drop-attack']);
 const point=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Math.abs(n)<2**26);
 function createActor(candidate,position,query,biome){
  if(candidate?.requirement?.biome!==biome)throw TypeError('Wrong candidate biome');
@@ -18,7 +18,7 @@ function createActor(candidate,position,query,biome){
   const {record:r,capability:c}=candidate,env=query.environment(position);
   if(env?.biome!=='cave'||env.hazard!==false||position[1]<c.depth[0]||position[1]>c.depth[1]||!c.spawnSupport.some(k=>expansionSupport(query,position,r.body,k)))throw TypeError('Invalid cave habitat');
  }
- return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,visual:'idle',state:'idle',action:'idle'};
+ return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,visual:'idle',state:'idle',action:'idle'};
 }
 function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},biome,decide){
  if(actor?.candidate?.requirement?.biome!==biome)return false;
@@ -31,7 +31,12 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  const visible=sight(target?.position),threatVisible=sight(threat?.position);
  const grounded=expansionSupport(query,actor.position,r.body,'ground');
  const attackTarget=['bison','dunewalker','woolly-mammoth','griffin','geodeback'].includes(r.id)?threat:target;
- const obs={...facts,ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
+ const obs={...facts,
+  climbContact:r.id==='cliff-reaver'&&expansionSupport(query,actor.position,r.body,'climb-surface'),
+  climbGoal:point(goal)&&goal[1]>actor.position[1]+.1,
+  dropState:actor.dropState,dropTargetMatches:actor.dropTarget===target,
+  targetBelow:visible&&target.position[1]<actor.position[1]-.5&&Math.hypot(target.position[0]-actor.position[0],target.position[2]-actor.position[2])<=.8,
+  ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
  const intent=decide(actor.candidate,obs);
  actor.cooldown=obs.cooldownRemaining;
  actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
@@ -40,7 +45,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
- if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl'].includes(intent.action)&&point(goal))destination=goal;
+ if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl','climb'].includes(intent.action)&&point(goal))destination=goal;
  let heading=[0,0],vertical=0;
  if(destination){let dx=destination[0]-actor.position[0],dz=destination[2]-actor.position[2],n=Math.hypot(dx,dz);if(n>1e-5)heading=[dx/n*(away?-1:1),dz/n*(away?-1:1)];vertical=Math.sign(destination[1]-actor.position[1]);}
  const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit'].includes(intent.action));
@@ -50,15 +55,23 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
  if(intent.action==='fly'&&grounded&&vertical<=0)vertical=1;
  try{
-  const waterOnly=r.id==='blind-cavefish', ceilingOnly=r.id==='ceiling-lurker', roost=intent.action==='roost';
+  const waterOnly=r.id==='blind-cavefish',roost=intent.action==='roost',climbing=intent.action==='climb';
+  if(r.id==='ceiling-lurker'){
+   if(intent.action==='drop-fall'&&actor.dropState!=='descending'){actor.dropState='descending';actor.dropTarget=target;actor.velocity=[0,0,0];}
+   if(intent.action==='drop-recover'){actor.dropState='recovering';actor.dropTarget=null;}
+   if(intent.action==='ceiling-crawl'&&obs.ceilingContact){actor.dropState=null;actor.dropTarget=null;}
+  }
+  const ceilingOnly=r.id==='ceiling-lurker'&&!actor.dropState;
   const support=waterOnly?'water':ceilingOnly||roost?'ceiling':null;
   if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
   if(!obs.ready&&biome==='cave'){Object.assign(actor,start);return false;}
   const movementQuery={...query,grounded:(p,b)=>expansionSupport(query,p,b,ceilingOnly||roost?'ceiling':'ground'),
-   volume:(p,b)=>{const state=query.volume(p,b);return state==='clear'&&support&&!expansionSupport(query,p,b,support)?'solid':state;}};
+   volume:(p,b)=>{const state=query.volume(p,b);return state==='clear'&&support&&!expansionSupport(query,p,b,support)?'solid':state;},
+   environment:p=>({...query.environment(p),climbable:climbing&&expansionSupport(query,p,r.body,'climb-surface')})};
   if(roost){actor.velocity=[0,0,0];actor.motionMode='roost';actor.grounded=false;}
-  else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,pace:intent.action==='charge'?1.5:away?1.2:1});
+  else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,climb:climbing,pace:intent.action==='charge'?1.5:away?1.2:1});
   if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
+  if(climbing&&(!expansionSupport(query,actor.position,r.body,'climb-surface')||actor.motionMode!=='climb')){Object.assign(actor,start);return false;}
   if(waterOnly&&actor.motionMode!=='swim'){Object.assign(actor,start);return false;}
   if(ceilingOnly){actor.motionMode='ceiling-crawl';actor.grounded=false;}
   if(query.revision()!==rev||query.volume(actor.position,r.body)!=='clear'||query.revision()!==rev){Object.assign(actor,start);return false;}
@@ -68,6 +81,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
    // Commit must atomically check owner revision and identity; false is no mutation.
    if(commitDamage(victim,r.combat.damage,rev,intent.action)!==true){Object.assign(actor,start);return false;}
    actor.cooldown=r.combat.cooldown;
+   if(intent.action==='drop-attack'){actor.dropState='recovering';actor.dropTarget=null;}
   }
   return true;
  }catch{Object.assign(actor,start);return false;}

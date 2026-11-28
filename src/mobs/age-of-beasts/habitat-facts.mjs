@@ -68,6 +68,11 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
     case 'darkness':result[tag]=Number.isFinite(env.light)&&env.light<=.3;break;
     case 'crystal-floor':result[tag]=support('ground')&&materialFloor().every(id=>id===BLOCK.CRYSTAL);break;
     case 'rock':result[tag]=localMaterials().includes(undefined)?false:localMaterials().some(id=>rock.has(id));break;
+    case 'rock-or-vegetation':result[tag]=!localMaterials().includes(undefined)&&localMaterials().some(id=>rock.has(id)||plants.has(id));break;
+    case 'shallow-or-middle-cave':result[tag]=env.biome==='cave'&&p[1]>=-100&&p[1]<=-4;break;
+    case 'middle-or-deep-cave':result[tag]=env.biome==='cave'&&p[1]<=-35;break;
+    case 'deep-cave':result[tag]=env.biome==='cave'&&p[1]<=-80;break;
+    case 'vertical-clearance':result[tag]=q.volume([p[0],p[1]-.25,p[2]],body)==='clear';break;
     case 'vegetation':result[tag]=localMaterials().includes(undefined)?false:localMaterials().some(id=>plants.has(id));break;
     case 'flowers':result[tag]=localMaterials().includes(undefined)?false:localMaterials().some(id=>blooms.has(id));break;
     default:result[tag]=false;

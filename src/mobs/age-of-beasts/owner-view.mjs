@@ -1,7 +1,7 @@
 // AB2 isolated owner bridge. Callers must provide the actual resident mesh
 // inventory and environmental/overlay revision; no production host mounting.
 import {createExpansionWorldQuery} from './physical-query.mjs';
-import {runtimeMeshKey} from '../../world-height.mjs';
+import {runtimeMeshKey,LEGACY_GENERATION_MAX_Y} from '../../world-height.mjs';
 import {createMobSourceRevision} from '../source-edit-epoch.mjs';
 import {createM7MobCollisionReader} from '../ecosystem-world-geometry.mjs';
 import {isEnvironmentGenerator} from '../../manual-biomes/profile-world.mjs';
@@ -34,5 +34,17 @@ export function createExpansionOwnerView(world,{hasOwner,observe,overlayEpoch,ov
   const id=world.get(x,y,z);
   return Number.isInteger(id)&&id>=0?id:undefined;
  };
- return Object.freeze({query,materialAt,revision});
+ // Read the original generated/landmark source only, excluding player edits
+ // and placed Pack2 cells. Above the historical natural ceiling is not
+ // evidence of a natural provider; the future owner must supply that seam.
+ const generatedMaterialAt=(x,y,z)=>{
+  const source=world.base??world,key=x+','+y+','+z;
+  if(y>LEGACY_GENERATION_MAX_Y||typeof source.naturalAndLandmarkBlock!=='function'||
+     typeof source.edits?.has!=='function'||source.edits.has(key)||world.pack2Cells?.has(key))return undefined;
+  const rev=revision(),actual=materialAt(x,y,z);
+  if(actual===undefined)return undefined;
+  const generated=source.naturalAndLandmarkBlock(x,y,z);
+  return actual===generated&&query.residentAt([x,y,z])&&revision()===rev?actual:undefined;
+ };
+ return Object.freeze({query,materialAt,generatedMaterialAt,revision});
 }
