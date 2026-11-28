@@ -11,7 +11,7 @@ async function pinned(env,sha){
   assert.equal(createHash('sha1').update(`blob ${data.length}\0`).update(data).digest('hex'),sha);
   return import(pathToFileURL(path).href);
 }
-const {createLiquidEngine}=await pinned('LIQUID_ENGINE_MODULE','ac9dfb9e85e99cce81ffc6a4aabe8b2f6f2b764b');
+const {createLiquidEngine}=await pinned('LIQUID_ENGINE_MODULE','48269883882fd04020bf3856ac1350a607f842a7');
 const {ACID_DEFINITION,readAcidStrength}=await pinned('ACID_PHYSICS_MODULE','3fc22a876f07fe8965858d5187ddee1438b06e2d');
 const p=[0,0,0],q=[1,0,0];
 const acid=(units,quantities={})=>({id:'acid',units,quantities});
@@ -84,4 +84,57 @@ test('staged output is immutable and roundtrips exact FIFO state',()=>{
 test('permission fault propagates without any live inventory or liquid change',()=>{
   const f=fixture({},()=>{throw Error('host permission failure');});f.engine.insert(...p,'acid',2);
   const s=f.state();assert.throws(()=>f.stage(s,'collect'),/host permission failure/);assert.deepEqual(f.engine.save(),s.liquid);assert.equal(s.canister,null);
+});
+
+function dormantFixture(){
+  const options={maxCells:3,isOpen:(x,y,z)=>y===0&&z===0&&[0,1,10,11,20].includes(x)};
+  const f=fixture(options),target=[20,0,0];
+  f.engine.insert(0,0,0,'water',8);f.engine.insert(10,0,0,'water',8);
+  f.engine.insert(...target,'acid',2,{'acid-solute':1200});
+  f.engine.tick();
+  assert.deepEqual(f.engine.save().capacityBlocked,[[0,0,0],[10,0,0]]);
+  assert.deepEqual(f.engine.save().pending,[]);
+  return {f,target,options};
+}
+test('collection releases capacity without losing unrelated dormant FIFO or resumption',()=>{
+  const {f,target}=dormantFixture(),before=f.state(),bytes=JSON.stringify(before);
+  const r=f.stage(before,'collect',target);
+  assert.deepEqual(r.state.liquid.capacityBlocked,before.liquid.capacityBlocked);
+  assert.ok(Object.isFrozen(r.state.liquid.capacityBlocked)&&Object.isFrozen(r.state.liquid.capacityBlocked[0]));
+  assert.deepEqual(conserved(r.state),conserved(before));
+  const restored=f.restore(JSON.parse(JSON.stringify(r.state)));
+  assert.deepEqual(restored.save(),r.state.liquid);
+  assert.equal(restored.tick(1).moved,4);
+  assert.equal(restored.getCell(1,0,0).units,4);
+  assert.equal(restored.getCell(11,0,0),null);
+  assert.deepEqual(restored.save().capacityBlocked,[[10,0,0]]);
+  assert.equal(JSON.stringify(before),bytes);assert.deepEqual(f.engine.save(),before.liquid);
+});
+test('partial collect and placement preserve dormant order at full cap',()=>{
+  const {f,target}=dormantFixture(),before=f.state();
+  const take=f.stage(before,'collect',target,1),put=f.stage(take.state,'place',target);
+  assert.deepEqual(take.state.liquid.capacityBlocked,before.liquid.capacityBlocked);
+  assert.deepEqual(put.state.liquid.capacityBlocked,before.liquid.capacityBlocked);
+  assert.deepEqual(conserved(put.state),conserved(before));
+  assert.deepEqual(f.restore(put.state).save(),put.state.liquid);
+});
+test('stale engine reader that drops dormant work is rejected before permission or edit',()=>{
+  const {f,target,options}=dormantFixture(),before=f.state(),bytes=JSON.stringify(before);
+  let permitted=0;
+  const oldFactory=opts=>{const {capacityBlocked,...snapshot}=opts.snapshot;return createLiquidEngine({...opts,snapshot});};
+  const adapter=createAcidCreativeTransfer({createLiquidEngine:oldFactory,readAcidStrength,
+    engineOptions:{isLoaded:()=>true,definitions:[ACID_DEFINITION,{id:'water',gravityLimit:8,lateralLimit:4}],...options},
+    canEdit:()=>{permitted++;return true;}});
+  assert.throws(()=>adapter.stage({state:before,revision:4,action:'collect',point:target}),/capacity retry/);
+  assert.equal(permitted,0);assert.equal(JSON.stringify(before),bytes);
+});
+test('malformed dormant queue is rejected; old v1 empty snapshots keep original shape',()=>{
+  const {f,target}=dormantFixture(),before=f.state();
+  for(const dormant of [null,[[0,0,0],[0,0,0]],[[0,257,0]],[[99,0,0]]]){
+    const invalid={...before,liquid:{...before.liquid,capacityBlocked:dormant}};
+    assert.throws(()=>f.stage(invalid,'collect',target),TypeError);
+  }
+  const g=fixture();g.engine.insert(...p,'acid',2);
+  const result=g.stage(g.state(),'collect',p,1);
+  assert.equal(Object.hasOwn(result.state.liquid,'capacityBlocked'),false);
 });

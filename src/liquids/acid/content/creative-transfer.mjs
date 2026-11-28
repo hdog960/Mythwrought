@@ -23,6 +23,9 @@ export function createAcidCreativeTransfer({createLiquidEngine,readAcidStrength,
     if(state?.version!==1||!state.liquid||!Array.isArray(state.liquid.cells)||!Array.isArray(state.liquid.pending)||
       state.liquid.cells.length>maxCells||state.liquid.pending.length>state.liquid.cells.length)
       throw new TypeError('Invalid staged acid state');
+    const dormant=Object.hasOwn(state.liquid,'capacityBlocked')?state.liquid.capacityBlocked:[];
+    if(!Array.isArray(dormant)||dormant.length+state.liquid.pending.length>state.liquid.cells.length||
+      dormant.some(p=>!pointOK(p)))throw new TypeError('Invalid capacity retry queue');
     const p=Object.freeze([...point]),[x,y,z]=p;
     const slot=state.canister;
     if(slot!==null&&(!validPayload(slot)||readAcidStrength({...slot,x,y,z})===null))throw new TypeError('Invalid acid canister');
@@ -30,6 +33,10 @@ export function createAcidCreativeTransfer({createLiquidEngine,readAcidStrength,
     if(options.isLoaded(...p)!==true||options.isOpen(...p)!==true)return null;
     // One bounded snapshot restore per explicit inventory edit, not per frame.
     const engine=createLiquidEngine({...options,snapshot:state.liquid});
+    // Older v1 readers may silently discard the additive dormant FIFO.
+    // Authenticate its exact order before any edit or permission callback.
+    if(dormant.length&&JSON.stringify(engine.save().capacityBlocked)!==JSON.stringify(dormant))
+      throw new TypeError('Engine cannot preserve capacity retry queue');
     const before=engine.getCell(...p);
     if(before&&(before.id!=='acid'||readAcidStrength(before)===null))return null;
     if(action==='collect'&&!before)return null;
@@ -47,7 +54,8 @@ export function createAcidCreativeTransfer({createLiquidEngine,readAcidStrength,
       nextSlot=null;movedUnits=slot.units;
     }
     const next=engine.save();
-    const liquid=Object.freeze({version:next.version,cells:Object.freeze(next.cells),pending:Object.freeze(next.pending.map(a=>Object.freeze(a)))});
+    const liquid=Object.freeze({version:next.version,cells:Object.freeze(next.cells),pending:Object.freeze(next.pending.map(a=>Object.freeze(a))),
+      ...(next.capacityBlocked?.length?{capacityBlocked:Object.freeze(next.capacityBlocked.map(a=>Object.freeze(a)))}:{})});
     // This is a proposal, not a commit token. Host must atomically adopt the
     // entire state under a current revision/edit lease, or discard it.
     return Object.freeze({expectedRevision:revision,action,movedUnits,changed:Object.freeze([p]),
