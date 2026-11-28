@@ -1,0 +1,22 @@
+# Living Underworld — isolated Phase 2 next measurement checkpoint
+
+## Exact authority
+- Parent protected DRAFT PR #367 HEAD `5455bc9fa3a19bc6c9c3717db10fc4a8dfcbc286`, original production main `7016e14cd6289f45eaf7fc6a79a362b47996df65` verified before code.
+- User forbids merging, deploying, invoking Codex, or modifying any five hourly automations, builders, biome cleanups, Creative overhaul, digging-lag development, any existing M7 world generator or player saves.
+- Root exact-head run #44954743529 job #137000302137 SUCCESS: 20-script WebGL2 stage, non-block lifecycle and offline, default-world backup gates. Artifact #14728401211 ZIP SHA256 `8b9b77665e308ca912f8b07129d56bcd13c20fdb0df5b5ee7d33df7b15852253`, 231 entries all ZIP CRC valid.
+- Dedicated #44954743551 job #137000235525 failed ONLY where the untouched M7 baseline fails for positive seed `8675309` and `13579` (old protected `switchback36` entrance). All 21 native tests PASS. Artifact #14726384078 ZIP SHA256 `f402e87c97e42f16e1131f1aebd90bae1a407358ae4cc48e2fb10ae973e73ed5`, 31 entries all ZIP CRC valid; 30 manifest SHA256 entries matched. Real M7 air: 2965/1430784=0.207229%; detached calibrated proposal: 195599/529920=36.911043% across 20 seeds.
+
+## Strict new evidence, isolated only
+1. **3-D bounded component census** in `bounded-components.mjs`: brute-force air voxels within a bounded window, full six-face-adjacent BFS, component sizes, largest component air fraction, edge-touching components, checked anchors. Includes deliberately disconnected diagonal-only synthetic test. NOT a proof that all caves across an infinite world connect.
+2. **Full-resolution city-floor audit**, no spacing gaps: every cell in one proposed 200+ block chamber's buildable ellipse must have all six supporting layers solid and all nine clear air voxels; 4-neighbor BFS verifies the floor is one contiguous accessible 2-D component. Independent exact-source precommit spot check: seed 179 region (2,0), 11,387 fully checked floor cells, zero bad, one component. Does not place settlements or test the live game.
+3. **Real M7 entrance protection**: new strict survey rejects mouths not in their requested biome and reads the full candidate tunnel's legacy-surface material envelope (conservative whitelist), original authored cave-source cells, existing player-edit map, and the unmodified legacy VoxelWorld landmark baseline. Cannot claim safe if ANY existing protected/unknown material would be overwritten. This corrects an old **overclaim**: 120/120 previous proposals were geometry-only, and at least one selected enchanted region produced a plains mouth. New strict count is expected to be lower; count only audited safe candidates. No real-world terrain carving.
+4. **Supported stair-gallery voxel geometry** reserves a 3-wide supported floor and 3-high clearance for each step. Rejects vertical-only steps, rises >1, invalid world depth, floor-vs-air conflicts, and cell-budget overload. Tested six synthetic-height galleries in source-function checks, 0 conflicts, maximum rise 1. The supports have NOT been injected into M7; they are candidate write plans only.
+5. **No-output-changing prototype CPU optimization**: early reject cavern candidates beyond the maximum possible noise distortion; single-pass city-material query replaces two 3x3-neighbor city scans while retaining floor-priority. Independent exact-original-versus-proposed source comparison: 4500 composed voxel queries with **zero differences**, plus 2000 standalone chamber and 2000 city-override queries with zero differences. GitHub CI native source-parity tests and 20-seed density audit must confirm no change. New benchmark includes a same-run reference path (two-pass city) for fairer CPU comparison. Still NOT iPhone FPS or GPU evidence.
+6. New conditional CI audit preserves all **20 actual M7 seed attempts and fails RED** on genuine inherited constructor faults. The isolated component/city/stair report, protected real-M7 entry census and CPU A/B benchmark run independently, with SHA256 manifest and exact checked-out commit.
+
+## Unaccepted
+- No full-world connected component fraction or complete Creative-flight/ordinary-foot travel certification.
+- No verified wide accessible surface entry in real M7; protected terrain survey is purely diagnostic.
+- No original-game WebGL screenshots of the new generator, no chunk renderer/culling rework, no updated PWA.
+- No cave non-block placement and persistent mining integration.
+- No merge, deployment, approval to touch existing saves or other workstreams.

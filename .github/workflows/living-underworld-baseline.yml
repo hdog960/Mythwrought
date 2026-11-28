@@ -1,0 +1,174 @@
+name: Living Underworld Phase 1 — Real M7 Cave Density (isolated)
+
+on:
+  pull_request:
+    paths:
+      - 'src/living-underworld/**'
+      - 'scripts/underworld/**'
+      - 'tests/living-underworld-foundation.test.mjs'
+      - 'tests/living-underworld-network.test.mjs'
+      - 'tests/living-underworld-entry-city.test.mjs'
+      - 'tests/living-underworld-calibration.test.mjs'
+      - 'tests/living-underworld-physical-connectivity.test.mjs'
+      - 'tests/living-underworld-components-floor.test.mjs'
+      - 'tests/living-underworld-provenance.test.mjs'
+      - 'tests/living-underworld-stairs.test.mjs'
+      - 'tests/living-underworld-optimization.test.mjs'
+      - 'tests/living-underworld-entrance-alternatives.test.mjs'
+      - 'tests/living-underworld-seam-components.test.mjs'
+      - 'tests/living-underworld-city-neighbor-cache.test.mjs'
+      - 'tests/living-underworld-radial-search.test.mjs'
+      - 'tests/living-underworld-geography.test.mjs'
+      - 'tests/living-underworld-network-cache-parity.test.mjs'
+      - 'tests/living-underworld-lateral-search.test.mjs'
+      - 'tests/living-underworld-city-access.test.mjs'
+      - 'tests/living-underworld-multidepth-topology.test.mjs'
+      - '.github/workflows/living-underworld-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-natural-voxel-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact PR head (no merge commit)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Configure Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify native sources and worldwide network joins
+        run: |
+          node --check src/living-underworld/density-audit.mjs
+          node --check src/living-underworld/procedural-core.mjs
+          node --check src/living-underworld/worldwide-network.mjs
+          node --check src/living-underworld/surface-entrance-proposal.mjs
+          node --check src/living-underworld/city-floor-proposal.mjs
+          node --check src/living-underworld/depth-calibrated-proposal.mjs
+          node --check src/living-underworld/physical-connectivity-audit.mjs
+          node --check src/living-underworld/bounded-components.mjs
+          node --check src/living-underworld/city-full-floor-audit.mjs
+          node --check src/living-underworld/protected-entrance-envelope.mjs
+          node --check src/living-underworld/walkable-entrance-stairs.mjs
+          node --check src/living-underworld/entrance-candidate-search.mjs
+          node --check src/living-underworld/region-seam-components.mjs
+          node --check src/living-underworld/distributed-biome-regions.mjs
+          node --check src/living-underworld/city-access-proposal.mjs
+          node --check scripts/underworld/audit-multidepth-components.mjs
+          node --check scripts/underworld/audit-distributed-entrance-terrain.mjs
+          node --check scripts/underworld/audit-region-seams.mjs
+          node --check scripts/underworld/audit-candidate-physical-proof.mjs
+          node --check scripts/underworld/audit-real-m7-entrance-terrain.mjs
+          node --check scripts/underworld/benchmark-node-proposal.mjs
+          node --check scripts/underworld/audit-m7-density.mjs
+          node --test tests/living-underworld-foundation.test.mjs tests/living-underworld-network.test.mjs tests/living-underworld-entry-city.test.mjs tests/living-underworld-calibration.test.mjs tests/living-underworld-physical-connectivity.test.mjs tests/living-underworld-components-floor.test.mjs tests/living-underworld-provenance.test.mjs tests/living-underworld-stairs.test.mjs tests/living-underworld-optimization.test.mjs tests/living-underworld-entrance-alternatives.test.mjs tests/living-underworld-seam-components.test.mjs tests/living-underworld-city-neighbor-cache.test.mjs tests/living-underworld-radial-search.test.mjs tests/living-underworld-geography.test.mjs tests/living-underworld-network-cache-parity.test.mjs tests/living-underworld-lateral-search.test.mjs tests/living-underworld-city-access.test.mjs tests/living-underworld-multidepth-topology.test.mjs
+      - name: Attempt ALL twenty real M7 seeds and fail closed on any genuine crash
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/living-underworld
+          git rev-parse HEAD > artifacts/living-underworld/checked-out-head.txt
+          : > artifacts/living-underworld/FAILED_SEEDS.txt
+          for seed in 179 -17 2026 314159 -987 451 0 1 17 42 12345 -12345 8675309 -8675309 777 991 -991 65535 24680 13579; do
+            output="artifacts/living-underworld/m7-seed-${seed}.json"
+            errorlog="artifacts/living-underworld/m7-seed-${seed}.stderr.txt"
+            if node scripts/underworld/audit-m7-density.mjs "${seed}" > "${output}" 2>"${errorlog}"; then
+              rm -f "${errorlog}"
+            else
+              rm -f "${output}"
+              printf '%s\n' "${seed}" >> artifacts/living-underworld/FAILED_SEEDS.txt
+              echo "::error::Actual M7 new-world generator refused seed ${seed}; preserving unmodified stderr evidence."
+            fi
+          done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const dir='artifacts/living-underworld';
+          const files=fs.readdirSync(dir).filter(x=>/^m7-seed-.*\.json$/.test(x));
+          const failedSeeds=fs.readFileSync(dir+'/FAILED_SEEDS.txt','utf8').trim().split('\n').filter(Boolean).map(Number);
+          let air=0,total=0;
+          for(const file of files){
+            const r=JSON.parse(fs.readFileSync(dir+'/'+file,'utf8'));
+            if(r.overall.total!==79488||r.schema!=='living-underworld-density-audit-v1')
+              throw Error('Untrusted M7 report '+file);
+            air+=r.overall.air;total+=r.overall.total;
+          }
+          if(files.length+failedSeeds.length!==20)throw Error('Incomplete seed attempt inventory');
+          const result={exactHead:fs.readFileSync(dir+'/checked-out-head.txt','utf8').trim(),
+            attemptedSeeds:20,successfulSeeds:files.length,failedSeeds,
+            air,total,percentage:total?100*air/total:null,
+            status:failedSeeds.length?'INHERITED_M7_SEED_FAILURE':'ALL_SEEDS_MEASURED',
+            note:'Actual M7 baseline; no generator changes; failures are real and NOT accepted'};
+          fs.writeFileSync(dir+'/SUMMARY.json',JSON.stringify(result,null,2)+'\n');
+          console.log('Real M7 twenty-seed audit',JSON.stringify(result));
+          NODE
+          if [[ -s artifacts/living-underworld/FAILED_SEEDS.txt ]]; then
+            echo "::error::Real M7 baseline is not universally constructible for the attempted seeds; keeping CI RED."
+            exit 1
+          fi
+      - name: Measure detached worldwide network candidate independently
+        if: always()
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-network-prototype.mjs > artifacts/living-underworld/NETWORK_PROTOTYPE_ONLY.jsonl
+      - name: Measure twenty-seed calibrated detached cave volume and depth bands
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-calibrated-proposal.mjs artifacts/living-underworld/CALIBRATED_PROPOSAL_SUMMARY.json > artifacts/living-underworld/CALIBRATED_PROPOSAL_20_SEEDS.jsonl
+      - name: Read-only actual M7 terrain entrance proposals for five biomes
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-real-m7-entrance-terrain.mjs artifacts/living-underworld/M7_TERRAIN_ENTRANCE_PROPOSALS.json > artifacts/living-underworld/M7_TERRAIN_ENTRANCE_LOG.txt
+      - name: Detached Node CPU-only query benchmark
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/benchmark-node-proposal.mjs artifacts/living-underworld/DETACHED_CPU_ONLY_BENCHMARK.json > artifacts/living-underworld/DETACHED_CPU_ONLY_BENCHMARK.log
+      - name: Detached actual-voxel component, full floor and supported stairs proof
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-candidate-physical-proof.mjs artifacts/living-underworld/CANDIDATE_PHYSICAL_PROOF.json > artifacts/living-underworld/CANDIDATE_PHYSICAL_PROOF.log
+      - name: Strict 3D face-connected physical region seam census
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-region-seams.mjs artifacts/living-underworld/STRICT_REGION_SEAMS_3D.json > artifacts/living-underworld/STRICT_REGION_SEAMS_3D.log
+      - name: Geographically balanced genuine M7 five-biome protected radial entrance survey
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-distributed-entrance-terrain.mjs artifacts/living-underworld/DISTRIBUTED_REAL_M7_RADIAL_COHORT.json > artifacts/living-underworld/DISTRIBUTED_REAL_M7_RADIAL_COHORT.log
+      - name: Source-exact multi-depth local AIR components and buildable city-access ramps
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p artifacts/living-underworld
+          node scripts/underworld/audit-multidepth-components.mjs artifacts/living-underworld/DETACHED_MULTIDEPTH_COMPONENTS_96_WINDOWS.json > artifacts/living-underworld/DETACHED_MULTIDEPTH_COMPONENTS_96_WINDOWS.log
+      - name: Preserve SHA256 for every actual report, failure and prototype output
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          find artifacts/living-underworld -type f ! -name SHA256SUMS -print0 | sort -z |
+            xargs -0 sha256sum > artifacts/living-underworld/SHA256SUMS
+      - name: Preserve exact-head M7 + explicitly unintegrated network evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: living-underworld-phase1-m7-20seed-and-detached-network
+          path: artifacts/living-underworld/
+          if-no-files-found: warn
+          retention-days: 14
