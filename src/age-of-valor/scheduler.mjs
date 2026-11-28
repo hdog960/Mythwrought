@@ -37,6 +37,10 @@ export function createCombatScheduler() {
     }
     clock=end;return result(true,'advanced',events);
   }
+  function finishCast(id,recoveryMs){
+    if(state!=='casting'||action?.id!==id||!validMs(recoveryMs)||clock>Number.MAX_SAFE_INTEGER-recoveryMs)return result(false,'invalid-cast-finish');
+    const events=[];transition('attack-recovery',clock,events);deadline=clock+recoveryMs;phases=[];return result(true,'cast-recovery',events);
+  }
   function releaseBlock(id){
     if(state!=='blocking'||id!==action?.id)return result(false,'stale-or-not-blocking');
     const events=[];finish(clock,events);return result(true,'released',events);
@@ -67,5 +71,5 @@ export function createCombatScheduler() {
     if(state!=='dead')return result(false,'not-dead');
     const events=[];finish(clock,events);return result(true,'respawn-reset',events);
   }
-  return Object.freeze({states,snapshot,begin,advance,releaseBlock,cancel,abortForLifecycle,interrupt,resetAfterRespawn});
+  return Object.freeze({states,snapshot,begin,advance,finishCast,releaseBlock,cancel,abortForLifecycle,interrupt,resetAfterRespawn});
 }

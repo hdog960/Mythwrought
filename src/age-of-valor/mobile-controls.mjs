@@ -3,11 +3,11 @@ export function createMobileCombatInput({worldEpoch,readContext,holdMs=350,maxHo
  const int=(n,a,b)=>Number.isSafeInteger(n)&&n>=a&&n<=b;
  if(!int(worldEpoch,0,Number.MAX_SAFE_INTEGER)||typeof readContext!=='function'||!int(holdMs,100,2000)||!int(maxHoldMs,holdMs,10000))throw Error('invalid input policy');
  const actions=new Set(['attack','block','parry','dodge','target','next-target','previous-target','ability']);
- let mode='exploration',clock=0,generation=0,seq=0,retired=false,busy=false;const pointers=new Map();
- const snapshot=()=>Object.freeze({mode,clock,generation,retired,pointers:Object.freeze([...pointers].map(([id,p])=>Object.freeze({id,zone:p.zone,started:p.started})))});
+ let mode='exploration',pending=null,clock=0,generation=0,capture=0,seq=0,retired=false,busy=false;const pointers=new Map();
+ const snapshot=()=>Object.freeze({mode,pending,clock,generation,retired,pointers:Object.freeze([...pointers].map(([id,p])=>Object.freeze({id,zone:p.zone,started:p.started,captureToken:p.token})))});
  const result=(handled,intents=[])=>Object.freeze({handled,intents:Object.freeze(intents),snapshot:snapshot()});
  function intent(kind,extra={}){if(seq>=Number.MAX_SAFE_INTEGER)throw Error('input sequence exhausted');return Object.freeze({version:1,kind,worldEpoch,generation,sequence:++seq,at:clock,...extra});}
- function clear(reason){pointers.clear();generation++;return [intent('cancel-combat-input',{reason})];}
+ function clear(reason){pointers.clear();pending=null;generation++;return [intent('cancel-combat-input',{reason})];}
  function gate(){
   let c;try{c=readContext();}catch{}
   if(!c||c.worldEpoch!==worldEpoch||c.alive!==true){retired=true;return false;}
@@ -17,23 +17,25 @@ export function createMobileCombatInput({worldEpoch,readContext,holdMs=350,maxHo
   if(retired||busy||!e||typeof e.type!=='string')return result(false);
   busy=true;try{
    const lifecycle=['blur','hidden','orientationchange','pointercancelall','contextlost','overlay-open','worldchange','death','pagehide'];
-   if(lifecycle.includes(e.type)){const active=mode==='combat'||pointers.size>0;if(['worldchange','death'].includes(e.type))retired=true;mode='exploration';return result(active,active?clear(e.type):[]);}
-   if(!gate()){const active=mode==='combat'||pointers.size>0;mode='exploration';return result(active,active?clear('context-blocked'):[]);}
+   if(lifecycle.includes(e.type)){const active=mode==='combat'||pending!==null||pointers.size>0;if(['worldchange','death'].includes(e.type))retired=true;mode='exploration';return result(active,active?clear(e.type):[]);}
+   if(!gate()){const active=mode==='combat'||pending!==null||pointers.size>0;mode='exploration';return result(active,active?clear('context-blocked'):[]);}
    if(!int(e.at,clock,Number.MAX_SAFE_INTEGER))return result(false);
    clock=e.at;
-   if(e.type==='mode'){if(!['exploration','combat'].includes(e.mode)||mode===e.mode)return result(false);const events=clear('mode-change');mode=e.mode;return result(true,[...events,intent('mode-request',{mode})]);}
-   if(mode!=='combat')return result(false);
+   if(e.type==='mode'){if(!['exploration','combat'].includes(e.mode)||mode===e.mode&&!pending)return result(false);const events=clear('mode-change');mode='exploration';pending=e.mode;return result(true,[...events,intent('mode-request',{mode:pending})]);}
+   if(e.type==='mode-ack'){if(!pending||e.generation!==generation||e.mode!==pending)return result(false);let c;try{c=readContext();}catch{}if(c?.worldEpoch!==worldEpoch||c.combatMode!==(pending==='combat'))return result(false);mode=pending;pending=null;return result(true);}
+   if(mode!=='combat'||pending)return result(false);
+   if(readContext()?.combatMode!==true){mode='exploration';return result(true,clear('host-mode-lost'));}
    if(!int(e.id,0,Number.MAX_SAFE_INTEGER))return result(false);
    if(e.type==='pointerdown'){
     if(e.existingOwner!==false||!actions.has(e.zone)||pointers.has(e.id)||[...pointers.values()].some(p=>p.zone===e.zone)||pointers.size>=8)return result(false);
     if(e.zone==='ability'&&(typeof e.abilityId!=='string'||!/^[a-z][a-z0-9_-]{0,31}:[a-z0-9][a-z0-9._-]{0,63}$/.test(e.abilityId)))return result(false);
     let direction=null;if(e.zone==='dodge'){if(!Array.isArray(e.direction)||e.direction.length!==2||e.direction.some(x=>!Number.isFinite(x)||Math.abs(x)>1)||Math.abs(Math.hypot(...e.direction)-1)>.001)return result(false);direction=Object.freeze([...e.direction]);}
-    const p={zone:e.zone,started:clock,token:generation,abilityId:e.abilityId};pointers.set(e.id,p);
+    const p={zone:e.zone,started:clock,token:++capture,abilityId:e.abilityId};pointers.set(e.id,p);
     const kinds={block:'block-start',parry:'parry-request',dodge:'dodge-request',target:'target-toggle','next-target':'target-next','previous-target':'target-previous',ability:'ability-start'};
     return result(true,kinds[e.zone]?[intent(kinds[e.zone],{pointerId:e.id,...(direction?{direction}:{}),...(e.zone==='ability'?{abilityId:e.abilityId}:{})})]:[]);
    }
    if(!['pointerup','pointercancel','lostpointercapture'].includes(e.type))return result(false);
-   const p=pointers.get(e.id);if(!p||e.generation!==p.token)return result(false);
+   const p=pointers.get(e.id);if(!p||e.captureToken!==p.token)return result(false);
    pointers.delete(e.id);
    if(e.type!=='pointerup')return result(true,[intent('cancel-pointer',{pointerId:e.id,zone:p.zone})]);
    const held=clock-p.started;

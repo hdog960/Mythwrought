@@ -28,7 +28,7 @@ export function createAbilityExecutor({registry,identity,policies,readContext,re
  function emit(){
   const a=active;if(!a||!context()||!unlocked(a.d)){active=null;return out(false,'execution-denied');}
   const renewed=aim(a.d,a.aim);if(!renewed){active=null;return out(false,'aim-invalidated');}
-  const pulse=Object.freeze({...scope,actionId:a.actionId,definitionId:a.d.id,ordinal:a.count+1,at:clock,delivery:a.d.delivery,aim:renewed,chargeFraction:a.fraction});
+  const pulse=Object.freeze({...scope,actionId:a.actionId,definitionId:a.d.id,ordinal:a.count+1,final:a.count+1===a.p.pulses,at:clock,delivery:a.d.delivery,aim:renewed,chargeFraction:a.fraction});
   if(authorizePulse(pulse)!==true){active=null;return out(false,'pulse-denied');}
   a.count++;if(a.count>=a.p.pulses)active=null;else a.next+=a.p.pulseMs;
   return out(true,'execution-proposed',[Object.freeze({type:'ability-execution-proposal',...pulse})]);

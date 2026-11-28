@@ -68,5 +68,7 @@ export function createActionController({makeScheduler,makeLedger,resourceOptions
   const charged=debit(d.cost);if(!charged.ok){scheduler.abortForLifecycle();return result(false,charged.reason);}
   return result(true,'admitted',started.events);
  });}
- return Object.freeze({state,request,requestAbility,advance,guardCharge,releaseBlock:id=>exclusive(()=>{const g=gate();if(g)return result(false,g);const x=scheduler.releaseBlock(id);return result(x.ok,x.reason,x.events);}),cancel:()=>exclusive(()=>{const x=scheduler.abortForLifecycle();return result(x.ok,x.reason,x.events);})});
+ function finishAbility(id,recoveryMs){return exclusive(()=>{const g=gate();if(g)return result(false,g);const v=scheduler.finishCast(id,recoveryMs);return result(v.ok,v.reason,v.events);});}
+ function reactToPoise(durationMs){return exclusive(()=>{const g=gate();if(g)return result(false,g);const s=scheduler.snapshot();if(['stagger','incapacitated','dead'].includes(s.state))return result(false,'already-interrupted');const v=scheduler.interrupt('stagger',durationMs);return result(v.ok,v.reason,v.events);});}
+ return Object.freeze({state,request,requestAbility,finishAbility,reactToPoise,advance,guardCharge,releaseBlock:id=>exclusive(()=>{const g=gate();if(g)return result(false,g);const x=scheduler.releaseBlock(id);return result(x.ok,x.reason,x.events);}),cancel:()=>exclusive(()=>{const x=scheduler.abortForLifecycle();return result(x.ok,x.reason,x.events);})});
 }
