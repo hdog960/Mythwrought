@@ -11,8 +11,9 @@ export function createProjectileTargetFrame({identity,fromMs,targets,complete}){
   if(t.id===scope.sourceId||!t.alive||t.friendly||!t.attackable)continue;
   if(!t.resident||Math.hypot(t.to[0]-t.from[0],t.to[1]-t.from[1],t.to[2]-t.from[2])>2)throw Error('unresolved target');
   const copy=Object.freeze({...t,from:Object.freeze([...t.from]),to:Object.freeze([...t.to])});
+  const low=t.from.map((x,i)=>Math.min(x,t.to[i])-t.radius-1e-8),high=t.from.map((x,i)=>Math.max(x,t.to[i])+t.radius+1e-8),entry={copy,low,high};
   const lo=t.from.map((x,i)=>Math.floor((Math.min(x,t.to[i])-t.radius-1e-8)/cell)),hi=t.from.map((x,i)=>Math.floor((Math.max(x,t.to[i])+t.radius+1e-8)/cell));
-  for(let x=lo[0];x<=hi[0];x++)for(let y=lo[1];y<=hi[1];y++)for(let z=lo[2];z<=hi[2];z++){if(++entries>3456)throw Error('grid capacity');const k=key(x,y,z);if(!grid.has(k))grid.set(k,[]);grid.get(k).push(copy);}
+  for(let x=lo[0];x<=hi[0];x++)for(let y=lo[1];y<=hi[1];y++)for(let z=lo[2];z<=hi[2];z++){if(++entries>3456)throw Error('grid capacity');const k=key(x,y,z);if(!grid.has(k))grid.set(k,[]);grid.get(k).push(entry);}
  }
  const frame=Object.freeze({fromMs,scope,stats:()=>Object.freeze({validated:targets.length,entries,queries,candidates})});
  targetFrames.set(frame,(q,worldFromMs)=>{
@@ -20,8 +21,8 @@ export function createProjectileTargetFrame({identity,fromMs,targets,complete}){
   const lo=q.from.map((x,i)=>Math.floor((Math.min(x,q.to[i])-q.radius-1e-8)/cell)),hi=q.from.map((x,i)=>Math.floor((Math.max(x,q.to[i])+q.radius+1e-8)/cell));
   const cells=(hi[0]-lo[0]+1)*(hi[1]-lo[1]+1)*(hi[2]-lo[2]+1);
   if(cells>64)throw Error('query capacity');
-  const found=new Map();queries++;
-  for(let x=lo[0];x<=hi[0];x++)for(let y=lo[1];y<=hi[1];y++)for(let z=lo[2];z<=hi[2];z++)for(const t of grid.get(key(x,y,z))??[])found.set(t.id,t);
+  const found=new Map();queries++;const low=q.from.map((x,i)=>Math.min(x,q.to[i])-q.radius-1e-8),high=q.from.map((x,i)=>Math.max(x,q.to[i])+q.radius+1e-8);
+  for(let x=lo[0];x<=hi[0];x++)for(let y=lo[1];y<=hi[1];y++)for(let z=lo[2];z<=hi[2];z++)for(const e of grid.get(key(x,y,z))??[])if(e.low[0]<=high[0]&&e.high[0]>=low[0]&&e.low[1]<=high[1]&&e.high[1]>=low[1]&&e.low[2]<=high[2]&&e.high[2]>=low[2])found.set(e.copy.id,e.copy);
   candidates+=found.size;return [...found.values()];
  });
  return frame;
