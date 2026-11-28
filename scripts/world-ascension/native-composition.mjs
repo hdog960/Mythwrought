@@ -5,6 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { openCompositionReader, openCompositionSurfaces } from './composition-reader.mjs';
 
 const pins = {
   'release-main': 'aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7',
@@ -43,22 +44,9 @@ const [sands, frost, frostProfile, ponds, wilds, wildsProfile, peaks, decks, sta
 const seed = 179, { BLOCK } = V, { FourRegionWorld, fourRegionProfile } = profile;
 const current = new FourRegionWorld(seed, fourRegionProfile(seed, VEILREACH_GENERATOR));
 const initialWorld = JSON.stringify(current.save());
-const RestoredDesert = sands.createRestoredDesertResearchWorld(FourRegionWorld, V.terrainHeight);
-const desert = new RestoredDesert(seed, current.generationProfile);
-function historicalSurface(module) {
-  return new module.FourRegionWorld(seed, module.fourRegionProfile(seed, module.M8_MOUNTAIN_GENERATOR));
-}
-const snow = new frost.FrostboundSixRegionsCandidate(seed), pond = ponds.surveyMirrorfrostPond(snow, 142, 322);
-assert.equal(pond?.ice.length, 57);
-const frozen = ponds.openMirrorfrostPondWitness(snow, pond);
-const enchanted = new wilds.WildsFamilyResearchWorld(seed);
-const mountain = new peaks.ShatteredPeaksStrataWorld(seed);
-const sources = {
-  desert: { candidate: desert, original: current },
-  snow: { candidate: frozen, original: historicalSurface(frostProfile) },
-  enchanted: { candidate: enchanted, original: historicalSurface(wildsProfile) },
-  mountain: { candidate: mountain, original: { get: (...point) => mountain.originalNatural(...point) } }
-};
+const { pond, frozen, surfaceSources } = openCompositionSurfaces(current, V.terrainHeight,
+  { sands, frost, frostProfile, ponds, wilds, wildsProfile, peaks });
+const { desert: { candidate: desert }, enchanted: { candidate: enchanted }, mountain: { candidate: mountain } } = surfaceSources;
 
 const extraOwners = [];
 for (let cx = -41; cx <= -39; cx++) for (let cz = -136; cz <= -134; cz++) extraOwners.push([cx, cz, -5].join(','));
@@ -81,42 +69,12 @@ for (const [key, expected] of capture.halo) {
 const caveBelowSurface = [...cuts].filter(key => Number(key.split(',')[1]) < 0);
 assert.equal(caveBelowSurface.length, cuts.size);
 
-const conflicts = new Set();
-function read(x, y, z) {
-  const value = current.get(x, y, z), key = V.worldKey(x, y, z);
-  if (current.edits.has(key)) return value;
-  if (y < 0) return cuts.has(key) ? BLOCK.AIR : value;
-  if (y > H.LEGACY_GENERATION_MAX_Y && value !== BLOCK.AIR) return value;
-  if (current.environmentCaves.get(x, y, z) !== undefined) return value;
-  const source = sources[v6BiomeAt(x, z, seed)?.name];
-  if (!source) return value;
-  const candidate = source.candidate.get(x, y, z);
-  if (candidate === value) return value;
-  if (source.original.get(x, y, z) !== value) {
-    conflicts.add(key);
-    return value;
-  }
-  return candidate;
-}
-const pondCells = new Set(pond.water.map(point => V.worldKey(...point)));
-const fixture = Object.create(current, {
-  get: { value: read },
-  naturalAndLandmarkBlock: { value: read },
-  upperNaturalOccupied: { value: key => current.upperNaturalOccupied(key) ||
-    enchanted.upperNaturalOccupied(key) || mountain.upperNaturalOccupied(key) },
-  upperNaturalRevision: { value: current.upperNaturalRevision },
-  environmentWaterState: { value(x, y, z) {
-    if (pondCells.has(V.worldKey(x, y, z)) && read(x, y, z) === 76) return frozen.environmentWaterState(x, y, z);
-    return current.environmentWaterState(x, y, z);
-  } },
-  environmentOasisWaterEntries: { value(cx, cz) {
-    return [...current.environmentOasisWaterEntries(cx, cz), ...frozen.environmentOasisWaterEntries(cx, cz)
-      .filter(([key]) => pondCells.has(key) && read(...key.split(',').map(Number)) === 76)];
-  } },
-  set: { value() { throw Error('World Ascension source fixture is read-only'); } },
-  save: { value() { throw Error('World Ascension source fixture has no durable world profile'); } }
+const { fixture, conflicts } = openCompositionReader({
+  current, surfaceSources, pond, frozen, cuts, v6BiomeAt, worldKey: V.worldKey,
+  legacyCeiling: H.LEGACY_GENERATION_MAX_Y, air: BLOCK.AIR
 });
 const world = new Pack2LiveWorld(fixture), released = new Pack2LiveWorld(current);
+assert.strictEqual(fixture.upperSourceProfile, current.upperSourceProfile);
 let desertCap;
 for (let z = -24; z <= 24 && !desertCap; z++) for (let x = 480; x <= 544 && !desertCap; x++) {
   const column = current._columnPlan(x, z), y = Math.max(...column.keys());
@@ -184,3 +142,9 @@ console.log(JSON.stringify({ seed, pins, witnesses, pondBytes: water.byteLength,
   caveJoinedStations: caveProof.joinedReplay.stations,
   windows, disposableEditPrecedence: true,
   historicalSourceConflicts: conflicts.size, releasedSaveUnchanged: true }, null, 2));
+
+if (process.argv.includes('--webgl')) {
+  const { qualifyCompositionWebGL } = await import('./webgl-composition.mjs');
+  const report = await qualifyCompositionWebGL({ root, pins, seed, witnesses, cuts, world, V });
+  console.log(JSON.stringify(report, null, 2));
+}
