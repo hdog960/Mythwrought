@@ -1,4 +1,4 @@
-import {farSkyMesh,VEILREACH_DISTANCE_MAX_BYTES,VEILREACH_DISTANCE_OFFSET} from '../src/veilreach/distance.mjs';
+import {farSkyMesh,veilreachDrawRanges,VEILREACH_DISTANCE_MAX_BYTES,VEILREACH_DISTANCE_OFFSET} from '../src/veilreach/distance.mjs';
 import {VEILREACH_GRASS_ID} from '../src/veilreach/flora.mjs';
 import assert from 'node:assert/strict';
 import test from 'node:test';
@@ -155,4 +155,30 @@ test('distance mesh leaves detailed chunk interiors clear and stays within its b
     }
   }
   assert.ok(materialTags.has(1)&&materialTags.has(19)&&materialTags.has(3));
+});
+
+test('a distant forest contains trunks at resolved source anchors before physical streaming',()=>{
+  const terrain=createSkylands(180);
+  const mesh=farSkyMesh(terrain,16,16);
+  const woodXZ=new Set();
+  let canopyVertices=0;
+  for(let i=0;i<mesh.length;i+=9){
+    const tag=mesh[i+8]-VEILREACH_DISTANCE_OFFSET;
+    if(tag===4)woodXZ.add(mesh[i]+','+mesh[i+2]);
+    if(tag===18)canopyVertices++;
+  }
+  const source=terrain.vegetationCells(3,2).filter(({cell,id})=>
+    id===BLOCK.WOOD&&terrain.get(...cell)===id);
+  assert.ok(source.length>0);
+  assert.ok(source.every(({cell:[x,,z]})=>woodXZ.has(x+','+z)));
+  assert.ok(canopyVertices>500);
+});
+
+test('visual ownership changes only change draw ranges, retaining the staged section data',()=>{
+  const owners=[{key:'a',first:0,count:6},{key:'b',first:6,count:18},{key:'c',first:24,count:6}];
+  assert.deepEqual(veilreachDrawRanges(owners,new Set()),[{first:0,count:30}]);
+  assert.deepEqual(veilreachDrawRanges(owners,new Set(['b'])),[{first:0,count:6},{first:24,count:6}]);
+  assert.deepEqual(veilreachDrawRanges(owners,new Set(['a','b'])),[{first:24,count:6}]);
+  assert.deepEqual(veilreachDrawRanges(owners,new Set(['a','b','c'])),[]);
+  assert.deepEqual(veilreachDrawRanges(owners,new Set()),[{first:0,count:30}]);
 });

@@ -276,7 +276,19 @@ export function createSkylands(seed){
       return mask;
     });
   }
-  return Object.freeze({region,nearby,shapeAt:shape,rockMaterial:geology,sectionMask,supportedCells,
+  // Read-only access for the visual mesher. These are the same resolved
+  // columns and flora used by get(), including conflicts between islands.
+  function rockSpan(x,z){
+    const columns=at(x,z);
+    if(!columns.length)return null;
+    return {minY:Math.min(...columns.map(c=>c.bottom)),maxY:columns[0].top};
+  }
+  function vegetationCells(cx,cz){
+    return [...vegetation(cx,cz)].map(([key,value])=>({
+      cell:key.split(',').map(Number),id:value.id,owner:value.owner
+    }));
+  }
+  return Object.freeze({region,nearby,shapeAt:shape,rockMaterial:geology,rock,rockSpan,vegetationCells,sectionMask,supportedCells,
     topAt(x,z){return at(x,z)[0]?.top??null;},
     get(x,y,z){
       if(y<naturalMinY||y>naturalMaxY)return air;
