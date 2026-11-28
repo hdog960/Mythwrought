@@ -36,15 +36,16 @@ export function createSapSource({x,y,z,treeId,stock,rate=1,target=8,snapshot=nul
     remaining=snapshot.remaining;
   }
   function save(){if(busy)throw new Error('Active sap source');return {version:1,signature,remaining};}
-  function collect(engine,isTreeAvailable){
+  function collect(engine,isTreeAvailable,limit=8){
     if(busy)throw new Error('Reentrant sap source');
     if(typeof engine?.getCell!=='function'||typeof engine?.insert!=='function'||typeof isTreeAvailable!=='function')throw new TypeError('Explicit source host required');
+    if(!int(limit,0,8))throw new RangeError('Invalid sap collection limit');
     busy=true;
     try{
-      if(!remaining||isTreeAvailable(treeId,x,y,z)!==true)return 0;
+      if(!limit||!remaining||isTreeAvailable(treeId,x,y,z)!==true)return 0;
       const c=engine.getCell(x,y,z);
       if(c&&(!sap(c)||c.x!==x||c.y!==y||c.z!==z))return 0;
-      const n=Math.min(rate,remaining,Math.max(0,target-(c?.units??0)));
+      const n=Math.min(limit,rate,remaining,Math.max(0,target-(c?.units??0)));
       if(n>0&&engine.insert(x,y,z,'amber-sap',n)===true){remaining-=n;return n;}
       return 0;
     }finally{busy=false;}
