@@ -51,6 +51,7 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
  get terraceSourceVersion(){return SP2_SOURCE_VERSION;}
  _shapeSummit(rawTop){return rawTop;}
  _surfaceMaterial(p){return p.topY>=140?M.snow:p.topY>=80?M.scree:M['alpine-grass'];}
+ _rockMaterial(y){return Math.floor(y/9)%5===0?M.gneiss:M.stone;}
  get generationProfile(){return this.#profile;}
  get hasNaturalNonCubeShapes(){return true;}
  get cachedTerraceTiles(){return this.#tiles.size;}
@@ -97,7 +98,7 @@ export class ShatteredPeaksTerraceWorld extends VoxelWorld{
  #fill(p,y,x,z){
   if(y===p.topY)return this._surfaceMaterial(p,x,z);
   if(y>=p.topY-2)return p.topY>=80?M.stone:M.dirt;
-  return Math.floor(y/9)%5===0?M.gneiss:M.stone;
+  return this._rockMaterial(y,x,z);
  }
  #occupied(key){
   const match=/^sky:(-?\d+),(-?\d+),(\d+)$/.exec(key);
