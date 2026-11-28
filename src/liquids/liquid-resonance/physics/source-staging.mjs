@@ -34,6 +34,7 @@ export function stageResonanceSourceStep({createLiquidEngine,engineOptions,sourc
   }
   const next=engine.save(),stock=scheduler.save();
   return freeze({expectedRevision,stateRevision:stateRevision+1,
-    resident:freeze({...next,cells:freeze(next.cells),pending:freeze(next.pending.map(p=>freeze(p)))}),
+    resident:freeze({...next,cells:freeze(next.cells),pending:freeze(next.pending.map(p=>freeze(p))),
+      ...(Object.hasOwn(next,'capacityBlocked')?{capacityBlocked:freeze(next.capacityBlocked.map(p=>freeze(p)))}:{})}),
     sourceSnapshot:freeze({...stock,stores:freeze(stock.stores)}),receipt});
 }
