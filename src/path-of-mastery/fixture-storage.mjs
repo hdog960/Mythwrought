@@ -3,11 +3,16 @@ const id = x => typeof x === 'string' && /^[a-zA-Z0-9:_./-]{1,96}$/.test(x);
 const sequence = x => Number.isSafeInteger(x) && x > 0;
 const MAX_BYTES = 65536, MAX_EVENTS = 1000000;
 const validBytes = x => typeof x === 'string' && x.length <= MAX_BYTES;
-export async function openFixtureStorage({indexedDB, scope, producer, verify, readContext}={}) {
-  if (!indexedDB || !id(scope) || !/^fixture:.+$/.test(scope) || !id(producer) ||
+export function classifyFixtureClaim(existing,producer){
+  if(existing===undefined)return null;
+  if(!existing||!id(existing.producer)||!sequence(existing.sequence)||existing.sequence>MAX_EVENTS)throw Error('Corrupt shared claim');
+  return existing.producer===producer?{ok:false,reason:'duplicate',sequence:existing.sequence}:{ok:false,reason:'claimed-by-other-source'};
+}
+export async function openFixtureStorage({indexedDB, scope, producer, verify, readContext, sharedClaims=false}={}) {
+  if (typeof sharedClaims!=='boolean' || !indexedDB || !id(scope) || !/^fixture:.+$/.test(scope) || !id(producer) ||
       typeof verify !== 'function' || typeof readContext !== 'function') throw Error('Invalid fixture host');
   const db = await new Promise((resolve,reject)=>{
-    const req=indexedDB.open('mythwrought-pm4-fixture:'+scope,1); let blocked=false;
+    const req=indexedDB.open((sharedClaims?'mythwrought-pm4-shared-fixture:':'mythwrought-pm4-fixture:')+scope,1); let blocked=false;
     req.onupgradeneeded=()=>req.result.createObjectStore('records');
     req.onerror=()=>reject(req.error);req.onblocked=()=>{blocked=true;reject(Error('Blocked database'));};
     req.onsuccess=()=>{if(blocked)req.result.close();else resolve(req.result);};
@@ -55,15 +60,17 @@ export async function openFixtureStorage({indexedDB, scope, producer, verify, re
     record(evidence){return transact('readwrite',({get,put,done})=>{
       if(!context()){done({ok:false,reason:'context'});return;}
       const semantic=verify(evidence);if(!id(semantic)){done({ok:false,reason:'unverified'});return;}
-      get(prefix+'semantic|'+semantic,existing=>{
+      const admit=()=>get(prefix+'semantic|'+semantic,existing=>{
         if(existing!==undefined){if(!sequence(existing))throw Error('Corrupt semantic index');done({ok:false,reason:'duplicate',sequence:existing});return;}
         get(prefix+'cursor',cursor=>{
           const last=cursor??0;if(!Number.isSafeInteger(last)||last<0||last>MAX_EVENTS)throw Error('Corrupt producer cursor');
           if(last===MAX_EVENTS||!context()){done({ok:false,reason:'capacity-or-context'});return;}
           const seq=last+1;put(prefix+'cursor',seq);put(prefix+'semantic|'+semantic,seq);put(prefix+'event|'+seq,semantic);
+          if(sharedClaims)put('claim|'+semantic,{producer,sequence:seq});
           done({ok:true,sequence:seq});
         });
       });
+      if(sharedClaims)get('claim|'+semantic,existing=>{const result=classifyFixtureClaim(existing,producer);if(result)done(result);else admit();});else admit();
     });},
     // Retained outbox; recovery can replay against ledger's durable cursor.
     event(seq){if(!sequence(seq)||seq>MAX_EVENTS)return Promise.reject(Error('Invalid sequence'));
@@ -71,7 +78,7 @@ export async function openFixtureStorage({indexedDB, scope, producer, verify, re
         if(semantic!==undefined&&!id(semantic))throw Error('Corrupt event');
         if(semantic===undefined){get(prefix+'cursor',cursor=>{if(cursor!==undefined&&(!Number.isSafeInteger(cursor)||cursor<0||cursor>MAX_EVENTS||seq<=cursor))throw Error('Missing committed event');done(null);});return;}
         get(prefix+'semantic|'+semantic,reverse=>{if(reverse!==seq)throw Error('Corrupt reverse index');
-          get(prefix+'cursor',cursor=>{if(!Number.isSafeInteger(cursor)||cursor<seq||cursor>MAX_EVENTS)throw Error('Corrupt producer cursor');done(Object.freeze({producer,sequence:seq,semantic}));});});
+          get(prefix+'cursor',cursor=>{if(!Number.isSafeInteger(cursor)||cursor<seq||cursor>MAX_EVENTS)throw Error('Corrupt producer cursor');const finish=()=>done(Object.freeze({producer,sequence:seq,semantic}));if(sharedClaims)get('claim|'+semantic,claim=>{if(claim?.producer!==producer||claim.sequence!==seq)throw Error('Corrupt shared claim');finish();});else finish();});});
       }));},
   });
 }
