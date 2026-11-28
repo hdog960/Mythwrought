@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditRecordingProvenance,MOVEMENT_PROVENANCE_V1} from '../src/movement12/recording-provenance.mjs';
+const sha='a'.repeat(40),seed='fixed-seed',scenario='shaped-step';
+const make=()=>[30,60,120].map(hz=>({hz,duration:1,samples:Array.from({length:hz+1},(_,i)=>({time:i/hz,position:{x:i/hz,feet:0,z:0}})),events:Array.from({length:hz},()=>({})),provenance:{contract:MOVEMENT_PROVENANCE_V1,sourceSha:sha,worldSeed:seed,mode:'survival',scenario,synthetic:false,productionEnabled:false,frameCount:hz}}));
+const audit=r=>auditRecordingProvenance({recordings:r,expectedSourceSha:sha,expectedWorldSeed:seed,expectedScenario:scenario});
+test('complete source-pinned recordings accepted as non-live evidence',()=>{const a=audit(make());assert.equal(a.accepted,true);assert.equal(a.live,false);assert.deepEqual(a.cadences.map(c=>c.hz),[30,60,120])});
+test('source mismatch rejected',()=>{const r=make();r[1].provenance.sourceSha='b'.repeat(40);assert.throws(()=>audit(r))});
+test('seed mismatch rejected',()=>{const r=make();r[1].provenance.worldSeed='other';assert.throws(()=>audit(r))});
+test('scenario mismatch rejected',()=>{const r=make();r[1].provenance.scenario='ledge';assert.throws(()=>audit(r))});
+test('synthetic recording rejected',()=>{const r=make();r[0].provenance.synthetic=true;assert.throws(()=>audit(r))});
+test('production registration rejected',()=>{const r=make();r[0].provenance.productionEnabled=true;assert.throws(()=>audit(r))});
+test('duplicate cadence rejected',()=>{const r=make();r[2].hz=60;assert.throws(()=>audit(r))});
+test('missing frame rejected',()=>{const r=make();r[0].samples.pop();assert.throws(()=>audit(r))});
+test('nonfinite position rejected',()=>{const r=make();r[0].samples[1].position.x=Infinity;assert.throws(()=>audit(r))});
+test('timestamp manipulation rejected',()=>{const r=make();r[0].samples[1].time=.9;assert.throws(()=>audit(r))});
+test('duration mismatch rejected',()=>{const r=make();r[0].duration=2;assert.throws(()=>audit(r))});
+test('invalid source pin rejected',()=>assert.throws(()=>auditRecordingProvenance({recordings:make(),expectedSourceSha:'main',expectedWorldSeed:seed,expectedScenario:scenario})));

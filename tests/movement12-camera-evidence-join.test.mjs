@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditRecordedCameraFollow} from '../src/movement12/camera-evidence-join.mjs';
+const trace={source:'src/physics.mjs:stepPlayer',samples:[0,1,2,3].map(i=>({time:i/60,position:{x:i/60,feet:1,z:0}}))};
+const cameras=trace.samples.map(s=>({time:s.time,x:s.position.x,y:2.6,z:0}));
+const opts={eyeOffset:{x:0,y:1.6,z:0},maxLag:.2,maxJerk:250};
+test('aligned independent camera telemetry accepted',()=>assert.equal(auditRecordedCameraFollow(trace,cameras,opts).safe,true));
+test('no synthetic camera evidence accepted',()=>assert.equal(auditRecordedCameraFollow(trace,[],opts).reason,'missing-camera-evidence'));
+test('requires authentic stepPlayer provenance',()=>assert.equal(auditRecordedCameraFollow({...trace,source:'synthetic'},cameras,opts).reason,'missing-engine-evidence'));
+test('rejects mismatched timestamps',()=>{const frames=cameras.map(c=>({...c}));frames[2].time+=.01;assert.deepEqual(auditRecordedCameraFollow(trace,frames,opts),{safe:false,reason:'unaligned-camera-time',index:2});});
+test('rejects camera lag',()=>{const frames=cameras.map(c=>({...c}));frames[2].x+=1;assert.equal(auditRecordedCameraFollow(trace,frames,opts).reason,'camera-lag');});
+test('rejects invalid camera coordinate',()=>{const frames=cameras.map(c=>({...c}));frames[1].x=NaN;assert.equal(auditRecordedCameraFollow(trace,frames,opts).reason,'invalid-camera-evidence');});
+test('rejects invalid eye offset',()=>assert.equal(auditRecordedCameraFollow(trace,cameras,{eyeOffset:{x:0,y:NaN,z:0}}).reason,'invalid-eye-offset'));
+test('rejects truncated engine evidence',()=>assert.equal(auditRecordedCameraFollow({...trace,samples:trace.samples.slice(0,2)},cameras,opts).reason,'missing-engine-evidence'));

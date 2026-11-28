@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditBoundedTrace,TRACE_BUDGET_CONTRACT} from '../src/movement12/trace-budget.mjs';
+const p=x=>({x,feet:0,z:0});
+const run=(positions,collides=()=>false,opts={})=>auditBoundedTrace({positions,collides,...opts});
+test('versioned and explicitly not live',()=>{assert.equal(TRACE_BUDGET_CONTRACT,'movement12-trace-budget-v1');assert.equal(run([p(0),p(1)]).live,false)});
+test('exact budget passes',()=>assert.equal(run([p(0),p(.2)],undefined,{maxSamples:3}).samples,3));
+test('one less than budget fails without host calls',()=>{let calls=0;const r=run([p(0),p(.2)],()=>{calls++;return false},{maxSamples:2});assert.equal(r.reason,'budget-exceeded');assert.equal(calls,0)});
+test('shared vertex sampled once',()=>assert.equal(run([p(0),p(.1),p(.2)]).samples,3));
+test('embedded start fails',()=>assert.equal(run([p(0),p(.1)],()=>true).reason,'embedded-start'));
+test('wall crossing fails even if endpoint clear',()=>assert.equal(run([p(0),p(1)],(_,x)=>x>.45&&x<.55).reason,'collision'));
+test('invalid callback result fails closed',()=>assert.throws(()=>run([p(0),p(.1)],()=>0),TypeError));
+test('invalid coordinates rejected',()=>assert.throws(()=>run([p(0),p(NaN)]),TypeError));
+test('invalid sample budget rejected',()=>assert.throws(()=>run([p(0),p(1)],undefined,{maxSamples:0}),RangeError));
+test('zero distance still bounded',()=>assert.equal(run([p(0),p(0)],undefined,{maxSamples:2}).samples,2));
+test('segment index of collision is preserved',()=>assert.equal(run([p(0),p(.1),p(.2)],(_,x)=>x>.15).segment,1));

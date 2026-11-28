@@ -37,7 +37,7 @@ function resolveAxis(world,p,axis,delta){
   const x=axis==='x'?destination:p.x;
   const z=axis==='z'?destination:p.z;
   if(!collides(world,x,p.feet,z)){p[axis]=destination;return {blocked:false,stepped:false};}
-  if(p.onGround && p.vY<=0){
+  if(p.onGround && p.vY<=0 && collides(world,p.x,p.feet-.002,p.z)){
     // Authored stairs, paving, slabs and gravel have REAL partial-height
     // collision boxes. A fixed +1 voxel "step" can leave the ground probe
     // above their surface, making the player jump over otherwise walkable art.
@@ -138,6 +138,9 @@ export function stepPlayer(world,p,input,dt){
       out.hitWall ||= collision.blocked;
       if(collision.blocked)p[velocityAxis]=0;
     }
+    // Horizontal motion can leave support during this very substep. Clear
+    // stale grounded state before gravity, without consuming coyote time twice.
+    if(p.onGround && !collides(world,p.x,p.feet-.002,p.z))p.onGround=false;
     // Don't repeatedly accelerate downward when standing on a stable surface.
     if(climbing){
       p.vY=front*2.0;
@@ -147,9 +150,6 @@ export function stepPlayer(world,p,input,dt){
     if(p.vY!==0){
       const vertical=resolveY(world,p,h);
       out.landed ||=vertical.landed;out.ceiling ||=vertical.ceiling;
-    }
-    if(p.onGround && !collides(world,p.x,p.feet-GROUND_PROBE,p.z)){
-      p.onGround=false;
     }
   }
   return out;

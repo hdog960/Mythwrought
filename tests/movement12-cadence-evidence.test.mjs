@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditCadenceEvidence,CADENCE_EVIDENCE_CONTRACT} from '../src/movement12/cadence-evidence.mjs';
+const run=(hz,fn=t=>({x:t,feet:0,z:0}),duration=1)=>({hz,duration,samples:Array.from({length:hz*duration+1},(_,i)=>({time:i/hz,position:fn(i/hz)})),events:Array(hz*duration).fill({})});
+const trio=(fn)=>[30,60,120].map(h=>run(h,fn));
+test('versioned and source only',()=>{assert.equal(CADENCE_EVIDENCE_CONTRACT,'movement12-cadence-evidence-v1');assert.equal(auditCadenceEvidence({recordings:trio(t=>({x:t,feet:0,z:0}))}).live,false)});
+test('equal linear trajectories pass',()=>assert.equal(auditCadenceEvidence({recordings:trio(t=>({x:t,feet:0,z:0}))}).safe,true));
+test('different intermediate motion fails',()=>{const r=trio(t=>({x:t,feet:0,z:0}));r[1]=run(60,t=>({x:t+.2*Math.sin(Math.PI*t),feet:0,z:0}));assert.equal(auditCadenceEvidence({recordings:r}).safe,false)});
+test('missing cadence rejected',()=>assert.throws(()=>auditCadenceEvidence({recordings:[run(30),run(60),run(60)]})));
+test('incomplete frames rejected',()=>{const r=trio();r[0].samples.pop();assert.throws(()=>auditCadenceEvidence({recordings:r}))});
+test('nonfinite samples rejected',()=>{const r=trio();r[0].samples[3].position.x=NaN;assert.throws(()=>auditCadenceEvidence({recordings:r}))});
+test('incorrect timestamps rejected',()=>{const r=trio();r[0].samples[4].time=.9;assert.throws(()=>auditCadenceEvidence({recordings:r}))});
+test('mismatched durations rejected',()=>assert.throws(()=>auditCadenceEvidence({recordings:[run(30,undefined,1),run(60,undefined,2),run(120,undefined,1)]})));
+test('velocity divergence separately detected',()=>{const r=trio(t=>({x:t,feet:0,z:0}));r[2]=run(120,t=>({x:t+.01*Math.sin(20*Math.PI*t),feet:0,z:0}));const a=auditCadenceEvidence({recordings:r,positionTolerance:.1,velocityTolerance:.1});assert.equal(a.safe,false);assert.ok(a.worstVelocity>.1)});

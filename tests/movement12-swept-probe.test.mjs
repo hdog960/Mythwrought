@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditMotionSegment,auditMovementTrace,MOVEMENT12_CONTRACT} from '../src/movement12/swept-probe.mjs';
+const p=(x,feet=1,z=.5)=>({x,feet,z});
+const wall=(_,x,feet)=>x>=2&&x<3&&feet<4;
+test('contract is explicitly source-only',()=>assert.equal(MOVEMENT12_CONTRACT,'movement12-swept-probe-v1'));
+test('clear bounded traversal',()=>{const r=auditMotionSegment({world:{},from:p(.5),to:p(1.5),collides:()=>false});assert.equal(r.safe,true);assert.equal(r.live,false)});
+test('detects a thin obstruction between clear endpoints',()=>{const r=auditMotionSegment({from:p(1.5),to:p(3.5),collides:(_,x)=>x>2&&x<2.15,maxSegment:.025});assert.equal(r.reason,'collision')});
+test('rejects embedded start',()=>assert.equal(auditMotionSegment({from:p(2.5),to:p(1),collides:wall}).reason,'embedded-start'));
+test('clear vertical motion when host reports clearance',()=>assert.equal(auditMotionSegment({from:p(.5,1),to:p(.5,2.5),collides:()=>false}).safe,true));
+test('detects head-height ceiling through host reader',()=>assert.equal(auditMotionSegment({from:p(.5,1),to:p(.5,2.5),collides:(_,x,y)=>y>1.8}).safe,false));
+test('budget fails closed',()=>assert.equal(auditMotionSegment({from:p(0),to:p(10),collides:()=>false,maxSamples:2}).reason,'budget-exceeded'));
+test('nonboolean collision reader rejected',()=>assert.throws(()=>auditMotionSegment({from:p(0),to:p(1),collides:()=>0}),TypeError));
+test('invalid coordinates and budget rejected',()=>{assert.throws(()=>auditMotionSegment({from:p(NaN),to:p(1),collides:()=>false}));assert.throws(()=>auditMotionSegment({from:p(0),to:p(1),collides:()=>false,maxSegment:1}))});
+test('trace detects intermediate wall and preserves segment index',()=>{const r=auditMovementTrace({positions:[p(.5),p(1.5),p(3.5)],collides:wall});assert.equal(r.safe,false);assert.equal(r.segment,1)});
+test('trace accepts clear movement',()=>assert.equal(auditMovementTrace({positions:[p(0),p(1),p(2)],collides:()=>false}).safe,true));
+test('trace rejects empty and huge arrays',()=>assert.throws(()=>auditMovementTrace({positions:[],collides:()=>false})));

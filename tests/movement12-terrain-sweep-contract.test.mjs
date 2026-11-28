@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateTerrainSweepEvidence as check} from '../src/movement12/terrain-sweep-contract.mjs';
+const p=(x,y,z)=>({x,y,z});
+const shape={min:p(1,0,1),max:p(2,2,2)};
+const base=()=>({worldRevision:'seed179:edit42',bounds:{min:p(-5,-5,-5),max:p(5,5,5)},primary:{worldRevision:'seed179:edit42',complete:true,start:p(0,0,0),end:p(1,0,0),shapes:[shape]},secondary:{worldRevision:'seed179:edit42',complete:true,start:p(1,0,0),end:p(1,0,2),shapes:[shape]}});
+test('valid two-stage snapshot contract',()=>assert.equal(check(base()).ok,true));
+test('missing secondary evidence fails closed',()=>{const b=base();delete b.secondary;assert.equal(check(b).reason,'secondary-unverified')});
+test('mixed world edits fail closed',()=>{const b=base();b.secondary.worldRevision='edit43';assert.equal(check(b).reason,'secondary-unverified')});
+test('incomplete shape enumeration fails closed',()=>{const b=base();b.secondary.complete=false;assert.equal(check(b).ok,false)});
+test('disconnected sweep segments fail closed',()=>{const b=base();b.secondary.start=p(2,0,0);assert.equal(check(b).reason,'disconnected-stages')});
+test('out-of-bounds sweep fails closed',()=>{const b=base();b.secondary.end=p(6,0,0);assert.equal(check(b).reason,'secondary-out-of-bounds')});
+test('invalid geometry fails closed',()=>{const b=base();b.primary.shapes=[{min:p(2,0,0),max:p(1,1,1)}];assert.equal(check(b).reason,'primary-invalid-shape')});
+test('shape budget fails closed',()=>{const b=base();b.maxShapes=0;assert.equal(check(b).ok,false)});
+test('nonfinite movement fails closed',()=>{const b=base();b.primary.end.x=NaN;assert.equal(check(b).reason,'primary-invalid-path')});

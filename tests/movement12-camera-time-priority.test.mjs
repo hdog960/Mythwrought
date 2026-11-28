@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {auditRecordedCameraFollow} from '../src/movement12/camera-evidence-join.mjs';
+const mk=(times,positions=times.map(t=>t))=>({source:'src/physics.mjs:stepPlayer',samples:times.map((time,i)=>({time,position:{x:positions[i],feet:1,z:0}}))});
+const cams=t=>t.samples.map(s=>({time:s.time,x:s.position.x,y:2.6,z:0}));
+const opts={eyeOffset:{x:0,y:1.6,z:0},maxLag:0.2,maxJerk:250};
+test('repeated timestamps rejected before camera-lag classification',()=>{const t=mk([0,1/60,1/60,3/60],[0,1/60,1/60,3/60]);const c=cams(t);c[2].x+=1;assert.equal(auditRecordedCameraFollow(t,c,opts).reason,'nonmonotonic-time')});
+test('decreasing timestamps rejected before camera-lag classification',()=>{const t=mk([0,1/60,0,3/60]);const c=cams(t);c[2].x+=1;assert.equal(auditRecordedCameraFollow(t,c,opts).reason,'nonmonotonic-time')});
+test('missing intervals rejected before camera-lag classification',()=>{const t=mk([0,1/60,0.5,0.516]);const c=cams(t);c[2].x+=1;assert.equal(auditRecordedCameraFollow(t,c,opts).reason,'missing-interval')});
+test('valid constant-speed 30 fps trace accepted',()=>{const t=mk([0,1/30,2/30,3/30]);assert.equal(auditRecordedCameraFollow(t,cams(t),opts).safe,true)});
+test('valid constant-speed 60 fps trace accepted',()=>{const t=mk([0,1/60,2/60,3/60]);assert.equal(auditRecordedCameraFollow(t,cams(t),opts).safe,true)});
+test('valid constant-speed 120 fps trace accepted',()=>{const t=mk([0,1/120,2/120,3/120]);assert.equal(auditRecordedCameraFollow(t,cams(t),opts).safe,true)});
+test('camera lag on valid timestamps still rejected',()=>{const t=mk([0,1/60,2/60,3/60]);const c=cams(t);c[2].x+=1;assert.equal(auditRecordedCameraFollow(t,c,opts).reason,'camera-lag')});
+test('timestamp misalignment still rejected',()=>{const t=mk([0,1/60,2/60,3/60]);const c=cams(t);c[2].time+=0.01;assert.equal(auditRecordedCameraFollow(t,c,opts).reason,'unaligned-camera-time')});

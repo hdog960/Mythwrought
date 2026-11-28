@@ -1,0 +1,3 @@
+# Camera evidence join (source-only)
+
+Requires a genuine `src/physics.mjs:stepPlayer` recording and separately captured camera positions with matching timestamps, in the same world coordinate system. No camera coordinates are invented or inferred. `eyeOffset` aligns feet with intended camera eye height. Rejects missing, nonfinite or misaligned evidence before applying the camera lag/acceleration auditor. Does not assert that a recording is a live iPhone camera capture; provenance labels are necessary but not independently sufficient proof. No production hookup, browser screenshots, offline/save tests or physical-device certification.
