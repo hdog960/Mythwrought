@@ -1,0 +1,4 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {catalog,validateItemCatalog} from '../src/age-of-artifice/rm/catalog.mjs';
+test('candidate catalog and fail-closed contract',()=>{assert.equal(validateItemCatalog(catalog).length,4);assert.equal(catalog.every(x=>x.acquisition.status==="pending-owner-mapping"),true);assert.throws(()=>validateItemCatalog([...catalog,catalog[0]]));assert.throws(()=>validateItemCatalog([{...catalog[0],tier:Infinity}]));assert.throws(()=>validateItemCatalog([{...catalog[0],id:"artifice:material:Bad"}]));assert.throws(()=>validateItemCatalog([{...catalog[0],icon:"assets/age-of-artifice/wa/a.svg"}]));assert.throws(()=>validateItemCatalog([{...catalog[0],tags:["same","same"]}]));assert.throws(()=>validateItemCatalog([{...catalog[0],stackMax:0}]));});
