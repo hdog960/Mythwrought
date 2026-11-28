@@ -1,0 +1,32 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {createCombatScheduler} from '../src/age-of-valor/scheduler.mjs';
+function cases(create,check){
+  const attack={kind:'light',windupMs:100,activeMs:50,recoveryMs:200};
+  const c=create();check(c.snapshot().state==='idle','initial idle');
+  check(c.begin(attack).ok,'attack accepted');check(!c.begin(attack).ok,'overlap denied');
+  check(c.advance(99).snapshot.state==='attack-windup','windup persists');
+  const first=c.advance(1);check(first.events.length===1&&first.events[0].at===100&&first.snapshot.state==='attack-active','exact active boundary');
+  check(!c.cancel(first.snapshot.actionId).ok,'active not voluntarily cancelled');
+  check(c.advance(50).snapshot.state==='attack-recovery','recovery boundary');
+  check(c.advance(200).snapshot.state==='idle','recovery finishes');
+  const a=create(),b=create();a.begin(attack);b.begin(attack);
+  const whole=a.advance(350).events, split=[...b.advance(100).events,...b.advance(50).events,...b.advance(200).events];
+  check(JSON.stringify(whole)===JSON.stringify(split),'frame partition invariant');
+  const block=c.begin({kind:'block'});check(block.ok&&c.advance(1000).snapshot.state==='blocking','held block');
+  check(!c.releaseBlock(block.snapshot.actionId+1).ok,'stale release rejected');
+  check(c.releaseBlock(block.snapshot.actionId).snapshot.state==='idle','correct release');
+  check(!c.begin({...attack,activeMs:NaN}).ok&&!c.begin({...attack,windupMs:0}).ok,'invalid timing rejected');
+  check(!c.advance(-1).ok&&!c.advance(Infinity).ok,'invalid delta rejected');
+  const heavy=c.begin({...attack,kind:'heavy'});check(heavy.ok&&c.cancel(heavy.snapshot.actionId).snapshot.state==='idle','windup cancellation');
+  check(c.begin({kind:'dodge',durationMs:60}).ok,'dodge starts');check(c.advance(60).snapshot.state==='idle','dodge finishes');
+  check(c.begin({kind:'parry',durationMs:20}).ok&&c.advance(20).snapshot.state==='idle','parry timing');
+  check(c.begin({kind:'cast',durationMs:100}).ok,'cast starts');
+  check(c.interrupt('stagger',30).snapshot.state==='stagger','stagger interrupts cast');
+  check(!c.begin(attack).ok&&c.advance(30).snapshot.state==='idle','stagger recovery');
+  check(c.interrupt('incapacitated',100).ok&&!c.interrupt('stagger',20).ok,'priority');
+  check(c.interrupt('dead').ok&&!c.begin(attack).ok&&c.advance(1000).snapshot.state==='dead','death terminal');
+  check(!c.interrupt('stagger',30).ok&&c.resetAfterRespawn().snapshot.state==='idle','explicit revival only');
+  check(!c.resetAfterRespawn().ok,'invalid revival rejected');
+}
+test('AV1 scheduling contract',()=>cases(createCombatScheduler,(condition,name)=>assert.ok(condition,name)));
