@@ -12,7 +12,7 @@ const actions={meadow:[createPlainsActor,stepPlainsActor],desert:[createDesertAc
 export function createBeastEngineFixture(view,seed=179){
  const q=view?.query,catalog=completeBeastCandidateCatalog();
  if(!q||typeof view.generatedMaterialAt!=='function'||typeof view.revision!=='function')throw TypeError('Explicit fixture source required');
- let pending=null,busy=false,lastTick=-1,batch=null,peerFrame=null;
+ let pending=null,busy=false,lastTick=-1,batch=null,peerFrame=null,disturbanceFrame=null;
  const targets=new Map();
  const navigator=new LocalNavigator({...q,grounded:(p,b)=>expansionSupport(q,p,b,'ground')});
  const engine=MobEngine.createExpansionFixture(q,seed,{
@@ -21,7 +21,22 @@ export function createBeastEngineFixture(view,seed=179){
   step:(mob,previous,command,roster,tick)=>{
    if(tick!==lastTick){
     navigator.beginTick();lastTick=tick;
-    peerFrame=Object.freeze({revision:view.revision(),tick,entities:Object.freeze(roster.map(e=>Object.freeze({...e,targetId:batch?.get(e.id)?.targetId??null})))});
+    const rev=view.revision(),prior=peerFrame;
+    const sounds=[];
+    // Observed completed ground motion from the original engine, not an
+    // interpolated trajectory. Expire on revision change or skipped tick.
+    if(prior?.revision===rev&&prior.tick===tick-1){
+     for(const e of roster){
+      const old=prior.entities.find(x=>x.id===e.id);
+      if(!old||!['active','idle'].includes(e.state)||!['active','idle'].includes(old.state)||!e.grounded||!old.grounded)continue;
+      const dx=e.position[0]-old.position[0],dz=e.position[2]-old.position[2],d=Math.hypot(dx,dz);
+      if(d<.035||d>.6||Math.abs(e.position[1]-old.position[1])>.25||q.residentAt(e.position)!==true)continue;
+      sounds.push(Object.freeze({sourceId:e.id,position:e.position,loudness:Math.min(1,.5+d*3)}));
+     }
+    }
+    sounds.sort((a,b)=>b.loudness-a.loudness||a.sourceId.localeCompare(b.sourceId));
+    disturbanceFrame=Object.freeze({revision:rev,events:Object.freeze(sounds.slice(0,8))});
+    peerFrame=Object.freeze({revision:rev,tick,entities:Object.freeze(roster.map(e=>Object.freeze({...e,targetId:batch?.get(e.id)?.targetId??null})))});
     const alive=new Set(roster.filter(e=>['idle','active'].includes(e.state)).map(e=>e.id));
     for(const id of targets.keys())if(!alive.has(id))targets.delete(id);
     for(const e of roster)if(alive.has(e.id)){
@@ -41,6 +56,7 @@ export function createBeastEngineFixture(view,seed=179){
    const goal=command?.goal??(batch&&!target&&!threat?refreshForageGoal(actor,view,roster,tick):null);
    const ok=step(actor,q,{target,threat,goal,flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
     readPeers:()=>peerFrame,
+    readDisturbances:()=>({revision:disturbanceFrame.revision,events:disturbanceFrame.events.filter(e=>e.sourceId!==mob.id)}),
     commitDamage:(victim,amount,revision,kind)=>{
      if(hit||!victim||(victim!==target&&victim!==threat))return false;
      hit=Object.freeze({targetId:victim.id,amount,revision,kind});return true;

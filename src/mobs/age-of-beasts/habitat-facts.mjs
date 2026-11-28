@@ -63,6 +63,29 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
   const knownVolume=(at,b=body)=>{const v=planBodyVolume(at,b);return !!v&&v.cells.every(({x,y,z})=>read(x,y,z)!==undefined);};
   const knownFloor=at=>{const b=planBodyVolume(at,body)?.bounds;if(!b)return false;
    for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)if(read(x,Math.floor(b[1]-.035),z)===undefined)return false;return true;};
+  // Baseline alpine elevation is intentionally limited to current natural
+  // generator height. The final mountain owner must approve final bands.
+  const highTerrain=new Set([...rock,M.snow,M['alpine-grass']]);
+  const ledgeAt=()=>{
+   const at=findLanding();if(!at||!knownVolume(at)||!knownFloor(at)||at[1]<10)return false;
+   const b=planBodyVolume(at,body).bounds,fy=Math.floor(b[1]-.035);
+   // A real supported rock platform next to a >=2-cell drop, not a biome flag.
+   for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)
+    for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)if(!highTerrain.has(read(x,fy,z)))return false;
+   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+    const x=Math.floor(at[0]+dx*(body.radius+1.25)),z=Math.floor(at[2]+dz*(body.radius+1.25));
+    if(read(x,fy,z)===BLOCK.AIR&&read(x,fy-1,z)===BLOCK.AIR&&read(x,fy-2,z)===BLOCK.AIR)return true;
+   }
+   return false;
+  };
+  let ledge;
+  const ledgeSite=()=>ledge??=ledgeAt();
+  const highElevation=()=>env.biome==='alpine'&&p[1]>=14&&knownVolume(p)&&support('air')&&(()=>{
+   // Actual nearby alpine terrain, below the actor, not a floating coordinate.
+   const [x,y,z]=p.map(Math.floor);
+   for(let dy=1;dy<=6;dy++){const id=read(x,y-dy,z);if(id===undefined)return false;if(highTerrain.has(id))return y-dy>=10;}
+   return false;
+  })();
   let refuge,shore;
   const refugeSite=()=>refuge??=(()=>{
    const at=findLanding();if(!at||!knownFloor(at)||!shelteredAt(q,at,body))return false;
@@ -102,6 +125,8 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
     case 'snow-or-vegetation':result[tag]=floorIs(snow)||(!localMaterials().includes(undefined)&&localMaterials().some(id=>plants.has(id)));break;
     case 'rock-or-sand':result[tag]=floorIs(sand)||(!localMaterials().includes(undefined)&&localMaterials().some(id=>rock.has(id)));break;
     case 'magical-or-dark-forest':result[tag]=env.biome==='forest'&&Number.isFinite(env.light)&&env.light<=.3;break;
+    case 'high-elevation':result[tag]=highElevation();break;
+    case 'cliff-ledge':case 'perch-site':result[tag]=ledgeSite();break;
     case 'high-meadow':result[tag]=p[1]>=10&&floorIs(new Set([M['alpine-grass']]));break;
     case 'open-ground':case 'running-clearance':case 'open-snow':case 'traversable-cave':{
      const at=findLanding(),required=tag==='open-snow'?floorIs(snow):true;

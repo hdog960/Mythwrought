@@ -15,7 +15,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
-| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; same-engine isolated damage PASS session21; integrated pack batch session22 admission rejected overlapping bodies; corrected fixture separation session23; native/live pending |
+| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; same-engine isolated damage PASS session21; integrated pack batch session22 admission rejected overlapping bodies; corrected fixture separation and integrated same-engine pack damage native PASS session23; live pending |
 | Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate native PASS session19; live and restraint owner pending |
 
 ## desert
@@ -72,9 +72,9 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Yak | herd, grazing, domestication | Original candidate taming native PASS session16; live pending |
-| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; live pending |
+| Golden Eagle | soar, perch | Physical approach/perch/departure native PASS session17; actual ledge predicate authored session24; native/live pending |
 | Pika | gather, evasion, shelter | Incomplete |
-| Skyray | glide, flight | Original movement glide native PASS session17; live pending |
+| Skyray | glide, flight | Original movement glide native PASS session17; actual baseline high-elevation predicate authored session24; native/live pending |
 | Griffin | tame, flight, aerial-mount, defense | Aerial mounting still blocked pending movement owner; candidate tame interface authored |
 | Cyclops | club, rock-projectile | Ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
@@ -94,7 +94,7 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
 | Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior native PASS session20; live pending |
-| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; live sound producer pending |
+| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; actual prior-tick engine ground-motion disturbance fixture authored session24; native/live pending |
 | Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites native PASS session16; live pending |
 
@@ -104,4 +104,6 @@ Session21: original MobEngine explicitly gated fixture admission + six-region be
 
 Session22: actual generated baseline surface/cave population admission and fixed-step traversal tests authored, immutable tick roster/command batch for herd/pack and physical blossom input connected to fixture; surface/cave integration native PASS session22, 39 admissions /13 species, pack fixture failed overlapping admission. No owner effect activation or production admission.
 
-Session23: bounded autonomous ground foraging goal search for nine species, scoped collision source ID read reuse with revision invalidation and unchanged residency/shape/overlay checks, corrected Dire Hound separation regression. New native pending. No species declared fully complete.
+Session23: bounded autonomous ground foraging goal search for nine species, scoped collision source ID read reuse with revision invalidation and unchanged residency/shape/overlay checks, corrected Dire Hound separation regression. Native PASS session23, 82/82, same39 generated admissions; autonomous Ermine and safe source-cache regression passed. No species declared fully complete.
+
+Session24: actual high-elevation and ledge facts, independent ceiling-lurker baseline admission, expanded mountain survey, observed engine ground-motion hearing integration authored; native pending. No final natural-provider claim.
