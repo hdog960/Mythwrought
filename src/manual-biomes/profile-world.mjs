@@ -31,6 +31,55 @@ import {combinedEnvironmentCaves} from '../manual-caves/opt-in-runtime.mjs';
 // The default new-world action and all historical saves stay on accepted v4.
 export {M7_ENVIRONMENT_GENERATOR,ENCHANTED_P2_GENERATOR,SNOW_P1_GENERATOR,M8_MOUNTAIN_GENERATOR};
 export const isEnvironmentGenerator=generator=>originalEnvironmentGenerator(generator)||usesMountainV8Terrain(generator);
+// Random world selection may skip a seed whose read-only existing cave
+// entrance planner refused it. Explicit seed admission remains unchanged;
+// unknown failures are not retryable and no geometry or storage is altered.
+export function canAdmitCombinedRandomSeed(seed){
+  try{combinedEnvironmentCaves(seed);return true;}
+  catch(error){
+    if(error instanceof Error&&error.message.startsWith('New cave surface entrances not safe: ')){
+      const failures=JSON.parse(error.message.slice('New cave surface entrances not safe: '.length));
+      if(Array.isArray(failures)&&failures.length>0&&failures.every(f=>
+        typeof f.name==='string'&&Array.isArray(f.attempts)&&f.attempts.length===4&&
+        f.attempts.every(reason=>['HEIGHT_LIMIT','WORLD_BOUNDS','OTHER_ENTRANCE_COLLISION',
+          'AUTHORED_SOURCE_COLLISION','PLAYER_EDIT_PROTECTION','PROTECTED_EXISTING_LANDMARK',
+          'INTERNAL_PORTAL_CONFLICT','NO_SUPPORTED_SURFACE_MOUTH'].includes(reason))))return false;
+    }
+    // The existing spiral planner also refuses a seed when its verified
+    // surface collar conflicts with an entrance support or authored source.
+    // Recognize only that structured topology refusal; never ignore a
+    // storage failure, malformed report or unexpected exception.
+    const prefix='Historical deep spiral surface seam is unsafe: ';
+    if(error instanceof Error&&error.message.startsWith(prefix)){
+      const conflicts=JSON.parse(error.message.slice(prefix.length));
+      if(Array.isArray(conflicts)&&conflicts.length>0&&conflicts.length<=3&&conflicts.every(c=>
+        typeof c.k==='string'&&/^-?\d+,-?\d+,-?\d+$/.test(c.k)&&
+        ((c.reason==='SURFACE_PORTAL_SUPPORT_COLLISION'||c.reason==='OTHER_CAVE_SOURCE_OVERLAP')&&Number.isInteger(c.existing)||
+         c.reason==='EXISTING_LIVE_CAVE_OR_LANDMARK'&&Number.isInteger(c.id))))return false;
+    }
+    // The original East Gallery can exhaust all candidate sites due to
+    // seed-specific protected natural landmarks. Do not relax its planner.
+    const eastPrefix='Historical East Gallery has no safe new-world site: ';
+    if(error instanceof Error&&error.message.startsWith(eastPrefix)){
+      const sites=JSON.parse(error.message.slice(eastPrefix.length));
+      if(Array.isArray(sites)&&sites.length===3&&sites.every(s=>
+        s&&s.origin&&['x','z','length','width'].every(k=>Number.isInteger(s.origin[k]))&&
+        Array.isArray(s.errors)&&s.errors.length>0&&
+        s.errors.every(e=>['EXISTING_SOURCE_LANDMARK_OR_PLAYER_EDIT_CONFLICT',
+          'COMPOSED_EAST_PATH_PHYSICALLY_BLOCKED'].includes(e))&&
+        Number.isInteger(s.conflictCount)&&s.conflictCount>=0&&
+        Array.isArray(s.examples)&&s.examples.length<=3&&
+        s.examples.every(c=>c&&c.reason==='PREEXISTING_LIVE_CAVE_OR_LANDMARK'&&
+          typeof c.key==='string'&&/^-?\d+,-?\d+,-?\d+$/.test(c.key)&&
+          Number.isInteger(c.original)&&Number.isInteger(c.id))&&
+        Array.isArray(s.badWalk)&&s.badWalk.length<=3&&
+        s.badWalk.every(c=>c&&['x','z','feet'].every(k=>Number.isFinite(c[k]))&&
+          ['supported','headroom','body'].every(k=>typeof c[k]==='boolean'))&&
+        (s.examples.length>0||s.badWalk.length>0)))return false;
+    }
+    throw error;
+  }
+}
 const environmentalProfile=isEnvironmentGenerator;
 export const M6_BALANCED_GENERATOR='mythwrought-five-surface-regions-v6';
 export const M5_EXPERIMENTAL_GENERATOR='mythwrought-four-surface-regions-v5';
@@ -289,6 +338,22 @@ export class FourRegionWorld extends VoxelWorld{
     }
     return BLOCK.AIR;
   }
+  hasHistoricalXericCascade(){
+    return [M6_BALANCED_GENERATOR,M5_EXPERIMENTAL_GENERATOR,FOUR_REGION_GENERATOR,M3_FOUR_REGION_GENERATOR].includes(this.profile.generator);
+  }
+  historicalXericSupportedCells(x,y,z){
+    if(!this.hasHistoricalXericCascade()||![x,y,z].every(Number.isSafeInteger))return [];
+    const cells=[];
+    // The exact original setter predicate, evaluated before any mutation.
+    for(let above=y+1;above<=WORLD_MAX_Y;above++){
+      const k=worldKey(x,above,z);
+      if(this.edits.has(k))break;
+      const natural=this.naturalAndLandmarkBlock(x,above,z);
+      if(!M3_XERIC_IDS.includes(natural)||this.get(x,above,z)!==natural)break;
+      cells.push([x,above,z]);
+    }
+    return cells;
+  }
   set(x,y,z,id,rotation=0){
     // Original setter knows the original block registry, validation,
     // schema-1 delta format and rotation restrictions. The profile baseline
@@ -303,10 +368,7 @@ export class FourRegionWorld extends VoxelWorld{
     this.biomeCellCount=count-Number(isBiome130BlockId(previous))+
       Number(isBiome130BlockId(next));
     if(!this.edits.has(key))this.rotations.delete(key);
-    if((this.profile.generator===M6_BALANCED_GENERATOR||
-        this.profile.generator===M5_EXPERIMENTAL_GENERATOR||
-        this.profile.generator===FOUR_REGION_GENERATOR||
-        this.profile.generator===M3_FOUR_REGION_GENERATOR)&&id===BLOCK.AIR){
+    if(this.hasHistoricalXericCascade()&&id===BLOCK.AIR){
       // When the player mines the support of a naturally authored xeric
       // formation, persist AIR edits for its supported stack, too. No fake
       // floating cactus after mining or after a cold world reload.

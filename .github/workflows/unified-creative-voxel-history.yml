@@ -1,0 +1,24 @@
+name: Unified isolated Creative voxel history expansion
+on:
+  push:
+    branches: [probe/unified-creative-voxel-history-20261126]
+    paths: ['src/**','tests/creative-integration/**','.github/workflows/unified-creative-voxel-history.yml']
+permissions:
+  contents: read
+jobs:
+  voxel-history:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact isolated history contracts
+        run: |
+          test "$(git rev-parse HEAD^)" = f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          node --check src/main.mjs
+          node --test tests/creative-integration/creative-history.test.mjs tests/creative-integration/creative-voxel-batch.test.mjs tests/creative-integration/creative-pack5-history.test.mjs tests/gpu-edit-batch.test.mjs

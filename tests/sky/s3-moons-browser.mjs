@@ -1,6 +1,7 @@
 // Mythwrought SKY S3: authentic 3-moon original-game WebGL2 evidence.
 // Real 24-min S1 buttons, 25 chunks, exact graphics, no synthetic moon art.
 import assert from 'node:assert/strict';
+import {assertSkySaveIsolation} from './save-isolation.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -169,7 +170,7 @@ try{
         'Manual SET DAY changed independent lunar age');
       await shot(page,w,h,'three-moons-day');
       await shot(page,w,h,'three-moons-day',true);
-      assert.deepEqual(await nonSky(page),saved,'Moon controls changed schema-1 or other world data');
+      assertSkySaveIsolation(await nonSky(page),saved,'Moon controls changed schema-1 or other world data');
       // Two game days' lunar progression, installed only in independent lunar
       // sidecar; the S1 clock and saved voxel data are never rewritten.
       await page.evaluate(()=>{
@@ -189,7 +190,7 @@ try{
       assert.equal(new Set(progressed.phases.map(x=>x.toFixed(3))).size,3);
       await shot(page,w,h,'two-days-later-night');
       await shot(page,w,h,'two-days-later-night',true);
-      assert.deepEqual(await nonSky(page),saved,'Lunar-age change modified the original world save');
+      assertSkySaveIsolation(await nonSky(page),saved,'Lunar-age change modified the original world save');
       assert.equal(progressed.glError,progressed.glNoError);
       assert.equal(progressed.chunks,25);
       // Corrupted lunar sidecar is never overwritten and the actual game still

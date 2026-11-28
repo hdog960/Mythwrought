@@ -1,0 +1,52 @@
+name: Unified isolated history cache closure and offline upgrade
+on:
+  push:
+    branches: [probe/unified-history-cache-20261126]
+    paths: ['index.html','sw-m5.js','sw-nonblock-stage.js','nonblock-stage-assets.json','tests/ci/unified-history-cache-closure.mjs','tests/unified-history-upgrade-browser.mjs','.github/workflows/unified-history-cache.yml']
+permissions:
+  contents: read
+jobs:
+  cache-qualification:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: f48c42e85c979dd66d8b42db0e8b01dd531b0fe6
+          path: frozen-source
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 2168ac4d38cb1701e49963c7c4ce9f12d3c32cf0
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Exact frozen set plus new dependency and every actual asset digest
+        env:
+          UNIFIED_FROZEN_ROOT: ${{ github.workspace }}/frozen-source
+        run: |
+          test "$(git rev-parse HEAD^)" = 78d08cb8265a42ad0442adecd5eda5f7e2fa4500
+          test -z "$(git diff HEAD^ HEAD -- src)"
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node tests/ci/unified-history-cache-closure.mjs
+          node --test tests/ci/nonblock-cache-manifest.test.mjs
+          node --check tests/unified-history-upgrade-browser.mjs
+      - name: Actual installed old shell, missing new helper rollback and cold offline upgrade
+        env:
+          UNIFIED_PREVIOUS_ROOT: ${{ github.workspace }}/prior-production
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2
+          npx playwright install chromium
+          node tests/unified-history-upgrade-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-history-cache
+          path: artifacts/unified-history-upgrade/
+          if-no-files-found: warn

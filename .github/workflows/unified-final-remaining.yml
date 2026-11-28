@@ -1,0 +1,76 @@
+name: Unified remaining targeted acceptance
+on:
+  push:
+    branches: [probe/unified-final-remaining-20261127]
+permissions:
+  contents: read
+jobs:
+  sky:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [s2-atmosphere, s3-moons, s4-stars, s5-events, s6-legacy]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check tests/sky/save-isolation.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/unified-sky.log 2>&1 &
+          node tests/sky/${{ matrix.stage }}-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-targeted-sky-${{ matrix.stage }}
+          path: artifacts/sky-*/
+  cloudfinch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - env:
+          EGG_SHARD: '1'
+          EGG_ONLY: cloudfinch
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4174 >/tmp/unified-egg.log 2>&1 &
+          node tests/creative-integration/physical-eggs-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-cloudfinch-only
+          path: artifacts/creative-eggs/
+  upper-creative:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          path: prior-production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C prior-production rev-parse HEAD)" = 40f0fbd7fbbc5fe0e5df289001ded91d19295d7f
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          node scripts/ci/creative-shared-height-upgrade.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-targeted-upper-creative
+          path: artifacts/creative-installed-upgrade/

@@ -44,6 +44,28 @@ try{
       Object.entries(localStorage).filter(([key])=>
         !key.startsWith('mythwrought-sky-s1-clock-')&&
         !key.startsWith('mythwrought-mobs-v1-'))));
+    // Independently observed navigation sidecars may grow during gameplay.
+    // Canonical saves, unrelated namespaces and prior markers remain strict.
+    const assertClockIsolation=(after,before,message)=>{
+      const nav=key=>/^mythwrought-(?:exploration-v1|navigation00-observations-v1)-\d+$/.test(key);
+      const stable=state=>Object.fromEntries(Object.entries(state).filter(([key])=>!nav(key)));
+      assert.deepEqual(stable(after),stable(before),message);
+      for(const [key,value] of Object.entries(before)){
+        if(!nav(key))continue;
+        assert.ok(Object.hasOwn(after,key),'Navigation sidecar disappeared: '+key);
+        const prior=JSON.parse(value),next=JSON.parse(after[key]);
+        assert.equal(next.version,prior.version);assert.equal(next.seed,prior.seed);
+        if(Array.isArray(prior.cells)){
+          assert.equal(next.cellSize,prior.cellSize);
+          const cells=new Set(next.cells);
+          assert.ok(prior.cells.every(cell=>cells.has(cell)),'Existing discovery lost');
+        }else{
+          const tiles=new Set(next.tiles.map(tile=>tile[0]+','+tile[1]));
+          assert.ok(prior.tiles.every(tile=>tiles.has(tile[0]+','+tile[1])),'Observed tile lost');
+          assert.deepEqual(next.marks,prior.marks,'Clock changed navigation markers');
+        }
+      }
+    };
     const shot=async(kind)=>{
       const path=dir+'/s1-'+width+'x'+height+'-'+kind+'.png';
       const b=await page.screenshot({path,animations:'disabled'});
@@ -102,7 +124,7 @@ try{
       await page.locator('#closeHelp').click();
       await shot('day-world');
       const worldAfter=await storageExceptClock();
-      assert.deepEqual(worldAfter,worldBefore,'Sky controls changed non-sky storage');
+      assertClockIsolation(worldAfter,worldBefore,'Sky controls changed unrelated storage');
       await page.reload({waitUntil:'networkidle'});
       await page.waitForFunction(()=>+document.querySelector('#scene')?.dataset.loadedChunks===25,
         null,{timeout:45000});
@@ -110,7 +132,7 @@ try{
       assert.equal(reload.seed,'179');
       assert.ok(reload.phase>=720000&&reload.phase<750000,'Per-seed day choice not retained after reload');
       assert.equal(reload.persistence,'saved');
-      assert.deepEqual(await storageExceptClock(),worldBefore,'Reload changed canonical save bytes');
+      assertClockIsolation(await storageExceptClock(),worldBefore,'Reload changed canonical save bytes');
       // Cross-world isolation: only in the largest viewport to keep evidence focused.
       let seedIsolation=null;
       if(width===932){
@@ -172,7 +194,7 @@ try{
         p95Ms:+perfMatch[4],worstMs:+perfMatch[5],slowFrames:+perfMatch[6]};
       assert.ok(performance.samples>=30&&performance.p95Ms>=performance.p50Ms);
       await page.locator('#closeHelp').click();
-      assert.deepEqual(await storageExceptClock(),beforeAudit,
+      assertClockIsolation(await storageExceptClock(),beforeAudit,
         'Read-only performance audit changed non-clock saved data');
       await page.waitForFunction(()=>{const c=document.querySelector('#scene');return +c.dataset.loadedChunks===25&&+c.dataset.pendingChunks===0;},null,{timeout:45000});
       const end=await state();

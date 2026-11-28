@@ -12,7 +12,7 @@ import {CompanionManager} from './companion.mjs';
 import {AnimalInteractions} from './animal-interactions.mjs';
 import {PopulationManager} from './ecology.mjs';
 import {serializeRoster,restoreRoster} from './roster-persistence.mjs';
-import {speciesRegistry} from './species.mjs';
+import {speciesRegistry,getSpecies} from './species.mjs';
 import {sectionForY} from '../depth.mjs';
 
 export const LIVE_MOB_COUNT=40;
@@ -52,13 +52,16 @@ export function createLiveMobSession({
   worldKind='normal',spawnOnFirstVisit=false,allowWrites=()=>true,onPlayerDamage=()=>{},
   sourceRevision
 }={}){
-  if(!world||typeof world.get!=='function'||!storage||!Number.isSafeInteger(seed)||
+  if(!world||typeof world.get!=='function'||(world.seed!==undefined&&world.seed!==seed)||
+    !storage||!Number.isSafeInteger(seed)||
     typeof resident!=='function'||typeof biomeAt!=='function'||
     typeof skyAt!=='function'||typeof caveAt!=='function'||
     typeof playerAt!=='function')
     throw TypeError('Invalid live mob host');
   const key=mobSaveKey(seed,worldKind);
-  let damaged=false,readOnly=false,damageCooldown=0,health=100,lastStored='',elapsed=0;
+  // null is the original world's not-yet-persisted roster. Do not
+  // overwrite an independently created sidecar after this session loaded.
+  let damaged=false,readOnly=false,disposed=false,damageCooldown=0,health=100,lastStored=null,elapsed=0;
   // Original M7 ground IDs 400–410 are physical full cubes, but the generic
   // source mob shape reader treats them as unknown. The current owner approves
   // historical M7, Enchanted P2, Snow P1 and Mountain V8 exact profiles.
@@ -111,10 +114,13 @@ export function createLiveMobSession({
   // Active-world residency is checked by createWorldQuery for every collision
   // and eye ray. No mob can spawn on an unloaded or unknown physical surface.
   let engine,behavior,combat,companions,animals;
+  const creativeSpawnIds=new Set();
   const raw=storage.getItem(key);
   if(raw!==null){
     try{
-      ({engine,behavior,combat,companions,animals}=restoreRoster(raw,query,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT}));
+      const restored=restoreRoster(raw,query,null,{maxProjectiles:LIVE_PROJECTILE_LIMIT});
+      ({engine,behavior,combat,companions,animals}=restored);
+      for(const id of restored.creativeSpawnIds)creativeSpawnIds.add(id);
       lastStored=raw;
     }catch(error){
       readOnly=true;
@@ -132,14 +138,31 @@ export function createLiveMobSession({
     // Tame ownership persists in the existing per-seed checksummed sidecar.
     // Protect it from six-second ecology GC without elevating a horse to a
     // bonded-only MobEngine.important checkpoint bit.
-    isProtected:mob=>animals.isTamed(mob.id,{id:OWNER})
+    isProtected:mob=>creativeSpawnIds.has(mob.id)||animals.isTamed(mob.id,{id:OWNER})
   });
+  // A healthy checksummed roster does not grant write permission to a
+  // protected current world. Suspend unsaved creature simulation and actions
+  // until the actual world's synchronous authority returns primitive true.
+  // Never poison or replace intact save bytes merely because it is revoked.
+  function canAct({quarantineOnAuthorityError=false}={}){
+    // Both the real world identity and its write authority can be temporarily
+    // unavailable during a switch or recovery. Direct saves and simulation
+    // fail closed WITHOUT damaging healthy old-world checksums. A provisional
+    // Creative egg transaction must still propagate an unexpected authority
+    // exception to the existing rollback/quarantine handler.
+    if(disposed||readOnly)return false;
+    try{return world.seed===seed&&allowWrites()===true;}
+    catch(error){
+      if(quarantineOnAuthorityError)throw error;
+      return false;
+    }
+  }
   const player={
     id:OWNER,height:1.72,threatening:true,
     get position(){return playerAt();},
     get alive(){return health>0;},
     damage(amount){
-      if(readOnly||health<=0||damageCooldown>0||
+      if(!canAct()||health<=0||damageCooldown>0||
          !Number.isFinite(amount)||amount<=0)return false;
       health=Math.max(0,health-amount);
       damageCooldown=.7;
@@ -148,7 +171,7 @@ export function createLiveMobSession({
     }
   };
   function advance(seconds,regions=[]){
-    if(readOnly||!Number.isFinite(seconds)||seconds<=0)return;
+    if(!canAct()||!Number.isFinite(seconds)||seconds<=0)return;
     const dt=Math.min(seconds,.1);
     elapsed+=dt;
     damageCooldown=Math.max(0,damageCooldown-dt);
@@ -172,6 +195,7 @@ export function createLiveMobSession({
     engine.drainEvents();
   }
   function drawEntities(){
+    if(disposed)return [];
     const creatures=engine.all().filter(m=>m.state!=='dormant').map(m=>({
       ...m, visual:behavior.state(m.id)
     }));
@@ -185,7 +209,7 @@ export function createLiveMobSession({
     return [...creatures,...projectiles];
   }
   function attack(eye,forward){
-    if(readOnly||!player.alive)return null;
+    if(!canAct()||!player.alive)return null;
     let best=null,bestDistance=2.6;
     for(const mob of engine.all()){
       if(!['active','idle'].includes(mob.state))continue;
@@ -204,7 +228,7 @@ export function createLiveMobSession({
       downed:engine.get(best.id)?.state==='downed'};
   }
   function interact(){
-    if(readOnly||!player.alive)return 'Creature interaction unavailable in protected mode';
+    if(!canAct()||!player.alive)return 'Creature interaction unavailable in protected mode';
     const near=engine.all().filter(m=>m.state!=='dormant').map(m=>({
       mob:m,d:Math.hypot(...m.position.map((x,i)=>x-player.position[i]))
     })).filter(x=>x.d<=1.8).sort((a,b)=>a.d-b.d);
@@ -219,7 +243,7 @@ export function createLiveMobSession({
     return 'No eligible interaction with '+mob.species.displayName;
   }
   function toggleMount(){
-    if(readOnly||!player.alive)return 'Creature riding unavailable in protected mode';
+    if(!canAct()||!player.alive)return 'Creature riding unavailable in protected mode';
     if(animals.riderPosition(player)){
       animals.dismount(player);
       return 'Dismounted; regular walking controls restored';
@@ -236,10 +260,10 @@ export function createLiveMobSession({
     }
     return 'No nearby tamed rideable creature with safe headroom';
   }
-  function dismount(){return animals.dismount(player);}
-  function riderPosition(){return animals.riderPosition(player);}
+  function dismount(){return disposed?false:animals.dismount(player);}
+  function riderPosition(){return disposed?null:animals.riderPosition(player);}
   function steerMount(strafe,forward,yaw,run=false){
-    if(readOnly||!riderPosition()||![strafe,forward,yaw].every(Number.isFinite))
+    if(!canAct()||!riderPosition()||![strafe,forward,yaw].every(Number.isFinite))
       return false;
     // Match original iPhone/keyboard two-thumb frame, not preview axes.
     const dx=Math.sin(yaw)*forward+Math.cos(yaw)*strafe;
@@ -247,7 +271,7 @@ export function createLiveMobSession({
     return animals.steer(player,[dx,dz],run===true);
   }
   function breedNearby(){
-    if(readOnly||!player.alive)return 'Breeding unavailable in protected mode';
+    if(!canAct()||!player.alive)return 'Breeding unavailable in protected mode';
     const eligible=engine.all().filter(m=>
       ['idle','active'].includes(m.state)&&
       m.species.breeding.eligible&&!m.juvenile&&
@@ -262,7 +286,7 @@ export function createLiveMobSession({
     return 'Breeding needs two nearby healthy matching adults and clear habitat';
   }
   function companionOrder(mode){
-    if(readOnly||!player.alive)return 'Companion commands unavailable in protected mode';
+    if(!canAct()||!player.alive)return 'Companion commands unavailable in protected mode';
     if(!['follow','stay','return'].includes(mode))return 'Unknown companion order';
     const slots=companions.slots().filter(slot=>slot.owner===player.id)
       .map(slot=>({slot,mob:engine.get(slot.id)}))
@@ -275,29 +299,112 @@ export function createLiveMobSession({
     return companions.command(slot.id,player,mode)?
       mob.species.displayName+' ordered to '+mode:'Companion order rejected safely';
   }
-  function save(){
-    if(readOnly||!allowWrites())return false;
+  function spawnCreative(speciesId,point){
+    // Permission providers can fail independently of the roster's own state.
+    // Reject before allocating a real entity or writing a sidecar.
+    if(disposed||readOnly||world.seed!==seed)
+      return {ok:false,reason:'Saved creature roster or world identity is protected'};
+    let writable=false;
+    try{writable=allowWrites()===true;}catch(_){/* Deny unknown permission. */}
+    if(!writable)return {ok:false,reason:'Saved creature roster is protected'};
+    const species=getSpecies(speciesId);
+    if(!species||species.implementation!=='preview')
+      return {ok:false,reason:'Unregistered or unimplemented species'};
+    if(!Array.isArray(point)||point.length!==3||!point.every(Number.isFinite))
+      return {ok:false,reason:'Invalid physical spawn position'};
+    if(!query.residentAt(point)||query.volume(point,species.body)!=='clear')
+      return {ok:false,reason:'Unloaded, obstructed or unsafe placement'};
+    const canFly=species.movement.capabilities.includes('fly');
+    const canSwim=species.movement.capabilities.includes('swim')&&
+      query.medium([point[0],point[1]+.1,point[2]])==='water';
+    if(!canFly&&!canSwim&&!query.grounded(point,species.body))
+      return {ok:false,reason:'This creature needs solid ground or valid water'};
+    if(engine.counts().total>=32||engine.counts().awake>=LIVE_MOB_ACTIVE_LIMIT)
+      return {ok:false,reason:'Creature simulation capacity reached'};
+    // Original distance-only separation missed tall bodies: two creatures
+    // could have a large feet-to-feet distance yet intersect vertically.
+    // Compare their actual radius/height volumes and the original player body.
+    const intersects=(a,ab,b,bb)=>
+      Math.abs(a[0]-b[0])<ab.radius+bb.radius-1e-5 &&
+      Math.abs(a[2]-b[2])<ab.radius+bb.radius-1e-5 &&
+      a[1]<b[1]+bb.height-1e-5 && b[1]<a[1]+ab.height-1e-5;
+    const playerPosition=player.position;
+    if(!Array.isArray(playerPosition)||playerPosition.length!==3||
+       !playerPosition.every(Number.isFinite))
+      return {ok:false,reason:'Player position is not ready for creature placement'};
+    if(intersects(point,species.body,playerPosition,{radius:.28,height:1.78}))
+      return {ok:false,reason:'Creature would intersect the player'};
+    const overlapping=engine.all().some(mob=>
+      ['idle','active','dormant','downed'].includes(mob.state)&&
+      intersects(point,species.body,mob.position,mob.species.body));
+    if(overlapping)return {ok:false,reason:'Another creature occupies this location'};
+    const id=engine.spawn(speciesId,point,{dormant:false,homeChunk:null});
+    if(!id)return {ok:false,reason:'Real creature engine rejected the spawn'};
+    if(engine.get(id)?.state==='dormant'){
+      engine.transition(id,'removed');
+      return {ok:false,reason:'Active capacity was lost; no invisible creature saved'};
+    }
+    creativeSpawnIds.add(id); // Preserve original ecology protection and roster identity.
+    let saved=false;
+    try{saved=save({quarantineOnAuthorityError:true})===true;}
+    catch(_){readOnly=true;damaged=true;}
+    if(!saved){
+      creativeSpawnIds.delete(id);
+      const removed=engine.transition(id,'removed');
+      return {ok:false,reason:removed?
+        'Creature save could not be verified; active spawn reverted':
+        'Creature save and rollback could not be verified; preserve roster'};
+    }
+    return Object.freeze({ok:true,id,speciesId,position:Object.freeze([...point])});
+  }
+  function save({quarantineOnAuthorityError=false}={}){
+    // Reuse the strict primitive-true, exception-safe mutation gate. A
+    // failing direct save must not throw into original main's world-switch
+    // disposeLiveMobSession(), leaving the prior MobEngine still live.
+    if(!canAct({quarantineOnAuthorityError}))return false;
     let value;
     try{
-      value=serializeRoster({engine,companions,animals});
-      if(value===lastStored)return true;
+      // A cached serialized roster is not proof that localStorage still
+      // contains it; other tabs may replace or delete the same seed slot.
       const previous=storage.getItem(key);
+      if(previous!==lastStored)
+        throw Error('Creature save changed outside this session');
+      const live=new Set(engine.all().map(mob=>mob.id));
+      for(const id of creativeSpawnIds)if(!live.has(id))creativeSpawnIds.delete(id);
+      value=serializeRoster({engine,companions,animals,creativeSpawnIds:[...creativeSpawnIds]});
+      // Revalidate the authoritative source before both early-return and
+      // write. This guards observable mutation, not external atomicity.
+      if(storage.getItem(key)!==previous)
+        throw Error('Creature save changed during preparation');
+      if(value===lastStored)return true;
       // Keep a verified previous-good copy even if a quota/storage error stops
       // the new commit. Never delete either copy during an upgrade.
       if(previous!==null && previous!==value)storage.setItem(key+'.backup',previous);
+      // A previous-good backup is an observable storage write. Recheck the
+      // actual canonical primary AFTER that operation, before replacing it.
+      // A changed slot is quarantined, not silently overwritten by our draft.
+      if(storage.getItem(key)!==previous)
+        throw Error('Creature primary changed during backup preparation');
+      // World/session permission can also be revoked while backing up.
+      // Deny the final write without damaging an otherwise healthy roster.
+      if(!canAct())return false;
       storage.setItem(key,value);
       if(storage.getItem(key)!==value)throw Error('Mob sidecar write not verified');
       lastStored=value;return true;
     }catch(error){readOnly=true;damaged=true;return false;}
   }
-  function revive(){health=100;damageCooldown=2;return health;}
+  function revive(){if(disposed)return health;health=100;damageCooldown=2;return health;}
   function status(){return {
-    enabled:true,species:LIVE_MOB_COUNT,counts:engine.counts(),
+    enabled:!disposed,species:LIVE_MOB_COUNT,counts:engine.counts(),
     health,readonly:readOnly,damaged,companions:companions.slots().length,
-    mounted:Boolean(riderPosition()),gpuSafe:true,elapsed
+    mounted:Boolean(riderPosition()),creativeSpawned:creativeSpawnIds.size,gpuSafe:true,elapsed
   };}
-  function dispose(){engine.dispose();}
-  return {advance,drawEntities,attack,interact,save,dispose,status,revive,
+  function dispose(){
+    if(disposed)return;
+    disposed=true; // Revoke old-world authority before engine removal events.
+    engine.dispose();
+  }
+  return {advance,drawEntities,attack,interact,spawnCreative,save,dispose,status,revive,
     toggleMount,dismount,riderPosition,steerMount,breedNearby,companionOrder,
     get query(){return query;}, get engine(){return engine;}};
 }

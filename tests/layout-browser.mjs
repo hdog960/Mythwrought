@@ -1,6 +1,6 @@
 // MYTHWROUGHT v0.05 mobile layout acceptance: real Chromium pixels and DOM bounds.
 import assert from 'node:assert/strict';
-import {M8_MOUNTAIN_GENERATOR} from '../src/manual-biomes/profile-world.mjs';
+import {VEILREACH_GENERATOR} from '../src/environment-ground.mjs';
 import {V8_STORAGE_PREFIX,V8_ACTIVE_KEY} from '../src/manual-biomes/mountain-v8-isolated-storage.mjs';
 import {mkdir} from 'node:fs/promises';
 import {chromium} from 'playwright';
@@ -167,7 +167,7 @@ try{
   assert.equal(await page.evaluate(()=>localStorage.getItem('mythwrought-v002-selected-seed')),oldSeed,'Canceled NEW WORLD changed selection');
   page.once('dialog',dialog=>dialog.accept());
   await page.locator('#newWorld').click();
-  await page.waitForFunction(generator=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===generator,M8_MOUNTAIN_GENERATOR,{timeout:180000});
+  await page.waitForFunction(generator=>window.__mythwroughtTest?.fourBiomeProfile()?.generator===generator,VEILREACH_GENERATOR,{timeout:180000});
   await page.waitForFunction(()=>Number(document.querySelector('#scene')?.dataset.loadedChunks)>0,null,{timeout:180000});
   const latest=await page.evaluate(({prefix,activeKey,oldSeed})=>{
     const seed=localStorage.getItem(prefix+'mythwrought-v002-selected-seed');
@@ -175,7 +175,7 @@ try{
       oldSeed:localStorage.getItem('mythwrought-v002-selected-seed'),oldRaw:localStorage.getItem('mythwrought-v002-world-'+oldSeed),
       actualSeed:String(window.__mythwroughtTest.snapshot().seed),canonical:localStorage.getItem(prefix+'mythwrought-v002-world-'+seed)};
   },{prefix:V8_STORAGE_PREFIX,activeKey:V8_ACTIVE_KEY,oldSeed});
-  assert.equal(latest.generator,M8_MOUNTAIN_GENERATOR,'NEW WORLD must select the latest durable generator');
+  assert.equal(latest.generator,VEILREACH_GENERATOR,'NEW WORLD must select the latest durable generator');
   assert.notEqual(latest.seed,oldSeed);
   assert.equal(latest.active,'1');assert.equal(latest.actualSeed,latest.seed);
   assert.equal(latest.oldSeed,oldSeed);

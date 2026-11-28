@@ -8,10 +8,13 @@ import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
 const source=readFileSync(new URL('../sw-m5.js',import.meta.url),'utf8');
-const RELEASE='20261128-veilreach-launch-v2';
+const RELEASE='20261128-unified-veilreach-v2';
 const CACHE='mythwrought-m5-shell-'+RELEASE;
-const PREVIOUS='mythwrought-m5-shell-20261127-mining-save-replay-v1';
+const PREVIOUS='mythwrought-m5-shell-20261128-veilreach-launch-v2';
 const ROOT='https://example.test/Mythwrought/';
+const staged=JSON.parse(readFileSync(new URL('../nonblock-stage-assets.json',import.meta.url),'utf8'));
+const expectedPublic=Object.keys(staged.assets).filter(p=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p)).map(p=>new URL(p,ROOT).href).sort();
+assert.equal(new Set(expectedPublic).size,expectedPublic.length);
 assert.ok(source.includes("const ASSET_RELEASE='"+RELEASE+"'"));
 assert.ok(source.includes("const CACHE_NAME=CACHE_PREFIX+'"+RELEASE+"'"));
 
@@ -83,7 +86,7 @@ test('complete unified original Home Screen shell installs source-exact and leav
   assert.ok(candidate.peak>1&&candidate.peak<=6,
     'Worker must stream no more than six concurrent origin requests');
   const entries=candidate.all.get(CACHE);
-  assert.ok(entries?.size>=263,'No source file may be silently dropped');
+  assert.deepEqual([...entries.keys()].sort(),expectedPublic,'Exact combined source shell required');
   assert.equal(candidate.seen.size,entries.size,
     'Every cached source must be freshly fetched from origin');
   assert.ok(entries.has(ROOT+'src/mobs/live-game.mjs'));
@@ -96,6 +99,7 @@ test('complete unified original Home Screen shell installs source-exact and leav
   assert.ok(entries.has(ROOT+'src/nonblock/candidate-scene.mjs'));
   for(const source of ['src/world-height.mjs','src/world-height-budget.mjs','src/world-height-mesh-pages.mjs','src/world-height-stream.mjs','src/pack5-integration/upper-sections.mjs','src/floating-islands/sky-source-mesh.mjs','src/veilreach/source.mjs','src/veilreach/generation.mjs','src/veilreach/distance.mjs','src/veilreach/flora.mjs'])
     assert.ok(entries.has(ROOT+source),'Missing required shared-height source '+source);
+  for(const required of ['src/creative-integration/creative-history.mjs','src/creative-integration/creative-inventory.mjs','src/navigation00/observed-navigation.mjs','src/navigation00/navigation-live-observation.mjs','src/mobs/source-edit-epoch.mjs'])assert.ok(entries.has(ROOT+required),'Missing combined source '+required);
   assert.ok(entries.has(ROOT+'index.html'));
   await candidate.activate();
   assert.equal(candidate.all.get(PREVIOUS).size,1,
@@ -145,8 +149,9 @@ test('missing new Mob dependency fails atomically and retains prior shell',async
   assert.equal(candidate.all.get(PREVIOUS).size,1);
 });
 
-test('missing new mining trace refuses install and preserves previous-good app',async()=>{
- const candidate=stage({missing:'src/mining-trace.mjs'});
- await assert.rejects(candidate.install(),/Cannot verify\/cache/);
- assert.equal(candidate.skipped,0);assert.equal(candidate.all.has(CACHE),false);assert.equal(candidate.all.get(PREVIOUS).size,1);
+test('missing released mining trace or new history batch dependency refuses install and preserves previous-good app',async()=>{
+ for(const missing of ['src/mining-trace.mjs','src/creative-integration/creative-voxel-batch.mjs']){
+  const candidate=stage({missing});await assert.rejects(candidate.install(),/Cannot verify\/cache/);
+  assert.equal(candidate.skipped,0);assert.equal(candidate.all.has(CACHE),false);assert.equal(candidate.all.get(PREVIOUS).size,1);
+ }
 });

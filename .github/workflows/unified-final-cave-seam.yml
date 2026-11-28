@@ -1,0 +1,31 @@
+name: Unified final cave seam random admission witness
+on:
+  push:
+    branches: [probe/unified-final-cave-seam-admission-20261127]
+permissions:
+  contents: read
+jobs:
+  seam:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-integration/random-cave-admission.test.mjs | tee /tmp/seam-native.log
+          seed="$(sed -n 's/^# SEAM_REJECTED_SEED=//p' /tmp/seam-native.log)"
+          test -n "$seed"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4174 >/tmp/seam.log 2>&1 &
+          EGG_SHARD=2 EGG_ONLY=skeleton EGG_SEED_REJECTION_WITNESS=1 EGG_SEAM_REJECTED_SEED="$seed" node tests/creative-integration/physical-eggs-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-final-cave-seam
+          path: artifacts/creative-eggs/

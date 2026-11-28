@@ -58,7 +58,7 @@ try{
    const checkPosition=async()=>{
      await page.locator('#miniMapButton').click();
      const text=await page.locator('#explorationCoordinates').innerText();
-     const match=text.match(/X\s+(-?\d+)\s*·\s*Z\s+(-?\d+)\s*·\s*Seed\s+(-?\d+)/);
+     const match=text.match(/^X\s+(-?\d+(?:\.\d+)?)\s+Y\s+-?\d+(?:\.\d+)?\s+Z\s+(-?\d+(?:\.\d+)?)\s*·\s*[NSEW]+\s+\d+°\s*·\s*Seed\s+(-?\d+)$/);
      if(!match||Number(match[3])!==179)
        throw Error('Authentic map coordinates unavailable: '+text);
      const found=await page.evaluate(()=>Number(

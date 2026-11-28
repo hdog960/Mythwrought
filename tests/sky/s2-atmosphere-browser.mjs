@@ -2,6 +2,7 @@
 // Real mouse/keyboard input aims at sunrise/sunset; ONLY the isolated clock
 // sidecar is seeded for deterministic twilight times. No world edits/teleports.
 import assert from 'node:assert/strict';
+import {assertSkySaveIsolation} from './save-isolation.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {chromium} from 'playwright';
@@ -156,7 +157,7 @@ try{
       assert.notDeepEqual(day.fog,night.fog,'Terrain fog must track same clock');
       assert.notDeepEqual(day.ambient,night.ambient,'Terrain ambient must track sky clock');
       // Menu closes, real rendering and original save bytes remain untouched.
-      assert.deepEqual(await nonSky(page),protectedBytes,'Sky lighting changed non-sky save bytes');
+      assertSkySaveIsolation(await nonSky(page),protectedBytes,'Sky lighting changed non-sky save bytes');
       const after=await scene(page);
       assert.equal(after.glError,after.noError);
       assert.equal(after.loaded,25);
@@ -183,7 +184,7 @@ try{
         await capture(page,viewport,'sunset-world','canvas');
         assert.notEqual(sunrise.sha256,sunset.sha256,
           'Sunrise/sunset real directional captures must differ');
-        assert.deepEqual(await nonSky(page),protectedBytes,'Sun orbit test mutated original world save');
+        assertSkySaveIsolation(await nonSky(page),protectedBytes,'Sun orbit test mutated original world save');
         Object.assign(result,{sunrise:rise,sunset:set});
       }
       manifest.results.push(result);

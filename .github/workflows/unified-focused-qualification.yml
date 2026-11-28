@@ -1,0 +1,95 @@
+name: Unified focused Creative and Navigation qualification
+on:
+  push:
+    branches: [dev/unified-creative-navigation-performance-20261126]
+    paths:
+      - 'src/**'
+      - 'index.html'
+      - 'styles.css'
+      - 'sw*.js'
+      - 'nonblock-stage-assets.json'
+      - 'tests/creative-integration/**'
+      - 'tests/unified-mob-upgrade-browser.mjs'
+      - 'scripts/ci/creative-shared-height-upgrade.mjs'
+      - 'scripts/ci/navigation-production-upgrade.mjs'
+      - '.github/workflows/unified-focused-qualification.yml'
+permissions:
+  contents: read
+jobs:
+  installed-and-building:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 8400d13a6f5521901cbf0909a0c4f6e2e79c1629
+          path: prior-production
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Prepare exact source and targeted prerequisites
+        id: prepare
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C prior-production rev-parse HEAD)" = 8400d13a6f5521901cbf0909a0c4f6e2e79c1629
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-integration/creative-history.test.mjs tests/creative-integration/creative-pack5-history.test.mjs
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+      - name: Actual owner UI
+        if: always() && steps.prepare.outcome == 'success'
+        run: |
+          python3 -m http.server 4174 > /tmp/unified-http.log 2>&1 &
+          node tests/creative-integration/phase5-building-controls-browser.mjs
+      - name: Actual previous-production installed cache and upper Pack5 UI
+        if: always() && steps.prepare.outcome == 'success'
+        run: node scripts/ci/creative-shared-height-upgrade.mjs
+      - name: Actual previous-production map discovery and offline waypoints
+        if: always() && steps.prepare.outcome == 'success'
+        run: node scripts/ci/navigation-production-upgrade.mjs
+      - name: Exact prior production rollback and full installed source hash audit
+        if: always() && steps.prepare.outcome == 'success'
+        run: UNIFIED_PREVIOUS_ROOT=prior-production node tests/unified-mob-upgrade-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-installed-and-building
+          path: |
+            artifacts/creative-building/
+            artifacts/creative-installed-upgrade/
+            artifacts/navigation-upgrade/
+            artifacts/unified-mob-upgrade/
+          if-no-files-found: warn
+  physical-eggs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Actual physical egg placement and reload (ten distinct species)
+        env:
+          EGG_SHARD: ${{ matrix.shard }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7
+          npx playwright install chromium
+          python3 -m http.server 4174 > /tmp/unified-egg-http.log 2>&1 &
+          node tests/creative-integration/physical-eggs-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-physical-eggs-${{ matrix.shard }}
+          path: artifacts/creative-eggs/
+          if-no-files-found: warn

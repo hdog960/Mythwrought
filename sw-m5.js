@@ -3,8 +3,8 @@
 // from original per-seed localStorage and IndexedDB records.
 // BUMP THIS CACHE ID whenever ANY cached asset changes before incorporation.
 const CACHE_PREFIX='mythwrought-m5-shell-';
-const CACHE_NAME=CACHE_PREFIX+'20261128-veilreach-launch-v2';
-const ASSET_RELEASE='20261128-veilreach-launch-v2';
+const CACHE_NAME=CACHE_PREFIX+'20261128-unified-veilreach-v2';
+const ASSET_RELEASE='20261128-unified-veilreach-v2';
 const SOURCE_ASSETS=[
   "./src/veilreach/generation.mjs",
   "./src/veilreach/source.mjs",
@@ -346,7 +346,36 @@ const SOURCE_ASSETS=[
   "./src/west-gallery-world.mjs",
   "./src/world-atmosphere/canopy-bridges.mjs",
   "./styles.css",
-  "./sw-m5.js"
+  "./sw-m5.js",
+  "./src/creative-integration/creative-catalog.mjs",
+  "./src/creative-integration/creative-history.mjs",
+  "./src/creative-integration/creative-voxel-batch.mjs",
+  "./src/creative-integration/creative-inventory.mjs",
+  "./src/creative-integration/creative-thumbnails.mjs",
+  "./src/navigation00/navigation-adapter.mjs",
+  "./src/navigation00/navigation-gesture-history.mjs",
+  "./src/navigation00/navigation-gestures.mjs",
+  "./src/navigation00/navigation-height-observation.mjs",
+  "./src/navigation00/navigation-live-observation.mjs",
+  "./src/navigation00/navigation-location-readout.mjs",
+  "./src/navigation00/navigation-map-hit-test.mjs",
+  "./src/navigation00/navigation-map-pointer.mjs",
+  "./src/navigation00/navigation-map-reflow.mjs",
+  "./src/navigation00/navigation-map-session.mjs",
+  "./src/navigation00/navigation-marker-history.mjs",
+  "./src/navigation00/navigation-observation-catalog.mjs",
+  "./src/navigation00/navigation-observed-landmarks.mjs",
+  "./src/navigation00/navigation-observed-marker-adapter.mjs",
+  "./src/navigation00/navigation-observed-readout-adapter.mjs",
+  "./src/navigation00/navigation-paint.mjs",
+  "./src/navigation00/navigation-projection.mjs",
+  "./src/navigation00/navigation-safe-area.mjs",
+  "./src/navigation00/navigation-safe-controls.mjs",
+  "./src/navigation00/navigation-surface-witness.mjs",
+  "./src/navigation00/navigation-touch-guard.mjs",
+  "./src/navigation00/navigation-viewport.mjs",
+  "./src/navigation00/observed-landmarks.mjs",
+  "./src/navigation00/observed-navigation.mjs"
 ];
 const assetUrls=SOURCE_ASSETS.map(p=>new URL(p,self.registration.scope).href);
 const allowed=new Set(assetUrls);

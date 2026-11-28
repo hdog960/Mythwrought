@@ -1,0 +1,53 @@
+name: Unified final East Gallery admission and offline origin cutoff
+on:
+  push:
+    branches: [probe/unified-final-east-offline-20261128]
+permissions:
+  contents: read
+jobs:
+  east:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          node --test tests/creative-integration/random-cave-admission.test.mjs | tee /tmp/admission.log
+          east="$(sed -n 's/^# EAST_REJECTED_SEED=//p' /tmp/admission.log)"
+          seam="$(sed -n 's/^# SEAM_REJECTED_SEED=//p' /tmp/admission.log)"
+          test -n "$east" && test -n "$seam"
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4174 >/tmp/eggs.log 2>&1 &
+          EGG_SHARD=3 EGG_ONLY=shardmaw EGG_SEED_REJECTION_WITNESS=1 EGG_EAST_REJECTED_SEED="$east" EGG_SEAM_REJECTED_SEED="$seam" node tests/creative-integration/physical-eggs-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-east-gallery-egg
+          path: artifacts/creative-eggs/
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        viewport: [667x375, 844x390, 932x430]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          M5_VIEWPORT=${{ matrix.viewport }} node scripts/ci/manual-biomes-m5-offline-pwa-webgl2.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: unified-offline-cutoff-${{ matrix.viewport }}
+          path: artifacts/m5-offline-${{ matrix.viewport }}/

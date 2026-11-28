@@ -1,0 +1,24 @@
+name: Unified historical xeric full-footprint qualification
+on:
+  push:
+    branches: [probe/unified-historical-xeric-20261126]
+    paths: ['src/**','tests/creative-integration/historical-xeric-transaction.test.mjs','.github/workflows/unified-historical-xeric.yml']
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+      - name: Actual historical source and owner rollback contracts
+        run: |
+          test "$(git rev-parse HEAD^)" = 3ab9f2616f4e6ac1ec0b64e857e782d9dc2a354b
+          node --check src/main.mjs
+          node --test tests/creative-integration/historical-xeric-transaction.test.mjs tests/creative-integration/creative-voxel-batch.test.mjs tests/manual-biomes/desert-m3.test.mjs tests/mountain-v8-release/mountain-v8-dedicated-materials.test.mjs

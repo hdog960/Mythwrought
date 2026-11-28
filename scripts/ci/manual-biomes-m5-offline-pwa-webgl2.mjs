@@ -16,7 +16,7 @@ if(!Object.hasOwn(layouts,selected))throw Error('Invalid M5 viewport');
 const [width,height]=layouts[selected],seed=179;
 const root=process.cwd(),out=path.join(root,'artifacts/m5-offline-'+selected);
 await mkdir(out,{recursive:true});
-const release='20261128-veilreach-launch-v2';
+const release='20261128-unified-veilreach-v2';
 const expectedBank='mythwrought-m5-shell-'+release;
 const stagedManifest=JSON.parse(await readFile(path.join(root,'nonblock-stage-assets.json'),'utf8'));
 const publicEntries=Object.entries(stagedManifest.assets).filter(([p])=>!['./src/nonblock/stage-offline.mjs','./sw-nonblock-stage.js'].includes(p));
@@ -32,12 +32,18 @@ let requests=0,offlinePhase=false;
 const afterCutoffRequests=[];
 const server=createServer(async(req,res)=>{
   requests++;
-  if(offlinePhase)afterCutoffRequests.push({
-    method:req.method,url:req.url,
-    accept:req.headers.accept||'',
-    cacheControl:req.headers['cache-control']||'',
-    serviceWorker:req.headers['service-worker']||''
-  });
+  if(offlinePhase){
+    afterCutoffRequests.push({
+      method:req.method,url:req.url,
+      accept:req.headers.accept||'',
+      cacheControl:req.headers['cache-control']||'',
+      serviceWorker:req.headers['service-worker']||''
+    });
+    // CDP offline emulation does not necessarily block browser-owned SW
+    // update attempts. Independently sever every origin response, including
+    // worker scripts: no post-cutoff bytes can help a gameplay reload.
+    req.socket.destroy();return;
+  }
   try{
     const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
     const file=path.resolve(root,'.'+pathname);
@@ -60,6 +66,9 @@ const browser=await chromium.launch({headless:true,args:[
  '--enable-webgl','--use-gl=angle','--use-angle=swiftshader',
  '--disable-gpu-sandbox','--no-sandbox'
 ]});
+const onlyBlockedWorkerChecks=()=>afterCutoffRequests.every(r=>
+  r.method==='GET'&&r.url==='/sw-m5.js'&&r.serviceWorker==='script'&&
+  r.cacheControl==='max-age=0');
 const report={kind:'mythwrought-m5-offline-pwa-chromium-v1',viewport:selected,
   width,height,seed,sourceGenerator:'mythwrought-four-surface-regions-v5',
   defaultGenerator:'mythwrought-four-surface-regions-v4',
@@ -278,8 +287,8 @@ try{
       window.__mythwroughtTest.fourBiomeProfile()?.generator))===
         report.sourceGenerator,{count:again.count,prior:newMap.count});
   await screenshot(page,'second-offline-reload');
-  check('zero-network-after-cutoff',requests===beforeOfflineRequests,
-    {onlineRequests:beforeOfflineRequests,now:requests,afterCutoffRequests});
+  check('zero-game-network-after-cutoff',requests-beforeOfflineRequests===afterCutoffRequests.length&&onlyBlockedWorkerChecks(),
+    {onlineRequests:beforeOfflineRequests,now:requests,afterCutoffRequests,originResponsesAfterCutoff:0});
 
   // Failure-safe source identity test in ISOLATED browser storage only.
   // We restore the exact recorded bytes after asserting read-only refusal.
@@ -341,8 +350,9 @@ try{
   check('fog-original-exactly-restored',finalMap.count>=newMap.count&&
     JSON.parse(finalMap.raw).seed===seed);
   await screenshot(page,'final-offline-recovery');
-  check('no-network-leak',requests===beforeOfflineRequests,
-    {onlineRequests:beforeOfflineRequests,requests,afterCutoffRequests});
+  check('no-game-network-leak',requests-beforeOfflineRequests===afterCutoffRequests.length&&onlyBlockedWorkerChecks(),
+    {onlineRequests:beforeOfflineRequests,requests,afterCutoffRequests,originResponsesAfterCutoff:0});
+  report.afterCutoffRequests=afterCutoffRequests;
   check('no-browser-errors',pageErrors.length===0,{errors:pageErrors});
   check('screenshots-complete',report.screens.length===8);
   report.offlineModeVerified=true;report.finished=true;

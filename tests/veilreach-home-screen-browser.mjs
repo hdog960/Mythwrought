@@ -13,7 +13,7 @@ const candidate=process.cwd();
 const marker=html=>html.match(/data-mw-release="([^"]+)"/)?.[1];
 const priorRelease=marker(await readFile(resolve(prior,'index.html'),'utf8'));
 assert.ok(priorRelease&&priorRelease!==GAME_RELEASE);
-const previousGenerator=priorRelease==='20261127-veilreach-v1'?VEILREACH_GENERATOR:M8_MOUNTAIN_GENERATOR;
+const priorGenerator=['20261127-veilreach-v1','20261128-veilreach-launch-v2'].includes(priorRelease)?VEILREACH_GENERATOR:M8_MOUNTAIN_GENERATOR;
 const mime={'.html':'text/html','.mjs':'text/javascript','.js':'text/javascript',
   '.css':'text/css','.json':'application/json','.webmanifest':'application/manifest+json',
   '.svg':'image/svg+xml','.png':'image/png'};
@@ -68,7 +68,7 @@ try{
   });
   await page.goto(origin+'/?production-ui=1',{waitUntil:'domcontentloaded'});
   await settle();
-  assert.equal((await state()).generator,previousGenerator);
+  assert.equal((await state()).generator,priorGenerator);
   assert.equal(await page.evaluate(()=>{
     const game=window.__mythwroughtTest;
     return game.editBiomeCell(450,-80,450,0)&&game.editBiomeCell(450,256,450,3);
@@ -126,17 +126,22 @@ try{
   await reload();
   assert.equal(await page.locator('meta[data-mw-release]').getAttribute('data-mw-release'),GAME_RELEASE);
   assert.deepEqual(await oldSave(),saved);
-  assert.equal((await state()).generator,previousGenerator);
+  assert.equal((await state()).generator,priorGenerator);
   console.log('Upgraded same installation and preserved historical edit bytes offline',verified);
 
   await context.setOffline(false);
   await page.evaluate(()=>{globalThis.__releaseFixtureSeed=180;});
   await page.locator('#menu').click();
   await page.locator('#newWorld').click();
-  await page.waitForFunction(g=>{
+  // The prior release already uses Veilreach. Generator equality alone
+  // can resolve against the OLD page while asynchronous admission runs.
+  // Require the exact new seed and the newly loaded source before continuing.
+  await page.waitForFunction(({generator,seed,release})=>{
     const profile=window.__mythwroughtTest?.fourBiomeProfile();
-    return profile?.generator===g&&profile.seed===180;
-  },VEILREACH_GENERATOR,{timeout:120000});
+    return profile?.generator===generator&&profile.seed===seed&&
+      document.querySelector('meta[data-mw-release]')?.getAttribute('data-mw-release')===release&&
+      document.querySelector('#notice')?.hidden;
+  },{generator:VEILREACH_GENERATOR,seed:180,release:GAME_RELEASE},{timeout:120000});
   await settle();
   assert.equal((await state()).seed,180);
   const visible=await page.evaluate(()=>{
@@ -148,6 +153,8 @@ try{
   await context.setOffline(true);
   await reload();
   assert.equal((await state()).generator,VEILREACH_GENERATOR);
+  assert.equal((await state()).seed,180);
+  assert.equal(await page.locator('meta[data-mw-release]').getAttribute('data-mw-release'),GAME_RELEASE);
   assert.deepEqual(await oldSave(),saved);
   assert.deepEqual(errors,[]);
   console.log('PASS Veilreach from normal New World and offline Home Screen reload',visible);
