@@ -43,13 +43,22 @@ export function createResonanceSources({engine,sources=[],authorize,
   // Host must exclusively own these stores, persist the core and this snapshot
   // atomically, and supply pure stable authorization (source owner, load,
   // containment, outlet permission). Never mount a second scheduler for a store.
-  // Actual v1 core insert is synchronous and all-or-nothing. No callbacks occur
-  // between its successful return and the internal prevalidated store debit.
+  // getCell/authorize must be read-only. insert must be synchronous and atomic:
+  // false or a throw must leave the failing insertion unapplied, as in core v1.
+  // No callbacks occur between true and the internal prevalidated store debit.
+  // A commit-then-throw adapter violates this contract and needs host recovery,
+  // not a blind retry. Already acknowledged successful inserts are not rolled back.
+  // On failure error.partial is the immutable completed-prefix ledger, with the
+  // same shape as a normal result; error.cause is the original thrown value.
+  // visited counts completed visits only. The cursor stays at the failing outlet,
+  // so the next step resumes there with a new bounded budget. Consume partial's
+  // dirty/accounting handoff once; never replay it as a set of new insertions.
   function step(){
     if(active)throw new Error('Reentrant source step');
     active=true;
     let visited=0,units=0,energy=0;
     const changed=[];
+    const result=()=>freeze({visited,units,energy,changed:freeze(changed)});
     try{
       while(visited<Math.min(maxVisits,config.length)&&units<maxUnitsPerStep){
         const i=cursor,d=config[i],s=stores[i],p=d.point;
@@ -68,7 +77,12 @@ export function createResonanceSources({engine,sources=[],authorize,
         }
         cursor=(cursor+1)%config.length;visited++;
       }
-      return freeze({visited,units,energy,changed:freeze(changed)});
+      return result();
+    }catch(cause){
+      // Wrap rather than modify cause: callbacks may throw frozen errors or values.
+      const error=new Error('Liquid Resonance source step interrupted',{cause});
+      error.partial=result();
+      throw error;
     }finally{active=false;}
   }
   return freeze({step,save});

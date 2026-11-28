@@ -48,5 +48,10 @@ test('empty and zero-energy stores do not manufacture energy; no automatic sourc
   const s=createResonanceSources(opts(e,[source(0,3,0)]));s.step();s.step();assert.deepEqual(total(e,s),[3,0]);assert.equal(s.step().units,0);
 });
 test('reentrant authorization refuses nested writes and leaves current stock intact',()=>{
-  const e=host();let s;s=createResonanceSources(opts(e,[source(0)],{authorize:()=>s.step()}));const before=s.save();assert.throws(()=>s.step(),/Reentrant/);assert.deepEqual(s.save(),before);assert.equal(e.cells.size,0);
+  const e=host();let s;s=createResonanceSources(opts(e,[source(0)],{authorize:()=>s.step()}));const before=s.save();
+  assert.throws(()=>s.step(),error=>{
+    assert.match(error.cause.message,/Reentrant/);
+    assert.deepEqual(error.partial,{visited:0,units:0,energy:0,changed:[]});return true;
+  });
+  assert.deepEqual(s.save(),before);assert.equal(e.cells.size,0);
 });
