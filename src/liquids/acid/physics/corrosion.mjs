@@ -19,7 +19,7 @@ export function createAcidCorrosion({engine,isLoaded,isOpen,readMaterial,canDama
     allowed.set(r.material,Object.freeze({material:r.material,minStrength:r.minStrength,threshold:r.threshold}));
   }
   const signature=JSON.stringify({enabled,policyId,maxTracked,maxVisits,rules:[...allowed.values()]});
-  const queue=new Map();let busy=false;
+  const queue=new Map(),issued=new WeakMap();let busy=false;
   const idle=()=>{if(busy)throw new Error('Reentrant corrosion operation');};
   const blank=p=>({p,material:null,revision:null,progress:0});
   function track(x,y,z){
@@ -78,12 +78,12 @@ export function createAcidCorrosion({engine,isLoaded,isOpen,readMaterial,canDama
     try{
       for(const [k,p] of candidates){
         const prior=queue.get(k),o=observe(p);
-        if(o?.defer)continue; // retain existing unloaded entries, do not admit new ones
+        if(o?.defer){if(prior)updates.push([k,{...prior}]);continue;} // retain progress, invalidate transient proposals
         if(!o){if(prior){updates.push([k,null]);retired++;}continue;}
         if(!prior){updates.push([k,blank(p)]);admitted++;}
         else if(prior.progress>0&&(prior.material!==o.material||prior.revision!==o.revision)){
           updates.push([k,blank(p)]);reset++;
-        }
+        }else updates.push([k,{...prior}]); // invalidate on observed dirty boundary, even with unchanged progress
       }
       // Net cap permits retiring dry entries and admitting new ones together.
       // A rejected/throwing batch changes neither entries nor FIFO order.
@@ -102,18 +102,41 @@ export function createAcidCorrosion({engine,isLoaded,isOpen,readMaterial,canDama
       for(const [k,e] of queue){
         if(visited===limit)break;visited++;
         const o=observe(e.p);
-        if(o?.defer){deferred++;changes.push([k,e]);continue;}
+        if(o?.defer){deferred++;changes.push([k,{...e}]);continue;}
         if(!o){retired++;changes.push([k,null]);continue;}
         const prior=e.material===o.material&&e.revision===o.revision?e.progress:0;
         const progress=Math.min(o.rule.threshold,prior+o.peak);
-        changes.push([k,{p:e.p,material:o.material,revision:o.revision,progress}]);
-        if(progress===o.rule.threshold)proposals.push(Object.freeze({
-          target:Object.freeze([...e.p]),material:o.material,revision:o.revision,progress,
-          peakStrength:o.peak,expectedAcid:Object.freeze([...o.contacts]),product:'corrosion-proposal'}));
+        const next={p:e.p,material:o.material,revision:o.revision,progress};
+        changes.push([k,next]);
+        if(progress===o.rule.threshold){
+          const proposal=Object.freeze({
+            target:Object.freeze([...e.p]),material:o.material,revision:o.revision,progress,
+            peakStrength:o.peak,expectedAcid:Object.freeze([...o.contacts]),product:'corrosion-proposal'});
+          issued.set(proposal,next);
+          proposals.push(proposal);
+        }
       }
       for(const [k,e] of changes){queue.delete(k);if(e)queue.set(k,e);}
       return Object.freeze({visited,deferred,retired,pending:queue.size,proposals:Object.freeze(proposals)});
     }finally{busy=false;}
   }
-  return Object.freeze({track,trackChanges,step,save});
+  // Single-attempt, instance-local capability. Not a terrain edit or durable
+  // authorization: the host must hold its exclusive edit/streaming lease and
+  // atomically adopt the validated terrain change and all participating state.
+  function revalidateProposal(proposal){
+    idle();
+    const expected=issued.get(proposal);
+    if(!expected)return false;
+    issued.delete(proposal);
+    if(queue.get(key(expected.p))!==expected)return false;
+    busy=true;
+    try{
+      const o=observe(expected.p);
+      return !!o&&!o.defer&&o.material===expected.material&&o.revision===expected.revision&&
+        expected.progress===o.rule.threshold&&o.peak===proposal.peakStrength&&
+        o.contacts.length===proposal.expectedAcid.length&&
+        o.contacts.every((c,i)=>c===proposal.expectedAcid[i]);
+    }finally{busy=false;}
+  }
+  return Object.freeze({track,trackChanges,step,revalidateProposal,save});
 }
