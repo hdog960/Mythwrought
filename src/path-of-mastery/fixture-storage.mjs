@@ -1,0 +1,95 @@
+// Isolated real IndexedDB adapter. Never open a production database or save key.
+const id = x => typeof x === 'string' && /^[a-zA-Z0-9:_./-]{1,96}$/.test(x);
+const sequence = x => Number.isSafeInteger(x) && x > 0;
+const MAX_BYTES = 65536, MAX_EVENTS = 1000000;
+const validBytes = x => typeof x === 'string' && x.length <= MAX_BYTES;
+export function classifyFixtureClaim(existing,producer){
+  if(existing===undefined)return null;
+  if(!existing||!id(existing.producer)||!sequence(existing.sequence)||existing.sequence>MAX_EVENTS)throw Error('Corrupt shared claim');
+  return existing.producer===producer?{ok:false,reason:'duplicate',sequence:existing.sequence}:{ok:false,reason:'claimed-by-other-source'};
+}
+export async function openFixtureStorage({indexedDB, scope, producer, verify, readContext, sharedClaims=false}={}) {
+  if (typeof sharedClaims!=='boolean' || !indexedDB || !id(scope) || !/^fixture:.+$/.test(scope) || !id(producer) ||
+      typeof verify !== 'function' || typeof readContext !== 'function') throw Error('Invalid fixture host');
+  const db = await new Promise((resolve,reject)=>{
+    const req=indexedDB.open((sharedClaims?'mythwrought-pm4-shared-fixture:':'mythwrought-pm4-fixture:')+scope,1); let blocked=false;
+    req.onupgradeneeded=()=>req.result.createObjectStore('records');
+    req.onerror=()=>reject(req.error);req.onblocked=()=>{blocked=true;reject(Error('Blocked database'));};
+    req.onsuccess=()=>{if(blocked)req.result.close();else resolve(req.result);};
+  });
+  db.onversionchange=()=>db.close();
+  const context=()=>{const c=readContext();return c?.scope===scope&&c.mode==='survival'&&c.writable===true;};
+  function transact(mode,work){
+    return new Promise((resolve,reject)=>{
+      const tx=db.transaction('records',mode), store=tx.objectStore('records');let value, failure;
+      tx.oncomplete=()=>resolve(value);tx.onabort=()=>reject(failure??tx.error??Error('Aborted'));
+      const abort=e=>{failure=e;try{tx.abort();}catch{reject(e);}};
+      const get=(key,next)=>{const req=store.get(key);req.onsuccess=()=>{try{next(req.result);}catch(e){abort(e);}};};
+      const put=(key,v)=>store.put(v,key);
+      const done=v=>{value=v;};
+      try{work({get,put,done});}catch(e){abort(e);}
+    });
+  }
+  const prefix='producer|'+producer+'|';
+  return Object.freeze({
+    close:()=>db.close(),
+    read:()=>transact('readonly',({get,done})=>get('ledger',v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt ledger');done(v??null);})),
+    compareExchange(expected,next){
+      if(!(expected===null||validBytes(expected))||!validBytes(next))return Promise.reject(Error('Invalid CAS bytes'));
+      return transact('readwrite',({get,put,done})=>get('ledger',v=>{
+        if(v!==undefined&&!validBytes(v))throw Error('Corrupt ledger');
+        if((v??null)!==expected||!context()){done(false);return;}
+        put('ledger',next);done(true);
+      }));
+    },
+    specializationPort(skill){
+      if(typeof skill!=='string'||!/^pm:[a-z-]{1,64}$/.test(skill))throw Error('Invalid skill');
+      const key='specialization|'+skill;
+      return Object.freeze({read:()=>transact('readonly',({get,done})=>get(key,v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');done(v??null);})),
+        compareExchangeWithLedger(expected,next,expectedLedger){
+          if(!(expected===null||validBytes(expected))||!validBytes(next)||!(expectedLedger===null||validBytes(expectedLedger)))return Promise.reject(Error('Invalid guarded CAS bytes'));
+          return transact('readwrite',({get,put,done})=>get('ledger',ledger=>{
+            if(ledger!==undefined&&!validBytes(ledger))throw Error('Corrupt ledger');
+            if((ledger??null)!==expectedLedger){done(false);return;}
+            get(key,v=>{if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');
+              const c=readContext();if((v??null)!==expected||c?.scope!==scope||c.mode!=='survival'||c.writable!==true||c.inCombat!==false||c.hostileEngagement!==false){done(false);return;}
+              put(key,next);done(true);
+            });
+          }));
+        },
+        compareExchange(expected,next){
+          if(!(expected===null||validBytes(expected))||!validBytes(next))return Promise.reject(Error('Invalid CAS bytes'));
+          return transact('readwrite',({get,put,done})=>get(key,v=>{
+            if(v!==undefined&&!validBytes(v))throw Error('Corrupt specialization');
+            if((v??null)!==expected||!context()||readContext()?.inCombat!==false){done(false);return;}
+            put(key,next);done(true);
+          }));
+        }});
+    },
+    // Owner verifier must return canonical semantic identity for a committed action.
+    // Sequence allocation and semantic uniqueness are committed in ONE transaction.
+    record(evidence){return transact('readwrite',({get,put,done})=>{
+      if(!context()){done({ok:false,reason:'context'});return;}
+      const semantic=verify(evidence);if(!id(semantic)){done({ok:false,reason:'unverified'});return;}
+      const admit=()=>get(prefix+'semantic|'+semantic,existing=>{
+        if(existing!==undefined){if(!sequence(existing))throw Error('Corrupt semantic index');done({ok:false,reason:'duplicate',sequence:existing});return;}
+        get(prefix+'cursor',cursor=>{
+          const last=cursor??0;if(!Number.isSafeInteger(last)||last<0||last>MAX_EVENTS)throw Error('Corrupt producer cursor');
+          if(last===MAX_EVENTS||!context()){done({ok:false,reason:'capacity-or-context'});return;}
+          const seq=last+1;put(prefix+'cursor',seq);put(prefix+'semantic|'+semantic,seq);put(prefix+'event|'+seq,semantic);
+          if(sharedClaims)put('claim|'+semantic,{producer,sequence:seq});
+          done({ok:true,sequence:seq});
+        });
+      });
+      if(sharedClaims)get('claim|'+semantic,existing=>{const result=classifyFixtureClaim(existing,producer);if(result)done(result);else admit();});else admit();
+    });},
+    // Retained outbox; recovery can replay against ledger's durable cursor.
+    event(seq){if(!sequence(seq)||seq>MAX_EVENTS)return Promise.reject(Error('Invalid sequence'));
+      return transact('readonly',({get,done})=>get(prefix+'event|'+seq,semantic=>{
+        if(semantic!==undefined&&!id(semantic))throw Error('Corrupt event');
+        if(semantic===undefined){get(prefix+'cursor',cursor=>{if(cursor!==undefined&&(!Number.isSafeInteger(cursor)||cursor<0||cursor>MAX_EVENTS||seq<=cursor))throw Error('Missing committed event');done(null);});return;}
+        get(prefix+'semantic|'+semantic,reverse=>{if(reverse!==seq)throw Error('Corrupt reverse index');
+          get(prefix+'cursor',cursor=>{if(!Number.isSafeInteger(cursor)||cursor<seq||cursor>MAX_EVENTS)throw Error('Corrupt producer cursor');const finish=()=>done(Object.freeze({producer,sequence:seq,semantic}));if(sharedClaims)get('claim|'+semantic,claim=>{if(claim?.producer!==producer||claim.sequence!==seq)throw Error('Corrupt shared claim');finish();});else finish();});});
+      }));},
+  });
+}
