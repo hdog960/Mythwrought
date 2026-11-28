@@ -1,6 +1,7 @@
 // AB4 isolated execution of a single candidate using the ORIGINAL moveBody.
 // Not a new population manager. Only owner-provided target damage commit;
 // no world edits or production admission. Special abilities not yet executed.
+import {territoryDecision,observeDirePack,snowRollSurface} from './advanced-tactics.mjs';
 import {moveBody} from '../movement.mjs';
 import {nextPlainsIntent} from './plains-intents.mjs';
 import {nextDesertIntent} from './desert-intents.mjs';
@@ -24,9 +25,9 @@ function createActor(candidate,position,query,biome){
   const {record:r,capability:c}=candidate,env=query.environment(position);
   if(env?.biome!=='cave'||env.hazard!==false||position[1]<c.depth[0]||position[1]>c.depth[1]||!c.spawnSupport.some(k=>expansionSupport(query,position,r.body,k)))throw TypeError('Invalid cave habitat');
  }
- return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,combo:null,visual:'idle',state:'idle',action:'idle'};
+ return {candidate,species:candidate.record,position:[...position],home:Object.freeze([...position]),returningHome:false,rollTicks:0,rollCooldown:0,velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,combo:null,visual:'idle',state:'idle',action:'idle'};
 }
-function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator,launchProjectile,flowerCell,commitPollination}={},biome,decide){
+function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator,launchProjectile,flowerCell,commitPollination,controllerTick}={},biome,decide){
  if(actor?.candidate?.requirement?.biome!==biome)return false;
  const r=actor.species,rev=query.revision();
  if(!Number.isSafeInteger(rev)||query.volume(actor.position,r.body)!=='clear')return false;
@@ -52,6 +53,10 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
   targetBelow:visible&&target.position[1]<actor.position[1]-.5&&Math.hypot(target.position[0]-actor.position[0],target.position[2]-actor.position[2])<=.8,
   ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
  const profile=multiHitProfile(r),ranged=beastProjectilePolicy(r);
+ const territory=obs.ready?territoryDecision(actor,query,target,rev):null;
+ const pack=observeDirePack(actor,query,target,readPeers,rev,controllerTick);
+ if(typeof readPeers==='function'&&r.id==='dire-hound')obs.packNearby=!!pack;
+ const rolling=r.id==='snowdrifter'&&obs.ready&&threatVisible&&obs.threatDistance<5&&actor.rollCooldown<=0&&snowRollSurface(query,ownerView,actor.position,r.body,rev);
  let intent=decide(actor.candidate,obs);
  const activity=obs.ready&&matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness)?observeWildlife(actor,query,ownerView,{goal,flowerCell,threatVisible,targetVisible:visible,target,revision:rev}):null;
  if(activity)intent={action:activity.action,visual:activity.action};
@@ -66,8 +71,14 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
    intent={action:'combo-windup',visual:'idle'};
   }else intent={action:'combo-strike',visual:'attack'};
  }
+ if(territory){intent={action:territory.action,visual:'walk'};actor.combo=null;actor.returningHome=territory.action==='return-territory';}
+ else actor.returningHome=false;
+ if(pack&&intent.action==='lunge'&&!pack.mayStrike)intent={action:'prepare-attack',visual:'idle'};
+ if(rolling)intent={action:'snow-roll',visual:'walk'};
+ actor.rollCooldown=Math.max(0,actor.rollCooldown-1);
+ if(!rolling)actor.rollTicks=0;
  actor.cooldown=obs.cooldownRemaining;
- actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
+ actor.windup=intent.action==='prepare-attack'?Math.min(r.combat.windup+dt,obs.windupElapsed+dt):0;
  actor.windupTarget=intent.action==='prepare-attack'?attackTarget:null;
  actor.action=intent.action;actor.visual=intent.visual;
  if(['honeybee','faerie','prismwing'].includes(r.id)&&activity?.action!=='flower-contact'){actor.flowerKey=null;actor.flowerTicks=0;}
@@ -79,11 +90,13 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(intent.action==='investigate'&&heard)destination=heard;
  if(intent.action==='herd'&&social)destination=social.goal;
  if(activity)destination=activity.destination;
+ if(territory)destination=territory.destination;
+ if(rolling){destination=threat.position;away=true;}
  let heading=[0,0],vertical=0;
  if(destination){let dx=destination[0]-actor.position[0],dz=destination[2]-actor.position[2],n=Math.hypot(dx,dz);if(n>1e-5)heading=[dx/n*(away?-1:1),dz/n*(away?-1:1)];vertical=Math.sign(destination[1]-actor.position[1]);}
  if(intent.action==='reattach-climb'&&reattachWall)heading=reattachWall;
  // Existing LocalNavigator supplied and tick-budgeted by controller owner.
- if(destination&&!away&&grounded&&r.movement.capabilities.includes('walk')&&typeof actor.id==='string'&&typeof navigator?.steer==='function'&&['herd','investigate','pursue','forage'].includes(intent.action)){
+ if(destination&&!away&&grounded&&r.movement.capabilities.includes('walk')&&typeof actor.id==='string'&&typeof navigator?.steer==='function'&&['herd','investigate','pursue','forage','return-territory'].includes(intent.action)){
   const steer=navigator.steer(actor,destination);if(Array.isArray(steer)&&steer.length===2&&steer.every(Number.isFinite))heading=steer;
  }
  if(activity?.action==='flower-contact'){heading=[0,0];vertical=0;}
@@ -93,7 +106,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(intent.action==='perch-approach'&&landingGoal){const d=Math.hypot(landingGoal[0]-actor.position[0],landingGoal[2]-actor.position[2]);vertical=d>.3&&landingGoal[1]<actor.position[1]?0:Math.max(-.5,Math.min(.5,(landingGoal[1]-actor.position[1])*2));if(d<.16)heading=[0,0];}
  if(intent.action==='glide')vertical=-.32;
  if(biome==='cave'&&r.id==='cave-bat'&&obs.ceilingContact&&intent.action==='fly')vertical=-1;
- if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;heading=[x*.55-z*.835,z*.55+x*.835];}
+ if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;const sign=pack?.flank??1;heading=[x*.55-z*.835*sign,z*.55+x*.835*sign];}
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
  if(intent.action==='fly'&&grounded&&vertical<=0)vertical=1;
  try{
@@ -112,7 +125,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
    environment:p=>({...query.environment(p),climbable:climbing&&expansionSupport(query,p,r.body,'climb-surface')})};
   if(intent.action==='perch'&&perchReady){actor.velocity=[0,0,0];actor.motionMode='perch';actor.grounded=true;}
   else if(roost){actor.velocity=[0,0,0];actor.motionMode='roost';actor.grounded=false;}
-  else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,climb:climbing,pace:wading?.55:intent.action==='charge'?1.5:away?1.2:1});
+  else moveBody(movementQuery,actor,heading,dt,{mode:waterOnly?'swim':flying?'fly':'walk',vertical:ceilingOnly?0:vertical,jump,climb:climbing,pace:rolling?1.6:wading?.55:intent.action==='charge'?1.5:away?1.2:1});
   if(support&&!expansionSupport(query,actor.position,r.body,support)){Object.assign(actor,start);return false;}
   if(climbing&&(!expansionSupport(query,actor.position,r.body,'climb-surface')||actor.motionMode!=='climb')){Object.assign(actor,start);return false;}
   if(intent.action==='glide'&&!expansionSupport(query,actor.position,r.body,'air')){Object.assign(actor,start);return false;}
@@ -120,6 +133,11 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
   if(waterOnly&&actor.motionMode!=='swim'){Object.assign(actor,start);return false;}
   if(ceilingOnly||intent.action==='reattach-climb'&&expansionSupport(query,actor.position,r.body,'ceiling')){actor.dropState=null;actor.dropTarget=null;actor.motionMode='ceiling-crawl';actor.velocity=[0,0,0];actor.grounded=false;}
   if(query.revision()!==rev||query.volume(actor.position,r.body)!=='clear'||query.revision()!==rev){Object.assign(actor,start);return false;}
+  if(rolling){
+   if(!snowRollSurface(query,ownerView,actor.position,r.body,rev)){Object.assign(actor,start);return false;}
+   actor.motionMode='roll';actor.rollTicks++;
+   if(actor.rollTicks>=18){actor.rollTicks=0;actor.rollCooldown=30;}
+  }
   if(activity&&!settleWildlife(actor,query,ownerView,activity,rev,commitPollination)){Object.assign(actor,start);return false;}
   if(wading)actor.motionMode='wade';
   if(intent.action==='launch-projectile'){

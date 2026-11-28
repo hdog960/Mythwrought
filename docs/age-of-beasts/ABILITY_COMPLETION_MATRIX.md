@@ -9,14 +9,14 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 |---|---|---|
 | Bison | herd, grazing, defense | Peer-based herd and actual grass grazing native PASS session15; live integration pending |
 | Badger | forage, burrow | Incomplete |
-| Meadowlark | flight, forage, landing | Supported landing and threat takeoff authored; native/live pending |
-| Honeybee | flight, pollination, hive | Initial native failed due to missing shape authority in fixture; corrected real shape provider and continuous hover, native pending; hive/live pending |
+| Meadowlark | flight, forage, landing | Supported landing and threat takeoff native PASS session19; live pending |
+| Honeybee | flight, pollination, hive | Physical blossom contact and pollen transfer native PASS session19; hive/live pending |
 | Golden Antelope | evasion, herd | Incomplete |
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
-| Dire Hound | pack, lunge, bite | Incomplete |
-| Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate authored; native/live and restraint owner pending |
+| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots authored; native/live pending |
+| Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate native PASS session19; live and restraint owner pending |
 
 ## desert
 Native isolated pursuit, hop, pincer, night gate.
@@ -26,13 +26,13 @@ Native isolated pursuit, hop, pincer, night gate.
 | Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
-| Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; source-known shoreline selection authored, native/live pending |
+| Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; shoreline native failed on straddling footprint; corrected two-sided full-body search session20, native/live pending |
 | Dunewalker | herd, six-legged-walk | Incomplete |
 | Mummy | pursuit, melee | Incomplete |
 | Giant Scorpion | pincers, tail, venom | Incomplete |
 | Dune Serpent | serpentine, ambush, emergence | Incomplete |
 | Mirage Djinn | float, illusion, magic | Incomplete |
-| Sand Colossus | territory, heavy-melee | Incomplete |
+| Sand Colossus | territory, heavy-melee | Home radius and return behavior authored; native/live pending |
 
 ## snow
 Native isolated charge, heavy melee, night flight.
@@ -40,10 +40,10 @@ Native isolated charge, heavy melee, night flight.
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Woolly Mammoth | herd, defense, domestication, conditional-ground-mount | Incomplete |
-| Ptarmigan | forage, short-flight, evasion | Supported landing and threat takeoff authored; native/live pending |
+| Ptarmigan | forage, short-flight, evasion | Supported landing and threat takeoff native PASS session19; live pending |
 | Ermine | evasion, explore | Incomplete |
 | Aurora Wisp | float, illumination | Incomplete |
-| Snowdrifter | walk, roll | Incomplete |
+| Snowdrifter | walk, roll | Snow-supported bounded accelerated roll authored; native/live and rolling renderer animation pending |
 | Yeti | charge, heavy-melee, ice-projectile | Charge qualified; ranged windup/launch native PASS session17, AV pool fixture impact passed; live pending |
 | Ice Golem | heavy-melee | Incomplete |
 | Rime Widow | crawl, concealment, freezing-venom | Incomplete |
@@ -56,14 +56,14 @@ Native isolated jump, flower approach, branch strike, night gate.
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; live pending |
-| Faerie | flight, flower-visit | Physical blossom visit authored; native/live pending |
+| Faerie | flight, flower-visit | Physical blossom visit native PASS session19; live pending |
 | Sproutling | waddle, concealment, rest | Incomplete |
-| Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest authored; native/live pending |
+| Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest native PASS session19; live pending |
 | Glimmerstag | walk, illumination | Incomplete |
 | Corrupted Treant | branch-attack, root-attack | Incomplete |
 | Nightshade Witch | poison-spell, slow-spell | Incomplete |
 | Sporebeast | spore-cloud | Incomplete |
-| Chimera | territory, multi-attack | Three guarded timed strikes native PASS session16; live pending |
+| Chimera | territory, multi-attack | Three guarded timed strikes native PASS session16; home radius/return authored session20, native/live pending |
 | Dreamweaver | float, magic, vision-distortion | Incomplete |
 
 ## alpine
@@ -93,7 +93,7 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 | Lantern Beetle | crawl, illumination | Incomplete |
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
-| Abyssal Sentinel | territory, heavy-melee | Incomplete |
+| Abyssal Sentinel | territory, heavy-melee | Home radius and return behavior authored; native/live pending |
 | Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; live sound producer pending |
 | Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites native PASS session16; live pending |

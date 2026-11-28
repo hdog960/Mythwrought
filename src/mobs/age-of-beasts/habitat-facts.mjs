@@ -79,9 +79,15 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
    // and actual shallow supported water, with source-known footprints.
    const dry=pos=>knownVolume(pos)&&knownFloor(pos)&&expansionSupport(q,pos,body,'ground')&&expansionSupport(q,pos,body,'air');
    const wet=pos=>knownVolume(pos)&&knownFloor(pos)&&shallowWade(q,pos,body);
-   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])for(const d of [.5,1,1.5,2]){
-    const b=[at[0]+dx*d,at[1],at[2]+dz*d];
-    if((dry(at)&&wet(b)||wet(at)&&dry(b))&&q.lineOfSight([at[0],at[1]+body.height*.6,at[2]],[b[0],b[1]+body.height*.6,b[2]])===true)return true;
+   // Center can straddle the bank. Search independently on each side
+   // for complete dry and wet footprints; never require the center to be dry.
+   for(const [dx,dz] of [[1,0],[0,1]]){
+    const samples=[-2,-1.5,-1,-.5,0,.5,1,1.5,2].map(d=>[at[0]+dx*d,at[1],at[2]+dz*d]);
+    const drySites=samples.filter(dry),wetSites=samples.filter(wet);
+    for(const a of drySites)for(const b of wetSites){
+     if(Math.hypot(...a.map((n,i)=>n-b[i]))>2*body.radius+1)continue;
+     if(q.lineOfSight([a[0],a[1]+body.height*.6,a[2]],[b[0],b[1]+body.height*.6,b[2]])===true)return true;
+    }
    }
    return false;
   })();
