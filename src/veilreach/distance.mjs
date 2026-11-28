@@ -348,7 +348,7 @@ export function createVeilreachDistanceRenderer(gl){
   const retry=new GpuUploadRetry();
   let identity=null,terrain=null,readRevision=null,buffer=null,owners=[],drawKey='',job=null;
   let center=null,atlasBytes=0,rebuilds=0,preparedTiles=0,lastPreparationMs=0,lastUploadMs=0;
-  let fence=null,gpuDeferredFrames=0;
+  let fence=null,fenceSince=0,gpuDeferredFrames=0,atlasComplete=false;
   let uploadPhases={};
   function measureUpload(name,action){
     const started=performance.now();
@@ -362,18 +362,21 @@ export function createVeilreachDistanceRenderer(gl){
   function rendererReady(){
     if(!fence)return true;
     const status=measureUpload('fencePoll',()=>gl.clientWaitSync(fence,0,0));
-    if(status===gl.TIMEOUT_EXPIRED){gpuDeferredFrames++;return false;}
+    if(status===gl.TIMEOUT_EXPIRED&&performance.now()-fenceSince<32){
+      gpuDeferredFrames++;
+      return false;
+    }
     releaseFence(gl.isContextLost());
-    if(status!==gl.ALREADY_SIGNALED&&status!==gl.CONDITION_SATISFIED)
+    if(status!==gl.ALREADY_SIGNALED&&status!==gl.CONDITION_SATISFIED&&status!==gl.TIMEOUT_EXPIRED)
       throw Error('Veilreach GPU readiness check failed');
     return true;
   }
   function finishFrame(){
-    // The fence follows every draw in the current frame. A busy renderer can
-    // keep drawing the visible bank while the next staged transfer waits.
-    if(job?.ready&&!fence&&!gl.isContextLost()&&typeof gl.fenceSync==='function'){
+    // Defer only a replacement of a complete atlas. Waiting for GPU slack
+    // during bootstrap delayed first sight of the islands on a busy driver.
+    if(atlasComplete&&job?.ready&&!fence&&!gl.isContextLost()&&typeof gl.fenceSync==='function'){
       fence=gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE,0);
-      if(fence)gl.flush();
+      if(fence){fenceSince=performance.now();gl.flush();}
     }
   }
   function invalidate(lost=false){
@@ -383,15 +386,17 @@ export function createVeilreachDistanceRenderer(gl){
     job?.upload?.dispose(lost);
     owners=[];
     atlasBytes=0;
+    atlasComplete=false;
     drawKey='';
     job=null;
     retry.clear();
   }
-  function publish(next){
+  function publish(next,complete){
     if(buffer)gl.deleteBuffer(buffer);
     buffer=next.buffer;
     owners=next.owners;
     atlasBytes=next.bytes;
+    atlasComplete=complete;
     rebuilds++;
   }
 
@@ -436,7 +441,7 @@ export function createVeilreachDistanceRenderer(gl){
             if(rendererReady()){
               if(!job.upload)job.upload=measureUpload('pack',()=>stageUpload(gl,pack(job.ready)));
               if(job.upload.slice(measureUpload)){
-                publish(job.upload.finish());
+                publish(job.upload.finish(),job.done);
                 job.upload=null;job.ready=null;
                 retry.success(retryKey);
               }

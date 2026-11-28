@@ -272,7 +272,7 @@ test('visual ownership changes only change draw ranges, retaining the staged sec
 });
 
 test('distance publication keeps the previous buffer if a replacement upload fails',()=>{
-  let current=null,error=0,reject=false,busy=false,failures=0,largestTransfer=0;
+  let current=null,error=0,reject=false,busy=true,failures=0,largestTransfer=0;
   const deleted=new Set(),drawn=[],fences=new Set();
   const gl={
     canvas:{dataset:{}},ARRAY_BUFFER:1,STATIC_DRAW:2,TRIANGLES:3,FLOAT:4,NO_ERROR:0,
@@ -308,6 +308,7 @@ test('distance publication keeps the previous buffer if a replacement upload fai
   }
   const before=JSON.parse(gl.canvas.dataset.veilreachAtlas);
   assert.equal(before.pending,false);
+  assert.equal(before.gpuDeferredFrames,0,'cold visibility does not wait for replacement headroom');
   assert.ok(before.bytes>0&&before.bytes<=VEILREACH_DISTANCE_MAX_BYTES);
   for(const [cx,cz,section] of [[2,4,5],[3,4,5]]){
     assert.ok(meshChunk(world,cx,cz,section).length>900*9);
