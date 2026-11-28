@@ -19,14 +19,16 @@ try{
  await page.addInitScript(()=>{if(localStorage.getItem('mythwrought-v002-selected-seed')===null)localStorage.setItem('mythwrought-v002-selected-seed','7');});
  await page.goto('http://127.0.0.1:'+server.address().port+'/index.html',{waitUntil:'load'});
  await page.waitForFunction(()=>window.__mythwroughtTest&&Number(document.getElementById('miniMap').dataset.discovered)>0,null,{timeout:120000});
- assert.equal((await pose()).seed,7);await flush();const before7=await bytes(7);assert.ok(before7[2]);assert.equal(JSON.parse(before7[2]).seed,7);
- await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#seedInput').fill('179');await page.locator('#createExperimentalV5World').click();await page.locator('#closeHelp').click();
+ assert.equal((await pose()).seed,7);await flush();
+ await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#save').click();await page.locator('#closeHelp').click();
+ await flush();const before7=await bytes(7);assert.ok(before7[0]&&before7[2],'real prior SAVE and map must exist');assert.equal(JSON.parse(before7[0]).seed,7);assert.equal(JSON.parse(before7[2]).seed,7);console.log('PRIOR SAVED BASELINE',JSON.stringify({canonical:before7[0],cells:JSON.parse(before7[2]).cells.length}));
+ await page.locator('#menu').click();if(!await page.locator('#advancedMenu').evaluate(e=>e.open))await page.locator('#advancedMenu > summary').click();await page.locator('#seedInput').fill('179');await page.locator('#createExperimentalV5World').click();await page.locator('#closeHelp').click();
  assert.equal((await pose()).seed,179);assert.equal(await page.evaluate(()=>window.__mythwroughtTest.fourBiomeProfile()?.generator),'mythwrought-four-surface-regions-v5');
  await flush();const baseline7=await bytes(7),before179=await bytes(179);assert.ok(before179[0]);assert.equal(baseline7[0],before7[0]);assert.equal(baseline7[1],before7[1]);assert.ok(JSON.parse(before7[2]).cells.every(k=>JSON.parse(baseline7[2]).cells.includes(k)));
  const start=await pose(),n=await count();let travel=0;
  for(const k of ['w','a','d','s']){await page.locator('#scene').focus();await page.keyboard.down(k);await page.waitForTimeout(4800);await page.keyboard.up(k);const p=await pose();travel=Math.hypot(p.x-start.x,p.z-start.z);if(travel>=5&&await count()>n)break;}
  assert.ok(travel>=5&&await count()>n,'real movement and discovery');await flush();const walked=await bytes(179);assert.equal(JSON.parse(walked[2]).seed,179);assert.deepEqual(await bytes(7),baseline7,'inactive seed changed during active world exploration');
- await page.locator('#menu').click();await page.locator('#advancedMenu > summary').click();await page.locator('#save').click();
+ await page.locator('#menu').click();if(!await page.locator('#advancedMenu').evaluate(e=>e.open))await page.locator('#advancedMenu > summary').click();await page.locator('#save').click();
  assert.equal((await bytes(179))[0],before179[0],'canonical seed179 edited without block changes');assert.equal((await bytes(179))[1],before179[1]);assert.deepEqual(await bytes(7),baseline7,'inactive seed changed during save');
  await page.reload({waitUntil:'load'});await page.waitForFunction(()=>window.__mythwroughtTest?.m5ObservedPose().seed===179,null,{timeout:120000});await page.waitForFunction(()=>Number(document.getElementById('miniMap').dataset.discovered)>0,null,{timeout:120000});
  await flush();const after=await bytes(179);assert.equal(after[0],before179[0]);assert.equal(after[1],before179[1]);assert.ok(JSON.parse(walked[2]).cells.every(k=>JSON.parse(after[2]).cells.includes(k)));assert.deepEqual(await bytes(7),baseline7);assert.deepEqual(errors,[]);
