@@ -1,4 +1,13 @@
 export const FAMILIES=Object.freeze(["slashing","piercing","crushing","fire","frost","lightning","poison","arcane","resonance"]);
+function validateDelivery(d){
+ const compatible={unarmed:['melee'],projectile:['projectile'],spell:['projectile','area','self','target','channel'],ability:['melee','projectile','area','self','target','channel']};
+ const shapes={melee:['sweep','ray'],projectile:['ray','sphere'],area:['sphere'],self:['self'],target:['ray','sphere'],channel:['ray','sphere','self']};
+ if(!compatible[d.type]?.includes(d.delivery)||!shapes[d.delivery]?.includes(d.geometry.shape))throw Error('incompatible delivery');
+ if(d.delivery==='self'&&(d.reach!==0||d.geometry.maxTargets!==1)||d.delivery!=='self'&&d.delivery!=='channel'&&d.reach<=0)throw Error('invalid delivery reach');
+ if(d.delivery==='melee'&&(d.reach>16||d.geometry.radius>2||d.damage.length===0))throw Error('invalid melee bounds');
+ if(d.geometry.shape==='ray'&&d.geometry.radius!==0)throw Error('ray radius must be zero');
+ if(d.geometry.shape==='self'&&(d.geometry.radius!==0||d.geometry.maxTargets!==1||d.reach!==0))throw Error('invalid self geometry');
+}
 export function createCombatRegistry(definitions, families=FAMILIES){
  const record=x=>x!==null&&typeof x==='object'&&!Array.isArray(x)&&[Object.prototype,null].includes(Object.getPrototypeOf(x));
  const id=x=>typeof x==='string'&&/^[a-z][a-z0-9_-]{0,31}:[a-z0-9][a-z0-9._-]{0,63}$/.test(x);
@@ -28,6 +37,7 @@ export function createCombatRegistry(definitions, families=FAMILIES){
    if(!exact(d.cost,['stamina','mana'])||!number(d.cost.stamina,0,100000)||!number(d.cost.mana,0,100000)||typeof d.critical!=='boolean')throw Error('invalid cost/critical');
    if(!exact(d.geometry,['shape','radius','maxTargets'])||!['sweep','ray','sphere','self'].includes(d.geometry.shape)||!number(d.geometry.radius,0,16)||!Number.isInteger(d.geometry.maxTargets)||!number(d.geometry.maxTargets,1,32))throw Error('invalid geometry');
    if(!Array.isArray(d.effects)||d.effects.length>16||d.effects.some(x=>!id(x))||new Set(d.effects).size!==d.effects.length||!exact(d.hooks,['animation','feedback'])||Object.values(d.hooks).some(x=>x!==null&&!id(x)))throw Error('invalid effects/hooks');
+   validateDelivery(d);
    normalized={...d,requirements:requirements(d.requirements),damage,timing:Object.freeze({...d.timing}),cost:Object.freeze({...d.cost}),geometry:Object.freeze({...d.geometry}),effects:Object.freeze([...d.effects]),hooks:Object.freeze({...d.hooks})};
   }else if(equipmentTypes.includes(d.type)){
    if(!exact(d,[...common,'slot','actions','modifiers','weight'])||!['main-hand','off-hand','head','body','legs','feet','accessory'].includes(d.slot)||!number(d.weight,0,1000)||!Array.isArray(d.actions)||d.actions.length>16||d.actions.some(x=>!id(x))||new Set(d.actions).size!==d.actions.length||!Array.isArray(d.modifiers)||d.modifiers.length>32)throw Error('invalid equipment');
