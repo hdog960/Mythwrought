@@ -17,7 +17,7 @@ const pins={
   "src/liquids/water/physics/definition.mjs": "78bb5be0317698b0a7e2c27ad69f13d58d2bb054",
   "src/liquids/lava/physics/quench-persistence.mjs": "3f055cb12b00a7875c045c40e615a9bd0aa23e57",
   "src/liquids/lava/physics/persistence-bridge.mjs": "166aab758a25b697b879293fa288e6cf204e966e",
-  "src/liquids/lava/physics/quench-batch.mjs": "d206dc726feea1402279a97bf8a1286388faf7c0",
+  "src/liquids/lava/physics/quench-batch.mjs": "6ff0bf1ae40530b2366560668286b41d98694a87",
   "src/liquids/lava/physics/transactions.mjs": "1f5dcc886bbf2adcf2bc6d2d69a88c77115d569f",
   "src/liquids/lava/physics/definition.mjs": "93f6559d51ec1c1b6b2ac9aa4776129903fc3e96",
   "src/liquids/lava/physics/thermal-scheduler.mjs": "5bbb9687b82dd87893cf1740cf52464e80158c1b",
