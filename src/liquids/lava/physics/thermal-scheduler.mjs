@@ -22,6 +22,18 @@ export function createLavaThermalScheduler({engine,isLoaded,isOpen,canCool,
     pending.set(k,Object.freeze([x,y,z]));
     return true;
   }
+  // A committed owner transaction can retire a known loaded non-lava cell
+  // immediately, without rotating unrelated FIFO work or visiting parked cells.
+  function retireIfAbsent(x,y,z){
+    requireIdle();
+    if(!valid(x,y,z))throw new RangeError('Outside physical cell envelope');
+    busy=true;
+    try{
+      if(isLoaded(x,y,z)!==true||engine.getCell(x,y,z)?.id==='lava')return false;
+      pending.delete(key(x,y,z));
+      return true;
+    }finally{busy=false;}
+  }
   if(snapshot!==null){
     if(snapshot?.version!==1||snapshot.maxTracked!==maxTracked||snapshot.maxVisits!==maxVisits||
       snapshot.lossPerUnit!==lossPerUnit||!Array.isArray(snapshot.pending)||snapshot.pending.length>maxTracked)
@@ -74,5 +86,5 @@ export function createLavaThermalScheduler({engine,isLoaded,isOpen,canCool,
         observations:Object.freeze(observations),proposals:Object.freeze(proposals),pending:pending.size});
     }finally{busy=false;}
   }
-  return Object.freeze({track,step,save});
+  return Object.freeze({track,retireIfAbsent,step,save});
 }

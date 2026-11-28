@@ -58,8 +58,11 @@ export function createLavaQuenchBatch({createEngine,isLoaded,isOpen,canQuench,
       if(canQuench(plan)!==true){denied++;continue;}
       const receipt=engine.commitReaction(plan);
       if(!receipt){unavailable++;continue;}
-      // If residual lava cannot be tracked, abandon the entire private batch.
-      if(plan.afterB&&!thermal.track(...position(plan.afterB)))return null;
+      // Reclaim a fully consumed cell's slot before admitting later residuals.
+      // If tracking/retirement cannot be verified, abandon the private batch.
+      if(plan.afterB){
+        if(!thermal.track(...position(plan.afterB)))return null;
+      }else if(!thermal.retireIfAbsent(...position(plan.proposal.b)))return null;
       const entry=copyReceipt(receipt);
       receipts.push(entry);fresh.push(entry);
       for(const p of entry.changed)changed.set(key(p),p);
