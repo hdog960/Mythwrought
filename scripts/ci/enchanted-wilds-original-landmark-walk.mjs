@@ -8,12 +8,27 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { WildsFamilyResearchWorld } from '../../src/manual-biomes/enchanted-wilds-family-source.mjs';
 import { inspectWildsLandmarkWalk } from '../../src/manual-biomes/enchanted-wilds-landmark-walk.mjs';
-import { surveyWildsMonumentSite } from '../../src/manual-biomes/enchanted-wilds-monument-site.mjs';
+import { composeWildsMonumentSurveys } from '../../src/manual-biomes/enchanted-wilds-monument-site.mjs';
+import { surveyWildsMonumentTile } from '../../src/manual-biomes/enchanted-wilds-monument-tiles.mjs';
 
 const root = process.cwd(), out = resolve(process.env.RUNNER_TEMP ?? 'artifacts', 'wilds-original-landmark-walk');
-const observatory = process.argv.includes('--observatory');
-const seed = observatory ? 42 : 179, source = new WildsFamilyResearchWorld(seed);
-const monumentSite = { id: 12, x: -204, z: -580, turn: 0 };
+const procedural = process.argv.includes('--monuments');
+const monuments = procedural || process.argv.includes('--observatory');
+const seed = monuments ? 42 : 179, source = new WildsFamilyResearchWorld(seed);
+function findSite(tx, tz, id) {
+  let cursor = null;
+  do {
+    const survey = surveyWildsMonumentTile(source, tx, tz, { ids: [id], cursor, limit: 64 });
+    if (survey.state === 'admitted') {
+      const [x, , z] = survey.entry.plan.origin;
+      return { id, x, z, turn: survey.entry.plan.turn };
+    }
+    cursor = survey.cursor;
+  } while (cursor);
+  throw new Error('No admissible native monument on the requested tile');
+}
+const monumentSites = procedural ? [findSite(-2, -5, 12), findSite(12, -2, 15)] :
+  monuments ? [{ id: 12, x: -204, z: -580, turn: 0 }] : [];
 const directions = [[0, 1], [-1, 0], [0, -1], [1, 0]];
 function walkSite(world, landmark) {
   const route = inspectWildsLandmarkWalk(world, landmark);
@@ -21,23 +36,24 @@ function walkSite(world, landmark) {
   return { name: landmark.name, origin: landmark.origin, route,
     direction: directions[landmark.turn], cell: landmark.cells[0] };
 }
-const sites = observatory ? [] : [
+const sites = monuments ? [] : [
   [-25, -778], [-135, -726], [-136, -697], [-139, -584], [-10, -583], [154, -570]
 ].map(([x, z]) => walkSite(source, source.wildsSource.landmark(Math.floor(x / 16), Math.floor(z / 16))));
-if (observatory) {
-  const entry = surveyWildsMonumentSite(source, monumentSite);
+if (monuments) {
+  const entry = composeWildsMonumentSurveys(source, monumentSites);
   assert.ok(entry);
-  sites.push(walkSite(entry.witness, entry.plan));
+  for (const plan of entry.plans) sites.push(walkSite(entry.witness, plan));
 }
 const game = await readFile(resolve(root, 'src/main.mjs'), 'utf8');
 const marker = '  function loadWorld(seed){';
 assert.equal(game.split(marker).length, 2);
 const injected = "import { WildsFamilyResearchWorld } from './manual-biomes/enchanted-wilds-family-source.mjs';\n" +
-  "import { surveyWildsMonumentSite } from './manual-biomes/enchanted-wilds-monument-site.mjs';\n" +
+  "import { composeWildsMonumentSurveys } from './manual-biomes/enchanted-wilds-monument-site.mjs';\n" +
   game.replace(marker, marker + `\n    if(developerWorldFixtures&&new URLSearchParams(location.search).has('wilds-walk-fixture')){
       storageReadOnly=true;
       const fixture=new WildsFamilyResearchWorld(${seed});
-      return new Pack2LiveWorld(${observatory} ? surveyWildsMonumentSite(fixture,${JSON.stringify(monumentSite)}).witness : fixture);
+      const sites=${JSON.stringify(monumentSites)};
+      return new Pack2LiveWorld(sites.length ? composeWildsMonumentSurveys(fixture,sites).witness : fixture);
     }`);
 const mime = { '.html': 'text/html', '.mjs': 'text/javascript', '.js': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.webmanifest': 'application/manifest+json' };
@@ -114,7 +130,7 @@ try {
     results.push({ name: site.name, from, end, returned, file, sha256: createHash('sha256').update(image).digest('hex'), ...settled });
   }
   assert.deepEqual(errors, []);
-  const report = { seed, chromium: browser.version(), diagnostics, results };
+  const report = { seed, chromium: browser.version(), procedural, monumentSites, diagnostics, results };
   await writeFile(resolve(out, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report));
 } finally {
