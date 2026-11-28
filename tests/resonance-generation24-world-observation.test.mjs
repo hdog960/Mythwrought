@@ -1,0 +1,28 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {VoxelWorld,BLOCK} from '../src/voxel.mjs';
+import {describeGenerator} from '../src/resonance/generation24/index.mjs';
+import {observeResidentCrystal} from '../src/resonance/generation24/world-observation.mjs';
+import {evaluateObservedGenerators} from '../src/resonance/generation24/environment-bridge.mjs';
+import {createStarterCircuit} from '../src/resonance/network36/starter-circuit.mjs';
+test('original edited VoxelWorld crystal feeds actual circuit, removal stops generation',()=>{
+ const world=new VoxelWorld(179),anchor=[0,240,0];
+ const g=describeGenerator({id:'c',model:'crystal',seed:179,anchor});
+ const c=createStarterCircuit({seed:179,generators:[g],lamps:[{id:'lamp',anchor:[2,240,0]}]});
+ const channels=[{id:'ch',x:1,y:240,z:0,loaded:true}];
+ const resident=(x,y,z)=>x===0&&y===240&&z===0;
+ assert.equal(world.set(...anchor,BLOCK.CRYSTAL),true);
+ const saved=JSON.stringify(world.save());
+ const e=observeResidentCrystal(world,g,0,resident);
+ assert.equal(e.values.crystalPresent,true);
+ const source=evaluateObservedGenerators([g],(descriptor,tick)=>observeResidentCrystal(world,descriptor,tick,resident),0);
+ assert.equal(source.outputs[0].availablePerTick,3);
+ assert.equal(c.step({tick:0,channels,observations:{c:e.values}}).receipt.total,1);
+ assert.equal(JSON.stringify(world.save()),saved);
+ assert.equal(world.set(...anchor,BLOCK.AIR),true);
+ const off=observeResidentCrystal(world,g,1,resident);
+ assert.equal(off.values.crystalPresent,false);
+ assert.equal(c.step({tick:1,channels,observations:{c:off.values}}).receipt.total,0);
+ assert.equal(observeResidentCrystal(world,g,2,()=>false),null);
+ assert.throws(()=>evaluateObservedGenerators([g],()=>null,2));
+});
