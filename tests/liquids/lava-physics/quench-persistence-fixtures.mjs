@@ -121,4 +121,18 @@ export function runQuenchPersistenceFixtures({createLiquidEngine,createLiquidPer
     assert.equal(units(e.save(),'acid'),2);
     assert.equal(e.save().cells.filter(c=>c.id==='acid').reduce((n,c)=>n+(c.quantities.solute??0),0),9);
   });
+  test('rotating lateral phases survive quench and codec; only emptied cells lose phase',()=>{
+    const f=fixture();
+    // The shared contract retains phase on partial consumption and clears it
+    // only when a coordinate becomes empty. Unrelated cells retain their phase.
+    f.shared.resident.lateralPhases=[[8,0,0,2],[5,0,0,1],[1,0,0,3]];
+    const before=copy({shared:f.shared,lava:f.lava});
+    const r=f.adapter.stage({...f,pairs:[pairA,pairB],receiptIds:['q1','q2']});
+    assert.equal(r.status,'staged');
+    assert.deepEqual(r.state.shared.resident.lateralPhases,[[8,0,0,2],[1,0,0,3]]);
+    assert.deepEqual(f.codec.decode(r.encoded).resident.lateralPhases,[[8,0,0,2],[1,0,0,3]]);
+    assert.deepEqual({shared:f.shared,lava:f.lava},before);
+    const e=createLiquidEngine({definitions:[WATER_DEFINITION,LAVA_DEFINITION,{id:'acid',gravityLimit:1,lateralLimit:1}],isLoaded:x=>x<16,isOpen:()=>true,lateralOrder:'rotating',snapshot:r.state.shared.resident});
+    assert.deepEqual(e.save().lateralPhases,[[8,0,0,2],[1,0,0,3]]);
+  });
 }
