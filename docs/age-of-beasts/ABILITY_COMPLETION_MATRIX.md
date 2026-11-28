@@ -15,7 +15,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
-| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; same-engine isolated damage PASS session21; integrated pack batch authored session22; native/live pending |
+| Dire Hound | pack, lunge, bite | Owner-snapshot same-target pack ranks and staggered lunge slots native PASS session20; same-engine isolated damage PASS session21; integrated pack batch session22 admission rejected overlapping bodies; corrected fixture separation session23; native/live pending |
 | Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate native PASS session19; live and restraint owner pending |
 
 ## desert
@@ -102,4 +102,6 @@ Next: prove isolated physical mode and complete actual action contracts with COM
 
 Session21: original MobEngine explicitly gated fixture admission + six-region behavior dispatch and same-engine health/identity/capacity authored; native integration PASS session21, 6 regions and Dire Hound same-engine health, mixed capacity and historical original restoration. No persistent checkpoint or default roster activation. No species marked complete.
 
-Session22: actual generated baseline surface/cave population admission and fixed-step traversal tests authored, immutable tick roster/command batch for herd/pack and physical blossom input connected to fixture; native pending. No owner effect activation or production admission.
+Session22: actual generated baseline surface/cave population admission and fixed-step traversal tests authored, immutable tick roster/command batch for herd/pack and physical blossom input connected to fixture; surface/cave integration native PASS session22, 39 admissions /13 species, pack fixture failed overlapping admission. No owner effect activation or production admission.
+
+Session23: bounded autonomous ground foraging goal search for nine species, scoped collision source ID read reuse with revision invalidation and unchanged residency/shape/overlay checks, corrected Dire Hound separation regression. New native pending. No species declared fully complete.

@@ -80,7 +80,7 @@ test('mixed original-engine dire hounds consume one immutable target batch and s
  const q=createExpansionWorldQuery({get},{resident:()=>true,revision:()=>1,observe:()=>({biome:'meadow',hazard:false,light:.2,dayPhase:'night'}),extraOverlayBlocked:()=>false});
  const view={query:q,revision:()=>1,materialAt:get,generatedMaterialAt:get},f=createBeastEngineFixture(view);
  const spawn=x=>f.selectAndSpawn({proposals:[{id:'dire-hound',point:[x,-2,.5],rarityRoll:0}],observer:[x+8,-2,.5],homeChunk:'0,0,0'});
- const a=spawn(-1.25),b=spawn(1.25);assert.ok(a&&b);
+ const a=spawn(-1.35);assert.ok(a);assert.equal(spawn(1.15),null,'overlapping 2.50-block centers must reject');const b=spawn(1.35);assert.ok(b);
  const target=f.spawnOriginal('cow',[0,-2,.5]);assert.ok(target);
  const commands=[{id:a,targetId:target},{id:b,targetId:target}],ticks=[];
  assert.equal(f.advancePopulation(FIXED_STEP,[commands[0],commands[0]]),0);

@@ -26,7 +26,35 @@ export function createExpansionOwnerView(world,{hasOwner,observe,overlayEpoch,ov
   const hit=world.stagedNonblockCollision(bounds);
   return typeof hit==='boolean'?hit:undefined;
  };
- const query=createExpansionWorldQuery(reader,{resident,revision,observe,overlayRayHit,extraOverlayBlocked});
+ // Cache only scalar collision source IDs within one synchronous fixture
+ // advance. Residency, shapes, water, overlays and revisions remain checked
+ // by the original query. Never cache unknown IDs or retain across advances.
+ let scope=null;
+ function withSourceReadScope(fn){
+  if(typeof fn!=='function'||scope)throw TypeError('Invalid nested source scope');
+  scope={revision:revision(),cells:new Map()};
+  try{return fn();}finally{scope=null;}
+ }
+ const scopedReader={
+  get(x,y,z){
+   if(!scope)return reader.get(x,y,z);
+   const rev=revision();
+   if(scope.revision!==rev){scope.cells.clear();scope.revision=rev;}
+   const key=x+','+y+','+z;
+   if(scope.cells.has(key))return scope.cells.get(key);
+   const id=reader.get(x,y,z);
+   if(Number.isInteger(id)&&id>=0&&scope.cells.size<4096&&revision()===rev)scope.cells.set(key,id);
+   return id;
+  },
+  get mobMountainShape(){return reader.mobMountainShape;},
+  get getPack2State(){return typeof reader.getPack2State==='function'?reader.getPack2State.bind(reader):undefined;},
+  get rotationAt(){return typeof reader.rotationAt==='function'?reader.rotationAt.bind(reader):undefined;},
+  get pack3Runtime(){return reader.pack3Runtime;},
+  get manual14Layer(){return reader.manual14Layer;},
+  get manual14Collision(){return typeof reader.manual14Collision==='function'?reader.manual14Collision.bind(reader):undefined;},
+  get pack5Collision(){return typeof reader.pack5Collision==='function'?reader.pack5Collision.bind(reader):undefined;}
+ };
+ const query=createExpansionWorldQuery(scopedReader,{resident,revision,observe,overlayRayHit,extraOverlayBlocked});
  // The canonical collision reader maps M7 terrain to stone. Preserve original
  // source material identity for habitat classification; no mutable world API.
  const materialAt=(x,y,z)=>{
@@ -46,5 +74,5 @@ export function createExpansionOwnerView(world,{hasOwner,observe,overlayEpoch,ov
   const generated=source.naturalAndLandmarkBlock(x,y,z);
   return actual===generated&&query.residentAt([x,y,z])&&revision()===rev?actual:undefined;
  };
- return Object.freeze({query,materialAt,generatedMaterialAt,revision});
+ return Object.freeze({query,materialAt,generatedMaterialAt,revision,withSourceReadScope});
 }

@@ -1,5 +1,6 @@
 // AB13 isolated original-engine integration, never imported by production.
 // No separate scheduler, identity, health, population, or persistent save.
+import {refreshForageGoal} from './natural-forage.mjs';
 import {MobEngine} from '../engine.mjs';
 import {getSpecies} from '../species.mjs';
 import {completeBeastCandidateCatalog} from './complete-catalog.mjs';
@@ -37,7 +38,8 @@ export function createBeastEngineFixture(view,seed=179){
    const targetFor=id=>id!==mob.id?targets.get(id):undefined;
    const target=targetFor(command?.targetId),threat=targetFor(command?.threatId);
    let hit=null;
-   const ok=step(actor,q,{target,threat,goal:command?.goal,flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
+   const goal=command?.goal??(batch&&!target&&!threat?refreshForageGoal(actor,view,roster,tick):null);
+   const ok=step(actor,q,{target,threat,goal,flowerCell:command?.flowerCell,ownerView:view,navigator,controllerTick:tick,
     readPeers:()=>peerFrame,
     commitDamage:(victim,amount,revision,kind)=>{
      if(hit||!victim||(victim!==target&&victim!==threat))return false;
@@ -64,7 +66,7 @@ export function createBeastEngineFixture(view,seed=179){
     goal:c.goal?Object.freeze([...c.goal]):undefined,flowerCell:c.flowerCell?Object.freeze([...c.flowerCell]):undefined}));
   }
   busy=true;batch=next;
-  try{return engine.advance(seconds,m=>batch.get(m.id));}
+  try{const run=()=>engine.advance(seconds,m=>batch.get(m.id));return typeof view.withSourceReadScope==='function'?view.withSourceReadScope(run):run();}
   finally{batch=null;busy=false;}
  }
  function selectAndSpawn({proposals,observer,homeChunk}){
