@@ -1,8 +1,8 @@
 // Conservative, bounded line-of-sight for a nearby physical surface cell.
-export function surfaceWitness({eye,target,resident,read,maxSteps=64}){
- if(![...eye,...target].every(Number.isFinite)||!Number.isInteger(maxSteps)||maxSteps<1||maxSteps>64)return false;
+export function surfaceWitness({eye,target,resident,read,maxSteps=64,maxDistance=24}){
+ if(![...eye,...target].every(Number.isFinite)||!Number.isInteger(maxSteps)||maxSteps<1||maxSteps>384||!Number.isFinite(maxDistance)||maxDistance<=0||maxDistance>320)return false;
  const delta=target.map((v,i)=>v-eye[i]);
- if(Math.hypot(...delta)>24)return false;
+ if(Math.hypot(...delta)>maxDistance)return false;
  const cell=eye.map(Math.floor),end=target.map(Math.floor),step=delta.map(Math.sign);
  const next=delta.map((d,i)=>d===0?Infinity:((cell[i]+(d>0?1:0))-eye[i])/d);
  const stride=delta.map(d=>d===0?Infinity:Math.abs(1/d));

@@ -1,5 +1,6 @@
 // Persistent, bounded observations; painting never invokes world generation.
-export const OBSERVATION_LIMIT=8192, LANDMARK_LIMIT=128, SAMPLE_LIMIT=6;
+export const OBSERVATION_LIMIT=32768, LANDMARK_LIMIT=128, SAMPLE_LIMIT=6;
+const OBSERVATION_BYTE_LIMIT=2500000;
 const keyOf=(x,z)=>x+','+z;
 const coord=n=>Number.isSafeInteger(n)&&Math.abs(n)<=10000000;
 const tile=t=>Array.isArray(t)&&t.length===4&&coord(t[0])&&coord(t[1])&&/^#[0-9a-f]{6}$/i.test(t[2])&&Number.isInteger(t[3])&&t[3]>=-210&&t[3]<=257;
@@ -10,7 +11,7 @@ export function createObservationCatalog({seed,discovery,storage=null}){
  let tiles=new Map(),marks=new Map(),rawBefore=null,dirty=false,readOnly=false,warning='';
  try{
   if(storage&&(rawBefore=storage.getItem(key))!==null){
-   if(rawBefore.length>1048576)throw Error('Observation record too large');
+   if(rawBefore.length>OBSERVATION_BYTE_LIMIT)throw Error('Observation record too large');
    const v=JSON.parse(rawBefore);
    if(v.version!==1||v.seed!==seed||!Array.isArray(v.tiles)||v.tiles.length>OBSERVATION_LIMIT||!v.tiles.every(tile)||!Array.isArray(v.marks)||v.marks.length>LANDMARK_LIMIT||!v.marks.every(mark))throw Error('Invalid observation record');
    tiles=new Map(v.tiles.map(t=>[keyOf(t[0],t[1]),Object.freeze([...t])]));
@@ -45,7 +46,7 @@ export function createObservationCatalog({seed,discovery,storage=null}){
    try{
     if(storage.getItem(key)!==rawBefore){readOnly=true;throw Error('Observation record changed in another session');}
     const raw=JSON.stringify({version:1,seed,tiles:[...tiles.values()],marks:[...marks.values()]});
-    if(raw.length>1048576)throw Error('Observation storage budget exceeded');
+    if(raw.length>OBSERVATION_BYTE_LIMIT)throw Error('Observation storage budget exceeded');
     storage.setItem(key,raw);
     if(storage.getItem(key)!==raw){readOnly=true;throw Error('Observation readback mismatch');}
     rawBefore=raw;dirty=false;warning='';return true;
@@ -53,21 +54,24 @@ export function createObservationCatalog({seed,discovery,storage=null}){
   }
  });
 }
-export function sampleNearbyObservations({catalog,discovery,player,residentAt,sample,refreshIndex=0,admit=null}){
- if(![player.x,player.z].every(Number.isFinite))return 0;
+export function sampleNearbyObservations({catalog,discovery,player,residentAt,sample,refreshIndex=0,admit=null,radius=3,sampleLimit=SAMPLE_LIMIT}){
+ if(![player.x,player.z].every(Number.isFinite)||!Number.isInteger(radius)||radius<1||radius>8||!Number.isInteger(sampleLimit)||sampleLimit<1||sampleLimit>SAMPLE_LIMIT)return 0;
  const cx=Math.floor(player.x/4),cz=Math.floor(player.z/4),candidates=[];
- for(let dz=-3;dz<=3;dz++)for(let dx=-3;dx<=3;dx++){
-  if(dx*dx+dz*dz>9)continue;
+ for(let dz=-radius;dz<=radius;dz++)for(let dx=-radius;dx<=radius;dx++){
+  if(dx*dx+dz*dz>radius*radius)continue;
   const x=cx+dx,z=cz+dz;
   if(admit||discovery.seen.has(keyOf(x,z)))candidates.push({x,z,d:dx*dx+dz*dz});
  }
  candidates.sort((a,b)=>a.d-b.d||a.z-b.z||a.x-b.x);
  const missing=candidates.filter(t=>!catalog.has(t.x,t.z)),known=candidates.filter(t=>catalog.has(t.x,t.z));
  const rotate=known.length?Math.abs(refreshIndex)%known.length:0;
- const shift=missing.length?Math.abs(refreshIndex*SAMPLE_LIMIT)%missing.length:0;
+ // Nearest unobserved tile gets first opportunity; rotate the remainder so
+ // obstructed nearby tiles cannot permanently starve the outer flight radius.
+ const first=missing.slice(0,1),rest=missing.slice(1);
+ const shift=rest.length?Math.abs(refreshIndex*sampleLimit)%rest.length:0;
  let sampled=0;
- for(const t of [...missing.slice(shift),...missing.slice(0,shift),...known.slice(rotate),...known.slice(0,rotate)]){
-  if(sampled>=SAMPLE_LIMIT)break;
+ for(const t of [...first,...rest.slice(shift),...rest.slice(0,shift),...known.slice(rotate),...known.slice(0,rotate)]){
+  if(sampled>=sampleLimit)break;
   const x=t.x*4+2,z=t.z*4+2;
   if(!residentAt(x,z))continue;
   sampled++;const observed=sample(x,z);

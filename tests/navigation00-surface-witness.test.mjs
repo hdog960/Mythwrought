@@ -18,3 +18,13 @@ test('marker hit selection respects frame and nearest actual marker, prefers pin
  assert.equal(nearestVisibleMarker({point:{x:14,y:10},pins,landmarks,frame}).kind,'waypoint');
  assert.equal(nearestVisibleMarker({point:{x:100,y:100},pins,landmarks,frame}),null);
 });
+
+test('long flight witness uses explicit bounded range, rejects occlusion and unknown sections',()=>{
+ const base={eye:[.5,256.7,.5],target:[20.5,7.01,.5],resident:()=>true,read:()=>0,maxDistance:320,maxSteps:384};
+ assert.equal(surfaceWitness(base),true);
+ assert.equal(surfaceWitness({...base,read:(x,y,z)=>y===140?3:0}),false);
+ assert.equal(surfaceWitness({...base,resident:(x,y,z)=>y!==140}),false);
+ assert.equal(surfaceWitness({...base,maxSteps:64}),false);
+ assert.equal(surfaceWitness({...base,maxSteps:385}),false);
+ assert.equal(surfaceWitness({...base,maxDistance:321}),false);
+});

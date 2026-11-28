@@ -1,0 +1,75 @@
+name: Minimap flight correction targeted qualification
+on:
+  push:
+    branches: [dev/minimap-flight-hotfix-20261127]
+permissions:
+  contents: read
+jobs:
+  navigation-flight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Reuse exact affected-native evidence or run only if inputs changed
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          node --check tests/minimap-flight-browser.mjs
+          git fetch --no-tags --depth=1 origin bcfb026df8df50e4d11cc5d6feb7a9ac86fcea3b
+          if git diff --quiet bcfb026df8df50e4d11cc5d6feb7a9ac86fcea3b HEAD -- src tests ':!src/app-update.mjs' ':!tests/minimap-flight-browser.mjs' ':!tests/minimap-installed-upgrade-browser.mjs'; then
+            echo 'REUSED 25/25 native tests from bcfb026df8df50e4d11cc5d6feb7a9ac86fcea3b Actions 46098958105; runtime navigation/test files unchanged, only release marker and browser fixtures changed'
+          else
+            node --test tests/navigation00-observation-catalog.test.mjs tests/navigation00-surface-witness.test.mjs tests/navigation00-live-completion.test.mjs tests/navigation00-production-bridge.test.mjs
+          fi
+      - name: Original WebGL2 game flight at four heights and persisted map
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          python3 -m http.server 4173 >/tmp/minimap-flight.log 2>&1 &
+          node tests/minimap-flight-browser.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: minimap-flight-evidence
+          path: artifacts/minimap-flight/
+  installed-upgrade:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.5'
+      - name: Check exact installed-upgrade input equivalence
+        id: upgrade-reuse
+        run: |
+          git fetch --no-tags --depth=1 origin c789b8bd5dda5ca8310126f7d5be296994531e4d
+          if git diff --quiet c789b8bd5dda5ca8310126f7d5be296994531e4d HEAD -- . ':!tests/minimap-flight-browser.mjs' ':!.github/workflows/minimap-flight-hotfix-targeted.yml' ':!docs/navigation/MINIMAP_FLIGHT_HOTFIX_SESSION_04.md'; then
+            echo 'reuse=true' >> "$GITHUB_OUTPUT"
+            echo 'REUSED installed-upgrade PASS from exact c789b8bd5dda5ca8310126f7d5be296994531e4d run 46099913805 job 140839782417; only independent flight fixture, its orchestration and checkpoint differ.'
+          else
+            echo 'reuse=false' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.upgrade-reuse.outputs.reuse != 'true'
+        with:
+          ref: 0dbecd924629973412dfd4965db13ada4b3959af
+          path: prior-production
+      - name: Verify exact source cache closure
+        if: steps.upgrade-reuse.outputs.reuse != 'true'
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test "$(git -C prior-production rev-parse HEAD)" = "0dbecd924629973412dfd4965db13ada4b3959af"
+          node scripts/ci/build-stage-cache-manifest.mjs --check
+          (cd prior-production && node scripts/ci/build-stage-cache-manifest.mjs --check)
+          node --check tests/minimap-installed-upgrade-browser.mjs
+      - name: Existing installation rollback and offline upgrade
+        if: steps.upgrade-reuse.outputs.reuse != 'true'
+        env:
+          MINIMAP_PREVIOUS_ROOT: prior-production
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.58.2 pngjs@7.0.0
+          npx playwright install chromium
+          node tests/minimap-installed-upgrade-browser.mjs
