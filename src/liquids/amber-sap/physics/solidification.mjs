@@ -6,8 +6,11 @@ const key=c=>point(c).join(',');
 const full=c=>c?.id==='amber-sap'&&c.units===8&&Number.isSafeInteger(c.x)&&
   int(c.y,-210,256)&&Number.isSafeInteger(c.z)&&c.quantities&&
   typeof c.quantities==='object'&&!Array.isArray(c.quantities)&&Object.keys(c.quantities).length===0;
+// Preserve the core's canonical optional dormant FIFO after extraction/wakes.
 const freezeSnapshot=s=>Object.freeze({version:s.version,cells:Object.freeze(s.cells),
-  pending:Object.freeze(s.pending.map(p=>Object.freeze(p)))});
+  pending:Object.freeze(s.pending.map(p=>Object.freeze(p))),
+  ...(Object.hasOwn(s,'capacityBlocked')?{
+    capacityBlocked:Object.freeze(s.capacityBlocked.map(p=>Object.freeze(p)))}:{})});
 
 // createLiquidEngine is the pinned Water A factory, injected to avoid copying
 // the shared module onto this isolated branch. All callbacks are pure/stable
