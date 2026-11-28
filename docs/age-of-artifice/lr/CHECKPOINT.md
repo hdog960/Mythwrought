@@ -1,9 +1,2 @@
-# Age of Artifice — Loot & Rewards
-
-Assignment #525; program and contract #521. Personal lane lr; initial exact base aff36c2a71f1b84ca3a77bede78ba0998c1cd6e7.
-
-Status: isolated onboarding, zero automation-authored deliverables. The prior work is preserved under the manual successor handoffs; never change those refs. No live registration or merge/deploy authority.
-
-Next concrete engineering action: Implement bounded deterministic weighted selection and replay-safe claims, then authentic source-bound tables only.
-
-Use exact-head lease, owned paths, original art, source-backed references, actual focused tests and explicit pending evidence. See assignment and charter for all gates. Update this file in a coherent implementation commit only when the state materially advances. Distinguish setup from automation-authored changes.
+# LR0/LR2 inline first-batch checkpoint
+Assignment #525, contract #521, prior HEAD 59b5bb44e82d7e8901e69cdca22494795a0dd763; pinned candidates {"rm":"efec9ec8b9d5c307a4334bd1cacbebac39a04105","wa":"58e41e8ff7ddda54975b9a964020af7f7b765ab1","tc":"008dc24b279bb72ba2059d11689ce1229f8261ff"}. Four source-backed hostile table proposals against existing species IDs, held out of eligible live tables until Mob/Combat owner-authorized event and material acquisition mappings. No fictional creatures or fabricated reward authority. Continue LR1 and LR2 as dependencies permit; four candidate tables, zero live-eligible. 13 exact function assertions executed in V8 isolate precommit; native Node test execution and original-game qualification pending. No live integration. Next: exact focused tests and source-backed independent next batch. Inline run-now not independent scheduler proof.
