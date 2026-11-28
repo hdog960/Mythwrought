@@ -34,7 +34,7 @@ export function createProjectile({identity,origin,velocity,radius,range,lifeMs,g
  const scope=Object.freeze({...Object.fromEntries(keys.map(k=>[k,identity[k]])),fixture:identity.fixture});
  let p=[...origin],v=[...velocity],clock=0,distance=0,terminal=null,busy=false;
  const snapshot=()=>Object.freeze({clock,position:Object.freeze([...p]),velocity:Object.freeze([...v]),distance,terminal});
- const stop=(type,extra={})=>terminal=Object.freeze({type,...scope,...extra});
+ const stop=(type,extra={})=>terminal??=Object.freeze({type,...scope,...extra});
  const result=(ok,reason,impact=null)=>Object.freeze({ok,reason,impact,snapshot:snapshot()});
  function step(ms){
   if(terminal||busy)return result(false,'unavailable');
@@ -42,24 +42,26 @@ export function createProjectile({identity,origin,velocity,radius,range,lifeMs,g
   busy=true;
   try{
    for(let i=0;i<ms/10;i++){
-    const a=readAuthority();if(!a||a.active!==true||!keys.every(k=>a[k]===scope[k])||a.fixture!==scope.fixture){stop('retired');return result(false,'retired');}
+    const a=readAuthority();if(terminal||!a||a.active!==true||!keys.every(k=>a[k]===scope[k])||a.fixture!==scope.fixture){stop('retired');return result(false,'retired');}
     const dt=.01,delta=[v[0]*dt,v[1]*dt-.5*gravity*dt*dt,v[2]*dt],length=norm(delta),limit=Math.min(1,(range-distance)/Math.max(length,1e-12));
     const end=p.map((x,j)=>x+delta[j]*limit);
     if(!vec(end)||end[1]<-210+radius||end[1]>257-radius){stop('outside-world');return result(false,'outside-world');}
     const q=Object.freeze({...scope,from:Object.freeze([...p]),to:Object.freeze(end),radius,fromMs:clock,toMs:clock+10*limit});
-    const terrain=traceTerrain(q),raw=readTargets(q),frame=targetFrames.get(raw),targets=frame?frame(q,launchWorldMs+clock):raw;
+    const terrain=traceTerrain(q);if(terminal)return result(false,'retired');const raw=readTargets(q);if(terminal)return result(false,'retired');const frame=targetFrames.get(raw),targets=frame?frame(q,launchWorldMs+clock):raw;
     if(!terrain||terrain.complete!==true||!(terrain.fraction===null||finite(terrain.fraction,0,1))||!Array.isArray(targets)||targets.length>128)throw Error('incomplete collision');
     let best=null,minFraction=Infinity;const hits=[],seen=new Set();
     for(const t of targets){
-     if(!t||!id(t.id)||seen.has(t.id)||!vec(t.from)||!vec(t.to)||!finite(t.radius,.01,4)||!['alive','friendly','attackable','resident'].every(k=>typeof t[k]==='boolean'))throw Error('invalid target');
+     if(!frame){if(!t||!id(t.id)||seen.has(t.id)||!vec(t.from)||!vec(t.to)||!finite(t.radius,.01,4)||!['alive','friendly','attackable','resident'].every(k=>typeof t[k]==='boolean'))throw Error('invalid target');
      seen.add(t.id);if(t.id===scope.sourceId||!t.alive||t.friendly||!t.attackable)continue;
-     if(!t.resident||norm(sub(t.to,t.from))>2)throw Error('unresolved target');
-     const rel=sub(p,t.from),motion=sub(sub(end,p),sub(t.to,t.from)),rr=radius+t.radius;
+     if(!t.resident||norm(sub(t.to,t.from))>2)throw Error('unresolved target');}
+     // A branded frame spans the full 10ms. Direct providers already receive the clipped q interval.
+     const k=frame?limit:1,rel=sub(p,t.from),motion=[end[0]-p[0]-(t.to[0]-t.from[0])*k,end[1]-p[1]-(t.to[1]-t.from[1])*k,end[2]-p[2]-(t.to[2]-t.from[2])*k],rr=radius+t.radius;
      const c=dot(rel,rel)-rr*rr,b=dot(rel,motion),aa=dot(motion,motion);let f=null;
      if(c<=0)f=0;else if(aa>1e-14&&b<0){const disc=b*b-aa*c;if(disc>=0){const root=(-b-Math.sqrt(disc))/aa;if(root>=0&&root<=1)f=root;}}
      if(f!==null){minFraction=Math.min(minFraction,f);hits.push({id:t.id,fraction:f});}
     }
     for(const hit of hits)if(hit.fraction<=minFraction+1e-9&&(!best||hit.id<best.id))best=hit;
+    const confirmed=readAuthority();if(terminal||!confirmed||confirmed.active!==true||!keys.every(k=>confirmed[k]===scope[k])||confirmed.fixture!==scope.fixture){stop('retired');return result(false,'retired');}
     const wall=terrain.fraction!==null&&(!best||terrain.fraction<=minFraction+1e-9),f=wall?terrain.fraction:best?best.fraction:1;
     p=p.map((x,j)=>x+delta[j]*limit*f);distance+=length*limit*f;clock+=10*limit*f;
     if(wall||best){const impact=stop(wall?'terrain-impact':'target-impact',{at:clock,position:Object.freeze([...p]),...(wall?{}:{targetId:best.id})});return result(true,impact.type,impact);}
