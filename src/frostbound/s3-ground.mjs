@@ -13,6 +13,7 @@ function roll(x,z,seed,salt){let h=Math.imul(x^salt,0x7feb352d)^Math.imul(z^seed
 export class FrostboundS3Candidate extends FrostboundForest{
  constructor(seed,options){super(seed,options);this._groundDetails=new Map();}
  _groundSource(x,y,z){return super.naturalAndLandmarkBlock(x,y,z);}
+ _groundDetailChoice(x,z,id){return id;}
  groundDetails(cx,cz){
   const k=`${cx},${cz}`;if(this._groundDetails.has(k))return this._groundDetails.get(k);
   const cells=new Map();
@@ -25,7 +26,7 @@ export class FrostboundS3Candidate extends FrostboundForest{
    if(this._groundSource(x,y,z)||this._groundSource(x,y+1,z))continue;
    // Keep existing steep terrain and exposed protected holes clear.
    if([[1,0],[-1,0],[0,1],[0,-1]].some(([a,b])=>!this._groundSource(x+a,floor-1,z+b)||this.environmentCaves.get(x+a,floor-1,z+b)!==undefined))continue;
-   const id=stump??ids[Math.floor(roll(x,z,this.seed,733)*ids.length)];cells.set(key(x,y,z),id);
+   const id=stump??this._groundDetailChoice(x,z,ids[Math.floor(roll(x,z,this.seed,733)*ids.length)]);cells.set(key(x,y,z),id);
   }
   this._groundDetails.set(k,cells);if(this._groundDetails.size>64)this._groundDetails.delete(this._groundDetails.keys().next().value);return cells;
  }

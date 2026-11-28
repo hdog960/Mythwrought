@@ -41,12 +41,13 @@ export class FrostboundForest extends FrostboundS1Refined{
  }
  get forestSourceVersion(){return 's2-lattice-v2';}
  _forestFamilyRoll(x,z,value){return value;}
+ _forestSiteChance(x,z,reservation){return .88;}
  _sourceBlock(x,y,z){return super.naturalAndLandmarkBlock(x,y,z);}
  forestChunk(cx,cz){
   const k=`${cx},${cz}`;if(this._forest.has(k))return this._forest.get(k);
   const row={site:null,cells:new Map(),owners:new Set()};
   const x=cx*16+8,z=cz*16+8,r=v6BiomeAt(x,z,this.seed),reservation=forestReservation(cx,cz,this.seed);
-  if(r?.name==='snow'&&r.weight>=.65&&roll(cx,cz,this.seed,81)<.88){
+  if(r?.name==='snow'&&r.weight>=.65&&roll(cx,cz,this.seed,81)<this._forestSiteChance(x,z,reservation)){
    const p=this._columnPlan(x,z),floor=p.size?Math.max(...p.keys()):terrainHeight(x,z,this.seed);
    const f=this._forestFamilyRoll(x,z,roll(cx,cz,this.seed,38)),h=roll(cx,cz,this.seed,97);
    const upperFamily=reservation==='ancient'?'frostfather':normal[Math.floor(f*normal.length)];
