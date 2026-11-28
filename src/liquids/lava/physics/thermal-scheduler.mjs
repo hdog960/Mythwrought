@@ -34,6 +34,42 @@ export function createLavaThermalScheduler({engine,isLoaded,isOpen,canCool,
       return true;
     }finally{busy=false;}
   }
+  // Reconcile one authoritative dirty-coordinate batch after a staged core edit.
+  // Never scan resident cells. A rejected batch leaves the exact FIFO unchanged.
+  // Host retains deferred coordinates until owner attach, and adopts queue and
+  // liquid state together under its edit lease; this is not a live tick wrapper.
+  function reconcileChanged(changed,{limit=384}={}){
+    requireIdle();
+    if(!integer(limit,1,24576)||!Array.isArray(changed)||changed.length>limit)
+      throw new RangeError('Thermal changed-coordinate budget');
+    const points=new Map();
+    for(const p of changed){
+      if(!Array.isArray(p)||p.length!==3||!valid(...p))
+        throw new RangeError('Invalid thermal changed coordinate');
+      points.set(key(...p),Object.freeze([...p]));
+    }
+    const add=[],remove=[],deferred=[];
+    busy=true;
+    try{
+      for(const [k,p] of points){
+        if(isLoaded(...p)!==true){deferred.push(p);continue;}
+        const c=engine.getCell(...p);
+        if(!c||c.id!=='lava'){
+          if(pending.has(k))remove.push(k);
+        }else{
+          if(c.x!==p[0]||c.y!==p[1]||c.z!==p[2]||readLavaHeat(c)===null)
+            throw new TypeError('Invalid lava in changed batch');
+          if(!pending.has(k))add.push([k,p]);
+        }
+      }
+      if(pending.size-remove.length+add.length>maxTracked)return null;
+      // No callbacks after preflight. Retained entries never rotate.
+      for(const k of remove)pending.delete(k);
+      for(const [k,p] of add)pending.set(k,p);
+      return Object.freeze({added:add.length,retired:remove.length,
+        deferred:Object.freeze(deferred),pending:pending.size});
+    }finally{busy=false;}
+  }
   if(snapshot!==null){
     if(snapshot?.version!==1||snapshot.maxTracked!==maxTracked||snapshot.maxVisits!==maxVisits||
       snapshot.lossPerUnit!==lossPerUnit||!Array.isArray(snapshot.pending)||snapshot.pending.length>maxTracked)
@@ -86,5 +122,5 @@ export function createLavaThermalScheduler({engine,isLoaded,isOpen,canCool,
         observations:Object.freeze(observations),proposals:Object.freeze(proposals),pending:pending.size});
     }finally{busy=false;}
   }
-  return Object.freeze({track,retireIfAbsent,step,save});
+  return Object.freeze({track,retireIfAbsent,reconcileChanged,step,save});
 }
