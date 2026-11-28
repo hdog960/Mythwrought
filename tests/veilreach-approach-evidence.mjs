@@ -7,12 +7,13 @@ const origin=process.env.VEILREACH_ORIGIN??'http://127.0.0.1:4211/';
 const out=process.env.VEILREACH_EVIDENCE??'artifacts/veilreach-approach';
 const revision=process.env.VEILREACH_SOURCE;
 assert.match(revision??'',/^[a-f0-9]{40}$/);
+const recordVideo=process.env.VEILREACH_EVIDENCE_NO_VIDEO!=='1';
 const viewport={width:844,height:390};
 await mkdir(out,{recursive:true});
 const browser=await chromium.launch({args:['--enable-webgl','--use-gl=angle',
   '--use-angle=swiftshader','--enable-unsafe-swiftshader']});
 const context=await browser.newContext({viewport,hasTouch:true,isMobile:true,deviceScaleFactor:1,
-  recordVideo:{dir:out,size:viewport}});
+  ...(recordVideo?{recordVideo:{dir:out,size:viewport}}:{})});
 const page=await context.newPage(),errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 const wait=(fn,arg)=>page.waitForFunction(fn,arg,{polling:100,timeout:180000});
@@ -22,7 +23,7 @@ const hold=async(key,fn,arg)=>{
   await page.keyboard.down(key);
   try{await wait(fn,arg);}finally{await page.keyboard.up(key);}
 };
-const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',errors};
+const report={revision,viewport,seed:180,engine:'Chromium SwiftShader',recordVideo,errors};
 try{
   await page.addInitScript(()=>{
     const random=crypto.getRandomValues.bind(crypto);
@@ -102,6 +103,6 @@ try{
   await writeFile(join(out,'report.json'),JSON.stringify(report,null,2)+'\n');
   const clip=page.video();
   await context.close();
-  await clip.saveAs(join(out,'approach.webm'));
+  if(clip)await clip.saveAs(join(out,'approach.webm'));
   await browser.close();
 }

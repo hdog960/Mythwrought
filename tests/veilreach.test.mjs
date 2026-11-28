@@ -174,6 +174,35 @@ test('a distant forest contains trunks at resolved source anchors before physica
   assert.ok(canopyVertices>500);
 });
 
+test('signed distant terrain keeps mined and placed blocks authoritative after export',()=>{
+  const seed=180,terrain=createSkylands(seed);
+  const {x,z}=terrain.region(-1,0)[0],y=terrain.topAt(x,z);
+  const world=new Pack2LiveWorld(new FourRegionWorld(seed,fourRegionProfile(seed,VEILREACH_GENERATOR)));
+  assert.equal(world.get(x,y+1,z),BLOCK.AIR);
+  assert.equal(terrain.topAt(x+1,z),y);
+  assert.ok(world.set(x,y,z,BLOCK.AIR));
+  assert.ok(world.set(x,y+4,z,BLOCK.STONE));
+  const restored=inspectM2WorldExport(exportM2World(world)).world;
+  const mesh=farSkyMesh(terrain,x,z,[],restored);
+  const hasTop=(px,py,pz)=>{
+    for(let i=0;i<mesh.length;i+=54){
+      const face=[0,9,18,27,36,45].map(j=>[mesh[i+j],mesh[i+j+1],mesh[i+j+2]]);
+      if(!face.every(cell=>cell[1]===py))continue;
+      const [a,b,c]=face;
+      const up=(b[2]-a[2])*(c[0]-a[0])-(b[0]-a[0])*(c[2]-a[2]);
+      const xs=face.map(cell=>cell[0]),zs=face.map(cell=>cell[2]);
+      if(up>0&&px>=Math.min(...xs)&&px<Math.max(...xs)&&pz>=Math.min(...zs)&&pz<Math.max(...zs))
+        return true;
+    }
+    return false;
+  };
+  assert.ok(!hasTop(x+.5,y+1,z+.5),'the mined surface stays absent');
+  assert.ok(hasTop(x+.5,y,z+.5),'the block below the mined surface is exposed');
+  assert.ok(hasTop(x+.5,y+5,z+.5),'the placed block remains visible');
+  assert.ok(hasTop(x+1.5,y+1,z+.5),'the adjacent natural surface remains visible');
+  assert.ok(mesh.byteLength<=VEILREACH_DISTANCE_MAX_BYTES);
+});
+
 test('visual ownership changes only change draw ranges, retaining the staged section data',()=>{
   const owners=[{key:'a',first:0,count:6},{key:'b',first:6,count:18},{key:'c',first:24,count:6}];
   assert.deepEqual(veilreachDrawRanges(owners,new Set()),[{first:0,count:30}]);

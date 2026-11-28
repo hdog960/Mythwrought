@@ -37,12 +37,19 @@ function pushFace(vertices,axis,positive,plane,[u0,v0,u1,v1],id){
   }
 }
 
-function pushBox(vertices,min,max,id){
-  for(const {axis,axes:[u,v]} of planes){
-    const rect=[min[u],min[v],max[u],max[v]];
-    pushFace(vertices,axis,false,min[axis],rect,id);
-    pushFace(vertices,axis,true,max[axis],rect,id);
+// Merge only faces with identical material, normal and physical plane.
+// Two directional passes preserve every exposed sample and its world UV.
+function mergeRectangles(rects,axis){
+  const other=1-axis;
+  const sorted=rects.sort((a,b)=>a[other]-b[other]||a[other+2]-b[other+2]||a[axis]-b[axis]);
+  const merged=[];
+  for(const rect of sorted){
+    const last=merged.at(-1);
+    if(last&&last[other]===rect[other]&&last[other+2]===rect[other+2]&&last[axis+2]===rect[axis]){
+      last[axis+2]=rect[axis+2];
+    }else merged.push(rect);
   }
+  return merged;
 }
 
 function* editSnapshot(world,x,z){
@@ -87,10 +94,13 @@ function chunkMesh(terrain,cx,cz,step,edits){
     columns.set(key,result);
     return result;
   }
-  function owner(y){
+  function face(y,axis,positive,plane,rect,id){
     const section=runtimeSectionForY(y);
-    if(!owners.has(section))owners.set(section,[]);
-    return owners.get(section);
+    if(!owners.has(section))owners.set(section,new Map());
+    const groups=owners.get(section);
+    const key=[axis,positive,plane,id].join('|');
+    if(!groups.has(key))groups.set(key,{axis,positive,plane,id,rects:[]});
+    groups.get(key).rects.push(rect);
   }
 
   // Merge collinear side faces within an owner. Keep real Y planes instead
@@ -101,8 +111,8 @@ function chunkMesh(terrain,cx,cz,step,edits){
     for(let y=minY;y<=maxY;y++){
       const id=cells[y];
       if(!id)continue;
-      if(!cells[y-1])pushFace(owner(y),1,false,y,[x,z,x+step,z+step],id);
-      if(!cells[y+1])pushFace(owner(y),1,true,y+1,[x,z,x+step,z+step],id);
+      if(!cells[y-1])face(y,1,false,y,[x,z,x+step,z+step],id);
+      if(!cells[y+1])face(y,1,true,y+1,[x,z,x+step,z+step],id);
     }
     for(const [axis,positive,dx,dz] of [[0,false,-step,0],[0,true,step,0],[2,false,0,-step],[2,true,0,step]]){
       const neighbor=column(x+dx,z+dz).values;
@@ -115,7 +125,7 @@ function chunkMesh(terrain,cx,cz,step,edits){
         let top=y+1;
         while(top<end&&cells[top]===id&&!neighbor[top])top++;
         const rect=axis===0?[y,start,top,start+step]:[start,y,start+step,top];
-        pushFace(owner(y),axis,positive,plane,rect,id);
+        face(y,axis,positive,plane,rect,id);
         y=top;
       }
     }
@@ -135,7 +145,24 @@ function chunkMesh(terrain,cx,cz,step,edits){
     if(!plants.has(group))plants.set(group,{section,id,leaf,cells:[]});
     plants.get(group).cells.push([x,y,z]);
   }
+  // Resolve neighboring canopies as one opaque volume. Overlapping summaries
+  // no longer draw coincident outer surfaces or leaves through an authored cell.
+  const vegetation=new Map();
+  const plantAt=(x,y,z)=>{
+    if(x<x0||x>=x0+16||z<z0||z>=z0+16)return 0;
+    return vegetation.get(y)?.[(x-x0)*16+z-z0]??0;
+  };
+  function addPlant(x,y,z,id){
+    if(readEdits?.cells.has(`${x},${y},${z}`)||terrain.rock(x,y,z))return;
+    if(!vegetation.has(y))vegetation.set(y,new Uint16Array(256));
+    const slice=vegetation.get(y),index=(x-x0)*16+z-z0;
+    if(!slice[index]||trunks.has(id))slice[index]=id;
+  }
   for(const {id,leaf,cells} of plants.values()){
+    if(readEdits){
+      for(const [x,y,z] of cells)addPlant(x,y,z,id);
+      continue;
+    }
     const bottom=Math.min(...cells.map(c=>c[1])),top=Math.max(...cells.map(c=>c[1]));
     const middle=Math.floor((bottom+top)/2);
     const bands=leaf&&top-bottom>=2?
@@ -143,12 +170,31 @@ function chunkMesh(terrain,cx,cz,step,edits){
     for(const band of bands){
       const min=[0,1,2].map(axis=>Math.min(...band.map(c=>c[axis])));
       const max=[0,1,2].map(axis=>Math.max(...band.map(c=>c[axis]))+1);
-      pushBox(owner(min[1]),min,max,id);
+      for(let x=min[0];x<max[0];x++)for(let y=min[1];y<max[1];y++)for(let z=min[2];z<max[2];z++)
+        addPlant(x,y,z,id);
     }
   }
-  return [...owners].map(([section,values])=>({
-    key:runtimeMeshKey(cx,cz,section),section,cx,cz,values
-  }));
+  for(const [y,slice] of vegetation){
+    for(let i=0;i<slice.length;i++){
+      const id=slice[i];
+      if(!id)continue;
+      const x=x0+Math.floor(i/16),z=z0+i%16,at=[x,y,z];
+      for(const {axis,axes:[u,v]} of planes)for(const d of [-1,1]){
+        const adjacent=at.slice();
+        adjacent[axis]+=d;
+        if(plantAt(...adjacent))continue;
+        face(y,axis,d>0,at[axis]+Number(d>0),[at[u],at[v],at[u]+1,at[v]+1],id);
+      }
+    }
+  }
+  return [...owners].map(([section,groups])=>{
+    const values=[];
+    for(const {axis,positive,plane,rects,id} of groups.values()){
+      for(const rect of mergeRectangles(mergeRectangles(rects,0),1))
+        pushFace(values,axis,positive,plane,rect,id);
+    }
+    return {key:runtimeMeshKey(cx,cz,section),section,cx,cz,values};
+  });
 }
 
 function islandChunks(island,x,z){
@@ -219,8 +265,8 @@ export function veilreachDrawRanges(owners,detailed){
 
 // Native qualification path uses the same builder as runtime. Detail boxes
 // are only used by standalone tooling. Runtime selects whole section owners.
-export function farSkyMesh(terrain,x,z,detail=[]){
-  const prep=prepareAtlas(terrain,x,z);
+export function farSkyMesh(terrain,x,z,detail=[],world){
+  const prep=prepareAtlas(terrain,x,z,world);
   let result=prep.next();
   while(!result.done)result=prep.next();
   const rows=result.value.filter(({cx,cz,section})=>{
@@ -236,28 +282,28 @@ export function farSkyMesh(terrain,x,z,detail=[]){
 function stageUpload(gl,{data,owners}){
   const bytes=validateChunkUploadBytes(data,VEILREACH_DISTANCE_MAX_BYTES);
   let buffer=null,offset=0;
-  const check=()=>{
-    const error=gl.getError();
+  const check=measure=>{
+    const error=measure('check',()=>gl.getError());
     if(error!==gl.NO_ERROR)throw Error('Veilreach visual upload error '+error);
   };
-  function slice(){
+  function slice(measure){
     if(!bytes)return true;
     if(!buffer){
       for(let i=0;i<8;i++){
-        if(gl.getError()===gl.NO_ERROR)break;
+        if(measure('drain',()=>gl.getError())===gl.NO_ERROR)break;
         if(i===7)throw Error('Veilreach upload error queue did not clear');
       }
-      buffer=gl.createBuffer();
+      buffer=measure('create',()=>gl.createBuffer());
       if(!buffer)throw Error('Veilreach visual buffer unavailable');
-      gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-      gl.bufferData(gl.ARRAY_BUFFER,bytes,gl.STATIC_DRAW);
-      check();
+      measure('bind',()=>gl.bindBuffer(gl.ARRAY_BUFFER,buffer));
+      measure('allocate',()=>gl.bufferData(gl.ARRAY_BUFFER,bytes,gl.STATIC_DRAW));
+      check(measure);
       return false;
     }
     const end=Math.min(offset+uploadFloats,data.length);
-    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
-    gl.bufferSubData(gl.ARRAY_BUFFER,offset*4,data.subarray(offset,end));
-    check();
+    measure('bind',()=>gl.bindBuffer(gl.ARRAY_BUFFER,buffer));
+    measure('transfer',()=>gl.bufferSubData(gl.ARRAY_BUFFER,offset*4,data.subarray(offset,end)));
+    check(measure);
     offset=end;
     return offset===data.length;
   }
@@ -269,6 +315,12 @@ export function createVeilreachDistanceRenderer(gl){
   const retry=new GpuUploadRetry();
   let identity=null,terrain=null,readRevision=null,buffer=null,owners=[],drawKey='',job=null;
   let center=null,atlasBytes=0,rebuilds=0,preparedTiles=0,lastPreparationMs=0,lastUploadMs=0;
+  let uploadPhases={};
+  function measureUpload(name,action){
+    const started=performance.now();
+    try{return action();}
+    finally{uploadPhases[name]=(uploadPhases[name]??0)+performance.now()-started;}
+  }
   function invalidate(lost=false){
     if(buffer&&!lost)gl.deleteBuffer(buffer);
     buffer=null;
@@ -297,6 +349,9 @@ export function createVeilreachDistanceRenderer(gl){
       center=null;
     }
     if(!terrain||caveShade>.35||gl.isContextLost())return 0;
+    lastPreparationMs=0;
+    lastUploadMs=0;
+    uploadPhases={};
     if(!center||Math.max(Math.abs(player.x-center.x),Math.abs(player.z-center.z))>64)
       center={x:Math.floor(player.x/32)*32+16,z:Math.floor(player.z/32)*32+16};
     const key=[center.x,center.z,readRevision()].join('|');
@@ -320,8 +375,8 @@ export function createVeilreachDistanceRenderer(gl){
         lastPreparationMs=performance.now()-begin;
         if(job.ready){
           const beginUpload=performance.now();
-          if(!job.upload)job.upload=stageUpload(gl,pack(job.ready));
-          if(job.upload.slice()){
+          if(!job.upload)job.upload=measureUpload('pack',()=>stageUpload(gl,pack(job.ready)));
+          if(job.upload.slice(measureUpload)){
             publish(job.upload.finish());
             job.upload=null;job.ready=null;
             retry.success(retryKey);
@@ -342,7 +397,7 @@ export function createVeilreachDistanceRenderer(gl){
     const ranges=veilreachDrawRanges(owners,detailed);
     if(gl.canvas?.dataset){
       gl.canvas.dataset.veilreachAtlas=JSON.stringify({bytes:atlasBytes,rebuilds,preparedTiles,
-        pending:Boolean(job),drawCalls:ranges.length,prepareMs:lastPreparationMs,uploadMs:lastUploadMs});
+        pending:Boolean(job),drawCalls:ranges.length,prepareMs:lastPreparationMs,uploadMs:lastUploadMs,uploadPhases});
     }
     if(!buffer||!ranges.length)return 0;
     gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
