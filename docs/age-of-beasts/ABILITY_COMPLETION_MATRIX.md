@@ -9,14 +9,14 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 |---|---|---|
 | Bison | herd, grazing, defense | Peer-based herd and actual grass grazing native PASS session15; live integration pending |
 | Badger | forage, burrow | Incomplete |
-| Meadowlark | flight, forage, landing | Incomplete |
-| Honeybee | flight, pollination, hive | Actual blossom approach/contact and owner-mediated pollen transfer authored; hive owner/native/live pending |
+| Meadowlark | flight, forage, landing | Supported landing and threat takeoff authored; native/live pending |
+| Honeybee | flight, pollination, hive | Initial native failed due to missing shape authority in fixture; corrected real shape provider and continuous hover, native pending; hive/live pending |
 | Golden Antelope | evasion, herd | Incomplete |
 | Werewolf | pursuit, claw | Incomplete |
 | Scarefiend | disguise, awakening, ambush | Incomplete |
 | Headless Knight | sword, heavy-melee | Incomplete |
 | Dire Hound | pack, lunge, bite | Incomplete |
-| Gravehand | concealment, emergence, restraint | Existing physical refuge and emergence traversal authored; native/live and restraint owner pending |
+| Gravehand | concealment, emergence, restraint | Physical refuge and emergence traversal native PASS session18; source-known spawn gate authored; native/live and restraint owner pending |
 
 ## desert
 Native isolated pursuit, hop, pincer, night gate.
@@ -26,7 +26,7 @@ Native isolated pursuit, hop, pincer, night gate.
 | Camel | tame, ground-mount | Original candidate tame/mount/steer/dismount native PASS session16; live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
-| Oasis Ibis | wade, forage, flight | Supported shallow-water movement authored; native/live pending |
+| Oasis Ibis | wade, forage, flight | Supported shallow-water movement native PASS session18; source-known shoreline selection authored, native/live pending |
 | Dunewalker | herd, six-legged-walk | Incomplete |
 | Mummy | pursuit, melee | Incomplete |
 | Giant Scorpion | pincers, tail, venom | Incomplete |
@@ -40,7 +40,7 @@ Native isolated charge, heavy melee, night flight.
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Woolly Mammoth | herd, defense, domestication, conditional-ground-mount | Incomplete |
-| Ptarmigan | forage, short-flight, evasion | Incomplete |
+| Ptarmigan | forage, short-flight, evasion | Supported landing and threat takeoff authored; native/live pending |
 | Ermine | evasion, explore | Incomplete |
 | Aurora Wisp | float, illumination | Incomplete |
 | Snowdrifter | walk, roll | Incomplete |
@@ -56,9 +56,9 @@ Native isolated jump, flower approach, branch strike, night gate.
 | Species | Approved ability scope | Status |
 |---|---|---|
 | Unicorn | tame, ground-mount | Original candidate tame and ground mount native PASS session16; live pending |
-| Faerie | flight, flower-visit | Incomplete |
+| Faerie | flight, flower-visit | Physical blossom visit authored; native/live pending |
 | Sproutling | waddle, concealment, rest | Incomplete |
-| Prismwing | flight, flower-visit, rest | Incomplete |
+| Prismwing | flight, flower-visit, rest | Physical blossom visit and hover rest authored; native/live pending |
 | Glimmerstag | walk, illumination | Incomplete |
 | Corrupted Treant | branch-attack, root-attack | Incomplete |
 | Nightshade Witch | poison-spell, slow-spell | Incomplete |

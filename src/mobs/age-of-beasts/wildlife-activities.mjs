@@ -37,10 +37,10 @@ export function observeWildlife(actor,query,view,{goal,flowerCell,threatVisible,
   const validGoal=point(goal)&&shallowWade(query,goal,r.body);
   return wading&&validGoal?{action:'wade',destination:goal}:null;
  }
- if(r.id==='honeybee'){
+ if(['honeybee','faerie','prismwing'].includes(r.id)){
   const blossom=flowerAt(view,flowerCell);
   if(threatVisible)return null;
-  if(!blossom||query.environment(p)?.dayPhase!=='day')return {action:'fly',destination:null};
+  if(!blossom||r.id==='honeybee'&&query.environment(p)?.dayPhase!=='day')return {action:'fly',destination:null};
   // Fly just above the actual blossom instead of entering its collision shape.
   const at=[blossom[0],blossom[1]+.34,blossom[2]];
   if(distance(p,at)>r.perception.sight||!expansionSupport(query,at,r.body,'air')||query.lineOfSight(p,at)!==true)return {action:'fly',destination:null};
@@ -79,7 +79,7 @@ export function settleWildlife(actor,query,view,activity,revision,commitPollinat
   const key=activity.flower.join(',');
   if(actor.flowerKey!==key){actor.flowerKey=key;actor.flowerTicks=0;}
   actor.flowerTicks=Math.min(12,(actor.flowerTicks??0)+1);
-  if(actor.flowerTicks===12){
+  if(actor.flowerTicks===12&&actor.species.id==='honeybee'){
    if(!actor.pollenOrigin)actor.pollenOrigin=key;
    else if(actor.pollenOrigin!==key&&typeof commitPollination==='function'){
     const receipt=Object.freeze({sourceId:actor.id,from:actor.pollenOrigin,to:key,revision});

@@ -41,10 +41,11 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  const reattachWall=r.id==='ceiling-lurker'&&actor.dropState==='recovering'&&expansionSupport(query,actor.position,r.body,'climb-surface')?
   [[1,0],[-1,0],[0,1],[0,-1]].find(([x,z])=>query.volume([actor.position[0]+x*.18,actor.position[1],actor.position[2]+z*.18],r.body)==='solid'):null;
  const social=typeof readPeers==='function'?observeExpansionSocial(actor,query,ownerView,readPeers,rev):null;
- const landingGoal=r.id==='golden-eagle'&&point(goal)&&expansionSupport(query,goal,r.body,'ground')&&query.revision()===rev?goal:null;
+ const landingBird=['golden-eagle','meadowlark','ptarmigan'].includes(r.id);
+ const landingGoal=landingBird&&point(goal)&&expansionSupport(query,goal,r.body,'ground')&&query.revision()===rev?goal:null;
  const perchReady=Boolean(landingGoal&&grounded&&distance(landingGoal)<=.18);
  const glideReady=r.id==='skyray'&&point(goal)&&goal[1]<actor.position[1]-.25&&Math.hypot(goal[0]-actor.position[0],goal[2]-actor.position[2])>.25&&expansionSupport(query,actor.position,r.body,'air');
- const obs={...facts,perchReady,landingSite:r.id==='golden-eagle'?Boolean(landingGoal):facts.landingSite,glideReady,...(social?{herdSeparated:social.herdSeparated}:{}),heard,reattachWall:Boolean(reattachWall),
+ const obs={...facts,perchReady,landingSite:landingBird?Boolean(landingGoal):facts.landingSite,glideReady,...(social?{herdSeparated:social.herdSeparated}:{}),heard,reattachWall:Boolean(reattachWall),
   climbContact:r.id==='cliff-reaver'&&expansionSupport(query,actor.position,r.body,'climb-surface'),
   climbGoal:point(goal)&&goal[1]>actor.position[1]+.1,
   dropState:actor.dropState,dropTargetMatches:actor.dropTarget===target,
@@ -54,6 +55,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  let intent=decide(actor.candidate,obs);
  const activity=obs.ready&&matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness)?observeWildlife(actor,query,ownerView,{goal,flowerCell,threatVisible,targetVisible:visible,target,revision:rev}):null;
  if(activity)intent={action:activity.action,visual:activity.action};
+ else if(landingBird&&r.id!=='golden-eagle'&&landingGoal&&!threatVisible&&obs.ready&&matchesRequiredTime(actor.candidate.requirement,obs.dayPhase,obs.darkness))intent=perchReady?{action:'perch',visual:'idle'}:{action:'perch-approach',visual:'fly'};
  else if(r.id==='gravehand'&&actor.refugeState==='exposed'&&obs.ready)intent=decide(actor.candidate,{...obs,emerged:true});
  const rangedCandidate=typeof launchProjectile==='function'&&ranged&&obs.ready&&visible&&target?.alive===true&&obs.targetDistance>r.combat.reach&&obs.targetDistance<=ranged.range&&proposeBeastProjectile(actor,target,query,rev);
  if(rangedCandidate)intent=obs.cooldownRemaining>0?{action:'recover',visual:'idle'}:obs.windupElapsed<r.combat.windup?{action:'prepare-attack',visual:'idle'}:{action:'launch-projectile',visual:'attack'};
@@ -68,6 +70,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
  actor.windupTarget=intent.action==='prepare-attack'?attackTarget:null;
  actor.action=intent.action;actor.visual=intent.visual;
+ if(['honeybee','faerie','prismwing'].includes(r.id)&&activity?.action!=='flower-contact'){actor.flowerKey=null;actor.flowerTicks=0;}
  if(social&&intent.action==='graze'){actor.action=social.grazing?'graze':'forage';actor.visual=social.grazing?'graze':'idle';}
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
@@ -83,6 +86,7 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  if(destination&&!away&&grounded&&r.movement.capabilities.includes('walk')&&typeof actor.id==='string'&&typeof navigator?.steer==='function'&&['herd','investigate','pursue','forage'].includes(intent.action)){
   const steer=navigator.steer(actor,destination);if(Array.isArray(steer)&&steer.length===2&&steer.every(Number.isFinite))heading=steer;
  }
+ if(activity?.action==='flower-contact'){heading=[0,0];vertical=0;}
  if(activity?.action==='flower-approach'&&destination){const delta=destination.map((v,i)=>v-actor.position[i]),scale=Math.min(1,Math.hypot(...delta)/(r.movement.speed*dt));const n=Math.hypot(...delta)||1;heading=[delta[0]/n*scale,delta[2]/n*scale];vertical=delta[1]/n*scale;}
  const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit','glide','perch-approach','flower-approach','flower-contact'].includes(intent.action));
  if(intent.action==='land')vertical=-1;

@@ -2,6 +2,7 @@
 // landmarks, natural-origin chambers and vegetation owners remain explicit
 // vetoes until their own final source providers are available.
 import {planBodyVolume} from './body-contract.mjs';
+import {shallowWade,shelteredAt} from './wildlife-activities.mjs';
 import {expansionSupport} from './environment-support.mjs';
 import {BLOCK} from '../../voxel.mjs';
 import {ENVIRONMENT_GROUND} from '../../environment-ground.mjs';
@@ -57,9 +58,39 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
      if(read(x,y,z)!==BLOCK.GRASS)return false;
    return true;
   }
+  // Every probed cell must be available through the same source view.
+  // For spawning, view.materialAt is generatedMaterialAt, not a placed-block reader.
+  const knownVolume=(at,b=body)=>{const v=planBodyVolume(at,b);return !!v&&v.cells.every(({x,y,z})=>read(x,y,z)!==undefined);};
+  const knownFloor=at=>{const b=planBodyVolume(at,body)?.bounds;if(!b)return false;
+   for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)if(read(x,Math.floor(b[1]-.035),z)===undefined)return false;return true;};
+  let refuge,shore;
+  const refugeSite=()=>refuge??=(()=>{
+   const at=findLanding();if(!at||!knownFloor(at)||!shelteredAt(q,at,body))return false;
+   // Require known source across the whole possible overhead contact region.
+   for(let i=0;i<=4;i++)if(!knownVolume([at[0],at[1]+i*.25,at[2]]))return false;
+   const b=planBodyVolume(at,body).bounds;
+   for(let y=Math.floor(b[4]);y<=Math.floor(b[4]+1.035);y++)
+    for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)if(read(x,y,z)===undefined)return false;
+   return true;
+  })();
+  const shoreline=()=>shore??=(()=>{
+   const at=findLanding();if(!at||!knownVolume(at)||!knownFloor(at))return false;
+   // Bounded two-block radial shoreline check: same-height dry standing
+   // and actual shallow supported water, with source-known footprints.
+   const dry=pos=>knownVolume(pos)&&knownFloor(pos)&&expansionSupport(q,pos,body,'ground')&&expansionSupport(q,pos,body,'air');
+   const wet=pos=>knownVolume(pos)&&knownFloor(pos)&&shallowWade(q,pos,body);
+   for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]])for(const d of [.5,1,1.5,2]){
+    const b=[at[0]+dx*d,at[1],at[2]+dz*d];
+    if((dry(at)&&wet(b)||wet(at)&&dry(b))&&q.lineOfSight([at[0],at[1]+body.height*.6,at[2]],[b[0],b[1]+body.height*.6,b[2]])===true)return true;
+   }
+   return false;
+  })();
   for(const tag of needed){
    switch(tag){
     case 'ground':result[tag]=support('ground');break;
+    case 'emergence-site':case 'burrow-site':result[tag]=refugeSite();break;
+    case 'vegetation-or-hills':result[tag]=!localMaterials().includes(undefined)&&localMaterials().some(id=>plants.has(id));break;
+    case 'water-nearby':case 'shoreline':result[tag]=shoreline();break;
     case 'sand':case 'loose-sand':result[tag]=floorIs(sand);break;
     case 'snow-ground':case 'frozen-ground':result[tag]=floorIs(snow);break;
     case 'snow-or-vegetation':result[tag]=floorIs(snow)||(!localMaterials().includes(undefined)&&localMaterials().some(id=>plants.has(id)));break;

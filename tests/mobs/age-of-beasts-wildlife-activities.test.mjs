@@ -1,15 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {BLOCK} from '../../src/voxel.mjs';
-import {MOUNTAIN_V8_MATERIAL as M} from '../../src/manual-biomes/mountain-v8-materials.mjs';
+import {MOUNTAIN_V8_MATERIAL as M,mountainV8Material} from '../../src/manual-biomes/mountain-v8-materials.mjs';
 import {waterCell} from '../../src/block-packs/pack-2/water.mjs';
 import {createExpansionWorldQuery} from '../../src/mobs/age-of-beasts/physical-query.mjs';
 import {completeBeastCandidateCatalog} from '../../src/mobs/age-of-beasts/complete-catalog.mjs';
-import {createPlainsActor,stepPlainsActor,createDesertActor,stepDesertActor} from '../../src/mobs/age-of-beasts/plains-execution.mjs';
+import {createPlainsActor,stepPlainsActor,createDesertActor,stepDesertActor,createForestActor,stepForestActor,createSnowActor,stepSnowActor} from '../../src/mobs/age-of-beasts/plains-execution.mjs';
 import {shallowWade,shelteredAt} from '../../src/mobs/age-of-beasts/wildlife-activities.mjs';
 const cat=completeBeastCandidateCatalog();
-function fixture(get,biome,dayPhase='day',water=()=>undefined){
- const query=createExpansionWorldQuery({get,getPack2State:water},{resident:()=>true,revision:()=>1,observe:()=>({biome,hazard:false,dayPhase,light:dayPhase==='night'?.2:.8}),extraOverlayBlocked:()=>false});
+function fixture(get,biome,dayPhase='day',water=()=>undefined,shape=mountainV8Material){
+ const query=createExpansionWorldQuery({get,getPack2State:water,mobMountainShape:shape},{resident:()=>true,revision:()=>1,observe:()=>({biome,hazard:false,dayPhase,light:dayPhase==='night'?.2:.8}),extraOverlayBlocked:()=>false});
  return {query,revision:()=>1,materialAt:get};
 }
 test('honeybee visits actual two distinct blossom cells and transfers pollen once via owner',()=>{
@@ -42,4 +42,28 @@ test('gravehand physically leaves existing overhead refuge before attack; no ter
   assert.ok(Math.hypot(...a.position.map((n,j)=>n-before[j]))<.1);
  }
  assert.equal(a.refugeState,'exposed');assert.equal(hits.length,0);assert.equal(shelteredAt(q,a.position,c.record.body),false);
+});
+
+test('unknown blossom collision authority stays fail-closed; no pollen is inferred from material id',()=>{
+ const v=fixture((x,y,z)=>y===-3?BLOCK.STONE:y===-2&&x===2&&z===0?M['flower-petal']:BLOCK.AIR,'meadow','day',()=>undefined,()=>undefined);
+ const a=createPlainsActor(cat.get('honeybee'),[.5,-1.28,.5],v.query);a.id='bee-a';
+ for(let i=0;i<30;i++)assert.ok(stepPlainsActor(a,v.query,{ownerView:v,flowerCell:[2,-2,0],commitPollination:()=>{throw Error('unexpected transfer')}}));
+ assert.equal(a.pollenOrigin,undefined);assert.equal(a.flowerTicks,0);
+});
+test('faerie and prismwing approach real blossom and maintain contact without creating pollen rewards',()=>{
+ for(const id of ['faerie','prismwing']){
+  const v=fixture((x,y,z)=>y===-3?BLOCK.STONE:y===-2&&x===2&&z===0?M['flower-petal']:BLOCK.AIR,'forest');
+  const a=createForestActor(cat.get(id),[.5,-1.28,.5],v.query);a.id=id;
+  for(let i=0;i<65;i++)assert.ok(stepForestActor(a,v.query,{ownerView:v,flowerCell:[2,-2,0],commitPollination:()=>{throw Error('unexpected transfer')}}));
+  assert.equal(a.action,'flower-contact');assert.equal(a.flowerTicks,12);assert.equal(a.pollenOrigin,undefined);
+ }
+});
+test('meadowlark and ptarmigan land at physical support, then leave for a threat',()=>{
+ for(const [id,biome,create,step] of [['meadowlark','meadow',createPlainsActor,stepPlainsActor],['ptarmigan','snow',createSnowActor,stepSnowActor]]){
+  const v=fixture((x,y,z)=>y===-3?BLOCK.STONE:BLOCK.AIR,biome),a=create(cat.get(id),[.5,0,.5],v.query),goal=[3.5,-2,.5];
+  for(let i=0;i<220&&a.motionMode!=='perch';i++)assert.ok(step(a,v.query,{goal}));
+  assert.equal(a.motionMode,'perch',id);const at=[...a.position];
+  assert.ok(step(a,v.query,{goal}));assert.deepEqual(a.position,at);
+  assert.ok(step(a,v.query,{goal:[at[0],at[1]+3,at[2]],threat:{position:[at[0]+1,at[1]+.5,at[2]]}}));assert.equal(a.motionMode,'fly');assert.ok(a.position[1]>at[1]);
+ }
 });
