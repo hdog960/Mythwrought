@@ -7,11 +7,12 @@ import {nextDesertIntent} from './desert-intents.mjs';
 import {nextSnowIntent} from './snow-intents.mjs';
 import {nextForestIntent} from './forest-intents.mjs';
 import {nextAlpineIntent,nextCaveIntent} from './alpine-cave-intents.mjs';
+import {multiHitProfile} from './multi-hit.mjs';
 import {observeExpansionSocial} from './social-behavior.mjs';
 import {hearExpansionDisturbance} from './sound-perception.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
-const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike','drop-attack']);
+const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike','drop-attack','combo-strike']);
 const point=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Math.abs(n)<2**26);
 function createActor(candidate,position,query,biome){
  if(candidate?.requirement?.biome!==biome)throw TypeError('Wrong candidate biome');
@@ -20,7 +21,7 @@ function createActor(candidate,position,query,biome){
   const {record:r,capability:c}=candidate,env=query.environment(position);
   if(env?.biome!=='cave'||env.hazard!==false||position[1]<c.depth[0]||position[1]>c.depth[1]||!c.spawnSupport.some(k=>expansionSupport(query,position,r.body,k)))throw TypeError('Invalid cave habitat');
  }
- return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,visual:'idle',state:'idle',action:'idle'};
+ return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,combo:null,visual:'idle',state:'idle',action:'idle'};
 }
 function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator}={},biome,decide){
  if(actor?.candidate?.requirement?.biome!==biome)return false;
@@ -43,7 +44,15 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
   dropState:actor.dropState,dropTargetMatches:actor.dropTarget===target,
   targetBelow:visible&&target.position[1]<actor.position[1]-.5&&Math.hypot(target.position[0]-actor.position[0],target.position[2]-actor.position[2])<=.8,
   ceilingContact:biome==='cave'&&expansionSupport(query,actor.position,r.body,'ceiling'),ready:env?.hazard===false&&env.biome===biome&&(biome!=='cave'||actor.position[1]>=actor.candidate.capability.depth[0]&&actor.position[1]<=actor.candidate.capability.depth[1]),dayPhase:env?.dayPhase,darkness:Number.isFinite(env?.light)&&env.light<=.3,targetVisible:visible,targetDistance:visible?distance(target.position):1e6,threatDistance:threatVisible?distance(threat.position):1e6,grounded,cooldownRemaining:Math.max(0,actor.cooldown-dt),windupElapsed:actor.windupTarget===attackTarget?actor.windup:0};
- const intent=decide(actor.candidate,obs);
+ const profile=multiHitProfile(r);
+ let intent=decide(actor.candidate,obs);
+ if(actor.combo){
+  if(!profile||!obs.ready||!visible||target!==actor.combo.target||target?.alive===false||distance(target.position)>r.combat.reach)actor.combo=null;
+  else if(actor.combo.ticks>1){
+   actor.combo=Object.freeze({...actor.combo,ticks:actor.combo.ticks-1});
+   intent={action:'combo-windup',visual:'idle'};
+  }else intent={action:'combo-strike',visual:'attack'};
+ }
  actor.cooldown=obs.cooldownRemaining;
  actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
  actor.windupTarget=intent.action==='prepare-attack'?attackTarget:null;
@@ -93,8 +102,13 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
    const victim=intent.action==='defend'?threat:target;
    if(!victim||!sight(victim.position)||distance(victim.position)>r.combat.reach||query.revision()!==rev||typeof commitDamage!=='function'){Object.assign(actor,start);return false;}
    // Commit must atomically check owner revision and identity; false is no mutation.
-   if(commitDamage(victim,r.combat.damage,rev,intent.action)!==true){Object.assign(actor,start);return false;}
-   actor.cooldown=r.combat.cooldown;
+   const first=profile&&intent.action==='heavy-melee',follow=profile&&intent.action==='combo-strike';
+   const strike=first?0:follow?actor.combo.index:null;
+   const amount=strike===null?r.combat.damage:profile.amounts[strike];
+   const kind=strike===null?intent.action:profile.prefix+'-'+(strike+1);
+   if(commitDamage(victim,amount,rev,kind)!==true){Object.assign(actor,start);return false;}
+   if(!follow)actor.cooldown=r.combat.cooldown;
+   if(strike!==null)actor.combo=strike===2?null:Object.freeze({target:victim,index:strike+1,ticks:profile.interval});
    if(intent.action==='drop-attack'){actor.dropState='recovering';actor.dropTarget=null;}
   }
   return true;

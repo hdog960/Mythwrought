@@ -81,6 +81,24 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
      });break;
     }
     case 'landing-site':result[tag]=findLanding()!==null;break;
+    case 'rider-clearance':{
+     // Provisional adult player envelope, original interaction reach.
+     // Do not infer aerial mount availability or relax the actual body bounds.
+     const at=findLanding(),rider={radius:.24,height:1.78,collision:'aabb'},offset=body.radius+.40;
+     const generatedClear=pos=>{
+      const volume=planBodyVolume(pos,rider);
+      return !!volume&&q.volume(pos,rider)==='clear'&&volume.cells.every(({x,y,z})=>read(x,y,z)!==undefined);
+     };
+     result[tag]=at!==null&&offset<=2&&generatedClear([at[0],at[1]+body.height,at[2]])&&
+      [[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dz])=>{
+       const side=[at[0]+dx*offset,at[1],at[2]+dz*offset];
+       if(!generatedClear(side)||!expansionSupport(q,side,rider,'ground'))return false;
+       const bounds=planBodyVolume(side,rider).bounds,y=Math.floor(bounds[1]-.035);
+       for(let x=Math.floor(bounds[0]+1e-5);x<=Math.floor(bounds[3]-1e-5);x++)
+        for(let z=Math.floor(bounds[2]+1e-5);z<=Math.floor(bounds[5]-1e-5);z++)if(read(x,y,z)===undefined)return false;
+       return q.lineOfSight([at[0],at[1]+body.height*.6,at[2]],[side[0],side[1]+rider.height*.5,side[2]])===true;
+      });break;
+    }
     case 'open-grass':{const at=findLanding();result[tag]=at!==null&&grassAt(at);break;}
     case 'large-clearance':result[tag]=q.volume(p,body)==='clear';break;
     case 'ceiling':result[tag]=support('ceiling');break;

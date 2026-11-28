@@ -7,7 +7,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Bison | herd, grazing, defense | Peer-based herd and actual grass grazing authored; native/live integration pending |
+| Bison | herd, grazing, defense | Peer-based herd and actual grass grazing native PASS session15; live integration pending |
 | Badger | forage, burrow | Incomplete |
 | Meadowlark | flight, forage, landing | Incomplete |
 | Honeybee | flight, pollination, hive | Incomplete |
@@ -23,7 +23,7 @@ Native isolated pursuit, hop, pincer, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Camel | tame, ground-mount | Incomplete |
+| Camel | tame, ground-mount | Original AnimalInteractions candidate tame/mount/steer/dismount authored session16; native/live pending |
 | Jerboa | hop, evasion | Incomplete |
 | Golden Scarab | crawl, concealment | Incomplete |
 | Oasis Ibis | wade, forage, flight | Incomplete |
@@ -55,7 +55,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Unicorn | tame, ground-mount | Incomplete |
+| Unicorn | tame, ground-mount | Original candidate tame and ground mount authored; native/live pending |
 | Faerie | flight, flower-visit | Incomplete |
 | Sproutling | waddle, concealment, rest | Incomplete |
 | Prismwing | flight, flower-visit, rest | Incomplete |
@@ -63,7 +63,7 @@ Native isolated jump, flower approach, branch strike, night gate.
 | Corrupted Treant | branch-attack, root-attack | Incomplete |
 | Nightshade Witch | poison-spell, slow-spell | Incomplete |
 | Sporebeast | spore-cloud | Incomplete |
-| Chimera | territory, multi-attack | Incomplete |
+| Chimera | territory, multi-attack | Three guarded timed strikes authored; native/live pending |
 | Dreamweaver | float, magic, vision-distortion | Incomplete |
 
 ## alpine
@@ -71,11 +71,11 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Yak | herd, grazing, domestication | Incomplete |
+| Yak | herd, grazing, domestication | Original candidate taming authored; native/live pending |
 | Golden Eagle | soar, perch | Incomplete |
 | Pika | gather, evasion, shelter | Incomplete |
 | Skyray | glide, flight | Incomplete |
-| Griffin | tame, flight, aerial-mount, defense | Incomplete |
+| Griffin | tame, flight, aerial-mount, defense | Aerial mounting still blocked pending movement owner; candidate tame interface authored |
 | Cyclops | club, rock-projectile | Incomplete |
 | Wyvern | flight, pursuit, venom | Isolated aerial pursuit qualified; venom/live integration pending |
 | Avalanche Beast | charge | Isolated charge qualified; habitat/live integration pending |
@@ -96,6 +96,6 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 | Abyssal Sentinel | territory, heavy-melee | Incomplete |
 | Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; live sound producer pending |
 | Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
-| Abyssal Hydra | multi-attack, heavy-melee | Incomplete |
+| Abyssal Hydra | multi-attack, heavy-melee | Three guarded timed bites authored; native/live pending |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.
