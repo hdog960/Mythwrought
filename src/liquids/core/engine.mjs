@@ -17,8 +17,8 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
   }
   const pair=(a,b)=>[a,b].sort().join("|");
   for(const r of reactionRules){
-    if(!r||r.a===r.b||!defs.has(r.a)||!defs.has(r.b)||typeof r.propose!=="function"||rules.has(pair(r.a,r.b)))throw new TypeError("Invalid or duplicate reaction rule");
-    rules.set(pair(r.a,r.b),Object.freeze({a:r.a,b:r.b,propose:r.propose}));
+    if(!r||r.a===r.b||!defs.has(r.a)||!defs.has(r.b)||typeof r.propose!=="function"||(r.settle!==undefined&&typeof r.settle!=="function")||rules.has(pair(r.a,r.b)))throw new TypeError("Invalid or duplicate reaction rule");
+    rules.set(pair(r.a,r.b),Object.freeze({a:r.a,b:r.b,propose:r.propose,settle:r.settle}));
   }
   const open=(x,y,z)=>valid(x,y,z)&&isLoaded(x,y,z)===true&&isOpen(x,y,z)===true;
   const MAX_QUANTITY=2**40;
@@ -213,6 +213,64 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
     if(!proposal||!integer(proposal.consumeA,0,a.units)||!integer(proposal.consumeB,0,b.units)||proposal.consumeA+proposal.consumeB===0||typeof proposal.product!=="string"||!/^[a-z][a-z0-9-]{0,63}$/.test(proposal.product))throw new RangeError("Invalid reaction proposal");
     return Object.freeze({a,b,consumeA:proposal.consumeA,consumeB:proposal.consumeB,product:proposal.product});
   }
+  // Explicit owner routing; a proposal token alone never authorizes consumption.
+  // Every removed unit and extensive quantity reaches the other cell or a receipt.
+  const reactionPlans=new WeakSet();
+  function buildReaction(ax,ay,az,bx,by,bz){
+    const proposal=proposeReaction(ax,ay,az,bx,by,bz);
+    if(!proposal)return null;
+    const {a,b,consumeA,consumeB,product}=proposal;
+    const rule=rules.get(pair(a.id,b.id));
+    if(!rule.settle)return null;
+    const routing=rule.settle(proposal);
+    if(routing===null)return null;
+    const routeA=routing?.routeA,routeB=routing?.routeB;
+    if(!(consumeA?routeA==='b'||routeA==='product':routeA===null)||
+       !(consumeB?routeB==='a'||routeB==='product':routeB===null))throw new RangeError("Invalid reaction routing");
+    function partition(c,n){
+      if(!n)return [null,c];
+      const [taken,left]=split(c,n);
+      return [record(c.x,c.y,c.z,c.id,n,taken),n===c.units?null:record(c.x,c.y,c.z,c.id,c.units-n,left)];
+    }
+    const [takenA,leftA]=partition(a,consumeA),[takenB,leftB]=partition(b,consumeB);
+    function receive(original,left,incoming){
+      if(!incoming)return left;
+      const units=(left?.units??0)+incoming.units;
+      if(units>CELL_CAPACITY)return false;
+      const q=combine(left?.quantities??{},incoming.quantities);
+      return q?record(original.x,original.y,original.z,original.id,units,q):false;
+    }
+    const afterA=receive(a,leftA,routeB==='a'?takenB:null);
+    const afterB=receive(b,leftB,routeA==='b'?takenA:null);
+    if(afterA===false||afterB===false)return null;
+    const productInputs=Object.freeze([routeA==='product'?takenA:null,routeB==='product'?takenB:null].filter(Boolean));
+    if(getCell(a.x,a.y,a.z)!==a||getCell(b.x,b.y,b.z)!==b)return null;
+    return Object.freeze({proposal,routeA,routeB,takenA,takenB,afterA,afterB,product,productInputs});
+  }
+  function planReaction(...points){
+    if(dirty)throw new Error("Reaction during tick");
+    const plan=buildReaction(...points);
+    if(plan)reactionPlans.add(plan);
+    return plan;
+  }
+  function commitReaction(plan){
+    if(dirty)throw new Error("Reaction during tick");
+    if(!reactionPlans.has(plan))return null;
+    reactionPlans.delete(plan);
+    const {a,b,consumeA,consumeB,product}=plan.proposal;
+    if(getCell(a.x,a.y,a.z)!==a||getCell(b.x,b.y,b.z)!==b)return null;
+    // Re-run the pure owner policy and current host readiness before writing.
+    const fresh=buildReaction(a.x,a.y,a.z,b.x,b.y,b.z);
+    if(!fresh||fresh.proposal.a!==a||fresh.proposal.b!==b||
+       fresh.proposal.consumeA!==consumeA||fresh.proposal.consumeB!==consumeB||
+       fresh.product!==product||fresh.routeA!==plan.routeA||fresh.routeB!==plan.routeB)return null;
+    const changes=[[a,fresh.afterA],[b,fresh.afterB]].filter(([before,after])=>before!==after);
+    const changed=Object.freeze(changes.map(([c])=>Object.freeze([c.x,c.y,c.z])));
+    const receipt=Object.freeze({product,productInputs:fresh.productInputs,changed});
+    // At most two existing cells; no host callbacks or external writes here.
+    for(const [c,after] of changes)write(c.x,c.y,c.z,after);
+    return receipt;
+  }
   function save(){
     return {version:LIQUID_CONTRACT_VERSION,cells:[...cells.values()],pending:[...pending.values()].map(p=>[...p])};
   }
@@ -231,5 +289,5 @@ export function createLiquidEngine({isLoaded,isOpen,definitions=[],reactionRules
       pending.set(k,[...p]);
     }
   }
-  return Object.freeze({insert,extract,getCell,wake,tick,samplePoint,proposeReaction,planDisplacement,commitDisplacement,save});
+  return Object.freeze({insert,extract,getCell,wake,tick,samplePoint,proposeReaction,planDisplacement,commitDisplacement,planReaction,commitReaction,save});
 }
