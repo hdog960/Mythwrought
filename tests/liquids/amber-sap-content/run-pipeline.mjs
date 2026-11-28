@@ -27,7 +27,7 @@ const pins=[
   [peerURL,'visual/dirty-bridge.mjs','aadb734e572c1bbc35ca866d7bbeb259bae8764b'],
   [own,'visuals.mjs','64d12eeb5a08fcf707a42f1127a7ba1ef7cebce9'],
   [own,'sites.mjs','ee59609bc9288164a3f6de00f3eeef1ae6e5c949'],
-  [own,'transfers.mjs','97272c950be4e3d68e0588b6c4d4e8d5e1ca4452']
+  [own,'transfers.mjs','e0501ad5aa4f418c23611b83ecc62326ff7cb086']
 ];
 const urls=await Promise.all(pins.map(p=>verify(...p)));
 const [core,definition,sources,curing,mesh,bridge,visuals,sites,transfers]=await Promise.all(urls.map(u=>import(u)));

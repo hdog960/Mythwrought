@@ -13,3 +13,15 @@ test('quantity overflow and malformed records refuse rather than truncate',()=>{
 test('physical extremes and invalid positions',()=>{for(const y of [-210,256])assert.ok(planAmberTransfer(opts(w(8,{}, {y}),c(),{position:[0,y,0]})));for(const y of [-211,257])assert.throws(()=>planAmberTransfer(opts(w(),c(),{position:[0,y,0]})),TypeError);});
 test('curing content depends on physics readiness and live identity',()=>{const cell=w(),proposal=Object.freeze({expected:cell,consumeSap:8,solidUnits:8,product:'amber'});let ready=true,live=cell,allowed=true;const options={proposal,curing:{isReady:p=>ready&&p===proposal},engine:{getCell:()=>live},isLoaded:()=>true,isOpen:()=>true,canPlaceAmber:()=>allowed};assert.equal(planHardenedAmber(options).material,'amber');ready=false;assert.equal(planHardenedAmber(options),null);ready=true;allowed=false;assert.equal(planHardenedAmber(options),null);allowed=true;live=w();assert.equal(planHardenedAmber(options),null);assert.equal(planHardenedAmber({...options,proposal:{...proposal}}),null);});
 test('resource proposals are symbolic and unregistered',()=>{assert.deepEqual(AMBER_RESOURCE_PROPOSALS.map(x=>x.id),['amber','amber-adhesive','amber-preservation']);assert.ok(AMBER_RESOURCE_PROPOSALS.every(x=>Object.isFrozen(x)&&!x.registered));});
+test('zero rounded constructor quantity remains in the world on collection',()=>{
+  const p=planAmberTransfer(opts(w(8,{constructor:1,trace:13}),c(),{units:1}));
+  assert.deepEqual(p.moved,{trace:1});
+  assert.deepEqual(p.world.after.quantities,{constructor:1,trace:12});
+  assert.deepEqual(p.container.after.quantities,{trace:1});
+});
+test('zero rounded constructor quantity remains in the vessel on placement',()=>{
+  const p=planAmberTransfer(opts(null,c(8,{constructor:1,trace:13}),{direction:'place',units:1}));
+  assert.deepEqual(p.moved,{trace:1});
+  assert.deepEqual(p.container.after.quantities,{constructor:1,trace:12});
+  assert.deepEqual(p.world.after.quantities,{trace:1});
+});

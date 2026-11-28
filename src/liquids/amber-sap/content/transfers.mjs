@@ -10,7 +10,7 @@ function quantities(q){
   return Object.freeze(Object.fromEntries(entries.filter(([,v])=>v!==0)));
 }
 function split(q,n,total){return quantities(Object.fromEntries(Object.entries(q).map(([k,v])=>[k,Math.floor(v*n/total)])));}
-function remainder(q,t){return quantities(Object.fromEntries(Object.entries(q).map(([k,v])=>[k,v-(t[k]??0)])));}
+function remainder(q,t){return quantities(Object.fromEntries(Object.entries(q).map(([k,v])=>[k,v-(Object.hasOwn(t,k)?t[k]:0)])));}
 function merge(a,b){const q=Object.fromEntries(Object.entries(a));for(const [k,v] of Object.entries(b))q[k]=(Object.hasOwn(q,k)?q[k]:0)+v;try{return quantities(q);}catch{return null;}}
 const resource=(units,q)=>Object.freeze({id:units?'amber-sap':null,units,quantities:q});
 export const AMBER_RESOURCE_PROPOSALS=Object.freeze([
