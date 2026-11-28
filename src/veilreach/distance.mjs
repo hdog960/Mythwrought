@@ -9,6 +9,7 @@ export const VEILREACH_DISTANCE_OFFSET=512;
 export const VEILREACH_DISTANCE_MAX_BYTES=24_576*36;
 const maxVertices=VEILREACH_DISTANCE_MAX_BYTES/36;
 const radius=420;
+const handoffRadius=112;
 const uploadFloats=16_384;
 const light=[[.73,.77],[.48,1],[.67,.85]];
 const planes=[
@@ -72,7 +73,7 @@ function* editSnapshot(world,x,z){
 // One proxy column samples one actual physical column. Use every occupied
 // layer and material along that column, so cliffs, undercuts and strata are
 // sourced from voxels. Grid footprints still simplify horizontal detail.
-function chunkMesh(terrain,cx,cz,step,edits){
+function* chunkMesh(terrain,cx,cz,step,edits,sectionMask=-1){
   const x0=cx*16,z0=cz*16,half=Math.floor(step/2);
   const columns=new Map(),owners=new Map();
   const readEdits=edits.get(cx+','+cz);
@@ -96,6 +97,7 @@ function chunkMesh(terrain,cx,cz,step,edits){
   }
   function face(y,axis,positive,plane,rect,id){
     const section=runtimeSectionForY(y);
+    if(!(sectionMask&1<<(section-1)))return;
     if(!owners.has(section))owners.set(section,new Map());
     const groups=owners.get(section);
     const key=[axis,positive,plane,id].join('|');
@@ -106,6 +108,7 @@ function chunkMesh(terrain,cx,cz,step,edits){
   // Merge collinear side faces within an owner. Keep real Y planes instead
   // of rounding elevations or painting the whole vertical interval a color.
   for(let x=x0;x<x0+16;x+=step)for(let z=z0;z<z0+16;z+=step){
+    if(step===1&&z===z0&&x!==x0&&(x-x0)%4===0)yield;
     const {values:cells,minY,maxY}=column(x,z);
     if(minY>maxY)continue;
     for(let y=minY;y<=maxY;y++){
@@ -222,7 +225,7 @@ function* prepareAtlas(terrain,x,z,world){
     return {key,cx,cz,distance:Math.hypot(cx*16+8-x,cz*16+8-z)};
   }).filter(tile=>tile.distance<radius).sort((a,b)=>a.distance-b.distance||a.key.localeCompare(b.key)).slice(0,24);
   for(const {key,cx,cz} of authored){
-    const tile=chunkMesh(terrain,cx,cz,1,edits);
+    const tile=yield* chunkMesh(terrain,cx,cz,1,edits);
     const vertices=tile.reduce((sum,row)=>sum+row.values.length/9,0);
     yield;
     if(count+vertices>maxVertices/3)continue;
@@ -239,7 +242,17 @@ function* prepareAtlas(terrain,x,z,world){
       const group=[],admitted=[];
       for(const {cx,cz} of tiles){
         const modified=edits.has(cx+','+cz);
-        const tile=chunkMesh(terrain,cx,cz,modified?1:step,edits);
+        const tile=yield* chunkMesh(terrain,cx,cz,modified?1:step,edits);
+        if(!modified&&Math.hypot(cx*16+8-x,cz*16+8-z)<=handoffRadius){
+          const covered=tile.reduce((mask,row)=>mask|1<<(row.section-1),0);
+          const missing=terrain.sectionMask(cx,cz)&~covered;
+          if(missing){
+            // A coarse column can miss a thin ledge or the only voxel in a
+            // section. Keep those owners from disappearing at handoff.
+            yield;
+            tile.push(...(yield* chunkMesh(terrain,cx,cz,1,edits,missing)));
+          }
+        }
         groupCount+=tile.reduce((sum,row)=>sum+row.values.length/9,0);
         yield;
         if(count+groupCount>maxVertices)break;

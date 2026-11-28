@@ -280,6 +280,11 @@ test('distance publication keeps the previous buffer if a replacement upload fai
   const before=JSON.parse(gl.canvas.dataset.veilreachAtlas);
   assert.equal(before.pending,false);
   assert.ok(before.bytes>0&&before.bytes<=VEILREACH_DISTANCE_MAX_BYTES);
+  for(const [cx,cz,section] of [[2,4,5],[3,4,5]]){
+    assert.ok(meshChunk(world,cx,cz,section).length>900*9);
+    assert.ok(renderer.hasVisual(runtimeMeshKey(cx,cz,section)),
+      'thin occupied cliff sections retain a distance owner before physical retirement');
+  }
   const visible=drawn.at(-1);
   assert.ok(visible&&!deleted.has(visible));
   player.x=90;
