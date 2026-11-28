@@ -5,9 +5,10 @@ import {moveBody} from '../movement.mjs';
 import {nextPlainsIntent} from './plains-intents.mjs';
 import {nextDesertIntent} from './desert-intents.mjs';
 import {nextSnowIntent} from './snow-intents.mjs';
+import {nextForestIntent} from './forest-intents.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
-const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike']);
+const attackActions=new Set(['claw','ambush','heavy-melee','lunge','restrain','defend','melee','pincer','tail-strike','branch-strike']);
 const point=p=>Array.isArray(p)&&p.length===3&&p.every(n=>Number.isFinite(n)&&Math.abs(n)<2**26);
 function createActor(candidate,position,query,biome){
  if(candidate?.requirement?.biome!==biome)throw TypeError('Wrong candidate biome');
@@ -34,10 +35,10 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage}={},bio
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
- if(['herd','forage','fly','land','return-hive'].includes(intent.action)&&point(goal))destination=goal;
+ if(['herd','forage','fly','land','return-hive','flower-visit'].includes(intent.action)&&point(goal))destination=goal;
  let heading=[0,0],vertical=0;
  if(destination){let dx=destination[0]-actor.position[0],dz=destination[2]-actor.position[2],n=Math.hypot(dx,dz);if(n>1e-5)heading=[dx/n*(away?-1:1),dz/n*(away?-1:1)];vertical=Math.sign(destination[1]-actor.position[1]);}
- const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue'].includes(intent.action));
+ const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit'].includes(intent.action));
  if(intent.action==='land')vertical=-1;
  if(intent.action==='pack-flank'&&visible&&destination){const [x,z]=heading;heading=[x*.55-z*.835,z*.55+x*.835];}
  const jump=intent.action==='evade'&&r.movement.capabilities.includes('jump')&&grounded;
@@ -64,3 +65,6 @@ export const stepDesertActor=(a,q,o)=>stepActor(a,q,o,'desert',nextDesertIntent)
 
 export const createSnowActor=(c,p,q)=>createActor(c,p,q,'snow');
 export const stepSnowActor=(a,q,o)=>stepActor(a,q,o,'snow',nextSnowIntent);
+
+export const createForestActor=(c,p,q)=>createActor(c,p,q,'forest');
+export const stepForestActor=(a,q,o)=>stepActor(a,q,o,'forest',nextForestIntent);
