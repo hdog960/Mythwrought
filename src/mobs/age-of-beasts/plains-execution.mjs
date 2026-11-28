@@ -7,6 +7,7 @@ import {nextDesertIntent} from './desert-intents.mjs';
 import {nextSnowIntent} from './snow-intents.mjs';
 import {nextForestIntent} from './forest-intents.mjs';
 import {nextAlpineIntent,nextCaveIntent} from './alpine-cave-intents.mjs';
+import {observeExpansionSocial} from './social-behavior.mjs';
 import {hearExpansionDisturbance} from './sound-perception.mjs';
 import {expansionSupport} from './environment-support.mjs';
 const dt=1/30;
@@ -21,7 +22,7 @@ function createActor(candidate,position,query,biome){
  }
  return {candidate,species:candidate.record,position:[...position],velocity:[0,0,0],yaw:0,grounded:false,cooldown:0,windup:0,windupTarget:null,dropState:null,dropTarget:null,visual:'idle',state:'idle',action:'idle'};
 }
-function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances}={},biome,decide){
+function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDisturbances,readPeers,ownerView,navigator}={},biome,decide){
  if(actor?.candidate?.requirement?.biome!==biome)return false;
  const r=actor.species,rev=query.revision();
  if(!Number.isSafeInteger(rev)||query.volume(actor.position,r.body)!=='clear')return false;
@@ -35,7 +36,8 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  const heard=hearExpansionDisturbance(query,actor,readDisturbances,rev);
  const reattachWall=r.id==='ceiling-lurker'&&actor.dropState==='recovering'&&expansionSupport(query,actor.position,r.body,'climb-surface')?
   [[1,0],[-1,0],[0,1],[0,-1]].find(([x,z])=>query.volume([actor.position[0]+x*.18,actor.position[1],actor.position[2]+z*.18],r.body)==='solid'):null;
- const obs={...facts,heard,reattachWall:Boolean(reattachWall),
+ const social=typeof readPeers==='function'?observeExpansionSocial(actor,query,ownerView,readPeers,rev):null;
+ const obs={...facts,...(social?{herdSeparated:social.herdSeparated}:{}),heard,reattachWall:Boolean(reattachWall),
   climbContact:r.id==='cliff-reaver'&&expansionSupport(query,actor.position,r.body,'climb-surface'),
   climbGoal:point(goal)&&goal[1]>actor.position[1]+.1,
   dropState:actor.dropState,dropTargetMatches:actor.dropTarget===target,
@@ -46,14 +48,20 @@ function stepActor(actor,query,{target,threat,goal,facts={},commitDamage,readDis
  actor.windup=intent.action==='prepare-attack'?obs.windupElapsed+dt:0;
  actor.windupTarget=intent.action==='prepare-attack'?attackTarget:null;
  actor.action=intent.action;actor.visual=intent.visual;
+ if(social&&intent.action==='graze'){actor.action=social.grazing?'graze':'forage';actor.visual=social.grazing?'graze':'idle';}
  let destination=null,away=false;
  if(['pursue','pack-flank','charge'].includes(intent.action)&&visible)destination=target.position;
  if(['flee','evade'].includes(intent.action)&&threatVisible){destination=threat.position;away=true;}
  if(['herd','forage','fly','land','return-hive','flower-visit','swim','ceiling-crawl','climb'].includes(intent.action)&&point(goal))destination=goal;
  if(intent.action==='investigate'&&heard)destination=heard;
+ if(intent.action==='herd'&&social)destination=social.goal;
  let heading=[0,0],vertical=0;
  if(destination){let dx=destination[0]-actor.position[0],dz=destination[2]-actor.position[2],n=Math.hypot(dx,dz);if(n>1e-5)heading=[dx/n*(away?-1:1),dz/n*(away?-1:1)];vertical=Math.sign(destination[1]-actor.position[1]);}
  if(intent.action==='reattach-climb'&&reattachWall)heading=reattachWall;
+ // Existing LocalNavigator supplied and tick-budgeted by controller owner.
+ if(destination&&!away&&grounded&&r.movement.capabilities.includes('walk')&&typeof actor.id==='string'&&typeof navigator?.steer==='function'&&['herd','investigate','pursue','forage'].includes(intent.action)){
+  const steer=navigator.steer(actor,destination);if(Array.isArray(steer)&&steer.length===2&&steer.every(Number.isFinite))heading=steer;
+ }
  const flying=r.movement.capabilities.includes('fly')&&(!grounded||['fly','land','evade','return-hive','pursue','flower-visit'].includes(intent.action));
  if(intent.action==='land')vertical=-1;
  if(biome==='cave'&&r.id==='cave-bat'&&obs.ceilingContact&&intent.action==='fly')vertical=-1;

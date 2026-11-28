@@ -7,7 +7,7 @@ Native isolated pursuit, flanking, leap, guarded attack; species-level validatio
 
 | Species | Approved ability scope | Status |
 |---|---|---|
-| Bison | herd, grazing, defense | Incomplete |
+| Bison | herd, grazing, defense | Peer-based herd and actual grass grazing authored; native/live integration pending |
 | Badger | forage, burrow | Incomplete |
 | Meadowlark | flight, forage, landing | Incomplete |
 | Honeybee | flight, pollination, hive | Incomplete |
@@ -83,7 +83,7 @@ Native isolated charge/aerial pursuit PASS (session12); cliff climb native PASS 
 | Cliff Reaver | climb, leap | Isolated wall climb qualified; leap/live integration pending |
 
 ## cave
-Native isolated water-only swimming, ceiling traversal and bat roost/departure PASS (session12); guarded ceiling drop/impact native PASS session13; wall reattachment and owner-disturbance hearing authored session14, native pending.
+Native isolated water-only swimming, ceiling traversal and bat roost/departure PASS (session12); guarded ceiling drop/impact native PASS session13; wall reattachment and original-controller hearing native PASS session14.
 
 | Species | Approved ability scope | Status |
 |---|---|---|
@@ -94,8 +94,8 @@ Native isolated water-only swimming, ceiling traversal and bat roost/departure P
 | Geodeback | defense, walk | Incomplete |
 | Burrowing Horror | concealment, emergence, pursuit | Incomplete |
 | Abyssal Sentinel | territory, heavy-melee | Incomplete |
-| Echo Stalker | sound-perception, pursuit | Original sensing with bounded owner snapshot and investigation authored; native and live owner pending |
-| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment native and live integration pending |
+| Echo Stalker | sound-perception, pursuit | Original sensing and investigation qualified in isolated native test; live sound producer pending |
+| Ceiling Lurker | ceiling-attachment, drop-attack | Isolated traversal qualified; drop/impact qualified; wall reattachment qualified; distant-wall navigation/live integration pending |
 | Abyssal Hydra | multi-attack, heavy-melee | Incomplete |
 
 Next: prove isolated physical mode and complete actual action contracts with COMBAT #513, SKILL #512, movement :12; implement owner-approved effects, natural spawn facts and real 100-species engine admission only in authorized candidate integration. Do not emit fabricated skill receipts or permanent defeat from downed creatures.

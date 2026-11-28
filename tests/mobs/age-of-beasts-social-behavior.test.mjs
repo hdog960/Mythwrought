@@ -1,0 +1,21 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {BLOCK} from '../../src/voxel.mjs';
+import {arena} from './fixture.mjs';
+import {completeBeastCandidateCatalog} from '../../src/mobs/age-of-beasts/complete-catalog.mjs';
+import {createExpansionOwnerView} from '../../src/mobs/age-of-beasts/owner-view.mjs';
+import {createPlainsActor,stepPlainsActor} from '../../src/mobs/age-of-beasts/plains-execution.mjs';
+import {LocalNavigator} from '../../src/mobs/navigation.mjs';
+import {expansionSupport} from '../../src/mobs/age-of-beasts/environment-support.mjs';
+test('resident peer snapshot drives herd movement via original navigator; grazing requires actual grass',()=>{
+ const w=arena({floor:-3,bounds:[-8,12,-8,8]});
+ for(let x=-6;x<=10;x++)for(let z=-6;z<=6;z++)assert.ok(w.set(x,-3,z,BLOCK.GRASS));
+ const v=createExpansionOwnerView(w,{hasOwner:()=>true,overlayEpoch:()=>0,observe:()=>({biome:'meadow',light:.7,hazard:false,dayPhase:'day'})}),q=v.query,c=completeBeastCandidateCatalog().get('bison');
+ const a=createPlainsActor(c,[.5,-2,.5],q);a.id='bison-a';
+ const peer={id:'bison-b',species:c.record,state:'idle',position:[6.5,-2,.5]};
+ const nav=new LocalNavigator({...q,grounded:(p,b)=>expansionSupport(q,p,b,'ground')});
+ nav.beginTick();assert.ok(stepPlainsActor(a,q,{ownerView:v,navigator:nav,readPeers:()=>({revision:v.revision(),entities:[peer]})}));assert.equal(a.action,'herd');assert.ok(a.position[0]>.5);
+ assert.ok(stepPlainsActor(a,q,{ownerView:v,readPeers:()=>({revision:v.revision(),entities:[]})}));assert.equal(a.action,'graze');
+ for(let x=-2;x<=3;x++)for(let z=-2;z<=3;z++)assert.ok(w.set(x,-3,z,BLOCK.STONE));
+ assert.ok(stepPlainsActor(a,q,{ownerView:v,readPeers:()=>({revision:v.revision(),entities:[]})}));assert.equal(a.action,'forage');
+});

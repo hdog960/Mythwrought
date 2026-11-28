@@ -8,6 +8,7 @@ import {ENVIRONMENT_GROUND} from '../../environment-ground.mjs';
 import {MOUNTAIN_V8_MATERIAL as M} from '../../manual-biomes/mountain-v8-materials.mjs';
 const rock=new Set([BLOCK.STONE,BLOCK.DEEPSTONE,ENVIRONMENT_GROUND.slate,ENVIRONMENT_GROUND.scree,ENVIRONMENT_GROUND.gneiss,M.stone,M.slate,M.scree,M.gneiss]);
 const plants=new Set([BLOCK.LEAVES,BLOCK.WOOD,ENVIRONMENT_GROUND.aetherBark,ENVIRONMENT_GROUND.aetherLeaves,ENVIRONMENT_GROUND.moonLeaves,M.flower,M['flower-petal'],M.heather,M['heather-tip'],M['conifer-trunk'],M['conifer-needles']]);
+const sand=new Set([256,257]),snow=new Set([272,276,279,M.snow]);
 const blooms=new Set([M['flower-petal'],M['heather-tip']]);
 export function readExpansionHabitatFacts(view,point,capability,requirement){
  const q=view?.query,body=capability?.body,plan=planBodyVolume(point,body);
@@ -26,6 +27,7 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
    return out;
   };
   let floor,nearby;
+ const floorIs=ids=>support('ground')&&materialFloor().length>0&&materialFloor().every(id=>ids.has(id));
   const materialFloor=()=>floor??=(getFloor());
   const localMaterials=()=>nearby??=(()=>{
    const out=[],[x,y,z]=p.map(Math.floor);
@@ -58,6 +60,26 @@ export function readExpansionHabitatFacts(view,point,capability,requirement){
   for(const tag of needed){
    switch(tag){
     case 'ground':result[tag]=support('ground');break;
+    case 'sand':case 'loose-sand':result[tag]=floorIs(sand);break;
+    case 'snow-ground':case 'frozen-ground':result[tag]=floorIs(snow);break;
+    case 'snow-or-vegetation':result[tag]=floorIs(snow)||(!localMaterials().includes(undefined)&&localMaterials().some(id=>plants.has(id)));break;
+    case 'rock-or-sand':result[tag]=floorIs(sand)||(!localMaterials().includes(undefined)&&localMaterials().some(id=>rock.has(id)));break;
+    case 'magical-or-dark-forest':result[tag]=env.biome==='forest'&&Number.isFinite(env.light)&&env.light<=.3;break;
+    case 'high-meadow':result[tag]=p[1]>=10&&floorIs(new Set([M['alpine-grass']]));break;
+    case 'open-ground':case 'running-clearance':case 'open-snow':case 'traversable-cave':{
+     const at=findLanding(),required=tag==='open-snow'?floorIs(snow):true;
+     result[tag]=required&&at!==null&&[[1,0],[-1,0],[0,1],[0,-1]].some(([dx,dz])=>{
+      for(let i=1;i<=8;i++){
+       const next=[at[0]+dx*i*.25,at[1],at[2]+dz*i*.25];
+       if(!expansionSupport(q,next,body,'ground'))return false;
+       const volume=planBodyVolume(next,body);if(!volume)return false;
+       for(const {x,y,z} of volume.cells)if(read(x,y,z)===undefined)return false;
+       const b=volume.bounds,y=Math.floor(b[1]-.035);
+       for(let x=Math.floor(b[0]+1e-5);x<=Math.floor(b[3]-1e-5);x++)for(let z=Math.floor(b[2]+1e-5);z<=Math.floor(b[5]-1e-5);z++)if(read(x,y,z)===undefined)return false;
+      }
+      return true;
+     });break;
+    }
     case 'landing-site':result[tag]=findLanding()!==null;break;
     case 'open-grass':{const at=findLanding();result[tag]=at!==null&&grassAt(at);break;}
     case 'large-clearance':result[tag]=q.volume(p,body)==='clear';break;
