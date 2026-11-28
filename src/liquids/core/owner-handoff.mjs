@@ -128,5 +128,10 @@ export function createLiquidOwnerHandoff({definitions=[],reactionRules=[],
       movedUnits:moved.reduce((sum,c)=>sum+c.units,0),boundaryWoken,
       changed:Object.freeze(moved.map(c=>Object.freeze(point(c))))});
   }
-  return Object.freeze({stage});
+  function validateState(state){
+    const {resident,parked}=validate(state);
+    return Object.freeze({version:LIQUID_OWNER_HANDOFF_VERSION,resident,
+      parked:Object.freeze([...parked.values()])});
+  }
+  return Object.freeze({stage,validate:validateState});
 }
