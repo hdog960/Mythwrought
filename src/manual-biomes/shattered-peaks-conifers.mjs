@@ -32,9 +32,11 @@ export function surveyShatteredPine(world, tx, tz, kind) {
   return { kind, region, support: [x, floor, z], cells };
 }
 
-export function openShatteredPineWitness(world, tree) {
+export const openShatteredPineWitness = (world, tree) => openShatteredVegetationWitness(world, tree, 'pine');
+
+export function openShatteredVegetationWitness(world, placement, label = 'vegetation') {
   const cells = new Map(), upper = new Set();
-  for (const [x, y, z, id] of tree.cells) {
+  for (const [x, y, z, id] of placement.cells) {
     cells.set(worldKey(x, y, z), id);
     const owner = physicalRegionAt(x, y, z);
     if (owner.kind === 'upper') upper.add(owner.key);
@@ -46,7 +48,7 @@ export function openShatteredPineWitness(world, tree) {
     generationProfile: { value: world.generationProfile },
     upperNaturalOccupied: { value: key => upper.has(key) || world.upperNaturalOccupied(key) },
     upperNaturalRevision: { value: world.upperNaturalRevision },
-    set: { value() { throw Error('Read-only mountain pine witness'); } },
-    save: { value() { throw Error('Mountain pine research requires a separate save profile'); } }
+    set: { value() { throw Error('Read-only mountain ' + label + ' witness'); } },
+    save: { value() { throw Error('Mountain ' + label + ' research requires a separate save profile'); } }
   });
 }
